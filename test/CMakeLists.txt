@@ -12,7 +12,6 @@ list( APPEND ufo_test_input
   testinput/adt.yaml
   testinput/aircraft.yaml
   testinput/airs_crtm.yaml
-  testinput/airs_crtm_bc.yaml
   testinput/airs_qc_filters.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
@@ -25,14 +24,14 @@ list( APPEND ufo_test_input
   testinput/aod_crtm.yaml
   testinput/aod_luts.yaml
   testinput/atms_crtm.yaml
-  testinput/atms_crtm_bc.yaml
   testinput/atms_qc_filters.yaml
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/atms_rttov_qc.yaml
+  testinput/bias_coeff.yaml
+  testinput/bias_coeff_cov.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
-  testinput/cris_crtm_bc.yaml
   testinput/cris_qc.yaml
   testinput/cris_qc_filters.yaml
   testinput/cris_qc_land.yaml
@@ -105,7 +104,6 @@ list( APPEND ufo_test_input
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
-  testinput/iasi_crtm_bc.yaml
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
@@ -2347,58 +2345,30 @@ ecbuild_add_test( TARGET  test_ufo_qc_action_gnssroBndNBAM_obserr_inflation
 
 # Test bias correction classes
 
-ecbuild_add_test( TARGET  test_ufo_bias_airs
+ecbuild_add_test( TARGET  test_ufo_bias_coeffs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsBias.x
-                  ARGS    "testinput/airs_crtm_bc.yaml"
+                  ARGS    "testinput/bias_coeff.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsBias.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
-ecbuild_add_test( TARGET  test_ufo_bias_amsua
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsBias.x
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsBias.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
-
-ecbuild_add_test( TARGET  test_ufo_bias_atms
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsBias.x
-                  ARGS    "testinput/atms_crtm_bc.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsBias.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
-
-ecbuild_add_test( TARGET  test_ufo_bias_cris
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsBias.x
-                  ARGS    "testinput/cris_crtm_bc.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsBias.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
-
-ecbuild_add_test( TARGET  test_ufo_bias_iasi
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsBias.x
-                  ARGS    "testinput/iasi_crtm_bc.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsBias.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
-
-ecbuild_add_test( TARGET  test_ufo_bias_increment_amsua
+ecbuild_add_test( TARGET  test_ufo_bias_coeff_increment
                   SOURCES mains/TestObsBiasIncrement.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  ARGS    "testinput/bias_coeff_cov.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_bias_covariance_amsua
                   SOURCES mains/TestObsBiasCovariance.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  ARGS    "testinput/bias_coeff_cov.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_bias_covariance_details
                   SOURCES mains/TestObsBiasCovarianceDetails.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  ARGS    "testinput/bias_coeff_cov.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)

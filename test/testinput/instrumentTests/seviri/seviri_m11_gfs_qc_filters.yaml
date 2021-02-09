@@ -18,10 +18,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_geoval_2020110112_m.nc4
   obs bias:
-    name: LinearCombination
-    abias_in: Data/ufo/testinput_tier_1/instruments/radiance/satbias.2020110106
-    abias_out: Data/ufo/satbias_crtm_out
-    sensor: *Sensor_ID
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_seviri_m11.2020110106.nc4
     jobs: *all_channels
     predictors:
     - predictor:

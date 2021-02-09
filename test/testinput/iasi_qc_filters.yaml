@@ -87,7 +87,7 @@ observations:
 #    filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m_qc.nc4
 #    filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
+    input file: Data/ufo/testinput_tier_1/satbias_iasi_metop-a.nc4
     sensor: *Sensor_ID
     jobs: *all_channels
     predictors:

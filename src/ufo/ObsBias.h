@@ -47,20 +47,18 @@ class ObsBias : public util::Printable,
 
   ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
   ObsBias(const ObsBias &, const bool);
-  ~ObsBias() {}
 
   ObsBias & operator+=(const ObsBiasIncrement &);
   ObsBias & operator=(const ObsBias &);
 
-  // I/O and diagnostics
+  /// Read bias correction coefficients from file
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
   double norm() const;
   std::size_t size() const {return biascoeffs_.size();}
 
-  // Bias parameters interface
-  const double & operator[](const unsigned int ii) const {return biascoeffs_[ii];}
-  double & operator[](const unsigned int ii) {return biascoeffs_[ii];}
+  // Accessor to bias coefficients
+  double operator[](const unsigned int ii) const {return biascoeffs_(ii);}
 
   // Obs bias model
   void computeObsBias(ioda::ObsVector &, ObsDiagnostics &,
@@ -77,15 +75,20 @@ class ObsBias : public util::Printable,
   operator bool() const {return biascoeffs_.size() > 0;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
 
   ioda::ObsSpace & odb_;
-  eckit::LocalConfiguration conf_;
 
-  std::vector<double> biascoeffs_;
+  /// bias correction coefficients (npredictors x nchannels)
+  Eigen::MatrixXf biascoeffs_;
+
   std::vector<std::shared_ptr<PredictorBase>> predbases_;
+
+  /// predictor names
   std::vector<std::string> prednames_;
+  /// channel numbers
   std::vector<int> jobs_;
+
   oops::Variables geovars_;
   oops::Variables hdiags_;
 };

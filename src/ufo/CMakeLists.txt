@@ -100,7 +100,7 @@ list( APPEND ufo_src_files
     ${scatwind_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
-list( APPEND UFO_LIBS_DEP oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
+list( APPEND UFO_LIBS_DEP oops ioda ioda_engines ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
 if( ${CRTM_FOUND} )
     list( APPEND UFO_LIBS_DEP crtm )
 endif( ${CRTM_FOUND} )

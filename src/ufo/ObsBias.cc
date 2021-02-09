@@ -7,11 +7,14 @@
 
 #include "ufo/ObsBias.h"
 
-#include <Eigen/Core>
+#include <Eigen/Dense>
 #include <fstream>
 #include <iomanip>
 #include <set>
 
+#include "ioda/Engines/Factory.h"
+#include "ioda/Layout.h"
+#include "ioda/ObsGroup.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
@@ -26,19 +29,19 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
+  : predbases_(0), jobs_(0), odb_(odb) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Get the jobs(channels)
-  if (conf_.has("obs bias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
+  if (conf.has("obs bias.jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf.getString("obs bias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   // Predictor factory
-  if (conf_.has("obs bias.predictors")) {
+  if (conf.has("obs bias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("obs bias.predictors", confs);
+    conf.get("obs bias.predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
       predbases_.push_back(pred);
@@ -59,9 +62,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
   if (prednames_.size() * jobs_.size() > 0) {
     // Initialize the biascoeffs to ZERO
-    biascoeffs_.resize(prednames_.size() * jobs_.size());
-    std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
-
+    biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), jobs_.size());
     // Read or initialize bias coefficients
     this->read(conf);
   }
@@ -72,14 +73,13 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : odb_(other.odb_), conf_(other.conf_), predbases_(other.predbases_),
+  : odb_(other.odb_), predbases_(other.predbases_),
     prednames_(other.prednames_), jobs_(other.jobs_),
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_.resize(prednames_.size() * jobs_.size());
-  std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
+  biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), jobs_.size());
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -91,7 +91,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
 
 ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
   for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj)
-      biascoeffs_[jj] += dx[jj];
+    biascoeffs_(jj) += dx[jj];
   return *this;
 }
 
@@ -99,7 +99,6 @@ ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
 
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
   if (rhs.size() > 0 && this->size() == rhs.size()) {
-    conf_       = rhs.conf_;
     biascoeffs_ = rhs.biascoeffs_;
     predbases_  = rhs.predbases_;
     prednames_  = rhs.prednames_;
@@ -111,83 +110,75 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 }
 
 // -----------------------------------------------------------------------------
+/// Returns indices of all \p elements_to_look_for in the \p all_elements vector,
+/// in the same order that \p elements_to_look_for are in.
+/// Throws an exception if at least one of \p elements_to_look_for is missing
+/// from \p all_elements.
+template<typename T>
+std::vector<int> getAllIndices(const std::vector<T> & all_elements,
+                                 const std::vector<T> & elements_to_look_for) {
+  std::vector<int> result;
+  for (const T & element : elements_to_look_for) {
+    const auto it = std::find(all_elements.begin(), all_elements.end(), element);
+    if (it != all_elements.end()) {
+      result.push_back(std::distance(all_elements.begin(), it));
+    } else {
+      const std::string errormsg = "getAllIndices: Can't find element in the vector";
+      throw eckit::BadParameter(errormsg, Here());
+    }
+  }
+  return result;
+}
+
+// -----------------------------------------------------------------------------
 
 void ObsBias::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
 
   // Bias coefficients input file name
   std::string input_filename;
-  if (conf.has("obs bias.abias_in")) {
-    input_filename = conf.getString("obs bias.abias_in");
-    oops::Log::debug() << "ObsBias::initialize coefficients from file: "
-                       << input_filename <<  std::endl;
+  if (conf.has("obs bias.input file")) {
+    input_filename = conf.getString("obs bias.input file");
+    // Open an hdf5 file, read only
+    ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
+    ioda::Engines::BackendCreationParameters backendParams;
+    backendParams.fileName = input_filename;
+    backendParams.action   = ioda::Engines::BackendFileActions::Open;
+    backendParams.openMode = ioda::Engines::BackendOpenModes::Read_Only;
 
-    // Default predictor names from GSI
-    // temporary solution, we should have a self-explanatory obsbias file
-    const std::vector<std::string> gsi_predictors = {"constant",
-                                                     "zenith_angle",
-                                                     "cloud_liquid_water",
-                                                     "lapse_rate_order_2",
-                                                     "lapse_rate",
-                                                     "cosine_of_latitude_times_orbit_node",
-                                                     "sine_of_latitude",
-                                                     "emissivity",
-                                                     "scan_angle_order_4",
-                                                     "scan_angle_order_3",
-                                                     "scan_angle_order_2",
-                                                     "scan_angle"
-                                                     };
-    std::ifstream infile(input_filename);
+    // Create the backend and attach it to an ObsGroup
+    // Use the None DataLyoutPolicy for now to accommodate the current file format
+    ioda::Group backend = constructBackend(backendName, backendParams);
+    ioda::ObsGroup obsgroup = ioda::ObsGroup(backend,
+                   ioda::detail::DataLayoutPolicy::generate(
+                         ioda::detail::DataLayoutPolicy::Policies::None));
 
-    // get the sensor id
-    std::string sensor = conf.getString("obs bias.sensor");
-    oops::Log::debug() << "ObsBias::initialize coefficients for sensor: "
-                       << sensor <<  std::endl;
+    // Read all coefficients into the Eigen array
+    ioda::Variable coeffvar = obsgroup.vars["bias_coefficients"];
+    Eigen::ArrayXXf allbiascoeffs;
+    coeffvar.readWithEigenRegular(allbiascoeffs);
 
-    std::size_t ich;     //  sequential number
-    std::string nusis;   //  sensor/instrument/satellite
-    std::size_t nuchan;  //  channel number
-    float tlap, tsum;
-    std::size_t ntlapupdate;
+    // Read all channels from the file into std vector
+    ioda::Variable channelsvar = obsgroup.vars.open("channels");
+    std::vector<int> channels;
+    channelsvar.read<int>(channels);
 
-    if (infile.is_open())
-    {
-      oops::Log::debug() << "ObsBias:: prior file is opened" << std::endl;
-      float par;
-      while (infile >> ich)
-      {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> tlap;
-        infile >> tsum;
-        infile >> ntlapupdate;
-        if (nusis == sensor) {
-          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
-          if (ijob != jobs_.end()) {
-            int j = std::distance(jobs_.begin(), ijob);
+    // Read all predictors from the file into std vector
+    ioda::Variable predictorsvar = obsgroup.vars.open("predictors");
+    std::vector<std::string> predictors;
+    predictorsvar.read<std::string>(predictors);
 
-            for (auto & item : gsi_predictors) {
-              infile >> par;
-              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
-              if (ipred != prednames_.end()) {
-                int p = std::distance(prednames_.begin(), ipred);
-                biascoeffs_.at(j*prednames_.size() + p) = static_cast<double>(par);
-              }
-            }
-          } else {
-            for (auto & item : gsi_predictors)
-              infile >> par;
-          }
-        } else {
-          for (auto & item : gsi_predictors)
-            infile >> par;
-        }
+    // Find indices of predictors and channels that we need in the data read from the file
+    std::vector<int> pred_idx = getAllIndices(predictors, prednames_);
+    std::vector<int> chan_idx = getAllIndices(channels, jobs_);
+
+    // Filter predictors and channels that we need
+    // FIXME: may be possible by indexing allbiascoeffs(pred_idx, chan_idx) when Eigen 3.4
+    // is available
+    for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+      for (size_t jchan = 0; jchan < chan_idx.size(); ++jchan) {
+         biascoeffs_(jpred, jchan) = allbiascoeffs(pred_idx[jpred], chan_idx[jchan]);
       }
-      infile.close();
-      oops::Log::debug() << "ObsBias:: read prior from " << input_filename << std::endl;
-    } else {
-      oops::Log::error() << "Unable to open file : " << input_filename << std::endl;
-      ABORT("Unable to open bias prior file ");
     }
   } else {
     oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
@@ -201,14 +192,6 @@ void ObsBias::read(const eckit::Configuration & conf) {
 
 void ObsBias::write(const eckit::Configuration & conf) const {
   oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
-
-  // Bias coefficients output file name
-  std::string output_filename;
-  if (conf.has("ObsBias.abias_out")) {
-    output_filename = conf.getString("ObsBias.abias_out");
-  }
-
-  oops::Log::trace() << "ObsBias::write to file done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -261,14 +244,12 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
      * pred3 | 8      9     10      11 
      * ....  |
      */
-    Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
-
     std::vector<double> biasTerm(nlocs, 0.0);
     //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
     for (std::size_t jch = 0; jch < njobs; ++jch) {
       for (std::size_t jp = 0; jp < npreds; ++jp) {
         // axpy
-        const double beta = coeffs(jp, jch);
+        const double beta = biascoeffs_(jp, jch);
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
           biasTerm[jl] = predData[jp][jl*njobs+jch] * beta;
           ybias[jl*njobs+jch] += biasTerm[jl];
@@ -310,7 +291,7 @@ double ObsBias::norm() const {
   oops::Log::trace() << "ObsBias::norm starting." << std::endl;
   double zz = 0.0;
   for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj) {
-    zz += biascoeffs_[jj] * biascoeffs_[jj];
+    zz += biascoeffs_(jj) * biascoeffs_(jj);
   }
   if (biascoeffs_.size() > 0) zz = std::sqrt(zz/biascoeffs_.size());
   oops::Log::trace() << "ObsBias::norm done." << std::endl;
@@ -322,20 +303,17 @@ double ObsBias::norm() const {
 void ObsBias::print(std::ostream & os) const {
   if (this->size() > 0) {
     // map bias coeffs to eigen matrix (writable)
-    Eigen::Map<const Eigen::MatrixXd>
-      coeffs(biascoeffs_.data(), prednames_.size(), jobs_.size());
-
     os << "ObsBias::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     auto njobs = jobs_.size();
     for (std::size_t p = 0; p < prednames_.size(); ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
          << ":  Min= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).minCoeff()
+         << biascoeffs_.row(p).minCoeff()
          << ",  Max= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).maxCoeff()
+         << biascoeffs_.row(p).maxCoeff()
          << ",  Norm= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).norm()
+         << biascoeffs_.row(p).norm()
          << std::endl;
     }
     os << "---------------------------------------------------------------" << std::endl;

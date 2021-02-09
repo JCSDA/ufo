@@ -1,0 +1,115 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-15
+  obs bias:  # test reading coefficients for 2 predictors; coeffs are zero for all channels
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    jobs: *channels
+    predictors:
+    - predictor:
+        name: cosine_of_latitude_times_orbit_node
+        options:
+          preconditioner: 0.01
+    - predictor:
+        name: sine_of_latitude
+    norm: 0.0
+    relative tolerance: 0.0
+
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-15
+  obs bias:  # test reading coefficients for 1 predictor (all channels)
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    jobs: *channels
+    predictors:
+    - predictor:
+        name: emissivity
+    norm: 2.521706721918669
+    relative tolerance: 1.e-7
+
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 7-9, 12
+  obs bias:  # test reading coefficients for 1 predictor (subset of channels)
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    jobs: *channels
+    predictors:
+    - predictor:
+        name: emissivity
+    norm: 0.9845241512216701
+    relative tolerance: 1.e-7
+
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 7-9, 12
+  obs bias:  # test reading coefficients for 2 predictors and subset of channels
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    jobs: *channels
+    predictors:
+    - predictor:
+        name: emissivity
+    - predictor:
+        name: constant
+    norm: 0.8470894100411567
+    relative tolerance: 1.e-7
+
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-15
+  obs bias:  # test reading all channels and most predictors
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    jobs: *channels
+    predictors:
+    - predictor:
+        name: constant
+    - predictor:
+        name: cosine_of_latitude_times_orbit_node
+        options:
+          preconditioner: 0.01
+    - predictor:
+        name: sine_of_latitude
+    - predictor:
+        name: lapse_rate
+        options:
+          order: 2
+          tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
+    - predictor:
+        name: lapse_rate
+        options:
+          tlapse: *amsua19tlap
+    - predictor:
+        name: emissivity
+    - predictor:
+        name: scan_angle
+        options:
+          order: 4
+    - predictor:
+        name: scan_angle
+        options:
+          order: 3
+    - predictor:
+        name: scan_angle
+        options:
+          order: 2
+    - predictor:
+        name: scan_angle
+    norm: 2.8888588267029465
+    relative tolerance: 1.e-7
