@@ -6,7 +6,6 @@
 !
 module ufo_geovals_mod
 
-use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_vars_mod
 use kinds
@@ -20,9 +19,10 @@ private
 integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval
-public :: ufo_geovals_get_var, ufo_geovals_put_var
+public :: ufo_geovals_get_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
+public :: ufo_geovals_allocate
 public :: ufo_geovals_profmult
 public :: ufo_geovals_reorderzdir
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
@@ -84,7 +84,6 @@ type(oops_variables), intent(in) :: vars
 integer, intent(in) :: nlocs
 
 integer :: ivar
-type(fckit_configuration) :: f_vars
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -100,6 +99,49 @@ do ivar = 1, self%nvar
 enddo
 
 end subroutine ufo_geovals_setup
+
+! ------------------------------------------------------------------------------
+!> Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
+!> If the GeoVaLs for this variable were allocated before with different size,
+!> aborts.
+subroutine ufo_geovals_allocate(self, vars, nlevels)
+use oops_variables_mod
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(oops_variables), intent(in) :: vars
+integer, intent(in) :: nlevels
+
+integer :: ivar, ivar_gvals
+character(max_string) :: err_msg
+
+do ivar = 1, vars%nvars()
+  ! find index of variable to be allocated
+  ivar_gvals = ufo_vars_getindex(self%variables, vars%variable(ivar))
+  ! abort if we are trying to allocate geovals for nonexistent variable
+  if (ivar_gvals < 0) then
+    write(err_msg,*) "ufo_geovals_allocate: ", trim(vars%variable(ivar)), " doesn't exist in geovals"
+    call abor1_ftn(err_msg)
+  endif
+  ! abort if we are trying to allocate geovals again, and with a different size
+  if (allocated(self%geovals(ivar_gvals)%vals) .and. (self%geovals(ivar_gvals)%nval /= nlevels)) then
+    write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",          &
+                     trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(ivar_gvals)%nval, &
+                     " levels; now trying to allocate as ", nlevels, " levels."
+    call abor1_ftn(err_msg)
+  ! only allocate if not already allocated
+  elseif (.not. allocated(self%geovals(ivar_gvals)%vals)) then
+    self%geovals(ivar_gvals)%nval  = nlevels
+    allocate(self%geovals(ivar_gvals)%vals(nlevels, self%nlocs))
+  endif
+enddo
+
+! check if all variables are now allocated, and set self%linit accordingly
+self%linit = .true.
+do ivar = 1, self%nvar
+  if (.not. allocated(self%geovals(ivar)%vals)) self%linit = .false.
+enddo
+
+end subroutine ufo_geovals_allocate
 
 ! ------------------------------------------------------------------------------
 
@@ -154,21 +196,6 @@ else
 endif
 
 end subroutine ufo_geovals_get_var
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_put_var(self, varname, geoval,k)
-type(ufo_geovals),intent(inout) :: self
-character(len=*),    intent(in) :: varname
-type(ufo_geoval),    intent(in) :: geoval
-integer,             intent(in) :: k
-
-integer :: ivar
-
-ivar = ufo_vars_getindex(self%variables, varname)
-self%geovals(ivar)%vals(k,:)=geoval%vals(k,:)
-
-end subroutine ufo_geovals_put_var
 
 ! ------------------------------------------------------------------------------
 

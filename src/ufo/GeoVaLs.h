@@ -59,6 +59,14 @@ class GeoVaLs : public util::Printable,
   void split(GeoVaLs &, GeoVaLs &) const;
   void merge(const GeoVaLs &, const GeoVaLs &);
 
+  /// \brief Allocate GeoVaLs for \p vars variables with \p nlev number of levels
+  /// \details Fails if at least one of the \p vars doesn't exist in GeoVaLs.
+  ///          Only allocates variables that haven't been allocated before.
+  ///          Fails if one of \p vars is already allocated with number of levels
+  ///          different than \p nlev; doesn't reallocate variables that are already
+  ///          allocated with \p nlev.
+  void allocate(const int & nlev, const oops::Variables & vars);
+
   void zero();
   void reorderzdir(const std::string &, const std::string &);
   void random();
@@ -69,9 +77,14 @@ class GeoVaLs : public util::Printable,
   const oops::Variables & getVars() const {return vars_;}
 
   size_t nlevs(const std::string & var) const;
-  void get(std::vector<float> &, const std::string &) const;
   void get(std::vector<float> &, const std::string &, const int) const;
   void get(std::vector<double> &, const std::string &, const int) const;
+  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs)
+  void get(std::vector<double> &, const std::string & var) const;
+  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to float
+  void get(std::vector<float> &, const std::string & var) const;
+  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to int
+  void get(std::vector<int> &, const std::string & var) const;
   void put(const std::vector<double> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);

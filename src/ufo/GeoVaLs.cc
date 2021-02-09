@@ -104,6 +104,15 @@ GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Allocate GeoVaLs for \p vars variables to have \p nlevels levels (number of
+ *  locations is defined in the constructor) */
+void GeoVaLs::allocate(const int & nlevels, const oops::Variables & vars)
+{
+  oops::Log::trace() << "GeoVaLs::allocate starting" << std::endl;
+  ufo_geovals_allocate_f90(keyGVL_, nlevels, vars);
+  oops::Log::trace() << "GeoVaLs::allocate done" << std::endl;
+}
+// -----------------------------------------------------------------------------
 /*! \brief Zero out the GeoVaLs */
 void GeoVaLs::zero() {
   oops::Log::trace() << "GeoVaLs::zero starting" << std::endl;
@@ -269,10 +278,11 @@ size_t GeoVaLs::nlevs(const std::string & var) const {
 /*! \brief Return all values for a specific 2D variable */
 void GeoVaLs::get(std::vector<float> & vals, const std::string & var) const {
   oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
-  size_t nlocs;
-  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
-  ASSERT(vals.size() == nlocs);
-  ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), nlocs, vals[0]);
+  /// Call method to get double values (Fortran data structure stores data in double)
+  /// and convert to floats
+  std::vector<double> doublevals(vals.size());
+  this->get(doublevals, var);
+  vals.assign(doublevals.begin(), doublevals.end());
   oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -294,6 +304,27 @@ void GeoVaLs::get(std::vector<double> & vals, const std::string & var, const int
   ASSERT(vals.size() == nlocs);
   ufo_geovals_getdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
   oops::Log::trace() << "GeoVaLs::get done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific 2D variable */
+void GeoVaLs::get(std::vector<double> & vals, const std::string & var) const {
+  oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), nlocs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific 2D variable */
+void GeoVaLs::get(std::vector<int> & vals, const std::string & var) const {
+  oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
+  /// Call method to get double values (Fortran data structure stores data in double)
+  /// and convert to ints
+  std::vector<double> doublevals(vals.size());
+  this->get(doublevals, var);
+  vals.assign(doublevals.begin(), doublevals.end());
+  oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Put values for a specific variable and level */

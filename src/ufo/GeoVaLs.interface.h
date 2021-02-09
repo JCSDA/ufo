@@ -32,6 +32,7 @@ namespace ufo {
 extern "C" {
   void ufo_geovals_default_constr_f90(F90goms &);
   void ufo_geovals_setup_f90(F90goms &, const size_t &, const oops::Variables &);
+  void ufo_geovals_allocate_f90(F90goms &, const size_t &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
   void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, int &);
@@ -59,7 +60,7 @@ extern "C" {
   void ufo_geovals_nlocs_f90(const F90goms &, size_t &);
   void ufo_geovals_nlevs_f90(const F90goms &, const int &, const char *, int &);
   void ufo_geovals_get2d_f90(const F90goms &, const int &, const char *, const int &,
-                           float &);
+                           double &);
   void ufo_geovals_get_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, float &);
   void ufo_geovals_getdouble_f90(const F90goms &, const int &, const char *, const int &,

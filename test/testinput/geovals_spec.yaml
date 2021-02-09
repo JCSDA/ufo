@@ -53,3 +53,14 @@ geovals test:
     reorderzdir check:
       direction: top2bottom
       tolerance: 1.0e-12 
+
+# section for testGeoVaLsAllocatePutGet
+geovals get test:
+  window begin: 2018-04-14T21:00:00Z  # required for initializing Locations from the obs space below
+  window end: 2018-04-15T03:00:00Z    # required for initializing Locations from the obs space below
+  obs space:                          # required for initializing Locations to locations from this file
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-10,15

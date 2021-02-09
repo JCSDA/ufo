@@ -66,6 +66,24 @@ call ufo_geovals_setup(self, vars, c_nlocs)
 
 end subroutine ufo_geovals_setup_c
 
+!> Allocate GeoVaLs
+subroutine ufo_geovals_allocate_c(c_key_self, c_nlevels, c_vars) bind(c,name='ufo_geovals_allocate_f90')
+use oops_variables_mod
+implicit none
+integer(c_int), intent(inout)  :: c_key_self
+integer(c_int), intent(in)     :: c_nlevels
+type(c_ptr), value, intent(in) :: c_vars
+
+type(ufo_geovals), pointer :: self
+type(oops_variables) :: vars
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+vars = oops_variables(c_vars)
+call ufo_geovals_allocate(self, vars, c_nlevels)
+
+end subroutine ufo_geovals_allocate_c
+
 ! ------------------------------------------------------------------------------
 !> Copy one GeoVaLs object into another
 
@@ -428,7 +446,7 @@ call ufo_geovals_registry%get(c_key_self, self)
 
 call ufo_geovals_get_var(self, varname, geoval)
 
-nlevs = size(geoval%vals,1)
+nlevs = geoval%nval
 
 end subroutine ufo_geovals_nlevs_c
 
@@ -438,11 +456,11 @@ subroutine ufo_geovals_get2d_c(c_key_self, lvar, c_var, nlocs, values) bind(c, n
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lvar
+integer(c_int),    intent(in) :: c_key_self
+integer(c_int),    intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: nlocs
-real(c_float), intent(inout) :: values(nlocs)
+integer(c_int),    intent(in) :: nlocs
+real(c_double), intent(inout) :: values(nlocs)
 
 character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
@@ -532,7 +550,6 @@ end subroutine ufo_geovals_getdouble_c
 
 subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_putdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
-use oops_variables_mod
 use string_f_c_mod
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
@@ -541,19 +558,14 @@ integer(c_int), intent(in) :: lev
 integer(c_int), intent(in) :: nlocs
 real(c_double), intent(inout) :: values(nlocs)
 
-type(ufo_geoval) :: geoval
-character(len=MAXVARLEN) :: varname
+type(ufo_geoval), pointer  :: geoval
+character(len=MAXVARLEN)   :: varname
 type(ufo_geovals), pointer :: self
-type(oops_variables)      :: var
-integer :: nlev
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
-geoval%nval=self%geovals(1)%nval
-geoval%nlocs=nlocs
-allocate(geoval%vals(geoval%nval,geoval%nlocs))
+call ufo_geovals_get_var(self, varname, geoval)
 geoval%vals(lev,:) = values(:)
-call ufo_geovals_put_var(self, varname, geoval, lev)
 
 end subroutine ufo_geovals_putdouble_c
 

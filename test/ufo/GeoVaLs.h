@@ -163,12 +163,84 @@ void testGeoVaLs() {
       "GeoVaLs & operator *= (const std::vector<float>); test succeeded" << std::endl;
   }
 }
+
+/// \brief Tests GeoVaLs::allocate, GeoVaLs::put and GeoVaLs::get method (for 2D variables)
+void testGeoVaLsAllocatePutGet() {
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+  const eckit::LocalConfiguration testconf(conf, "geovals get test");
+
+  /// Test 2D variables
+  const std::string var1 = "variable1";
+  const std::string var2 = "variable2";
+  const oops::Variables testvars({var1, var2});
+
+  /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
+  const Locations locs(testconf, oops::mpi::world());
+  GeoVaLs gval(locs, testvars);
+  oops::Log::test() << "GeoVals allocate test: created empty GeoVaLs with " << testvars <<
+                       " variables and nlocs=" << gval.nlocs() << std::endl;
+  EXPECT_EQUAL(gval.nlevs(var1), 0);
+  EXPECT_EQUAL(gval.nlevs(var2), 0);
+
+  /// Allocate only the first variable, and test that it's allocated correctly
+  const oops::Variables testvar1({var1});
+  const int nlevs1 = 10;
+  gval.allocate(nlevs1, testvar1);
+  oops::Log::test() << "Allocated " << var1 << "; nlevs(var1) = " << gval.nlevs(var1) <<
+                                               "; nlevs(var2) = " << gval.nlevs(var2) << std::endl;
+  EXPECT_EQUAL(gval.nlevs(var1), nlevs1);
+  EXPECT_EQUAL(gval.nlevs(var2), 0);
+
+  /// Allocate only the second variable (2D variable), test that it's allocated correctly
+  const oops::Variables testvar2({var2});
+  const int nlevs2 = 1;
+  gval.allocate(nlevs2, testvar2);
+  oops::Log::test() << "Allocated " << var2 << "; nlevs(var1) = " << gval.nlevs(var1) <<
+                                               "; nlevs(var2) = " << gval.nlevs(var2) << std::endl;
+  EXPECT_EQUAL(gval.nlevs(var1), nlevs1);
+  EXPECT_EQUAL(gval.nlevs(var2), nlevs2);
+
+  /// set all values for the first level of 2D variable to an arbitrary number
+  const float fillvalue = 3.0;
+  oops::Log::test() << "Put fill value: " << fillvalue << std::endl;
+  const std::vector<double> refvalues(gval.nlocs(), fillvalue);
+  const std::vector<float>  refvalues_float(refvalues.begin(), refvalues.end());
+  const std::vector<int>    refvalues_int(refvalues.begin(), refvalues.end());
+  gval.put(refvalues, var2, 1);
+
+  /// check that get method returns what we put in geovals
+  std::vector<double> testvalues(gval.nlocs(), 0);
+  gval.get(testvalues, var2);
+  oops::Log::test() << "Get result:        " << testvalues << std::endl;
+  EXPECT_EQUAL(testvalues, refvalues);
+  std::vector<float> testvalues_float(gval.nlocs(), 0);
+  gval.get(testvalues_float, var2);
+  oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
+  EXPECT_EQUAL(testvalues_float, refvalues_float);
+  std::vector<int> testvalues_int(gval.nlocs(), 0);
+  gval.get(testvalues_int, var2);
+  oops::Log::test() << "Get(int) result:   " << testvalues_int << std::endl;
+  EXPECT_EQUAL(testvalues_int, refvalues_int);
+
+  /// test 3D put and get
+  for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
+    const float fillvalue = 3.0*(jlev+1);
+    const std::vector<double> refvalues(gval.nlocs(), fillvalue);
+    gval.put(refvalues, var1, jlev+1);
+    oops::Log::test() << jlev << " level: put fill value: " << fillvalue << std::endl;
+    std::vector<double> testvalues(gval.nlocs(), 0);
+    gval.get(testvalues, var1, jlev+1);
+    oops::Log::test() << jlev << " level: get result: " << testvalues << std::endl;
+    EXPECT_EQUAL(testvalues, refvalues);
+  }
+}
+
 // -----------------------------------------------------------------------------
 
 class GeoVaLs : public oops::Test {
  public:
-  GeoVaLs() {}
-  virtual ~GeoVaLs() {}
+  GeoVaLs() = default;
+  virtual ~GeoVaLs() = default;
  private:
   std::string testid() const override {return "ufo::test::GeoVaLs";}
 
@@ -177,6 +249,8 @@ class GeoVaLs : public oops::Test {
 
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLs")
       { testGeoVaLs(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsAllocatePutGet")
+      { testGeoVaLsAllocatePutGet(); });
   }
 
   void clear() const override {}
