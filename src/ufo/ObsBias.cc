@@ -33,15 +33,15 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Get the jobs(channels)
-  if (conf.has("obs bias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf.getString("obs bias.jobs"));
+  if (conf.has("jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf.getString("jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   // Predictor factory
-  if (conf.has("obs bias.predictors")) {
+  if (conf.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf.get("obs bias.predictors", confs);
+    conf.get("predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
       predbases_.push_back(pred);
@@ -137,8 +137,8 @@ void ObsBias::read(const eckit::Configuration & conf) {
 
   // Bias coefficients input file name
   std::string input_filename;
-  if (conf.has("obs bias.input file")) {
-    input_filename = conf.getString("obs bias.input file");
+  if (conf.has("input file")) {
+    input_filename = conf.getString("input file");
     // Open an hdf5 file, read only
     ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
     ioda::Engines::BackendCreationParameters backendParams;

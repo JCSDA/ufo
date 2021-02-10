@@ -44,28 +44,30 @@ void testObsBiasCovarianceDetails() {
                        bgn, end, oops::mpi::myself());
 
     // Setup ObsBias
-    ObsBias ybias(odb, oconf);
+    eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
+    ObsBias ybias(odb, biasconf);
 
     // Setup ObsBiasIncrements
-    ObsBiasIncrement ybias_inc(odb, oconf);
+    eckit::LocalConfiguration biaserrconf = oconf.getSubConfiguration("obs bias error");
+    ObsBiasIncrement ybias_inc(odb, biaserrconf);
     ObsBiasIncrement ybias_inc_2(ybias_inc);
     ObsBiasIncrement ybias_inc_3(ybias_inc);
     ybias_inc_2.zero();
     ybias_inc_3.zero();
 
     // Setup ObsBiasCovariance (include reading from file)
-    ObsBiasCovariance ybias_cov(odb, oconf);
+    ObsBiasCovariance ybias_cov(odb, biaserrconf);
 
     // Randomize increments
     ybias_cov.randomize(ybias_inc);
 
     // linearize for first outer loop
-    oconf.set("iteration", 0);
-    ybias_cov.linearize(ybias, oconf);
+    biaserrconf.set("iteration", 0);
+    ybias_cov.linearize(ybias, biaserrconf);
 
     // linearize for second outer loop
-    oconf.set("iteration", 1);
-    EXPECT_THROWS(ybias_cov.linearize(ybias, oconf));
+    biaserrconf.set("iteration", 1);
+    EXPECT_THROWS(ybias_cov.linearize(ybias, biaserrconf));
 
     // mimic QC flags from first outer loop
     const std::vector<int> qc_flags(odb.nlocs(), 50);
@@ -90,7 +92,7 @@ void testObsBiasCovarianceDetails() {
     ybias_cov.randomize(ybias_inc);
 
     // linearize for second outer loop
-    ybias_cov.linearize(ybias, oconf);
+    ybias_cov.linearize(ybias, biaserrconf);
 
     // delta_bias * B
     ybias_cov.multiply(ybias_inc, ybias_inc_2);

@@ -117,7 +117,7 @@ class ObsTypeParameters : public oops::Parameters {
   oops::OptionalParameter<eckit::LocalConfiguration> obsDiagnostics{"obs diagnostics", this};
 
   /// Options used to configure the observation bias.
-  oops::OptionalParameter<eckit::LocalConfiguration> obsBias{"obs bias", this};
+  oops::Parameter<eckit::LocalConfiguration> obsBias{"obs bias", eckit::LocalConfiguration(), this};
 
   /// Indices of observations expected to pass quality control.
   ///
@@ -404,23 +404,19 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
     ObsOperator_ hop(obspace, *params.obsOperator.value());
-    // TODO(wsmigaj): ObsAuxCtrl currently expects to receive the top-level configuration
-    // even though the implementations I've seen only reference elements of the "obs bias"
-    // subconfiguration. If that's universally true, ObsAuxCtrl should be refactored so that
-    // it can be passed just the contents of the "obs bias" section.
-    const ObsAuxCtrl_ ybias(obspace, params.toConfiguration());
+    const ObsAuxCtrl_ ybias(obspace, params.obsBias.value());
     ObsVector_ hofx(obspace);
     oops::Variables vars;
     vars += hop.requiredVars();
     vars += filters.requiredVars();
-    if (params.obsBias.value() != boost::none) vars += ybias.requiredVars();
+    vars += ybias.requiredVars();
     if (params.geovals.value() == boost::none)
       throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
                              " of the 'observations' list requires a 'geovals' section", Here());
     const GeoVaLs_ gval(*params.geovals.value(), obspace, vars);
     oops::Variables diagvars;
     diagvars += filters.requiredHdiagnostics();
-    if (params.obsBias.value() != boost::none) diagvars += ybias.requiredHdiagnostics();
+    diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
     hop.simulateObs(gval, hofx, ybias, diags);

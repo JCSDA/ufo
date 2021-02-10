@@ -30,15 +30,15 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
   oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
 
   // Get the jobs(channels)
-  if (conf_.has("obs bias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
+  if (conf_.has("jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf_.getString("jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   // Predictor factory
-  if (conf_.has("obs bias.predictors")) {
+  if (conf_.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("obs bias.predictors", confs);
+    conf_.get("predictors", confs);
     typedef std::unique_ptr<PredictorBase> predictor;
     for (std::size_t j = 0; j < confs.size(); ++j) {
       predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));
@@ -77,15 +77,15 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
   : odb_(other.odb_), conf_(conf), predbases_(), prednames_(), jobs_() {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting." << std::endl;
   // Get the jobs(channels)
-  if (conf_.has("obs bias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
+  if (conf_.has("jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf_.getString("jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   // Predictor factory
-  if (conf_.has("obs bias.predictors")) {
+  if (conf_.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("obs bias.predictors", confs);
+    conf_.get("predictors", confs);
     typedef std::unique_ptr<PredictorBase> predictor;
     for (std::size_t j = 0; j < confs.size(); ++j) {
       predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));

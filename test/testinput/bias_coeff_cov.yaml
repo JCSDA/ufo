@@ -11,18 +11,7 @@ observations:
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     jobs: *channels
-    sensor: amsua_n19
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0 
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
-    predictors:
+    predictors: &predictors
     - predictor:
         name: constant
     - predictor:
@@ -56,4 +45,18 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
+
+  obs bias error:
+    jobs: *channels
+    sensor: amsua_n19
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0
+    prior:
+      datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+    predictors: *predictors
   tolerance: 1.e-7

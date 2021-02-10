@@ -27,19 +27,8 @@ observations:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    sensor: *Sensor_ID
     jobs: *channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0 
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
-    predictors:
+    predictors: &predictors
     - predictor:
         name: constant
     - predictor:
@@ -73,6 +62,22 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
+  obs bias error:
+    sensor: *Sensor_ID
+    jobs: *channels
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0 
+    prior:
+      datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+      options:
+        order: 2
+        tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
+    predictors: *predictors
     tolerance: 1.e-5
   vector ref: GsiHofXBc
   tolerance: 1.e-7
