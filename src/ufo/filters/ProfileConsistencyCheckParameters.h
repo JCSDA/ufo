@@ -322,7 +322,7 @@ namespace ufo {
 
     /// Minimum value of denominator used when computing big gaps
     /// (dimensionless; equal to log (pressure threshold / hPa)).
-    oops::Parameter<float> AvgP_GapLogPDiffMin {"AvgP_GapLogPDiffMin", log(5.0), this};
+    oops::Parameter<float> AvgP_GapLogPDiffMin {"AvgP_GapLogPDiffMin", std::log(5.0), this};
 
     /// @}
 

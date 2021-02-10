@@ -29,7 +29,7 @@ namespace ufo {
   {
     logP = pressures;
     std::transform(logP.begin(), logP.end(), logP.begin(),
-                   [this](float PLev){return PLev > 0 ? log(PLev) : missingValueFloat;});
+                   [this](float PLev){return PLev > 0 ? std::log(PLev) : missingValueFloat;});
   }
 
   void ProfileAveragePressure::ExnerPressure(const std::vector <float> &pressures,
@@ -47,7 +47,7 @@ namespace ufo {
                                                std::vector <float> &bigPgaps)
   {
     bigPgaps = pressures;
-    const float GapSize = log(10.0f);
+    const float GapSize = std::log(10.0f);
     const float GapFactor = ObsType == ufo::MetOfficeObsIDs::AtmosphericProfile::WindProf ?
       options_.AvgP_WinProGapFactor.value() * GapSize :
       options_.AvgP_SondeGapFactor.value() * GapSize;
@@ -55,7 +55,7 @@ namespace ufo {
     // Subtracting log(100.0) from PLev effectively converts the pressure to hPa.
     std::transform(bigPgaps.begin(), bigPgaps.end(), bigPgaps.begin(),
                    [this, GapFactor, GapLogPDiffMin](float PLev){return PLev > 0.0 ?
-                       GapFactor / std::max(log(PLev) - log(100.0f), GapLogPDiffMin) :
+                       GapFactor / std::max(std::log(PLev) - std::log(100.0f), GapLogPDiffMin) :
                        missingValueFloat;});
   }
 

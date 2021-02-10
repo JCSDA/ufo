@@ -141,7 +141,7 @@ float amsua_clw(float tobs1, float tobs2, float sza) {
         tobs1 <= 284.0 && tobs2 <= 284.0 && tobs1 > 0.0 && tobs2 > 0.0) {
       float cossza = cos(M_PI * sza/180.0);
       float d0 = 8.240 - (2.622 - 1.846*cossza)*cossza;
-      clw = cossza*(d0 + d1*log(285.0-tobs1)) + d2*log(285.0-tobs2);
+      clw = cossza*(d0 + d1*std::log(285.0-tobs1)) + d2*std::log(285.0-tobs2);
       clw = std::max(0.0f, clw);
     } else {
       clw = missing;

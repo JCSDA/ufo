@@ -91,8 +91,8 @@ namespace ufo {
           if (coordOut[jlevOut] > 0.0 &&
               coordIn[jlevIn] > 0.0 &&
               coordIn[jlevIn + 1] > 0.0) {
-            Interp_factor = log(coordOut[jlevOut] / coordIn[jlevIn]) /
-              log(coordIn[jlevIn + 1] / coordIn[jlevIn]);
+            Interp_factor = std::log(coordOut[jlevOut] / coordIn[jlevIn]) /
+              std::log(coordIn[jlevIn + 1] / coordIn[jlevIn]);
           }
         } else {
           // Linear interpolation.
