@@ -31,6 +31,7 @@ list( APPEND ufo_test_input
   testinput/bias_coeff.yaml
   testinput/bias_coeff_cov.yaml
   testinput/coolskin.yaml
+  testinput/composite.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
   testinput/cris_qc_filters.yaml
@@ -129,6 +130,7 @@ list( APPEND ufo_test_input
   testinput/ompstc_npp.yaml
   testinput/ompstc_npp_flipz.yaml
   testinput/ompslp_npp.yaml
+  testinput/operatorutils.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
   testinput/qc_actions.yaml
@@ -1334,6 +1336,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_radarradialvelocity
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_opr_composite
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/composite.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 # Test UFO ObsFilters (generic)
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_processwhere
@@ -2179,6 +2188,13 @@ ecbuild_add_test( TARGET  test_ufo_parameters
 ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
                   SOURCES mains/TestPiecewiseLinearInterpolation.cc
                   ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test piecewise linear interpolation
+ecbuild_add_test( TARGET  test_ufo_operator_utils
+                  SOURCES mains/TestOperatorUtils.cc
+                  ARGS    "testinput/operatorutils.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

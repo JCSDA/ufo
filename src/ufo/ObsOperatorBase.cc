@@ -31,6 +31,12 @@ std::unique_ptr<Locations> ObsOperatorBase::locations() const {
 
 // -----------------------------------------------------------------------------
 
+oops::Variables ObsOperatorBase::simulatedVars() const {
+  return odb_.obsvariables();
+}
+
+// -----------------------------------------------------------------------------
+
 ObsOperatorFactory::ObsOperatorFactory(const std::string & name) {
   if (getMakers().find(name) != getMakers().end()) {
     oops::Log::error() << name << " already registered in ufo::ObsOperatorFactory." << std::endl;

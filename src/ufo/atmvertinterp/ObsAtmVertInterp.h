@@ -46,6 +46,8 @@ class ObsAtmVertInterp : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
+  oops::Variables simulatedVars() const override {return operatorVars_;}
+
   int & toFortran() {return keyOperAtmVertInterp_;}
   const int & toFortran() const {return keyOperAtmVertInterp_;}
 
@@ -54,6 +56,7 @@ class ObsAtmVertInterp : public ObsOperatorBase,
   F90hop keyOperAtmVertInterp_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  oops::Variables operatorVars_;
 };
 
 // -----------------------------------------------------------------------------

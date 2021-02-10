@@ -1,0 +1,174 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+
+# The commented-out part of this file defines four "elementary" operators (2x vertical
+# interpolation and 2x identity) applied to single variables. The RMS values of vectors produced by
+# these operators were used to derive the reference RMS values for tests of the Composite operator
+# (below). The commented-out code is preserved here in case these values need to be recalculated,
+# e.g. because of a change in the test files.
+#
+#- obs space:
+#    name: Radiosonde
+#    obsdatain:
+#      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#    simulated variables: [eastward_wind]
+#  obs operator:
+#    name: VertInterp
+#    vertical coordinate: air_pressure
+#  geovals:
+#    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+#  rms ref: 24.343567787559724
+#  tolerance: 1.0e-06
+#- obs space:
+#    name: Radiosonde
+#    obsdatain:
+#      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#    simulated variables: [northward_wind]
+#  obs operator:
+#    name: VertInterp
+#    vertical coordinate: air_pressure
+#  geovals:
+#    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+#  rms ref: 5.5678287067725627
+#  tolerance: 1.0e-06
+#- obs space:
+#    name: Radiosonde
+#    obsdatain:
+#      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#    simulated variables: [surface_pressure]
+#  obs operator:
+#    name: Identity
+#  geovals:
+#    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+#  rms ref: 98283.406637309454
+#  tolerance: 1.0e-06
+#- obs space:
+#    name: Radiosonde
+#    obsdatain:
+#      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#    # We use the identity operator here just for testing purposes -- in reality we'd use the
+#    # VertInterp operator
+#    simulated variables: [air_temperature]
+#  obs operator:
+#    name: Identity
+#  geovals:
+#    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+#  rms ref: 294.79799709699643
+#  tolerance: 1.0e-06
+
+# Composite operator (with the identity operator as the first component and
+# the vertical interpolation operator as the second)
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+  obs operator:
+    name: Composite
+    components:
+     - name: Identity
+       variables:
+       - name: air_temperature
+       - name: surface_pressure
+     - name: VertInterp
+       variables:
+       - name: northward_wind
+       - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  # The reference value is calculated as
+  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
+  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  # with the values of rms(...) taken from the four commented-out test cases at the top of this file
+  rms ref: 49141.92596374258
+  tolerance: 1.0e-06
+# Composite operator (with components listed in the opposite order)
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       variables:
+       - name: northward_wind
+       - name: eastward_wind
+     - name: Identity
+       variables:
+       - name: air_temperature
+       - name: surface_pressure
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  # The reference value is calculated as
+  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
+  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  # with the values of rms(...) taken from the four commented-out test cases at the top of this file
+  rms ref: 49141.92596374258
+  tolerance: 1.0e-06
+# Invalid composite operator with two components said to simulate the same variable
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind]
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       variables:
+       - name: eastward_wind
+     - name: Identity
+       variables:
+       - name: eastward_wind
+  expect constructor to throw exception with message: Multiple components simulate the same variables
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  rms ref: 0  # bogus value; simulateObs won't be called because the constructor will throw an exception
+  tolerance: 1.0e-06
+# Invalid composite operator with two components said to simulate the same variables
+# (listed in different order, which shouldn't matter, though)
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       variables:
+       - name: eastward_wind
+       - name: northward_wind
+     - name: Identity
+       variables:
+       - name: northward_wind
+       - name: eastward_wind
+  expect constructor to throw exception with message: Multiple components simulate the same variables
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  rms ref: 0  # bogus value; simulateObs won't be called because the constructor will throw an exception
+  tolerance: 1.0e-06
+# Invalid composite operator with some variables not simulated by any component
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       variables:
+       - name: eastward_wind
+     - name: Identity
+       variables:
+       - name: northward_wind
+  expect constructor to throw exception with message: The list of variables simulated by the obs operator differs from the list of simulated variables in the obs space
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  rms ref: 0  # bogus value; simulateObs won't be called because the constructor will throw an exception
+  tolerance: 1.0e-06

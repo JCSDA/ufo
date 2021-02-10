@@ -11,7 +11,9 @@ use ufo_vars_mod
 
   type, public :: ufo_atmvertinterp
      type(oops_variables), public :: geovars 
-     type(oops_variables), public :: obsvars 
+     type(oops_variables), public :: obsvars ! Variables to be simulated
+     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                      ! simulated variables in the ObsSpace
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
    contains
@@ -71,7 +73,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, ivar
+  integer :: iobs, ivar, iobsvar
   real(kind_real), dimension(:), allocatable :: obsvcoord
   type(ufo_geoval), pointer :: vcoordprofile, profile
   real(kind_real), allocatable :: wf(:)
@@ -105,9 +107,12 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
   enddo
 
-  do ivar = 1, nvars
+  do iobsvar = 1, size(self%obsvarindices)
+    ! Get the index of the row of hofx to fill
+    ivar = self%obsvarindices(iobsvar)
+
     ! Get the name of input variable in geovals
-    geovar = self%geovars%variable(ivar)
+    geovar = self%geovars%variable(iobsvar)
 
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)

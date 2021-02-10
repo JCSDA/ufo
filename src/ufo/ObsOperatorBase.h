@@ -48,6 +48,11 @@ class ObsOperatorBase : public util::Printable,
 /// Locations for GeoVaLs
   virtual std::unique_ptr<Locations> locations() const;
 
+/// \brief List of variables simulated by this operator.
+///
+/// The default implementation returns the list of all simulated variables in the ObsSpace.
+  virtual oops::Variables simulatedVars() const;
+
  private:
   virtual void print(std::ostream &) const = 0;
   const ioda::ObsSpace & odb_;
