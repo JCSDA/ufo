@@ -41,7 +41,7 @@ Incorrect and missing values:
     simulated variables: [air_temperature, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
@@ -326,3 +326,50 @@ Background manual QC flags:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ManualFlagModification: true
+
+#Do not run profile pressure routine before temperature averaging
+Profile pressure not run before temperature averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
+
+#GeoVaLs missing for temperature averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for temperature averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_temperature.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringOperation: true

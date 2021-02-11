@@ -116,6 +116,7 @@ struct VariableNames
   static constexpr const char* const counter_TotCFlags = "TotCFlags@Counters";
   static constexpr const char* const counter_TotHFlags = "TotHFlags@Counters";
   static constexpr const char* const counter_TotLFlags = "TotLFlags@Counters";
+  static constexpr const char* const counter_NumGapsT = "NumGapsT@Counters";
 
   // Corrections
 
@@ -162,6 +163,7 @@ struct VariableNames
   static constexpr const char* const geovals_pressure = "air_pressure";
   static constexpr const char* const geovals_pressure_rho = "air_pressure_rho";
   static constexpr const char* const geovals_height = "height";
+  static constexpr const char* const geovals_potential_temperature = "air_potential_temperature";
 
   // GeoVaLs used in validation
 
@@ -169,11 +171,24 @@ struct VariableNames
   static constexpr const char* const geovals_ExnerP = "ExnerPB";
   static constexpr const char* const geovals_logP_rho = "LogPA";
   static constexpr const char* const geovals_ExnerP_rho = "ExnerPA";
+  static constexpr const char* const geovals_air_temperature = "air_temperature";
+  static constexpr const char* const geovals_average_air_temperature = "average_air_temperature";
+  static constexpr const char* const geovals_average_air_temperature_qcflags =
+    "average_air_temperature_flags";
 
   // Derived values on model levels
 
   static constexpr const char* const geovals_logP_derived = "LogPB@ModelLevelsDerivedValue";
   static constexpr const char* const geovals_ExnerP_derived = "ExnerPB@ModelLevelsDerivedValue";
+  static constexpr const char* const geovals_air_temperature_derived =
+    "air_temperature@ModelLevelsDerivedValue";
+
+  // Averaged values on model levels
+
+  static constexpr const char* const average_air_temperature_derived =
+    "average_air_temperature@ModelLevelsDerivedValue";
+  static constexpr const char* const average_air_temperature_qcflags =
+    "average_air_temperature@ModelLevelsQCFlags";
 
   // Derived values on model rho levels
 

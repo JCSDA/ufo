@@ -78,9 +78,9 @@ namespace ufo {
         } else if (obsdb_.has(groupname, varname) || optional) {
           // Initially fill the vector with the default value for the type T.
           if (entriesPerProfile == 0) {
-            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all));
+            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all, groupname));
           } else {
-            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all));
+            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all, groupname));
           }
           // Retrieve variable from the obsdb if present, overwriting the default value.
           if (obsdb_.has(groupname, varname)) obsdb_.get_db(groupname, varname, vec_all);
@@ -120,9 +120,10 @@ namespace ufo {
           const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
           std::vector <T> vec_all;  // Vector storing data for entire sample.
           if (entriesPerProfile == 0) {
-            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all));
+            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all, groupname));
           } else {
-            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all));
+            vec_all.assign(entriesPerProfile * obsdb_.nrecs(),
+                           defaultValue(vec_all, groupname));
           }
           entireSampleData_[fullname] = vec_all;
         }
@@ -151,17 +152,26 @@ namespace ufo {
     const DataHandlerParameters &options_;
 
     /// Default value used to fill vector of integers.
-    int defaultValue(const std::vector <int> &vec) {return 0;}
+    int defaultValue(const std::vector <int> &vec, const std::string &groupname);
 
     /// Default value used to fill vector of floats.
-    float defaultValue(const std::vector <float> &vec) {return 0.0f;}
+    float defaultValue(const std::vector <float> &vec, const std::string &groupname);
 
     /// Default value used to fill vector of strings.
-    std::string defaultValue(const std::vector <std::string> &vec) {return "";}
+    std::string defaultValue(const std::vector <std::string> &vec, const std::string &groupname);
 
     /// Container of each variable in the entire data set.
     std::unordered_map <std::string, boost::variant
       <std::vector <int>, std::vector <float>, std::vector <std::string>>> entireSampleData_;
+
+    /// Missing value (int)
+    const int missingValueInt = util::missingValue(missingValueInt);
+
+    /// Missing value (float)
+    const float missingValueFloat = util::missingValue(missingValueFloat);
+
+    /// Missing value (string)
+    const std::string missingValueString = util::missingValue(missingValueString);
   };
 }  // namespace ufo
 

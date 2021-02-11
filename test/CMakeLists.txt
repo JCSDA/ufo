@@ -210,6 +210,8 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_history_obsfilter.yaml
   testinput/profileconsistencychecks_average_pressure_obsfilter.yaml
   testinput/profileconsistencychecks_average_pressure_OPScomparison.yaml
+  testinput/profileconsistencychecks_average_temperature_obsfilter.yaml
+  testinput/profileconsistencychecks_average_temperature_OPScomparison.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
@@ -1646,6 +1648,13 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_pressure_obs
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_temperature_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_average_temperature_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -1815,6 +1824,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_pressure_OPScomparison
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_average_pressure_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_temperature_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_average_temperature_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ProfileConsistencyChecks.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

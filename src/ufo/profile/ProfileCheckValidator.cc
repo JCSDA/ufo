@@ -158,6 +158,13 @@ namespace ufo {
             ufo::VariableNames::geovals_ExnerP_derived,
             ufo::VariableNames::geovals_logP_rho_derived,
             ufo::VariableNames::geovals_ExnerP_rho_derived});
+      } else if (check == "AverageTemperature") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::average_air_temperature_qcflags,
+            ufo::VariableNames::counter_NumGapsT});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::geovals_air_temperature_derived,
+            ufo::VariableNames::average_air_temperature_derived});
       }
     }
   }

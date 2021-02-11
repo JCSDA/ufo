@@ -324,6 +324,14 @@ namespace ufo {
     /// (dimensionless; equal to log (pressure threshold / hPa)).
     oops::Parameter<float> AvgP_GapLogPDiffMin {"AvgP_GapLogPDiffMin", std::log(5.0), this};
 
+    /// Minimum fraction of a model layer that must have been covered (in the vertical coordinate)
+    /// by observed values in order for temperature to be averaged onto that layer.
+    oops::Parameter<float> AvgT_SondeDZFraction {"AvgT_SondeDZFraction", 0.5, this};
+
+    /// Probability of gross error threshold above which rejection flags are set
+    /// in the temperature averaging routine.
+    oops::Parameter<float> AvgT_PGEskip {"AvgT_PGEskip", 0.9, this};
+
     /// @}
 
     /// @name OPS comparison parameters

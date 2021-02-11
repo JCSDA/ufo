@@ -99,6 +99,7 @@ constexpr const char* const ufo::VariableNames::counter_TotHProfs;
 constexpr const char* const ufo::VariableNames::counter_TotCFlags;
 constexpr const char* const ufo::VariableNames::counter_TotHFlags;
 constexpr const char* const ufo::VariableNames::counter_TotLFlags;
+constexpr const char* const ufo::VariableNames::counter_NumGapsT;
 
 // Corrections
 
@@ -144,7 +145,7 @@ constexpr const char* const ufo::VariableNames::geovals_orog;
 constexpr const char* const ufo::VariableNames::geovals_pressure;
 constexpr const char* const ufo::VariableNames::geovals_pressure_rho;
 constexpr const char* const ufo::VariableNames::geovals_height;
-
+constexpr const char* const ufo::VariableNames::geovals_potential_temperature;
 
 // GeoVaLs used in validation
 
@@ -152,11 +153,20 @@ constexpr const char* const ufo::VariableNames::geovals_logP;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP;
 constexpr const char* const ufo::VariableNames::geovals_logP_rho;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho;
+constexpr const char* const ufo::VariableNames::geovals_air_temperature;
+constexpr const char* const ufo::VariableNames::geovals_average_air_temperature;
+constexpr const char* const ufo::VariableNames::geovals_average_air_temperature_qcflags;
 
 // Derived values on model levels
 
 constexpr const char* const ufo::VariableNames::geovals_logP_derived;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP_derived;
+constexpr const char* const ufo::VariableNames::geovals_air_temperature_derived;
+
+// Averaged values on model levels
+
+constexpr const char* const ufo::VariableNames::average_air_temperature_derived;
+constexpr const char* const ufo::VariableNames::average_air_temperature_qcflags;
 
 // Derived values on model rho levels
 

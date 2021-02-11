@@ -13,6 +13,8 @@ set ( profile_files
       ModelParameters.h
       ProfileAveragePressure.cc
       ProfileAveragePressure.h
+      ProfileAverageTemperature.cc
+      ProfileAverageTemperature.h
       ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h

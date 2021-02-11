@@ -100,15 +100,16 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   if (!ignoreGeoVaLs && geovars.size() > 0) {
     const eckit::LocalConfiguration geovalsConf(conf, "geovals");
     geovals.reset(new GeoVaLs(geovalsConf, obsspace, geovars));
+  } else {
+    geovals.reset(new GeoVaLs(oops::mpi::world()));
   }
 
   filter.preProcess();
-  if (expectThrowDuringOperation) {
+  filter.priorFilter(*geovals);
+  if (expectThrowDuringOperation)
     EXPECT_THROWS(filter.postFilter(hofx, obsdiags));
-  } else {
-    filter.priorFilter(*geovals);
+  else
     filter.postFilter(hofx, obsdiags);
-  }
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are

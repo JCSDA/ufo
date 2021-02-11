@@ -42,4 +42,28 @@ namespace ufo {
       get<int>(ufo::VariableNames::counter_NumAnyErrors);
     putDataVector(ufo::VariableNames::counter_NumAnyErrors, NumAnyErrors);
   }
+
+  int EntireSampleDataHandler::defaultValue(const std::vector <int> &vec,
+                                            const std::string &groupname)
+  {
+    if (groupname == "Counters")
+      return 0;
+    else
+      return missingValueInt;
+  }
+
+  float EntireSampleDataHandler::defaultValue(const std::vector <float> &vec,
+                                              const std::string &groupname)
+  {
+    if (groupname == "Corrections")
+      return 0.0f;
+    else
+      return missingValueFloat;
+  }
+
+  std::string EntireSampleDataHandler::defaultValue(const std::vector <std::string> &vec,
+                                                    const std::string &groupname)
+  {
+    return missingValueString;
+  }
 }  // namespace ufo
