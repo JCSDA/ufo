@@ -1,0 +1,26 @@
+window begin: 2020-12-01T09:00:00Z
+window end: 2020-12-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+  obs space:
+    name: test_obserrorfactorconv
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
+      obsgrouping:
+        group variables: ["station_id", "datetime"]
+        sort variable: "air_pressure"
+        sort order: "descending"  
+    simulated variables: [eastward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/converr_vadwind_geoval_2020120112_s.nc4
+  obs function:
+    name: ObsErrorFactorConventional@ObsFunction
+    variables: [eastward_wind]
+    tolerance: 1.e-6
+    options:
+      inflate variables: [eastward_wind] # Required
+      test QCflag: PreQC  # Optional. Default is from filter qcflags     
+      test QCthreshold: 2 # Optonal only when using PreQC flags 
+                          # Default value = 3 for PreQC

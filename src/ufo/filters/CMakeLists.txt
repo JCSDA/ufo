@@ -157,6 +157,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorWavenumIR.h
       obsfunctions/ObsErrorFactorSfcPressure.cc
       obsfunctions/ObsErrorFactorSfcPressure.h
+      obsfunctions/ObsErrorFactorConventional.cc
+      obsfunctions/ObsErrorFactorConventional.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
       obsfunctions/ObsFunctionLinearCombination.cc
