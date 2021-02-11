@@ -133,6 +133,8 @@ end subroutine ufo_radiancecrtm_tlad_delete
 
 subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, hofxdiags)
 use fckit_mpi_module,   only: fckit_mpi_comm
+use fckit_log_module,   only: fckit_log
+use ieee_arithmetic,    only: ieee_is_nan
 
 implicit none
 
@@ -171,7 +173,7 @@ character(len=MAXVARLEN) :: varstr
 character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
-integer :: str_pos(4), ch_diags(hofxdiags%nvar)
+integer :: str_pos(4), ch_diags(hofxdiags%nvar),numNaN
 
 real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
@@ -335,6 +337,21 @@ real(kind_real), allocatable :: Wfunc(:)
 
    !call CRTM_RTSolution_Inspect(rts)
 
+   ! check for NaN values in atm_k
+   numNaN = 0
+   do jprofile = 1, self%n_Profiles
+      do jchannel = 1, size(self%channels)
+         do jlevel = 1, self%atm_K(jchannel,jprofile)%n_layers
+            if (ieee_is_nan(self%atm_K(jchannel,jprofile)%Temperature(jlevel))) then
+               self%Skip_Profiles(jprofile) = .TRUE.
+               numNaN = numNaN + 1
+               write(message,*) numNaN, 'th NaN in Jacobian Profiles'
+               call fckit_log%info(message)
+               cycle
+            end if
+         end do
+      end do
+   end do
 
    !! Parse hofxdiags%variables into independent/dependent variables and channel
    !! assumed formats:
