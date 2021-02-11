@@ -60,7 +60,7 @@ class FilterBase : public ObsProcessorBase {
 
  private:
   void doFilter() const override;
-  virtual void print(std::ostream &) const = 0;
+  void print(std::ostream &) const override = 0;
   virtual void applyFilter(const std::vector<bool> &, const Variables &,
                            std::vector<std::vector<bool>> &) const = 0;
   virtual int qcFlag() const = 0;

@@ -125,7 +125,7 @@ template<class T>
 class FilterActionMaker : public FilterActionFactory {
   typedef typename T::Parameters_ Parameters_;
 
-  virtual std::unique_ptr<FilterActionBase> make(const FilterActionParametersBase & parameters) {
+  std::unique_ptr<FilterActionBase> make(const FilterActionParametersBase & parameters) override {
     const auto &stronglyTypedParameters = dynamic_cast<const Parameters_&>(parameters);
     return boost::make_unique<T>(stronglyTypedParameters);
   }
