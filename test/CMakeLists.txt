@@ -154,6 +154,7 @@ list( APPEND ufo_test_input
   testinput/qc_poisson_disk_thinning_parallel.yaml
   testinput/qc_preqc.yaml
   testinput/qc_profile_background_check.yaml
+  testinput/qc_profile_fewobs_check.yaml
   testinput/qc_stuckcheck.yaml
   testinput/qc_stuckcheck_unittests.yaml
   testinput/qc_thinning.yaml
@@ -1372,6 +1373,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gen_backgroundcheck
 ecbuild_add_test( TARGET  test_ufo_qc_gen_profilebackgroundcheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_profile_background_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gen_profilefewobservationscheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_profile_fewobs_check.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

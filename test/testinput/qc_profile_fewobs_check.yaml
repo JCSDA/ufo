@@ -1,0 +1,61 @@
+window begin: 2020-12-31T23:59:00Z
+window end: 2021-01-01T00:01:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    threshold: 10
+  passedBenchmark: 90  # Rejects only profile 1, which has missing data
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    threshold: 9
+  passedBenchmark: 99  # Accepts all profiles
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    threshold: 11
+  passedBenchmark: 0  # Rejects all profiles
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    threshold: 11
+    where:
+    - variable:
+        name: record_number@MetaData
+      is_in: 0-4        # First five profiles
+  passedBenchmark: 50   # Rejects all profiles, except those removed by where
+

@@ -26,6 +26,7 @@
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
+#include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/TemporalThinning.h"
@@ -108,6 +109,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            VariableConversionMaker("Variable Conversion");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileBackgroundCheck> >
            ProfileBackgroundCheckMaker("Profile Background Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileFewObsCheck> >
+           ProfileFewObsCheckMaker("Profile Few Observations Check");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
