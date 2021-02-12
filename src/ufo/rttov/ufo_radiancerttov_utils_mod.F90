@@ -1722,10 +1722,16 @@ contains
           end do
 
         case default
+          ! not a supported obsdiag but we allocate and initialise here anyway for use later on
+          hofxdiags%geovals(jvar)%nval = 1
+          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+          hofxdiags%geovals(jvar)%vals = missing
+
           write(message,*) 'ufo_radiancerttov_simobs: //&
-            & ObsDiagnostic is unsupported, ', &
-            & hofxdiags%variables(jvar)
+            & ObsDiagnostic is unsupported but allocating anyway, ', &
+            & hofxdiags%variables(jvar), SHAPE(hofxdiags%geovals(jvar)%vals)
           call fckit_log%info(message)
+
         end select
 
       else if (trim(ystr_diags(jvar)) == var_tb) then
@@ -1800,13 +1806,13 @@ contains
 
         case default
           write(message,*) 'ufo_radiancerttov_simobs: //&
-            & ObsDiagnostic is unsupported, ', &
+            & Jacobian ObsDiagnostic is unsupported, ', &
             & hofxdiags%variables(jvar)
           call fckit_log%info(message)
         end select
       else
         write(message,*) 'ufo_radiancerttov_simobs: //&
-          & ObsDiagnostic is unsupported, ', &
+          & ObsDiagnostic is not recognised, ', &
           & hofxdiags%variables(jvar)
         call fckit_log%info(message)
       end if
