@@ -3,7 +3,7 @@
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
 
-!> Thae main Fortran module for implementing the rttov onedvar check
+!> The main Fortran module for implementing the rttov onedvar check
 
 module ufo_rttovonedvarcheck_mod
 
@@ -114,6 +114,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix    ! r_submatrix object
   type(ufo_geovals)                      :: hofxdiags      ! hofxdiags containing jacobian
   type(ufo_rttovonedvarcheck_pcemis), target :: IR_pcemis  ! Infrared principal components object
+  type(ufo_geoval), pointer          :: geoval
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
@@ -181,20 +182,21 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   ! ------------------------------------------
   ! 2. Beginning main observation loop
   ! ------------------------------------------
-  write(*,*) "Beginning loop over observations: ",self%qcname
+  write(*,*) "Beginning loop over observations: ",trim(self%qcname)
   apply_count = 0
   obs_loop: do jobs = 1, obs % iloc
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
-      write(*,*) "starting obs number    ",jobs
+      write(message, *) "starting obs number    ",jobs
+      call fckit_log % debug(message)
       !---------------------------------------------------
       ! 2.1 Setup Jb terms
       !---------------------------------------------------
       ! create one ob geovals from full all obs geovals
       call ufo_geovals_copy_one(local_geovals, geovals, jobs)
-      call ufo_rttovonedvarcheck_check_geovals(local_geovals, &
-              prof_index, obs % surface_type(jobs), self % UseRHwaterForQC)
+      call ufo_rttovonedvarcheck_check_geovals(self, local_geovals, &
+              prof_index, obs % surface_type(jobs))
 
       ! create b matrix arrays for this single observation location
       call full_bmatrix % reset( obs % lat(jobs), & ! in
@@ -218,7 +220,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used, prof_index % nprofelements, self % nchans)
+      call ob % setup(nchans_used, self %  nlevels, prof_index % nprofelements, self % nchans)
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -234,6 +236,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       ob % calc_emiss = obs % calc_emiss(jobs)
       if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
+
+      ! Store background T in ob data space
+      call ufo_geovals_get_var(local_geovals, var_ts, geoval)
+      ob % background_T(:) = geoval%vals(:, 1) ! K
 
       ! Create obs vector and r matrix
       jchans_used = 0
@@ -278,8 +284,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       end if
 
       obs % output_BT(:, jobs) = ob % output_BT(:)
+      obs % background_BT(:, jobs) = ob % background_BT(:)
       obs % output_profile(:,jobs) = ob % output_profile(:)
       obs % final_cost(jobs) = ob % final_cost
+      obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then

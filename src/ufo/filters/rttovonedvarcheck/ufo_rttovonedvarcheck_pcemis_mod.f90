@@ -14,7 +14,7 @@ module ufo_rttovonedvarcheck_pcemis_mod
 use fckit_log_module, only : fckit_log
 use kinds
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_utils_mod, only : ufo_utils_iogetfreeunit
 
 implicit none
 private
@@ -24,22 +24,22 @@ type, public :: ufo_rttovonedvarcheck_EmisEigenvec
    integer          :: NChans
    integer          :: NumEV
    integer, pointer :: Channels(:) => null()
-   real, pointer    :: Mean(:) => null()
-   real, pointer    :: PCmin(:) => null()
-   real, pointer    :: PCmax(:) => null()
-   real, pointer    :: PCguess(:) => null()
-   real, pointer    :: EV(:,:) => null()
-   real, pointer    :: EV_Inverse(:,:) => null()
+   real(kind_real), pointer    :: Mean(:) => null()
+   real(kind_real), pointer    :: PCmin(:) => null()
+   real(kind_real), pointer    :: PCmax(:) => null()
+   real(kind_real), pointer    :: PCguess(:) => null()
+   real(kind_real), pointer    :: EV(:,:) => null()
+   real(kind_real), pointer    :: EV_Inverse(:,:) => null()
 end type ufo_rttovonedvarcheck_EmisEigenvec
 
 !< Emissivity eigen vector atlas type definition
-TYPE ufo_rttovonedvarcheck_EmisAtlas
-   INTEGER          :: Nlat
-   INTEGER          :: Nlon
-   INTEGER          :: Npc
-   REAL             :: gridstep
-   REAL, POINTER    :: EmisPC(:,:,:)
-END TYPE ufo_rttovonedvarcheck_EmisAtlas
+type ufo_rttovonedvarcheck_EmisAtlas
+   integer          :: Nlat
+   integer          :: Nlon
+   integer          :: Npc
+   real(kind_real)  :: gridstep
+   real(kind_real), POINTER  :: EmisPC(:,:,:)
+end type ufo_rttovonedvarcheck_EmisAtlas
 
 !< Principal component emissivity type definition
 type, public :: ufo_rttovonedvarcheck_pcemis
@@ -83,7 +83,7 @@ integer                     :: fileunit     ! Unit number for reading in files
 ! Read eigenvector file
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
-  call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
+  fileunit = ufo_utils_iogetfreeunit()
   open(unit = fileunit, file = trim(filepath))
   call ufo_rttovonedvarcheck_GetEmisEigenVec(self, fileunit)
   close(unit = fileunit)
@@ -99,7 +99,7 @@ self % initialised = .true.
 if (present(atlaspath)) then
   inquire(file=trim(atlaspath), exist=file_exists)
   if (file_exists) then
-    call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
+    fileunit = ufo_utils_iogetfreeunit()
     open(unit = fileunit, file = trim(filepath))
     call ufo_rttovonedvarcheck_GetEmisAtlas(self, fileunit)
     close(unit = fileunit)
@@ -433,7 +433,7 @@ real(kind_real), intent(out) :: PC_K(NumChans,NumPC)
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_EmisKToPC"
-real                        :: JEMatrix_element
+real(kind_real)             :: JEMatrix_element
 integer                     :: ichan
 
 do ichan = 1, NumChans

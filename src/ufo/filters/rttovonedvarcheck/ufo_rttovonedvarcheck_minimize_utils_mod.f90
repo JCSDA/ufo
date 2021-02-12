@@ -8,14 +8,16 @@
 module ufo_rttovonedvarcheck_minimize_utils_mod
 
 use kinds
-use ufo_constants_mod, only: grav, zero, t0c, half, one, two
+use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q
+use fckit_log_module, only : fckit_log
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
+use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
-use ufo_utils_mod, only: Ops_QSat, Ops_QSatWat
+use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat
 
 implicit none
 private
@@ -25,9 +27,10 @@ public ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 public ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 public ufo_rttovonedvarcheck_check_geovals
 public ufo_rttovonedvarcheck_CostFunction
-public ufo_rttovonedvarcheck_Qsplit
 public ufo_rttovonedvarcheck_CheckIteration
 public ufo_rttovonedvarcheck_CheckCloudyIteration
+
+character(len=max_string) :: message
 
 contains
 
@@ -68,8 +71,6 @@ real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: emiss_pc(:)
 
 !-------------------------------------------------------------------------------
-
-write(*,*) trim(RoutineName)," start"
 
 prof_x(:) = zero
 nlevels = profindex % nlevels
@@ -194,8 +195,6 @@ end if
 !  deallocate(emiss_pc)
 !end if
 
-write(*,*) trim(RoutineName)," end"
-
 end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
 !-------------------------------------------------------------------------------
@@ -213,7 +212,8 @@ end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, & ! inout
                                             profindex,    & ! in
                                             ob,           & ! inout
-                                            prof_x )        ! in
+                                            prof_x,       & ! in
+                                            UseQtsplitRain) ! in
 
 implicit none
 
@@ -222,6 +222,7 @@ type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
 type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob   !< satellite metadata
 real(kind_real), intent(in)      :: prof_x(:) !< x vector
+logical, intent(in) :: UseQtsplitRain !< flag to choose whether to split rain in qt
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
@@ -230,7 +231,6 @@ integer                      :: gv_index, i, ii
 integer                      :: nlevels
 integer                      :: EmissElement
 type(ufo_geoval), pointer    :: geoval
-real(kind_real), allocatable :: temperature(:)
 real(kind_real), allocatable :: pressure(:)
 real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)
@@ -240,7 +240,6 @@ real(kind_real), allocatable :: emiss_pc(:)
 
 !-------------------------------------------------------------------------------
 
-write(*,*) trim(RoutineName)," start"
 nlevels = profindex % nlevels
 
 !------------------------------
@@ -279,7 +278,6 @@ end if
 ! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   nlevels = profindex % nlevels
-  allocate(temperature(nlevels))
   allocate(pressure(nlevels))
   allocate(humidity_total(nlevels))
   allocate(q(nlevels))
@@ -290,23 +288,19 @@ if (profindex % qt(1) > 0) then
   humidity_total(nlevels:1:-1) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / &
                                 1000.0_kind_real ! ln(g/kg) => kg/kg
 
-  ! Get temperature and pressure from geovals
-  ! var_ts   = "air_temperature" K
-  call ufo_geovals_get_var(geovals, var_ts, geoval)
-  temperature(:) = geoval%vals(:, 1) ! K
   ! var_prs  = "air_pressure" Pa
   call ufo_geovals_get_var(geovals, var_prs, geoval)
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
-                          temperature(:),    & ! in
-                          pressure(:),       & ! in
-                          nlevels,           & ! in
-                          humidity_total(:), & ! in
-                          q(:),              & ! out
-                          ql(:),             & ! out
-                          qi(:))               ! out
+  call Ops_SatRad_Qsplit ( 1,             &
+                    pressure(:),          &
+                    ob % background_T(:), &
+                    humidity_total,       &
+                    q(:),                 &
+                    ql(:),                &
+                    qi(:),                &
+                    UseQtsplitRain)
 
   ! Assign values to geovals
   gv_index = 0
@@ -327,7 +321,6 @@ if (profindex % qt(1) > 0) then
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
-  deallocate(temperature)
   deallocate(pressure)
   deallocate(humidity_total)
   deallocate(q)
@@ -425,8 +418,6 @@ end if
 !  deallocate(emiss_pc)
 !end if
 
-write(*,*) trim(RoutineName)," end"
-
 end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 
 !-------------------------------------------------------------------------------
@@ -442,15 +433,15 @@ end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_check_geovals(geovals, profindex, surface_type, UseRHwaterForQC)
+subroutine ufo_rttovonedvarcheck_check_geovals(self, geovals, profindex, surface_type)
 
 implicit none
 
 ! subroutine arguments:
+type(ufo_rttovonedvarcheck), intent(in) :: self
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
 integer, intent(in) :: surface_type  !< surface type for cold surface check
-logical, intent(in) :: UseRHwaterForQC  !< flag to enable humidity saturation check
 
 character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
 character(len=max_string)    :: varname
@@ -471,7 +462,8 @@ real(kind_real)              :: new_v_wind
 real(kind_real)              :: skin_t, pressure_2m, temperature_2m, NewT
 integer                      :: level_1000hpa, level_950hpa
 
-write(*,*) routinename, " : started"
+write(message, *) routinename, " : started"
+call fckit_log % debug(message)
 
 ! -------------------------------------------
 ! Load variables needed by multiple routines
@@ -498,7 +490,7 @@ if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
   q(:) = geoval%vals(:, 1)
 
   ! Calculated saturation humidity
-  if (UseRHwaterForQC) then
+  if (self % UseRHwaterForQC) then
     call Ops_QsatWat (qsaturated(:),   & ! out
                       temperature(:),  & ! in
                       pressure(:),     & ! in
@@ -539,7 +531,7 @@ if (profindex % q2 > 0) then
   q(1) = geoval%vals(1, 1)
 
   ! Calculated saturation humidity
-  if (UseRHwaterForQC) then
+  if (self % UseRHwaterForQC) then
     call Ops_QsatWat (qsaturated(1:1),   & ! out
                       temperature(1:1),  & ! in
                       pressure(1:1),     & ! in
@@ -571,7 +563,6 @@ end if
 !-------------------------
 
 if (profindex % qt(1) > 0) then
-write(*,*) "Do qt"
 
   allocate(humidity_total(nlevels))
   allocate(q(nlevels))
@@ -579,23 +570,24 @@ write(*,*) "Do qt"
   allocate(qi(nlevels))
 
   humidity_total(:) = 0.0
+  ! Water vapour
   call ufo_geovals_get_var(geovals, trim(var_q), geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+
+  ! Cloud liquid water
   call ufo_geovals_get_var(geovals, trim(var_clw), geoval)
+  where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
-  ! Max sure theres a minimum humidity
-  humidity_total(:) = MAX(humidity_total(:), Min_q)
-
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
-                          temperature(:),    & ! in
-                          pressure(:),       & ! in
-                          nlevels,           & ! in
-                          humidity_total(:), & ! in
-                          q(:),              & ! out
-                          ql(:),             & ! out
-                          qi(:))               ! out
+  call Ops_SatRad_Qsplit ( 1,       &
+                    pressure(:),    &
+                    temperature(:), &
+                    humidity_total, &
+                    q(:),           &
+                    ql(:),          &
+                    qi(:),          &
+                    self % UseQtsplitRain)
 
   ! Assign values to geovals q
   varname = trim(var_q)  ! kg/kg
@@ -633,7 +625,7 @@ end if
 ! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
 ! N.B. I think this should be flagged so it's clear that the background has been modified
 !----
-if(surface_type /= RTsea) then
+if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
 
   ! Get skin temperature
   call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval)
@@ -690,10 +682,6 @@ if(surface_type /= RTsea) then
 
    endif
 
-  !min_q fix
-  !where(profiles(iprof)%q < min_q) profiles(iprof)%q = min_q
-  !if(profiles(iprof)%s2m%q < min_q) profiles(iprof)%s2m%q = min_q
-
 endif
 
 !-------
@@ -746,7 +734,8 @@ if (allocated(q))              deallocate(q)
 if (allocated(ql))             deallocate(ql)
 if (allocated(qi))             deallocate(qi)
 
-write(*,*) routinename, " : ended"
+write(message, *) routinename, " : ended"
+call fckit_log % debug(message)
 
 end subroutine ufo_rttovonedvarcheck_check_geovals
 
@@ -755,7 +744,7 @@ end subroutine ufo_rttovonedvarcheck_check_geovals
 !!
 !! \details Heritage: Ops_SatRad_CostFunction.f90
 !!
-!! Caculate the cost function from the input delta's and error
+!! Calculate the cost function from the input delta's and error
 !! covariances.
 !!
 !! \author Met Office
@@ -783,8 +772,6 @@ real(kind_real), allocatable :: RinvDeltaY(:)
 
 !-------------------------------------------------------------------------------
 
-write(*,*) trim(RoutineName)," start"
-
 allocate(RinvDeltaY, source=DeltaObs)
 
 y_size = size(DeltaObs)
@@ -795,271 +782,16 @@ Jo = half * dot_product(DeltaObs, RinvDeltaY)
 Jb = half * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
 Jcurrent = Jb + Jo
 
-Jcost(1) = (Jo + Jb) * two / real (y_size)     ! Normalize cost by nchans
-Jcost(2) = Jb * two / real (y_size)            ! Normalize cost by nchans
-Jcost(3) = Jo * two / real (y_size)            ! Normalize cost by nchans
+Jcost(1) = (Jo + Jb) * two / real (y_size, kind_real)   ! Normalize cost by nchans
+Jcost(2) = Jb * two / real (y_size, kind_real)          ! Normalize cost by nchans
+Jcost(3) = Jo * two / real (y_size, kind_real)          ! Normalize cost by nchans
 
-write(*,*) "Jo, Jb, Jcurrent = ", Jo, Jb, Jcost(1)
+write(message,*) "Jo, Jb, Jcurrent = ", Jo, Jb, Jcost(1)
+call fckit_log % debug(message)
 
 deallocate(RinvDeltaY)
 
 end subroutine ufo_rttovonedvarcheck_CostFunction
-
-!-------------------------------------------------------------------------------
-!> Split the humidity into water vapour, liquid water and ice.
-!!
-!! \details Heritage: Ops_SatRad_Qsplit.f90
-!!
-!! if output_type=1 : Split total water content (qtotal) into <br>
-!!   water vapor content (q) and <br>
-!!   cloud liquid water content (ql) and <br>
-!!   cloud ice water content (qi) <br>
-!!
-!! if output_type ne 1 : Compute derivatives: (q) =dq/dqtotal <br>
-!!                                            (ql)=dql/dqtotal <br>
-!!                                            (qi)=dqi/dqtotal <br>
-!!
-!! \warning The derivatives are not valid if LtemperatureVar=.true. since
-!!     qsaturated depends on temperature.
-!!
-!! The partitioning of the excess moisture between ice and clw uses a temperature
-!! based parametrization based on aircraft data Ref: Jones DC Reading phdthesis
-!! p126
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine ufo_rttovonedvarcheck_Qsplit (output_type, &
-                              t,           &
-                              p,           &
-                              nlevels_q,   &
-                              qtotal,      &
-                              q,           &
-                              ql,          &
-                              qi)
-
-implicit none
-
-! subroutine arguments:
-integer, intent(in)               :: output_type       !< output profiles or gradients
-real(kind=kind_real), intent(in)  :: t(:)              !< air temperature
-real(kind=kind_real), intent(in)  :: p(:)              !< air pressure
-integer, intent(in)               :: nlevels_q         !< no. of levels
-real(kind=kind_real), intent(in)  :: qtotal(nlevels_q) !< humidity total (kg/kg)
-real(kind=kind_real), intent(out) :: q(nlevels_q)      !< water vapour component q
-real(kind=kind_real), intent(out) :: ql(nlevels_q)     !< liquid component ql
-real(kind=kind_real), intent(out) :: qi(nlevels_q)     !< ice component qi
-
-! Local declarations:
-integer                     :: nlevels_diff
-integer                     :: i
-integer                     :: toplevel_q
-integer                     :: nlevels_mwclw
-integer                     :: nlevels_1dvar
-integer                     :: Qsplit_MixPhaseParam = 1
-real(kind=kind_real), parameter :: lower_rh = 0.95
-real(kind=kind_real), parameter :: upper_rh = 1.05
-real(kind=kind_real), parameter :: Split_Factor = 0.5
-real(kind=kind_real), parameter :: minTempQl = 233.15     ! temperature (K) below which all cloud is ice
-real(kind=kind_real), parameter :: min_q = 3.0E-6         ! ( kg / kg )
-real(kind=kind_real) :: qsaturated(nlevels_q)
-real(kind=kind_real) :: RH_qtotal(nlevels_q)
-real(kind=kind_real) :: qnv(nlevels_q)         ! non vapour component
-real(kind=kind_real) :: qc(nlevels_q)          ! cloud component
-real(kind=kind_real) :: V1(nlevels_q)
-real(kind=kind_real) :: V2(nlevels_q)
-real(kind=kind_real) :: V1zero
-real(kind=kind_real) :: V2zero
-real(kind=kind_real) :: W(nlevels_q)
-real(kind=kind_real) :: Y1,Y2,Y3,Y4
-real(kind=kind_real) :: intConst
-real(kind=kind_real) :: Aconst
-real(kind=kind_real) :: Bconst
-real(kind=kind_real) :: Cconst
-real(kind=kind_real) :: Dconst
-real(kind=kind_real) :: Denom
-real(kind=kind_real) :: SmallValue
-real(kind=kind_real) :: LF(nlevels_q)          ! fraction of ql to ql+qi
-real(kind=kind_real) :: QsplitRainParamA
-real(kind=kind_real) :: QsplitRainParamB
-real(kind=kind_real) :: QsplitRainParamC
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Qsplit"
-character(len=max_string)   :: message
-logical                     :: useQtsplitRain
-
-! Addition to make it work
-nlevels_1dvar = nlevels_q
-nlevels_mwclw = nlevels_q
-useQtsplitRain = .true.
-QsplitRainParamA = 0.15_kind_real
-QsplitRainParamB = 0.09_kind_real
-QsplitRainParamC = 50.0_kind_real
-
-! Calculate the highest wet level
-
-!toplevel_q = nlevels_1dvar - nlevels_q + 1 ! assuming they are the same size now change from OPS
-
-! Compute saturated water vapor profile for nlevels_q only
-
-call Ops_Qsat (qsaturated(1:nlevels_q), & ! out
-               t(1:nlevels_q),          & ! in
-               p(1:nlevels_q),          & ! in
-               nlevels_q)                 ! in
-
-SmallValue = one / 8.5_kind_real
-Denom = SmallValue * (upper_rh - lower_rh)
-
-! don't let rh exceed 2.0 to avoid cosh function blowing up
-RH_qtotal(:) = min (qtotal(:) / qsaturated(:), two)
-
-V1(:) = (RH_qtotal(:) - lower_rh) / Denom
-V2(:) = (RH_qtotal(:) - upper_rh) / Denom
-
-Y1 = one
-Y2 = Split_Factor
-Y3 = zero
-Y4 = Split_Factor
-
-Aconst = (Y2 - Y1) / two
-Bconst = -(Y4 - Y3) / two
-Cconst = (Y2 + Y1) / two
-Dconst = -(Y4 + Y3) / two
-
-! Deal with mixed phase clouds
-! Compute fraction of ql to ql+qi based on temperature profile
-
-! Either
-!Qsplit_MixPhaseParam=1 Jones Method
-
-if (Qsplit_MixPhaseParam == 1) then
-
-  where (t(:) - t0c >= -0.01_kind_real) ! -0.01degc and above
-
-    ! all ql
-    LF(:) = one
-
-  end where
-
-  where (t(:) <= minTempql)
-
-    ! all qi
-    LF(:) = zero
-
-  end where
-
-  where (t(:) > minTempql .and. t(:) - t0c < -0.01_kind_real)
-
-    ! Jones' parametrization
-    LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - t0c)) / 70.0_kind_real)
-
-  end where
-
-!Or
-!Bower et al 1996 parameterisation for ls cloud. Follows UM partitioning
-
-else if (Qsplit_MixPhaseParam == 2) then
-
-  LF(:) = (one/9.0_kind_real)*(T(:)-t0c)+one
-  
-  where( LF(:) > one )
-    LF(:) = one
-  end where
-
-  where( LF(:) < zero )
-    LF(:) = zero
-  end where
-
-!incorrect value supplied bale out
-else
-
-  write(message,'(A,I10)') 'Invalid option for Qsplit_MixPhaseParam. Value=', Qsplit_MixPhaseParam
-  call abor1_ftn(message)
-
-end if
-
-! finally set LF to 0.0 for the rttov levels on which clw jacobians are not
-! calculated since nlevels_mwclw < nlevels_q
-
-nlevels_diff = nlevels_q - nlevels_mwclw
-
-if (nlevels_diff > 0) then
-
-  LF(1:nlevels_diff) = zero
-
-end if
-
-V1zero = -1.0_kind_real * lower_rh / Denom
-V2zero = -1.0_kind_real * upper_rh / Denom
-intConst = -(Aconst * Denom * log (cosh (V1zero)) + Bconst * Denom * log (cosh (V2zero)))
-W(:) = Aconst * Denom * log (cosh (V1(:))) + Bconst * Denom * log (cosh (V2(:))) + &
-       (Cconst + Dconst) * RH_qtotal(:) + intConst
-
-! store the components of qtotal
-! ensuring that they are above lower limits
-
-if (useQtsplitRain) then
-
-  ! Split qtotal into q and qnv (non-vapour part - includes
-  ! ql, qi, qr)
-
-  ! Split qtotal into q, ql ,qi
-
-  do i = 1, nlevels_q
-
-    q(i) = max (W(i) * qsaturated(i), min_q)
-    qnv(i) = max (qtotal(i) - q(i), zero)
-
-    ! Split qnv into a cloud and precipitation part
-
-    qc(i) = max (QsplitRainParamA * (QsplitRainParamB - (QsplitRainParamB / &
-                                    ((QsplitRainParamC * qnv(i)) + one))), zero)
-
-    ! Finally split non-precip part into liquid and ice
-
-    ql(i) = max (LF(i) * qc(i), zero)
-    qi(i) = max ((one - LF(i)) * (qc(i)), zero)
-
-  end do
-
-else
-  do i = 1, nlevels_q
-
-    q(i) = max (W(i) * qsaturated(i), min_q)
-    ql(i) = max (LF(i) * (qtotal(i) - q(i)), zero)
-    qi(i) = max ((one - LF(i)) * (qtotal(i) - q(i)), zero)
-
-  end do
-
-end if
-
-! Values of q, ql and qi are overwritten if output_type /= 1
-! and replaced with the derivatives
-
-if (output_type /= 1) then
-
-  ! Compute derivates
-  ! q = dq/dqtotal, ql = dql/dqtotal, qi=dqi/dqtotal
-
-  q(:) = Aconst * tanh (V1(:)) + Cconst + Bconst * tanh (V2(:)) + Dconst
-
-  if (useQtsplitRain) then
-
-    ql(:) = LF(:) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (one - q(:)) /  &
-                         ((QsplitRainParamC * qnv(:)) + one) ** 2
-    qi(:) = (1.0 - LF(:)) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (one - q(:)) / &
-                         ((QsplitRainParamC * qnv(:)) + one) ** 2
-
-  else
-
-    ql(:) = LF(:) * (one - q(:))
-    qi(:) = (one - LF(:)) * (one - q(:))
-
-  end if
-
-end if
-
-end subroutine ufo_rttovonedvarcheck_Qsplit
 
 !-------------------------------------------------------------------------------
 !> Constrain profile humidity and check temperature values are okay
@@ -1072,18 +804,18 @@ end subroutine ufo_rttovonedvarcheck_Qsplit
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_CheckIteration (geovals,    &
+subroutine ufo_rttovonedvarcheck_CheckIteration (self, &
+                                      geovals,    &
                                       profindex,  &
-                                      nlevels_1dvar, &
                                       profile,    &
                                       OutOfRange)
 
 implicit none
 
 ! subroutine arguments:
-type(ufo_geovals), intent(in)    :: geovals
+type(ufo_rttovonedvarcheck), intent(in) :: self
+type(ufo_geovals), intent(in)           :: geovals
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
-integer, intent(in)              :: nlevels_1dvar
 real(kind_real), intent(inout)   :: profile(:)
 logical, intent(out)             :: OutOfRange
 
@@ -1093,7 +825,7 @@ real(kind_real), allocatable :: scaled_qsaturated(:)
 real(kind_real)              :: q2_sat(1)
 real(kind_real), allocatable :: Plevels_1DVar(:)
 real(kind_real)              :: Pstar_Pa(1)
-real(kind_real)              :: Temp(nlevels_1dvar)
+real(kind_real), allocatable :: Temp(:)
 real(kind_real)              :: Temp2(1)
 real(kind_real)              :: rtbase
 integer                      :: nlevels_q
@@ -1101,12 +833,13 @@ integer                      :: toplevel_q
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CheckIteration"
 type(ufo_geoval), pointer    :: geoval
 character(len=max_string)    :: varname
-logical                      :: useRHwaterForQC
 integer                      :: ii
+integer                      :: nlevels_1dvar
 
 ! Setup
 OutOfRange = .false.
-useRHwaterForQC = .true.
+nlevels_1dvar = self % nlevels
+allocate(Temp(nlevels_1dvar))
 
 !---------------------
 ! 1. Check Temperatures
@@ -1191,7 +924,7 @@ Constrain: if (.not. OutOfRange) then
 
   if (profindex % q(1) > 0) then
 
-    if (useRHwaterForQC) then
+    if (self % useRHwaterForQC) then
       call Ops_QsatWat(qsaturated(1:nlevels_q),    & ! out (qsat levels)
                        Temp(1:nlevels_q),          & ! in  (t levels)
                        Plevels_1DVar(1:nlevels_q), & ! in  (p levels)
@@ -1203,7 +936,7 @@ Constrain: if (.not. OutOfRange) then
                     nlevels_q)                    ! in
     end if
 
-    qsaturated(1:nlevels_q) = log (qsaturated(1:nlevels_q) * 1000.0)
+    qsaturated(1:nlevels_q) = log (qsaturated(1:nlevels_q) * 1000.0_kind_real)
     where (profile(profindex % q(1):profindex % q(2)) > qsaturated(1:nlevels_q))
       profile(profindex % q(1):profindex % q(2)) = qsaturated(1:nlevels_q)
     end where
@@ -1220,8 +953,7 @@ Constrain: if (.not. OutOfRange) then
 
     ! scaled_qsaturated is generated as an upper limit on the value of qtot , and
     ! is set to 2*qsat.
-
-    scaled_qsaturated(1:nlevels_q) = log (2 * qsaturated(1:nlevels_q) * 1000.0)
+    scaled_qsaturated(1:nlevels_q) = log (two * qsaturated(1:nlevels_q) * 1000.0_kind_real)
     where (profile(profindex % qt(1):profindex % qt(2)) > scaled_qsaturated(1:nlevels_q))
       profile(profindex % qt(1):profindex % qt(2)) = scaled_qsaturated(1:nlevels_q)
     end where
@@ -1236,7 +968,7 @@ Constrain: if (.not. OutOfRange) then
     varname = var_sfc_p2m
     call ufo_geovals_get_var(geovals, varname, geoval)
     Pstar_Pa(1) = geoval%vals(1, 1)
-    if (useRHwaterForQC) then
+    if (self % useRHwaterForQC) then
       call Ops_QsatWat (q2_sat(1:1),   & ! out
                         Temp2,         & ! in
                         Pstar_Pa(1:1), & ! in
@@ -1247,7 +979,7 @@ Constrain: if (.not. OutOfRange) then
                      Pstar_Pa(1:1), & ! in
                      1)               ! in
     end if
-    q2_sat(1) = log (q2_sat(1) * 1000.0)
+    q2_sat(1) = log (q2_sat(1) * 1000.0_kind_real)
     if (profile(profindex % q2) > q2_sat(1)) then
       profile(profindex % q2) = q2_sat(1)
     end if
@@ -1318,6 +1050,7 @@ end if Constrain
 if (allocated(qsaturated))        deallocate(qsaturated)
 if (allocated(scaled_qsaturated)) deallocate(scaled_qsaturated)
 if (allocated(Plevels_1DVar))     deallocate(Plevels_1DVar)
+if (allocated(Temp))              deallocate(Temp)
 
 end subroutine ufo_rttovonedvarcheck_CheckIteration
 
@@ -1357,8 +1090,8 @@ integer         :: i
 integer         :: nlevels_q, toplevel_q
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_CheckCloudyIteration"
 
-real(kind_real), parameter   :: MaxLWP = 2.0
-real(kind_real), parameter   :: MaxIWP = 3.0
+real(kind_real), parameter   :: MaxLWP = two
+real(kind_real), parameter   :: MaxIWP = 3.0_kind_real
 real(kind_real)              :: Plevels_1DVar(nlevels_1dvar)
 type(ufo_geoval), pointer    :: geoval
 real(kind_real)              :: clw(nlevels_1dvar)
@@ -1369,8 +1102,8 @@ character(len=max_string)    :: varname
 
 !initialise
 OutOfRange = .false.
-IWP = 0.0
-LWP = 0.0
+IWP = zero
+LWP = zero
 
 ! Get pressure from geovals
 varname = var_prs
@@ -1404,8 +1137,8 @@ toplevel_q = nlevels_1dvar - nlevels_q + 1
 !is the profile cloudy?
 !if it is do the test
 
-if (any(ciw(:) > 0.0) .or. &
-    any(clw(:) > 0.0)) then
+if (any(ciw(:) > zero) .or. &
+    any(clw(:) > zero)) then
 
 !1.1 compute iwp, lwp
 
@@ -1414,15 +1147,15 @@ if (any(ciw(:) > 0.0) .or. &
     dp =  Plevels_1DVar(i) - Plevels_1DVar(i+1)
 
     ! Calculate layer mean from CloudIce on levels
-    meanqi = 0.5 * &
+    meanqi = half * &
       (ciw(i) + ciw(i+1))
-    if (meanqi > 0.0) then
+    if (meanqi > zero) then
       IWP = IWP + dp * meanqi
     end if
 
     ! Calculate layer mean from CLW on levels
-    meanql = 0.5 * (clw(i) + clw(i+1))
-    if (meanql > 0.0) then
+    meanql = half * (clw(i) + clw(i+1))
+    if (meanql > zero) then
       LWP = LWP + dp * meanql
     end if
 
@@ -1435,12 +1168,14 @@ if (any(ciw(:) > 0.0) .or. &
 !2.1 test if lwp iwp exceeds thresholds
 
   if ((IWP > MaxIWP) .or. (LWP > MaxLWP)) then
-    write(*,*) "lwp or iwp exceeds thresholds"
+    call fckit_log % debug("lwp or iwp exceeds thresholds")
     OutOfRange = .true.
-    write(*,*) "lwp and iwp = ",LWP,IWP
+    write(message,*) "lwp and iwp = ",LWP,IWP
+    call fckit_log % debug(message)
   else
-    write(*,*) "lwp and iwp less than thresholds"
-    write(*,*) "lwp and iwp = ",LWP,IWP
+    call fckit_log % debug("lwp and iwp less than thresholds")
+    write(message,*) "lwp and iwp = ",LWP,IWP
+    call fckit_log % debug(message)
   end if
 
 end if

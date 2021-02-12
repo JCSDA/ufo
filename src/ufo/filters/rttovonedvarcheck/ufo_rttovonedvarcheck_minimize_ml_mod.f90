@@ -8,6 +8,8 @@
 module ufo_rttovonedvarcheck_minimize_ml_mod
 
 use kinds
+use ufo_constants_mod, only: zero, ten
+use fckit_log_module, only : fckit_log
 use ufo_geovals_mod
 use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
@@ -144,9 +146,9 @@ Converged = .false.
 onedvar_success = .false.
 Error = .false.
 nchans = size(ob % channels_used)
-Gamma = 1.0E-4
-Jcost = 1.0e4
-JcostOld = 1.0e4
+Gamma = 1.0e-4_kind_real
+Jcost = 1.0e4_kind_real
+JcostOld = 1.0e4_kind_real
 nprofelements = profile_index % nprofelements
 allocate(OldProfile(nprofelements))
 allocate(GuessProfile(nprofelements))
@@ -160,7 +162,7 @@ allocate(Y(nchans))
 allocate(Y0(nchans))
 geovals = local_geovals
 
-write(*,*) "Using ML solver"
+call fckit_log % debug("Using ML solver")
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
 call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, ob, GuessProfile(:))
@@ -175,13 +177,13 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and new hofx
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
-                                       self % obsdb, profile_index, GuessProfile(:), &
+  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_used, &
+                                       profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, Y(:), H_matrix)
 
   if (iter == 1) then
     RTerrorcode = 0
-    Diffprofile(:) = 0.0
+    Diffprofile(:) = zero
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
   end if
@@ -218,7 +220,7 @@ Iterations: do iter = 1, self % max1DVarIterations
       if (self % JConvergenceOption == 1) then
 
         ! percentage change tested between iterations
-        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (0.0)))
+        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (zero)))
 
         ! default test for checking that overall cost is getting smaller
         DeltaJo = -1.0_kind_real
@@ -234,7 +236,7 @@ Iterations: do iter = 1, self % max1DVarIterations
       end if
 
       if (DeltaJ < self % cost_convergencefactor .and. &
-          DeltaJo < 0.0)  then ! overall is cost getting smaller?
+          DeltaJo < zero)  then ! overall is cost getting smaller?
         converged = .true.
         exit iterations
       end if
@@ -278,14 +280,15 @@ Iterations: do iter = 1, self % max1DVarIterations
   !---------------------------------------------------------
 
   ! Check profile and constrain humidity variables
-  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
+  call ufo_rttovonedvarcheck_CheckIteration (self, & ! in
+                                  geovals,         & ! in
                                   profile_index,   & ! in
-                                  self % nlevels,  & ! in
                                   GuessProfile(:), & ! inout
                                   outOfRange)        ! out
 
   ! Update geovals to be the same as guess profile
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, GuessProfile)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, &
+                                             GuessProfile, self % UseQtSplitRain)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
@@ -308,7 +311,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   !    This is performed if UseJforConvergence is false
   !-------------------------------------------------
 
-  absDiffprofile(:) = 0.0
+  absDiffprofile(:) = zero
 
   if ((.not. outOfRange) .and. (.not. self % UseJForConvergence)) then
     absDiffProfile(:) = abs(GuessProfile(:) - OldProfile(:))
@@ -352,8 +355,8 @@ if (converged) then
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
-                                       self % obsdb, profile_index, GuessProfile(:), &
+  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_all, &
+                                       profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
@@ -364,12 +367,9 @@ end if
 ! 4. output diagnostics
 !----------------------
 
-if (self % UseJForConvergence) then
+if (self % UseJForConvergence .and. self % FullDiagnostics) then
   write(*,'(A45,3F10.3,I5,L5)') "ML J initial, final, lowest, iter, converged = ", &
                                  JCostorig, Jcost,  Jcost, iter, onedvar_success
-  write(*,*) "ML Final 1Dvar cost (pass) = ",Jcost
-else
-  write(*,*) "ML Final 1Dvar cost (fail) = ",Jcost
 end if
 
 ! ----------
@@ -484,9 +484,9 @@ integer, intent(out)                    :: Status          !< code to capture fa
 ! Local declarations:
 character(len=*), parameter         :: RoutineName = 'ufo_rttovonedvarcheck_ML_RTTOV12'
 integer                             :: i
-integer                             :: Iter_ML                ! M-L iteration count
-real(kind_real)                     :: JOut(3)                ! J, Jb, Jo
-real(kind_real)                     :: JCost                  ! Cost function,
+integer                             :: Iter_ML             ! M-L iteration count
+real(kind_real)                     :: JOut(3)             ! J, Jb, Jo
+real(kind_real)                     :: JCost               ! Cost function,
 logical                             :: OutOfRange
 real(kind_real)                     :: HTR(nprofelements, nChans)              ! Scratch vector
 real(kind_real)                     :: U(nprofelements, nprofelements)         ! U = H.B.H^T + R
@@ -498,9 +498,9 @@ real(kind_real)                     :: Tau_Surf(nchans)                ! Transmi
 real(kind_real)                     :: BriTemp(nchans)                 ! Forward modelled brightness temperatures
 real(kind_real)                     :: Ydiff(nchans)
 real(kind_real)                     :: Emiss(nchans)
+real(kind_real)                     :: H_matrix_tmp(nchans,nprofelements)
 logical                             :: CalcEmiss(nchans)
 integer                             :: StatusOK = 0
-real(kind_real)                     :: H_matrix_tmp(nchans,nprofelements)
 integer                             :: RTStatus = 0
 
 Status = StatusOK
@@ -533,15 +533,15 @@ U = U + b_inv
 !    Search for a value of gamma that reduces the cost function.
 !---------------------------------------------------------------------------
 
-JCost = 1.0E10
-Gamma = Gamma / 10.0
+JCost = 1.0e10_kind_real
+Gamma = Gamma / ten
 USave = U
 VSave = V
 Iter_ML = 0
 
 DescentLoop : do while (JCost > JOld .and.              &
                         Iter_ML < self % MaxMLIterations .and. &
-                        Gamma <= 1.0E25)
+                        Gamma <= 1.0e25_kind_real)
 
   Iter_ML = Iter_ML + 1
 
@@ -549,7 +549,7 @@ DescentLoop : do while (JCost > JOld .and.              &
   ! 5.1 Add on Marquardt-Levenberg terms to U and V.
   !------------------------------------------------------------------------
 
-  Gamma = Gamma * 10.0
+  Gamma = Gamma * ten
 
   do I = 1, nprofelements
     U(I,I) = USave(I,I) + Gamma
@@ -575,21 +575,22 @@ DescentLoop : do while (JCost > JOld .and.              &
 
   GuessProfile(:) = BackProfile(:) + New_DeltaProfile(:)
 
-  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
+  call ufo_rttovonedvarcheck_CheckIteration (self, & ! in
+                                  geovals,         & ! in
                                   profile_index,   & ! in
-                                  self % nlevels,  & ! in
                                   GuessProfile(:), & ! inout
                                   outOfRange)        ! out
 
   if (.not. OutOfRange) then
-    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, GuessProfile)
+    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, &
+                                               GuessProfile, self % UseQtSplitRain)
 
     !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
 
    ! Get Jabobian and new hofx
-   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
-                                           self % obsdb, profile_index, GuessProfile(:), &
+   call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_used, &
+                                           profile_index, GuessProfile(:), &
                                            hofxdiags, rttov_simobs, BriTemp(:), H_matrix_tmp)
 
     !------------------------------------------------------------------------
@@ -601,7 +602,7 @@ DescentLoop : do while (JCost > JOld .and.              &
       ! In case of RT error, set cost to large value and
       ! continue with next iteration
 
-      Jcost = 1.0E10
+      Jcost = 1.0e10_kind_real
     else
       DeltaProfile(:) = GuessProfile(:) - BackProfile(:)
       Ydiff(:) = ob % yobs(:) - BriTemp(:)
@@ -615,14 +616,14 @@ DescentLoop : do while (JCost > JOld .and.              &
     ! if profile out of range, set cost to large value and
     ! continue with next iteration
 
-    Jcost = 1.0E10
+    Jcost = 1.0e10_kind_real
 
   end if
 
 end do DescentLoop
 
 DeltaProfile = New_DeltaProfile
-Gamma = Gamma / 10.0
+Gamma = Gamma / ten
 JOld = JCost
 
 9999 continue

@@ -12,6 +12,7 @@ use iso_c_binding
 use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
+use ufo_constants_mod, only: zero, Pa_to_hPa
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_pcemis_mod
@@ -37,11 +38,13 @@ real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth 
 real(kind_real), allocatable :: sol_zen(:)      ! observation solar zenith angle
 real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angle
 integer, allocatable         :: surface_type(:) ! surface type
+integer, allocatable         :: niter(:)        ! number of iterations
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
-real(kind_real), allocatable :: output_BT(:,:)  ! output brightness temperature
-logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
+real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
+real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
+logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_obs_setup
@@ -100,15 +103,17 @@ allocate(self % sat_azi(self % iloc))
 allocate(self % sol_zen(self % iloc))
 allocate(self % sol_azi(self % iloc))
 allocate(self % surface_type(self % iloc))
+allocate(self % niter(self % iloc))
 allocate(self % final_cost(self % iloc))
 allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % output_profile(nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
+allocate(self % background_BT(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
 
 ! initialize arrays
 self % yobs(:,:) = missing
-self % ybias(:,:) = 0.0
+self % ybias(:,:) = zero
 self % QCflags(:,:) = 0
 self % lat(:) = missing
 self % lon(:) = missing
@@ -118,10 +123,12 @@ self % sat_azi(:) = missing
 self % sol_zen(:) = missing
 self % sol_azi(:) = missing
 self % surface_type = RTSea
+self % niter = 0
 self % final_cost = missing
-self % emiss(:,:) = 0.0
+self % emiss(:,:) = zero
 self % output_profile(:,:) = missing
 self % output_BT(:,:) = missing
+self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 
 ! read in observations and associated errors / biases for full ObsSpace
@@ -174,7 +181,7 @@ else
   if (model_surface_present) then
     call obsspace_get_db(config % obsdb, "MetaData", "model_surface", self % elevation(:))
   else
-    self % elevation(:) = 0.0
+    self % elevation(:) = zero
   end if
 end if
 
@@ -221,10 +228,12 @@ if (allocated(self % sat_azi))    deallocate(self % sat_azi)
 if (allocated(self % sol_zen))    deallocate(self % sol_zen)
 if (allocated(self % sol_azi))    deallocate(self % sol_azi)
 if (allocated(self % surface_type)) deallocate(self % surface_type)
+if (allocated(self % niter))      deallocate(self % niter)
 if (allocated(self % final_cost))   deallocate(self % final_cost)
 if (allocated(self % emiss))        deallocate(self % emiss)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))  deallocate(self % output_BT)
+if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss)) deallocate(self % calc_emiss)
 
 end subroutine ufo_rttovonedvarcheck_obs_delete
@@ -264,7 +273,7 @@ do i = 1, self % iloc
   ! The default emissivity for land is a very crude estimate - the same
   ! for all surface types and all frequencies. However, we do not use
   ! channels which see the surface over land where we rely on this default.
-  self % emiss(:,i) = 0.0
+  self % emiss(:,i) = zero
   if (self % surface_type(i) == RTLand) then
     self % emiss(:,i) = config % EmissLandDefault
   else if (self % surface_type(i) == RTIce) then
@@ -301,7 +310,7 @@ integer :: emis_x
 integer :: emis_y
 
 ! Allocate and setup defaults - get RTTOV to calculate
-self % emiss(:,:) = 0.0
+self % emiss(:,:) = zero
 self % calc_emiss(:) = .true.
 
 allocate(EmissPC(self % iloc,nemisspc))
@@ -327,8 +336,10 @@ if (ir_pcemis % initialised) then
       if (associated (ir_pcemis % emis_atlas % EmisPC)) then
 
         ! Find the nearest lat/lon
-        emis_y = nint((self % lat(i) + 90.0) / ir_pcemis % emis_atlas % gridstep + 1)
-        emis_x = nint((self % lon(i) + 180.0) / ir_pcemis % emis_atlas % gridstep + 1)
+        emis_y = nint((self % lat(i) + 90.0_kind_real) / &
+                   ir_pcemis % emis_atlas % gridstep + 1)
+        emis_x = nint((self % lon(i) + 180.0_kind_real) / &
+                   ir_pcemis % emis_atlas % gridstep + 1)
         if (emis_x > ir_pcemis % emis_atlas % nlon) then
           emis_x = emis_x - ir_pcemis % emis_atlas % nlon
         end if
@@ -336,7 +347,7 @@ if (ir_pcemis % initialised) then
         ! If the atlas is valid at this point, then use it,
         ! otherwise use PCGuess. NB: missing or sea points are
         ! flagged as -9.99 in the atlas.
-        if (any (ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,:) > -9.99)) then
+        if (any (ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,:) > -9.99_kind_real)) then
           EmissPC(i,:) = ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,1:nemisspc)
         else
           EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
@@ -361,7 +372,7 @@ if (allocated(EmissPC)) deallocate(EmissPC)
 end subroutine
 
 !------------------------------------------------------------------------------
-!> Initialize the infrared emissivity array
+!> Store the 1D-Var analysis variables in obsspace for future assessment
 !!
 !! \details Heritage: Ops_SatRad_SetOutput_RTTOV12
 !!
@@ -394,11 +405,13 @@ do jvar = 1, nchans
   var = vars % variable(jvar)
   call obsspace_put_db(obsdb, "FortranQC", trim(var), self % QCflags(jvar,:))
   call obsspace_put_db(obsdb, "OneDVar", trim(var), self % output_BT(jvar,:))
+  call obsspace_put_db(obsdb, "OneDVarBack", trim(var), self % background_BT(jvar,:))
 end do
 
 ! Output final cost at solution
 call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
 nobs = size(self % final_cost(:))
+call obsspace_put_db(obsdb, "OneDVar", "n_iterations", self % niter(:))
 
 !--
 ! Output Retrieved profiles into ObsSpace
@@ -416,7 +429,7 @@ if (prof_index % pstar > 0) THEN
   allocate(surface_pressure(nobs))
   surface_pressure(:) = self % output_profile(prof_index % pstar, :)
   where (surface_pressure /= missing)
-    surface_pressure = surface_pressure * 100 ! Pa to hPa
+    surface_pressure = surface_pressure / Pa_to_hPa ! hPa to Pa
   end where
   call obsspace_put_db(obsdb, "OneDVar", trim(var_ps), surface_pressure)
   deallocate(surface_pressure)

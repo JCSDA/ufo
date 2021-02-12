@@ -17,7 +17,6 @@ implicit none
 private
 
 public ufo_rttovonedvarcheck_setup
-public ufo_rttovonedvarcheck_iogetfreeunit
 
 !===============================================================================
 ! type definitions
@@ -41,11 +40,13 @@ type, public :: ufo_rttovonedvarcheck
   integer                          :: nchans !< maximum number of channels (channels can be removed by previous qc checks)
   integer(c_int), allocatable      :: channels(:) !< integer list of channels
   logical                          :: qtotal !< flag to enable total humidity retrievals
+  logical                          :: UseQtsplitRain !< flag to choose whether to split rain in qsplit routine
   logical                          :: RTTOV_mwscattSwitch !< flag to switch on RTTOV-scatt
   logical                          :: RTTOV_usetotalice !< flag for use of total ice in RTTOV MW scatt
   logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
+  logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
   logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
   integer                          :: Max1DVarIterations !< maximum number of iterations
@@ -108,6 +109,9 @@ self % channels(:) = channels(:)
 ! Flag for total humidity
 call f_conf % get_or_die("qtotal", self % qtotal)
 
+! Flag to choose whether to split rain in qsplit routine
+call f_conf % get_or_die("UseQtSplitRain", self % UseQtsplitRain)
+
 ! Flag for RTTOV MW scatt
 call f_conf % get_or_die("RTTOVMWScattSwitch", self % RTTOV_mwscattSwitch)
 
@@ -122,6 +126,9 @@ call f_conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
 
 ! Flag to use water in relative humidity check
 call f_conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
+
+! Flag to use cold water check to adjust starting surface parameters
+call f_conf % get_or_die("UseColdSurfaceCheck", self % UseColdSurfaceCheck)
 
 ! Flag to turn on full diagnostics
 call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
@@ -195,60 +202,32 @@ write(*,*) "retrieval_variables = "
 do ii = 1, self % nmvars
   write(*,*) trim(self % retrieval_variables(ii))," "
 end do
-write(*,*) "nlevels = ", self %  nlevels
-write(*,*) "nmvars = ", self % nmvars
-write(*,*) "nchans = ", self % nchans
-write(*,*) "channels(:) = ", self % channels(:)
-write(*,*) "qtotal = ", self % qtotal
-write(*,*) "RTTOV_mwscattSwitch = ", self % RTTOV_mwscattSwitch
-write(*,*) "RTTOV_usetotalice = ", self % RTTOV_usetotalice
-write(*,*) "UseMLMinimization = ", self % UseMLMinimization
-write(*,*) "UseJforConvergence = ", self % UseJforConvergence
-write(*,*) "FullDiagnostics = ", self % FullDiagnostics
-write(*,*) "Max1DVarIterations = ", self % Max1DVarIterations
-write(*,*) "JConvergenceOption = ", self % JConvergenceOption
-write(*,*) "IterNumForLWPCheck = ", self % IterNumForLWPCheck
-write(*,*) "ConvergenceFactor = ", self % ConvergenceFactor
-write(*,*) "Cost_ConvergenceFactor = ", self % Cost_ConvergenceFactor
-write(*,*) "MaxMLIterations = ", self % MaxMLIterations
-write(*,*) "EmissLandDefault = ", self % EmissLandDefault
-write(*,*) "EmissSeaIceDefault = ", self % EmissSeaIceDefault
+write(*,*) "nlevels = ",self %  nlevels
+write(*,*) "nmvars = ",self % nmvars
+write(*,*) "nchans = ",self % nchans
+write(*,*) "channels(:) = ",self % channels(:)
+write(*,*) "qtotal = ",self % qtotal
+write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
+write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
+write(*,*) "UseMLMinimization = ",self % UseMLMinimization
+write(*,*) "UseJforConvergence = ",self % UseJforConvergence
+write(*,*) "UseRHwaterForQC = ", self % UseRHwaterForQC
+write(*,*) "UseColdSurfaceCheck = ", self % UseColdSurfaceCheck
+write(*,*) "UseQtsplitRain = ",self % UseQtsplitRain
+write(*,*) "FullDiagnostics = ",self % FullDiagnostics
+write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
+write(*,*) "JConvergenceOption = ",self % JConvergenceOption
+write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
+write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
+write(*,*) "CostConvergenceFactor = ",self % Cost_ConvergenceFactor
+write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+write(*,*) "EmissLandDefault = ",self % EmissLandDefault
+write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
 write(*,*) "Use PC for Emissivity = ", self % pcemiss
-write(*,*) "EmisEigVecPath = ", trim(self % EmisEigVecPath)
-write(*,*) "EmisAtlas = ", trim(self % EmisAtlas)
+write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
+write(*,*) "EmisAtlas = ",self % EmisAtlas
 
 end subroutine ufo_rttovonedvarcheck_print
-
-!------------------------------------------------------------------------------
-!> Find a free file unit.
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine ufo_rttovonedvarcheck_iogetfreeunit(unit)
-
-implicit none
-
-integer, intent(out) :: unit
-
-integer, parameter :: unit_min=10
-integer, parameter :: unit_max=1000
-logical            :: opened
-integer            :: lun
-integer            :: newunit
-
-newunit=-1
-do lun=unit_min,unit_max
-  inquire(unit=lun,opened=opened)
-  if (.not. opened) then
-      newunit=lun
-    exit
-  end if
-end do
-unit=newunit
-
-end subroutine ufo_rttovonedvarcheck_iogetfreeunit
 
 ! ------------------------------------------------------------------------------
 

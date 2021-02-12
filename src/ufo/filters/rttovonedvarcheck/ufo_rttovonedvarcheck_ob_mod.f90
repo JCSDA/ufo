@@ -9,6 +9,7 @@ module ufo_rttovonedvarcheck_ob_mod
 
 use kinds
 use missing_values_mod
+use ufo_constants_mod, only: zero
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_utils_mod
@@ -23,6 +24,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   character(len=max_string) :: forward_mod_name !< forward model name (RTTOV only one at the moment)
   integer              :: nlocs !< number of locations = 1
   integer              :: surface_type  !< surface type of observation
+  integer              :: niter
   integer, allocatable :: channels_used(:) !< channels used for this observation
   integer, allocatable :: channels_all(:) !< all channels used for output
   real(kind_real)      :: latitude !< latitude of observation
@@ -37,8 +39,10 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
+  real(kind_real), allocatable :: background_T(:) !< background temperature used by qsplit
   real(kind_real), allocatable :: output_profile(:) !< retrieved state at converge as profile vector
   real(kind_real), allocatable :: output_BT(:) !< Brightness temperatures using retrieved state
+  real(kind_real), allocatable :: background_BT(:) !< Brightness temperatures from 1st itreration
   logical              :: retrievecloud  !< flag to turn on retrieve cloud
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
@@ -63,6 +67,7 @@ contains
 !!
 subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
                                         nchans, &  ! in
+                                        nlevels, & ! in
                                         nprofelements, & ! in
                                         nchans_all ) ! in
 
@@ -71,6 +76,7 @@ implicit none
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_ob), intent(out) :: self !< observation metadata type
 integer, intent(in) :: nchans !< number of channels used for this particular observation
+integer, intent(in) :: nlevels !< number of levels in the profile
 integer, intent(in) :: nprofelements !< number of profile elements used
 integer :: nchans_all !< Size of all channels in ObsSpace
 
@@ -84,15 +90,19 @@ call self % delete()
 allocate(self % yobs(nchans))
 allocate(self % channels_used(nchans))
 allocate(self % channels_all(nchans_all))
-allocate(self % emiss(nchans))
+allocate(self % emiss(nchans_all))
+allocate(self % background_T(nlevels))
 allocate(self % output_profile(nprofelements))
 allocate(self % output_BT(nchans_all))
-allocate(self % calc_emiss(nchans))
+allocate(self % background_BT(nchans_all))
+allocate(self % calc_emiss(nchans_all))
 
 self % yobs(:) = missing
-self % emiss(:) = 0.0
+self % emiss(:) = zero
+self % background_T(:) = missing
 self % output_profile(:) = missing
 self % output_BT(:) = missing
+self % background_BT(:) = missing
 self % calc_emiss(:) = .true.
 
 end subroutine ufo_rttovonedvarcheck_InitOb
@@ -121,12 +131,13 @@ self % latitude = missing
 self % longitude = missing
 self % elevation = missing
 self % surface_type = 0
+self % niter = 0
 self % sensor_zenith_angle = missing
 self % sensor_azimuth_angle = missing
 self % solar_zenith_angle = missing
 self % solar_azimuth_angle = missing
-self % cloudtopp = 500.0
-self % cloudfrac = 0.0
+self % cloudtopp = 500.0_kind_real
+self % cloudfrac = zero
 self % final_cost = missing
 self % retrievecloud = .false.
 self % mwscatt = .false.
@@ -136,8 +147,10 @@ if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % channels_used))  deallocate(self % channels_used)
 if (allocated(self % channels_all))   deallocate(self % channels_all)
 if (allocated(self % emiss))          deallocate(self % emiss)
+if (allocated(self % background_T))   deallocate(self % background_T)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
+if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 
 self % pcemis => null()
@@ -175,6 +188,8 @@ write(*,*) "Surface type for RTTOV: ",surface_type
 write(*,"(A,F8.2)") "Surface height:",self % elevation
 write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
+write(*,"(A)") "Background T profile: "
+write(*,"(10F8.2)") self % background_T
 
 end subroutine
 

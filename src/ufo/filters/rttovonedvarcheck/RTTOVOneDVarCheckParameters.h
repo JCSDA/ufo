@@ -45,11 +45,14 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Is qtotal being used instead of separate q, clw, ciw
   oops::Parameter<bool> QTotal{"qtotal", false, this};
 
+  /// Choose whether to split rain in qsplit routine
+  oops::Parameter<bool> UseQtSplitRain{"UseQtSplitRain", true, this};
+
   /// Make sure profile is setup to use RTTOV-Scatt
   oops::Parameter<bool> RTTOVMWScattSwitch{"RTTOVMWScattSwitch", false, this};
 
   /// Use total ice option for RTTOV-Scatt
-  oops::Parameter<bool> RTTOVUseTotalIce{"RTTOVUseTotalIce", false, this};
+  oops::Parameter<bool> RTTOVUseTotalIce{"RTTOVUseTotalIce", true, this};
 
   /// Use the Marquardt-Levenberg minimizer - default is Newton
   oops::Parameter<bool> UseMLMinimization{"UseMLMinimization", false, this};
@@ -61,6 +64,9 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
 
   /// Use liquid water in the q saturation calculations
   oops::Parameter<bool> UseRHwaterForQC{"UseRHwaterForQC", true, this};
+
+  /// Reset low level temperatures over seaice and cold, low land
+  oops::Parameter<bool> UseColdSurfaceCheck{"UseColdSurfaceCheck", false, this};
 
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};

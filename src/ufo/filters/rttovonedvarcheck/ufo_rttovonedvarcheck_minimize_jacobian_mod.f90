@@ -12,11 +12,11 @@ use kinds
 use ufo_geovals_mod
 use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
-        ufo_rttovonedvarcheck_Qsplit
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
+use ufo_utils_mod, only: Ops_SatRad_Qsplit
 
 implicit none
 private
@@ -32,18 +32,18 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob, channels, &
-                                              obsdb, profindex, &
+subroutine ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, channels, &
+                                              profindex, &
                                               prof_x, hofxdiags, rttov_simobs, &
                                               hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
+type(ufo_rttovonedvarcheck), intent(in)           :: self          !< Main 1D-Var object
 type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob            !< satellite metadata
 integer, intent(in)                               :: channels(:)   !< channels used for this calculation
-type(c_ptr), value, intent(in)                    :: obsdb         !< observation database
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
 type(ufo_geovals), intent(inout)                  :: hofxdiags     !< model data to pass the jacobian
@@ -53,15 +53,14 @@ real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
 
 select case (trim(ob % forward_mod_name))
   case ("RTTOV")
-    write(*,*) "RTTOV get H_matrix"
-    call ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, obsdb, &
+    call ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, self % obsdb, &
                                               rttov_simobs, channels, &
                                               profindex, prof_x(:), hofxdiags, &
+                                              self % UseQtsplitRain, &
                                               hofx(:), H_matrix) ! out
 
-   case default
-      write(*,*) "No suitable forward model exiting"
-      stop
+  case default
+    call abor1_ftn("rttovonedvarcheck get jacobian: no suitable forward model => exiting")
 end select
 
 end  subroutine ufo_rttovonedvarcheck_get_jacobian
@@ -80,21 +79,22 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, obsdb, &
                                        rttov_data, channels, profindex, prof_x, &
-                                       hofxdiags, hofx, H_matrix)
+                                       hofxdiags, UseQtsplitRain, hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
-type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
-type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob            !< satellite metadata
-type(c_ptr), value, intent(in)                    :: obsdb         !< observation database
-type(ufo_radiancerttov), intent(inout)            :: rttov_data    !< structure for running rttov_k
-integer, intent(in)                               :: channels(:)   !< channels used for this calculation
-type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
-real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
-type(ufo_geovals), intent(inout)                  :: hofxdiags     !< model data to pass the jacobian
-real(kind_real), intent(out)                      :: hofx(:)       !< BT's
-real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
+type(ufo_geovals), intent(in)                     :: geovals        !< model data at obs location
+type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob             !< satellite metadata
+type(c_ptr), value, intent(in)                    :: obsdb          !< observation database
+type(ufo_radiancerttov), intent(inout)            :: rttov_data     !< structure for running rttov_k
+integer, intent(in)                               :: channels(:)    !< channels used for this calculation
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex      !< index array for x vector
+real(kind_real), intent(in)                       :: prof_x(:)      !< x vector
+type(ufo_geovals), intent(inout)                  :: hofxdiags      !< model data to pass the jacobian
+logical, intent(in)                               :: UseQtsplitRain !< flag to make qtsplit use rain
+real(kind_real), intent(out)                      :: hofx(:)        !< BT's
+real(kind_real), intent(out)                      :: H_matrix(:,:)  !< Jacobian
 
 ! Local arguments
 integer :: nchans, nlevels, nq_levels
@@ -104,7 +104,6 @@ logical :: RTTOV_GasunitConv = .false.
 real(kind_real),allocatable  :: q_kgkg(:)
 real(kind_real)              :: s2m_kgkg
 type(ufo_geoval), pointer    :: geoval
-real(kind_real), allocatable :: temperature(:)
 real(kind_real), allocatable :: pressure(:)
 real(kind_real), allocatable :: dq_dqt(:)
 real(kind_real), allocatable :: dql_dqt(:)
@@ -185,7 +184,6 @@ end if
 if (profindex % qt(1) > 0) then
 
   allocate(q_kgkg(nlevels))
-  allocate(temperature(nlevels))
   allocate(pressure(nlevels))
   allocate(dq_dqt(nlevels))
   allocate(dql_dqt(nlevels))
@@ -196,23 +194,19 @@ if (profindex % qt(1) > 0) then
   ! Get qtotal from profile
   q_kgkg(:) = exp(prof_x(profindex % qt(1):profindex % qt(2))) / 1000.0_kind_real
 
-  ! Get temperature and pressure from geovals
-  ! var_ts   = "air_temperature" K
-  call ufo_geovals_get_var(geovals, trim(var_ts), geoval)
-  temperature(:) = geoval%vals(nlevels:1:-1, 1)
   ! var_prs  = "air_pressure" Pa
   call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
   pressure(:) = geoval%vals(nlevels:1:-1, 1)
 
   ! Calculate the gradients with respect to qtotal
-  call ufo_rttovonedvarcheck_Qsplit (0,    & ! in
-                          temperature,     & ! in
-                          pressure,        & ! in
-                          nlevels,         & ! in
-                          q_kgkg(:),       & ! in
-                          dq_dqt(:),       & ! out
-                          dql_dqt(:),      & ! out
-                          dqi_dqt(:))        ! out
+  call Ops_SatRad_Qsplit ( 0,      &
+                    pressure(:),   &
+                    ob % background_T(nlevels:1:-1),   &
+                    q_kgkg(:),     & ! in
+                    dq_dqt(:),     & ! out
+                    dql_dqt(:),    & ! out
+                    dqi_dqt(:),    & ! out
+                    UseQtsplitRain)
 
   ! Calculate jacobian wrt humidity and clw
   do i = 1, nchans
@@ -232,7 +226,6 @@ if (profindex % qt(1) > 0) then
 
   ! Clean up
   deallocate(q_kgkg)
-  deallocate(temperature)
   deallocate(pressure)
   deallocate(dq_dqt)
   deallocate(dql_dqt)

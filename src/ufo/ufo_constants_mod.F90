@@ -64,9 +64,9 @@ real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity c
 real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
 real(kind_real), parameter, public :: m_to_km = 0.001_kind_real
 real(kind_real), parameter, public :: Pa_to_hPa = 0.01_kind_real
-real(kind_real), parameter, public :: min_q = 3e-6
-real(kind_real), parameter, public :: ZeroDegC = 273.15
-real(kind_real), parameter, public :: epsilon = 0.62198 ! molecular mass ratio of water (18.01528) to dry air (28.9645)
+real(kind_real), parameter, public :: min_q = 3.0e-6_kind_real
+real(kind_real), parameter, public :: ZeroDegC = 273.15_kind_real
+real(kind_real), parameter, public :: epsilon = 0.62198_kind_real ! molecular mass ratio of water (18.01528) to dry air (28.9645)
 
 end module ufo_constants_mod
 

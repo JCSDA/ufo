@@ -12,6 +12,8 @@ observations:
     obs options:
       RTTOV_default_opts: OPS
       SatRad_compatibility: true
+      UseRHwaterForQC: &UseRHwaterForQC1 true # default
+      UseColdSurfaceCheck: &UseColdSurfaceCheck1 true # default
       Sensor_ID: &sensor_id noaa_20_atms
       CoefficientPath: Data/
   obs space:
@@ -56,19 +58,19 @@ observations:
     - air_pressure_at_two_meters_above_surface
     nlevels: 70
     qtotal: true
-    RTTOVMWScattSwitch: false
-    RTTOVUseTotalIce: false
+    UseQtSplitRain: true
     UseMLMinimization: false
     UseJforConvergence: true
-    UseRHwaterForQC: true
-    FullDiagnostics: false
+    UseRHwaterForQC: *UseRHwaterForQC1 # setting the same as obs operator
+    UseColdSurfaceCheck: *UseColdSurfaceCheck1 # setting the same as obs operator
+    FullDiagnostics: true
     JConvergenceOption: 1
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1395      # number of passed obs
+  passedBenchmark: 1365      # number of passed obs
 ## Test ML minimizer
 - obs operator:
     name: RTTOV
@@ -79,6 +81,8 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: OPS
       SatRad_compatibility: true
+      UseRHwaterForQC: &UseRHwaterForQC2 false # non-default
+      UseColdSurfaceCheck: &UseColdSurfaceCheck2 false # non-default
       Sensor_ID: *sensor_id
       CoefficientPath: Data/
   obs space:
@@ -123,11 +127,11 @@ observations:
     - air_pressure_at_two_meters_above_surface
     nlevels: 70
     qtotal: true
-    RTTOVMWScattSwitch: false
-    RTTOVUseTotalIce: false
+    UseQtSplitRain: false
     UseMLMinimization: true
     UseJforConvergence: true
-    UseRHwaterForQC: false
+    UseRHwaterForQC: *UseRHwaterForQC2 # setting the same as obs operator
+    UseColdSurfaceCheck: *UseColdSurfaceCheck2 # setting the same as obs operator
     FullDiagnostics: true
     JConvergenceOption: 1
     ConvergenceFactor: 0.40
@@ -135,4 +139,4 @@ observations:
     Max1DVarIterations: 7
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1410      # number of passed obs
+  passedBenchmark: 1350      # number of passed obs

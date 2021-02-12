@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-/* 1-D var qc
+/* 1-D var qc and retrieval of atmospheric state
  *   J(x) = (x-xb)T B-1 (x-xb) + (y-H(x))T R-1 (y-H(x))
  *   Code adapted from Met Office OPS System
  */

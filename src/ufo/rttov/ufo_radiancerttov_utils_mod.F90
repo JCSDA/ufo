@@ -328,6 +328,11 @@ contains
     deallocate(conf%Absorbers)
     deallocate(conf%Absorber_Id)
 
+    ! needed to prevent bugs caused when more than one obs spaces in a yaml file
+    if (allocated(ystr_diags)) deallocate (ystr_diags)
+    if (allocated(xstr_diags)) deallocate (xstr_diags)
+    if (allocated(ch_diags))   deallocate (ch_diags)
+
   end subroutine rttov_conf_delete
 
   ! -----------------------------------------------------------------------------
@@ -791,7 +796,6 @@ contains
 
     if(present(ob_info)) then
 
-       write(*,*) "load_atm_data_rttov: getting from ob info"
        profiles(1) % elevation = ob_info % elevation / 1000.0 ! m -> km
        profiles(1) % latitude = ob_info % latitude
        profiles(1) % longitude = ob_info % longitude

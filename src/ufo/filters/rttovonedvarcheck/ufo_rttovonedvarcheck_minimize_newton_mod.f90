@@ -7,6 +7,8 @@
 module ufo_rttovonedvarcheck_minimize_newton_mod
 
 use kinds
+use ufo_constants_mod, only: zero
+use fckit_log_module, only : fckit_log
 use ufo_geovals_mod
 use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
@@ -131,7 +133,7 @@ real(kind_real), allocatable    :: out_Y(:)
 type(ufo_geovals)               :: geovals
 real(kind_real)                 :: Jout(3)
 
-integer                         :: ii
+integer                         :: ii, jj
 
 ! ---------
 ! Setup
@@ -154,9 +156,9 @@ allocate(Y0(nchans))
 geovals = local_geovals
 
 if (self % FullDiagnostics) call ufo_geovals_print(geovals,1)
-write(*,*) "Using Newton solver"
+call fckit_log % debug("Using Newton solver")
 
-JCost = 1.0e4
+JCost = 1.0e4_kind_real
 
 Iterations: do iter = 1, self % max1DVarIterations
 
@@ -172,8 +174,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   if (iter == 1) then
 
     RTerrorcode = 0
-    Diffprofile(:) = 0.0
-    JcostOld = 1.0e4
+    Diffprofile(:) = zero
+    JcostOld = 1.0e4_kind_real
 
     ! Map GeovaLs to 1D-var profile using B matrix profile structure
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, &
@@ -188,13 +190,20 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and hofx
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
-                                       self % obsdb, profile_index, GuessProfile(:), &
-                                       hofxdiags, rttov_simobs, Y(:), H_matrix)
+  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_used, &
+                                          profile_index, GuessProfile(:), &
+                                          hofxdiags, rttov_simobs, Y(:), H_matrix)
 
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
+    do ii = 1, size(ob % channels_all)
+      do jj = 1, size(ob % channels_used)
+        if (ob % channels_all(ii) == ob % channels_used(jj)) then
+           ob % background_BT(ii) = Y0(jj)
+        end if
+      end do
+    end do
   end if
 
   ! exit on error
@@ -237,10 +246,10 @@ Iterations: do iter = 1, self % max1DVarIterations
       if (self % JConvergenceOption == 1) then
 
         ! percentage change tested between iterations
-        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (0.0)))
+        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (zero)))
 
         ! default test for checking that overall cost is getting smaller
-        DeltaJo = -1.0
+        DeltaJo = -1.0_kind_real
 
       else
 
@@ -253,12 +262,13 @@ Iterations: do iter = 1, self % max1DVarIterations
       end if
 
       if (self % FullDiagnostics) THEN
-        write (*, '(A,F12.5)') 'Cost Function=', Jcost
-        write (*, '(A,F12.5)') 'Cost Function Increment=', deltaj
+        write (*, '(A,F12.5)') 'Cost Function = ', Jcost
+        write (*, '(A,F12.5)') 'Cost Function old = ', JcostOld
+        write (*, '(A,F12.5)') 'Cost Function Increment = ', deltaj
       end if
 
       if (DeltaJ < self % cost_convergencefactor .and. &
-          DeltaJo < 0.0)  then ! overall is cost getting smaller?
+          DeltaJo < zero)  then ! overall is cost getting smaller?
         converged = .true.
         if (self % FullDiagnostics) then
           write (*, '(A,I0)') 'Iteration', iter
@@ -279,7 +289,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
   ! Iterate (Guess) profile vector
   if (nchans > nprofelements) then
-    write(*,*) "Many Chans"
+    call fckit_log % debug("Many Chans")
     call ufo_rttovonedvarcheck_NewtonManyChans (Ydiff,          &
                                      nchans,                    &
                                      H_matrix(:,:),             & ! in
@@ -290,7 +300,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                      r_matrix,                  &
                                      inversionStatus)
   else ! nchans <= nprofelements
-    write(*,*) "Few Chans"
+    call fckit_log % debug("Few Chans")
     call ufo_rttovonedvarcheck_NewtonFewChans (Ydiff,          &
                                     nchans,                    &
                                     H_matrix(:,:),             & ! in
@@ -315,15 +325,15 @@ Iterations: do iter = 1, self % max1DVarIterations
   !---------------------------------------------------------
 
   ! Check profile and constrain humidity variables
-  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
+  call ufo_rttovonedvarcheck_CheckIteration (self, & ! in
+                                  geovals,         & ! in
                                   profile_index,   & ! in
-                                  self % nlevels,  & ! in
                                   GuessProfile(:), & ! inout
                                   outOfRange)        ! out
 
   ! Update geovals with guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, &
-                                             ob, GuessProfile)
+                                             ob, GuessProfile, self % UseQtSplitRain)
 
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
@@ -346,12 +356,12 @@ Iterations: do iter = 1, self % max1DVarIterations
   !    This is performed if UseJforConvergence is false
   !-------------------------------------------------
 
-  absDiffprofile(:) = 0.0
+  absDiffprofile(:) = zero
 
   if ((.NOT. outOfRange) .and. (.NOT. self % UseJForConvergence))then
     absDiffProfile(:) = abs(GuessProfile(:) - OldProfile(:))
     if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
-      write(*,*) "Profile used for convergence"
+      call fckit_log % debug("Profile used for convergence")
       Converged = .true.
     end if
   end if
@@ -379,20 +389,21 @@ end do Iterations
 ! Pass convergence flag out
 onedvar_success = converged
 
+! Recalculate final cost - to make sure output when profile has not converged
+call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+ob % final_cost = Jout(1)
+ob % niter = iter
+
 ! Pass output profile, final BTs and final cost out
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
 
-  ! Recalculate final cost - to make sure output when using profile convergence
-  call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
-  ob % final_cost = Jout(1)
-
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
-                                       self % obsdb, profile_index, GuessProfile(:), &
-                                       hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
+  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_all, &
+                                          profile_index, GuessProfile(:), &
+                                          hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
   deallocate(out_H_matrix)
@@ -402,12 +413,9 @@ end if
 ! 4. output diagnostics
 !---------------------
 
-if (self % UseJForConvergence) then
-  write(*,'(A45,3F10.3,I5,L5)') "Newton J initial, final, lowest, iter, converged = ", &
-                                 JCostorig, Jcost,  Jcost, iter, onedvar_success
-  write(*,*) "Newton Final 1Dvar cost (pass) = ",Jcost
-else
-  write(*,*) "Newton Final 1Dvar cost (fail) = ",Jcost
+if (self % UseJForConvergence .and. self % FullDiagnostics) then
+  write(*,'(A70,3F10.3,I5,2L5)') "Newton J initial, final, lowest, iter, converged, outofrange = ", &
+                                 JCostorig, Jcost,  Jcost, iter, onedvar_success, outOfRange
 end if
 
 ! ----------
@@ -423,7 +431,7 @@ if (allocated(Ydiff))              deallocate(Ydiff)
 if (allocated(Y))                  deallocate(Y)
 if (allocated(Y0))                 deallocate(Y0)
 
-write(*,*) "finished with ufo_rttovonedvarcheck_minimize_newton"
+call fckit_log % debug("finished with ufo_rttovonedvarcheck_minimize_newton")
 
 end subroutine ufo_rttovonedvarcheck_minimize_newton
 
@@ -454,9 +462,7 @@ end subroutine ufo_rttovonedvarcheck_minimize_newton
 !!
 !! This routine should be used when: <br>
 !!     -# The length of the observation vector is less than the length
-!!        of the state vector,
-!!     -# Where no additional cost function terms are provided and
-!!     -# where Newtonian minimisation is desired.
+!!        of the state vector.
 !!
 !! Note on input/output variable DeltaProfile:
 !!
@@ -502,14 +508,13 @@ type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation er
 integer, intent(out)              :: Status          !< check if Cholesky decomposition fails
 
 ! Local declarations:
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Minimize_101"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_NewtonFewChans"
 integer                     :: Element
 integer                     :: i
 real(kind_real)             :: HB(nChans,nprofelements) ! Scratch vector
 real(kind_real)             :: Q(nChans)                ! Q = U^-1.V
 real(kind_real)             :: U(nChans,nChans)         ! U = H.B.H^T + R
 real(kind_real)             :: V(nChans)                ! V = (y-y(x_n))-H^T(xb-x_n)
-
 
 Status = 0
 
@@ -580,9 +585,7 @@ end subroutine ufo_rttovonedvarcheck_NewtonFewChans
 !!
 !! This routine should be used when:
 !!     -# The length of the observation vector is greater than the length
-!!        of the state vector,
-!!     -# Additional cost function terms are provided and
-!!     -# where Newtonian minimisation is desired.
+!!        of the state vector
 !!
 !! References:
 !!

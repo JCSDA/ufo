@@ -9,8 +9,9 @@ module ufo_rttovonedvarcheck_bmatrix_mod
 
 use fckit_log_module, only : fckit_log
 use kinds
+use ufo_constants_mod, only: zero, one 
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_utils_mod, only : ufo_utils_iogetfreeunit, InvertMatrix
 use ufo_vars_mod
 
 implicit none
@@ -18,7 +19,6 @@ private
 
 type, public :: ufo_rttovonedvarcheck_bmatrix
   logical :: status                                 !< status indicator
-  logical :: debug                                  !< flag for printing verbose output
   integer :: nbands                                 !< number of latitude bands
   integer :: nsurf                                  !< number of surface type variations
   integer :: nfields                                !< number of fields
@@ -36,6 +36,8 @@ contains
   procedure :: delete => ufo_rttovonedvarcheck_bmatrix_delete
   procedure :: reset  => ufo_rttovonedvarcheck_reset_covariances
 end type ufo_rttovonedvarcheck_bmatrix
+
+character(len=max_string)     :: message
 
 contains
 
@@ -58,18 +60,19 @@ logical                       :: file_exists  ! Check if a file exists logical
 integer                       :: fileunit     ! Unit number for reading in files
 integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matrix for testing.
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
-character(len=max_string)     :: message
 character(len=:), allocatable :: str
-logical                       :: testing = .true.
+logical                       :: testing = .false.
+integer                       :: ii, jj
+logical                       :: match
 
 call fckit_log % info("ufo_rttovonedvarcheck_bmatrix_setup start")
 
-call CPU_TIME(t1)
+call cpu_time(t1)
 
 ! Open file and read in b-matrix
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
-  call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
+  fileunit = ufo_utils_iogetfreeunit()
   open(unit = fileunit, file = trim(filepath))
   call rttovonedvarcheck_covariance_InitBmatrix(self)
   call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
@@ -84,9 +87,19 @@ else
   call abor1_ftn("rttovonedvarcheck bmatrix file not found")
 end if
 
-self % debug = .true.
-
 call cpu_time(t2)
+
+! Check the yaml input contains all required b-matrix elements
+do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
+  match = .false.
+  do jj = 1, size(fields_in) ! loop over array generated from yaml
+    if (self % fields(ii,1) == fields_in(jj)) match = .true.
+  end do
+  if (.not. match) then
+    write(*,*) "input model variables do not have ",fieldtype_text(self % fields(ii,1))
+    call abor1_ftn("rttovonedvarcheck not all the model data is available for the b-matrix")
+  end if
+end do
 
 write(message,*) "ufo_rttovonedvarcheck_bmatrix_setup cpu time = ",(t2-t1)
 call fckit_log % info(message)
@@ -110,7 +123,6 @@ class(ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self  !< B-matrix Covaria
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_bmatrix_delete"
 
 self % status = .false.
-self % debug = .false.
 self % nbands = 0
 self % nsurf = 0
 if ( associated(self % fields)      ) deallocate( self % fields      )
@@ -144,7 +156,6 @@ type(ufo_rttovonedvarcheck_bmatrix), intent(out) :: self !< B-matrix Covariance
 character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
 
 self % status = .false.
-self % debug = .false.
 self % nbands = 0
 self % nsurf = 0
 nullify( self % fields      )
@@ -279,16 +290,17 @@ end if
 ! 1.3) output initial messages
 !----
 
-if (self % debug) then
-  write (*, '(a)') 'reading b matrix file:'
-  write (*, '(a,i0)') 'number of latitude bands = ', nbands
-  write (*, '(a,i0)') 'matrix size = ', matrixsize
-  if (nbfields > 0) then
-    write (*, '(a)') 'order of fields and number of elements in each:'
-    do i = 1, nbfields
-      write (*, '(i0,a)') bfields(i,2), ' x ' // fieldtype_text(bfields(i,1))
-    end do
-  end if
+call fckit_log % debug('reading b matrix file:')
+write (message, '(a,i0)') 'number of latitude bands = ', nbands
+call fckit_log % debug(message)
+write (message, '(a,i0)') 'matrix size = ', matrixsize
+call fckit_log % debug(message)
+if (nbfields > 0) then
+  call fckit_log % debug('order of fields and number of elements in each:')
+  do i = 1, nbfields
+    write (message, '(i0,a)') bfields(i,2), ' x ' // fieldtype_text(bfields(i,1))
+    call fckit_log % debug(message)
+  end do
 end if
 
 !-------------------------------------------------------
@@ -343,28 +355,29 @@ if (present (fieldlist)) then
 
   ! 2.1.1) write messages
 
-  if (self % debug .and. any (fieldlist /= 0)) then
-    write (*, '(a)') 'the following requested retrieval fields are not in the b matrix:'
+  if (any (fieldlist /= 0)) then
+    call fckit_log % debug('the following requested retrieval fields are not in the b matrix:')
     do i = 1, size (fieldlist)
       if (fieldlist(i) /= 0) then
         write (fieldtype, '(i0)') fieldlist(i)
         if (fieldlist(i) > 0 .and. fieldlist(i) <= nfieldtypes) then
-          write (*, '(a)') trim (fieldtype_text(fieldlist(i))) // &
+          write (message, '(a)') trim (fieldtype_text(fieldlist(i))) // &
             ' (fieldtype ' // trim (adjustl (fieldtype)) // ')'
+          call fckit_log % debug(message)
         else
-          write (*, '(a)') 'fieldtype ' // trim (adjustl (fieldtype)) // &
+          write (message, '(a)') 'fieldtype ' // trim (adjustl (fieldtype)) // &
             ' which is invalid'
+          call fckit_log % debug(message)
         end if
       end if
     end do
   end if
 
-  if (self % debug) then
-    write (*, '(a)') 'b matrix fields used to define the retrieval profile vector:'
-    do i = 1, nbfields
-      write (*, '(a)') fieldtype_text(bfields(i,1))
-    end do
-  end if
+  call fckit_log % debug('b matrix fields used to define the retrieval profile vector:')
+  do i = 1, nbfields
+    write (message, '(a)') fieldtype_text(bfields(i,1))
+    call fckit_log % debug(message)
+  end do
 
   ! 2.1.2) reset fieldlist so that only used fields are now stored
 
@@ -409,7 +422,7 @@ self % nbands = nbands
 allocate (self % store(nelements,nelements,nbands))
 allocate (self % south(nbands))
 allocate (self % north(nbands))
-self % store(:,:,:) = 0.0_kind_real
+self % store(:,:,:) = zero
 
 ! allocate dummy variables for file input
 
@@ -434,11 +447,10 @@ readallb : do
     read (fileunit, '(5e16.8)' ) (bfromfile(i,j), i = 1, matrixsize)
   end do
 
-  if (self % debug) then
-    write (*, '(a,i0,a,2f8.2)') &
-      'band no.', band, ' has southern and northern latitude limits of', &
-      southlimit, northlimit
-  end if
+  write (message, '(a,i0,a,2f8.2)') &
+    'band no.', band, ' has southern and northern latitude limits of', &
+    southlimit, northlimit
+  call fckit_log % debug(message)
 
   !----
   ! 3.2) transfer into 1d-var arrays
@@ -455,8 +467,9 @@ readallb : do
     end if
     self % south(band) = southlimit
     self % north(band) = northlimit
-  else if (self % debug) then
-    write (*, '(a,i0)') 'skipped matrix with band number ', band
+  else
+    write (message, '(a,i0)') 'skipped matrix with band number ', band
+    call fckit_log % debug(message)
   end if
 
 end do readallb
@@ -478,12 +491,12 @@ allocate (self % inverse(nelements,nelements,nbands))
 self % inverse(:,:,:) = self % store(:,:,:)
 
 do k = 1, nbands
-  call rttovonedvarcheck_covariance_InvertMatrix (nelements,       & ! in
-                                           nelements,              & ! in
-                                           self % inverse(:,:,k),  & ! inout
-                                           status)                   ! out
+  call InvertMatrix (nelements,              & ! in
+                     nelements,              & ! in
+                     self % inverse(:,:,k),  & ! inout
+                     status)                   ! out
   if (status /= 0) then
-    write(*,*) routinename // ' : b matrix is not invertible'
+    call abor1_ftn("rttovonedvarcheck: bmatrix is not invertible")
   end if
 end do
 
@@ -492,7 +505,7 @@ end do
 !----------
 
 if (nmatrix < nbands) then
-  write(*,*) routinename // ' : too few b matrices found in input file'
+  call abor1_ftn("rttovonedvarcheck: too few b matrices found in input file")
 end if
 
 end subroutine rttovonedvarcheck_covariance_GetBmatrix
@@ -522,9 +535,9 @@ real(kind_real), intent(out) :: b_sigma(:)
 integer :: band, i
 
 ! select appropriate b matrix for latitude of observation
-b_matrix(:,:) = 0.0
-b_inverse(:,:) = 0.0
-b_sigma(:) = 0.0
+b_matrix(:,:) = zero
+b_inverse(:,:) = zero
+b_sigma(:) = zero
 do band = 1, self % nbands
   if (latitude < self % north(band)) exit
 end do
@@ -571,161 +584,6 @@ b_sigma(:) = self % sigma(:,band)
 end subroutine ufo_rttovonedvarcheck_reset_covariances
 
 ! ------------------------------------------------------------------------------------------------
-!> Routine to invert the 1D-Var B-matrix
-!!
-!! \details Met Office OPS Heritage: Ops_SatRad_InvertMatrix.f90
-!!
-!! invert a matrix and optionally premultiply by another matrix.
-!!
-!! variables with intent in:
-!!
-!!     n:  size of the matrix being inverted <br>
-!!     m:  if matrix is not present this is the same as n, else this is
-!!         the other dimension of matrix.
-!!
-!! variables with intent inout:
-!!
-!!     a:               real matrix (assumed square and symmetrical)
-!!                      overwritten by its inverse if matrix is not
-!!                      present.
-!!
-!! variables with intent out:
-!!
-!!     status:          0: ok, 1: a is not positive definite.
-!!
-!! optional variables with intent inout:
-!!
-!!     matrix:          if present this input matrix is replaced by
-!!                      (matrix).a^-1 on exit (leaving a unchanged).
-!!
-!! uses cholesky decomposition - a method particularly suitable for real
-!! symmetric matrices.
-!!
-!! cholesky decomposition solves the linear equation uq=v for q where u is a
-!! symmetric positive definite matrix and u and q are vectors of length n.
-!!
-!! the method follows that in golub and van loan although this is pretty
-!! standard.
-!!
-!! if u is not positive definite this will be detected by the program and flagged
-!! as an error.  u is assumed to be symmetric as only the upper triangle is in
-!! fact used.
-!!
-!! if the the optional parameter matrix is present, it is replaced by
-!! (matrix).a^-1 on exit and a is left unchanged.
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
-                                                 m,      &
-                                                 a,      &
-                                                 status, &
-                                                 matrix)
-
-implicit none
-
-! subroutine arguments:
-integer, intent(in)                           :: n           !< order of a
-integer, intent(in)                           :: m           !< order of optional matrix, if required
-real(kind=kind_real), intent(inout)           :: a(n,n)      !< square mx, overwritten by its inverse
-integer, intent(out)                          :: status      !< 0 if all ok 1 if matrix is not positive definite
-real(kind=kind_real), optional, intent(inout) :: matrix(n,m) !< replaced by (matrix).a^-1 on exit
-
-! local declarations:
-character(len=*), parameter   :: routinename = "rttovonedvarcheck_covariance_InvertMatrix"
-character(len=80)             :: errormessage(2)
-real(kind=kind_real), parameter :: tolerance = tiny (0.0_kind_real) * 100.0_kind_real
-integer                       :: i
-integer                       :: j
-integer                       :: k
-integer                       :: mm
-real(kind=kind_real)          :: g(n,n)      ! the cholesky triangle matrix
-real(kind=kind_real)          :: q(n)
-real(kind=kind_real)          :: tmp(n,m)
-real(kind=kind_real)          :: v(n)
-real(kind=kind_real)          :: x(n)        ! temporary array
-
-status = 0
-
-! determine the cholesky triangle matrix.
-
-do j = 1, n
-  x(j:n) = a(j:n,j)
-  if (j /= 1) then
-    do k = 1, j - 1
-      x(j:n) = x(j:n) - g(j,k) * g(j:n,k)
-    end do
-  end if
-  if (x(j) <= tolerance) then
-    write(*,*) routinename // ' : matrix is not positive definite'
-    status = 1
-    goto 9999
-  end if
-  g(j:n,j) = x(j:n) / sqrt (x(j))
-end do
-
-! now solve the equation g.g^t.q=v for the set of
-! vectors, v, with one element = 1 and the rest zero.
-! the solutions q are brought together at the end to form
-! the inverse of g.g^t (i.e., the inverse of a).
-
-if (present (matrix)) then
-   mm = m
-else
-
-  ! make sure that the dimensions of tmp were correctly specified
-
-  if (m /= n) then
-    errormessage(1) = '2nd and 3rd arguments of routine must be'
-    errormessage(2) = 'identical if the matrix option is not present'
-    write(*,*) routinename // errormessage(1:2)
-    status = 2
-    goto 9999
-  end if
-  mm = n
-end if
-
-main_loop : do i = 1, mm
-  if (.not. (present (matrix))) then
-    v(:) = 0.0_kind_real
-    v(i) = 1.0_kind_real
-  else
-    v(:) = matrix(i,:)
-  end if
-
-  ! solve gx=v for x by forward substitution
-
-  x = v
-  x(1) = x(1) / g(1,1)
-  do j = 2, n
-    x(j) = (x(j) - dot_product (g(j,1:j - 1), x(1:j - 1))) / g(j,j)
-  end do
-
-  ! solve g^t.q=x for q by backward substitution
-
-  q = x
-  q(n) = q(n) / g(n,n)
-  do j = n - 1, 1, -1
-    q(j) = (q(j) - dot_product (g(j + 1:n,j), q(j + 1:n))) / g(j,j)
-  end do
-
-  tmp(:,i) = q(:)
-
-end do main_loop
-
-if (.not. (present (matrix))) then
-  a(:,:) = tmp(:,:)
-else
-  matrix(:,:) = tmp(:,:)
-end if
-
-9999 continue
-
-end subroutine rttovonedvarcheck_covariance_InvertMatrix
-
-! ------------------------------------------------------------------------------------------------
 !> Create a subset of the b-matrix.  Used for testing.
 !!
 !! \author Met Office
@@ -742,79 +600,79 @@ logical, intent(in)                 :: qtotal_flag  !< Flag for qtotal
 
 character(len=max_string) :: varname
 integer                   :: jvar
-integer                   :: nmvars
+integer                   :: nmvars, counter
 character(len=max_string) :: message
+logical                   :: clw_present = .false.
+logical                   :: ciw_present = .false.
 
 call fckit_log % info("rttovonedvarcheck_create_fields_in: starting")
 
 ! Which fields are being used from b matrix file - temporary until rttov can handle all fields
-allocate(fields_in(19))
+nmvars = size(variables)
+allocate(fields_in(nmvars))
 fields_in(:) = 0
 
-nmvars = size(variables)
+counter = 0
 do jvar = 1, nmvars
 
+  counter = counter + 1
   varname = variables(jvar)
 
   select case (trim(varname))
 
     case (var_ts)
-      fields_in(1) = 1 ! air_temperature
+      fields_in(counter) = 1 ! air_temperature
 
     case (var_q)
       if (qtotal_flag) then
-        fields_in(10) = 10 ! total water profile
+        fields_in(counter) = 10 ! total water profile
       else
-        fields_in(2) = 2 ! water profile
+        fields_in(counter) = 2 ! water profile
       end if
 
     case(var_sfc_t2m)
-      fields_in(3) = 3 ! 2m air_temperature
+      fields_in(counter) = 3 ! 2m air_temperature
 
     case(var_sfc_q2m)
-      fields_in(4) = 4 ! 2m specific_humidity
+      fields_in(counter) = 4 ! 2m specific_humidity
 
     case(var_sfc_tskin)
-      fields_in(5) = 5 ! surface skin temperature
+      fields_in(counter) = 5 ! surface skin temperature
 
     case(var_sfc_p2m)
-      fields_in(6) = 6 ! surface air pressure
+      fields_in(counter) = 6 ! surface air pressure
 
     ! 7 - o3total is not implmented yet
     ! 8 - not used is not implmented yet
 
     case (var_clw)
+      clw_present = .true.
       if (.NOT. qtotal_flag) then 
-        fields_in(9) = 9  ! liquid water profile
         call abor1_ftn("rttovonedvarcheck not setup for independent clw yet")
       end if
 
     case ("surface_wind_speed") ! surface wind speed
-      fields_in(11) = 11
       call abor1_ftn("rttovonedvarcheck not setup for surface windspeed yet")
 
     ! 12 - o3profile is not implmented yet
     ! 13 - lwp (liquid water path) is not implmented yet
 
     case ("surface_emissivity") ! microwave emissivity
-      fields_in(14) = 14
+      call abor1_ftn("rttovonedvarcheck not setup for surface surface_emissivity yet")
 
     case (var_cli)
+      ciw_present = .true.
       if (.NOT. qtotal_flag) then
-        fields_in(15) = 15 ! ice profile
         call abor1_ftn("rttovonedvarcheck not setup for independent ciw yet")
       end if
 
     case ("cloud_top_pressure")
-      fields_in(16) = 16
       call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
 
     case ("effective_cloud_fraction") ! effective cloud fraction
-      fields_in(17) = 17
       call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
 
     case ("emissivity_pc") ! emissivity prinipal components
-      fields_in(18) = 18
       call abor1_ftn("rttovonedvarcheck not setup for pc emissivity yet")
 
     ! 19 cloud fraction profile - not currently used
@@ -826,6 +684,11 @@ do jvar = 1, nmvars
   end select
 
 end do
+
+! Check clw and ciw are both in the list of required variables
+if (qtotal_flag .and. ((.not. clw_present) .or. (.not. ciw_present))) then
+  call abor1_ftn("rttovonedvarcheck using qtotal but clw or ciw not in variables")
+end if
 
 end subroutine rttovonedvarcheck_create_fields_in
 

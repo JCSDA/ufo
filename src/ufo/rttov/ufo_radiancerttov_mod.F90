@@ -350,7 +350,6 @@ contains
       end if
 
     end do Sensor_Loop
-    write(*,*)
 
   end subroutine ufo_radiancerttov_simobs
 

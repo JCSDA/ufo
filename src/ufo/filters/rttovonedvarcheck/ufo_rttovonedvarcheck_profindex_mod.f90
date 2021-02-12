@@ -119,16 +119,13 @@ do j = 1, bmatrix % nfields
       self % q(2)         = lastelement
 
     case( fieldtype_ql )
-      self % ql(1)        = firstelement
-      self % ql(2)        = lastelement
+      call abor1_ftn("fieldtype_ql: Not currently implemented aborting")
 
     case( fieldtype_qi )
-      self % qi(1)        = firstelement
-      self % qi(2)        = lastelement
+      call abor1_ftn("fieldtype_qi: Not currently implemented aborting")
 
     case( fieldtype_cf )
-      self % cf(1)        = firstelement
-      self % cf(2)        = lastelement
+      call abor1_ftn("fieldtype_cf: Not currently implemented aborting")
 
     case( fieldtype_qt )
       self % qt(1)        = firstelement
@@ -157,25 +154,23 @@ do j = 1, bmatrix % nfields
       self % pstar      = firstelement
 
     case( fieldtype_windspeed )
-      self % windspeed  = firstelement
+      call abor1_ftn("fieldtype_windspeed: Not currently implemented aborting")
 
     case( fieldtype_mwemiss )
-      self % mwemiss(1) = firstelement
-      self % mwemiss(2) = lastelement
+      call abor1_ftn("fieldtype_mwemiss: Not currently implemented aborting")
 
     case( fieldtype_emisspc )
-      self % emisspc(1) = firstelement
-      self % emisspc(2) = lastelement
+      call abor1_ftn("fieldtype_emisspc: Not currently implemented aborting")
 
    !------------------------------------
    !cloud (single-level grey cloud only)
    !------------------------------------
 
     case( fieldtype_cloudtopp )
-      self % cloudtopp         = firstelement
+      call abor1_ftn("fieldtype_cloudtopp: Not currently implemented aborting")
 
     case( fieldtype_cloudfrac )
-      self % cloudfrac         = firstelement
+      call abor1_ftn("fieldtype_cloudfrac: Not currently implemented aborting")
 
     case( fieldtype_not_used ) ! currently unused
       continue

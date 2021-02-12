@@ -8,6 +8,10 @@
 module ufo_rttovonedvarcheck_constants_mod
 
 use kinds
+use ufo_vars_mod, only : var_ts, var_q, var_sfc_t2m, var_sfc_q2m, &
+                         var_sfc_tskin, var_sfc_p2m, var_clw, &
+                         var_sfc_wspeed, var_cli, var_sfc_emiss, &
+                         var_cldfrac
 
 implicit none
 private
@@ -57,41 +61,33 @@ integer, parameter, public :: &
   fieldtype_cf         = 19      !< cloud fraction profile - not currently setup
 
 character(len=*), parameter, public :: fieldtype_text(nfieldtypes) = &
-  (/ 't                   ', &
-     'q water vapour      ', &
-     't2                  ', &
-     'q2                  ', &
-     'tstar               ', &
-     'pstar               ', &
+  (/ var_ts,                 &
+     var_q,                  &
+     var_sfc_t2m,            &
+     var_sfc_q2m,            &
+     var_sfc_tskin,          &
+     var_sfc_p2m,            &
      'ozone (total column)', &
      '[unused field type] ', &
-     'q liquid            ', &
+     var_clw,                &
      'q total             ', &
-     'wind speed          ', &
+     var_sfc_wspeed,         &
      'ozone (profile)     ', &
      'liquid water path   ', &
-     'microwave emissivity', &
-     'q ice               ', &
+     var_sfc_emiss,          &
+     var_cli,                &
      'cloud top pressure  ', &
      'cloud fraction      ', &
      'emissivity pcs      ', &
-     'cloud fraction prof ' /)
+     var_cldfrac /)
 
 !-----------------------------------------------------------------------------
 ! 3. Physical Constants
 !-----------------------------------------------------------------------------
 
 real(kind_real), parameter, public :: &
-  MaxTotalOzone   =   650.0,    & !< Maximum total ozone ( Dobson units )
-  MinTotalOzone   =    70.0,    & !< Minimum total ozone ( Dobson units )
-  MaxSurfaceP     =  1200.0,    & !< Maximum surface pressure ( hPa )
-  MinSurfaceP     =   300.0,    & !< Minimum surface pressure ( hPa )
-  Min_q           =     3.0E-6, & !< Minimum humidity ( kg / kg )
-  MaxTemperature  =   340.0,    & !< Maximum temperature ( K )
-  MinTemperature  =    70.0,    & !< Minimum temperature ( K )
-  IceShelfLimit   =   -72.0,    & !< Assumed limit of SH seaice
-  WetLevelLid     =   115.0,    & !< Uppermost wet pressure level
-  MWCloudLevelLid =   310.0
+  MaxTemperature  =   340.0_kind_real,    & !< Maximum temperature ( K )
+  MinTemperature  =    70.0_kind_real       !< Minimum temperature ( K )
 
 !-----------------------------------------------------------------------------
 ! 4. Information for emissivity retrieval
