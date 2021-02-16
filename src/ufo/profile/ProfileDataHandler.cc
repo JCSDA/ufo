@@ -171,16 +171,16 @@ namespace ufo {
       if (geovals_ &&
           obsdb_.nlocs() > 0 &&
           geovals_->has(variableName)) {
-        // Vector storing GeoVaL data for current profile.
-        std::vector <float> vec_GeoVaL(obsdb_.nlocs(), 0.0);
-        const size_t gvnlevs = geovals_->nlevs(variableName);
-        // This assumes each model column for each observation is identical
+        // Location at which to retrieve the GeoVaL.
+        // This assumes each model column for each observation in a profile is identical
         // so takes the first entry in each case.
-        // NB This uses array indices that start at 1 rather than 0.
-        for (int jlev = 1; jlev < gvnlevs + 1; ++jlev) {
-          geovals_->get(vec_GeoVaL, variableName, jlev);
-          vec_GeoVaL_column.push_back(vec_GeoVaL[profileIndices_->getProfileIndices()[0]]);
-        }
+        // todo(ctgh): this is an approximation that should be revisited
+        // when considering horizontal drift.
+        const size_t jloc = profileIndices_->getProfileIndices()[0];
+        // Vector storing GeoVaL data for current profile.
+        vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);
+        // Get GeoVaLs at the specified location.
+        geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
       }
       // Add GeoVaL vector to map (even if it is empty).
       GeoVaLData_.emplace(variableName, std::move(vec_GeoVaL_column));

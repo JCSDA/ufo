@@ -523,6 +523,46 @@ end subroutine ufo_geovals_get_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_get_loc_c(c_key_self, lvar, c_var, c_loc, nlevs, values) bind(c, name='ufo_geovals_get_loc_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_int), intent(in) :: c_loc
+integer(c_int), intent(in) :: nlevs
+real(c_float), intent(inout) :: values(nlevs)
+
+character(max_string) :: err_msg
+type(ufo_geoval), pointer :: geoval
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+integer(c_int) :: loc
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_get_var(self, varname, geoval)
+
+! Convert location index from the C++ to the Fortran convention.
+loc = c_loc + 1
+
+if (loc<1 .or. loc>size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get_loc_f90',trim(varname),'location out of range:',loc,size(geoval%vals,2)
+  call abor1_ftn(err_msg)
+endif
+if (nlevs /= size(geoval%vals,1)) then
+  write(err_msg,*)'ufo_geovals_get_loc_f90',trim(varname),'incorrect number of levels:',nlevs,size(geoval%vals,1)
+  call abor1_ftn(err_msg)
+endif
+
+values(:) = geoval%vals(:,loc)
+
+end subroutine ufo_geovals_get_loc_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_getdouble_c(c_key_self, lvar, c_var, lev, nlocs, values)&
   bind(c, name='ufo_geovals_getdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN

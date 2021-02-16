@@ -222,6 +222,31 @@ void testGeoVaLsAllocatePutGet() {
   oops::Log::test() << "Get(int) result:   " << testvalues_int << std::endl;
   EXPECT_EQUAL(testvalues_int, refvalues_int);
 
+  /// Check that the getAtLocation method returns what we put in the GeoVaLs.
+  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc.
+  for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
+    std::vector<double> refvalues_loc_double(gval.nlocs());
+    std::iota(refvalues_loc_double.begin(), refvalues_loc_double.end(), jlev);
+    gval.put(refvalues_loc_double, var1, jlev+1);
+  }
+  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
+    // Get the test vector at this location.
+    std::vector<float> testvalues_loc_float(gval.nlevs(var1));
+    gval.getAtLocation(testvalues_loc_float, var1, jloc);
+    // Recreate reference vector for this location.
+    std::vector<float> refvalues_loc_float(gval.nlevs(var1));
+    std::iota(refvalues_loc_float.begin(), refvalues_loc_float.end(), jloc);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_loc_float, refvalues_loc_float);
+  }
+
+  /// Check code paths that throw exceptions for the getAtLocation method.
+  std::vector<float> testvalues_loc_wrongsize(gval.nlevs(var1) + 1, 0.0);
+  EXPECT_THROWS(gval.getAtLocation(testvalues_loc_wrongsize, var1, 1));
+  std::vector<float> testvalues_loc(gval.nlevs(var1), 0.0);
+  EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, -1));
+  EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, gval.nlocs()));
+
   /// test 3D put and get
   for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
     const float fillvalue = 3.0*(jlev+1);
