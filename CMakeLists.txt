@@ -40,6 +40,9 @@ set( UFO_LINKER_LANGUAGE CXX )
 # Dependencies
 ################################################################################
 
+# MPI
+find_package( MPI REQUIRED COMPONENTS C CXX Fortran )
+
 # Boost
 include_directories( ${Boost_INCLUDE_DIR} )
 
@@ -53,6 +56,9 @@ find_package( Eigen3 REQUIRED NO_MODULE HINTS
               $ENV{Eigen3_ROOT} $ENV{EIGEN3_ROOT} $ENV{Eigen_ROOT} $ENV{EIGEN_ROOT}
               $ENV{Eigen3_PATH} $ENV{EIGEN3_PATH} $ENV{Eigen_PATH} $ENV{EIGEN_PATH} )
 include_directories( ${EIGEN3_INCLUDE_DIRS} )
+
+# gsl-lite
+find_package(gsl-lite REQUIRED HINTS $ENV{gsl_lite_DIR})
 
 # eckit
 ecbuild_use_package( PROJECT eckit VERSION 1.11.6 REQUIRED )
