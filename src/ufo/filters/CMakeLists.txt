@@ -49,6 +49,8 @@ set ( filters_files
       QCflags.h
       QCmanager.cc
       QCmanager.h
+      PerformAction.cc
+      PerformAction.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
       ProfileConsistencyChecks.cc
@@ -83,6 +85,8 @@ set ( filters_files
       Variables.h
       VariableAssignment.cc
       VariableAssignment.h
+      AcceptList.cc
+      AcceptList.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.cc
@@ -97,6 +101,8 @@ set ( filters_files
       ObsAccessor.h
       actions/AssignError.cc
       actions/AssignError.h
+      actions/AcceptObs.cc
+      actions/AcceptObs.h
       actions/FilterAction.cc
       actions/FilterAction.h
       actions/FilterActionBase.cc

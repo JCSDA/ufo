@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2018-2019 UCAR
- * 
+ * (C) Copyright 2021 Met Office UK
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/BlackList.h"
+#include "ufo/filters/PerformAction.h"
 
 #include <string>
 #include <vector>
@@ -22,23 +22,19 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-BlackList::BlackList(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                     std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+PerformAction::PerformAction(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
+                             std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::debug() << "BlackList: config = " << parameters_ << std::endl;
+  oops::Log::debug() << "PerformAction: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-BlackList::~BlackList() {}
-
-// -----------------------------------------------------------------------------
-
-void BlackList::applyFilter(const std::vector<bool> & apply,
-                            const Variables & filtervars,
-                            std::vector<std::vector<bool>> & flagged) const {
+void PerformAction::applyFilter(const std::vector<bool> & apply,
+                                const Variables & filtervars,
+                                std::vector<std::vector<bool>> & flagged) const {
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       flagged[jv][jobs] = apply[jobs];
@@ -48,8 +44,8 @@ void BlackList::applyFilter(const std::vector<bool> & apply,
 
 // -----------------------------------------------------------------------------
 
-void BlackList::print(std::ostream & os) const {
-  os << "BlackList: config = " << parameters_ << std::endl;
+void PerformAction::print(std::ostream & os) const {
+  os << "PerformAction: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

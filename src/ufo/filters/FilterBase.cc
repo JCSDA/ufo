@@ -29,14 +29,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & parameters,
+FilterBase::FilterBase(ioda::ObsSpace & os,
+                       const FilterParametersBaseWithAbstractAction & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     config_(parameters.toConfiguration()),
     filtervars_(),
     whereConfig_(parameters.where),
-    actionParameters_(parameters.action.value().actionParameters.value().clone())
+    actionParameters_(parameters.action().clone())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
   allvars_ += getAllWhereVariables(parameters.where);

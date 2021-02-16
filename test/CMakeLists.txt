@@ -149,6 +149,7 @@ list( APPEND ufo_test_input
   testinput/qc_met_office_buddy_pair_finder.yaml
   testinput/qc_recursive_splitter.yaml
   testinput/qc_oceancolor_preqc.yaml
+  testinput/qc_performaction.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_poisson_disk_thinning_parallel.yaml
@@ -166,6 +167,7 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheckship_mainloop_unittests.yaml
   testinput/qc_trackcheckship_unittests.yaml
   testinput/qc_variableassignment.yaml
+  testinput/qc_acceptlist.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
@@ -1659,6 +1661,20 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_pressure_obs
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_temperature_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/profileconsistencychecks_average_temperature_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_acceptlist
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_acceptlist.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_performaction
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_performaction.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

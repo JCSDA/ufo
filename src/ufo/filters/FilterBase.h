@@ -43,7 +43,7 @@ namespace ufo {
 
 class FilterBase : public ObsProcessorBase {
  public:
-  FilterBase(ioda::ObsSpace &, const FilterParametersBase &parameters,
+  FilterBase(ioda::ObsSpace &, const FilterParametersBaseWithAbstractAction &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> >,
              std::shared_ptr<ioda::ObsDataVector<float> >);
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,

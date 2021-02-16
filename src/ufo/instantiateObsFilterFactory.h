@@ -10,6 +10,7 @@
 
 #include "oops/base/instantiateObsFilterFactory.h"
 #include "oops/interface/ObsFilter.h"
+#include "ufo/filters/AcceptList.h"
 #include "ufo/filters/BackgroundCheck.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
@@ -22,6 +23,7 @@
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
+#include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
@@ -59,6 +61,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            boundsCheckMaker("Bounds Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BlackList> >
            blackListMaker("BlackList");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BlackList> >
+           rejectListMaker("RejectList");  // alternative name
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheck> >
            backgroundCheckMaker("Background Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DifferenceCheck> >
@@ -111,6 +115,10 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileFewObsCheck> >
            ProfileFewObsCheckMaker("Profile Few Observations Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::AcceptList> >
+           acceptListMaker("AcceptList");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PerformAction> >
+           performActionMaker("Perform Action");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
