@@ -17,30 +17,29 @@ namespace ufo {
     : obsdb_(obsdb),
       options_(options),
       apply_(apply),
-      profileNums_(obsdb.recnum()),
-      profileNumCurrent_(0),
-      profileNumToFind_(0),
-      profIndex_(0)
+      profileNums_(obsdb.recnum())
   {
+    this->reset();
+
     // If not sorting observations, ensure number of profiles is consistent
     // with quantity reported by obsdb.
     // (If sorting is imposed, nothing is assumed about the ordering of the input data
     // so this validation should not be performed.)
-    if (obsdb_.obs_sort_var().empty() && options_.ValidateTotalNumProf.value()) {
+    if (!profileNums_.empty() &&
+        obsdb_.obs_sort_var().empty() &&
+        options_.ValidateTotalNumProf.value()) {
       validateTotalNumProf();
-    }
-
-    // If sorting observations, point to beginning of record index iterator
-    if (!obsdb_.obs_sort_var().empty() &&
-        obsdb_.obs_sort_order() == "descending") {
-      profidx_current_ = obsdb_.recidx_begin();
     }
   }
 
   void ProfileIndices::reset()
   {
-    profileNumCurrent_ = 0;
-    profileNumToFind_ = 0;
+    // Do not proceed if there are no profiles on the current processor.
+    if (profileNums_.empty())
+      return;
+
+    profileNumCurrent_ = profileNums_[0];
+    profileNumToFind_ = profileNums_[0];
     profIndex_ = 0;
 
     // If sorting observations, point to beginning of record index iterator
@@ -54,8 +53,8 @@ namespace ufo {
   {
     profileIndices_.clear();
 
-    // If there are no profiles in the sample, warn and exit
-    if (profileNums_.size() == 0) {
+    // Do not proceed if there are no profiles on the current processor.
+    if (profileNums_.empty()) {
       oops::Log::debug() << "No profiles found in the sample" << std::endl;
       return;
     }
@@ -126,8 +125,8 @@ namespace ufo {
     // This would lead to an incorrect value of nrecs.
     // This routine ensures that nrecs is the same as the actual number of profiles in the sample.
 
-    size_t profNum = 0;
-    std::vector <size_t> allProfileNums = {0};
+    size_t profNum = profileNums_[0];
+    std::vector <size_t> allProfileNums = {profNum};
     for (size_t j = 0; j < profileNums_.size(); ++j) {
       size_t profNum_j = profileNums_[j];
       if (profNum_j != profNum) {

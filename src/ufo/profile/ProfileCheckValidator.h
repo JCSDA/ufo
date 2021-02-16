@@ -29,7 +29,8 @@ namespace ufo {
     explicit ProfileCheckValidator(const ProfileConsistencyCheckParameters &options);
 
     /// Validate check results against OPS values.
-    void validate(ProfileDataHandler &profileDataHandler);
+    void validate(ProfileDataHandler &profileDataHandler,
+                  size_t commSize);
 
     /// Get number of mismatches between values produced in this code and the OPS equivalents.
     int getMismatches() const {return nMismatches_;}

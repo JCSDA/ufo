@@ -215,7 +215,8 @@ namespace ufo {
     }
   }
 
-  void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler,
+                                       size_t commSize)
   {
     oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
 
@@ -260,9 +261,19 @@ namespace ufo {
       // Only the first element of each counter is compared;
       // in all other cases tne entire vectors are compared.
       if (groupname == "Counters") {
-        if (!oops::anyVectorEmpty(values_OPS, values_thiscode))
-          compareOutput(valueToCompare_int, values_OPS[0], values_thiscode[0],
-                        offset, tol, nMismatches_);
+        // The counter comparison is only performed if there is one processor.
+        // With some refactoring it would be possible to use eckit::allGatherv
+        // to sum the results over multiple processors but, at present,
+        // if two processors have a different number of profiles then the allGatherv
+        // routine on the processor with more profiles will hang indefinitely.
+        if (commSize == 1) {
+          if (!oops::anyVectorEmpty(values_OPS, values_thiscode))
+            compareOutput(valueToCompare_int, values_OPS[0], values_thiscode[0],
+                          offset, tol, nMismatches_);
+        } else {
+            oops::Log::debug() << "The counter comparison was not performed "
+                               << "because multiple processors are in use." << std::endl;
+        }
       } else {
         compareOutput(valueToCompare_int, values_OPS, values_thiscode,
                       offset, tol, nMismatches_);

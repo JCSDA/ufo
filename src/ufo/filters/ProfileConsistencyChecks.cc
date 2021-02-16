@@ -109,7 +109,7 @@ namespace ufo {
 
       // Optionally compare check results with OPS values
       if (options_.compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
-        profileCheckValidator.validate(profileDataHandler);
+        profileCheckValidator.validate(profileDataHandler, obsdb_.comm().size());
         nMismatches_.emplace_back(profileCheckValidator.getMismatches());
       }
     }

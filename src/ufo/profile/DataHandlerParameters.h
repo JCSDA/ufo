@@ -68,7 +68,7 @@ namespace ufo {
 
     /// Groups of variables which have one value per profile.
     oops::Parameter<std::vector<std::string>> groups_singlevalue
-      {"groups_singlevalue", {"Counters"}, this};
+      {"groups_singlevalue", {}, this};
 
     /// Groups of variables which are on model levels.
     oops::Parameter<std::vector<std::string>> groups_modellevels
