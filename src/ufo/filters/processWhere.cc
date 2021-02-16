@@ -37,11 +37,13 @@ ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
   return vars;
 }
 
+
 // -----------------------------------------------------------------------------
-void processWhereMinMax(const std::vector<float> & data,
-                        const float & vmin, const float & vmax,
+template<typename T>
+void processWhereMinMax(const std::vector<T> & data,
+                        const T & vmin, const T & vmax,
                         std::vector<bool> & mask) {
-  const float not_set_value = util::missingValue(not_set_value);
+  const T not_set_value = util::missingValue(not_set_value);
   const size_t n = data.size();
 
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -122,21 +124,29 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
 }
 
 // -----------------------------------------------------------------------------
-void applyMinMaxFloat(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
-                      ObsFilterData const & filterdata, Variable const & varname) {
-  const float not_set_value = util::missingValue(not_set_value);
-  const float vmin = mask.getFloat("minvalue", not_set_value);
-  const float vmax = mask.getFloat("maxvalue", not_set_value);
+template <typename T>
+void applyMinMax(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                 ObsFilterData const & filterdata, Variable const & varname) {
+  const T not_set_value = util::missingValue(not_set_value);
+
+  T vmin = not_set_value;
+  // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
+  mask.get("minvalue", vmin);
+  T vmax = not_set_value;
+  mask.get("maxvalue", vmax);
+
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {
-    std::vector<float> data;
+    std::vector<T> data;
     filterdata.get(varname, data);
     processWhereMinMax(data, vmin, vmax, where);
   }
 }
 
-void applyMinMaxDatetime(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
-                         ObsFilterData const & filterdata, Variable const & varname) {
+// -----------------------------------------------------------------------------
+template <>
+void applyMinMax<util::DateTime>(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                                 ObsFilterData const & filterdata, Variable const & varname) {
   const std::string not_set_value("0000-00-00T00:00:00Z");
   const std::string vmin = mask.getString("minvalue", not_set_value);
   const std::string vmax = mask.getString("maxvalue", not_set_value);
@@ -335,9 +345,11 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
         if (dtype == ioda::ObsDtype::DateTime) {
-          applyMinMaxDatetime(where, masks[jm], filterdata, varname);
+          applyMinMax<util::DateTime>(where, masks[jm], filterdata, varname);
+        } else if (dtype == ioda::ObsDtype::Integer) {
+          applyMinMax<int>(where, masks[jm], filterdata, varname);
         } else {
-          applyMinMaxFloat(where, masks[jm], filterdata, varname);
+          applyMinMax<float>(where, masks[jm], filterdata, varname);
         }
 
 //      Apply mask is_defined

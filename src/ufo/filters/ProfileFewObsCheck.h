@@ -14,7 +14,8 @@
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/NumericConstraints.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
@@ -33,7 +34,7 @@ class ProfileFewObsCheckParameters : public FilterParametersBase {
  public:
   /// The filter will flag profiles which contain fewer than `threshold` number
   /// of observations
-  oops::Parameter<int> threshold{"threshold", 0, this};
+  oops::RequiredParameter<int> threshold{"threshold", this, {oops::minConstraint(0)}};
 };
 
 /// ProfileFewObsCheck: Check the number of observations in a profile

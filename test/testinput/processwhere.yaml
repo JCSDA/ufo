@@ -182,6 +182,66 @@ successful:
         is_in: 0-3
   # intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
       size where true: 8
+    - where:                      # test maxvalue when all are <= max
+      - variable:
+          name:  intvar1@MetaData
+        maxvalue: 10
+  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 10
+    - where:                      # test maxvalue when all but one are > max, one == max
+      - variable:
+          name:  intvar1@MetaData
+        maxvalue: 1
+  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 1
+    - where:                      # test min & max at the same time when all should pass
+      - variable:
+          name:  intvar2@MetaData
+        minvalue: 1
+        maxvalue: 10
+  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 10
+    - where:                      # test min & max at the same time when some should pass
+      - variable:
+          name:  intvar2@MetaData
+        minvalue: 2
+        maxvalue: 5
+  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 4
+    - where:                      # test min & max at the same time when max < min
+      - variable:
+          name:  intvar2@MetaData
+        minvalue: 6
+        maxvalue: 4
+  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 0
+    - where:                      # test min & max at the same time when max == min
+      - variable:
+          name:  intvar2@MetaData
+        minvalue: 7
+        maxvalue: 7
+  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 1
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  intvar5@MetaData
+        minvalue: 2
+        maxvalue: 5
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 4
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  intvar5@MetaData
+        minvalue: 0
+        maxvalue: 100
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 6
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  intvar5@MetaData
+        minvalue: 100
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 0
     - where:                       # test is_in for string-based inputs
       - variable:
           name:  station_id@MetaData

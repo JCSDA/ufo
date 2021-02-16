@@ -35,8 +35,6 @@ ProfileFewObsCheck::ProfileFewObsCheck(
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileFewObsCheck constructor" << std::endl;
-
-  ASSERT(parameters_.threshold.value() >= 0);
 }
 
 // -----------------------------------------------------------------------------

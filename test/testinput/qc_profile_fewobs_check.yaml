@@ -56,6 +56,6 @@ observations:
     where:
     - variable:
         name: record_number@MetaData
-      is_in: 0-4        # First five profiles
+      maxvalue: 4       # First five profiles
   passedBenchmark: 50   # Rejects all profiles, except those removed by where
 
