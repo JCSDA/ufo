@@ -1078,18 +1078,6 @@ ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_qc_derivative_ascent
-                  SOURCES mains/TestObsFilters.cc
-                  ARGS    "testinput/qc_derivative_dpdt.yaml"
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
-
-ecbuild_add_test( TARGET  test_ufo_qc_derivative_speed
-                  SOURCES mains/TestObsFilters.cc
-                  ARGS    "testinput/qc_derivative_dxdt.yaml"
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
-
 ecbuild_add_test( TARGET  test_ufo_super_refraction_gnssroBndNBAM
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1424,6 +1412,20 @@ ecbuild_add_test( TARGET  test_ufo_qc_wdircheck
 ecbuild_add_test( TARGET  test_ufo_qc_lam_domaincheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/function_lam_domaincheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_derivative_ascent
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_derivative_dpdt.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_derivative_speed
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_derivative_dxdt.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
