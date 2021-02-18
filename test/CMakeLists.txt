@@ -438,6 +438,13 @@ ecbuild_add_executable( TARGET  test_ProfileConsistencyChecks.x
                        )
 
 ####################################################################
+# Establish test tiering
+
+set( UFO_TEST_TIER 1 CACHE STRING "UFO test tier. Run tests up to and including this tier.")
+
+message(STATUS "Running ufo tests for tiers up to and including tier " ${UFO_TEST_TIER})
+
+####################################################################
 # Test Locations, GeoVaLs with oops tests:
 
 ecbuild_add_test( TARGET  test_ufo_geovals

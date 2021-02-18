@@ -7,12 +7,12 @@
 
 
 # H(x) test
-ecbuild_add_test( TARGET  test_ufo_instrument_aircraft_gfs_HofX
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+ufo_add_test(     NAME    instrument_aircraft_gfs_HofX
+                  TIER    1
+                  ECBUILD
+		  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aircraft_gfs_HofX.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
                   LABELS  aircraft instrument HofX
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
-
