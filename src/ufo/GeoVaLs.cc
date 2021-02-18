@@ -328,7 +328,7 @@ void GeoVaLs::get(std::vector<int> & vals, const std::string & var) const {
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location */
-void GeoVaLs::getAtLocation(std::vector<float> & vals,
+void GeoVaLs::getAtLocation(std::vector<double> & vals,
                             const std::string & var,
                             const int loc) const {
   oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
@@ -336,6 +336,28 @@ void GeoVaLs::getAtLocation(std::vector<float> & vals,
   ASSERT(vals.size() == nlevs);
   ASSERT(loc >= 0 && loc < this->nlocs());
   ufo_geovals_get_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and location and convert to float */
+void GeoVaLs::getAtLocation(std::vector<float> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
+  std::vector <double> doublevals(vals.size());
+  this->getAtLocation(doublevals, var, loc);
+  vals.assign(doublevals.begin(), doublevals.end());
+  oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and location and convert to int */
+void GeoVaLs::getAtLocation(std::vector<int> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
+  std::vector <double> doublevals(vals.size());
+  this->getAtLocation(doublevals, var, loc);
+  vals.assign(doublevals.begin(), doublevals.end());
   oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
 }
 // -----------------------------------------------------------------------------

@@ -86,7 +86,11 @@ class GeoVaLs : public util::Printable,
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to int
   void get(std::vector<int> &, const std::string & var) const;
   /// Get GeoVaLs at a specified location
+  void getAtLocation(std::vector<double> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified location and convert to float
   void getAtLocation(std::vector<float> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified location and convert to int
+  void getAtLocation(std::vector<int> &, const std::string &, const int) const;
   void put(const std::vector<double> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);

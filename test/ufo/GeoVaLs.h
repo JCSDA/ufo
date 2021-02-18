@@ -231,19 +231,31 @@ void testGeoVaLsAllocatePutGet() {
   }
   for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
     // Get the test vector at this location.
+    std::vector<double> testvalues_loc_double(gval.nlevs(var1));
+    gval.getAtLocation(testvalues_loc_double, var1, jloc);
+    // Recreate reference vector for this location.
+    std::vector<double> refvalues_loc_double(gval.nlevs(var1));
+    std::iota(refvalues_loc_double.begin(), refvalues_loc_double.end(), jloc);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_loc_double, refvalues_loc_double);
+    // Repeat the test for floats.
     std::vector<float> testvalues_loc_float(gval.nlevs(var1));
     gval.getAtLocation(testvalues_loc_float, var1, jloc);
-    // Recreate reference vector for this location.
-    std::vector<float> refvalues_loc_float(gval.nlevs(var1));
-    std::iota(refvalues_loc_float.begin(), refvalues_loc_float.end(), jloc);
-    // Compare the two vectors.
+    std::vector<float> refvalues_loc_float(refvalues_loc_double.begin(),
+                                           refvalues_loc_double.end());
     EXPECT_EQUAL(testvalues_loc_float, refvalues_loc_float);
+    // Repeat the test for ints.
+    std::vector<int> testvalues_loc_int(gval.nlevs(var1));
+    gval.getAtLocation(testvalues_loc_int, var1, jloc);
+    std::vector<int> refvalues_loc_int(refvalues_loc_double.begin(),
+                                       refvalues_loc_double.end());
+    EXPECT_EQUAL(testvalues_loc_int, refvalues_loc_int);
   }
 
   /// Check code paths that throw exceptions for the getAtLocation method.
-  std::vector<float> testvalues_loc_wrongsize(gval.nlevs(var1) + 1, 0.0);
+  std::vector<double> testvalues_loc_wrongsize(gval.nlevs(var1) + 1, 0.0);
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc_wrongsize, var1, 1));
-  std::vector<float> testvalues_loc(gval.nlevs(var1), 0.0);
+  std::vector<double> testvalues_loc(gval.nlevs(var1), 0.0);
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, -1));
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, gval.nlocs()));
 

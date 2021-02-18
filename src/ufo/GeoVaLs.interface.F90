@@ -532,7 +532,7 @@ integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_loc
 integer(c_int), intent(in) :: nlevs
-real(c_float), intent(inout) :: values(nlevs)
+real(c_double), intent(inout) :: values(nlevs)
 
 character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
