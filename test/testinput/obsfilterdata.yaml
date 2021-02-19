@@ -6,6 +6,7 @@ obs filter data:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [eastward_wind, northward_wind]
+  test data:
     datetime variables:
     - name: datetime@MetaData
     float variables:
@@ -38,6 +39,7 @@ obs filter data:
       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
+  test data:
     datetime variables:
     - name: datetime@MetaData
     float variables:

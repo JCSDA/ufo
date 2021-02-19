@@ -6,7 +6,7 @@ successful:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [var1]
-    nlocs: 10
+  nlocs: 10
   ProcessWhere:
     - where:                      # test minvalue when all are >= min
       - variable:
@@ -409,7 +409,7 @@ user_error_type_handling_is_in:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [var1]
-    nlocs: 10
+  nlocs: 10
   ProcessWhere:
     - where:                       # test is_not_in for unsupported type (float)
       - variable:

@@ -40,7 +40,7 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
   ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
   ObsFilterData data(ospace);
 
-  const int nlocs = obsconf.getInt("nlocs");
+  const int nlocs = conf.getInt("nlocs");
   EXPECT(data.nlocs() == nlocs);
 
   std::vector<eckit::LocalConfiguration> confs;
