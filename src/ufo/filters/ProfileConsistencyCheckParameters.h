@@ -332,6 +332,14 @@ namespace ufo {
     /// in the temperature averaging routine.
     oops::Parameter<float> AvgT_PGEskip {"AvgT_PGEskip", 0.9, this};
 
+    /// Minimum fraction of a model layer that must have been covered (in the vertical coordinate)
+    /// by observed values in order for wind speed to be averaged onto that layer.
+    oops::Parameter<float> AvgU_SondeDZFraction {"AvgU_SondeDZFraction", 0.5, this};
+
+    /// Probability of gross error threshold above which rejection flags are set
+    /// in the wind speed averaging routine.
+    oops::Parameter<float> AvgU_PGEskip {"AvgU_PGEskip", 0.9, this};
+
     /// @}
 
     /// @name OPS comparison parameters

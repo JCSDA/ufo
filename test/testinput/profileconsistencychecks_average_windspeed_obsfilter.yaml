@@ -1,0 +1,33 @@
+#
+#=== Profile average wind speed ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs filters:
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 3318
+  benchmarkFlag: 15
+  flaggedBenchmark: 264

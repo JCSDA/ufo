@@ -165,6 +165,15 @@ namespace ufo {
         valuesToCompare_float_.insert({
             ufo::VariableNames::geovals_air_temperature_derived,
             ufo::VariableNames::average_air_temperature_derived});
+      } else if (check == "AverageWindSpeed") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::average_eastward_wind_qcflags,
+            ufo::VariableNames::average_northward_wind_qcflags,
+            ufo::VariableNames::counter_NumGapsU,
+            ufo::VariableNames::counter_NumGapsUWP});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::average_eastward_wind_derived,
+            ufo::VariableNames::average_northward_wind_derived});
       }
     }
   }

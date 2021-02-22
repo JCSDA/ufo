@@ -70,6 +70,7 @@ constexpr const char* const ufo::VariableNames::Latitude;
 constexpr const char* const ufo::VariableNames::Longitude;
 constexpr const char* const ufo::VariableNames::Time;
 constexpr const char* const ufo::VariableNames::Zstation;
+constexpr const char* const ufo::VariableNames::LevelType;
 
 // QC flags
 
@@ -80,6 +81,7 @@ constexpr const char* const ufo::VariableNames::qcflags_geopotential_height;
 constexpr const char* const ufo::VariableNames::qcflags_eastward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_northward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_time;
+constexpr const char* const ufo::VariableNames::qcflags_wind_profiler;
 
 // Counters
 
@@ -100,6 +102,8 @@ constexpr const char* const ufo::VariableNames::counter_TotCFlags;
 constexpr const char* const ufo::VariableNames::counter_TotHFlags;
 constexpr const char* const ufo::VariableNames::counter_TotLFlags;
 constexpr const char* const ufo::VariableNames::counter_NumGapsT;
+constexpr const char* const ufo::VariableNames::counter_NumGapsU;
+constexpr const char* const ufo::VariableNames::counter_NumGapsUWP;
 
 // Corrections
 
@@ -146,6 +150,7 @@ constexpr const char* const ufo::VariableNames::geovals_pressure;
 constexpr const char* const ufo::VariableNames::geovals_pressure_rho;
 constexpr const char* const ufo::VariableNames::geovals_height;
 constexpr const char* const ufo::VariableNames::geovals_potential_temperature;
+constexpr const char* const ufo::VariableNames::geovals_surface_pressure;
 
 // GeoVaLs used in validation
 
@@ -155,7 +160,11 @@ constexpr const char* const ufo::VariableNames::geovals_logP_rho;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho;
 constexpr const char* const ufo::VariableNames::geovals_air_temperature;
 constexpr const char* const ufo::VariableNames::geovals_average_air_temperature;
+constexpr const char* const ufo::VariableNames::geovals_average_eastward_wind;
+constexpr const char* const ufo::VariableNames::geovals_average_northward_wind;
 constexpr const char* const ufo::VariableNames::geovals_average_air_temperature_qcflags;
+constexpr const char* const ufo::VariableNames::geovals_average_eastward_wind_qcflags;
+constexpr const char* const ufo::VariableNames::geovals_average_northward_wind_qcflags;
 
 // Derived values on model levels
 
@@ -166,7 +175,11 @@ constexpr const char* const ufo::VariableNames::geovals_air_temperature_derived;
 // Averaged values on model levels
 
 constexpr const char* const ufo::VariableNames::average_air_temperature_derived;
+constexpr const char* const ufo::VariableNames::average_eastward_wind_derived;
+constexpr const char* const ufo::VariableNames::average_northward_wind_derived;
 constexpr const char* const ufo::VariableNames::average_air_temperature_qcflags;
+constexpr const char* const ufo::VariableNames::average_eastward_wind_qcflags;
+constexpr const char* const ufo::VariableNames::average_northward_wind_qcflags;
 
 // Derived values on model rho levels
 

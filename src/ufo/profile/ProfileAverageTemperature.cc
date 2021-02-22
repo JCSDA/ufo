@@ -49,7 +49,7 @@ namespace ufo {
 
     if (!oops::allVectorsSameNonZeroSize(tObs, tPGEBd, tFlags, rhFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Pressure transformation will not be performed." << std::endl;
+                           << "Temperature averaging will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(tObs, tPGEBd, tFlags, rhFlags, tObsCorrection)
                            << std::endl;

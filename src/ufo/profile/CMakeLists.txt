@@ -15,6 +15,8 @@ set ( profile_files
       ProfileAveragePressure.h
       ProfileAverageTemperature.cc
       ProfileAverageTemperature.h
+      ProfileAverageWindSpeed.cc
+      ProfileAverageWindSpeed.h
       ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h

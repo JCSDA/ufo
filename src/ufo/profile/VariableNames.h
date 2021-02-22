@@ -117,6 +117,8 @@ struct VariableNames
   static constexpr const char* const counter_TotHFlags = "TotHFlags@Counters";
   static constexpr const char* const counter_TotLFlags = "TotLFlags@Counters";
   static constexpr const char* const counter_NumGapsT = "NumGapsT@Counters";
+  static constexpr const char* const counter_NumGapsU = "NumGapsU@Counters";
+  static constexpr const char* const counter_NumGapsUWP = "NumGapsUWP@Counters";
 
   // Corrections
 
@@ -164,6 +166,7 @@ struct VariableNames
   static constexpr const char* const geovals_pressure_rho = "air_pressure_rho";
   static constexpr const char* const geovals_height = "height";
   static constexpr const char* const geovals_potential_temperature = "air_potential_temperature";
+  static constexpr const char* const geovals_surface_pressure = "surface_pressure";
 
   // GeoVaLs used in validation
 
@@ -173,8 +176,14 @@ struct VariableNames
   static constexpr const char* const geovals_ExnerP_rho = "ExnerPA";
   static constexpr const char* const geovals_air_temperature = "air_temperature";
   static constexpr const char* const geovals_average_air_temperature = "average_air_temperature";
+  static constexpr const char* const geovals_average_eastward_wind = "average_eastward_wind";
+  static constexpr const char* const geovals_average_northward_wind = "average_northward_wind";
   static constexpr const char* const geovals_average_air_temperature_qcflags =
     "average_air_temperature_flags";
+  static constexpr const char* const geovals_average_eastward_wind_qcflags =
+    "average_eastward_wind_flags";
+  static constexpr const char* const geovals_average_northward_wind_qcflags =
+    "average_northward_wind_flags";
 
   // Derived values on model levels
 
@@ -187,8 +196,16 @@ struct VariableNames
 
   static constexpr const char* const average_air_temperature_derived =
     "average_air_temperature@ModelLevelsDerivedValue";
+  static constexpr const char* const average_eastward_wind_derived =
+    "average_eastward_wind@ModelLevelsDerivedValue";
+  static constexpr const char* const average_northward_wind_derived =
+    "average_northward_wind@ModelLevelsDerivedValue";
   static constexpr const char* const average_air_temperature_qcflags =
     "average_air_temperature@ModelLevelsQCFlags";
+  static constexpr const char* const average_eastward_wind_qcflags =
+    "average_eastward_wind@ModelLevelsQCFlags";
+  static constexpr const char* const average_northward_wind_qcflags =
+    "average_northward_wind@ModelLevelsQCFlags";
 
   // Derived values on model rho levels
 

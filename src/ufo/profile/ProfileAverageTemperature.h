@@ -29,7 +29,7 @@ namespace ufo {
   /// \brief Profile QC: average temperature observations onto model levels.
   ///
   /// Vectors produced by the AveragePressure routine must be present
-  /// otherwise an exception will be thrown.
+  /// otherwise the exception eckit::BadValue will be thrown.
   ///
   /// The vertical processing of temperature is based on calculating the thickness
   /// of the model layers (rather than just averaging the temperatures).
@@ -45,10 +45,12 @@ namespace ufo {
    public:
     explicit ProfileAverageTemperature(const ProfileConsistencyCheckParameters &options);
 
-    /// Run check
+    /// Average temperature observations onto model levels and store the results.
+    /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
+    /// are not present.
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
+    /// Fill variables in validator (for comparison with OPS output).
     void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
     /// List of names of required GeoVaLs.

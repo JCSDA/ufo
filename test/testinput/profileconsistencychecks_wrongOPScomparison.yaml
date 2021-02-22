@@ -41,7 +41,7 @@ Incorrect and missing values:
     simulated variables: [air_temperature, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature", "AverageWindSpeed"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
@@ -366,6 +366,53 @@ Missing GeoVaLs for temperature averaging:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringOperation: true
+
+#Do not run profile pressure routine before wind speed averaging
+Profile pressure not run before wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageWindSpeed"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
+
+#GeoVaLs missing for wind speed averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_windspeed.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageWindSpeed"]
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true
