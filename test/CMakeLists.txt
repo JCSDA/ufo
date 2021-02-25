@@ -28,6 +28,8 @@ list( APPEND ufo_test_input
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/atms_rttov_qc.yaml
+  testinput/background_error_vert_interp.yaml
+  testinput/background_error_identity.yaml
   testinput/bias_coeff.yaml
   testinput/bias_coeff_cov.yaml
   testinput/coolskin.yaml
@@ -111,6 +113,10 @@ list( APPEND ufo_test_input
   testinput/locations.yaml
   testinput/metar_qc_filters.yaml
   testinput/mhs_crtm.yaml
+  testinput/obsdiag_background_error_identity.yaml
+  testinput/obsdiag_background_error_upper_air_and_surface_variables.yaml
+  testinput/obsdiag_background_error_vert_interp_air_pressure.yaml
+  testinput/obsdiag_background_error_vert_interp_height.yaml
   testinput/obsdiag_crtm_airs_jacobian.yaml
   testinput/obsdiag_crtm_airs_optics.yaml
   testinput/obsdiag_crtm_amsua_jacobian.yaml
@@ -1042,6 +1048,20 @@ ecbuild_add_test( TARGET  test_ufo_linopr_timeoper
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_background_error_vert_interp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/background_error_vert_interp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_opr_background_error_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/background_error_identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -2201,6 +2221,34 @@ ecbuild_add_test( TARGET  test_ufo_function_linear_combination
                   TEST_DEPENDS test_ufo_function_representation_err_synthetic_data)
 
 # Test Diagnostics
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_background_error_vert_interp_air_pressure
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+                  ARGS    "testinput/obsdiag_background_error_vert_interp_air_pressure.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsDiagnostics.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_background_error_vert_interp_height
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+                  ARGS    "testinput/obsdiag_background_error_vert_interp_height.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsDiagnostics.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_background_error_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+                  ARGS    "testinput/obsdiag_background_error_identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsDiagnostics.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_background_error_upper_air_and_surface_variables
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+                  ARGS    "testinput/obsdiag_background_error_upper_air_and_surface_variables.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsDiagnostics.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_airs_optics

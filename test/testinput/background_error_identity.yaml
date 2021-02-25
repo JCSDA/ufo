@@ -1,0 +1,23 @@
+# Verify that the BackgroundErrorIdentity obs operator doesn't mess up the H(x) array produced
+# by another component of the Composite operator.
+
+window begin: '2018-04-14T20:30:00Z'
+window end: '2018-04-15T03:30:00Z'
+
+observations:
+- obs space:
+    name: Sondes
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [surface_pressure]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_height_geoval_2018041500_s.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-6

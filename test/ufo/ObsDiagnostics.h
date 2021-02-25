@@ -28,6 +28,14 @@
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperator.h"
 
+namespace eckit
+{
+  // Don't use the contracted output for this type: the current implementation works only
+  // with integer types.
+  // TODO(wsmigaj) Report this as a bug in eckit.
+  template <> struct VectorPrintSelector<float> { typedef VectorPrintSimple selector; };
+}  // namespace eckit
+
 namespace ufo {
 namespace test {
 

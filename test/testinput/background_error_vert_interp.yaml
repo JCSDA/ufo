@@ -1,0 +1,25 @@
+# Verify that the BackgroundErrorVertInterp obs operator doesn't mess up the H(x) array produced
+# by another component of the Composite operator..
+
+window begin: '2018-04-14T20:30:00Z'
+window end: '2018-04-15T03:30:00Z'
+
+observations:
+- obs space:
+    name: Sondes
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [air_temperature, specific_humidity]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: VertInterp
+    # operator used to evaluate background errors
+    - name: BackgroundErrorVertInterp
+      vertical coordinate: air_pressure
+      interpolation levels: background_error_air_pressure
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-6

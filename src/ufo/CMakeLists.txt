@@ -76,6 +76,8 @@ add_subdirectory( groundgnss )
 add_subdirectory( calculate )
 add_subdirectory( scatwind )
 add_subdirectory( compositeoper )
+add_subdirectory( backgrounderrorvertinterp )
+add_subdirectory( backgrounderroridentity )
 
 list( APPEND ufo_src_files
     ${utils_src_files}
@@ -100,6 +102,8 @@ list( APPEND ufo_src_files
     ${calculate_src_files}
     ${scatwind_src_files}
     ${compositeoper_src_files}
+    ${backgrounderrorvertinterp_src_files}
+    ${backgrounderroridentity_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda ioda_engines ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
