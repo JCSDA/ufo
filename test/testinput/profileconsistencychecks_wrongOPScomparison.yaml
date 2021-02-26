@@ -41,7 +41,7 @@ Incorrect and missing values:
     simulated variables: [air_temperature, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature", "AverageWindSpeed"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature", "AverageWindSpeed", "AverageRelativeHumidity"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
@@ -413,6 +413,53 @@ Missing GeoVaLs for wind speed averaging:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "AverageWindSpeed"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringOperation: true
+
+#Do not run profile pressure routine before relative humidity averaging
+Profile pressure not run before relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
+
+#GeoVaLs missing for relative humidity averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_relativehumidity.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AverageRelativeHumidity"]
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true

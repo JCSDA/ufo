@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_PROFILECONSISTENCYCHECKPARAMETERS_H_
 #define UFO_FILTERS_PROFILECONSISTENCYCHECKPARAMETERS_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -339,6 +340,49 @@ namespace ufo {
     /// Probability of gross error threshold above which rejection flags are set
     /// in the wind speed averaging routine.
     oops::Parameter<float> AvgU_PGEskip {"AvgU_PGEskip", 0.9, this};
+
+    /// Probability of gross error threshold above which rejection flags are set
+    /// in the relative humidity averaging routine.
+    oops::Parameter<float> AvgRH_PGEskip {"AvgRH_PGEskip", 0.9, this};
+
+    /// Minimum fraction of a model layer that must have been covered (in the vertical coordinate)
+    /// by observed values in order for relative humidity to be averaged onto that layer.
+    oops::Parameter<float> AvgRH_SondeDZFraction {"AvgRH_SondeDZFraction", 0.5, this};
+
+    /// Perform interpolation or averaging of relative humidity observations?
+    oops::Parameter<bool> AvgRH_Interp {"AvgRH_Interp", true, this};
+
+    /// Default average temperature threshold below which average relative humidity
+    /// observations are rejected (degrees C).
+    oops::Parameter<float> AvgRH_AvgTThreshold {"AvgRH_AvgTThreshold", -40.0, this};
+
+    /// Custom average temperature thresholds below which average relative humidity
+    /// observations are rejected (degrees C).
+    /// These thresholds are stored in a map with keys equal to the WMO codes for
+    /// radiosonde instrument types and values equal to the custom thresholds.
+    ///
+    /// The full list of codes can be found in "WMO Manual on Codes -
+    /// International Codes, Volume I.2, Annex II to the WMO Technical Regulations:
+    /// Part C - Common Features to Binary and Alphanumeric Codes"
+    /// (available at https://library.wmo.int/?lvl=notice_display&id=10684).
+    ///
+    /// The default list of custom thresholds applies to the following codes:
+    /// - Types 37, 52, 60-63, 66-67 = Vaisala RS80,
+    /// - Types 71-74, 78 = Vaisala RS90,
+    /// - Types 79-81 = Vaisala RS92.
+    ///
+    /// To customise this list in the yaml file, please note the following information from
+    /// oops/util/parameter/ParameterTraits.h:
+    /// Owing to a bug in the eckit YAML parser, maps need to be written in the JSON style,
+    /// with keys quoted. Example:
+    ///   my_int_to_float_map: {"1": 123, "2": 321}
+    oops::Parameter<std::map<int, float>> AvgRH_InstrTThresholds
+    {"AvgRH_InstrTThresholds",
+        {{37, -60.0}, {52, -60.0}, {60, -60.0}, {61, -60.0},
+         {62, -60.0}, {63, -60.0}, {66, -60.0}, {67, -60.0},
+         {71, -80.0}, {72, -80.0}, {73, -80.0}, {74, -80.0},
+         {78, -80.0}, {79, -80.0}, {80, -80.0}, {81, -80.0}
+        }, this};
 
     /// @}
 

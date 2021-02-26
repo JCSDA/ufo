@@ -174,6 +174,12 @@ namespace ufo {
         valuesToCompare_float_.insert({
             ufo::VariableNames::average_eastward_wind_derived,
             ufo::VariableNames::average_northward_wind_derived});
+      } else if (check == "AverageRelativeHumidity") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::average_relative_humidity_qcflags,
+            ufo::VariableNames::counter_NumGapsRH});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::average_relative_humidity_derived});
       }
     }
   }

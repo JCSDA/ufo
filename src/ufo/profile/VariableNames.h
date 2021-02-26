@@ -86,6 +86,7 @@ struct VariableNames
   static constexpr const char* const Time = "time@MetaData";
   static constexpr const char* const Zstation = "Zstation@MetaData";
   static constexpr const char* const LevelType = "LevelType@MetaData";
+  static constexpr const char* const InstrType = "InstrType@MetaData";
 
   // QC flags
 
@@ -119,6 +120,7 @@ struct VariableNames
   static constexpr const char* const counter_NumGapsT = "NumGapsT@Counters";
   static constexpr const char* const counter_NumGapsU = "NumGapsU@Counters";
   static constexpr const char* const counter_NumGapsUWP = "NumGapsUWP@Counters";
+  static constexpr const char* const counter_NumGapsRH = "NumGapsRH@Counters";
 
   // Corrections
 
@@ -167,6 +169,7 @@ struct VariableNames
   static constexpr const char* const geovals_height = "height";
   static constexpr const char* const geovals_potential_temperature = "air_potential_temperature";
   static constexpr const char* const geovals_surface_pressure = "surface_pressure";
+  static constexpr const char* const geovals_relative_humidity = "relative_humidity";
 
   // GeoVaLs used in validation
 
@@ -178,12 +181,16 @@ struct VariableNames
   static constexpr const char* const geovals_average_air_temperature = "average_air_temperature";
   static constexpr const char* const geovals_average_eastward_wind = "average_eastward_wind";
   static constexpr const char* const geovals_average_northward_wind = "average_northward_wind";
+  static constexpr const char* const geovals_average_relative_humidity =
+    "average_relative_humidity";
   static constexpr const char* const geovals_average_air_temperature_qcflags =
     "average_air_temperature_flags";
   static constexpr const char* const geovals_average_eastward_wind_qcflags =
     "average_eastward_wind_flags";
   static constexpr const char* const geovals_average_northward_wind_qcflags =
     "average_northward_wind_flags";
+  static constexpr const char* const geovals_average_relative_humidity_qcflags =
+    "average_relative_humidity_flags";
 
   // Derived values on model levels
 
@@ -200,12 +207,16 @@ struct VariableNames
     "average_eastward_wind@ModelLevelsDerivedValue";
   static constexpr const char* const average_northward_wind_derived =
     "average_northward_wind@ModelLevelsDerivedValue";
+  static constexpr const char* const average_relative_humidity_derived =
+    "average_relative_humidity@ModelLevelsDerivedValue";
   static constexpr const char* const average_air_temperature_qcflags =
     "average_air_temperature@ModelLevelsQCFlags";
   static constexpr const char* const average_eastward_wind_qcflags =
     "average_eastward_wind@ModelLevelsQCFlags";
   static constexpr const char* const average_northward_wind_qcflags =
     "average_northward_wind@ModelLevelsQCFlags";
+  static constexpr const char* const average_relative_humidity_qcflags =
+    "average_relative_humidity@ModelLevelsQCFlags";
 
   // Derived values on model rho levels
 
