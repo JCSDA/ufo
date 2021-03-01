@@ -174,10 +174,11 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
 
   // Loop through locations
   // TODO(EL): review the use of irday with EMC
-  std::vector<int> irday(nchans, 1);
+  std::vector<int> irday(nchans);
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     bool sea = water_frac[iloc] >= 0.99;
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      irday[ichan] = 1;
       out[ichan][iloc] = 0.0;
       if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0 && wavenumber[ichan] > 2400.0) {
         irday[ichan] = 0;
@@ -247,7 +248,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
 
     if (dtz != -999.0) {
       for (size_t ichan = 0; ichan < nchans; ++ichan) {
-        if (use_flag[ichan] >= 1 && varinv[ichan][iloc] > 0.0 && dbtdts[ichan][iloc] >= tschk) {
+        if (use_flag[ichan] >= 1 && varinv[ichan][iloc] > 0.0 && dbtdts[ichan][iloc] > tschk) {
           float xindx = pow((dbtdts[ichan][iloc] - ts_ave) / (1.0 - ts_ave), 3);
           float tzchks = tzchk * pow(0.5, xindx);
           if (std::fabs(dtz) > tzchks) out[ichan][iloc] = 1;
