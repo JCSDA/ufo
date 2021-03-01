@@ -15,6 +15,8 @@
 
 #include "oops/util/Printable.h"
 
+#include "ufo/ObsOperatorBase.h"
+
 // Forward declarations
 namespace eckit {
   class Configuration;
@@ -34,7 +36,6 @@ namespace ufo {
   class Locations;
   class ObsBias;
   class ObsDiagnostics;
-  class ObsOperatorBase;
 
 // -----------------------------------------------------------------------------
 
@@ -42,7 +43,6 @@ class ObsOperator : public util::Printable,
                     private boost::noncopyable {
  public:
   ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
-  ~ObsOperator();
 
 /// Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;

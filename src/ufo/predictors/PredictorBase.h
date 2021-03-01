@@ -9,6 +9,7 @@
 #define UFO_PREDICTORS_PREDICTORBASE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -64,6 +65,8 @@ class PredictorBase : private boost::noncopyable {
  private:
   std::string func_name_;        ///<  predictor name
 };
+
+typedef std::vector<std::shared_ptr<PredictorBase>> Predictors;
 
 // -----------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,8 +7,6 @@
 
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
-
-#include <Eigen/Core>
 
 #include <memory>
 #include <string>
@@ -34,15 +32,13 @@ namespace ufo {
   class GeoVaLs;
   class ObsBias;
 
-// -----------------------------------------------------------------------------
-
+/// Contains increments to bias correction coefficients
 class ObsBiasIncrement : public util::Printable {
  public:
 // Constructor, destructor
   ObsBiasIncrement(const ioda::ObsSpace &, const eckit::Configuration &);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
   ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
-  ~ObsBiasIncrement() {}
 
 // Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
@@ -62,15 +58,6 @@ class ObsBiasIncrement : public util::Printable {
   double & operator[](const unsigned int ii) {return biascoeffsinc_[ii];}
   const double & operator[](const unsigned int ii) const {return biascoeffsinc_[ii];}
 
-// Linear obs bias model
-  void computeObsBiasTL(const GeoVaLs &,
-                        const std::vector<ioda::ObsVector> &,
-                        ioda::ObsVector &) const;
-
-  void computeObsBiasAD(GeoVaLs &,
-                        const std::vector<ioda::ObsVector> &,
-                        const ioda::ObsVector &);
-
 // Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
   void serialize(std::vector<double> &) const {}
@@ -79,14 +66,15 @@ class ObsBiasIncrement : public util::Printable {
 // Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
+  /// Reduce (sum) all bias correction coefficients increments
+  void allSumInPlace();
+
  private:
   void print(std::ostream &) const;
 
   const ioda::ObsSpace & odb_;
-  const eckit::LocalConfiguration conf_;
 
   std::vector<double> biascoeffsinc_;
-  std::vector<std::shared_ptr<PredictorBase>> predbases_;
   std::vector<std::string> prednames_;
   std::vector<int> jobs_;
 };

@@ -5,9 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ioda/ObsVector.h"
-
 #include "ufo/LinearObsOperator.h"
+
+#include <vector>
+
+#include "ioda/ObsVector.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
@@ -19,12 +21,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os), biaspreds_()
+  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
 {}
-
-// -----------------------------------------------------------------------------
-
-LinearObsOperator::~LinearObsOperator() {}
 
 // -----------------------------------------------------------------------------
 
@@ -39,8 +37,10 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   odb_.get_db("MetaData", "datetime", times);
   ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.comm()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
-  biaspreds_.clear();
-  biaspreds_ = bias.computePredictors(gvals, ydiags);
+  if (bias) {
+    biasoper_.reset(new LinearObsBiasOperator(odb_));
+    biasoper_->setTrajectory(gvals, bias, ydiags);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
-    bias.computeObsBiasTL(gvals, biaspreds_, ybiasinc);
+    biasoper_->computeObsBiasTL(gvals, bias, ybiasinc);
     yy += ybiasinc;
   }
 }
@@ -62,7 +62,7 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
-    bias.computeObsBiasAD(gvals, biaspreds_, ybiasinc);
+    biasoper_->computeObsBiasAD(gvals, bias, ybiasinc);
   }
 }
 

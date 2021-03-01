@@ -12,6 +12,8 @@ list( APPEND ufo_src_files
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
     instantiateObsFilterFactory.h
+    LinearObsBiasOperator.cc
+    LinearObsBiasOperator.h
     LinearObsOperator.cc
     LinearObsOperator.h
     LinearObsOperatorBase.cc
@@ -24,6 +26,8 @@ list( APPEND ufo_src_files
     ObsBiasCovariance.h
     ObsBiasIncrement.cc
     ObsBiasIncrement.h
+    ObsBiasOperator.cc
+    ObsBiasOperator.h
     ObsDiagnostics.cc
     ObsDiagnostics.h
     ObsOperator.cc

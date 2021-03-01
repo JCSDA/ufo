@@ -8,14 +8,13 @@
 #ifndef UFO_LINEAROBSOPERATOR_H_
 #define UFO_LINEAROBSOPERATOR_H_
 
-#include <Eigen/Core>
-
 #include <memory>
-#include <vector>
 
 #include <boost/noncopyable.hpp>
 
 #include "oops/util/Printable.h"
+#include "ufo/LinearObsBiasOperator.h"
+#include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
 namespace eckit {
@@ -35,7 +34,6 @@ namespace ufo {
   class GeoVaLs;
   class ObsBias;
   class ObsBiasIncrement;
-  class LinearObsOperatorBase;
 
 // -----------------------------------------------------------------------------
 
@@ -43,7 +41,6 @@ class LinearObsOperator : public util::Printable,
                           private boost::noncopyable {
  public:
   LinearObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
-  ~LinearObsOperator();
 
 /// Obs Operator
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -56,8 +53,8 @@ class LinearObsOperator : public util::Printable,
  private:
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
+  std::unique_ptr<LinearObsBiasOperator> biasoper_;
   ioda::ObsSpace & odb_;
-  std::vector<ioda::ObsVector> biaspreds_;
 };
 
 // -----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -36,10 +36,9 @@ namespace ufo {
   class ObsBiasIncrement;
   class ObsDiagnostics;
 
-/// Class to handle observation bias parameters.
-
-// -----------------------------------------------------------------------------
-
+/// Class to handle observation bias correction coefficients
+/// \details contains information on what predictors are used for bias
+///          correction application
 class ObsBias : public util::Printable,
                 private util::ObjectCounter<ObsBias> {
  public:
@@ -59,17 +58,14 @@ class ObsBias : public util::Printable,
 
   // Accessor to bias coefficients
   double operator[](const unsigned int ii) const {return biascoeffs_(ii);}
-
-  // Obs bias model
-  void computeObsBias(ioda::ObsVector &, ObsDiagnostics &,
-                      const std::vector<ioda::ObsVector> &) const;
-
-  // Obs Bias Predictors
-  std::vector<ioda::ObsVector> computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
+  double operator()(size_t ii, size_t jj) const {return biascoeffs_(ii, jj);}
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
+
+  const Predictors & predictors() const {return predictors_;}
+  const std::vector<int> & jobs() const {return jobs_;}
 
   // Operator
   operator bool() const {return biascoeffs_.size() > 0;}
@@ -77,19 +73,20 @@ class ObsBias : public util::Printable,
  private:
   void print(std::ostream &) const override;
 
-  ioda::ObsSpace & odb_;
-
   /// bias correction coefficients (npredictors x nchannels)
   Eigen::MatrixXf biascoeffs_;
 
-  std::vector<std::shared_ptr<PredictorBase>> predbases_;
+  /// bias correction predictors
+  Predictors predictors_;
 
   /// predictor names
   std::vector<std::string> prednames_;
   /// channel numbers
   std::vector<int> jobs_;
 
+  /// Variables that need to be requested from the model (for computation of predictors)
   oops::Variables geovars_;
+  /// Diagnostics that need to be requested from the obs operator (for computation of predictors)
   oops::Variables hdiags_;
 };
 

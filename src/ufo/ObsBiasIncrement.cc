@@ -26,23 +26,23 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
+  : odb_(odb), jobs_(0) {
   oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
 
   // Get the jobs(channels)
-  if (conf_.has("jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("jobs"));
+  if (conf.has("jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf.getString("jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   // Predictor factory
-  if (conf_.has("predictors")) {
+  if (conf.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("predictors", confs);
+    conf.get("predictors", confs);
     typedef std::unique_ptr<PredictorBase> predictor;
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));
-      prednames_.push_back(predbases_[j]->name());
+      std::unique_ptr<PredictorBase> predictor(PredictorFactory::create(confs[j], jobs_));
+      prednames_.push_back(predictor->name());
     }
   }
 
@@ -56,49 +56,19 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
-  : odb_(other.odb_), conf_(other.conf_), predbases_(other.predbases_),
+  : odb_(other.odb_),
     prednames_(other.prednames_), jobs_(other.jobs_) {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
 
   // initialize bias coefficient perturbations
   biascoeffsinc_.resize(prednames_.size()*jobs_.size());
-  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
 
-  // Copy the bias model coeff data
-  if (biascoeffsinc_.size() > 0) *this = other;
-
-  oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
-                                   const eckit::Configuration & conf)
-  : odb_(other.odb_), conf_(conf), predbases_(), prednames_(), jobs_() {
-  oops::Log::trace() << "ObsBiasIncrement::copy ctor starting." << std::endl;
-  // Get the jobs(channels)
-  if (conf_.has("jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("jobs"));
-    jobs_.assign(jobs.begin(), jobs.end());
+  // Copy the bias coefficients data, or fill in with zeros
+  if (copy) {
+    biascoeffsinc_ = other.biascoeffsinc_;
+  } else {
+    std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
   }
-
-  // Predictor factory
-  if (conf_.has("predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("predictors", confs);
-    typedef std::unique_ptr<PredictorBase> predictor;
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));
-      prednames_.push_back(predbases_[j]->name());
-    }
-  }
-
-  // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size()*jobs_.size());
-  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
-
-  // Copy the data
-  if (biascoeffsinc_.size() > 0) *this = other;
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
 }
@@ -121,10 +91,7 @@ void ObsBiasIncrement::zero() {
 
 ObsBiasIncrement & ObsBiasIncrement::operator=(const ObsBiasIncrement & rhs) {
   if (rhs) {
-    predbases_.clear();
-    jobs_.clear();
-
-    predbases_     = rhs.predbases_;
+    prednames_     = rhs.prednames_;
     jobs_          = rhs.jobs_;
     biascoeffsinc_ = rhs.biascoeffsinc_;
   }
@@ -185,107 +152,8 @@ double ObsBiasIncrement::norm() const {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
-                                        const std::vector<ioda::ObsVector> & predData,
-                                        ioda::ObsVector & ybiasinc) const {
-  oops::Log::trace() << "ObsBiasIncrement::computeObsBiasTL starts." << std::endl;
-
-  if (serialSize() > 0) {
-    const std::size_t nlocs  = ybiasinc.nlocs();
-    const std::size_t npreds = prednames_.size();
-    const std::size_t njobs  = jobs_.size();
-
-    ASSERT(biascoeffsinc_.size() == npreds*njobs);
-    ASSERT(predData.size() == npreds);
-    ASSERT(ybiasinc.nvars() == njobs);
-
-    /* predData memory layout (npreds X nlocs X njobs)
-     *       Loc     0      1      2       3
-     *             --------------------------
-     * pred1 Chan1 | 0      3      6       9
-     *       Chan2 | 1      4      7      10
-     *       ....  | 2      5      8      11
-     *
-     * pred2 Chan1 |12     15     18      21
-     *       Chan2 |13     16     19      22
-     *       ....  |14     17     20      23
-     */
-
-    /* ybiasinc memory layout (nlocs X njobs)
-     *     ch1    ch2    ch3     ch4
-     * Loc --------------------------
-     *  0 | 0      1      2       3
-     *  1 | 4      5      6       7
-     *  2 | 8      9     10      11 
-     *  3 |12     13     14      15
-     *  4 |16     17     18      19
-     * ...|
-    */
-
-    ybiasinc.zero();
-
-    // map bias coeffs to eigen matrix (read only)
-    Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffsinc_.data(), npreds, njobs);
-
-    // For each channel: ( nlocs X 1 ) = ( nlocs X npreds ) * ( npreds X 1 )
-    for (std::size_t jch = 0; jch < njobs; ++jch) {
-      for (std::size_t jp = 0; jp < npreds; ++jp) {
-        const double beta = coeffs(jp, jch);
-        /// axpy
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          ybiasinc[jl*njobs+jch] += predData[jp][jl*njobs+jch] * beta;
-        }
-      }
-    }
-  }
-
-  oops::Log::trace() << "ObsBiasIncrement::computeObsBiasTL done." << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
-                                        const std::vector<ioda::ObsVector> & predData,
-                                        const ioda::ObsVector & ybiasinc) {
-  oops::Log::trace() << "ObsBiasIncrement::computeObsBiasAD starts." << std::endl;
-
-  if (this->serialSize() > 0) {
-    const std::size_t nlocs  = ybiasinc.nlocs();
-    const std::size_t npreds = prednames_.size();
-    const std::size_t njobs  = jobs_.size();
-
-    ASSERT(biascoeffsinc_.size() == npreds*njobs);
-    ASSERT(predData.size() == npreds);
-    ASSERT(ybiasinc.nvars() == njobs);
-
-    // map bias coeffs to eigen matrix (writable)
-    Eigen::Map<Eigen::MatrixXd> coeffs(biascoeffsinc_.data(), npreds, njobs);
-
-    std::size_t indx;
-    Eigen::VectorXd tmp = Eigen::VectorXd::Zero(nlocs, 1);
-    for (std::size_t jch = 0; jch < njobs; ++jch) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        indx = jl*njobs+jch;
-        if (ybiasinc[indx] != util::missingValue(ybiasinc[indx])) {
-          tmp(jl) = ybiasinc[indx];
-        }
-      }
-      // For each channel: ( npreds X 1 ) = ( npreds X nlocs ) * ( nlocs X 1 )
-      for (std::size_t jp = 0; jp < npreds; ++jp) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          coeffs(jp, jch) += predData[jp][jl*njobs+jch] * tmp(jl);
-        }
-      }
-
-      // zero out for next job
-      tmp.setConstant(0.0);
-    }
-
-    // Sum across the processros
-    odb_.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
-  }
-
-  oops::Log::trace() << "ObsBiasIncrement::computeAD done." << std::endl;
+void ObsBiasIncrement::allSumInPlace() {
+  odb_.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
 }
 
 // -----------------------------------------------------------------------------

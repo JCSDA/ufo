@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 UCAR
+ * (C) Copyright 2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -19,6 +19,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsBiasOperator.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -43,16 +44,13 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
 
 // -----------------------------------------------------------------------------
 
-ObsOperator::~ObsOperator() {}
-
-// -----------------------------------------------------------------------------
-
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
                               const ObsBias & bias, ObsDiagnostics & ydiags) const {
   oper_->simulateObs(gvals, yy, ydiags);
   if (bias) {
     ioda::ObsVector ybias(odb_);
-    bias.computeObsBias(ybias, ydiags, bias.computePredictors(gvals, ydiags));
+    ObsBiasOperator biasoper(odb_);
+    biasoper.computeObsBias(gvals, ybias, bias, ydiags);
     // update H(x) with bias correction
     yy += ybias;
     ybias.save("ObsBias");

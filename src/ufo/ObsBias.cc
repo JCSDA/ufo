@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2019 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -29,7 +29,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predbases_(0), jobs_(0), odb_(odb) {
+  : predictors_(0), jobs_(0) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Get the jobs(channels)
@@ -44,7 +44,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
     conf.get("predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
-      predbases_.push_back(pred);
+      predictors_.push_back(pred);
       prednames_.push_back(pred->name());
       geovars_ += pred->requiredGeovars();
       hdiags_ += pred->requiredHdiagnostics();
@@ -73,7 +73,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : odb_(other.odb_), predbases_(other.predbases_),
+  : predictors_(other.predictors_),
     prednames_(other.prednames_), jobs_(other.jobs_),
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
@@ -100,7 +100,7 @@ ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
   if (rhs.size() > 0 && this->size() == rhs.size()) {
     biascoeffs_ = rhs.biascoeffs_;
-    predbases_  = rhs.predbases_;
+    predictors_  = rhs.predictors_;
     prednames_  = rhs.prednames_;
     jobs_       = rhs.jobs_;
     geovars_    = rhs.geovars_;
@@ -192,97 +192,6 @@ void ObsBias::read(const eckit::Configuration & conf) {
 
 void ObsBias::write(const eckit::Configuration & conf) const {
   oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBias::computeObsBias(ioda::ObsVector & ybias,
-                             ObsDiagnostics & ydiags,
-                             const std::vector<ioda::ObsVector> & predData) const {
-  oops::Log::trace() << "ObsBias::computeObsBias starting" << std::endl;
-
-  if (this->size() > 0) {
-    const std::size_t nlocs  = ybias.nlocs();
-    const std::size_t npreds = prednames_.size();
-    const std::size_t njobs  = jobs_.size();
-
-    ASSERT(biascoeffs_.size() == npreds*njobs);
-    ASSERT(predData.size() == npreds);
-    ASSERT(ybias.nvars() == njobs);
-
-    /* predData memory layout (npreds X nlocs X njobs)
-     *       Loc     0      1      2       3
-     *             --------------------------
-     * pred1 Chan1 | 0      3      6       9
-     *       Chan2 | 1      4      7      10
-     *       ....  | 2      5      8      11 
-     *
-     * pred2 Chan1 |12     15     18      21
-     *       Chan2 |13     16     19      22
-     *       ....  |14     17     20      23
-     */
-
-    ybias.zero();
-
-    /* ybias memory layout (nlocs X njobs)
-     *     ch1    ch2    ch3     ch4
-     * Loc --------------------------
-     *  0 | 0      1      2       3
-     *  1 | 4      5      6       7
-     *  2 | 8      9     10      11 
-     *  3 |12     13     14      15
-     *  4 |16     17     18      19
-     * ...|
-     */
-
-    /* map bias coeff to eigen matrix npreds X njobs (read only)
-     * bias coeff memory layout (npreds X njobs)
-     *        ch1    ch2    ch3     ch4
-     *       --------------------------
-     * pred1 | 0      1      2       3
-     * pred2 | 4      5      6       7
-     * pred3 | 8      9     10      11 
-     * ....  |
-     */
-    std::vector<double> biasTerm(nlocs, 0.0);
-    //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
-    for (std::size_t jch = 0; jch < njobs; ++jch) {
-      for (std::size_t jp = 0; jp < npreds; ++jp) {
-        // axpy
-        const double beta = biascoeffs_(jp, jch);
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          biasTerm[jl] = predData[jp][jl*njobs+jch] * beta;
-          ybias[jl*njobs+jch] += biasTerm[jl];
-        }
-        // Save ObsBiasTerms (bias_coeff * predictor) for QC
-        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
-        if (ydiags.has(varname)) {
-          ydiags.save(biasTerm, varname, 1);
-        } else {
-          oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
-          ABORT("ObsBiasTerm variable is not reserved in ydiags");
-        }
-      }
-    }
-  }
-
-  oops::Log::trace() << "ObsBias::computeObsBias done." << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-std::vector<ioda::ObsVector> ObsBias::computePredictors(const GeoVaLs & geovals,
-                                                        const ObsDiagnostics & ydiags) const {
-  const std::size_t npreds = predbases_.size();
-
-  std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
-
-  for (std::size_t p = 0; p < npreds; ++p) {
-    predbases_[p]->compute(odb_, geovals, ydiags, predData[p]);
-    predData[p].save(predbases_[p]->name() + "Predictor");
-  }
-
-  oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;
-  return predData;
 }
 
 // -----------------------------------------------------------------------------
