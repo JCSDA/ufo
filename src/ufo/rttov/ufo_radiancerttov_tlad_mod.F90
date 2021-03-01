@@ -20,7 +20,7 @@ module ufo_radiancerttov_tlad_mod
   use ufo_radiancerttov_utils_mod
 
   use rttov_types
-  use rttov_const, only : errorstatus_success
+  use rttov_const ! errorstatus and gas_id
   use rttov_unix_env
 
   implicit none
@@ -307,11 +307,9 @@ contains
           call abor1_ftn(message)
         end if
 
-        write(*,'(A1, i0, A, i0)',ADVANCE="NO") achar(13), prof_start+nprof_sim-1, ' locations processed out of ', geovals%nlocs
-
         ! Put simulated diagnostics into hofxdiags
         ! ----------------------------------------------
-        if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, self % RTprof_K % chanprof, hofxdiags)
+        if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, self % RTprof_K % chanprof, self % conf, hofxdiags)
 
         prof_start = prof_start + nprof_sim
         nchan_total = nchan_total + nchan_sim
@@ -320,8 +318,6 @@ contains
       end do
       ! Deallocate structures for rttov_direct
     end do Sensor_Loop
-
-    write(*,*)
 
     ! Set flag that the tracectory was set
     ! ------------------------------------
@@ -405,14 +401,16 @@ contains
           do jchan = 1, size(self%channels)
             if(self%conf%Absorbers(jspec) == var_q) then
               hofx(jchan,prof) = hofx(jchan,prof) + &
-                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof))
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * &
+                    geoval_d % vals(1:geoval_d % nval,prof)) * self%conf%scale_fac(gas_id_watervapour)
             elseif(self%conf%Absorbers(jspec) == var_mixr) then
               hofx(jchan,prof) = hofx(jchan,prof) + &
-                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof)) / &
-                g_to_kg
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * &
+                    geoval_d % vals(1:geoval_d % nval,prof)) * self%conf%scale_fac(gas_id_watervapour) / g_to_kg
             elseif(self%conf%Absorbers(jspec) == var_clw) then
               hofx(jchan,prof) = hofx(jchan,prof) + &
-                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof))
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(self % nlevels:1:-1) * &
+                    geoval_d % vals(1:geoval_d % nval,prof))
             endif
           enddo
         endif
@@ -451,7 +449,7 @@ contains
       if (.not. self % Skip_Profiles(prof)) then
         do jchan = 1, size(self%channels)
           hofx(jchan,prof) = hofx(jchan,prof) + &
-            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * geoval_d % vals(1,prof)
+            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * geoval_d % vals(1,prof) * self%conf%scale_fac(gas_id_watervapour)
         enddo
       endif
     end do
@@ -571,10 +569,12 @@ contains
               
               if(self%conf%Absorbers(jspec) == var_q) then
                 geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
-                  self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan,prof)
+                  self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan,prof) * &
+                  self%conf%scale_fac(gas_id_watervapour)
               elseif(self%conf%Absorbers(jspec) == var_mixr) then
                 geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
-                  (self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) / g_to_kg) * hofx(jchan,prof)
+                  (self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan,prof)) * &
+                  self%conf%scale_fac(gas_id_watervapour) / g_to_kg
               elseif(self%conf%Absorbers(jspec) == var_clw) then
                 geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
                   self % RTprof_K % profiles_k(ichan+jchan-1) % clw(self % nlevels:1:-1) * hofx(jchan,prof)
@@ -634,7 +634,7 @@ contains
         do jchan = 1, size(self%channels)
           if (hofx(jchan, prof) /= missing) then
             geoval_d % vals(1,prof) = geoval_d % vals(1,prof) + &
-              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * hofx(jchan,prof)
+              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * hofx(jchan,prof) * self%conf%scale_fac(gas_id_watervapour)
           endif
         enddo
       endif

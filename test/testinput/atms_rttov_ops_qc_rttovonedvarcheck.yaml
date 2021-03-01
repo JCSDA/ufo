@@ -10,8 +10,9 @@ observations:
     linear obs operator:
       Absorbers: [Water_vapour]
     obs options:
-      RTTOV_default_opts: OPS
+      RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
+      RTTOV_GasUnitConv: true
       UseRHwaterForQC: &UseRHwaterForQC1 true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck1 true # default
       Sensor_ID: &sensor_id noaa_20_atms
@@ -38,8 +39,10 @@ observations:
     ModOptions:
       Absorbers: *rttov_absobers
       obs options: 
-        RTTOV_default_opts: OPS
+        RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
+#        RTTOV_GasUnitConv: false
+        RTTOV_GasUnitConv: true
         Sensor_ID: *sensor_id
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
@@ -79,8 +82,9 @@ observations:
     linear obs operator:
       Absorbers: [Water_vapour]
     obs options: &rttov_options
-      RTTOV_default_opts: OPS
+      RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
+      RTTOV_GasUnitConv: false
       UseRHwaterForQC: &UseRHwaterForQC2 false # non-default
       UseColdSurfaceCheck: &UseColdSurfaceCheck2 false # non-default
       Sensor_ID: *sensor_id
@@ -107,7 +111,7 @@ observations:
     ModOptions:
       Absorbers: *rttov_absobers
       obs options: 
-        RTTOV_default_opts: OPS
+        RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
         Sensor_ID: *sensor_id
         CoefficientPath: Data/

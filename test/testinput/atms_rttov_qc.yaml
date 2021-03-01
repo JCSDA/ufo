@@ -9,7 +9,7 @@ observations:
     linear obs operator:
       Absorbers: [Water_vapour]
     obs options: &rttov_options
-      RTTOV_default_opts: OPS
+      RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
       Sensor_ID: noaa_20_atms
       CoefficientPath: Data/

@@ -17,9 +17,10 @@ module ufo_radiancerttov_utils_mod
     rttov_radiance, rttov_transmission, rttov_emissivity, &
     rttov_chanprof
 
-  use rttov_const ! gas_ids
+  use rttov_const ! gas_ids and gas_units
 
   use ufo_vars_mod
+  use ufo_constants_mod
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_basis_mod, only: ufo_basis
   use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat
@@ -90,7 +91,20 @@ module ufo_radiancerttov_utils_mod
     gas_id_n2o,  &
     gas_id_co, &
     gas_id_ch4,  &
-    gas_id_so2, 99, 999]
+    gas_id_so2, 0, 0]
+
+  real(kind_real), parameter :: &
+    gas_unit_conv(0:ngases_max) = &
+    [1.0_kind_real, & ! 0 index for use with CLW/CIW
+    1.0_kind_real, & ! 'mixed' gases - RTTOV internal absorber only, no conversion 
+    q_mixratio_to_ppmv, &
+    o3_mixratio_to_ppmv,  &
+    1.0_kind_real,  & ! WV continuum - RTTOV internal absorber only, no conversion
+    co2_mixratio_to_ppmv,  &
+    n2o_mixratio_to_ppmv,  &
+    co_mixratio_to_ppmv,  &
+    ch4_mixratio_to_ppmv, &
+    so2_mixratio_to_ppmv]
 
   character(len=MAXVARLEN), parameter :: null_str = ''
 
@@ -136,12 +150,14 @@ module ufo_radiancerttov_utils_mod
 
     character(len=MAXVARLEN), allocatable :: Absorbers(:)
     integer, allocatable                  :: Absorber_Id(:)
+    real(kind_real)                       :: scale_fac(0:ngases_max)
+    logical                               :: RTTOV_GasUnitConv
 
     character(len=255), allocatable       :: SENSOR_ID(:)
     character(len=255)                    :: COEFFICIENT_PATH
 
     type(rttov_coefs), allocatable        :: rttov_coef_array(:)
-    character(len=8)                      :: RTTOV_default_opts = 'RTTOV'
+    character(len=10)                     :: RTTOV_default_opts = 'RTTOV'
     type(rttov_options)                   :: rttov_opts
     logical                               :: rttov_is_setup = .false.
 
@@ -248,6 +264,18 @@ contains
       conf%Absorber_Id(jspec) = RTTOV_Absorber_Id(ivar)
     end do
 
+    if(f_confOpts % has("RTTOV_GasUnitConv")) then
+      call f_confOpts % get_or_die("RTTOV_GasUnitConv",conf % RTTOV_GasUnitConv) !test, OPS, RTTOV
+    else
+      conf % RTTOV_GasUnitConv = .false. ! no unit conversion done for RTTOV by default
+    endif
+
+! set scalar mixing ratio conversion if converting units prior to use in RTTOV
+    if(conf%RTTOV_GasUnitConv) then 
+      conf%scale_fac = gas_unit_conv
+    else
+      conf%scale_fac = 1.0
+    endif
 
     ! Allocate SENSOR_ID
     allocate(conf % SENSOR_ID(conf % nSensors))
@@ -373,6 +401,8 @@ contains
 
     real(kind_real), allocatable :: q_temp(:), clw_temp(:), ciw_temp(:), Qtotal(:), qsaturated(:)
 
+    real(kind_real)              :: scale_fac
+
     if(present(ob_info)) then
       nlocs_total = 1
     else
@@ -423,9 +453,12 @@ contains
             stride = 1       
           endif
         endif
-        profiles(iprof)%p(top_level+stride:bottom_level:stride) = half * (p(top_level:bottom_level-stride:stride) + p(top_level+stride:bottom_level:stride))
-        profiles(iprof)%p(1) = max( profiles(iprof)%p(2) - half * (profiles(iprof)%p(3) - profiles(iprof)%p(2)),half * profiles(iprof)%p(2))
-        profiles(iprof)%p(nlevels) = profiles(iprof)%p(nlevels-1) - half * (profiles(iprof)%p(nlevels-2) - profiles(iprof)%p(nlevels-1))
+        profiles(iprof)%p(top_level+stride:bottom_level:stride) = half * &
+          (p(top_level:bottom_level-stride:stride) + p(top_level+stride:bottom_level:stride))
+        profiles(iprof)%p(1) = max( profiles(iprof)%p(2) - half * &
+          (profiles(iprof)%p(3) - profiles(iprof)%p(2)),half * profiles(iprof)%p(2))
+        profiles(iprof)%p(nlevels) = profiles(iprof)%p(nlevels-1) - &
+          half * (profiles(iprof)%p(nlevels-2) - profiles(iprof)%p(nlevels-1))
       end do
       deallocate(p)
     endif
@@ -446,47 +479,55 @@ contains
       bottom_level = nlevels-1
 
       do iprof = 1, nprofiles
-        profiles(iprof)%t(top_level+stride:bottom_level:stride) = half * (profiles(iprof)%t(top_level:bottom_level-stride:stride) + &
-          profiles(iprof)%t(top_level+stride:bottom_level:stride))
+        profiles(iprof)%t(top_level+stride:bottom_level:stride) = half * &
+          (profiles(iprof)%t(top_level:bottom_level-stride:stride) + profiles(iprof)%t(top_level+stride:bottom_level:stride))
         profiles(iprof)%t(1) = profiles(iprof)%t(2)
-        profiles(iprof)%t(nlevels) = profiles(iprof)%t(nlevels-1) - half * (profiles(iprof)%t(nlevels-2) - profiles(iprof)%t(nlevels-1))
+        profiles(iprof)%t(nlevels) = profiles(iprof)%t(nlevels-1) - &
+          half * (profiles(iprof)%t(nlevels-2) - profiles(iprof)%t(nlevels-1))
       end do
     endif
 
-! Get absorbers. Assume mass mixing ratio (moist air). The distinction has been made that q will be in kg/kg as per OPS convention
-! And mixr will be in g/kg.
-! For now all other gases will be in kg/kg and this needs to be handled carefully.
-
-    profiles(1:nprofiles)%gas_units = 1
+! Get absorbers.
+    if (conf % RTTOV_GasUnitConv) then
+      !gas_units = 0 is ppmv dry. Conversion will be done prior to use by RTTOV. Currently only scalar conversion performed.
+      !this matches satrad conversion
+      profiles(1:nprofiles)%gas_units = gas_unit_ppmvdry
+    else
+      !gas_units = 1 is kg/kg moist. Conversion will be done internally by RTTOV
+      profiles(1:nprofiles)%gas_units = gas_unit_specconc
+    endif
 
     do jspec = 1, conf%ngas
+
+      scale_fac = conf%scale_fac(conf%absorber_id(jspec))
+
       call ufo_geovals_get_var(geovals,conf%Absorbers(jspec) , geoval)
 
       select case (conf%Absorbers(jspec))
-      case (var_mixr)
+      case (var_mixr) ! mixr assumed to be in g/kg
         do iprof = 1, nProfiles
-          profiles(iprof)%q(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) * g_to_kg
+          profiles(iprof)%q(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) * scale_fac * g_to_kg
         end do
       case (var_q)
         do iprof = 1, nProfiles
-          profiles(iprof)%q(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+          profiles(iprof)%q(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) * scale_fac
         end do
       case (var_oz)
         if (associated(profiles(1)%o3)) then
           do iprof = 1, nProfiles
-            profiles(iprof)%o3(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+            profiles(iprof)%o3(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) * scale_fac
           end do
         endif
       case (var_co2)
         if (associated(profiles(1)%co2)) then
           do iprof = 1, nProfiles
-            profiles(iprof)%co2(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+            profiles(iprof)%co2(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) * scale_fac 
           end do
         endif
       case (var_clw)
         if (associated(profiles(1)%clw)) then
           do iprof = 1, nProfiles
-            profiles(iprof)%clw(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+            profiles(iprof)%clw(top_level:bottom_level:stride) = geoval%vals(:,prof_start + iprof - 1) ! always kg/kg
           end do
         endif
       case default
@@ -524,11 +565,11 @@ contains
       enddo
     endif
 
-    varname = var_sfc_q2m ! 2m specific humidity (kg/kg)
+    varname = var_sfc_q2m ! 2m specific humidity
     if (ufo_vars_getindex(geovals%variables, varname) > 0) then
       call ufo_geovals_get_var(geovals, varname, geoval) ! lfric
 
-      profiles(1:nprofiles)%s2m%q = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
+      profiles(1:nprofiles)%s2m%q = geoval%vals(1,prof_start:prof_start + nprofiles - 1) * conf%scale_fac(gas_id_watervapour)
     else
       write(message,'(A)') 'No near-surface specific humidity. Using bottom q level'
       call fckit_log%info(message)
@@ -648,9 +689,8 @@ contains
 ! SatRad profile manipulation
 ! ---------------------------
 
-    do iprof = 1, nProfiles
-      if(conf % SatRad_compatibility) then
-
+    if(conf % SatRad_compatibility) then
+      do iprof = 1, nProfiles
         !----
         ! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
         ! N.B. I think this should be flagged so it's clear that the background has been modified
@@ -691,6 +731,9 @@ contains
                          nlevels)           ! in
         end if
 
+        qsaturated = qsaturated * conf%scale_fac(gas_id_watervapour)
+
+!qsaturated is assumed to be in kg/kg
         where (profiles(iprof)%q > qsaturated)
           profiles(iprof)%q = qsaturated
         end where
@@ -701,7 +744,7 @@ contains
         ! -----------------------------------------------
         allocate(qsaturated(1))
         s2m_t(1) = profiles(iprof)%s2m%t
-        s2m_p(1) = profiles(iprof)%s2m%p
+        s2m_p(1) = profiles(iprof)%s2m%p / Pa_to_hPa
         if (conf % UseRHwaterForQC) then
           call Ops_QsatWat (qsaturated(1:1),  & ! out
                             s2m_t(1:1), & ! in
@@ -714,16 +757,17 @@ contains
                          1)            ! in
         end if
 
+        qsaturated(1) = qsaturated(1) * conf%scale_fac(gas_id_watervapour)
+
         if (profiles(iprof)%s2m%q > qsaturated(1)) profiles(iprof)%s2m%q = qsaturated(1)
         deallocate(qsaturated)
 
         ! Constrain small values to min_q fix
-        where(profiles(iprof)%q < min_q) profiles(iprof)%q = min_q
-        if(profiles(iprof)%s2m%q < min_q) profiles(iprof)%s2m%q = min_q
+        where(profiles(iprof)%q < min_q * conf%scale_fac(gas_id_watervapour) ) profiles(iprof)%q = min_q * conf%scale_fac(gas_id_watervapour)
+        if(profiles(iprof)%s2m%q < min_q * conf%scale_fac(gas_id_watervapour)) profiles(iprof)%s2m%q = min_q * conf%scale_fac(gas_id_watervapour)
 
-      endif
-
-    enddo
+      enddo
+    endif
 
 ! ----------------------------
 ! Interpolate layer quantities
@@ -733,10 +777,12 @@ contains
 
     if(layer_quantities) then
       do iprof=1,nprofiles
-        profiles(iprof)%q(top_level+stride:bottom_level:stride) = half * (profiles(iprof)%q(top_level:bottom_level-stride:stride) + &
-          profiles(iprof)%q(top_level+stride:bottom_level:stride))
+        profiles(iprof)%q(top_level+stride:bottom_level:stride) = half * &
+          (profiles(iprof)%q(top_level:bottom_level-stride:stride) + profiles(iprof)%q(top_level+stride:bottom_level:stride)) * &
+          conf%scale_fac(gas_id_watervapour)
         profiles(iprof)%q(1) = profiles(iprof)%q(2)
-        profiles(iprof)%q(nlevels) = profiles(iprof)%q(nlevels-1) - half * (profiles(iprof)%q(nlevels-2) - profiles(iprof)%q(nlevels-1))
+        profiles(iprof)%q(nlevels) = profiles(iprof)%q(nlevels-1) - &
+          half * (profiles(iprof)%q(nlevels-2) - profiles(iprof)%q(nlevels-1))
 
         if (associated(profiles(1)%o3)) then
           profiles(iprof)%o3(top_level+stride:bottom_level:stride) = half * &
@@ -764,7 +810,7 @@ contains
       do iprof = 1, nprofiles
         ! compute bg qtotal using q and clw only
         ! currently ice is ignored
-        Qtotal(:) = profiles(iprof) % q(:)
+        Qtotal(:) = profiles(iprof) % q(:) / conf%scale_fac(gas_id_watervapour) ! kg/kg
         Qtotal(:) = max(Qtotal(:), min_q)
         Qtotal(:) = Qtotal(:) + profiles(iprof) % clw(:)
 
@@ -780,7 +826,7 @@ contains
 
         ! store in the profile
         profiles(iprof) % clw(:) = clw_temp(:)
-        profiles(iprof) % q(:)   = q_temp(:)
+        profiles(iprof) % q(:)   = q_temp(:) * conf%scale_fac(gas_id_watervapour)
 
         ! !store non active variable
         ! IF (ALLOCATED(CloudIce)) THEN
@@ -881,7 +927,7 @@ contains
 
       nlocs_total = 1
       nprofiles = 1
-      nlevels = SIZE(profiles(1) % p)
+      nlevels = size(profiles(1) % p)
 
       profiles(1) % zenangle    = ob_info % sensor_zenith_angle
       profiles(1) % azangle     = ob_info % sensor_azimuth_angle
@@ -1096,7 +1142,7 @@ contains
 
     !< Switch to supply cloud optical properties explicitly per channel
     if (f_confOpts % has("RTTOV_user_cld_opt_param")) then
-      call f_confOpts % get_or_die("RTTOV_", self % rttov_opts % rt_ir % user_cld_opt_param)
+      call f_confOpts % get_or_die("RTTOV_user_cld_opt_param", self % rttov_opts % rt_ir % user_cld_opt_param)
     end if
 
     !< Switch to supply grid-box average cloud concentration or cloud
@@ -1174,9 +1220,12 @@ contains
       call f_confOpts % get_or_die("RTTOV_so2_data", self % rttov_opts % rt_ir % so2_data)
     end if
 
-    ! OPEN(666,file='RTTOV_options.log')
-    ! CALL rttov_print_opts(self % rttov_opts,lu=666)
-    ! CLOSE(666)
+    if(debug) then
+!      open(666,file='RTTOV_options.log')
+!      call rttov_print_opts(self % rttov_opts,lu=666)
+!      close(666)
+      call rttov_print_opts(self % rttov_opts)
+    endif
   end subroutine set_options_rttov
 
   ! ------------------------------------------------------------------------------
@@ -1217,9 +1266,11 @@ contains
                               file_coef = coef_filename)     !in
 
         if (rttov_errorstatus /= errorstatus_success) then
-          write(*,*) 'fatal error reading coefficients'
+            write(message,*) 'fatal error reading coefficients'
+            call abor1_ftn(message)
         else
-          write(*,*) 'successfully read' // coef_filename
+            write(message,*) 'successfully read' // coef_filename
+            call fckit_log%info(message)
         end if
 
       end do
@@ -1454,181 +1505,153 @@ contains
   subroutine set_defaults_rttov(self, default_opts_set)
 
     class(rttov_conf), intent(inout) :: self
-    character(8),      intent(in)    :: default_opts_set
+    character(10),      intent(in)   :: default_opts_set
+
+    integer                          :: PS_Number
+    logical                          :: PS_configuration
 
     write(message,'(A, A)') 'Setting RTTOV default options to ', default_opts_set
     call fckit_log%info(message)
 
-    select case (trim(default_opts_set))
-    case ('RTTOV') ! RTTOV defaults - needn't set this...
-      self % rttov_opts % rt_all % addrefrac               = .false. !< Switch to enable atmospheric refraction
-      self % rttov_opts % rt_all % switchrad               = .false. !< Switch for input units in AD/K models
-      self % rttov_opts % rt_all % use_q2m                 = .true.  !< Switch to enable use of 2m q variable
-      self % rttov_opts % rt_all % do_lambertian           = .false. !< Switch for setting Lambertian reflection (IR and MW)
-      self % rttov_opts % rt_all % lambertian_fixed_angle  = .true.  !< Switch for fixed/parameterised effective angle for Lambertian option
-      self % rttov_opts % rt_all % plane_parallel          = .false. !< Switch to ignore atmospheric curvature           
-      self % rttov_opts % rt_all % rad_down_lin_tau        = .true.  !< Linear-in-tau or layer-mean for downwelling radiances    
-      self % rttov_opts % rt_all % dtau_test               = .true.  !< Switch to apply dtau test in transmit/integrate calculations
+    ! Get PS number if it exists
+    if(default_opts_set(1:4) == 'UKMO') then
+      PS_configuration = .true.
+      read(default_opts_set(8:9),*) PS_Number
 
-      self % rttov_opts % rt_ir % solar_sea_brdf_model     = 1     !< Solar sea BRDF model (1-2)
-      self % rttov_opts % rt_ir % ir_sea_emis_model        = 2     !< IR sea emissivity model (1-2)
-      self % rttov_opts % rt_ir % addsolar                 = .false.  !< Switch to enable solar simulations
-      self % rttov_opts % rt_ir % rayleigh_single_scatt    = .true.  !< Switch to enable Rayleigh single-scattering for VIS/NIR channels
-      self % rttov_opts % rt_ir % do_nlte_correction       = .false.  !< Switch to enable NLTE bias correction
-      self % rttov_opts % rt_ir % addaerosl                = .false.  !< Switch to enable IR aerosol calculations
-      self % rttov_opts % rt_ir % user_aer_opt_param       = .false.  !< Switch to supply aerosol optical properties explicitly per channel
-      self % rttov_opts % rt_ir % addclouds                = .false.  !< Switch to enable IR cloudy calculations
-      self % rttov_opts % rt_ir % user_cld_opt_param       = .false.  !< Switch to supply cloud optical properties explicitly per channel
-      self % rttov_opts % rt_ir % grid_box_avg_cloud       = .false.  !< Switch to supply grid-box average cloud concentration or cloud
-      !!  concentration in cloudy fraction of each layer
-      self % rttov_opts % rt_ir % cldstr_threshold         = -1.0_kind_real !< Ignore cloud streams with weights lower than this
-      self % rttov_opts % rt_ir % cldstr_simple            = .false.  !< Switch for simplified cloud stream option - USE WITH CAUTION
-      self % rttov_opts % rt_ir % cldstr_low_cloud_top     = 750._kind_real !< Upper pressure limit for cldstr_simple option (hPa)
-      self % rttov_opts % rt_ir % ir_scatt_model           = ir_scatt_chou  !< IR scattering model to use
-      self % rttov_opts % rt_ir % vis_scatt_model          = vis_scatt_dom  !< VIS/NIR scattering model to use
-      self % rttov_opts % rt_ir % dom_nstreams             = 8     !< Number of DOM streams, must be even and not less than 2
-      self % rttov_opts % rt_ir % dom_accuracy             = 0._kind_real  !< Convergence criterion for termination of DOM azimuthal loop
-      self % rttov_opts % rt_ir % dom_opdep_threshold      = 0._kind_real  !< DOM ignores levels below this optical depth:
-      !!  10. is reasonable, not applied if <              = 0
-      self % rttov_opts % rt_ir % ozone_data               = .false.       !< Switch to enable input of O3 profile
-      self % rttov_opts % rt_ir % co2_data                 = .false.       !< Switch to enable input of CO2 profile
-      self % rttov_opts % rt_ir % n2o_data                 = .false.       !< Switch to enable input of N2O profile
-      self % rttov_opts % rt_ir % co_data                  = .false.       !< Switch to enable input of CO profile
-      self % rttov_opts % rt_ir % ch4_data                 = .false.       !< Switch to enable input of CH4 profile
-      self % rttov_opts % rt_ir % so2_data                 = .false.       !< Switch to enable input of SO2 profile                      
+      write(message,'(A, i3)') 'Setting RTTOV default options for PS', PS_Number
+      call fckit_log%info(message)
+    else
+      PS_configuration = .false.
+      PS_Number = -1
+    endif
 
-      self % rttov_opts % rt_ir % pc % addpc               = .false.  !< Switch to enable PC-RTTOV
-      self % rttov_opts % rt_ir % pc % ipcbnd              = -1    !< PC spectral band
-      self % rttov_opts % rt_ir % pc % ipcreg              = -1    !< PC predictor channel set
-      self % rttov_opts % rt_ir % pc % npcscores           = -1    !< Number of PC scores to compute, if less than 1 npcscores is derived
-      !!  from the size of the pccomp%pcscores array
-      self % rttov_opts % rt_ir % pc % addradrec           = .false.  !< Switch for calculation of reconstructed radiances
+!Set RTTOV 12.3 defaults explicitly
+    self % rttov_opts % config % apply_reg_limits        = .false. !< Switch to restrict input profiles to coef training limits
+    self % rttov_opts % config % verbose                 = .true.  !< Switch for verbose output
+    self % rttov_opts % config % do_checkinput           = .true.  !< Switch to apply internal profile checking
+    self % rttov_opts % config % fix_hgpl                = .false. !< Switch to apply fix to match 2m p with elevation in geometry calculations
 
-      !> MW-only radiative transfer options
-      self % rttov_opts % rt_mw % fastem_version           = 6     !< FASTEM version (0-6); 0 => TESSEM2
-      self % rttov_opts % rt_mw % supply_foam_fraction     = .false.  !< Supply a foam fraction to FASTEM
-      self % rttov_opts % rt_mw % clw_data                 = .false.  !< Switch to enable input of cloud liquid water profile
-      self % rttov_opts % rt_mw % clw_scheme               = 1     !< MW CLW scheme: 1 => Liebe, 2 => Rosenkranz, 3 => TKC
-      self % rttov_opts % rt_mw % clw_calc_on_coef_lev     = .true.  !< Apply MW CLW calculations on coef/user levels (true/false resp.)
-      self % rttov_opts % rt_mw % clw_cloud_top            = 322    !< Lower pressure limit for MW CLW calculations (hPa)
-      self % rttov_opts % rt_mw % apply_band_correction    = .true.  !< Apply band-correction for Planck radiance and BT calculations
+    self % rttov_opts % rt_all % addrefrac               = .false. !< Switch to enable atmospheric refraction
+    self % rttov_opts % rt_all % switchrad               = .false. !< Switch for input units in AD/K models
+    self % rttov_opts % rt_all % use_q2m                 = .true.  !< Switch to enable use of 2m q variable
+    self % rttov_opts % rt_all % do_lambertian           = .false. !< Switch for setting Lambertian reflection (IR and MW)
+    self % rttov_opts % rt_all % lambertian_fixed_angle  = .true.  !< Switch for fixed/parameterised effective angle for Lambertian option
+    self % rttov_opts % rt_all % plane_parallel          = .false. !< Switch to ignore atmospheric curvature           
+    self % rttov_opts % rt_all % rad_down_lin_tau        = .true.  !< Linear-in-tau or layer-mean for downwelling radiances    
+    self % rttov_opts % rt_all % dtau_test               = .true.  !< Switch to apply dtau test in transmit/integrate calculations
 
-      self % rttov_opts % interpolation % addinterp        = .false.    !< Switch to enable RTTOV interpolator
-      self % rttov_opts % interpolation % interp_mode      = interp_rochon !< Interpolation mode (1-5, see user guide)
-      self % rttov_opts % interpolation % lgradp           = .false.    !< Switch to make pressure an active variable in TL/AD/K models
-      self % rttov_opts % interpolation % spacetop         = .true.     !< Switch to assume space boundary at top-most input pressure level
-      self % rttov_opts % interpolation % reg_limit_extrap = .false.    !< Switch to extrapolate input profiles using regression limits
+    self % rttov_opts % rt_ir % solar_sea_brdf_model     = 1       !< Solar sea BRDF model (1-2)
+    self % rttov_opts % rt_ir % ir_sea_emis_model        = 2       !< IR sea emissivity model (1-2)
+    self % rttov_opts % rt_ir % addsolar                 = .false. !< Switch to enable solar simulations
+    self % rttov_opts % rt_ir % rayleigh_single_scatt    = .true.  !< Switch to enable Rayleigh single-scattering for VIS/NIR channels
+    self % rttov_opts % rt_ir % do_nlte_correction       = .false. !< Switch to enable NLTE bias correction
+    self % rttov_opts % rt_ir % addaerosl                = .false. !< Switch to enable IR aerosol calculations
+    self % rttov_opts % rt_ir % user_aer_opt_param       = .false. !< Switch to supply aerosol optical properties explicitly per channel
+    self % rttov_opts % rt_ir % addclouds                = .false. !< Switch to enable IR cloudy calculations
+    self % rttov_opts % rt_ir % user_cld_opt_param       = .false. !< Switch to supply cloud optical properties explicitly per channel
+    self % rttov_opts % rt_ir % grid_box_avg_cloud       = .false. !< Switch to supply grid-box average cloud concentration or cloud
+    
+    self % rttov_opts % rt_ir % cldstr_threshold         = -1.0_kind_real !< Ignore cloud streams with weights lower than this
+    self % rttov_opts % rt_ir % cldstr_simple            = .false.        !< Switch for simplified cloud stream option - USE WITH CAUTION
+    self % rttov_opts % rt_ir % cldstr_low_cloud_top     = 750._kind_real !< Upper pressure limit for cldstr_simple option (hPa)
+    self % rttov_opts % rt_ir % ir_scatt_model           = ir_scatt_chou  !< IR scattering model to use
+    self % rttov_opts % rt_ir % vis_scatt_model          = vis_scatt_dom  !< VIS/NIR scattering model to use
+    self % rttov_opts % rt_ir % dom_nstreams             = 8              !< Number of DOM streams, must be even and not less than 2
+    self % rttov_opts % rt_ir % dom_accuracy             = 0._kind_real   !< Convergence criterion for termination of DOM azimuthal loop
+    self % rttov_opts % rt_ir % dom_opdep_threshold      = 0._kind_real   !< DOM ignores levels below this optical depth:
+    
+    self % rttov_opts % rt_ir % ozone_data               = .false.       !< Switch to enable input of O3 profile
+    self % rttov_opts % rt_ir % co2_data                 = .false.       !< Switch to enable input of CO2 profile
+    self % rttov_opts % rt_ir % n2o_data                 = .false.       !< Switch to enable input of N2O profile
+    self % rttov_opts % rt_ir % co_data                  = .false.       !< Switch to enable input of CO profile
+    self % rttov_opts % rt_ir % ch4_data                 = .false.       !< Switch to enable input of CH4 profile
+    self % rttov_opts % rt_ir % so2_data                 = .false.       !< Switch to enable input of SO2 profile                      
+    
+    self % rttov_opts % rt_ir % pc % addpc               = .false. !< Switch to enable PC-RTTOV
+    self % rttov_opts % rt_ir % pc % ipcbnd              = -1      !< PC spectral band
+    self % rttov_opts % rt_ir % pc % ipcreg              = -1      !< PC predictor channel set
+    self % rttov_opts % rt_ir % pc % npcscores           = -1      !< Number of PC scores to compute
+    self % rttov_opts % rt_ir % pc % addradrec           = .false. !< Switch for calculation of reconstructed radiances
+    
+    !> MW-only radiative transfer options
+    self % rttov_opts % rt_mw % fastem_version           = 6       !< FASTEM version (0-6); 0 => TESSEM2
+    self % rttov_opts % rt_mw % supply_foam_fraction     = .false. !< Supply a foam fraction to FASTEM
+    self % rttov_opts % rt_mw % clw_data                 = .false. !< Switch to enable input of cloud liquid water profile
+    self % rttov_opts % rt_mw % clw_scheme               = 1       !< MW CLW scheme: 1 => Liebe, 2 => Rosenkranz, 3 => TKC
+    self % rttov_opts % rt_mw % clw_calc_on_coef_lev     = .true.  !< Apply MW CLW calculations on coef/user levels (true/false resp.)
+    self % rttov_opts % rt_mw % clw_cloud_top            = 322     !< Lower pressure limit for MW CLW calculations (hPa)
+    self % rttov_opts % rt_mw % apply_band_correction    = .true.  !< Apply band-correction for Planck radiance and BT calculations
+    
+    self % rttov_opts % interpolation % addinterp        = .false.       !< Switch to enable RTTOV interpolator
+    self % rttov_opts % interpolation % interp_mode      = interp_rochon !< Interpolation mode 1 (valid options 1-5, see user guide)
+    self % rttov_opts % interpolation % lgradp           = .false.       !< Switch to make pressure an active variable in TL/AD/K models
+    self % rttov_opts % interpolation % spacetop         = .true.        !< Switch to assume space boundary at top-most input pressure level
+    self % rttov_opts % interpolation % reg_limit_extrap = .false.       !< Switch to extrapolate input profiles using regression limits
+    
+    !> HTFRTC options structure
+    self % rttov_opts % htfrtc_opts % htfrtc             = .false. !< Switch to use htfrtc
+    self % rttov_opts % htfrtc_opts % n_pc_in            = -1   !< Number of principal components to be used
+    self % rttov_opts % htfrtc_opts % reconstruct        = .false. !< Switch to select reconstructed radiances
+    self % rttov_opts % htfrtc_opts % simple_cloud       = .false. !< Calculate simple cloud
+    self % rttov_opts % htfrtc_opts % overcast           = .false. !< Calculate overcast cloud on all levels
+    
+    if (PS_configuration) then
 
-      !> HTFRTC options structure
-      self % rttov_opts % htfrtc_opts % htfrtc             = .false. !< Switch to use htfrtc
-      self % rttov_opts % htfrtc_opts % n_pc_in            = -1   !< Number of principal components to be used
-      self % rttov_opts % htfrtc_opts % reconstruct        = .false. !< Switch to select reconstructed radiances
-      self % rttov_opts % htfrtc_opts % simple_cloud       = .false. !< Calculate simple cloud
-      self % rttov_opts % htfrtc_opts % overcast           = .false. !< Calculate overcast cloud on all levels
-
-    case ('OPS','PS45')
-      self % rttov_opts % config % apply_reg_limits        = .true. ! set as true for all instruments
-      self % rttov_opts % config % fix_hgpl                = .false. ! true @ PS44
-      self % rttov_opts % config % verbose                 = .false. ! true if (ProcessMode > VerboseMode .OR. RTTOV_Verbosity > 0)
-      self % rttov_opts % config % do_checkinput           = .false.  ! we will use the more thorough and verbose
-      ! rttov_user_profile_checkinput instead to save ourselves an 
-      ! RTTOV call where the profile is no good
-
-      self % rttov_opts % rt_all % rad_down_lin_tau        = .true. !FALSE @PS44
-      self % rttov_opts % rt_all % dtau_test               = .true. !FALSE @PS44
-
-      if(trim(default_opts_set) == 'OPS') then
-        self % rttov_opts % rt_all % addrefrac               = .false. ! At PS44 .TRUE. @ PS45?
-      else
-        self % rttov_opts % rt_all % addrefrac               = .true. ! At PS44 .TRUE. @ PS45?
+      ! Set RTTOV options that different from default and are true for all MetO configurations up to PS45
+      if (trim(default_opts_set(1:4)) == 'UKMO') then
+        self % rttov_opts % config % verbose                 = .false. ! true if (ProcessMode > VerboseMode .OR. RTTOV_Verbosity > 0)
+        self % rttov_opts % config % do_checkinput           = .false. ! we will use the more thorough and verbose user_checkinput
+      
+        self % rttov_opts % rt_all % switchrad               = .true. 
+        self % rttov_opts % rt_all % use_q2m                 = .false.
+      
+        self % rttov_opts % rt_ir % grid_box_avg_cloud       = .true. ! Assume grid-box average for cloud concentrations
+        self % rttov_opts % rt_ir % ozone_data               = .true.  ! Set to true for allocation purposes
+      
+        self % rttov_opts % rt_mw % clw_data                 = .true.  ! Set to true for allocation purposes
+      
+        self % rttov_opts % interpolation % addinterp        = .true.  ! Allow interpolation of input profile
+        self % rttov_opts % interpolation % interp_mode      = 4       ! Set interpolation method (4 for all insts at PS44)
       endif
-
-      self % rttov_opts % rt_all % switchrad               = .true. 
-      if(trim(default_opts_set) == 'OPS') then
-        self % rttov_opts % rt_all % use_q2m                 = .false. ! At PS44 .TRUE. @ PS45?
+    
+      !RTTOV options that are different from RTTOV defaults at and before PS44
+      if (PS_Number <= 44) then
+        self % rttov_opts % rt_ir % ir_sea_emis_model        = 1 ! Use SSIREM
+        
+        self % rttov_opts % rt_mw % fastem_version           = 2 ! no support for Fastem-bug so use caution
+        
+        self % rttov_opts % interpolation % spacetop         = .false. 
       endif
-      self % rttov_opts % rt_all % do_lambertian           = .false. !
-      !  self % rttov_opts % rt_all % plane_parallel       = .FALSE. 
-
-      self % rttov_opts % interpolation % addinterp        = .true. ! Allow interpolation of input profile
-      self % rttov_opts % interpolation % interp_mode      = 4 ! Set interpolation method (4 for all insts at PS44)
-      !  self % rttov_opts % interpolation % lgradp        = .FALSE. 
-      if(trim(default_opts_set) == 'OPS') then
-        self % rttov_opts % interpolation % spacetop         = .false. ! At PS44 .TRUE. @ PS45?
-        self % rttov_opts % interpolation % reg_limit_extrap = .false. ! At PS44 .TRUE. @ PS45?
-      else
-        self % rttov_opts % interpolation % reg_limit_extrap = .true. ! At PS44 .TRUE. @ PS45?
+      
+      !RTTOV options that are different from RTTOV and PS43 defaults at PS44
+      if (PS_Number >= 44) then
+        self % rttov_opts % config % apply_reg_limits        = .true.  
+        self % rttov_opts % config % fix_hgpl                = .true.  ! This is an RTTOV 13 default
+        
+        self % rttov_opts % rt_all % dtau_test               = .false. ! This is an RTTOV 13 default
+        self % rttov_opts % rt_all % rad_down_lin_tau        = .false. ! This is the recommended setting
+      
+        self % rttov_opts % rt_mw % clw_calc_on_coef_lev     = .false. ! This is an RTTOV 13 default
       endif
-
-      !  self % rttov_opts % rt_ir % addsolar              = .FALSE.
-      !  self % rttov_opts % rt_ir % do_nlte_correction    = .FALSE.
-      self % rttov_opts % rt_ir % ir_sea_emis_model        = 1 ! At PS44 2 @ PS45?
-
-      !  self % rttov_opts % rt_ir % user_aer_opt_param    = .FALSE. ! user specifies aerosol scattering optical parameters
-      !  self % rttov_opts % rt_ir % user_cld_opt_param    = .FALSE. ! user specifies cloud scattering optical parameters
-      !  self % rttov_opts % rt_ir % ir_scatt_model        = 2      ! Chou-scaling
-      self % rttov_opts % rt_ir % grid_box_avg_cloud       = .true. ! Assume grid-box average for cloud concentrations
-
-      self % rttov_opts % rt_ir % ozone_data               = .true.  ! There WILL be an ozone profile
-      self % rttov_opts % rt_ir % co2_data                 = .false.   ! We do not have profiles
-      self % rttov_opts % rt_ir % n2o_data                 = .false.   ! for any other constituents
-      self % rttov_opts % rt_ir % ch4_data                 = .false.
-      self % rttov_opts % rt_ir % co_data                  = .false.
-      self % rttov_opts % rt_ir % so2_data                 = .false.
-
-      ! RTTOV v12 Discrete ordinates method (DOM) not implemented for now 
-
-      self % rttov_opts % rt_mw % clw_calc_on_coef_lev     = .true. ! .FALSE. @PS44
-      self % rttov_opts % rt_mw % clw_data                 = .true.  ! Set to true for allocation
-      if(trim(default_opts_set) == 'OPS') then
-        self % rttov_opts % rt_mw % fastem_version           = 2 ! at PS44 6 at PS45? 
+    
+      !RTTOV options that are different from RTTOV and PS44 defaults at PS45       
+      if (PS_Number == 45) then
+        self % rttov_opts % rt_all % addrefrac               = .true. ! This is an RTTOV 13 default
+        
+        self % rttov_opts % rt_mw % clw_scheme               = 2      ! This is an RTTOV 13 default
+        
+        self % rttov_opts % interpolation % reg_limit_extrap = .true. ! This is an RTTOV 13 default
       endif
-      !self % rttov_opts % rt_mw % supply_foam_fraction    = RTTOV_Supply_Foam_Fraction
-
-      ! IF (ANY (MwscattSwitch)) THEN
-      !  RTTOV12_opts_scatt % config                       = self % rttov_opts % config
-      !  RTTOV12_opts_scatt % use_q2m                      = self % rttov_opts % rt_all % use_q2m
-      !  RTTOV12_opts_scatt % fastem_version               = self % rttov_opts % rt_mw % fastem_version
-      !  RTTOV12_opts_scatt % supply_foam_fraction         = self % rttov_opts % rt_mw % supply_foam_fraction
-      !  RTTOV12_opts_scatt % interp_mode                  = self % rttov_opts % interpolation % interp_mode
-      !  RTTOV12_opts_scatt % reg_limit_extrap             = self % rttov_opts % interpolation % reg_limit_extrap
-      !  RTTOV12_opts_scatt % rttov9_fastem_bug            = self % rttov_opts % compatibility % rttov9_fastem_bug
-      ! END IF
-
-    case ('test')
-      self % rttov_opts % rt_ir % addsolar                 = .false. ! Do not include solar radiation
-      self % rttov_opts % interpolation % addinterp        = .true.  ! Allow interpolation of input profile
-      self % rttov_opts % interpolation % interp_mode      = 4       ! Set interpolation method
-      self % rttov_opts % interpolation % reg_limit_extrap = .true.  ! reg_limit_extrap
-      self % rttov_opts % rt_all % addrefrac               = .true.  ! Include refraction in path calc
-      self % rttov_opts % rt_all % switchrad               = .true.  ! Include refraction in path calc
-      self % rttov_opts % rt_all % dtau_test               = .false. 
-      self % rttov_opts % rt_ir % addclouds                = .false. ! Don't include cloud effects
-      self % rttov_opts % rt_ir % addaerosl                = .false. ! Don't include aerosol effects
-
-      self % rttov_opts % rt_ir % ozone_data               = .false. ! Set the relevant flag to .TRUE.
-      self % rttov_opts % rt_ir % co2_data                 = .false. !  when supplying a profile of the
-      self % rttov_opts % rt_ir % n2o_data                 = .false. !  given trace gas (ensure the
-      self % rttov_opts % rt_ir % ch4_data                 = .false. !  coef file supports the gas)
-      self % rttov_opts % rt_ir % co_data                  = .false. !
-      self % rttov_opts % rt_ir % so2_data                 = .false. !
-      self % rttov_opts % rt_mw % clw_data                 = .false. !
-
-      self % rttov_opts % config % verbose                 = .true. ! Enable printing of warnings
-      self % rttov_opts % config % apply_reg_limits        = .true.
-      self % rttov_opts % config % do_checkinput           = .false.
-      self % rttov_opts % config % fix_hgpl                = .false.
-    case('default')
-      ! RTTOV defaults
-    end select
+    endif
 
   end subroutine set_defaults_rttov
 
-  subroutine populate_hofxdiags(RTProf, chanprof, hofxdiags)
+  subroutine populate_hofxdiags(RTProf, chanprof, conf, hofxdiags)
     use ufo_constants_mod, only : g_to_kg
 
     type(ufo_rttov_io),   intent(in)    :: RTProf
     type(rttov_chanprof), intent(in)    :: chanprof(:)
+    type(rttov_conf),     intent(in)    :: conf
     type(ufo_geovals),    intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
     integer                      :: jvar, chan, prof, ichan 
@@ -1674,12 +1697,13 @@ contains
 
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
-              if(ystr_diags(jvar) == var_opt_depth) then
+              if(trim(ystr_diags(jvar)) == var_opt_depth) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
                 hofxdiags%geovals(jvar)%vals(:,prof) = od_level(1:nlevels-1) - od_level(2:nlevels) ! defined +ve 
-              else if (ystr_diags(jvar) == var_lvl_transmit) then
-                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % transmission % tau_levels(1:nlevels-1,chan) - RTProf % transmission%tau_levels(2:,chan)
-              else if (ystr_diags(jvar) == var_lvl_weightfunc) then
+              else if (trim(ystr_diags(jvar)) == var_lvl_transmit) then
+                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % transmission % tau_levels(1:nlevels-1,chan) - &
+                                                       RTProf % transmission%tau_levels(2:,chan)
+              else if (trim(ystr_diags(jvar)) == var_lvl_weightfunc) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
                   hofxdiags%geovals(jvar)%vals(:,prof))
@@ -1705,17 +1729,17 @@ contains
             prof = chanprof(ichan)%prof
 
             if(chan == ch_diags(jvar)) then
-              if(ystr_diags(jvar) == var_radiance) then
+              if(trim(ystr_diags(jvar)) == var_radiance) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % total(ichan)
-              else if(ystr_diags(jvar) == var_tb_clr) then
+              else if(trim(ystr_diags(jvar)) == var_tb_clr) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % bt_clear(ichan)
-              else if(ystr_diags(jvar) == var_tb) then
+              else if(trim(ystr_diags(jvar)) == var_tb) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % bt(ichan)
-              else if(ystr_diags(jvar) == var_pmaxlev_weightfunc ) then
+              else if(trim(ystr_diags(jvar)) == var_pmaxlev_weightfunc ) then
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
                   Wfunc(:))
                 hofxdiags%geovals(jvar)%vals(1,prof) = maxloc(Wfunc(:), DIM=1) ! scalar not array(1)
-              else if(ystr_diags(jvar) == var_total_transmit) then
+              else if(trim(ystr_diags(jvar)) == var_total_transmit) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % transmission % tau_total(ichan)
               end if
             endif
@@ -1729,7 +1753,7 @@ contains
 
           write(message,*) 'ufo_radiancerttov_simobs: //&
             & ObsDiagnostic is unsupported but allocating anyway, ', &
-            & hofxdiags%variables(jvar), SHAPE(hofxdiags%geovals(jvar)%vals)
+            & hofxdiags%variables(jvar), shape(hofxdiags%geovals(jvar)%vals)
           call fckit_log%info(message)
 
         end select
@@ -1739,6 +1763,7 @@ contains
         select case (trim(xstr_diags(jvar)))
 
         case (var_ts,var_mixr,var_q,var_clw,var_cli)
+
           nlayers = nlevels - 1
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
@@ -1755,10 +1780,10 @@ contains
                   RTProf % profiles_k(ichan) % t(:)
               else if(xstr_diags(jvar) == var_mixr) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
-                  RTProf % profiles_k(ichan) % q(:) / g_to_kg
+                  RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour) / g_to_kg
               else if(xstr_diags(jvar) == var_q) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
-                  RTProf % profiles_k(ichan) % q(:)
+                  RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour)
               else if(xstr_diags(jvar) == var_clw) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % clw(:)
@@ -1790,7 +1815,7 @@ contains
                   RTProf % profiles_k(ichan) % s2m % p
               else if (xstr_diags(jvar) == var_sfc_q2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
-                  RTProf % profiles_k(ichan) % s2m % q
+                  RTProf % profiles_k(ichan) % s2m % q * conf%scale_fac(gas_id_watervapour)
               else if (xstr_diags(jvar) == var_u) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % u

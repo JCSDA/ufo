@@ -232,7 +232,8 @@ contains
               self % RTprof % chanprof(nchan_sim) % chan = self % channels(ichan)
             end do
           else
-            if (debug) write(*,*) 'skipping ', iprof, prof_start + iprof - 1
+            write(message,*) 'skipping profile ', iprof, prof_start + iprof - 1
+            call fckit_log%debug(message)
           end if
         end do
 
@@ -318,10 +319,6 @@ contains
           end if
         endif ! jacobian_needed
 
-        !DARFIX: This should be available only when debugging
-        ! Write out progress through batch
-        if (debug) write(*,'(A1, i0, A, i0)',ADVANCE="NO") achar(13), prof_start+nprof_sim-1, ' locations processed out of ', geovals%nlocs
-
         ! Put simulated brightness temperature into hofx
         ! ----------------------------------------------
         do ichan=1, nchan_sim, size(self%channels)
@@ -331,7 +328,7 @@ contains
 
         ! Put simulated diagnostics into hofxdiags
         ! ----------------------------------------------
-        if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTProf, self % RTProf % chanprof, hofxdiags)
+        if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTProf, self % RTProf % chanprof, self % conf, hofxdiags)
 
         nchan_total = nchan_total + nchan_sim
         prof_start = prof_start + nprof_sim
