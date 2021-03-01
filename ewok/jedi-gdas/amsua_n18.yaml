@@ -1,0 +1,17 @@
+obs space:
+  name: amsua-n18
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/amsua-n18_obs.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).amsua-n18.{{window_begin}}.nc4
+  simulated variables: [brightness_temperature]
+  channels: 1-15
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  Cloud_Fraction: 1.0
+  obs options:
+    Sensor_ID: amsua_n18
+    EndianType: little_endian
+    CoefficientPath: $(jedi_build)/ufo/test/Data/

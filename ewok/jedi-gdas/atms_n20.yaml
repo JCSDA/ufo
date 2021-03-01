@@ -1,0 +1,17 @@
+obs space:
+  name: atms-n20
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/atms-n20_obs.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).atms-n20.{{window_begin}}.nc4
+  simulated variables: [brightness_temperature]
+  channels: 1-22
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  Cloud_Fraction: 1.0
+  obs options:
+    Sensor_ID: atms_n20
+    EndianType: little_endian
+    CoefficientPath: $(jedi_build)/ufo/test/Data/

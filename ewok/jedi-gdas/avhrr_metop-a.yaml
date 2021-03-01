@@ -1,0 +1,15 @@
+obs space:
+  name: avhrr3-metopa
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/avhrr-metopa_obs.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).avhrr-metopa.{{window_begin}}.nc4
+  simulated variables: [brightness_temperature]
+  channels: 3,4,5
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  obs options:
+    Sensor_ID: avhrr3_metop-a
+    EndianType: little_endian
+    CoefficientPath: $(jedi_build)/ufo/test/Data/
