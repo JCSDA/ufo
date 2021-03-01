@@ -172,3 +172,57 @@ observations:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   rms ref: 0  # bogus value; simulateObs won't be called because the constructor will throw an exception
   tolerance: 1.0e-06
+# Composite operator with the coordinates listed explicitly
+- obs space:
+    name: Radiosonde with coordinates listed explicitly
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+  obs operator:
+    name: Composite
+    components:
+     - name: Identity
+       variables:
+       - name: air_temperature
+       - name: surface_pressure
+     - name: VertInterp
+       variables:
+       - name: northward_wind
+       - name: eastward_wind
+       vertical coordinate: air_pressure
+       observation vertical coordinate: air_pressure
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  # The reference value is calculated as
+  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
+  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  # with the values of rms(...) taken from the four commented-out test cases at the top of this file
+  rms ref: 49141.92596374258
+  tolerance: 1.0e-06
+# Composite operator with staggered vertical levels
+- obs space:
+    name: Radiosonde with staggered vertical levels
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_obs.nc4
+    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+  obs operator:
+    name: Composite
+    components:
+     - name: Identity
+       variables:
+       - name: surface_pressure
+     - name: VertInterp
+       variables:
+       - name: air_temperature
+       vertical coordinate: air_pressure
+       observation vertical coordinate: air_pressure
+     - name: VertInterp
+       variables:
+       - name: northward_wind
+       - name: eastward_wind
+       vertical coordinate: air_pressure_levels
+       observation vertical coordinate: air_pressure
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_geovals.nc4
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06

@@ -22,6 +22,7 @@ module ufo_atmvertinterp_tlad_mod
     real(kind_real), allocatable :: wf(:)
     integer, allocatable :: wi(:)
     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
+    character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
@@ -62,6 +63,16 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
       self%use_ln  = .true.
   endif
 
+  !> Determine observation vertical coordinate.
+  !  Use the model vertical coordinate unless the option
+  !  'observation vertical coordinate' is specified.
+  if ( grid_conf%has("observation vertical coordinate") ) then
+     call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+     self%o_v_coord = coord_name
+  else
+     self%o_v_coord = self%v_coord
+  endif
+
 end subroutine atmvertinterp_tlad_setup_
 
 ! ------------------------------------------------------------------------------
@@ -89,7 +100,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   ! Get the observation vertical coordinates
   self%nlocs = obsspace_get_nlocs(obss)
   allocate(obsvcoord(self%nlocs))
-  call obsspace_get_db(obss, "MetaData", self%v_coord, obsvcoord)
+  call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
 
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))

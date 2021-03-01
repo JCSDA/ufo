@@ -15,6 +15,7 @@ use ufo_vars_mod
      integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                       ! simulated variables in the ObsSpace
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
+     character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
    contains
      procedure :: setup  => atmvertinterp_setup_
@@ -55,6 +56,17 @@ subroutine atmvertinterp_setup_(self, grid_conf)
       self%v_coord = var_prs
       self%use_ln  = .true.
   endif
+
+  !> Determine observation vertical coordinate.
+  !  Use the model vertical coordinate unless the option
+  !  'observation vertical coordinate' is specified.
+  if ( grid_conf%has("observation vertical coordinate") ) then
+     call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+     self%o_v_coord = coord_name
+  else
+     self%o_v_coord = self%v_coord
+  endif
+
   call self%geovars%push_back(self%v_coord)
  
 end subroutine atmvertinterp_setup_
@@ -88,7 +100,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   ! Get the observation vertical coordinates
   allocate(obsvcoord(nlocs))
-  call obsspace_get_db(obss, "MetaData", self%v_coord, obsvcoord)
+  call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
 
   ! Allocate arrays for interpolation weights
   allocate(wi(nlocs))
