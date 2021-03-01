@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: cris-fsr_npp
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/cris-fsr_npp_obs_2020120112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
@@ -42,10 +42,10 @@ observations:
               2158, 2161, 2168, 2171, 2175, 2182
  # can have GeoVaLs section like below
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/cris-fsr_npp_geoval_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_geoval_2020120112.nc4
   # can have ObsDiag section like below
   obs diagnostics:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/obsdiag/cris-fsr_npp_obsdiag_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obsdiag_2020120112.nc4
   obs function:
     name: ObsErrorFactorTopoRad@ObsFunction
     options:
@@ -54,4 +54,3 @@ observations:
     variables: [error_inflation_factor_topo]
     channels: *all_channels
     tolerance: 1.0e-8
-

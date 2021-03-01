@@ -8,33 +8,22 @@ observations:
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
     obs options:
-      Sensor_ID: &Sensor_ID atms_npp
+      Sensor_ID: &Sensor_ID amsua_metop-a
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: atms_npp
+    name: amsua_metop-a
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/atms_npp_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-a_obs_2020110112_m.nc4
     obsdataout:
-      obsfile: Data/atms_npp_obs_2020110112_qc_filters_out.nc4
+      obsfile: Data/amsua_metop-a_obs_2020110112_qc_filters_out.nc4
     simulated variables: [brightness_temperature]
-    channels: &all_channels 1-22
+    channels: &all_channels 1-15
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/atms_npp_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-a_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
-    sensor: *Sensor_ID
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_amsua_metop-a.2020110106.nc4
     jobs: *all_channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
     predictors:
     - predictor:
         name: constant
@@ -48,11 +37,11 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &atms_npp_tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/atms_npp_tlapmean.txt
+          tlapse: &amsua_metop-a_tlap Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-a_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *atms_npp_tlap
+          tlapse: *amsua_metop-a_tlap
     - predictor:
         name: emissivity
     - predictor:
@@ -87,31 +76,23 @@ observations:
               clwret_ch238: 1
               clwret_ch314: 2
               clwret_types: [ObsValue, HofX]
-          x0:    [ 0.030,  0.030,  0.030,  0.020,  0.030,
-                   0.080,  0.150,  0.000,  0.000,  0.000,
-                   0.000,  0.000,  0.000,  0.000,  0.000,
-                   0.020,  0.030,  0.030,  0.030,  0.030,
-                   0.050,  0.100]
-          x1:    [ 0.350,  0.380,  0.400,  0.450,  0.500,
-                   1.000,  1.000,  0.000,  0.000,  0.000,
-                   0.000,  0.000,  0.000,  0.000,  0.000,
-                   0.350,  0.500,  0.500,  0.500,  0.500,
-                   0.500,  0.500]
-          err0:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
-                   0.300,  0.300,  0.400,  0.400,  0.400,
-                   0.450,  0.450,  0.550,  0.800,  3.000,
-                   4.000,  4.000,  3.500,  3.000,  3.000,
-                   3.000,  3.000]
-          err1:  [20.000, 25.000, 12.000,  7.000,  3.500,
-                   3.000,  0.800,  0.400,  0.400,  0.400,
-                   0.450,  0.450,  0.550,  0.800,  3.000,
-                  19.000, 30.000, 25.000, 16.500, 12.000,
-                   9.000,  6.500]
+          x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                   0.100,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.030]
+          x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                   1.500,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.200]
+          err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                   0.230,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000,  3.500]
+          err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                   0.300,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000, 18.000]
 #  CLW Retrieval Check
   - filter: Bounds Check
     filter variables:
     - name: brightness_temperature
-      channels: 1-7, 16-22
+      channels: 1-6, 15
     test variables:
     - name: CLWRetMW@ObsFunction
       options:
@@ -125,7 +106,7 @@ observations:
   - filter: Bounds Check
     filter variables:
     - name: brightness_temperature
-      channels: 1-7, 16-22
+      channels: 1-6, 15
     test variables:
     - name: CLWRetMW@ObsFunction
       options:
@@ -141,15 +122,13 @@ observations:
     - name: brightness_temperature
       channels: *all_channels
     test variables:
-    - name: HydrometeorCheckATMS@ObsFunction
+    - name: HydrometeorCheckAMSUA@ObsFunction
       channels: *all_channels
       options:
         channels: *all_channels
-        obserr_clearsky:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
-                            0.300,  0.300,  0.400,  0.400,  0.400,
-                            0.450,  0.450,  0.550,  0.800,  3.000,
-                            4.000,  4.000,  3.500,  3.000,  3.000,
-                            3.000,  3.000]
+        obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
+                           0.230, 0.230, 0.250, 0.250, 0.350,
+                           0.400, 0.550, 0.800, 3.000, 3.500]
         clwret_function:
           name: CLWRetMW@ObsFunction
           options:
@@ -167,26 +146,18 @@ observations:
                 clwret_ch238: 1
                 clwret_ch314: 2
                 clwret_types: [ObsValue, HofX]
-            x0:    [ 0.030,  0.030,  0.030,  0.020,  0.030,
-                     0.080,  0.150,  0.000,  0.000,  0.000,
-                     0.000,  0.000,  0.000,  0.000,  0.000,
-                     0.020,  0.030,  0.030,  0.030,  0.030,
-                     0.050,  0.100]
-            x1:    [ 0.350,  0.380,  0.400,  0.450,  0.500,
-                     1.000,  1.000,  0.000,  0.000,  0.000,
-                     0.000,  0.000,  0.000,  0.000,  0.000,
-                     0.350,  0.500,  0.500,  0.500,  0.500,
-                     0.500,  0.500]
-            err0:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
-                     0.300,  0.300,  0.400,  0.400,  0.400,
-                     0.450,  0.450,  0.550,  0.800,  3.000,
-                     4.000,  4.000,  3.500,  3.000,  3.000,
-                     3.000,  3.000]
-            err1:  [20.000, 25.000, 12.000,  7.000,  3.500,
-                    3.000,  0.800,  0.400,  0.400,  0.400,
-                    0.450,  0.450,  0.550,  0.800,  3.000,
-                   19.000, 30.000, 25.000, 16.500, 12.000,
-                    9.000,  6.500]
+            x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                     0.100,  0.000,  0.000,  0.000,  0.000,
+                     0.000,  0.000,  0.000,  0.000,  0.030]
+            x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                     1.500,  0.000,  0.000,  0.000,  0.000,
+                     0.000,  0.000,  0.000,  0.000,  0.200]
+            err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                     0.230,  0.230,  0.250,  0.250,  0.350,
+                     0.400,  0.550,  0.800,  3.000,  3.500]
+            err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                     0.300,  0.230,  0.250,  0.250,  0.350,
+                     0.400,  0.550,  0.800,  3.000, 18.000]
     maxvalue: 0.0
     action:
       name: reject
@@ -254,13 +225,15 @@ observations:
               clwret_ch238: 1
               clwret_ch314: 2
               clwret_types: [HofX]
+              bias_application: HofX
           scatobs_function:
             name: SCATRetMW@ObsFunction
             options:
               scatret_ch238: 1
               scatret_ch314: 2
-              scatret_ch890: 16
+              scatret_ch890: 15
               scatret_types: [ObsValue]
+              bias_application: HofX
           clwmatchidx_function:
             name: CLWMatchIndexMW@ObsFunction
             channels: *all_channels
@@ -278,16 +251,13 @@ observations:
                   clwret_ch238: 1
                   clwret_ch314: 2
                   clwret_types: [HofX]
-              clwret_clearsky: [ 0.030,  0.030,  0.030,  0.020,  0.030,
-                                 0.080,  0.150,  0.000,  0.000,  0.000,
-                                 0.000,  0.000,  0.000,  0.000,  0.000,
-                                 0.020,  0.030,  0.030,  0.030,  0.030,
-                                 0.050,  0.100]
-          obserr_clearsky:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
-                              0.300,  0.300,  0.400,  0.400,  0.400,
-                              0.450,  0.450,  0.550,  0.800,  3.000,
-                              4.000,  4.000,  3.500,  3.000,  3.000,
-                              3.000,  3.000]
+                  bias_application: HofX
+              clwret_clearsky: [0.050, 0.030, 0.030, 0.020, 0.000,
+                                0.100, 0.000, 0.000, 0.000, 0.000,
+                                0.000, 0.000, 0.000, 0.000, 0.030]
+          obserr_clearsky: [2.500, 2.200, 2.000, 0.550, 0.300,
+                            0.230, 0.230, 0.250, 0.250, 0.350,
+                            0.400, 0.550, 0.800, 3.000, 3.500]
 #  Gross check
   - filter: Background Check
     filter variables:
@@ -325,31 +295,22 @@ observations:
                 clwret_ch238: 1
                 clwret_ch314: 2
                 clwret_types: [ObsValue, HofX]
-            x0:    [ 0.030,  0.030,  0.030,  0.020,  0.030,
-                     0.080,  0.150,  0.000,  0.000,  0.000,
-                     0.000,  0.000,  0.000,  0.000,  0.000,
-                     0.020,  0.030,  0.030,  0.030,  0.030,
-                     0.050,  0.100]
-            x1:    [ 0.350,  0.380,  0.400,  0.450,  0.500,
-                     1.000,  1.000,  0.000,  0.000,  0.000,
-                     0.000,  0.000,  0.000,  0.000,  0.000,
-                     0.350,  0.500,  0.500,  0.500,  0.500,
-                     0.500,  0.500]
-            err0:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
-                     0.300,  0.300,  0.400,  0.400,  0.400,
-                     0.450,  0.450,  0.550,  0.800,  3.000,
-                     4.000,  4.000,  3.500,  3.000,  3.000,
-                     3.000,  3.000]
-            err1:  [20.000, 25.000, 12.000,  7.000,  3.500,
-                     3.000,  0.800,  0.400,  0.400,  0.400,
-                     0.450,  0.450,  0.550,  0.800,  3.000,
-                    19.000, 30.000, 25.000, 16.500, 12.000,
-                     9.000,  6.500]
-        obserr_bound_max: [4.5, 4.5, 3.0, 3.0, 1.0,
-                           1.0, 1.0, 1.0, 1.0, 1.0,
-                           1.0, 1.0, 1.0, 2.0, 4.5,
-                           4.5, 2.0, 2.0, 2.0, 2.0,
-                           2.0, 2.0]
+                bias_application: HofX
+            x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                     0.100,  0.000,  0.000,  0.000,  0.000,
+                     0.000,  0.000,  0.000,  0.000,  0.030]
+            x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                     1.500,  0.000,  0.000,  0.000,  0.000,
+                     0.000,  0.000,  0.000,  0.000,  0.200]
+            err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                     0.230,  0.230,  0.250,  0.250,  0.350,
+                     0.400,  0.550,  0.800,  3.000,  3.500]
+            err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                     0.300,  0.230,  0.250,  0.250,  0.350,
+                     0.400,  0.550,  0.800,  3.000, 18.000]
+        obserr_bound_max: [4.5, 4.5, 4.5, 2.5, 2.0,
+                           2.0, 2.0, 2.0, 2.0, 2.0,
+                           2.5, 3.5, 4.5, 4.5, 4.5]
     action:
       name: reject
 #  Inter-channel check
@@ -364,10 +325,8 @@ observations:
         channels: *all_channels
         sensor: *Sensor_ID
         use_flag: [ 1,  1,  1,  1,  1,
-                    1,  1,  1,  1,  1,
-                    1,  1,  1,  1, -1,
-                    1,  1,  1,  1,  1,
-                    1,  1]
+                    1, -1, -1,  1,  1,
+                    1,  1,  1, -1,  1 ]
     maxvalue: 1.0e-12
     action:
       name: reject
@@ -382,12 +341,9 @@ observations:
       options:
         channels: *all_channels
         use_flag: [ 1,  1,  1,  1,  1,
-                    1,  1,  1,  1,  1,
-                    1,  1,  1,  1, -1,
-                    1,  1,  1,  1,  1,
-                    1,  1]
+                    1, -1, -1,  1,  1,
+                    1,  1,  1, -1,  1 ]
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 159152
-
+  passedBenchmark: 107

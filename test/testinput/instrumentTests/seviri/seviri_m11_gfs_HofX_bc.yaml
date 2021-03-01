@@ -12,7 +12,7 @@ observations:
   obs space:
     name: seviri_m11
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 4-11
   geovals:

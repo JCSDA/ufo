@@ -5,8 +5,6 @@ observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
-    linear obs operator:
-      Absorbers: [H2O,O3,CO2]
     obs options:
       Sensor_ID: &Sensor_ID mhs_metop-b
       EndianType: little_endian
@@ -14,25 +12,15 @@ observations:
   obs space:
     name: mhs_metop-b
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/mhs_metop-b_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-b_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-5
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/mhs_metop-b_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-b_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_mhs_metop-b.2020110106.nc4
     sensor: *Sensor_ID
     jobs: *channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
     predictors:
     - predictor:
         name: constant
@@ -46,7 +34,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &mhs_metop-b_tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/mhs_metop-b_tlapmean.txt
+          tlapse: &mhs_metop-b_tlap Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-b_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
@@ -67,12 +55,5 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
-    tolerance: 1.e-5
   vector ref: GsiHofXBc
   tolerance: 1.e-7
-  linear obs operator test:
-    iterations TL: 2
-    coef TL: 1.e-3
-    tolerance TL: 1.0e-3
-    tolerance AD: 1.0e-11
-

@@ -7,36 +7,21 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
-    linear obs operator:
-      Absorbers: [H2O,O3,CO2]
-      Clouds: [Water, Ice]
     obs options:
-      inspectProfile: 1
       Sensor_ID: &Sensor_ID amsua_n18
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
     name: amsua_n18
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/amsua_n18_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-15
+    channels: &all_channels 1-15
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/amsua_n18_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
-    sensor: *Sensor_ID
-    jobs: *channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_amsua_n18.2020110106.nc4
+    jobs: *all_channels
     predictors:
     - predictor:
         name: constant
@@ -50,11 +35,11 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &amsua_n18tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/amsua_n18_tlapmean.txt
+          tlapse: &amsua_n18_tlap Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *amsua_n18tlap
+          tlapse: *amsua_n18_tlap
     - predictor:
         name: emissivity
     - predictor:
@@ -71,12 +56,5 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
-    tolerance: 1.e-5
   vector ref: GsiHofXBc
   tolerance: 1.e-7
-  linear obs operator test:
-    iterations TL: 2
-    coef TL: 1.e-3
-    tolerance TL: 1.0e-3
-    tolerance AD: 1.0e-11
-

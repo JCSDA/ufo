@@ -12,7 +12,7 @@ observations:
   obs space:
     name: iasi_metop-b
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/iasi_metop-b_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-b_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
                             55, 56, 57, 59, 61, 62, 63, 66, 68, 70, 72, 74, 76, 78, 79, 81, 82, 83,
@@ -64,10 +64,9 @@ observations:
                             7475, 7549, 7584, 7665, 7666, 7831, 7836, 7853, 7865, 7885, 7888, 7912,
                             7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/iasi_metop-b_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-b_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
-    sensor: *Sensor_ID
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_iasi_metop-b.2020110106.nc4
     jobs: *all_channels
     predictors:
     - predictor:
@@ -76,7 +75,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &iasi_metop-b_tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/iasi_metop-b_tlapmean.txt
+          tlapse: &iasi_metop-b_tlap Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-b_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
@@ -99,4 +98,3 @@ observations:
         name: scan_angle
   vector ref: GsiHofXBc
   tolerance: 1.e-7
-

@@ -6,16 +6,16 @@ observations:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
     obs options:
-      Sensor_ID: mhs_metop-b
+      Sensor_ID: ssmis_f17
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: mhs_metop-b
+    name: ssmis_f17
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-b_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
-    channels: 1-5
+    channels: 1-24
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-b_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_geoval_2020110112_m.nc4
   vector ref: GsiHofX
-  tolerance: 1.5e-5
+  tolerance: 1.e-5

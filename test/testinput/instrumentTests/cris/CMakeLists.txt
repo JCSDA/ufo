@@ -5,25 +5,73 @@
 
 # Instrument tests for CrIS
 
-# H(x) test
 if( crtm_FOUND )
-    ecbuild_add_test( TARGET  test_ufo_instrument_cris-fsr_n20_gfs_HofX
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                      ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_gfs_HofX.yaml"
-                      MPI     1
-                      LABELS  cris n20 HofX instrument
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                      LIBS    ufo
-                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    # H(x) test
+    ufo_add_test( NAME  instrument_cris-fsr_n20_gfs_HofX
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_gfs_HofX.yaml"
+        MPI     1
+        LABELS  cris n20 HofX instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
-    ecbuild_add_test( TARGET  test_ufo_instrument_cris-fsr_npp_gfs_HofX
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                      ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_npp_gfs_HofX.yaml"
-                      MPI     1
-                      LABELS  cris npp HofX instrument
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                      LIBS    ufo
-                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    ufo_add_test( NAME  instrument_cris-fsr_npp_gfs_HofX
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_npp_gfs_HofX.yaml"
+        MPI     1
+        LABELS  cris npp HofX instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    # H(x) with Bias Correction (bc)
+    ufo_add_test( NAME  instrument_cris-fsr_n20_gfs_HofX_bc
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_gfs_HofX_bc.yaml"
+        MPI     1
+        LABELS  cris-fsr n20 bc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ufo_add_test( NAME  instrument_cris-fsr_npp_gfs_HofX_bc
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_npp_gfs_HofX_bc.yaml"
+        MPI     1
+        LABELS  cris-fsr npp bc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    # H(x) with QC
+    ufo_add_test( NAME  instrument_cris-fsr_n20_gfs_HofX_qc
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_gfs_HofX_qc.yaml"
+        MPI     1
+        LABELS  cris-fsr n20 qc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ufo_add_test( NAME  instrument_cris-fsr_npp_gfs_HofX_qc
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_npp_gfs_HofX_qc.yaml"
+        MPI     1
+        LABELS  cris-fsr npp qc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 endif( crtm_FOUND )

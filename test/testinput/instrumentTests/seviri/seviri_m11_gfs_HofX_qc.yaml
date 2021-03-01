@@ -12,7 +12,7 @@ observations:
   obs space:
     name: seviri_m11
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 4-11
   geovals:
@@ -150,4 +150,4 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 13 # passedBenchmark for the global dataset: 6401
+  passedBenchmark: 13

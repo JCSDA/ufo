@@ -12,11 +12,10 @@ observations:
   obs space:
     name: mhs_metop-c
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/instruments/radiance/mhs_metop-c_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-c_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-5
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-c_geoval_2020110112_m.nc4
   vector ref: GsiHofX
   tolerance: 1.5e-5
-

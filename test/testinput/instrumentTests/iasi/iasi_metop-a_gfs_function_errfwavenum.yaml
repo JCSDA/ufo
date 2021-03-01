@@ -4,7 +4,7 @@ window end: 2020-12-01T15:00:00Z
 observations:
 - obs space:
     name: iasi_metop-a
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/iasi_metop-a_obs_2020120112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obs_2020120112.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
                             55, 56, 57, 59, 61, 62, 63, 66, 68, 70, 72, 74, 76, 78, 79, 81, 82, 83,
@@ -57,10 +57,10 @@ observations:
                             7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
   # can have GeoVaLs section like below
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/iasi_metop-a_geoval_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_geoval_2020120112.nc4
   # can have ObsDiag section like below
   obs diagnostics:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/obsdiag/iasi_metop-a_obsdiag_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obsdiag_2020120112.nc4
   obs function:
     name: ObsErrorFactorWavenumIR@ObsFunction
     options:
@@ -68,4 +68,3 @@ observations:
     variables: [error_inflation_factor_wavenum]
     channels: *all_channels
     tolerance: 1.0e-8
-

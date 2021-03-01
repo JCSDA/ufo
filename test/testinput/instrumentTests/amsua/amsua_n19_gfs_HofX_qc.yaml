@@ -8,35 +8,40 @@ observations:
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
     obs options:
-      Sensor_ID: &Sensor_ID amsua_metop-a
+      Sensor_ID: &Sensor_ID amsua_n19
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: amsua_metop-a
+    name: amsua_n19
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/amsua_metop-a_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n19_obs_2020110112_m.nc4
     obsdataout:
-      obsfile: Data/amsua_metop-a_obs_2020110112_qc_filters_out.nc4
+      obsfile: Data/amsua_n19_obs_2020110112_qc_filters_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-15
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/amsua_metop-a_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n19_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
-    sensor: *Sensor_ID
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_amsua_n19.2020110106.nc4
     jobs: *all_channels
     predictors:
     - predictor:
         name: constant
     - predictor:
-        name: lapse_rate
+        name: cosine_of_latitude_times_orbit_node
         options:
-          order: 2
-          tlapse: &amsua_metop-a_tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/amsua_metop-a_tlapmean.txt
+          preconditioner: 0.01
+    - predictor:
+        name: sine_of_latitude
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *amsua_metop-a_tlap
+          order: 2
+          tlapse: &amsua_n19_tlap Data/ufo/testinput_tier_1/instruments/radiance/amsua_n19_tlapmean.txt
+    - predictor:
+        name: lapse_rate
+        options:
+          tlapse: *amsua_n19_tlap
     - predictor:
         name: emissivity
     - predictor:
@@ -341,5 +346,4 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 87325
-
+  passedBenchmark: 76

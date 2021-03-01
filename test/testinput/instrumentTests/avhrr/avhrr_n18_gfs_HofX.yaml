@@ -12,11 +12,10 @@ observations:
   obs space:
     name: avhrr3_n18
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: 3,4,5
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_geoval_2020110112_m.nc4
   vector ref: GsiHofX
   tolerance: 1.e-5
-

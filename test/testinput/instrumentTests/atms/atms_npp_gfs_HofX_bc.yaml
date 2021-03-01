@@ -7,9 +7,6 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
-    linear obs operator:
-      Absorbers: [H2O,O3,CO2]
-      Clouds: [Water, Ice]
     obs options:
       Sensor_ID: &Sensor_ID atms_npp
       EndianType: little_endian
@@ -17,25 +14,14 @@ observations:
   obs space:
     name: atms_npp
     obsdatain:
-      obsfile: @INSTRUMENT_TESTS_DATA_DIR@/obs/atms_npp_obs_2020110112.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-22
   geovals:
-    filename: @INSTRUMENT_TESTS_DATA_DIR@/geoval/atms_npp_geoval_2020110112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_geoval_2020110112_m.nc4
   obs bias:
-    abias_in: @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/satbias.2020110106
-    sensor: *Sensor_ID
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_atms_npp.2020110106.nc4
     jobs: *channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
     predictors:
     - predictor:
         name: constant
@@ -49,7 +35,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &atms_npp_tlap @INSTRUMENT_TESTS_DATA_DIR@/GSI_diags/atms_npp_tlapmean.txt
+          tlapse: &atms_npp_tlap Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
@@ -70,12 +56,5 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
-    tolerance: 1.e-5
   vector ref: GsiHofXBc
   tolerance: 1.e-7
-  linear obs operator test:
-    iterations TL: 2
-    coef TL: 1.e-3
-    tolerance TL: 1.0e-3
-    tolerance AD: 1.0e-11
-

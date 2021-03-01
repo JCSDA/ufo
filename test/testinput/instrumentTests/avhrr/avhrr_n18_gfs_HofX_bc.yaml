@@ -6,38 +6,32 @@ observations:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
     obs options:
-      Sensor_ID: &Sensor_ID mhs_n19
+      Sensor_ID: &Sensor_ID avhrr3_n18
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: mhs_n19
+    name: avhrr3_n18
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/mhs_n19_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-5
+    channels: &all_channels 3,4,5
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/radiance/mhs_n19_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_geoval_2020110112_m.nc4
   obs bias:
-    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_mhs_n19.2020110106.nc4
-    jobs: *channels
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_avhrr3_n18.2020110106.nc4
+    jobs: *all_channels
     predictors:
     - predictor:
         name: constant
     - predictor:
-        name: cosine_of_latitude_times_orbit_node
-        options:
-          preconditioner: 0.01
-    - predictor:
-        name: sine_of_latitude
-    - predictor:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &mhs_n19_tlap Data/ufo/testinput_tier_1/instruments/radiance/mhs_n19_tlapmean.txt
+          tlapse: &avhrr_n18_tlap Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *mhs_n19_tlap
+          tlapse: *avhrr_n18_tlap
     - predictor:
         name: emissivity
     - predictor:
@@ -55,4 +49,4 @@ observations:
     - predictor:
         name: scan_angle
   vector ref: GsiHofXBc
-  tolerance: 1.e-7
+  tolerance: 1.e-6
