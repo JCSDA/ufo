@@ -14,7 +14,7 @@ contains
 !> For each obs diagnostic called <var>_background_error, where <var> belongs to the set of variable
 !> names @p obsvars, fill this diagnostic with estimates of the background error of variable <var>
 !> at observation locations.
-subroutine ufo_backgrounderrorvertinterp_fillobsdiags(vcoord, vcoord_levels, &
+subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_name, &
                                                       geovals, obsspace, nlocs, obsvars, obsdiags)
   use kinds,           only: kind_real
   use obsspace_mod,    only: obsspace_get_db
@@ -24,10 +24,10 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(vcoord, vcoord_levels, &
   implicit none
 
   ! Name of the variable with vertical coordinates of observations
-  character(len=*), intent(in)     :: vcoord
+  character(len=*), intent(in)     :: obs_vcoord_name
   ! Name of the GeoVaL with the vertical coordinate levels to use for
   ! interpolation of background errors
-  character(len=*), intent(in)     :: vcoord_levels
+  character(len=*), intent(in)     :: vcoord_name
   type(ufo_geovals), intent(in)    :: geovals
   type(c_ptr), value, intent(in)   :: obsspace
   integer, intent(in)              :: nlocs
@@ -48,14 +48,14 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(vcoord, vcoord_levels, &
   character(len=*), parameter      :: suffix = "_background_error"
 
   ! Get vertical coordinate profiles from geovals
-  call ufo_geovals_get_var(geovals, vcoord_levels, vcoord_profile)
+  call ufo_geovals_get_var(geovals, vcoord_name, vcoord_profile)
 
   ! Get the observation vertical coordinates
-  call obsspace_get_db(obsspace, "MetaData", vcoord, obs_vcoord)
+  call obsspace_get_db(obsspace, "MetaData", obs_vcoord_name, obs_vcoord)
 
   ! Use logarithmic interpolation if the vertical coordinate is air_pressure
   ! or air_pressure_levels
-  use_ln = (vcoord .eq. var_prs) .or. (vcoord .eq. var_prsi)
+  use_ln = (obs_vcoord_name .eq. var_prs) .or. (obs_vcoord_name .eq. var_prsi)
 
   ! Calculate the interpolation weights
   allocate(interp_nodes(vcoord_profile%nval))

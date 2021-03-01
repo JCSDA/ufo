@@ -56,13 +56,11 @@ class ObsBackgroundErrorVertInterpParameters : public oops::Parameters {
 
   /// Name of the ufo variable (from the `MetaData` group) storing the vertical coordinate of
   /// observation locations.
-  oops::Parameter<std::string> verticalCoordinate{"vertical coordinate", "air_pressure", this};
+  oops::RequiredParameter<std::string> observationVerticalCoordinate{
+    "observation vertical coordinate", this};
 
   /// Name of the GeoVaL storing the interpolation levels of background errors.
-  ///
-  /// If not specified, it is assumed to be the same as the value of the `vertical coordinate`
-  /// option.
-  oops::OptionalParameter<std::string> interpolationLevels{"interpolation levels", this};
+  oops::RequiredParameter<std::string> verticalCoordinate{"vertical coordinate", this};
 };
 
 /// \brief An observation operator calculating ObsDiagnostics representing vertically interpolated
@@ -93,8 +91,10 @@ class ObsBackgroundErrorVertInterpParameters : public oops::Parameters {
 ///         vertical coordinate: geopotential_height  # coordinate used for obs value interpolation
 ///       # operator used to evaluate background errors
 ///       - name: BackgroundErrorVertInterp
-///         vertical coordinate: geopotential_height  # coordinate used for bg error interpolation
-///         interpolation levels: background_error_geopotential_height
+///         # vertical coordinate of observation locations
+///         observation vertical coordinate: geopotential_height
+///         # GeoVaL storing interpolation levels of background errors
+///         vertical coordinate: background_error_geopotential_height
 ///
 class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
                                      private util::ObjectCounter<ObsBackgroundErrorVertInterp> {
@@ -113,8 +113,6 @@ class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
 
  private:
   void print(std::ostream &) const override;
-
-  std::string interpolationLevels() const;
 
  private:
   const ioda::ObsSpace& odb_;

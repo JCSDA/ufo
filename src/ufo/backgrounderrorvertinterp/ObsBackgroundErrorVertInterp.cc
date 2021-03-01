@@ -35,7 +35,7 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
 
   parameters_.validateAndDeserialize(config);
 
-  requiredVars_.push_back(interpolationLevels());
+  requiredVars_.push_back(parameters_.verticalCoordinate);
   // simulateObs() may be asked to interpolate the background errors of any simulated variables.
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.
   const oops::Variables &obsvars = odb.obsvariables();
@@ -53,8 +53,8 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
                                                ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "ObsBackgroundErrorVertInterp: simulateObs entered" << std::endl;
 
+  const std::string &obsVerticalCoordinate = parameters_.observationVerticalCoordinate;
   const std::string &verticalCoordinate = parameters_.verticalCoordinate;
-  const std::string levels = interpolationLevels();
 
   oops::Variables variables;
   if (parameters_.variables.value() != boost::none)
@@ -63,10 +63,10 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
   else
     variables = odb_.obsvariables();
 
-  ufo_backgrounderrorvertinterp_fillobsdiags_f90(verticalCoordinate.size(),
+  ufo_backgrounderrorvertinterp_fillobsdiags_f90(obsVerticalCoordinate.size(),
+                                                 obsVerticalCoordinate.c_str(),
+                                                 verticalCoordinate.size(),
                                                  verticalCoordinate.c_str(),
-                                                 levels.size(),
-                                                 levels.c_str(),
                                                  geovals.toFortran(), odb_, hofx.nlocs(),
                                                  variables,
                                                  ydiags.toFortran());
@@ -85,11 +85,6 @@ oops::Variables ObsBackgroundErrorVertInterp::simulatedVars() const {
 
 void ObsBackgroundErrorVertInterp::print(std::ostream & os) const {
   os << "ObsBackgroundErrorVertInterp: config = " << parameters_ << std::endl;
-}
-
-std::string ObsBackgroundErrorVertInterp::interpolationLevels() const {
-  return parameters_.interpolationLevels.value().value_or(
-        parameters_.verticalCoordinate.value());
 }
 
 }  // namespace ufo

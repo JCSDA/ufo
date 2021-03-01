@@ -28,8 +28,8 @@ obs operator:
     - name: eastward_wind
     - name: air_temperature
     - name: specific_humidity
-    vertical coordinate: air_pressure
-    interpolation levels: background_error_air_pressure
+    observation vertical coordinate: air_pressure
+    vertical coordinate: background_error_air_pressure
   - name: BackgroundErrorIdentity
     variables:
     - name: surface_pressure

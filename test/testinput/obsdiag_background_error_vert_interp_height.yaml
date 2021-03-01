@@ -15,8 +15,8 @@ obs operator:
   - name: VertInterp
   # operator used to evaluate background errors
   - name: BackgroundErrorVertInterp
-    vertical coordinate: height
-    interpolation levels: background_error_height
+    observation vertical coordinate: height
+    vertical coordinate: background_error_height
 geovals:
   filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_height_geoval_2018041500_s.nc4
 obs diagnostics:

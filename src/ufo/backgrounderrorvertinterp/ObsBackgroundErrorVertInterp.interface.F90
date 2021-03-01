@@ -13,8 +13,8 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_vcoord, c_vcoord, &
-                                                        len_vcoord_levels, c_vcoord_levels, &
+subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_obs_vcoord, c_obs_vcoord, &
+                                                        len_vcoord, c_vcoord, &
                                                         c_key_geovals, c_obsspace, c_nlocs, &
                                                         c_obsvars, c_key_obsdiags) &
   bind(c, name='ufo_backgrounderrorvertinterp_fillobsdiags_f90')
@@ -26,29 +26,29 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_vcoord, c_vcoord, &
   use ufo_vars_mod,       only: MAXVARLEN
   implicit none
 
+  integer(c_int), intent(in) :: len_obs_vcoord
+  character(kind=c_char, len=1), intent(in) :: c_obs_vcoord(len_obs_vcoord + 1)
   integer(c_int), intent(in) :: len_vcoord
   character(kind=c_char, len=1), intent(in) :: c_vcoord(len_vcoord + 1)
-  integer(c_int), intent(in) :: len_vcoord_levels
-  character(kind=c_char, len=1), intent(in) :: c_vcoord_levels(len_vcoord_levels + 1)
   integer(c_int), intent(in) :: c_key_geovals
   type(c_ptr), value, intent(in) :: c_obsspace
   integer(c_int), intent(in) :: c_nlocs
   type(c_ptr), value, intent(in) :: c_obsvars
   integer(c_int), intent(in) :: c_key_obsdiags
 
+  character(len=MAXVARLEN) :: obs_vcoord
   character(len=MAXVARLEN) :: vcoord
-  character(len=MAXVARLEN) :: vcoord_levels
   type(ufo_geovals), pointer :: geovals
   type(oops_variables)       :: obsvars
   type(ufo_geovals), pointer :: obsdiags
 
+  call c_f_string(c_obs_vcoord, obs_vcoord)
   call c_f_string(c_vcoord, vcoord)
-  call c_f_string(c_vcoord_levels, vcoord_levels)
   call ufo_geovals_registry%get(c_key_geovals, geovals)
   obsvars = oops_variables(c_obsvars)
   call ufo_geovals_registry%get(c_key_obsdiags, obsdiags)
 
-  call ufo_backgrounderrorvertinterp_fillobsdiags(vcoord, vcoord_levels, &
+  call ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord, vcoord, &
                                                   geovals, c_obsspace, c_nlocs, obsvars, obsdiags)
 
 end subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c

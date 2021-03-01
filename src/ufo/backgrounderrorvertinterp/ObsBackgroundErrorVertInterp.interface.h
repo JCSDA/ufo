@@ -22,10 +22,10 @@ namespace ufo {
 
 extern "C" {
 
-  void ufo_backgrounderrorvertinterp_fillobsdiags_f90(const int &len_vcoord,
+  void ufo_backgrounderrorvertinterp_fillobsdiags_f90(const int &len_obs_vcoord,
+                                                      const char *obs_vcoord,
+                                                      const int &len_vcoord,
                                                       const char *vcoord,
-                                                      const int &len_vcoord_levels,
-                                                      const char *vcoord_levels,
                                                       const F90goms &geovals,
                                                       const ioda::ObsSpace &obsspace,
                                                       const int &nlocs,
