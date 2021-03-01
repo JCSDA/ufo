@@ -61,6 +61,8 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_sdepth  = "surface_snow_t
 character(len=MAXVARLEN), public, parameter :: var_sfc_vegfrac = "vegetation_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "surface_wind_speed"
 character(len=MAXVARLEN), public, parameter :: var_sfc_wdir    = "surface_wind_from_direction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_u10     = "uwind_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_v10     = "vwind_at_10m"
 character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "leaf_area_index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "volume_fraction_of_condensed_water_in_soil"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "soil_temperature"
@@ -93,7 +95,8 @@ character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_vel
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
 character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
-
+character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
+character(len=MAXVARLEN), public, parameter :: var_sfc_seaicefrac = "seaice_fraction"
 
 character(len=MAXVARLEN), public :: var_seaicefrac      = "sea_ice_category_area_fraction"
 character(len=MAXVARLEN), public :: var_seaicethick     = "sea_ice_category_thickness"

@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2020 UCAR.
+# (C) Copyright 2017-2021 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -28,6 +28,7 @@ list( APPEND ufo_test_input
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/atms_rttov_qc.yaml
+  testinput/amsua_rttovcpp.yaml
   testinput/background_error_vert_interp.yaml
   testinput/background_error_identity.yaml
   testinput/bias_coeff.yaml
@@ -764,6 +765,13 @@ if( ${RTTOV_FOUND} )
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
+                    TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_opr_rttovcpp_amsua
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                    ARGS    "testinput/amsua_rttovcpp.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsOperator.x
                     TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 endif( ${RTTOV_FOUND} )
 

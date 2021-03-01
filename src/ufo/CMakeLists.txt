@@ -69,6 +69,7 @@ add_subdirectory( radarreflectivity )
 add_subdirectory( radarradialvelocity )
 if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
+    add_subdirectory( rttovcpp )
 endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( sfcpcorrected )
@@ -95,6 +96,7 @@ list( APPEND ufo_src_files
     ${avgkernel_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
+    ${rttovcpp_src_files}
     ${gnssro_src_files}
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
