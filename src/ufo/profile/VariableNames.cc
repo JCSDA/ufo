@@ -64,7 +64,6 @@ constexpr const char* const ufo::VariableNames::pgebd_geopotential_height;
 
 constexpr const char* const ufo::VariableNames::station_ID;
 constexpr const char* const ufo::VariableNames::obs_level_time;
-constexpr const char* const ufo::VariableNames::PstarBackgr;
 constexpr const char* const ufo::VariableNames::ObsType;
 constexpr const char* const ufo::VariableNames::Latitude;
 constexpr const char* const ufo::VariableNames::Longitude;

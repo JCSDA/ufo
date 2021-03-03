@@ -79,7 +79,6 @@ struct VariableNames
 
   static constexpr const char* const station_ID = "station_id@MetaData";
   static constexpr const char* const obs_level_time = "level_time@MetaData";
-  static constexpr const char* const PstarBackgr = "PstarBackgr@MetaData";
   static constexpr const char* const ObsType = "ObsType@MetaData";
   static constexpr const char* const Latitude = "latitude@MetaData";
   static constexpr const char* const Longitude = "longitude@MetaData";

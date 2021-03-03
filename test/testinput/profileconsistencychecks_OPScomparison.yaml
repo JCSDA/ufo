@@ -13,6 +13,8 @@ Sondes:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
     simulated variables: [air_temperature, geopotential_height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_geovals.nc4
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
