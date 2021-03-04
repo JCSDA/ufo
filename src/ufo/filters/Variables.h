@@ -34,12 +34,17 @@ class Variables: public util::Printable {
   Variables & operator+=(const Variables &);
   Variables & operator+=(const Variable &);
 
+  /// \brief Return the number of constituent Variable objects (some of which may contain multiple
+  /// channels).
   size_t size() const;
+  /// \brief Return a given constituent Variable (which may contain multiple channels).
   const Variable & operator[](const size_t) const;
 
 // the below two functions are for compatibility with oops::Variables and should
 // eventually be removed
+  /// \brief Return the number of constituent "primitive" (single-channel) variables.
   size_t nvars() const;
+  /// \brief Return a given constituent "primitive" (single-channel) variable.
   Variable variable(const size_t) const;
 
   Variables allFromGroup(const std::string &) const;

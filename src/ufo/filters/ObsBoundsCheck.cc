@@ -21,9 +21,45 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/utils/PrimitiveVariables.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
+
+namespace {
+
+// -----------------------------------------------------------------------------
+
+/// Set each element of \p flagged to true if the corresponding element of \p apply is true
+/// and the corresponding element of \p testValues is a non-missing value lying outside the
+/// closed interval [\p minValue, \p maxValue].
+void flagWhereOutOfBounds(const std::vector<bool> & apply,
+                          const std::vector<float> & testValues,
+                          float minValue,
+                          float maxValue,
+                          bool treatMissingAsOutOfBounds,
+                          std::vector<bool> &flagged) {
+  const size_t nlocs = testValues.size();
+  ASSERT(apply.size() == nlocs);
+  ASSERT(flagged.size() == nlocs);
+
+  const float missing = util::missingValue(missing);
+  for (size_t i = 0; i < nlocs; ++i) {
+    if (apply[i]) {
+      if (testValues[i] != missing) {
+        if (minValue != missing && testValues[i] < minValue)
+          flagged[i] = true;
+        if (maxValue != missing && testValues[i] > maxValue)
+          flagged[i] = true;
+      } else {
+        if (treatMissingAsOutOfBounds)
+          flagged[i] = true;
+      }
+    }
+  }
+}
+
+}  // namespace
 
 // -----------------------------------------------------------------------------
 
@@ -48,103 +84,59 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
-  const float missing = util::missingValue(missing);
-  const oops::Variables observed = obsdb_.obsvariables();
-
-// Find which variables are tested and the conditions
+  // Find the variables that should be tested. Use the variables specified in the 'test variables'
+  // option if present, otherwise the filter variables.
   ufo::Variables testvars;
-// Use variables specified in test variables/functions for testing, otherwise filter variables
   if (parameters_.testVariables.value() != boost::none) {
     for (const Variable & var : *parameters_.testVariables.value())
       testvars += var;
   } else {
     testvars += ufo::Variables(filtervars, "ObsValue");
   }
-  const float vmin = parameters_.minvalue.value().value_or(missing);
-  const float vmax = parameters_.maxvalue.value().value_or(missing);
-
-// Sanity checks
-  if (filtervars.nvars() == 0) {
-    oops::Log::error() << "No variables will be filtered out in filter "
-                       << parameters_ << std::endl;
-    ABORT("No variables specified to be filtered out in filter");
-  }
+  if (!testvars)
+    throw eckit::UserError("ObsBoundsCheck: The list of test variables is empty", Here());
 
   oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
                      << testvars << std::endl;
 
-  oops::Log::debug() << "      sizes of each: " << filtervars.size() << " and "
-                     << testvars.size() << std::endl;
+  // Retrieve the bounds.
+  const float missing = util::missingValue(missing);
+  const float vmin = parameters_.minvalue.value().value_or(missing);
+  const float vmax = parameters_.maxvalue.value().value_or(missing);
 
-// Initialize map from filtervars to observed variables
-  std::vector<size_t> filt2obs;
-  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-    filt2obs.push_back(observed.find(filtervars.variable(jv).variable()));
-  }
+  // Determine the mode of operation.
+  const bool flagAllFilterVarsIfAnyTestVarOutOfBounds =
+      parameters_.testVariables.value() != boost::none &&
+      (parameters_.flagAllFilterVarsIfAnyTestVarOutOfBounds.value() ||
+       testvars.nvars() == 1);
+  const bool treatMissingAsOutOfBounds = parameters_.treatMissingAsOutOfBounds;
 
-  if (filtervars.size() == testvars.size()) {
-    // Loop over all test variables to get data
-    for (size_t iv = 0; iv < testvars.size(); ++iv) {
-      const std::string grp = testvars[iv].group();
-      ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables());
-      if (grp == "ObsFunction") {
-        data_.get(testvars[iv], testdata);
-      } else {
-        for (size_t ii = 0; ii < testvars[iv].size(); ++ii) {
-          size_t kv = ii + iv * testvars[iv].size();
-          data_.get(testvars.variable(kv), testdata[ii]);
-        }
-      }
-
-      std::vector<size_t> test_jv(filtervars[iv].size(), 0);
-      if (testvars[iv].size() == filtervars[iv].size()) {
-        std::iota(test_jv.begin(), test_jv.end(), 0);
-      }
-
-      // Loop over all variables to filter
-      for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
-        for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
-            ASSERT(testdata[test_jv[jv]][jobs] != missing);
-            size_t kv = jv + filtervars[iv].size() * iv;
-            if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[kv][jobs] = true;
-            if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[kv][jobs] = true;
-          }
-        }
-      }
+  // Do the actual work.
+  if (flagAllFilterVarsIfAnyTestVarOutOfBounds) {
+    std::vector<bool> anyTestVarOutOfBounds(obsdb_.nlocs(), false);
+    // Loop over all channels of all test variables and record all locations where any of these
+    // channels is out of bounds.
+    for (PrimitiveVariable singleChannelTestVar : PrimitiveVariables(testvars, data_)) {
+      const std::vector<float> & testValues = singleChannelTestVar.values();
+      flagWhereOutOfBounds(apply, testValues, vmin, vmax, treatMissingAsOutOfBounds,
+                           anyTestVarOutOfBounds);
     }
+    // Copy these flags to the flags of all filtered variables.
+    for (std::vector<bool> &f : flagged)
+      f = anyTestVarOutOfBounds;
   } else {
-    int iv = 0;
-    if (testvars.size() != 1) {
-      oops::Log::error() << "When number filtervars not equal number of test vars, "
-                         << "the latter can only be one." << parameters_ << std::endl;
-      ABORT("ONLY one testvar when filtervars>1 because its usage is ambiguous otherwise");
-    }
-
-    ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables());
-
-    const std::string grp = testvars[iv].group();
-
-    if (grp == "ObsFunction") {
-      data_.get(testvars[iv], testdata);
-    } else {
-      data_.get(testvars.variable(iv), testdata);
-    }
-
-    for (size_t jv = 0; jv < filtervars.size(); ++jv) {
-      oops::Log::debug() << "ObsBoundsCheck: testing filter var with index " << jv << std::endl;
-      if (testvars[iv].size() != filtervars[jv].size()) {
-        oops::Log::error() << "Dimension of filtervar, " << filtervars[jv].size()
-                  << " does not equal testvar dimension, " << testvars[iv].size() << std::endl;
-        ABORT("Aborting, sizes must be equivalent.");
-      }
-      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
-          ASSERT(testdata[iv][jobs] != missing);
-          if (vmin != missing && testdata[iv][jobs] < vmin) flagged[jv][jobs] = true;
-          if (vmax != missing && testdata[iv][jobs] > vmax) flagged[jv][jobs] = true;
-        }
-      }
+    if (filtervars.nvars() != testvars.nvars())
+      throw eckit::UserError("The number of 'primitive' (single-channel) test variables must match "
+                             "that of 'primitive' filter variables unless the 'flag all filter "
+                             "variables if any test variable is out of bounds' option is set");
+    // Loop over all channels of all test variables and for each locations where that channel is out
+    // of bounds, flag the corresponding filter variable channel.
+    ASSERT(filtervars.nvars() == flagged.size());
+    size_t ifiltervar = 0;
+    for (PrimitiveVariable singleChannelTestVar : PrimitiveVariables(testvars, data_)) {
+      const std::vector<float> & testValues = singleChannelTestVar.values();
+      flagWhereOutOfBounds(apply, testValues, vmin, vmax, treatMissingAsOutOfBounds,
+                           flagged[ifiltervar++]);
     }
   }
 }

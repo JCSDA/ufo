@@ -141,6 +141,7 @@ list( APPEND ufo_test_input
   testinput/operatorutils.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
+  testinput/primitive_variables.yaml
   testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
@@ -2360,10 +2361,17 @@ ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
-# Test piecewise linear interpolation
+# Test operator utils
 ecbuild_add_test( TARGET  test_ufo_operator_utils
                   SOURCES mains/TestOperatorUtils.cc
                   ARGS    "testinput/operatorutils.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test the iterator over primitive variables and their values
+ecbuild_add_test( TARGET  test_ufo_primitive_variables
+                  SOURCES mains/TestPrimitiveVariables.cc
+                  ARGS    "testinput/primitive_variables.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

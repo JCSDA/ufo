@@ -18,6 +18,8 @@ set ( utils_files
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
+      PrimitiveVariables.cc
+      PrimitiveVariables.h
       ProbabilityOfGrossError.cc
       ProbabilityOfGrossError.h
       ProbabilityOfGrossErrorParameters.h
