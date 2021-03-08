@@ -34,6 +34,12 @@ ObsDiagnostics::ObsDiagnostics(const eckit::Configuration & conf, const ioda::Ob
 
 // -----------------------------------------------------------------------------
 
+void ObsDiagnostics::allocate(const int nlev, const oops::Variables & vars) {
+  gdiags_.allocate(nlev, vars);
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsDiagnostics::save(const std::vector<double> & vals,
                           const std::string & var,
                           const int lev) {

@@ -102,6 +102,8 @@ MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters
 {
   oops::Log::debug() << "MetOfficeBuddyCheck: config = " << options_ << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
+  for (size_t i = 0; i < filtervars_.size(); ++i)
+    allvars_ += backgroundErrorVariable(filtervars_[i]);
 }
 
 // Required for the correct destruction of options_.
@@ -123,8 +125,6 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
 
   const oops::Variables &observedVars = obsdb_.obsvariables();
   ioda::ObsDataVector<float> obsValues(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> obsBiases(obsdb_, filtervars.toOopsVariables(), "ObsBias",
-                                       false /*fail if not found?*/);
 
   auto getFilterVariableName = [&] (size_t filterVarIndex) {
     return filtervars.variable(filterVarIndex).variable();
@@ -136,11 +136,9 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
     ScalarSingleLevelVariableData data;
     data.varFlags = &(*flags_)[observedVarIndex];
     data.obsValues = &obsValues[filterVarIndex];
-    data.obsBiases = &obsBiases[filterVarIndex];
     data.obsErrors = &(*obserr_)[observedVarIndex];
     data_.get(ufo::Variable(filtervars[filterVarIndex], "HofX"), data.bgValues);
-    // TODO(wsmigaj): It isn't clear where to get background error variances from.
-    data_.get(ufo::Variable(filtervars[filterVarIndex], "HofXError"), data.bgErrors);
+    data_.get(backgroundErrorVariable(filtervars[filterVarIndex]), data.bgErrors);
     // TODO(wsmigaj): How is this variable going to be initialized?
     data_.get(ufo::Variable(filtervars[filterVarIndex], "GrossErrorProbability"),
               data.grossErrorProbabilities);
@@ -180,8 +178,8 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                              *firstComponentData.varFlags,
                              verbose, bgErrorHorizCorrScales,
                              obsData.stationIds, obsData.datetimes,
-                             *firstComponentData.obsValues, *firstComponentData.obsBiases,
-                             *secondComponentData.obsValues, *secondComponentData.obsBiases,
+                             *firstComponentData.obsValues,
+                             *secondComponentData.obsValues,
                              *firstComponentData.obsErrors,
                              firstComponentData.bgValues, secondComponentData.bgValues,
                              firstComponentData.bgErrors,
@@ -207,7 +205,7 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
         checkScalarSurfaceData(buddyPairs,
                                *data.varFlags, verbose, bgErrorHorizCorrScales,
                                obsData.stationIds, obsData.datetimes,
-                               *data.obsValues, *data.obsBiases, *data.obsErrors,
+                               *data.obsValues, *data.obsErrors,
                                data.bgValues, data.bgErrors,
                                data.grossErrorProbabilities);
         calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
@@ -228,6 +226,10 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
   if (filtervars.size() != 0) {
     oops::Log::trace() << "MetOfficeBuddyCheck: flagged? = " << flagged[0] << std::endl;
   }
+}
+
+Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable) const {
+  return Variable(filterVariable.variable() + "_background_error@ObsDiag");
 }
 
 MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData() const {
@@ -351,7 +353,6 @@ void MetOfficeBuddyCheck::checkScalarSurfaceData(const std::vector<MetOfficeBudd
                                                  const std::vector<int> &stationIds,
                                                  const std::vector<util::DateTime> &datetimes,
                                                  const std::vector<float> &obsValues,
-                                                 const std::vector<float> &obsBiases,
                                                  const std::vector<float> &obsErrors,
                                                  const std::vector<float> &bgValues,
                                                  const std::vector<float> &bgErrors,
@@ -393,8 +394,8 @@ void MetOfficeBuddyCheck::checkScalarSurfaceData(const std::vector<MetOfficeBudd
       continue;  // skip to next pair
 
     // Differences from background
-    double diffA = obsValues[jA] + obsBiases[jA] - bgValues[jA];
-    double diffB = obsValues[jB] + obsBiases[jB] - bgValues[jB];
+    double diffA = obsValues[jA] - bgValues[jA];
+    double diffB = obsValues[jB] - bgValues[jB];
     // Estimated error variances (ob+bk) (eqn 2.5)
     double errVarA = sqr(obsErrors[jA]) + sqr(bgErrors[jA]);
     double errVarB = sqr(obsErrors[jB]) + sqr(bgErrors[jB]);
@@ -432,9 +433,7 @@ void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBudd
                                                  const std::vector<int> &stationIds,
                                                  const std::vector<util::DateTime> &datetimes,
                                                  const std::vector<float> &uObsValues,
-                                                 const std::vector<float> &uObsBiases,
                                                  const std::vector<float> &vObsValues,
-                                                 const std::vector<float> &vObsBiases,
                                                  const std::vector<float> &obsErrors,
                                                  const std::vector<float> &uBgValues,
                                                  const std::vector<float> &vBgValues,
@@ -478,19 +477,19 @@ void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBudd
     double sinRot = std::sin(pair.rotationAInRad);
     double cosRot = std::cos(pair.rotationAInRad);
     // Difference from background - longitudinal wind
-    double lDiffA = cosRot  * (uObsValues[jA] + uObsBiases[jA] - uBgValues[jA])
-        + sinRot * (vObsValues[jA] + vObsBiases[jA] - vBgValues[jA]);           // eqn 3.19
+    double lDiffA = cosRot  * (uObsValues[jA] - uBgValues[jA])
+        + sinRot * (vObsValues[jA] - vBgValues[jA]);           // eqn 3.19
     // Difference from background - transverse wind
-    double tDiffA = - sinRot * (uObsValues[jA] + uObsBiases[jA] - uBgValues[jA])
-        + cosRot * (vObsValues[jA] + vObsBiases[jA] - vBgValues[jA]);           // eqn 3.20
+    double tDiffA = - sinRot * (uObsValues[jA] - uBgValues[jA])
+        + cosRot * (vObsValues[jA] - vBgValues[jA]);           // eqn 3.20
     sinRot = std::sin(pair.rotationBInRad);
     cosRot  = std::cos(pair.rotationBInRad);
     // Difference from background - longitudinal wind
-    double lDiffB = cosRot  * (uObsValues[jB] + uObsBiases[jB] - uBgValues[jB])
-        + sinRot * (vObsValues[jB] + vObsBiases[jB] - vBgValues[jB]);           // eqn 3.19
+    double lDiffB = cosRot  * (uObsValues[jB] - uBgValues[jB])
+        + sinRot * (vObsValues[jB] - vBgValues[jB]);           // eqn 3.19
     // Difference from background - transverse wind
-    double tDiffB = - sinRot * (uObsValues[jB] + uObsBiases[jB] - uBgValues[jB])
-        + cosRot  * (vObsValues[jB] + vObsBiases[jB] - vBgValues[jB]);          // eqn 3.20
+    double tDiffB = - sinRot * (uObsValues[jB] - uBgValues[jB])
+        + cosRot  * (vObsValues[jB] - vBgValues[jB]);          // eqn 3.20
 
     // Estimated error variances (ob + bk; component wind variance)
     double errVarA = sqr(obsErrors[jA]) + sqr(bgErrors[jA]);                // eqn 2.5

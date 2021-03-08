@@ -39,7 +39,14 @@ class ObsDiagnostics : public util::Printable,
                  const oops::Variables &);
   ~ObsDiagnostics() {}
 
-// I/O
+  /// \brief Allocate diagnostics for variables \p vars with \p nlev number of levels
+  /// \details Fails if at least one of the \p vars doesn't exist in the ObsDiagnostics object.
+  ///          Only allocates variables that haven't been allocated before.
+  ///          Fails if one of \p vars is already allocated with a number of levels
+  ///          different than \p nlev; doesn't reallocate variables that are already
+  ///          allocated with \p nlev.
+  void allocate(const int nlev, const oops::Variables & vars);
+
   void save(const std::vector<double> &, const std::string &, const int);
 
 // Interfaces

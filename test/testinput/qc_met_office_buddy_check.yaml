@@ -9,6 +9,13 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -35,7 +42,8 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
@@ -55,6 +63,13 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -82,7 +97,8 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
@@ -102,6 +118,13 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -132,7 +155,8 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2958
   compareVariables:
     - reference:
@@ -151,6 +175,13 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -179,7 +210,8 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:

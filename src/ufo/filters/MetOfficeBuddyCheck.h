@@ -63,6 +63,22 @@ class MetOfficeBuddyPair;
 /// \endcode
 ///
 /// See MetOfficeBuddyCheckParameters for the documentation of the other available parameters.
+///
+/// This filter assumes background error estimates for each filter variable `var` can be retrieved
+/// from the `var_background_error` ObsDiagnostic. These diagnostics are typically produced using
+/// the BackgroundErrorVertInterp or BackgroundErrorIdentity operators. To make sure these operators
+/// are applied in addition to the "main" operator calculating model equivalents of observations,
+/// instruct the system to use a Composite operator with two or more components; for instance,
+///
+/// \code{.yaml}
+/// obs operator:
+///   name: Composite
+///   components:
+///   # operator used to evaluate H(x)
+///   - name: Identity
+///   # operator used to evaluate background errors
+///   - name: BackgroundErrorIdentity
+/// \endcode
 class MetOfficeBuddyCheck : public FilterBase,
                             private util::ObjectCounter<MetOfficeBuddyCheck> {
  public:
@@ -82,6 +98,10 @@ class MetOfficeBuddyCheck : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override { return QCflags::buddy; }
+
+  /// \brief Return the name of the variable containing the background error estimate of the
+  /// specified filter variable.
+  Variable backgroundErrorVariable(const Variable &filterVariable) const;
 
   /// \brief Returns a vector of IDs of all observations that should be buddy-checked.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
@@ -133,9 +153,7 @@ class MetOfficeBuddyCheck : public FilterBase,
   /// \param datetimes
   ///   Observation times.
   /// \param obsValues
-  ///   Observed values (excluding bias corrections).
-  /// \param obsBiases
-  ///   Bias corrections.
+  ///   Observed values.
   /// \param obsErrors
   ///   Estimated errors of observed values.
   /// \param bgValues
@@ -151,7 +169,6 @@ class MetOfficeBuddyCheck : public FilterBase,
                               const std::vector<int> &stationIds,
                               const std::vector<util::DateTime> &datetimes,
                               const std::vector<float> &obsValues,
-                              const std::vector<float> &obsBiases,
                               const std::vector<float> &obsErrors,
                               const std::vector<float> &bgValues,
                               const std::vector<float> &bgErrors,
@@ -174,13 +191,9 @@ class MetOfficeBuddyCheck : public FilterBase,
   /// \param datetimes
   ///   Observation times.
   /// \param uObsValues
-  ///   Observed values of the first component, u (excluding bias corrections).
-  /// \param uObsBiases
-  ///   Bias corrections for u.
+  ///   Observed values of the first component, u.
   /// \param vObsValues
-  ///   Observed values of the second component, v (excluding bias corrections).
-  /// \param vObsBiases
-  ///   Bias corrections for v.
+  ///   Observed values of the second component, v.
   /// \param obsErrors
   ///   Estimated errors of observed values (u or v).
   /// \param uBgValues
@@ -198,9 +211,7 @@ class MetOfficeBuddyCheck : public FilterBase,
                               const std::vector<int> &stationIds,
                               const std::vector<util::DateTime> &datetimes,
                               const std::vector<float> &uObsValues,
-                              const std::vector<float> &uObsBiases,
                               const std::vector<float> &vObsValues,
-                              const std::vector<float> &vObsBiases,
                               const std::vector<float> &obsErrors,
                               const std::vector<float> &uBgValues,
                               const std::vector<float> &vBgValues,
