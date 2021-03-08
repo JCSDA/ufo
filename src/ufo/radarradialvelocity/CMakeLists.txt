@@ -6,9 +6,14 @@
 set ( radarradialvelocity_files
     ObsRadarRadialVelocity.h
     ObsRadarRadialVelocity.cc
+    ObsRadarRadialVelocityTLAD.h
+    ObsRadarRadialVelocityTLAD.cc
     ObsRadarRadialVelocity.interface.F90
     ObsRadarRadialVelocity.interface.h
+    ObsRadarRadialVelocityTLAD.interface.F90
+    ObsRadarRadialVelocityTLAD.interface.h
     ufo_radarradialvelocity_mod.F90
+    ufo_radarradialvelocity_tlad_mod.F90
 )
 
 PREPEND( _p_radarradialvelocity_files     "radarradialvelocity"     ${radarradialvelocity_files} )
