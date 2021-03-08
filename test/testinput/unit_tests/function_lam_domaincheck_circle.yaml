@@ -1,0 +1,29 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: regional_domain_check
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/lam_domaincheck_circle_sondes_tv_obs_2018041500_m.nc4
+    simulated variables: [virtual_temperature]
+  obs filters:
+  # this obs function will compute, based off of input parameters,
+  # if an observation is inside of a specified circle area domain
+  # the result is then stored as a value 1 if yes, 0 no
+  # and can be filtered out by the bounds check.
+  - filter: Bounds Check
+    filter variables:
+    - name: virtual_temperature
+    test variables:
+    - name: LAMDomainCheck@ObsFunction
+      options:
+        map_projection: circle # an option currently supported
+        save: true # will save the DerivedValue to IODA output file
+        cenlat: 38.5    # central lat
+        cenlon: -97.5   # central lon
+        radius: 2000.0  # km
+    minvalue: 1.0 # will filter all obs outside of the specified limited area domain
+  passedBenchmark: 42 # only a couple radiosonde profiles are within the domain

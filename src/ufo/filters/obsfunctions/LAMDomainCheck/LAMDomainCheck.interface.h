@@ -22,6 +22,9 @@ extern "C" {
                                const float &, const float &, const float &, const float &,
                                int &);
 
+  void lam_domaincheck_circle_f90(const float &, const float &, const float &,
+                                  const float &, const float &, int &);
+
 }  // extern C
 
 }  // namespace ufo

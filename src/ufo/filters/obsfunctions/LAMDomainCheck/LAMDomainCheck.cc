@@ -105,6 +105,16 @@ void LAMDomainCheck::compute(const ObsFilterData & in,
                          dx, dy, latitude[jj], longitude[jj], iidx[jj]);
       out[0][jj] = static_cast<float>(iidx[jj]);
     }
+  } else if (options_.mapproj.value() == "circle") {
+    const float cenlat = options_.cenlat.value();
+    const float cenlon = options_.cenlon.value();
+    const float radius = options_.radius.value();
+    for (size_t jj = 0; jj < nlocs; ++jj) {
+      // calculate great-circle distance on sphere
+      lam_domaincheck_circle_f90(cenlat, cenlon, radius,
+                         latitude[jj], longitude[jj], iidx[jj]);
+      out[0][jj] = static_cast<float>(iidx[jj]);
+    }
   } else {
     // throw exception for unsupported projection
     std::string errString = " is not a supported map projection. Fatal error!!!";

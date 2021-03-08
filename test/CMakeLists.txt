@@ -238,6 +238,7 @@ list( APPEND ufo_test_input
   testinput/windprof.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
+  testinput/unit_tests/function_lam_domaincheck_circle.yaml
   testinput/unit_tests/function_obserrorfactorquotient.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
@@ -1452,6 +1453,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_wdircheck
 ecbuild_add_test( TARGET  test_ufo_qc_lam_domaincheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/function_lam_domaincheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_lam_domaincheck_circle
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/function_lam_domaincheck_circle.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )

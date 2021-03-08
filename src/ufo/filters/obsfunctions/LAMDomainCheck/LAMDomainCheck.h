@@ -28,7 +28,7 @@ class LAMDomainCheckParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(LAMDomainCheckParameters, Parameters)
 
  public:
-  oops::Parameter<std::string> mapproj{"map_projection", "NONE", this};
+  oops::RequiredParameter<std::string> mapproj{"map_projection", this};
   oops::Parameter<float> esg_a{"a", 0.0f, this};
   oops::Parameter<float> esg_k{"k", 0.0f, this};
   oops::Parameter<float> esg_plat{"plat", 0.0f, this};
@@ -39,6 +39,12 @@ class LAMDomainCheckParameters : public oops::Parameters {
   oops::Parameter<int> esg_npx{"npx", 2, this};
   oops::Parameter<int> esg_npy{"npy", 2, this};
   oops::Parameter<bool> save{"save", false, this};
+
+// for a circle domain on sphere with central lat/lon in degree
+// and radius in km
+  oops::Parameter<float> cenlat{"cenlat", 0.0f, this};
+  oops::Parameter<float> cenlon{"cenlon", 0.0f, this};
+  oops::Parameter<float> radius{"radius", 100.0f, this};
 };
 
 // -----------------------------------------------------------------------------

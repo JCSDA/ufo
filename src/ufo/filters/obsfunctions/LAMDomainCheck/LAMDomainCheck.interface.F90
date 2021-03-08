@@ -9,7 +9,7 @@ module ufo_lamdomaincheck_mod_c
 
   use iso_c_binding
   use kinds
-  use ufo_constants_mod, only: pi, deg2rad, rad2deg, two
+  use ufo_constants_mod, only: pi, deg2rad, rad2deg, two, half, mean_earth_rad
 
   implicit none
 
@@ -82,5 +82,54 @@ subroutine lam_domaincheck_esg_c(c_a, c_k, c_plat, c_plon, c_pazi, c_npx, c_npy,
   end if
 
 end subroutine lam_domaincheck_esg_c
+
+! -----------------------------------------------------------------------------
+!> \brief subroutine lam_domaincheck_circle_c
+!!
+!! \details **lam_domaincheck_circle_c()** is a subroutine that for a given input defined circle regional grid
+!! and a given input central lat/lon point and radius of circle, determines if the point is within or outside
+!! the regional domain. Circle domain could be typical for regional MPAS applications.
+!! It takes the following arguments as input:
+!! * float c_cenlat - center point latitude of circle domain (degrees)
+!! * float c_cenlon - center point longitude of circle domain (degrees)
+!! * float c_radius - radius of circle domain (km)
+!! * float c_lat - input latitude (degrees)
+!! * float c_lon - input longitude (degrees)
+!!
+!! and returns c_mask, an integer of 1 (inside the domain) or 0 (outside the domain)
+!! The above input arguments, c_lat and c_lon are independent for each observation.
+!!
+
+subroutine lam_domaincheck_circle_c(c_cenlat, c_cenlon, c_radius, &
+                                    c_lat, c_lon, c_mask) &
+                                 bind(c, name='lam_domaincheck_circle_f90')
+  implicit none
+  real(c_float),  intent(in   ) :: c_cenlat, c_cenlon, c_radius
+  real(c_float),  intent(in   ) :: c_lat, c_lon
+  integer(c_int), intent(inout) :: c_mask
+
+  real(kind_real) :: dlat, dlon, rr
+  real(kind_real) :: radius, cenlat, cenlon, lat, lon
+
+  ! some need converted from degrees to radians
+  cenlat = real(c_cenlat, kind_real)*deg2rad
+  cenlon = real(c_cenlon, kind_real)*deg2rad
+  radius = real(c_radius, kind_real)    ! in km
+  lat = real(c_lat, kind_real)*deg2rad
+  lon = real(c_lon, kind_real)*deg2rad
+
+  ! calculate great-circle distance using haversine formula
+  dlat = half*abs(lat - cenlat)
+  dlon = half*abs(lon - cenlon)
+  rr = sqrt( sin(dlon)**2 + cos(lon)*cos(cenlon)*sin(dlat)**2 )
+  rr = two*asin(rr)*mean_earth_rad
+
+  ! use rr to determine if mask is 1 (good) or 0 (bad)
+  c_mask = 0  ! outside domain
+  if (rr < radius) then
+    c_mask = 1
+  end if
+
+end subroutine lam_domaincheck_circle_c
 
 end module ufo_lamdomaincheck_mod_c
