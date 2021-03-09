@@ -1,5 +1,5 @@
 obs space:
-  name: avhrr3-metopa
+  name: avhrr-metopa
   obsdatain:
     obsfile: $(experiment_dir)/{{current_cycle}}/avhrr-metopa_obs.{{window_begin}}.nc4
   obsdataout:

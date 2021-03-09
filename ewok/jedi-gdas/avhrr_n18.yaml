@@ -1,5 +1,5 @@
 obs space:
-  name: avhrr3-n18
+  name: avhrr-n18
   obsdatain:
     obsfile: $(experiment_dir)/{{current_cycle}}/avhrr-n18_obs.{{window_begin}}.nc4
   obsdataout:

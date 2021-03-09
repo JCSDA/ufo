@@ -1,9 +1,9 @@
 obs space:
-  name: mhs-metop-c
+  name: mhs-metopc
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/mhs-metop-c_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/mhs-metopc_obs.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).mhs-metop-c.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).mhs-metopc.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 1-5
 obs operator:
