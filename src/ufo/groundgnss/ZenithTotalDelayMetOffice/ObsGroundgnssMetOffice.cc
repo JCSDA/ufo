@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/groundgnss/ObsGroundgnssMetOffice.h"
+#include "ufo/groundgnss/ZenithTotalDelayMetOffice/ObsGroundgnssMetOffice.h"
 
 #include <ostream>
 #include <string>

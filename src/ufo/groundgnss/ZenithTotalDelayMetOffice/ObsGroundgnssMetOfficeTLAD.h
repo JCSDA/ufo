@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_
-#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_
+#ifndef UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICETLAD_H_
+#define UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICETLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/groundgnss/ObsGroundgnssMetOfficeTLAD.interface.h"
+#include "ufo/groundgnss/ZenithTotalDelayMetOffice/ObsGroundgnssMetOfficeTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -63,4 +63,4 @@ class ObsGroundgnssMetOfficeTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_
+#endif  // UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICETLAD_H_

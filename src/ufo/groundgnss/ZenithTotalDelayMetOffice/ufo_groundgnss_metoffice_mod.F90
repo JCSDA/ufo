@@ -115,7 +115,7 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
     write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
     call fckit_log%debug(message)
-    write(message,'(A,1F2.4)') "hofx(iobs) = ", hofx(iobs)
+    write(message,'(A,F12.4)') "hofx(iobs) = ", hofx(iobs)
     call fckit_log%debug(message)
 
   end do obs_loop

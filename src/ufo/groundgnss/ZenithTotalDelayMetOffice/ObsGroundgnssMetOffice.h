@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
-#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
+#ifndef UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICE_H_
+#define UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICE_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/groundgnss/ObsGroundgnssMetOffice.interface.h"
+#include "ufo/groundgnss/ZenithTotalDelayMetOffice/ObsGroundgnssMetOffice.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -61,4 +61,4 @@ class ObsGroundgnssMetOffice : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
+#endif  // UFO_GROUNDGNSS_ZENITHTOTALDELAYMETOFFICE_OBSGROUNDGNSSMETOFFICE_H_
