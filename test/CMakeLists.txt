@@ -36,6 +36,7 @@ list( APPEND ufo_test_input
   testinput/bias_coeff_cov.yaml
   testinput/coolskin.yaml
   testinput/composite.yaml
+  testinput/constant_predictor.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
   testinput/cris_qc_filters.yaml
@@ -412,7 +413,7 @@ execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
-install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h
+install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h ufo/Predictor.h
          DESTINATION ${INSTALL_INCLUDE_DIR}/ufo/test/ufo)
 
 #####################################################################
@@ -450,6 +451,11 @@ ecbuild_add_executable( TARGET  test_ObsFunction.x
 
 ecbuild_add_executable( TARGET  test_ProfileConsistencyChecks.x
                         SOURCES mains/TestProfileConsistencyChecks.cc
+                        LIBS    ufo
+                       )
+
+ecbuild_add_executable( TARGET  test_Predictor.x
+                        SOURCES mains/TestPredictor.cc
                         LIBS    ufo
                        )
 
@@ -2611,6 +2617,16 @@ ecbuild_add_test( TARGET test_ufo_opr_sattcwv
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+# Test predictors
+ecbuild_add_test( TARGET  test_constant_predictor
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+                  ARGS    "testinput/constant_predictor.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+
 #####################################################################
 # Files for CRTM tests
 #####################################################################

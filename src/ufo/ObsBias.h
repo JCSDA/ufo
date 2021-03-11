@@ -63,6 +63,7 @@ class ObsBias : public util::Printable,
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
+  const std::vector<std::string> & requiredPredictors() const {return prednames_;}
 
   const Predictors & predictors() const {return predictors_;}
   const std::vector<int> & jobs() const {return jobs_;}

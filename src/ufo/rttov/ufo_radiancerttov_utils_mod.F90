@@ -69,7 +69,7 @@ module ufo_radiancerttov_utils_mod
 
   !var_ps
   character(len=maxvarlen), dimension(11), target :: varin_default_satrad = &
-    (/var_prs, var_ts, var_q, var_sfc_t2m, & 
+    (/var_prs, var_ts, var_q, var_sfc_t2m, &
     var_u, var_v, var_sfc_p2m, var_sfc_q2m, &
     var_sfc_tskin, var_water_type_rttov, var_surf_type_rttov /)
 
@@ -136,10 +136,10 @@ module ufo_radiancerttov_utils_mod
     type(rttov_transmission)        :: transmission_k  ! Output transmittances
     type(rttov_radiance)            :: radiance_k      ! Output radiances
 
-  contains 
+  contains
 
     procedure :: alloc   => alloc_rttov
-    procedure :: init_emissivity => ufo_rttov_init_emissivity 
+    procedure :: init_emissivity => ufo_rttov_init_emissivity
 
   end type ufo_rttov_io
 
@@ -450,7 +450,7 @@ contains
           else
             top_level = 1
             bottom_level = nlevels - 1
-            stride = 1       
+            stride = 1
           endif
         endif
         profiles(iprof)%p(top_level+stride:bottom_level:stride) = half * &
@@ -468,7 +468,7 @@ contains
     call ufo_geovals_get_var(geovals, varname, geoval)
 
 ! Check if temperatures are provided on levels as required for RTTOV, otherwise assume that temperatures are layer quantities
-! (and all future atmospheric variables) and do some interpolation to prepare for RTTOV. 
+! (and all future atmospheric variables) and do some interpolation to prepare for RTTOV.
 ! TODO: Put a warning in here that this is happening
     if( size(geoval%vals(:,1)) == nlevels) then
       do iprof = 1, nprofiles
@@ -554,7 +554,7 @@ contains
 
     varname = var_sfc_t2m ! 2m temperature
     if (ufo_vars_getindex(geovals%variables, varname) > 0) then
-      call ufo_geovals_get_var(geovals, varname, geoval) 
+      call ufo_geovals_get_var(geovals, varname, geoval)
       profiles(1:nprofiles)%s2m%t = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
     else
       write(message,'(A)') 'No near-surface temperature. Using bottom temperature level'
@@ -579,14 +579,14 @@ contains
       enddo
     endif
 
-    varname = var_u ! Eastward-wind in m/s 
+    varname = var_u ! Eastward-wind in m/s
     if (ufo_vars_getindex(geovals%variables, varname) > 0) then
       call ufo_geovals_get_var(geovals, varname, geoval)
 
       profiles(1:nprofiles)%s2m%u = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
       !assume if eastward then northward too
 
-      varname = var_v ! Northward-wind in m/s 
+      varname = var_v ! Northward-wind in m/s
       call ufo_geovals_get_var(geovals, varname, geoval)
 
       profiles(1:nprofiles)%s2m%v = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
@@ -625,7 +625,7 @@ contains
       call ufo_geovals_get_var(geovals, varname, geoval)
       profiles(1:nprofiles)%skin%t = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-      
+
     else
 
       ! Try to diagnose RTTOV surface from water fraction
@@ -647,24 +647,24 @@ contains
             !   !determine land, snow and ice fractions and temperatures to determine average temperature
             profiles(iprof)%skin%surftype   = surftype_land ! land
 
-            call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval) 
+            call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
             lfrac   = geoval%vals(1,prof_start + iprof - 1)
 
-            call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval) 
+            call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
             sfrac   = geoval%vals(1,prof_start + iprof - 1)
 
-            call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval) 
+            call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
             ifrac   = geoval%vals(1,prof_start + iprof - 1)
-            
+
             call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
             ltmp   = geoval%vals(1,prof_start + iprof - 1)
-            
+
             call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
             stmp   = geoval%vals(1,prof_start + iprof - 1)
-            
+
             call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
             itmp   = geoval%vals(1,prof_start + iprof - 1)
-            
+
             !Skin temperature is a combination of (i)ce temp, (l)and temp and (s)now temp
             profiles(iprof)%skin%t   = (lfrac * ltmp + sfrac * stmp + ifrac * itmp) / (lfrac + sfrac + ifrac)
           endif
@@ -695,7 +695,7 @@ contains
         ! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
         ! N.B. I think this should be flagged so it's clear that the background has been modified
         !----
-        
+
         if(profiles(iprof)%skin%surftype /= surftype_sea .and. &
             conf % UseColdSurfaceCheck) then
           if(profiles(iprof)%skin%t < 271.4_kind_real .and. &
@@ -1330,10 +1330,10 @@ contains
       asw_k = 1
       called_from = 2
     endif
-    
+
     if (present(init)) then
       init1 = init
-    else 
+    else
       init1 = .true.
     endif
 
@@ -1452,7 +1452,7 @@ contains
     self % emissivity(:) % emis_out = -1.0_kind_real ! RMDI?
     self % calcemis(:) = .false.
 
-!Emissivity and calcemis are only set for used channels. So if a profile is skipped then you must not set emis data for the channels that are skipped 
+!Emissivity and calcemis are only set for used channels. So if a profile is skipped then you must not set emis data for the channels that are skipped
 
     if ( conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_mw) then
       do ichan = 1, nchan_sim, nchan_inst ! all channels initialised equally
@@ -1463,14 +1463,14 @@ contains
           self % calcemis(ichan:ichan + nchan_inst - 1) = .true.
         else
           !IF ATLAS
-            
+
           !ELSE
           if (self % profiles(prof) % skin % surftype == surftype_land) then
-            
+
             !IF FASTEM (not implemented at MetO) ELSE
             self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.95_kind_real
           elseif (self % profiles(prof) % skin % surftype == surftype_seaice) then
-            
+
             !IF FASTEM (not implemented at MetO) ELSE
             self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.92_kind_real
           endif
@@ -1654,7 +1654,7 @@ contains
     type(rttov_conf),     intent(in)    :: conf
     type(ufo_geovals),    intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
-    integer                      :: jvar, chan, prof, ichan 
+    integer                      :: jvar, chan, prof, ichan
     integer                      :: nlayers, nchanprof, nlevels, nprofiles
     real(kind_real), allocatable :: od_level(:), wfunc(:)
 
@@ -1681,7 +1681,7 @@ contains
         select case(trim(ystr_diags(jvar)))
 
           ! variable: optical_thickness_of_atmosphere_layer_CH
-          ! variable: transmittances_of_atmosphere_layer_CH        
+          ! variable: transmittances_of_atmosphere_layer_CH
           ! variable: weightingfunction_of_atmosphere_layer_CH
         case (var_opt_depth, var_lvl_transmit,var_lvl_weightfunc)
 
@@ -1892,7 +1892,7 @@ contains
            xstr_diags(jvar)(str_pos(4)+1:) = ""
          else !null
            !Diagnostic is a dependent variable (y)
-           
+
            xstr_diags(jvar) = ""
            ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
            ystr_diags(jvar)(str_pos(3):) = ""
