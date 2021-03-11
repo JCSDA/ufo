@@ -1,9 +1,9 @@
 obs space:
-  name: avhrr-n18
+  name: avhrr3_n18
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/avhrr-n18_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/avhrr_n18.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).avhrr-n18.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).avhrr_n18.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 3,4,5
 obs operator:

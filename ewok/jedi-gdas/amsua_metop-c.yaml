@@ -1,9 +1,9 @@
 obs space:
-  name: amsua-metopc
+  name: amsua_metop-c
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/amsua-metopc_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/amsua_metop-c.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).amsua-metopc.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).amsua_metop-c.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 1-15
 obs operator:

@@ -1,9 +1,9 @@
 obs space:
-  name: atms-npp
+  name: atms_npp
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/atms-npp_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/atms_npp.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).atms-npp.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).atms_npp.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 1-22
 obs operator:

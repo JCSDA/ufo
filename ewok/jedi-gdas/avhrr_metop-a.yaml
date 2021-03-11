@@ -1,9 +1,9 @@
 obs space:
-  name: avhrr-metopa
+  name: avhrr_metop-a
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/avhrr-metopa_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/avhrr_metop-a.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).avhrr-metopa.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).avhrr_metop-a.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 3,4,5
 obs operator:

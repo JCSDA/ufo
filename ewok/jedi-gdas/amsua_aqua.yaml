@@ -1,9 +1,9 @@
 obs space:
-  name: amsua-aqua
+  name: amsua_aqua
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/amsua-aqua_obs.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/amsua_aqua.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).amsua-aqua.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).amsua_aqua.{{window_begin}}.nc4
   simulated variables: [brightness_temperature]
   channels: 1-15
 obs operator:
