@@ -133,6 +133,8 @@ set ( filters_files
       obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/BgdDepartureAnomaly.cc
+      obsfunctions/BgdDepartureAnomaly.h
       obsfunctions/ObsErrorModelStepwiseLinear.cc
       obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc

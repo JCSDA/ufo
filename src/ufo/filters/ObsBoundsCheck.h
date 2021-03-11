@@ -100,7 +100,6 @@ class ObsBoundsCheck : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::bounds;}
-
   Parameters_ parameters_;
 };
 

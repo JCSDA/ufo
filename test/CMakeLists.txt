@@ -13,6 +13,7 @@ list( APPEND ufo_test_input
   testinput/aircraft.yaml
   testinput/airs_crtm.yaml
   testinput/airs_qc_filters.yaml
+  testinput/amsr2_rttov_qc.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_qc.yaml
@@ -62,6 +63,7 @@ list( APPEND ufo_test_input
   testinput/function_errfwavenum.yaml
   testinput/function_hydrometeorchk.yaml
   testinput/function_hydrometeorchk_atms.yaml
+  testinput/function_bgddepartureanomaly.yaml
   testinput/function_nsstret.yaml
   testinput/function_obserrorinflatesfcp.yaml
   testinput/function_obserrorfactorconv.yaml
@@ -768,6 +770,13 @@ if( ${RTTOV_FOUND} )
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
+                    TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_qc_amsr2_rttov
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/amsr2_rttov_qc.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
                     TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_opr_rttovcpp_amsua
@@ -1995,6 +2004,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransform_humidityspecific
 
 # Test Functions
 
+ecbuild_add_test( TARGET  test_ufo_function_bgddepartureanomaly
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_bgddepartureanomaly.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_function_bennartzscatindex
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_bennartzscatindex.yaml"
@@ -2695,6 +2711,7 @@ if( ${RTTOV_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
+rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 )
 
 # Symlink all CRTM files
