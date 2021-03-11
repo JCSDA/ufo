@@ -16,6 +16,7 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/PolymorphicParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"  // for FilterActionFactory
+#include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -61,7 +62,7 @@ class FilterParametersBaseWithAbstractAction : public oops::ObsFilterParametersB
   /// already been rejected by another filter). The only exception is the Domain Check filter,
   /// which does the exact opposite: it rejects all observations that haven't been selected by the
   /// `where` statement.
-  oops::Parameter<eckit::LocalConfiguration> where{"where", eckit::LocalConfiguration(), this};
+  oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
 
   /// If set to true, the filter will be executed only after the obs operator (even if it
   /// doesn't require any variables from the GeoVaLs or HofX groups).

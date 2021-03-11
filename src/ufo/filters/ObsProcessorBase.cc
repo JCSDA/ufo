@@ -21,7 +21,6 @@
 
 #include "ufo/filters/actions/FilterAction.h"
 #include "ufo/filters/GenericFilterParameters.h"
-#include "ufo/filters/processWhere.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 

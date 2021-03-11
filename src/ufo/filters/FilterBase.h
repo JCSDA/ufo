@@ -20,6 +20,7 @@
 #include "ufo/filters/FilterParametersBase.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/ObsProcessorBase.h"
+#include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
 
 namespace eckit {
@@ -65,8 +66,7 @@ class FilterBase : public ObsProcessorBase {
                            std::vector<std::vector<bool>> &) const = 0;
   virtual int qcFlag() const = 0;
 
-  // This Configuration object will be replaced by an appropriate Parameters subclass later.
-  eckit::LocalConfiguration whereConfig_;
+  std::vector<WhereParameters> whereParameters_;
   std::unique_ptr<FilterActionParametersBase> actionParameters_;
 };
 

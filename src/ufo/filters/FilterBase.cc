@@ -36,7 +36,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     config_(parameters.toConfiguration()),
     filtervars_(),
-    whereConfig_(parameters.where),
+    whereParameters_(parameters.where),
     actionParameters_(parameters.action().clone())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
@@ -78,7 +78,7 @@ void FilterBase::doFilter() const {
   oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
 
 // Select locations to which the filter will be applied
-  std::vector<bool> apply = processWhere(whereConfig_, data_);
+  std::vector<bool> apply = processWhere(whereParameters_, data_);
 
 // Allocate flagged obs indicator (false by default)
   const size_t nvars = filtervars_.nvars();

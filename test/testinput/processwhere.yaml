@@ -421,3 +421,38 @@ user_error_type_handling_is_in:
           name:  var1@MetaData
         is_in: 0.5
       size where true: 0
+    - where:                       # test any_bit_set_of for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        any_bit_set_of: 1
+      size where true: 0
+    - where:                       # test any_bit_set_of for unsupported type (string)
+      - variable:
+          name:  station_id@MetaData
+        any_bit_set_of: 1
+      size where true: 0
+    - where:                       # test any_bit_unset_of for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        any_bit_unset_of: 1
+      size where true: 0
+    - where:                       # test any_bit_unset_of for unsupported type (string)
+      - variable:
+          name:  station_id@MetaData
+        any_bit_unset_of: 1
+      size where true: 0
+    - where:                       # test matches_regex for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        matches_regex: abc.*
+      size where true: 0
+    - where:                       # test matches_wildcard for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        matches_wildcard: abc*
+      size where true: 0
+    - where:                       # test matches_any_wildcard for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        matches_any_wildcard: [abc*]
+      size where true: 0

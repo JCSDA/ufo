@@ -21,7 +21,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
 

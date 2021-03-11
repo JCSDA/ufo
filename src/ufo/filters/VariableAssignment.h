@@ -23,6 +23,7 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/ObsProcessorBase.h"
+#include "ufo/filters/processWhere.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
@@ -72,7 +73,7 @@ class VariableAssignmentParameters : public oops::ObsFilterParametersBase {
 
   /// Conditions used to select locations where variable assignment should be performed.
   /// If not specified, variable assignment will be performed at all locations.
-  oops::Parameter<eckit::LocalConfiguration> where{"where", eckit::LocalConfiguration(), this};
+  oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
 
   /// If set to true, variable assignment will be done after the obs operator has been invoked
   /// (even if the filter doesn't require any variables from the GeoVaLs or HofX groups).

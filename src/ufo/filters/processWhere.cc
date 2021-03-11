@@ -26,13 +26,10 @@ namespace ufo {
 
 
 // -----------------------------------------------------------------------------
-ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
-  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
-
+ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> & params) {
   ufo::Variables vars;
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-    eckit::LocalConfiguration varconf(masks[jm], "variable");
-    vars += ufo::Variable(varconf);
+  for (const WhereParameters & currentParams : params) {
+    vars += currentParams.variable;
   }
   return vars;
 }
@@ -125,15 +122,18 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
 
 // -----------------------------------------------------------------------------
 template <typename T>
-void applyMinMax(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void applyMinMax(std::vector<bool> & where, WhereParameters const & parameters,
                  ObsFilterData const & filterdata, Variable const & varname) {
   const T not_set_value = util::missingValue(not_set_value);
 
-  T vmin = not_set_value;
   // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
-  mask.get("minvalue", vmin);
+  T vmin = not_set_value;
+  if (parameters.minvalue.value() != boost::none)
+    vmin = parameters.minvalue.value()->as<T>();
+  // Set vmax to the value of the 'maxvalue' option if it exists; if not, leave vmax unchanged.
   T vmax = not_set_value;
-  mask.get("maxvalue", vmax);
+  if (parameters.maxvalue.value() != boost::none)
+    vmax = parameters.maxvalue.value()->as<T>();
 
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -145,11 +145,18 @@ void applyMinMax(std::vector<bool> & where, eckit::LocalConfiguration const & ma
 
 // -----------------------------------------------------------------------------
 template <>
-void applyMinMax<util::DateTime>(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void applyMinMax<util::DateTime>(std::vector<bool> & where, WhereParameters const & parameters,
                                  ObsFilterData const & filterdata, Variable const & varname) {
   const std::string not_set_value("0000-00-00T00:00:00Z");
-  const std::string vmin = mask.getString("minvalue", not_set_value);
-  const std::string vmax = mask.getString("maxvalue", not_set_value);
+
+  // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
+  std::string vmin = not_set_value;
+  if (parameters.minvalue.value() != boost::none)
+    vmin = parameters.minvalue.value()->as<std::string>();
+  // Set vmax to the value of the 'maxvalue' option if it exists; if not, leave vmax unchanged.
+  std::string vmax = not_set_value;
+  if (parameters.maxvalue.value() != boost::none)
+    vmax = parameters.maxvalue.value()->as<std::string>();
 
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -289,71 +296,64 @@ void processWhereMatchesAnyWildcardPattern(const std::vector<int> & data,
 }
 
 // -----------------------------------------------------------------------------
-void isInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isInString(std::vector<bool> & where, std::vector<std::string> const & allowedValues,
                 ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<std::string> data;
-  std::vector<std::string> whitelistvec = mask.getStringVector("is_in");
-  std::set<std::string> whitelist(whitelistvec.begin(), whitelistvec.end());
+  std::set<std::string> whitelist(allowedValues.begin(), allowedValues.end());
   filterdata.get(varname, data);
   processWhereIsIn(data, whitelist, where);
 }
 
 // -----------------------------------------------------------------------------
-void isInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isInInteger(std::vector<bool> & where, std::set<int> const & allowedValues,
                  ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<int> data;
-  std::set<int> whitelist = oops::parseIntSet(mask.getString("is_in"));
   filterdata.get(varname, data);
-  processWhereIsIn(data, whitelist, where);
+  processWhereIsIn(data, allowedValues, where);
 }
 
 // -----------------------------------------------------------------------------
-void isNotInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isNotInString(std::vector<bool> & where, std::vector<std::string> const & forbiddenValues,
                    ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<std::string> data;
-  std::vector<std::string> blacklistvec = mask.getStringVector("is_not_in");
-  std::set<std::string> blacklist(blacklistvec.begin(), blacklistvec.end());
+  std::set<std::string> blacklist(forbiddenValues.begin(), forbiddenValues.end());
   filterdata.get(varname, data);
   processWhereIsNotIn(data, blacklist, where);
 }
 
 // -----------------------------------------------------------------------------
-void isNotInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isNotInInteger(std::vector<bool> & where, std::set<int> const & forbiddenValues,
                     ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<int> data;
   filterdata.get(varname, data);
-  std::set<int> blacklist = oops::parseIntSet(mask.getString("is_not_in"));
-  processWhereIsNotIn(data, blacklist, where);
+  processWhereIsNotIn(data, forbiddenValues, where);
 }
 
 // -----------------------------------------------------------------------------
-std::vector<bool> processWhere(const eckit::Configuration & config,
+std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
                                const ObsFilterData & filterdata) {
   const size_t nlocs = filterdata.nlocs();
 
 // Everywhere by default if no mask
   std::vector<bool> where(nlocs, true);
 
-  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
-
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-    eckit::LocalConfiguration varconf(masks[jm], "variable");
-    Variable var(varconf);
+  for (const WhereParameters &currentParams : params) {
+    const Variable &var = currentParams.variable;
     for (size_t jvar = 0; jvar < var.size(); ++jvar) {
       if (var.group() != "VarMetaData") {
         const Variable varname = var[jvar];
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
         if (dtype == ioda::ObsDtype::DateTime) {
-          applyMinMax<util::DateTime>(where, masks[jm], filterdata, varname);
+          applyMinMax<util::DateTime>(where, currentParams, filterdata, varname);
         } else if (dtype == ioda::ObsDtype::Integer) {
-          applyMinMax<int>(where, masks[jm], filterdata, varname);
+          applyMinMax<int>(where, currentParams, filterdata, varname);
         } else {
-          applyMinMax<float>(where, masks[jm], filterdata, varname);
+          applyMinMax<float>(where, currentParams, filterdata, varname);
         }
 
 //      Apply mask is_defined
-        if (masks[jm].has("is_defined")) {
+        if (currentParams.isDefined.value()) {
           if (filterdata.has(varname)) {
             std::vector<float> data;
             filterdata.get(varname, data);
@@ -364,18 +364,20 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask is_not_defined
-        if (masks[jm].has("is_not_defined")) {
+        if (currentParams.isNotDefined.value()) {
           std::vector<float> data;
           filterdata.get(varname, data);
           processWhereIsNotDefined(data, where);
         }
 
 //      Apply mask is_in
-        if (masks[jm].has("is_in")) {
+        if (currentParams.isIn.value() != boost::none) {
           if (dtype == ioda::ObsDtype::String) {
-            isInString(where, masks[jm], filterdata, varname);
+            isInString(where, currentParams.isIn.value()->as<std::vector<std::string>>(),
+                       filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isInInteger(where, masks[jm], filterdata, varname);
+            isInInteger(where, currentParams.isIn.value()->as<std::set<int>>(),
+                        filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_in'",
@@ -384,11 +386,13 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask is_not_in
-        if (masks[jm].has("is_not_in")) {
+        if (currentParams.isNotIn.value() != boost::none) {
           if (dtype == ioda::ObsDtype::String) {
-            isNotInString(where, masks[jm], filterdata, varname);
+            isNotInString(where, currentParams.isNotIn.value()->as<std::vector<std::string>>(),
+                          filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isNotInInteger(where, masks[jm], filterdata, varname);
+            isNotInInteger(where, currentParams.isNotIn.value()->as<std::set<int>>(),
+                           filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
@@ -397,10 +401,10 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask any_bit_set_of
-        if (masks[jm].has("any_bit_set_of")) {
+        if (currentParams.anyBitSetOf.value() != boost::none) {
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
-            std::set<int> bitIndices = oops::parseIntSet(masks[jm].getString("any_bit_set_of"));
+            const std::set<int> &bitIndices = *currentParams.anyBitSetOf.value();
             filterdata.get(varname, data);
             processWhereAnyBitSetOf(data, bitIndices, where);
           } else {
@@ -411,10 +415,10 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask any_bit_unset_of
-        if (masks[jm].has("any_bit_unset_of")) {
+        if (currentParams.anyBitUnsetOf.value() != boost::none) {
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
-            std::set<int> bitIndices = oops::parseIntSet(masks[jm].getString("any_bit_unset_of"));
+            const std::set<int> &bitIndices = *currentParams.anyBitUnsetOf.value();
             filterdata.get(varname, data);
             processWhereAnyBitUnsetOf(data, bitIndices, where);
           } else {
@@ -425,8 +429,8 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask matches_regex
-        if (masks[jm].has("matches_regex")) {
-          const std::string pattern = masks[jm].getString("matches_regex");
+        if (currentParams.matchesRegex.value() != boost::none) {
+          const std::string pattern = *currentParams.matchesRegex.value();
           // Select observations for which the variable 'varname' matches the regular expression
           // 'pattern'.
           if (dtype == ioda::ObsDtype::Integer) {
@@ -445,8 +449,8 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask matches_wildcard
-        if (masks[jm].has("matches_wildcard")) {
-          const std::string pattern = masks[jm].getString("matches_wildcard");
+        if (currentParams.matchesWildcard.value() != boost::none) {
+          const std::string &pattern = *currentParams.matchesWildcard.value();
           // Select observations for which the variable 'varname' matches the pattern
           // 'pattern', which may contain the * and ? wildcards.
           if (dtype == ioda::ObsDtype::Integer) {
@@ -465,9 +469,8 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask matches_any_wildcard
-        if (masks[jm].has("matches_any_wildcard")) {
-          const std::vector<std::string> patterns =
-              masks[jm].getStringVector("matches_any_wildcard");
+        if (currentParams.matchesAnyWildcard.value() != boost::none) {
+          const std::vector<std::string> &patterns = *currentParams.matchesAnyWildcard.value();
           // Select observations for which the variable 'varname' matches any of the patterns
           // 'patterns'; these may contain the * and ? wildcards.
           if (dtype == ioda::ObsDtype::Integer) {
