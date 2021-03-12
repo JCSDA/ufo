@@ -12,6 +12,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "ufo/filters/AcceptList.h"
 #include "ufo/filters/BackgroundCheck.h"
+#include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
@@ -119,6 +120,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            acceptListMaker("AcceptList");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PerformAction> >
            performActionMaker("Perform Action");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BayesianBackgroundQCFlags> >
+           BayesianBackgroundQCFlagsMaker("Bayesian Background QC Flags");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
