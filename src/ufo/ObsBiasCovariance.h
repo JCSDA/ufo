@@ -15,6 +15,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -90,7 +91,9 @@ class ObsBiasCovariance : public util::Printable,
   double step_size_ = 1.e-4;
 
   std::vector<std::string> prednames_;
-  std::vector<int> jobs_;
+
+  /// variables for which bias correction coefficients will be updated
+  oops::Variables vars_;
 };
 
 // -----------------------------------------------------------------------------

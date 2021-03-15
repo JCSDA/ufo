@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <vector>
 
 #include "ufo/predictors/Emissivity.h"
 
@@ -24,12 +25,13 @@ static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivity");
 
 // -----------------------------------------------------------------------------
 
-Emissivity::Emissivity(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+Emissivity::Emissivity(const eckit::Configuration & conf, const oops::Variables & vars)
+  : PredictorBase(conf, vars) {
   // required variables
   geovars_ += oops::Variables({"water_area_fraction"});
-  if (jobs.size() > 0) {
-    hdiags_ += oops::Variables({"brightness_temperature_jacobian_surface_emissivity"}, jobs);
+  if (vars.size() > 0) {
+    hdiags_ += oops::Variables({"brightness_temperature_jacobian_surface_emissivity"},
+                               vars.channels());
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;
     ABORT("Channels size is ZERO !");
@@ -42,23 +44,21 @@ void Emissivity::compute(const ioda::ObsSpace & odb,
                          const GeoVaLs & geovals,
                          const ObsDiagnostics & ydiags,
                          ioda::ObsVector & out) const {
-  const std::size_t njobs = jobs_.size();
-  const std::size_t nlocs = odb.nlocs();
+  const std::size_t nvars = out.nvars();
+  const std::size_t nlocs = out.nlocs();
 
-  // assure shape of out
-  ASSERT(out.nlocs() == nlocs);
-
-  std::vector <float> pred(nlocs, 0.0);
+  std::vector<float> pred(nlocs, 0.0);
   std::vector<float> h2o_frac(nlocs, 0.0);
   geovals.get(h2o_frac, "water_area_fraction");
   std::string hdiags;
   out.zero();
-  for (std::size_t jb = 0; jb < njobs; ++jb) {
-    hdiags = "brightness_temperature_jacobian_surface_emissivity_" + std::to_string(jobs_[jb]);
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    hdiags = "brightness_temperature_jacobian_surface_emissivity_" +
+             std::to_string(vars_.channels()[jvar]);
     ydiags.get(pred, hdiags);
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      if (h2o_frac[jl] < 0.99 && std::fabs(pred[jl]) > 0.001) {
-        out[jl*njobs+jb] = pred[jl];
+    for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+      if (h2o_frac[jloc] < 0.99 && std::fabs(pred[jloc]) > 0.001) {
+        out[jloc*nvars+jvar] = pred[jloc];
       }
     }
   }

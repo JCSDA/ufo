@@ -38,8 +38,8 @@ namespace ufo {
 
 class PredictorBase : private boost::noncopyable {
  public:
-  explicit PredictorBase(const eckit::Configuration &, const std::vector<int> &);
-  virtual ~PredictorBase() {}
+  explicit PredictorBase(const eckit::Configuration &, const oops::Variables &);
+  virtual ~PredictorBase() = default;
 
   /// compute the predictor
   virtual void compute(const ioda::ObsSpace &,
@@ -58,7 +58,7 @@ class PredictorBase : private boost::noncopyable {
   const std::string & name() const {return func_name_;}
 
  protected:
-  const std::vector<int> jobs_;  ///<  jobs(channels)
+  oops::Variables vars_;         ///<  variables that will be bias-corrected using this predictor
   oops::Variables geovars_;      ///<  required GeoVaLs
   oops::Variables hdiags_;       ///<  required ObsDiagnostics
 
@@ -73,13 +73,13 @@ typedef std::vector<std::shared_ptr<PredictorBase>> Predictors;
 /// Predictor Factory
 class PredictorFactory {
  public:
-  static PredictorBase * create(const eckit::Configuration &, const std::vector<int> &);
+  static PredictorBase * create(const eckit::Configuration &, const oops::Variables &);
   virtual ~PredictorFactory() = default;
   static bool predictorExists(const std::string &);
  protected:
   explicit PredictorFactory(const std::string &);
  private:
-  virtual PredictorBase * make(const eckit::Configuration &, const std::vector<int> &) = 0;
+  virtual PredictorBase * make(const eckit::Configuration &, const oops::Variables &) = 0;
   static std::map < std::string, PredictorFactory * > & getMakers() {
     static std::map < std::string, PredictorFactory * > makers_;
     return makers_;
@@ -90,8 +90,8 @@ class PredictorFactory {
 
 template<class T>
 class PredictorMaker : public PredictorFactory {
-  virtual PredictorBase * make(const eckit::Configuration & conf, const std::vector<int> & jobs)
-    { return new T(conf, jobs); }
+  virtual PredictorBase * make(const eckit::Configuration & conf, const oops::Variables & vars)
+    { return new T(conf, vars); }
  public:
   explicit PredictorMaker(const std::string & name)
     : PredictorFactory(name) {}

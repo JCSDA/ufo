@@ -1,0 +1,26 @@
+# Test bias correction of multiple single-channel variables.
+
+window begin: '2018-04-14T20:30:00Z'
+window end: '2018-04-15T03:30:00Z'
+
+observations:
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+    obsdataout:
+      obsfile: Data/aircraft_obs_2018041500_s_out_bc.nc4
+    simulated variables: [air_temperature, specific_humidity]
+  obs operator:
+    name: VertInterp
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias.nc4
+    predictors:
+    - predictor:
+        name: constant
+    - predictor:
+        name: sine_of_latitude
+  rms ref: 188.80571
+  tolerance: 1.0e-6

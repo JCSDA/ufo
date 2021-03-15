@@ -76,7 +76,9 @@ class ObsBiasIncrement : public util::Printable {
 
   std::vector<double> biascoeffsinc_;
   std::vector<std::string> prednames_;
-  std::vector<int> jobs_;
+
+  /// Variables that need to be bias-corrected
+  oops::Variables vars_;
 };
 
 // -----------------------------------------------------------------------------

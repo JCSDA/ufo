@@ -10,7 +10,6 @@ observations:
     channels: &channels 1-15
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors: &predictors
     - predictor:
         name: constant

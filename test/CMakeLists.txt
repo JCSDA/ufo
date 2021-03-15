@@ -34,6 +34,7 @@ list( APPEND ufo_test_input
   testinput/background_error_identity.yaml
   testinput/bias_coeff.yaml
   testinput/bias_coeff_cov.yaml
+  testinput/bias_single_channel.yaml
   testinput/coolskin.yaml
   testinput/composite.yaml
   testinput/constant_predictor.yaml
@@ -2603,6 +2604,13 @@ ecbuild_add_test( TARGET  test_ufo_bias_covariance_details
                   ARGS    "testinput/bias_coeff_cov.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_bias_single_channel
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/bias_single_channel.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET test_ufo_opr_groundgnssMetOffice

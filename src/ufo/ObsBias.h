@@ -27,6 +27,7 @@ namespace oops {
 }
 
 namespace ioda {
+  class ObsGroup;
   class ObsSpace;
   class ObsVector;
 }
@@ -66,7 +67,7 @@ class ObsBias : public util::Printable,
   const std::vector<std::string> & requiredPredictors() const {return prednames_;}
 
   const Predictors & predictors() const {return predictors_;}
-  const std::vector<int> & jobs() const {return jobs_;}
+  const oops::Variables & correctedVars() const {return vars_;}
 
   // Operator
   operator bool() const {return biascoeffs_.size() > 0;}
@@ -74,16 +75,24 @@ class ObsBias : public util::Printable,
  private:
   void print(std::ostream &) const override;
 
-  /// bias correction coefficients (npredictors x nchannels)
+  /// Return the vector of indices of predictors whose coefficients need to be initialized
+  /// from the input file.
+  std::vector<int> getRequiredPredictorIndices(const ioda::ObsGroup &obsgroup) const;
+
+  /// Return the vector of indices of variables or channels whose coefficients need to be
+  /// initialized from the input file.
+  std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup) const;
+
+  /// bias correction coefficients (npredictors x nprimitivevariables)
   Eigen::MatrixXf biascoeffs_;
 
   /// bias correction predictors
   Predictors predictors_;
-
   /// predictor names
   std::vector<std::string> prednames_;
-  /// channel numbers
-  std::vector<int> jobs_;
+
+  /// corrected variables names (for now has to be same as "simulated variables")
+  oops::Variables vars_;
 
   /// Variables that need to be requested from the model (for computation of predictors)
   oops::Variables geovars_;

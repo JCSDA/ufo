@@ -10,7 +10,6 @@ observations:
     channels: &channels 1-15
   obs bias:  # test reading coefficients for 2 predictors; coeffs are zero for all channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors:
     - predictor:
         name: cosine_of_latitude_times_orbit_node
@@ -29,7 +28,6 @@ observations:
     channels: &channels 1-15
   obs bias:  # test reading coefficients for 1 predictor (all channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors:
     - predictor:
         name: emissivity
@@ -44,7 +42,6 @@ observations:
     channels: &channels 7-9, 12
   obs bias:  # test reading coefficients for 1 predictor (subset of channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors:
     - predictor:
         name: emissivity
@@ -59,7 +56,6 @@ observations:
     channels: &channels 7-9, 12
   obs bias:  # test reading coefficients for 2 predictors and subset of channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors:
     - predictor:
         name: emissivity
@@ -76,7 +72,6 @@ observations:
     channels: &channels 1-15
   obs bias:  # test reading all channels and most predictors
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    jobs: *channels
     predictors:
     - predictor:
         name: constant

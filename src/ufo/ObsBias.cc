@@ -29,40 +29,38 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predictors_(0), jobs_(0) {
+  : predictors_(0), vars_(odb.obsvariables()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
-
-  // Get the jobs(channels)
-  if (conf.has("jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf.getString("jobs"));
-    jobs_.assign(jobs.begin(), jobs.end());
-  }
 
   // Predictor factory
   if (conf.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf.get("predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
+      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], vars_));
       predictors_.push_back(pred);
       prednames_.push_back(pred->name());
       geovars_ += pred->requiredGeovars();
       hdiags_ += pred->requiredHdiagnostics();
 
       // Reserve the space for ObsBiasTerm for predictor
-      if (jobs_.size() > 0) {
-        for (auto & job : jobs_) {
+      if (vars_.channels().size() > 0) {
+        // At present we can label predictors with either the channel number or the variable
+        // name, but not both. So make sure there's only one multi-channel variable.
+        ASSERT(vars_.size() == vars_.channels().size());
+        for (auto & job : vars_.channels()) {
           hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
         }
       } else {
-        hdiags_ += oops::Variables({prednames_.back()});
+        for (const std::string & variable : vars_.variables())
+          hdiags_ += oops::Variables({prednames_.back() + "_" + variable});
       }
     }
   }
 
-  if (prednames_.size() * jobs_.size() > 0) {
+  if (prednames_.size() * vars_.size() > 0) {
     // Initialize the biascoeffs to ZERO
-    biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), jobs_.size());
+    biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), vars_.size());
     // Read or initialize bias coefficients
     this->read(conf);
   }
@@ -74,12 +72,12 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : predictors_(other.predictors_),
-    prednames_(other.prednames_), jobs_(other.jobs_),
+    prednames_(other.prednames_), vars_(other.vars_),
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), jobs_.size());
+  biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), vars_.size());
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -102,7 +100,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     biascoeffs_ = rhs.biascoeffs_;
     predictors_  = rhs.predictors_;
     prednames_  = rhs.prednames_;
-    jobs_       = rhs.jobs_;
+    vars_       = rhs.vars_;
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
   }
@@ -158,26 +156,16 @@ void ObsBias::read(const eckit::Configuration & conf) {
     Eigen::ArrayXXf allbiascoeffs;
     coeffvar.readWithEigenRegular(allbiascoeffs);
 
-    // Read all channels from the file into std vector
-    ioda::Variable channelsvar = obsgroup.vars.open("channels");
-    std::vector<int> channels;
-    channelsvar.read<int>(channels);
-
-    // Read all predictors from the file into std vector
-    ioda::Variable predictorsvar = obsgroup.vars.open("predictors");
-    std::vector<std::string> predictors;
-    predictorsvar.read<std::string>(predictors);
-
-    // Find indices of predictors and channels that we need in the data read from the file
-    std::vector<int> pred_idx = getAllIndices(predictors, prednames_);
-    std::vector<int> chan_idx = getAllIndices(channels, jobs_);
+    // Find indices of predictors and variables/channels that we need in the data read from the file
+    const std::vector<int> pred_idx = getRequiredPredictorIndices(obsgroup);
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup);
 
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbiascoeffs(pred_idx, chan_idx) when Eigen 3.4
     // is available
     for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
-      for (size_t jchan = 0; jchan < chan_idx.size(); ++jchan) {
-         biascoeffs_(jpred, jchan) = allbiascoeffs(pred_idx[jpred], chan_idx[jchan]);
+      for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
+         biascoeffs_(jpred, jvar) = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
       }
     }
   } else {
@@ -186,6 +174,41 @@ void ObsBias::read(const eckit::Configuration & conf) {
   }
 
   oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<int> ObsBias::getRequiredPredictorIndices(const ioda::ObsGroup &obsgroup) const {
+  ioda::Variable predictorsvar = obsgroup.vars.open("predictors");
+  std::vector<std::string> predictors;
+  predictorsvar.read<std::string>(predictors);
+  return getAllIndices(predictors, prednames_);
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<int> ObsBias::getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup) const {
+  if (vars_.channels().empty()) {
+    // Read all variables from the file into std vector
+    ioda::Variable variablesvar = obsgroup.vars.open("variables");
+    std::vector<std::string> variables;
+    variablesvar.read<std::string>(variables);
+
+    // Find the indices of the ones we need
+    return getAllIndices(variables, vars_.variables());
+  } else {
+    // At present we can label predictors with either the channel number or the variable
+    // name, but not both. So make sure there's only one multi-channel variable.
+    ASSERT(vars_.variables().size() == vars_.channels().size());
+
+    // Read all channels from the file into std vector
+    ioda::Variable channelsvar = obsgroup.vars.open("channels");
+    std::vector<int> channels;
+    channelsvar.read<int>(channels);
+
+    // Find the indices of the ones we need
+    return getAllIndices(channels, vars_.channels());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -214,7 +237,6 @@ void ObsBias::print(std::ostream & os) const {
     // map bias coeffs to eigen matrix (writable)
     os << "ObsBias::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
-    auto njobs = jobs_.size();
     for (std::size_t p = 0; p < prednames_.size(); ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
          << ":  Min= " << std::setw(15) << std::setprecision(8)

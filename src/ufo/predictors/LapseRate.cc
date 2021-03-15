@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <vector>
 
 #include "ufo/predictors/LapseRate.h"
 
@@ -25,8 +26,8 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapse_rate");
 
 // -----------------------------------------------------------------------------
 
-LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs), order_(1)
+LapseRate::LapseRate(const eckit::Configuration & conf, const oops::Variables & vars)
+  : PredictorBase(conf, vars), order_(1)
 {
   // get the order if it is provided in options
   if (conf.has("predictor.options.order")) {
@@ -40,8 +41,8 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> &
   geovars_ += oops::Variables({"air_temperature",
                                "air_pressure",
                                "average_surface_temperature_within_field_of_view"});
-  if (jobs.size() > 0) {
-    hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, jobs);
+  if (vars.size() > 0) {
+    hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, vars.channels());
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;
     ABORT("Channels size is ZERO !");
@@ -81,11 +82,8 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs & geovals,
                         const ObsDiagnostics & ydiags,
                         ioda::ObsVector & out) const {
-  const std::size_t njobs = jobs_.size();
-  const std::size_t nlocs = odb.nlocs();
-
-  // assure shape of out
-  ASSERT(out.nlocs() == nlocs);
+  const std::size_t nvars = out.nvars();
+  const std::size_t nlocs = out.nlocs();
 
   // common vectors storage
   std::vector <float> pred(nlocs, 0.0);
@@ -99,8 +97,8 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   std::vector<std::vector<float>> tmpvar;
 
   std::string hdiags;
-  for (std::size_t jb = 0; jb < njobs; ++jb) {
-    hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(jobs_[jb]);
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(vars_.channels()[jvar]);
     tmpvar.clear();
     for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
       ydiags.get(pred, hdiags, js+1);
@@ -119,26 +117,28 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   nlevs = geovals.nlevs("air_pressure");
   float tlapchn;
 
-  // sort out the tlapmean based on jobs
+  // sort out the tlapmean based on vars
   std::vector<float> tlap;
-  for (std::size_t jb = 0; jb < njobs; ++jb) {
-    auto it = tlapmean_.find(jobs_[jb]);
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    auto it = tlapmean_.find(vars_.channels()[jvar]);
     if (it != tlapmean_.end()) {
       tlap.push_back(it->second);
     } else {
-      oops::Log::error() << "Could not locate tlapemean for channel: " << jobs_[jb] << std::endl;
+      oops::Log::error() << "Could not locate tlapemean for channel: " <<
+                            vars_.channels()[jvar] << std::endl;
       ABORT("Could not locate tlapemean value");
     }
   }
 
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    for (std::size_t jb = 0; jb < njobs; ++jb) {
-        tlapchn = (ptau5[jb][nlevs-2][jl]-ptau5[jb][nlevs-1][jl])*(tsavg5[jl]-tvp[nlevs-2][jl]);
+  for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+    for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+        tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
+                  (tsavg5[jloc]-tvp[nlevs-2][jloc]);
         for (std::size_t k = 1; k < nlevs-1; ++k) {
-          tlapchn = tlapchn+(ptau5[jb][nlevs-k-2][jl]-ptau5[jb][nlevs-k-1][jl])*
-                    (tvp[nlevs-k][jl]-tvp[nlevs-k-2][jl]);
+          tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
+                    (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
         }
-        out[jl*njobs+jb] = pow((tlapchn - tlap[jb]), order_);
+        out[jloc*nvars+jvar] = pow((tlapchn - tlap[jvar]), order_);
     }
   }
 }

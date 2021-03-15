@@ -30,27 +30,22 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : conf_(conf), odb_(odb), prednames_(0), jobs_(0), variances_(0), preconditioner_(0),
+  : conf_(conf), odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(0),
+    preconditioner_(0),
     ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
-
-  // Get the jobs(channels)
-  if (conf_.has("jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("jobs"));
-    jobs_.assign(jobs.begin(), jobs.end());
-  }
 
   // Predictor factory
   if (conf_.has("predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
+      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], vars_));
       prednames_.push_back(pred->name());
     }
   }
 
-  if (prednames_.size()*jobs_.size() > 0) {
+  if (prednames_.size()*vars_.size() > 0) {
     // Get the minimal required filtered obs number
     minimal_required_obs_number_ =
       conf_.getUnsigned("minimal required obs number");
@@ -76,23 +71,23 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
     }
 
     // Initialize the variances to upper limit
-    variances_.resize(prednames_.size() * jobs_.size());
+    variances_.resize(prednames_.size() * vars_.size());
     std::fill(variances_.begin(), variances_.end(), largest_variance_);
 
     // Initialize the hessian contribution to zero
-    ht_rinv_h_.resize(prednames_.size() * jobs_.size());
+    ht_rinv_h_.resize(prednames_.size() * vars_.size());
     std::fill(ht_rinv_h_.begin(), ht_rinv_h_.end(), 0.0);
 
     // Initialize the preconditioner to default step size
-    preconditioner_.resize(prednames_.size() * jobs_.size());
+    preconditioner_.resize(prednames_.size() * vars_.size());
     std::fill(preconditioner_.begin(), preconditioner_.end(), step_size_);
 
     // Initialize obs_num_ to ZERO
-    obs_num_.resize(jobs_.size());
+    obs_num_.resize(vars_.size());
     std::fill(obs_num_.begin(), obs_num_.end(), 0);
 
     // Initialize analysis error variances to the upper limit
-    analysis_variances_.resize(prednames_.size() * jobs_.size());
+    analysis_variances_.resize(prednames_.size() * vars_.size());
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
 
     // Initializes from given prior
@@ -112,7 +107,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance
       std::size_t ii;
-      for (std::size_t j = 0; j < jobs_.size(); ++j) {
+      for (std::size_t j = 0; j < vars_.size(); ++j) {
         const double inflation = (obs_num_[j] <= minimal_required_obs_number_) ?
                                  large_inflation_ratio : inflation_ratio;
         for (std::size_t p = 0; p < prednames_.size(); ++p) {
@@ -164,6 +159,11 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
       int nuchan;         //  channel number
       float number;       //  QCed obs number from previous cycle
 
+      // This function can only be used for bias correction of a single multi-channel variables.
+      // Anna's comment: we'll need to update the code here to use ioda files instead of
+      // GSI txt files.
+      ASSERT(vars_.size() == vars_.channels().size());
+
       float par;
       while (infile >> ich)
       {
@@ -171,9 +171,9 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
         infile >> nuchan;
         infile >> number;
         if (nusis == sensor) {
-          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
-          if (ijob != jobs_.end()) {
-            int j = std::distance(jobs_.begin(), ijob);
+          auto ijob = std::find(vars_.channels().begin(), vars_.channels().end(), nuchan);
+          if (ijob != vars_.channels().end()) {
+            int j = std::distance(vars_.channels().begin(), ijob);
             obs_num_[j] = static_cast<int>(number);
 
             for (auto & item : gsi_predictors) {
@@ -284,7 +284,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     }
 
     // reset variances for bias predictor coeff. based on current data count
-    for (std::size_t j = 0; j < jobs_.size(); ++j) {
+    for (std::size_t j = 0; j < obs_num_.size(); ++j) {
       if (obs_num_[j] <= minimal_required_obs_number_) {
         for (std::size_t p = 0; p < prednames_.size(); ++p)
           variances_[j*prednames_.size() + p] = smallest_variance_;
@@ -292,10 +292,9 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     }
 
     // set a coeff. factor for variances of control variables
-    std::size_t index;
-    for (std::size_t j = 0; j < jobs_.size(); ++j) {
+    for (std::size_t j = 0; j < vars_.size(); ++j) {
       for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        index = j*prednames_.size() + p;
+        const std::size_t index = j*prednames_.size() + p;
         preconditioner_[index] = step_size_;
         // L = \mathrm{A}^{-1}
         if (obs_num_[j] > 0)

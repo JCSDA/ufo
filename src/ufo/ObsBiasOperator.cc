@@ -40,6 +40,12 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
     predData[p].save(predictors[p]->name() + "Predictor");
   }
 
+  const oops::Variables &correctedVars = biascoeffs.correctedVars();
+  // At present we can label predictors with either the channel number or the variable name, but not
+  // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
+  ASSERT(correctedVars.channels().empty() ||
+         correctedVars.variables().size() == correctedVars.channels().size());
+
   const std::size_t nlocs  = ybias.nlocs();
   const std::size_t nvars  = ybias.nvars();
 
@@ -58,18 +64,24 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
 
   std::vector<double> biasTerm(nlocs);
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
-  for (std::size_t jch = 0; jch < nvars; ++jch) {
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    std::string predictorSuffix;
+    if (correctedVars.channels().empty())
+      predictorSuffix = correctedVars[jvar];
+    else
+      predictorSuffix = std::to_string(correctedVars.channels()[jvar]);
+
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       // axpy
-      const double beta = biascoeffs(jp, jch);
+      const double beta = biascoeffs(jp, jvar);
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        biasTerm[jl] = predData[jp][jl*nvars+jch] * beta;
-        ybias[jl*nvars+jch] += biasTerm[jl];
+        biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
+        ybias[jl*nvars+jvar] += biasTerm[jl];
       }
       // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
-      const std::string varname = predictors[jp]->name() + "_"
-                                  + std::to_string(biascoeffs.jobs()[jch]);
+      const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
       if (ydiags.has(varname)) {
+        ydiags.allocate(1, oops::Variables({varname}));
         ydiags.save(biasTerm, varname, 1);
       } else {
         oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;

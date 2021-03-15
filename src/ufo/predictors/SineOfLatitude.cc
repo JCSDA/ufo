@@ -5,9 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include <string>
-
 #include "ufo/predictors/SineOfLatitude.h"
+
+#include <vector>
 
 #include "ioda/ObsSpace.h"
 
@@ -20,8 +20,8 @@ static PredictorMaker<SineOfLatitude>
 
 // -----------------------------------------------------------------------------
 
-SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const oops::Variables & vars)
+  : PredictorBase(conf, vars) {
 }
 
 // -----------------------------------------------------------------------------
@@ -30,19 +30,16 @@ void SineOfLatitude::compute(const ioda::ObsSpace & odb,
                              const GeoVaLs &,
                              const ObsDiagnostics &,
                              ioda::ObsVector & out) const {
-  const std::size_t nlocs = odb.nlocs();
-
-  // assure shape of out
-  ASSERT(out.nlocs() == nlocs);
+  const std::size_t nlocs = out.nlocs();
+  const std::size_t nvars = out.nvars();
 
   // retrieve the sensor view angle
   std::vector<float> cenlat(nlocs, 0.0);
   odb.get_db("MetaData", "latitude", cenlat);
 
-  const std::size_t njobs = jobs_.size();
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    for (std::size_t jb = 0; jb < njobs; ++jb) {
-      out[jl*njobs+jb] = sin(cenlat[jl] * Constants::deg2rad);
+  for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+    for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+      out[jloc*nvars+jvar] = sin(cenlat[jloc] * Constants::deg2rad);
     }
   }
 }

@@ -7,6 +7,8 @@
 
 #include "ufo/predictors/CosineOfLatitudeTimesOrbitNode.h"
 
+#include <vector>
+
 #include "ioda/ObsSpace.h"
 
 #include "ufo/utils/Constants.h"
@@ -19,8 +21,8 @@ static PredictorMaker<CosineOfLatitudeTimesOrbitNode>
 // -----------------------------------------------------------------------------
 
 CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
-                                const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+                                const eckit::Configuration & conf, const oops::Variables & vars)
+  : PredictorBase(conf, vars) {
   // override the preconditioner from options
   if (conf.has("predictor.options"))
     precond_ = conf.getDouble("predictor.options.preconditioner");
@@ -31,10 +33,8 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
                                              const GeoVaLs &,
                                              const ObsDiagnostics &,
                                              ioda::ObsVector & out) const {
-  const std::size_t nlocs = odb.nlocs();
-
-  // assure shape of out
-  ASSERT(out.nlocs() == nlocs);
+  const std::size_t nlocs = out.nlocs();
+  const std::size_t nvars = out.nvars();
 
   // retrieve the sensor view angle
   std::vector<float> cenlat(nlocs, 0.0);
@@ -42,10 +42,9 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
   odb.get_db("MetaData", "latitude", cenlat);
   odb.get_db("MetaData", "sensor_azimuth_angle", node);
 
-  const std::size_t njobs = jobs_.size();
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    for (std::size_t jb = 0; jb < njobs; ++jb) {
-      out[jl*njobs+jb] = node[jl] * cos(cenlat[jl] * Constants::deg2rad);
+  for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+    for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+      out[jloc*nvars+jvar] = node[jloc] * cos(cenlat[jloc] * Constants::deg2rad);
     }
   }
 }
