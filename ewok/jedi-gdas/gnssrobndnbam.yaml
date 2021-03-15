@@ -1,0 +1,35 @@
+obs space:
+  name: gnssrobndnbam
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/gnssrobndnbam.{{window_begin}}.nc4
+    obsgrouping:
+      group variables: [ 'record_number' ]
+      sort variable: 'impact_height'
+      sort order: 'ascending'
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).gnssrobndnbam.{{window_begin}}.nc4
+  simulated variables: [bending_angle]
+obs operator:
+  name: GnssroBndNBAM
+  obs options:
+    sr_steps: 2
+    vertlayer: full
+    use_compress: 1
+    super_ref_qc: NBAM
+obs filters:
+- filter: Domain Check
+  filter variables:
+  - name: [bending_angle]
+  where:
+  - variable:
+      name: impact_height@MetaData
+    minvalue: 0
+    maxvalue: 50000
+- filter: ROobserror
+  filter variables:
+  - name: bending_angle
+  errmodel: NRL
+- filter: Background Check
+  filter variables:
+  - name: [bending_angle]
+  threshold: 3
