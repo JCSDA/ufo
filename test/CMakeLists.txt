@@ -110,6 +110,7 @@ list( APPEND ufo_test_input
   testinput/gome_metop-a.yaml
   testinput/gome_metop-a_flipz.yaml
   testinput/groundgnssmetoffice.yaml
+  testinput/groundgnssropp.yaml
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
@@ -2619,7 +2620,14 @@ ecbuild_add_test( TARGET test_ufo_opr_groundgnssMetOffice
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
-		  
+
+ecbuild_add_test( TARGET test_ufo_opr_groundgnssROPP
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS "testinput/groundgnssropp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
 ecbuild_add_test( TARGET test_ufo_linopr_groundgnssMetOffice
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/groundgnssmetoffice.yaml"
