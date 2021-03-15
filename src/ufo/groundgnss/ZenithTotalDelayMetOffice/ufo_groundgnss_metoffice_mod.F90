@@ -74,22 +74,39 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: rho_heights     ! Model heights of levels containing air pressure
 
   real(kind_real), allocatable       :: zStation(:)
+  
+  ! Local variables
+  INTEGER :: ilev, nlevp, nlevq, iflip
+  REAL(kind_real), allocatable :: pressure(:)   ! Model background values of air pressure (monotonic order)
+  REAL(kind_real), allocatable :: humidity(:)   ! Model background specific humidity  (in pressure monotonic order)
+  REAL(kind_real), allocatable :: za(:)         ! Model heights of rho levs (in pressure monotonic order)
+  REAL(kind_real), allocatable :: zb(:)         ! Model heights of theta levs (in pressure monotonic order)
+
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: begin"
   call fckit_log%info(err_msg)
 
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
-      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-      call abor1_ftn(err_msg)
-  endif
-
+  IF (geovals%nlocs /= size(hofx)) THEN
+    write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+    call abor1_ftn(err_msg)
+  END IF
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi, prs)          ! pressure
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
+
+  nlevp = prs % nval
+  nlevq = q % nval
+
+  iflip = 0
+  IF (prs % vals(1,1)-prs % vals(nlevp,1) < 0.0) THEN
+    iflip = 1
+    WRITE(message, *) "Pressure is in ascending order. Rrorder the variables in vertical direction"
+    CALL fckit_log % warning(message)
+  END IF
 
   nobs  = obsspace_get_nlocs(obss)
   allocate(zStation(nobs))
@@ -101,14 +118,35 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
   hofx(:) = 0
 
-  obs_loop: do iobs = 1, nobs 
+  allocate(pressure(1:nlevp)) 
+  allocate(humidity(1:nlevq))
+  allocate(za(1:nlevp))
+  allocate(zb(1:nlevq))
 
-    call Ops_Groundgnss_ForwardModel(prs % nval, &
-                                     q % nval, &
-                                     rho_heights % vals(:,iobs), &
-                                     theta_heights % vals(:,iobs), &
-                                     prs % vals(:,iobs), &
-                                     q % vals(:,iobs), &
+  obs_loop: do iobs = 1, nobs 
+ 
+    IF (iflip == 1) THEN
+      do ilev = 1, nlevp
+        pressure(ilev) = prs % vals(nlevp-ilev+1,iobs)
+        za(ilev) = rho_heights % vals(nlevp-ilev+1,iobs)
+      end do
+      do ilev = 1, nlevq
+        humidity(ilev) = q % vals(nlevq-ilev+1,iobs)
+        zb(ilev) = theta_heights % vals(nlevq-ilev+1,iobs)
+      end do
+    ELSE
+      pressure = prs % vals(:,iobs)
+      humidity = q % vals(:,iobs)
+      za = rho_heights % vals(:,iobs)
+      zb = theta_heights % vals(:,iobs)
+    END IF
+
+    call Ops_Groundgnss_ForwardModel(nlevp, &
+                                     nlevq, &
+                                     za(1:nlevp), &
+                                     zb(1:nlevq), &
+                                     pressure(1:nlevp), &
+                                     humidity(1:nlevq), &
                                      1, &
                                      zStation(iobs), &
                                      hofx(iobs))
@@ -122,12 +160,17 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: completed"
   call fckit_log%info(err_msg)
+  
+  deallocate(pressure)
+  deallocate(humidity)
+  deallocate(za)
+  deallocate(zb)
 
 end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_Groundgnss_ForwardModel(nlevP,    &
+SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,    &
                                        nlevq,    &
                                        za,       &
                                        zb,       &
@@ -166,7 +209,7 @@ character(len=*), parameter  :: myname_ = "Ops_Groundgnss_ForwardModel"
 ! Local variables
 ! 
 INTEGER                      :: nstate            ! no. of levels in state vec.
-REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector 
 character(max_string)        :: err_msg           ! Error message to be output
 character(max_string)        :: message           ! General message for output
 
@@ -177,6 +220,7 @@ IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
     call abor1_ftn(err_msg)
 END IF
+
 
 nstate = nlevp + nlevq
 x(1:nlevp) = pressure
@@ -205,7 +249,8 @@ CALL Ops_Groundgnss_ZTD  (nlevq,     &
 Model_ZTD = Model_ZTD + TopCorrection
 
 write(message,'(A,F16.14)') "Model_ZTD = ", Model_ZTD
-call fckit_log%info(message)
+call fckit_log%debug(message)
+
 
 END SUBROUTINE ops_groundgnss_forwardmodel
 
