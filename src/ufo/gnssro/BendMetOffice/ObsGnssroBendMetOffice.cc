@@ -50,9 +50,11 @@ ObsGnssroBendMetOffice::~ObsGnssroBendMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBendMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics & ydiags) const {
+  oops::Log::trace() << "Starting simulateObs" << std::endl;
   ufo_gnssro_bendmetoffice_simobs_f90(keyOperGnssroBendMetOffice_, gom.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran());
+                                  ovec.size(), ovec.toFortran(), ydiags.toFortran());
+  oops::Log::trace() << "Finishing simulateObs" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

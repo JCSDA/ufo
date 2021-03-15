@@ -17,6 +17,7 @@
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
+#include "ufo/filters/ImpactHeightCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
@@ -122,6 +123,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            performActionMaker("Perform Action");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BayesianBackgroundQCFlags> >
            BayesianBackgroundQCFlagsMaker("Bayesian Background QC Flags");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ImpactHeightCheck> >
+           ImpactHeightCheckMaker("GNSSRO Impact Height Check");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

@@ -438,9 +438,6 @@ ELSE
   ! Calculate exner on rho levels.
   Exner(:) = (P(:) / Pref) ** rd_over_cp
 
-!  PRINT*, 'Exner'
-!  WRITE(*, '(7E18.10)') exner
-
   ! Calculate the refractivity on the b levels
   search_lev = 1
   DO i = 1, nlevq

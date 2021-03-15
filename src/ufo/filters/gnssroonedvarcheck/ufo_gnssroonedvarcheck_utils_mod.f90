@@ -7,6 +7,7 @@
 
 module ufo_gnssroonedvarcheck_utils_mod
 
+use, intrinsic :: iso_c_binding
 use missing_values_mod
 use kinds
 
@@ -61,14 +62,15 @@ contains
 !!
 subroutine find_unique(input, output)
 
-integer, intent(in) :: input(:)
+integer(c_size_t), intent(in) :: input(:)
 integer, allocatable, intent(out) :: output(:)
 
 integer, allocatable :: unique_vals(:)    ! The list of unique elements
-integer :: nfound = 0                     ! The number of unique elements found
+integer :: nfound                         ! The number of unique elements found
 integer :: cur_val                        ! The current value being considered
 integer :: max_val                        ! The maximum value in the input list
 
+nfound = 0
 allocate(unique_vals(1:size(input)))
 
 cur_val = minval(input) - 1

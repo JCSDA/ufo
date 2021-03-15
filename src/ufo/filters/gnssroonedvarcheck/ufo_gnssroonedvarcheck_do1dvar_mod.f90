@@ -37,8 +37,6 @@ SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
                                  GPSRO_Delta_factor,     &   ! Delta
                                  GPSRO_Delta_ct2,        &   ! Delta observations
                                  GPSRO_OB_test,          &   ! Threshold value for the O-B test
-                                 GPSRO_max_grad,         &   ! Max background vertical N gradient: N units/ metre
-                                 GPSRO_hgt_shift,        &   ! Addition to imp_low if max N grad triggered: metre
                                  capsupersat,            &
                                  BAerr,                  &
                                  Tb,                     &
@@ -49,12 +47,6 @@ SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
 use ufo_gnssroonedvarcheck_utils_mod, only: &
     singlebg_type,             &
     singleob_type
-
-use ufo_gnssro_ukmo1d_utils_mod, only: &
-    Ops_GPSRO_refrac
-
-use ufo_gnssroonedvarcheck_deriv_mod, only: &
-    Ops_GPSRO_deriv
 
 use ufo_gnssroonedvarcheck_rootsolv_mod, only: &
     Ops_GPSRO_rootsolv_BA
@@ -78,8 +70,6 @@ INTEGER, INTENT(IN)                 :: GPSRO_n_iteration_test
 REAL(kind_real), INTENT(IN)         :: GPSRO_Delta_ct2
 REAL(kind_real), INTENT(IN)         :: GPSRO_Delta_factor
 REAL(kind_real), INTENT(IN)         :: GPSRO_OB_test
-REAL(kind_real), INTENT(INOUT)      :: GPSRO_max_grad
-REAL(kind_real), INTENT(INOUT)      :: GPSRO_hgt_shift
 LOGICAL, INTENT(IN)                 :: capsupersat
 LOGICAL, INTENT(OUT)                :: BAerr
 REAL(kind_real), INTENT(INOUT)      :: Tb(nlevq)
@@ -92,7 +82,6 @@ CHARACTER(len=*), PARAMETER         :: RoutineName = "Ops_GPSRO_Do1DVar_BA"
 INTEGER, PARAMETER                  :: max_string = 800
 
 ! Local variables
-REAL(kind_real), PARAMETER          :: nr_gap = 500.0   ! padding for vertical range, metres
 INTEGER                             :: nobs        ! size of the 1DVar observation vector
 INTEGER                             :: i
 INTEGER                             :: j
@@ -105,34 +94,21 @@ REAL(kind_real)                     :: J_pen
 REAL(kind_real)                     :: xb(nlevp+nlevq)                 ! background profile used in the 1D-Var
 REAL(kind_real)                     :: x(nlevp+nlevq)                  ! 1Dvar solution profile
 REAL(kind_real)                     :: Amat(nlevp+nlevq,nlevp+nlevq)        ! solultion error cov matrix
-REAL(kind_real)                     :: Refmodel(nlevq)            ! model refractivity on theta levels
-REAL(kind_real)                     :: lower_impact               ! lower impact height range
-REAL(kind_real)                     :: upper_impact               ! upper impact height range
-REAL(kind_real)                     :: Tdummy(nlevq)              ! to work create dummy
-REAL(kind_real), ALLOCATABLE        :: dyb_dz(:)                  ! refractivity vertical gradient array
-REAL(kind_real)                     :: imp_low                    ! lower impact height from gradient test
 REAL(kind_real), ALLOCATABLE        :: zobs(:)
 REAL(kind_real), ALLOCATABLE        :: yobs(:)
 REAL(kind_real), ALLOCATABLE        :: yb(:)
 REAL(kind_real), ALLOCATABLE        :: ycalc(:)
 REAL(kind_real), ALLOCATABLE        :: Om1(:,:)
 INTEGER, ALLOCATABLE                :: index_packed(:)
-REAL(kind_real), ALLOCATABLE        :: z_pseudo(:)                ! Heights of model and pseudo-levels
-REAL(kind_real), ALLOCATABLE        :: N_pseudo(:)                ! Refractivity on model and pseudo_levels
-INTEGER                             :: nb_pseudo                  ! Number of levs to calculate ref on
 CHARACTER(LEN=max_string)           :: message
 
-REAL(kind_real) :: temp_rad_curv, temp_latitude, temp_undulation
+REAL(kind_real) :: temp_rad_curv     ! Temporary store of the earth's radius of curvature
+REAL(kind_real) :: temp_latitude     ! Temporary store of the observation's latitude
+REAL(kind_real) :: temp_undulation   ! Temporary store of the undulation
 
 !--------------
 ! 1. Initialise
 !--------------
-
-IF (GPSRO_pseudo_ops) THEN
-  ALLOCATE (dyb_dz((2 * nlevq - 1) - 1))
-ELSE
-  ALLOCATE (dyb_dz(nlevq - 1))
-END IF
 
 Do1DVar_error = .FALSE.
 BAerr = .FALSE.
@@ -145,138 +121,16 @@ Ob % BendingAngle(:) % PGEFinal = 1.0
 
 ! Set the background vector xb
 
-xb(1:nlevp) = Back % p(:)          ! in h/Pa
-xb(nlevp + 1:nlevp+nlevq) = Back % q(:)    ! in g/kg
-
-! Calculate refractivity on theta levels, to find appropriate
-! impact height vertical range
-
-CALL Ops_GPSRO_Refrac (nlevp,     &
-                       nlevq,     &
-                       Back % za, &
-                       Back % zb, &
-                       xb,        &
-                       GPSRO_vert_interp_ops, &
-                       GPSRO_pseudo_ops, &
-                       BAerr,     &
-                       Refmodel,  &
-                       Tdummy,    &
-                       z_pseudo,  &
-                       N_pseudo,  &
-                       nb_pseudo)
-
-! Calculate refractivity vertical gradient
-! Pseudo levels
-IF (GPSRO_pseudo_ops) THEN
-  CALL Ops_GPSRO_deriv (nb_pseudo, &    ! no of modelled levels
-                        n_pseudo,  &    ! background refractivity on pseudo levels
-                        z_pseudo,  &    ! refractivity height levels
-                        dyb_dz)         ! output gradient
-! Normal model levels
-ELSE
-  CALL Ops_GPSRO_deriv (nlevq,     &    ! no of modelled levels
-                        Refmodel,  &    ! background refractivity on theta levels
-                        Back % zb, &    ! refractivity height levels
-                        dyb_dz)         ! output gradient
-END IF
-
-!PRINT*, 'Refmodel'
-!WRITE(*,'(10F14.4)') Refmodel
-
 xb(1:nlevp) = 1.0E-2 * Back % p(:)          ! in h/Pa
 xb(nlevp + 1:nlevp+nlevq) = 1.0E3 * Back % q(:)    ! in g/kg
 
-! initialise lower impact for gradient test
-imp_low = 0.0
-
-! Check that Obs % GPSRO_max_grad(i) and  Obs % GPSRO_hgt_shift(i) have been
-! read in from the stationlist
-IF (GPSRO_max_grad == missing_value(GPSRO_max_grad)) THEN
-
-  ! set default value - a value that should never be triggered
-  GPSRO_max_grad = -100000.0
-
-END IF
-
-IF (GPSRO_hgt_shift == missing_value(GPSRO_hgt_shift)) THEN
-
-  ! set default value
-  GPSRO_hgt_shift = 0.0
-
-END IF
-
-WRITE (message, '(A,F12.2)') 'GPSRO_max_grad', GPSRO_max_grad
-CALL fckit_log % info(message)
-WRITE (message, '(A,F12.2)') 'GPSRO_hgt_shift', GPSRO_hgt_shift
-CALL fckit_log % info(message)
-
-! Perform refractivity vertical gradient check, and assign lower impact height accordingly
-! Pseudo levels
-IF (GPSRO_pseudo_ops) THEN
-  DO i = nb_pseudo - 1, 1, -1
-    ! check gradient
-    IF (dyb_dz(i) < GPSRO_max_grad .AND.  &
-        dyb_dz(i) /= missing_value(dyb_dz(i))) THEN
-
-      ! make sure imp. hght is > that of sharp gradient,(x(i) -RoC) +GPSRO_hgt_shift
-      imp_low = (1.0E-6 * n_pseudo(i) + 1.0) * (z_pseudo(i) + Ob % RO_Rad_Curv % value) - &
-                            Ob % RO_Rad_Curv % value + GPSRO_hgt_shift
-
-      WRITE(message, '(A,F12.3)') 'large back refractivity gradient found:', dyb_dz(i)
-      CALL fckit_log % info(message)
-
-      ! exit the loop once GPSRO_max_grad exceeded
-      EXIT
-    END IF
-  END DO
-  ! lower vertical range for BA assimilation, maximum of x(1)-RoC, GPSRO_Zmin or imp_low
-  lower_impact = MAX ((1.0E-6 * n_pseudo(1) + 1.0) * (z_pseudo(1) + Ob % RO_Rad_Curv % value) &
-                      - Ob % RO_Rad_Curv % value + nr_gap, GPSRO_Zmin, imp_low)
-
-  ! upper vertical range for BA assimilation, minimum of (x(nb)-RoC) or GPSRO_Zmax
-  upper_impact = MIN ((1.0E-6 * n_pseudo(nb_pseudo) + 1.0) * (z_pseudo(nb_pseudo) + Ob % RO_Rad_Curv % value) &
-                      - Ob % RO_Rad_Curv % value, GPSRO_Zmax)
-! Normal model levels
-ELSE
-  DO i = nlevq - 1, 1, -1
-    ! check gradient
-    IF (dyb_dz(i) < GPSRO_max_grad .AND.  &
-        dyb_dz(i) /= missing_value(dyb_dz(i))) THEN
-
-      !make sure imp. hght is > that of sharp gradient,(x(i) -RoC) +GPSRO_hgt_shift
-      imp_low = (1.0E-6 * Refmodel(i) + 1.0) * (Back % zb(i) + Ob % RO_Rad_Curv % value) &
-                      - Ob % RO_Rad_Curv % value + GPSRO_hgt_shift
-
-      WRITE(message,'(A,F12.2)') 'large back refractivity gradient found:', dyb_dz(i)
-      CALL fckit_log % info(message)
-
-      !exit the loop once GPSRO_max_grad exceeded
-      EXIT
-    END IF
-  END DO
-
-!  print*, Refmodel(1), Back % zb(1), Ob % RO_Rad_Curv % value, nr_gap, GPSRO_Zmin, imp_low
-
-  ! lower vertical range for BA assimilation, maximum of x(1)-RoC, GPSRO_Zmin or imp_low
-  lower_impact = MAX ((1.0E-6 * Refmodel(1) + 1.0) * (Back % zb(1) + Ob % RO_Rad_Curv % value) &
-                      - Ob % RO_Rad_Curv % value + nr_gap, GPSRO_Zmin, imp_low)
-
-  ! upper vertical range for BA assimilation, minimum of (x(nlevq)-RoC) or GPSRO_Zmax
-  upper_impact = MIN ((1.0E-6 * Refmodel(nlevq) + 1.0) * (Back % zb(nlevq) + Ob % RO_Rad_Curv % value) &
-                      - Ob % RO_Rad_Curv % value, GPSRO_Zmax)
-END IF
-
-WRITE (message, '(A,F12.2)') 'lower_impact', lower_impact
-CALL fckit_log % info(message)
-WRITE (message, '(A,F12.2)') 'upper_impact', upper_impact
-CALL fckit_log % info(message)
+! Calculate refractivity on theta levels, to find appropriate
+! impact height vertical range
 
 ! Set size of obs vector used in 1D- Var
 
 nobs = COUNT (Ob % BendingAngle(:) % value /= missing_value(Ob % BendingAngle(1) % value) .AND. & ! not missing bending angle
               Ob % ImpactParam(:) % value /= missing_value(Ob % ImpactParam(1) % value)   .AND. & ! not missing impact parameter
-              Ob % ImpactParam(:) % value - Ob % RO_Rad_Curv % value > lower_impact       .AND. & ! within lower impact height cut-off
-              Ob % ImpactParam(:) % value - Ob % RO_Rad_Curv % value < upper_impact       .AND. & ! within upper impact height cut-off
               Ob % qc_flags(:) == 0)
 
 WRITE (message, '(A,I0)') 'size of input obs vector ', SIZE (Ob % BendingAngle(:) % value)
@@ -284,22 +138,20 @@ CALL fckit_log % info(message)
 WRITE (message, '(A,I0)') 'size of packed obs vector ', nobs
 CALL fckit_log % info(message)
 
-! Only continue if more than 10 obs in vector, note 10 is a arbitrary value
-! and the BAerr is .FALSE.
-IF (nobs > 10 .AND. .NOT. BAerr) THEN
+! Only continue if we have some observations to process
+IF (nobs > 0) THEN
 
   ! calculate an array of indices of the packed elements
 
   ALLOCATE (index_packed(nobs))                           ! allocate the packed index vector
   index_packed = missing_value(index_packed(1))           ! initialise
 
-  ! Allocate arrays used in 1D- Var after test to stop allocating size nobs=0
+  ! Allocate arrays used in 1D-Var after test to stop allocating size nobs=0
   ALLOCATE (om1(nobs,nobs))
   ALLOCATE (yobs(nobs))
   ALLOCATE (zobs(nobs))
   ALLOCATE (yb(nobs))
   ALLOCATE (ycalc(nobs))
-
 
   ! Pack observation arrays for valid values
   ! Note: This hard-codes the R-matrix to be diagonal, since that is all that
@@ -311,8 +163,6 @@ IF (nobs > 10 .AND. .NOT. BAerr) THEN
   DO i = 1, SIZE (Ob % BendingAngle(:) % Value)
     IF (Ob % BendingAngle(i) % Value /= missing_value(Ob % BendingAngle(i) % Value) .AND. &
         Ob % ImpactParam(i) % value /= missing_value(Ob % ImpactParam(i) % value)   .AND. &
-        Ob % ImpactParam(i) % value - Ob % RO_Rad_Curv % value > lower_impact       .AND. &
-        Ob % ImpactParam(i) % value - Ob % RO_Rad_Curv % value < upper_impact       .AND. &
         Ob % qc_flags(i) == 0) THEN
       index_packed(j) = i
       zobs(j) = Ob % ImpactParam(i) % value

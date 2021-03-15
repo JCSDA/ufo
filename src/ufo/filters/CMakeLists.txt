@@ -18,6 +18,8 @@ set ( filters_files
       GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
+      ImpactHeightCheck.cc
+      ImpactHeightCheck.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
       ObsProcessorBase.cc

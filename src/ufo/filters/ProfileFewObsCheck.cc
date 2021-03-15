@@ -86,7 +86,7 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void ProfileFewObsCheck::print(std::ostream & os) const {
-  os << "<FilterName>: config = " << parameters_ << std::endl;
+  os << "ProfileFewObsCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

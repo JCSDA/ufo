@@ -8,7 +8,6 @@ set ( gnssroonedvarcheck_files
     GNSSROOneDVarCheck.cc
     GNSSROOneDVarCheck.interface.F90
     GNSSROOneDVarCheck.interface.h
-    ufo_gnssroonedvarcheck_deriv_mod.f90
     ufo_gnssroonedvarcheck_do1dvar_mod.f90
     ufo_gnssroonedvarcheck_eval_derivs_mod.f90
     ufo_gnssroonedvarcheck_get_bmatrix_mod.f90

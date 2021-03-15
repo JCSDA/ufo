@@ -14,7 +14,6 @@ use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
-use ufo_basis_mod,     only: ufo_basis
 use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod  
@@ -27,7 +26,7 @@ public             :: ufo_gnssro_bendmetoffice
 private
 
   !> Fortran derived type for gnssro trajectory
-type, extends(ufo_basis) :: ufo_gnssro_BendMetOffice
+type :: ufo_gnssro_BendMetOffice
   logical :: vert_interp_ops
   logical :: pseudo_ops
   contains
@@ -56,15 +55,16 @@ end subroutine ufo_gnssro_bendmetoffice_setup
 ! ------------------------------------------------------------------------------
 ! 1-dimensional GNSS-RO forward operator for the Met Office system
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
+subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
   implicit none
 
   ! Arguments to this routine
-  class(ufo_gnssro_BendMetOffice), intent(in)    :: self     ! The object in which this operator is contained
-  type(ufo_geovals),               intent(in)    :: geovals  ! The model values, interpolated to the obsevation locations
-  real(kind_real),                 intent(inout) :: hofx(:)  ! The model forecast of the observations
-  type(c_ptr), value,              intent(in)    :: obss     ! The observations, and meta-data for those observations
+  class(ufo_gnssro_BendMetOffice), intent(in)    :: self      ! The object in which this operator is contained
+  type(ufo_geovals),               intent(in)    :: geovals   ! The model values, interpolated to the observation locations
+  real(kind_real),                 intent(inout) :: hofx(:)   ! The model forecast of the observations
+  type(c_ptr), value,              intent(in)    :: obss      ! The observations, and meta-data for those observations
+  type(ufo_geovals),               intent(inout) :: obs_diags ! Observations diagnostics
 
   character(len=*), parameter     :: myname_ = "ufo_gnssro_bendmetoffice_simobs"
   integer, parameter              :: max_string = 800
@@ -85,9 +85,25 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
   real(kind_real), allocatable       :: undulation(:)         ! Undulation - height of the geoid above the ellipsoid
   logical                            :: flip_data             ! Whether to reverse the order of the model data
   logical                            :: BAErr                 ! Was there an error in the calculation?
+  integer                            :: iVar                  ! Loop variable, obs diagnostics variable number
+  real(kind_real), allocatable       :: refractivity(:)       ! Refractivity on various model levels
+  real(kind_real), allocatable       :: model_heights(:)      ! Geopotential heights that refractivity is calculated on
 
   write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: begin"
   call fckit_log%info(err_msg)
+
+  ! If output to refractivity (and heights of the refractivity levels) is needed,
+  ! then use nval as a way to check whether the array has been initialised (since
+  ! it is called in a loop).
+  DO iVar = 1, obs_diags % nvar
+    IF (obs_diags % variables(ivar) == "refractivity" .OR. &
+        obs_diags % variables(ivar) == "model_heights") THEN
+      write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: initialising obs_diags for " // &
+        obs_diags % variables(ivar)
+      call fckit_log%info(err_msg)
+      obs_diags % geovals(iVar) % nval = 0
+    END IF
+  END DO
 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -153,7 +169,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
                                     obsLat(iobs), &
                                     undulation(iobs), &
                                     hofx(iobs:iobs), &
-                                    BAErr)
+                                    BAErr, &
+                                    refractivity, &
+                                    model_heights)
     else
         call Ops_GPSRO_ForwardModel(prs % nval, &
                                     q % nval, &
@@ -169,7 +187,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
                                     obsLat(iobs), &
                                     undulation(iobs), &
                                     hofx(iobs:iobs), &
-                                    BAErr)
+                                    BAErr, &
+                                    refractivity, &
+                                    model_heights)
     end if
 
     if (BAErr) then
@@ -177,6 +197,34 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
       call fckit_log % info(err_msg)
     end if
 
+    ! If output to refractivity is needed, then initialise things
+    DO iVar = 1, obs_diags % nvar
+        IF (obs_diags % variables(ivar) == "refractivity") THEN
+            IF (iobs == 1) THEN
+                obs_diags % geovals(iVar) % nval = SIZE(refractivity)
+                ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(refractivity), obs_diags % nlocs))
+            END IF
+
+            IF (BAerr) THEN
+                obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
+            ELSE
+                obs_diags % geovals(iVar) % vals(:,iobs) = refractivity(:)
+            END IF
+        END IF
+
+        IF (obs_diags % variables(ivar) == "model_heights") THEN
+            IF (iobs == 1) THEN
+                obs_diags % geovals(iVar) % nval = SIZE(model_heights)
+                ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(model_heights), obs_diags % nlocs))
+            END IF
+
+            IF (BAerr) THEN
+                obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
+            ELSE
+                obs_diags % geovals(iVar) % vals(:,iobs) = model_heights(:)
+            END IF
+        END IF
+    END DO
   end do obs_loop
 
   deallocate(obsLat)
@@ -206,28 +254,32 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   Latitude, &
                                   RO_geoid_und, &
                                   ycalc, &
-                                  BAErr)
+                                  BAErr, &
+                                  refractivity, &
+                                  model_heights)
 
-INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
-INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
-REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
-LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
-LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
-INTEGER, INTENT(IN)            :: nobs                   ! Number of observations in the profile
-REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)           ! Impact parameter for the obs
-REAL(kind_real), INTENT(IN)    :: RO_Rad_Curv            ! Earth's radius of curvature for these observations
-REAL(kind_real), INTENT(IN)    :: Latitude               ! Latitude of this profile
-REAL(kind_real), INTENT(IN)    :: RO_geoid_und           ! Undulation - difference between the geoid and the ellipsoid
-REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the observations
-LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?
-! 
+INTEGER, INTENT(IN)              :: nlevp                  ! no. of p levels in state vec.
+INTEGER, INTENT(IN)              :: nlevq                  ! no. of theta levels
+REAL(kind_real), INTENT(IN)      :: za(1:nlevp)            ! heights of rho levs
+REAL(kind_real), INTENT(IN)      :: zb(1:nlevq)            ! heights of theta levs
+REAL(kind_real), INTENT(IN)      :: pressure(1:nlevp)      ! Model background pressure
+REAL(kind_real), INTENT(IN)      :: humidity(1:nlevq)      ! Model background specific humidity
+LOGICAL, INTENT(IN)              :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
+LOGICAL, INTENT(IN)              :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
+INTEGER, INTENT(IN)              :: nobs                   ! Number of observations in the profile
+REAL(kind_real), INTENT(IN)      :: zobs(1:nobs)           ! Impact parameter for the obs
+REAL(kind_real), INTENT(IN)      :: RO_Rad_Curv            ! Earth's radius of curvature for these observations
+REAL(kind_real), INTENT(IN)      :: Latitude               ! Latitude of this profile
+REAL(kind_real), INTENT(IN)      :: RO_geoid_und           ! Undulation - difference between the geoid and the ellipsoid
+REAL(kind_real), INTENT(INOUT)   :: ycalc(1:nobs)          ! Model forecast of the observations
+LOGICAL, INTENT(OUT)             :: BAErr                  ! Was an error encountered during the calculation?
+REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)  ! Refractivity as calculated
+REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:) ! Height of the levels for refractivity
+!
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
-REAL(kind_real), ALLOCATABLE :: z_pseudo(:)        ! Heights of the pseudo levels       | Allocated by
-REAL(kind_real), ALLOCATABLE :: N_pseudo(:)        ! Refractivity on the pseudo levels  | Ops_GPSRO_refrac
+REAL(kind_real), ALLOCATABLE :: N_pseudo(:) ! Refractivity on the pseudo levels - allocated by Ops_GPSRO_refrac
+REAL(kind_real), ALLOCATABLE :: Z_pseudo(:) ! Height of the pseudo levels - allocated by Ops_GPSRO_refrac
 INTEGER                      :: nb_pseudo          ! Number of pseudo levels
 REAL(kind_real)              :: T(1:nlevq)         ! Temperature on model levels
 REAL(kind_real), ALLOCATABLE :: nr(:)              ! Model calculation of impact parameters
@@ -277,6 +329,18 @@ CALL Ops_GPSRO_refrac (nlevp,    &
                        z_pseudo, &
                        N_pseudo, &
                        nb_pseudo)
+
+! Save the refractivity and model heights for return to main routine
+IF (.NOT. ALLOCATED(refractivity)) THEN
+    ALLOCATE(refractivity(1:num_pseudo), model_heights(1:num_pseudo))
+END IF
+IF (GPSRO_pseudo_ops) THEN
+    refractivity(:) = N_pseudo(1:num_pseudo)
+    model_heights(:) = z_pseudo(1:num_pseudo)
+ELSE
+    refractivity(:) = Refmodel(1:num_pseudo)
+    model_heights(:) = zb(1:num_pseudo)
+END IF
 
 ! no point proceeding further if ...
 IF (.NOT. BAerr) THEN

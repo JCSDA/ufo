@@ -7,6 +7,7 @@
 
 module ufo_gnssroonedvarcheck_mod
 
+use, intrinsic :: iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use iso_c_binding
@@ -39,8 +40,6 @@ type, public :: ufo_gnssroonedvarcheck
   real(kind_real)           :: cost_funct_test   !< Threshold value for the cost function convergence test
   real(kind_real)           :: Delta_ct2         !< Threshold used in calculating convergence
   real(kind_real)           :: Delta_factor      !< Threshold used in calculating convergence
-  real(kind_real)           :: height_shift      !< Addition to lower impact height if max N grad triggered: metre
-  real(kind_real)           :: max_grad          !< Threshold for the maximum refractivity gradient
   integer                   :: n_iteration_test  !< Maximum number of iterations in the 1DVar
   real(kind_real)           :: OB_test           !< Threshold for the O-B throughout the profile
   real(kind_real)           :: y_test            !< Threshold on distance between observed and solution bending angles
@@ -85,8 +84,6 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, f_conf, onedvarflag)
   call f_conf%get_or_die("Delta_ct2", self % Delta_ct2)
   call f_conf%get_or_die("Delta_factor", self % Delta_factor)
   call f_conf%get_or_die("OB_test", self % OB_test)
-  call f_conf%get_or_die("max_grad", self % max_grad)
-  call f_conf%get_or_die("height_shift", self % height_shift)
   call f_conf%get_or_die("bmatrix_filename", temp_str1)
   self % bmatrix_filename = temp_str1
   call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
@@ -146,7 +143,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   integer, allocatable               :: qc_flags(:)           ! QC flags to be updated
   integer, allocatable               :: obsSatid(:)           ! Satellite identifier for each observation
   integer, allocatable               :: obsOrigC(:)           ! Originating centre for each observation
-  integer, allocatable               :: record_number(:)      ! Number used to identify unique profiles in the data
+  integer(c_size_t), allocatable     :: record_number(:)      ! Number used to identify unique profiles in the data
   real(kind_real), allocatable       :: sort_key(:)           ! Key for the sorting (based on record number and impact parameter)
   integer, allocatable               :: index_vals(:)         ! Indices of sorted observation
   integer, allocatable               :: unique(:)             ! Set of unique profile numbers
@@ -184,7 +181,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   call obsspace_get_db(self % obsdb, "MetaData", "earth_radius_of_curvature", radius_curv)
   call obsspace_get_db(self % obsdb, "MetaData", "geoid_height_above_reference_ellipsoid", undulation)
   call obsspace_get_db(self % obsdb, "ObsValue", "bending_angle", obs_bending_angle)
-  call obsspace_get_db(self % obsdb, "MetaData", "record_number", record_number)
+  call obsspace_get_recnum(self % obsdb, record_number)
   call obsspace_get_db(self % obsdb, "MetaData", "occulting_sat_id", obsSatid)
   call obsspace_get_db(self % obsdb, "MetaData", "originating_center", obsOrigC)
   call obsspace_get_db(self % obsdb, "FortranQC", "bending_angle", qc_flags)
@@ -281,8 +278,6 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
                               self % Delta_factor,     &   ! Delta
                               self % Delta_ct2,        &   ! Delta observations
                               self % OB_test,          &   ! Threshold value for the O-B test
-                              self % max_grad,         &   ! Max background vertical N gradient: N units/ metre
-                              self % height_shift,     &   ! Addition to imp_low if max N grad triggered: metre
                               self % capsupersat,      &   ! Whether to remove super-saturation
                               BAerr,                   &   ! Whether there are errors in the bending angle calculation
                               Tb,                      &   ! Calculated background temperature

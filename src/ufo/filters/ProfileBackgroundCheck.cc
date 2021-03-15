@@ -170,7 +170,7 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void ProfileBackgroundCheck::print(std::ostream & os) const {
-  os << "ProfileBackgroundCheck::print not yet implemented ";
+  os << "ProfileBackgroundCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
