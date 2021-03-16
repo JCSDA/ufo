@@ -49,8 +49,6 @@ void testPredictor() {
     /// initialize bias correction
     eckit::LocalConfiguration bconf(conf, "obs bias");
     const ObsBias ybias(ospace, bconf);
-    const std::set<int> jobs = oops::parseIntSet(bconf.getString("jobs"));
-    int njobs = jobs.size();
     // get predictor names
     std::vector<std::string> predictor_names = ybias.requiredPredictors();
 
@@ -92,29 +90,38 @@ void testPredictor() {
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       vars.push_back("predictor_" + predictor_names[jp]);
     }
-    std::vector<int> channels(jobs.begin(), jobs.end());
-    const oops::Variables testvars(vars, channels);
-    ioda::ObsDataVector<float> ref(ospace, testvars, "TestReference");
+    const oops::Variables testvars = ospace.obsvariables();
+    const std::size_t nvars = testvars.size();
+    if (!testvars.channels().empty()) {
+      // At present we can label predictors with either the channel number or the variable
+      // name, but not both. So make sure there's only one multi-channel variable.
+      ASSERT(nvars == testvars.channels().size());
+    }
 
-    /// For each predictor for each channel compare computed predictor values to reference
+    /// For each predictor for each variable compare computed predictor values to reference
+    std::vector<float> testData(ospace.nlocs());
     for (std::size_t jp = 0; jp < npreds; ++jp) {
-      const std::size_t nlocs  = predData[jp].nlocs();
-      for (std::size_t jc = 0; jc < njobs; ++jc) {
-        std::vector<float> TestData =
-                ref["predictor_" + predictor_names[jp] + '_' + std::to_string(channels[jc])];
+      const std::size_t nlocs = predData[jp].nlocs();
+      for (std::size_t jv = 0; jv < nvars; ++jv) {
+        std::string refVarName = "predictor_" + predictor_names[jp] + '_';
+        if (testvars.channels().empty())
+          refVarName += testvars[jv];
+        else
+          refVarName += std::to_string(testvars.channels()[jv]);
+
+        ospace.get_db("TestReference", refVarName, testData);
 
         // compare test and reference vectors
         double rms = 0.0;
         for (size_t jl = 0; jl < nlocs; jl++) {
-          TestData[jl] -= predData[jp][jl*njobs + jc];
-          rms += TestData[jl] * TestData[jl];
+          testData[jl] -= predData[jp][jl*nvars + jv];
+          rms += testData[jl] * testData[jl];
         }
         rms = std::sqrt(rms / nlocs);
 
+        oops::Log::debug() << "Vector difference between reference and computed for "
+                           << refVarName << ": " << testData << std::endl;
         EXPECT(rms <= tol);
-        oops::Log::debug() << "Vector difference between reference and computed for predictor_"
-                             + predictor_names[jp] + '_' + std::to_string(channels[jc]) + ": "
-                          << TestData << std::endl;
       }
     }
   }

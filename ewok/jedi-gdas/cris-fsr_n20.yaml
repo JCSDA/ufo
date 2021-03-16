@@ -46,35 +46,27 @@ obs operator:
     CoefficientPath: $(jedi_build)/ufo/test/Data/
 obs bias:
 # input file: $(experiment_dir)/{{current_cycle}}/satbias_cris-fsr_n20.{{window_begin}}.nc4
-  jobs: *cris-fsr_n20_channels
-  predictors:
-  - predictor:
-      name: constant
-# - predictor:
-#     name: lapse_rate
+  variational bc:
+    predictors:
+    - name: constant
+#   - name: lapse_rate
 #     options:
 #       order: 2
 #       tlapse: &cris-fsr_n20_tlapse $(experiment_dir)/{{current_cycle}}/tlapmean_cris-fsr_n20.{{window_begin}}.nc4
-# - predictor:
-#     name: lapse_rate
+#   - name: lapse_rate
 #     options:
 #       tlapse: *cris-fsr_n20_tlapse
-  - predictor:
-      name: emissivity
-  - predictor:
-      name: scan_angle
+    - name: emissivity
+    - name: scan_angle
       options:
         order: 4
-  - predictor:
-      name: scan_angle
+    - name: scan_angle
       options:
         order: 3
-  - predictor:
-      name: scan_angle
+    - name: scan_angle
       options:
         order: 2
-  - predictor:
-      name: scan_angle
+    - name: scan_angle
 obs filters:
 #  Wavenumber Check
 - filter: BlackList

@@ -29,38 +29,29 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predictors_(0), vars_(odb.obsvariables()) {
+  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
-  if (conf.has("predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf.get("predictors", confs);
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], vars_));
-      predictors_.push_back(pred);
-      prednames_.push_back(pred->name());
-      geovars_ += pred->requiredGeovars();
-      hdiags_ += pred->requiredHdiagnostics();
-
-      // Reserve the space for ObsBiasTerm for predictor
-      if (vars_.channels().size() > 0) {
-        // At present we can label predictors with either the channel number or the variable
-        // name, but not both. So make sure there's only one multi-channel variable.
-        ASSERT(vars_.size() == vars_.channels().size());
-        for (auto & job : vars_.channels()) {
-          hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
-        }
-      } else {
-        for (const std::string & variable : vars_.variables())
-          hdiags_ += oops::Variables({prednames_.back() + "_" + variable});
-      }
+  if (conf.has("static bc.predictors")) {
+    const eckit::LocalConfiguration predsConf(conf, "static bc.predictors");
+    for (const eckit::LocalConfiguration &conf : predsConf.getSubConfigurations()) {
+      initPredictor(conf);
+      ++numStaticPredictors_;
+    }
+  }
+  if (conf.has("variational bc.predictors")) {
+    const eckit::LocalConfiguration predsConf(conf, "variational bc.predictors");
+    for (const eckit::LocalConfiguration &conf : predsConf.getSubConfigurations()) {
+      initPredictor(conf);
+      ++numVariablePredictors_;
     }
   }
 
   if (prednames_.size() * vars_.size() > 0) {
-    // Initialize the biascoeffs to ZERO
-    biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), vars_.size());
+    // Initialize the coefficients of variable predictors to 0. (Coefficients of static predictors
+    // are not stored; they are always equal to 1.)
+    biascoeffs_ = Eigen::MatrixXf::Zero(numVariablePredictors_, vars_.size());
     // Read or initialize bias coefficients
     this->read(conf);
   }
@@ -72,12 +63,15 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : predictors_(other.predictors_),
-    prednames_(other.prednames_), vars_(other.vars_),
+    prednames_(other.prednames_),
+    numStaticPredictors_(other.numStaticPredictors_),
+    numVariablePredictors_(other.numVariablePredictors_),
+    vars_(other.vars_),
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_ = Eigen::MatrixXf::Zero(prednames_.size(), vars_.size());
+  biascoeffs_ = Eigen::MatrixXf::Zero(numVariablePredictors_, vars_.size());
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -100,6 +94,8 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     biascoeffs_ = rhs.biascoeffs_;
     predictors_  = rhs.predictors_;
     prednames_  = rhs.prednames_;
+    numStaticPredictors_ = rhs.numStaticPredictors_;
+    numVariablePredictors_ = rhs.numVariablePredictors_;
     vars_       = rhs.vars_;
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
@@ -108,24 +104,39 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 }
 
 // -----------------------------------------------------------------------------
-/// Returns indices of all \p elements_to_look_for in the \p all_elements vector,
-/// in the same order that \p elements_to_look_for are in.
-/// Throws an exception if at least one of \p elements_to_look_for is missing
+/// Returns indices of all elements in the range
+/// [\p elements_to_look_for_begin, \p elements_to_look_for_end) in the \p all_elements vector,
+/// in the same order that the former are in.
+/// Throws an exception if at least one of elements looked for is missing
 /// from \p all_elements.
 template<typename T>
 std::vector<int> getAllIndices(const std::vector<T> & all_elements,
-                                 const std::vector<T> & elements_to_look_for) {
+                               typename std::vector<T>::const_iterator elements_to_look_for_begin,
+                               typename std::vector<T>::const_iterator elements_to_look_for_end) {
   std::vector<int> result;
-  for (const T & element : elements_to_look_for) {
-    const auto it = std::find(all_elements.begin(), all_elements.end(), element);
-    if (it != all_elements.end()) {
-      result.push_back(std::distance(all_elements.begin(), it));
+  for (typename std::vector<T>::const_iterator sought_it = elements_to_look_for_begin;
+       sought_it != elements_to_look_for_end; ++sought_it) {
+    const T &sought = *sought_it;
+    const auto found_it = std::find(all_elements.begin(), all_elements.end(), sought);
+    if (found_it != all_elements.end()) {
+      result.push_back(std::distance(all_elements.begin(), found_it));
     } else {
       const std::string errormsg = "getAllIndices: Can't find element in the vector";
       throw eckit::BadParameter(errormsg, Here());
     }
   }
   return result;
+}
+
+// -----------------------------------------------------------------------------
+/// Returns indices of all elements in \p elements_to_look_for in the \p all_elements vector,
+/// in the same order that \p elements_to_look_for are in.
+/// Throws an exception if at least one of elements looked for is missing
+/// from \p all_elements.
+template<typename T>
+std::vector<int> getAllIndices(const std::vector<T> & all_elements,
+                               const std::vector<T> & elements_to_look_for) {
+  return getAllIndices(all_elements, elements_to_look_for.begin(), elements_to_look_for.end());
 }
 
 // -----------------------------------------------------------------------------
@@ -165,12 +176,14 @@ void ObsBias::read(const eckit::Configuration & conf) {
     // is available
     for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
-         biascoeffs_(jpred, jvar) = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
+         biascoeffs_(jpred, jvar) =
+             allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
       }
     }
   } else {
-    oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
-                         << std::endl;
+    if (numVariablePredictors_ > 0)
+      oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
+                           << std::endl;
   }
 
   oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
@@ -182,7 +195,7 @@ std::vector<int> ObsBias::getRequiredPredictorIndices(const ioda::ObsGroup &obsg
   ioda::Variable predictorsvar = obsgroup.vars.open("predictors");
   std::vector<std::string> predictors;
   predictorsvar.read<std::string>(predictors);
-  return getAllIndices(predictors, prednames_);
+  return getAllIndices(predictors, prednames_.begin() + numStaticPredictors_, prednames_.end());
 }
 
 // -----------------------------------------------------------------------------
@@ -222,12 +235,29 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 double ObsBias::norm() const {
   oops::Log::trace() << "ObsBias::norm starting." << std::endl;
   double zz = 0.0;
+
+  // Static predictors
+  const int numUnitCoeffs = numStaticPredictors_ * vars_.size();
+  zz += numUnitCoeffs * numUnitCoeffs;
+
+  // Variable predictors
   for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj) {
     zz += biascoeffs_(jj) * biascoeffs_(jj);
   }
-  if (biascoeffs_.size() > 0) zz = std::sqrt(zz/biascoeffs_.size());
+
+  // Compute average and take square root
+  const int numCoeffs = numUnitCoeffs + biascoeffs_.size();
+  if (numCoeffs > 0) zz = std::sqrt(zz/numCoeffs);
+
   oops::Log::trace() << "ObsBias::norm done." << std::endl;
   return zz;
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<std::shared_ptr<const PredictorBase>> ObsBias::variablePredictors() const {
+  return std::vector<std::shared_ptr<const PredictorBase>>(
+    predictors_.begin() + numStaticPredictors_, predictors_.end());
 }
 
 // -----------------------------------------------------------------------------
@@ -237,8 +267,18 @@ void ObsBias::print(std::ostream & os) const {
     // map bias coeffs to eigen matrix (writable)
     os << "ObsBias::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
-    for (std::size_t p = 0; p < prednames_.size(); ++p) {
+    for (std::size_t p = 0; p < numStaticPredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
+         << ":  Min= " << std::setw(15) << std::setprecision(8)
+         << 1.0f
+         << ",  Max= " << std::setw(15) << std::setprecision(8)
+         << 1.0f
+         << ",  Norm= " << std::setw(15) << std::setprecision(8)
+         << std::sqrt(static_cast<double>(vars_.size()))
+         << std::endl;
+    }
+    for (std::size_t p = 0; p < numVariablePredictors_; ++p) {
+      os << std::fixed << std::setw(20) << prednames_[numStaticPredictors_ + p]
          << ":  Min= " << std::setw(15) << std::setprecision(8)
          << biascoeffs_.row(p).minCoeff()
          << ",  Max= " << std::setw(15) << std::setprecision(8)
@@ -249,6 +289,29 @@ void ObsBias::print(std::ostream & os) const {
     }
     os << "---------------------------------------------------------------" << std::endl;
     os << "ObsBias::print done" << std::endl;
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBias::initPredictor(const eckit::Configuration &predictorConf) {
+  std::shared_ptr<PredictorBase> pred(PredictorFactory::create(predictorConf, vars_));
+  predictors_.push_back(pred);
+  prednames_.push_back(pred->name());
+  geovars_ += pred->requiredGeovars();
+  hdiags_ += pred->requiredHdiagnostics();
+
+  // Reserve the space for ObsBiasTerm for predictor
+  if (vars_.channels().size() > 0) {
+    // At present we can label predictors with either the channel number or the variable
+    // name, but not both. So make sure there's only one multi-channel variable.
+    ASSERT(vars_.size() == vars_.channels().size());
+    for (auto & job : vars_.channels()) {
+      hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
+    }
+  } else {
+    for (const std::string & variable : vars_.variables())
+      hdiags_ += oops::Variables({prednames_.back() + "_" + variable});
   }
 }
 

@@ -40,7 +40,8 @@ class ObsBiasCovariance : public util::Printable,
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 // Constructor, destructor
-  ObsBiasCovariance(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasCovariance(ioda::ObsSpace & odb,
+                    const eckit::Configuration & biasConf);
   ~ObsBiasCovariance() {}
 
 // Linear algebra operators
@@ -50,14 +51,13 @@ class ObsBiasCovariance : public util::Printable,
   void randomize(ObsBiasIncrement &) const;
 
 // Utilities
-  const eckit::Configuration & config() const {return conf_;}
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
 
  private:
   void print(std::ostream &) const {}
-  const eckit::LocalConfiguration conf_;
+
   ioda::ObsSpace & odb_;
 
 // Hessian contribution from Jo bias correction terms

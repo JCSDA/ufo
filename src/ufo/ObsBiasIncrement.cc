@@ -25,14 +25,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
+ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
+                                   const eckit::Configuration & biasConf)
   : odb_(odb), vars_(odb.obsvariables()) {
   oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory
-  if (conf.has("predictors")) {
+  if (biasConf.has("variational bc.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf.get("predictors", confs);
+    biasConf.get("variational bc.predictors", confs);
     typedef std::unique_ptr<PredictorBase> predictor;
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::unique_ptr<PredictorBase> predictor(PredictorFactory::create(confs[j], vars_));

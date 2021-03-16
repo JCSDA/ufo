@@ -20,39 +20,30 @@ observations:
   obs bias:
     input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_mhs_n19.2020110106.nc4
     jobs: *channels
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: cosine_of_latitude_times_orbit_node
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
         options:
           preconditioner: 0.01
-    - predictor:
-        name: sine_of_latitude
-    - predictor:
-        name: lapse_rate
+      - name: sine_of_latitude
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &mhs_n19_tlap Data/ufo/testinput_tier_1/instruments/radiance/mhs_n19_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *mhs_n19_tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   vector ref: GsiHofXBc
   tolerance: 1.e-7

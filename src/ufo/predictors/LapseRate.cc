@@ -30,8 +30,8 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const oops::Variables & 
   : PredictorBase(conf, vars), order_(1)
 {
   // get the order if it is provided in options
-  if (conf.has("predictor.options.order")) {
-    conf.get("predictor.options.order", order_);
+  if (conf.has("options.order")) {
+    conf.get("options.order", order_);
 
     // override the predictor name for differentiable
     name() = name() + "_order_" + std::to_string(order_);
@@ -50,8 +50,8 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const oops::Variables & 
 
   // This is a very preliminary method, please revisit
   // more flexibilites are needed
-  if (conf.has("predictor.options.tlapse")) {
-    const std::string tlapse_file = conf.getString("predictor.options.tlapse");
+  if (conf.has("options.tlapse")) {
+    const std::string tlapse_file = conf.getString("options.tlapse");
     std::ifstream infile(tlapse_file);
     std::string nusis;   //  sensor/instrument/satellite
     int nuchan;  //  channel number

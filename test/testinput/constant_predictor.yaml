@@ -14,9 +14,8 @@ observations:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs bias:
     sensor: noaa_20_atms
-    jobs: *channels
-    predictors:
-    - predictor:
-        name: constant
+    variational bc:
+      predictors:
+      - name: constant
   tolerance: 1.0e-16
 

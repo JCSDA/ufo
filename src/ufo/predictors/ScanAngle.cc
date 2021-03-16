@@ -26,8 +26,8 @@ static PredictorMaker<ScanAngle> makerFuncScanAngle_("scan_angle");
 ScanAngle::ScanAngle(const eckit::Configuration & conf, const oops::Variables & vars)
   : PredictorBase(conf, vars), order_(1) {
   // get the order if it is provided in options
-  if (conf.has("predictor.options.order")) {
-    conf.get("predictor.options.order", order_);
+  if (conf.has("options.order")) {
+    conf.get("options.order", order_);
 
     // override the predictor name for differentiable
     name() = name() + "_order_" + std::to_string(order_);

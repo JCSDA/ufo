@@ -36,9 +36,9 @@ namespace ufo {
 class ObsBiasIncrement : public util::Printable {
  public:
 // Constructor, destructor
-  ObsBiasIncrement(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasIncrement(const ioda::ObsSpace & odb,
+                   const eckit::Configuration & biasConf);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
-  ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
 
 // Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);

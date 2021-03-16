@@ -7,6 +7,9 @@
 
 #include "ufo/LinearObsBiasOperator.h"
 
+#include <memory>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -30,11 +33,13 @@ LinearObsBiasOperator::LinearObsBiasOperator(ioda::ObsSpace & odb)
 void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                           ObsDiagnostics & ydiags) {
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory starts." << std::endl;
-  const std::size_t npreds = bias.predictors().size();
+  const std::vector<std::shared_ptr<const PredictorBase>> variablePredictors =
+      bias.variablePredictors();
+  const std::size_t npreds = variablePredictors.size();
 
   predData_.resize(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
-    bias.predictors()[p]->compute(odb_, geovals, ydiags, predData_[p]);
+    variablePredictors[p]->compute(odb_, geovals, ydiags, predData_[p]);
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory done." << std::endl;

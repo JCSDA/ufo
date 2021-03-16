@@ -57,23 +57,39 @@ class ObsBias : public util::Printable,
   double norm() const;
   std::size_t size() const {return biascoeffs_.size();}
 
-  // Accessor to bias coefficients
+  /// Return the coefficient of predictor \p jpred for variable \p jvar.
+  ///
+  /// Note: \p jpred may be the index of a static or a variable predictor.
+  double operator()(size_t jpred, size_t jvar) const {
+    return jpred < numStaticPredictors_ ? 1.0 : biascoeffs_(jpred - numStaticPredictors_, jvar);
+  }
+
+  /// Return the ii'th element of the flattened array of coefficients of *variable* predictors.
   double operator[](const unsigned int ii) const {return biascoeffs_(ii);}
-  double operator()(size_t ii, size_t jj) const {return biascoeffs_(ii, jj);}
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
   const std::vector<std::string> & requiredPredictors() const {return prednames_;}
 
+  /// Return a reference to the vector of all (static and variable) predictors.
   const Predictors & predictors() const {return predictors_;}
+
+  /// Return the vector of variable predictors.
+  std::vector<std::shared_ptr<const PredictorBase>> variablePredictors() const;
+
+  /// Return the list of bias-corrected variables.
   const oops::Variables & correctedVars() const {return vars_;}
 
   // Operator
-  operator bool() const {return biascoeffs_.size() > 0;}
+  operator bool() const {
+    return (numStaticPredictors_ > 0 || numVariablePredictors_ > 0) && vars_.size() > 0;
+  }
 
  private:
   void print(std::ostream &) const override;
+
+  void initPredictor(const eckit::Configuration &predictorConf);
 
   /// Return the vector of indices of predictors whose coefficients need to be initialized
   /// from the input file.
@@ -90,6 +106,10 @@ class ObsBias : public util::Printable,
   Predictors predictors_;
   /// predictor names
   std::vector<std::string> prednames_;
+  /// number of static predictors (i.e. predictors with fixed coefficients all equal to 1)
+  std::size_t numStaticPredictors_;
+  /// number of variable predictors (i.e. predictors with variable coefficients)
+  std::size_t numVariablePredictors_;
 
   /// corrected variables names (for now has to be same as "simulated variables")
   oops::Variables vars_;

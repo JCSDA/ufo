@@ -29,16 +29,17 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : conf_(conf), odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(0),
+ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
+                                     const eckit::Configuration & biasConf)
+  : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(0),
     preconditioner_(0),
     ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
-  if (conf_.has("predictors")) {
+  if (biasConf.has("variational bc.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("predictors", confs);
+    biasConf.get("variational bc.predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], vars_));
       prednames_.push_back(pred->name());
@@ -46,28 +47,30 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
   }
 
   if (prednames_.size()*vars_.size() > 0) {
+    const eckit::LocalConfiguration biasCovConf = biasConf.getSubConfiguration("covariance");
+
     // Get the minimal required filtered obs number
     minimal_required_obs_number_ =
-      conf_.getUnsigned("minimal required obs number");
+      biasCovConf.getUnsigned("minimal required obs number");
 
     // Override the variance range if provided
-    if (conf_.has("variance range")) {
+    if (biasCovConf.has("variance range")) {
       const std::vector<double>
-        range = conf_.getDoubleVector("variance range");
+        range = biasCovConf.getDoubleVector("variance range");
       ASSERT(range.size() == 2);
       smallest_variance_ = range[0];
       largest_variance_ = range[1];
     }
 
     // Override the preconditioning step size  if provided
-    if (conf_.has("step size")) {
-      step_size_ = conf_.getDouble("step size");
+    if (biasCovConf.has("step size")) {
+      step_size_ = biasCovConf.getDouble("step size");
     }
 
     // Override the largest analysis variance if provided
-    if (conf_.has("largest analysis variance")) {
+    if (biasCovConf.has("largest analysis variance")) {
       largest_analysis_variance_ =
-        conf_.getDouble("largest analysis variance");
+        biasCovConf.getDouble("largest analysis variance");
     }
 
     // Initialize the variances to upper limit
@@ -91,18 +94,18 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
 
     // Initializes from given prior
-    if (conf_.has("prior")) {
+    if (biasCovConf.has("prior")) {
       // Get default inflation ratio
       const double inflation_ratio =
-        conf.getDouble("prior.inflation.ratio");
+        biasCovConf.getDouble("prior.inflation.ratio");
 
       // Check the large inflation ratio when obs number < minimal_required_obs_number
       const double large_inflation_ratio =
-        conf.getDouble("prior.inflation.ratio for small dataset");
+        biasCovConf.getDouble("prior.inflation.ratio for small dataset");
 
       // read in Variances prior (analysis_variances_) and number of obs. (obs_num_)
       // from previous cycle
-      this->read(conf_);
+      this->read(biasCovConf);
 
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance

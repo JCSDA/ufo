@@ -46,34 +46,27 @@ observations:
     filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_unittest.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_airs_aqua.nc4
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: lapse_rate
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &airs_aqua-atlap Data/ufo/testinput_tier_1/airs_aqua_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *airs_aqua-atlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
 #  Wavenumber Check
   - filter: BlackList

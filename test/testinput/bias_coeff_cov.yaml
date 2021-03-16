@@ -10,52 +10,41 @@ observations:
     channels: &channels 1-15
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
-    predictors: &predictors
-    - predictor:
-        name: constant
-    - predictor:
-        name: cosine_of_latitude_times_orbit_node
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
         options:
           preconditioner: 0.01
-    - predictor:
-        name: sine_of_latitude
-    - predictor:
-        name: lapse_rate
+      - name: sine_of_latitude
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *amsua19tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
-
-  obs bias error:
-    jobs: *channels
-    sensor: amsua_n19
-    minimal required obs number: 20
-    variance range: [1.0e-6, 10.]
-    step size: 1.0e-4
-    largest analysis variance: 10000.0
-    prior:
-      datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-      inflation:
-        ratio: 1.1
-        ratio for small dataset: 2.0
-    predictors: *predictors
+      - name: scan_angle
+    covariance:
+      jobs: *channels
+      sensor: amsua_n19
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
   tolerance: 1.e-7

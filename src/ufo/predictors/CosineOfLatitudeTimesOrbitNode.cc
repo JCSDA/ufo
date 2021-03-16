@@ -24,8 +24,8 @@ CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
                                 const eckit::Configuration & conf, const oops::Variables & vars)
   : PredictorBase(conf, vars) {
   // override the preconditioner from options
-  if (conf.has("predictor.options"))
-    precond_ = conf.getDouble("predictor.options.preconditioner");
+  if (conf.has("options"))
+    precond_ = conf.getDouble("options.preconditioner");
 }
 
 // -----------------------------------------------------------------------------

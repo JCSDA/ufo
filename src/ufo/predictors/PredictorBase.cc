@@ -19,7 +19,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 PredictorBase::PredictorBase(const eckit::Configuration & conf, const oops::Variables & vars)
-  : func_name_(conf.getString("predictor.name")),
+  : func_name_(conf.getString("name")),
     geovars_(), hdiags_(), vars_(vars) {
 }
 
@@ -39,7 +39,7 @@ PredictorFactory::PredictorFactory(const std::string & name) {
 PredictorBase * PredictorFactory::create(const eckit::Configuration & conf,
                                          const oops::Variables & vars) {
   oops::Log::trace() << "PredictorBase::create starting" << std::endl;
-  const std::string name = conf.getString("predictor.name");
+  const std::string name = conf.getString("name");
   if (!predictorExists(name)) {
     oops::Log::error() << name << " does not exist in ufo::PredictorFactory."
                        << std::endl;

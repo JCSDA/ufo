@@ -23,41 +23,31 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/atms_n20_geoval_2020110112_m.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_atms_n20.2020110106.nc4
-    jobs: *all_channels
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: cosine_of_latitude_times_orbit_node
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
         options:
           preconditioner: 0.01
-    - predictor:
-        name: sine_of_latitude
-    - predictor:
-        name: lapse_rate
+      - name: sine_of_latitude
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &atms_n20_tlap Data/ufo/testinput_tier_1/instruments/radiance/atms_n20_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *atms_n20_tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
   - filter: BlackList
     filter variables:

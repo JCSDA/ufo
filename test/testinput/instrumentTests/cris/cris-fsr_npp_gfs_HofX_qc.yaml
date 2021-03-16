@@ -53,35 +53,27 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_geoval_2020110112_m.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_cris-fsr_npp.2020110106.nc4
-    jobs: *all_channels
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: lapse_rate
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &cris-fsr_npp_tlap Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *cris-fsr_npp_tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
 #  Wavenumber Check
   - filter: BlackList

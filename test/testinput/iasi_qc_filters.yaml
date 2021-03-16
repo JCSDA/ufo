@@ -88,34 +88,27 @@ observations:
 #    filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_iasi_metop-a.nc4
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: lapse_rate
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &iasi_metop-atlap Data/ufo/testinput_tier_1/iasi_metop-a_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *iasi_metop-atlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
 #  Wavenumber Check
   - filter: BlackList
