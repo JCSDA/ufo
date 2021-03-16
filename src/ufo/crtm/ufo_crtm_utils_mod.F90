@@ -568,16 +568,26 @@ character(max_string) :: err_msg
   end do
 
   ! When n_Clouds>0, Cloud_Fraction must either be provided as geoval or in conf
+  ! If Cloud_Fraction is provided in conf,then use the Cloud_Fraction in conf
+  ! If Cloud_Fraction is not provided in conf , then use the Cloud_Fraction in geoval 
+  ! and make sure the cloud fraction interpolated from background is in the valid range [0.0,1.0]
   if (conf%n_Clouds > 0) then
-    if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
-      CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
-      do k1 = 1, n_Profiles
-        atm(k1)%Cloud_Fraction(:) = geoval%vals(:, k1)
-      end do
-    else
+    if ( conf%Cloud_Fraction >= 0.0  ) then 
       do k1 = 1, n_Profiles
         atm(k1)%Cloud_Fraction(:) = conf%Cloud_Fraction
-      end do
+      end do	
+	else	
+		if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
+		  
+		  CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
+		  do k1 = 1, n_Profiles
+			where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
+			where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
+			atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)  
+		  end do
+		  
+		end if
+		
     end if
   end if
 
