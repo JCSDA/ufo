@@ -26,7 +26,7 @@ obs filters:
     channels: *amsua_n15_channels
     options:
       channels: *amsua_n15_channels
-      sensor: amsua_n15_channels
+      sensor: amsua_n15
       use_flag: [ 1,  1,  1,  1,  1,
                  -1,  1,  1,  1,  1,
                  -1,  1,  1, -1,  1 ]
