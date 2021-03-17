@@ -212,10 +212,10 @@ set ( filters_files
       variabletransforms/WindSpeedAndDirection.h
 )
 
-if( ${RTTOV_FOUND} )
+if( ${rttov_FOUND} )
   add_subdirectory( rttovonedvarcheck )
   list( APPEND filters_files ${rttovonedvarcheck_src_files} )
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
 add_subdirectory( gnssroonedvarcheck )
 list( APPEND filters_files ${gnssroonedvarcheck_src_files} )

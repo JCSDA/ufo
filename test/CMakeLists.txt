@@ -731,7 +731,7 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
-    if( ${GEOS-AERO_FOUND} )
+    if( ${geos-aero_FOUND} )
 
       ecbuild_add_test( TARGET  test_ufo_opr_aod_luts
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -747,14 +747,14 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
-   endif( ${GEOS-AERO_FOUND} )
+   endif( ${geos-aero_FOUND} )
 
 
 endif( crtm_FOUND )
 
 
 
-if( ${RTTOV_FOUND} )
+if( ${rttov_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_opr_rttov_atms
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                     ARGS    "testinput/atms_rttov_ops.yaml"
@@ -795,7 +795,7 @@ if( ${RTTOV_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperator.x
                     TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
 
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_gome_metop-a
@@ -1188,7 +1188,7 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssrobndropp1d.yaml"
@@ -1212,7 +1212,7 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndROPP2D
                   ARGS    "testinput/gnssrobndropp2d.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
 #ecbuild_add_test( TARGET  test_ufo_opr_windprof
 #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1313,7 +1313,7 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBendMetOffice_qc
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-if( ${GSW_FOUND} )
+if( ${gsw_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_opr_insitutemperature
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/tprof.yaml"
@@ -1342,9 +1342,9 @@ if( ${GSW_FOUND} )
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-endif( ${GSW_FOUND} )
+endif( ${gsw_FOUND} )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_opr_geos_aero
                   MPI     4
@@ -1360,7 +1360,7 @@ ecbuild_add_test( TARGET  test_ufo_linopr_geos_aero
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS    test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_opr_aod_ext
                   MPI     4
@@ -2513,13 +2513,13 @@ if( crtm_FOUND )
 
 endif( crtm_FOUND )
 
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/gnssrobndropp1d_qc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_opr_sfc_p
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -2549,13 +2549,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice_obs_error
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error_ROPP
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/gnssro_obs_error_ropp.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gnssro_domain_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -2755,7 +2755,7 @@ endif()
 #####################################################################
 # Files for RTTOV tests
 #####################################################################
-if( ${RTTOV_FOUND} )
+if( ${rttov_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
@@ -2766,13 +2766,13 @@ rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
 ######
 #Files for geos-aero tests
 ######
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
 list( APPEND geos-aero_test_data
 Data/optics_BC.v1_3_.nc
 Data/optics_BRC.v1_5_.nc
@@ -2795,7 +2795,7 @@ CREATE_SYMLINK_FILENAME( ${geos-aero_SOURCE_DIR}/test/
                          ${CMAKE_CURRENT_BINARY_DIR}
                          ${geos-aero_test_input} )
 
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 add_subdirectory(testinput/instrumentTests)
 

@@ -62,15 +62,15 @@ add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
 add_subdirectory( avgkernel )
-if( ${CRTM_FOUND} )
+if( ${crtm_FOUND} )
     add_subdirectory( crtm )
-endif( ${CRTM_FOUND} )
+endif( ${crtm_FOUND} )
 add_subdirectory( radarreflectivity )
 add_subdirectory( radarradialvelocity )
-if( ${RTTOV_FOUND} )
+if( ${rttov_FOUND} )
     add_subdirectory( rttov )
     add_subdirectory( rttovcpp )
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
@@ -115,33 +115,33 @@ list( APPEND ufo_src_files
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda ioda_engines ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
-if( ${CRTM_FOUND} )
+if( ${crtm_FOUND} )
     list( APPEND UFO_LIBS_DEP crtm )
-endif( ${CRTM_FOUND} )
-if( ${GSW_FOUND} )
+endif( ${crtm_FOUND} )
+if( ${gsw_FOUND} )
     list( APPEND UFO_LIBS_DEP gsw )
-endif( ${GSW_FOUND} )
-if( ${RTTOV_FOUND} )
+endif( ${gsw_FOUND} )
+if( ${rttov_FOUND} )
     list( APPEND UFO_LIBS_DEP rttov )
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
     list( APPEND UFO_LIBS_DEP geos-aero )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-                     LIBS     ${UFO_LIBS_DEP}
+		     LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
                      HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/ufo
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
 
-if (${RTTOV_FOUND})
+if (${rttov_FOUND})
   target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
 endif()

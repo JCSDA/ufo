@@ -27,7 +27,7 @@ set ( crtm_files
   ufo_aodcrtm_tlad_mod.F90
 )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
   set ( lut_files
     ObsAodLUTs.h
     ObsAodLUTs.cc
@@ -45,7 +45,7 @@ if( ${GEOS-AERO_FOUND} )
     ${crtm_files} 
     ${lut_files}
   )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 
 PREPEND( _p_crtm_files       "crtm"       ${crtm_files} )

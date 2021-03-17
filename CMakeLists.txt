@@ -32,13 +32,15 @@ ecbuild_declare_project()
 option( ENABLE_UFO_DOC "Build UFO documentation" OFF )
 
 ecbuild_enable_fortran( REQUIRED )
-ecbuild_add_cxx11_flags()
 
 set( UFO_LINKER_LANGUAGE CXX )
 
 ################################################################################
 # Dependencies
 ################################################################################
+
+# jedi-cmake
+find_package( jedicmake QUIET )
 
 # MPI
 find_package( MPI REQUIRED COMPONENTS C CXX Fortran )
@@ -61,64 +63,64 @@ include_directories( ${EIGEN3_INCLUDE_DIRS} )
 find_package(gsl-lite REQUIRED HINTS $ENV{gsl_lite_DIR})
 
 # eckit
-ecbuild_use_package( PROJECT eckit VERSION 1.11.6 REQUIRED )
+find_package( eckit 1.11.6 REQUIRED )
 include_directories( ${ECKIT_INCLUDE_DIRS} )
 
 # fckit
-ecbuild_use_package( PROJECT fckit VERSION 0.7.0 REQUIRED )
+find_package( fckit 0.7.0 REQUIRED )
 include_directories( ${FCKIT_INCLUDE_DIRS} )
 
 # ioda
-ecbuild_use_package( PROJECT ioda VERSION 1.0.0 REQUIRED )
+find_package( ioda 1.0.0 REQUIRED )
 include_directories( ${IODA_INCLUDE_DIRS} )
 
 # oops
-ecbuild_use_package( PROJECT oops VERSION 1.0.0 REQUIRED )
+find_package( oops 1.0.0 REQUIRED )
 include_directories( ${OOPS_INCLUDE_DIRS} )
 
 # crtm
-ecbuild_use_package( PROJECT crtm VERSION 2.3 QUIET )
-if( ${CRTM_FOUND} )
+find_package( crtm 2.3 QUIET )
+if( ${crtm_FOUND} )
   message(STATUS "CRTM FOUND; Including CRTM Observation Operator")
   include_directories( ${CRTM_INCLUDE_DIRS} )
-else( ${CRTM_FOUND} )
+else( ${crtm_FOUND} )
   message(STATUS "CRTM NOT FOUND; Excluding CRTM Observation Operator")
-endif( ${CRTM_FOUND} )
+endif( ${crtm_FOUND} )
 
 # RTTOV
-ecbuild_use_package( PROJECT rttov VERSION 12.1.0 QUIET )
-if( ${RTTOV_FOUND} )
+find_package( rttov 12.1.0 QUIET )
+if( ${rttov_FOUND} )
     message(STATUS "RTTOV FOUND; Including RTTOV Radiance Observation Operator")
     include_directories( ${RTTOV_INCLUDE_DIRS} )
-else( ${RTTOV_FOUND} )
+else( ${rttov_FOUND} )
     message(STATUS "RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
 # GSW
-ecbuild_use_package( PROJECT gsw QUIET )
-if( ${GSW_FOUND} )
+find_package( gsw QUIET )
+if( ${gsw_FOUND} )
     message(STATUS "GSW FOUND; Including Marine Observation Operators")
     include_directories( ${GSW_INCLUDE_DIRS} )
-else( ${GSW_FOUND} )
+else( ${gsw_FOUND} )
     message(STATUS "GSW NOT FOUND: Excluding Marine Observation Operators")
-endif( ${GSW_FOUND} )
+endif( ${gsw_FOUND} )
 
 # ROPP-UFO
-ecbuild_use_package( PROJECT ropp-ufo QUIET )
-if( ${ROPP-UFO_FOUND} )
+find_package( ropp-ufo QUIET )
+if( ${ropp-ufo_FOUND} )
     message(STATUS "ROPP FOUND; Including GNSSRO Bending angle ROPP Operators")
-else( ${ROPP-UFO_FOUND} )
+else( ${ropp-ufo_FOUND} )
     message(STATUS "ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
 # GEOS-AERO
-ecbuild_use_package( PROJECT geos-aero QUIET )
-if( ${GEOS-AERO_FOUND} )
+find_package( geos-aero QUIET )
+if( ${geos-aero_FOUND} )
     message(STATUS "GEOS-AERO FOUND; Including AOD operator from GEOS")
     include_directories( ${GEOSAERO_INCLUDE_DIRS} )
-else( ${GEOS-AERO_FOUND} )
+else( ${geos-aero_FOUND} )
     message(STATUS "GEOS-AERO NOT FOUND: Excluding  AOD operator from GEOS")
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 ################################################################################
 # Export package info
@@ -126,21 +128,21 @@ endif( ${GEOS-AERO_FOUND} )
 
 list( APPEND UFO_TPLS oops ioda crtm )
 
-if( ${GSW_FOUND} )
+if( ${gsw_FOUND} )
     list ( APPEND UFO_TPLS gsw)
-endif( ${GSW_FOUND} )
+endif( ${gsw_FOUND} )
 
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
     list ( APPEND UFO_TPLS ropp-ufo )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
     list ( APPEND UFO_TPLS geos-aero )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
-if( ${RTTOV_FOUND} )
+if( ${rttov_FOUND} )
     list ( APPEND UFO_TPLS rttov)
-endif( ${RTTOV_FOUND} )
+endif( ${rttov_FOUND} )
 
 set( UFO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
                       ${CMAKE_Fortran_MODULE_DIRECTORY} )

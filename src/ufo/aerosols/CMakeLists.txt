@@ -6,15 +6,15 @@
 
 add_subdirectory( AOP )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
   add_subdirectory( MR )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 PREPEND( _p_aodext_files  "aerosols/AOP"  ${aodext_src_files} )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${geos-aero_FOUND} )
   PREPEND( _p_aodgeos_files   "aerosols/MR"   ${aodgeos_src_files} )
-endif( ${GEOS-AERO_FOUND} )
+endif( ${geos-aero_FOUND} )
 
 set ( aerosols_src_files
     ${_p_aodext_files}
