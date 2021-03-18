@@ -7,7 +7,7 @@
 
 #ifndef UFO_PREDICTORS_SCANANGLE_H_
 #define UFO_PREDICTORS_SCANANGLE_H_
-
+#include <string>
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
@@ -37,6 +37,7 @@ class ScanAngle : public PredictorBase {
 
  private:
   int order_;
+  std::string var_name_;
 };
 
 // -----------------------------------------------------------------------------
