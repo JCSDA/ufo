@@ -575,19 +575,16 @@ character(max_string) :: err_msg
     if ( conf%Cloud_Fraction >= 0.0  ) then 
       do k1 = 1, n_Profiles
         atm(k1)%Cloud_Fraction(:) = conf%Cloud_Fraction
-      end do	
-	else	
-		if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
-		  
-		  CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
-		  do k1 = 1, n_Profiles
-			where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
-			where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
-			atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)  
-		  end do
-		  
-		end if
-		
+      end do
+    else
+      if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
+        CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
+        do k1 = 1, n_Profiles
+          where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
+          where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
+          atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)  
+        end do
+      end if
     end if
   end if
 
