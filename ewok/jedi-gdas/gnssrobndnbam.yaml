@@ -29,7 +29,7 @@ obs filters:
   filter variables:
   - name: bending_angle
   errmodel: NRL
-- filter: Background Check
+- filter: Background Check RONBAM
   filter variables:
   - name: [bending_angle]
   threshold: 3
