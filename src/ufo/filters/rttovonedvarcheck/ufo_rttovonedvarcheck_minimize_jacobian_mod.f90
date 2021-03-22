@@ -9,6 +9,7 @@ module ufo_rttovonedvarcheck_minimize_jacobian_mod
 
 use iso_c_binding
 use kinds
+use ufo_constants_mod, only: zero
 use ufo_geovals_mod
 use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
@@ -55,8 +56,8 @@ select case (trim(ob % forward_mod_name))
   case ("RTTOV")
     call ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, self % obsdb, &
                                               rttov_simobs, channels, &
-                                              profindex, prof_x(:), hofxdiags, &
-                                              self % UseQtsplitRain, &
+                                              profindex, hofxdiags, &
+                                              self % UseQtsplitRain, self % FullDiagnostics, &
                                               hofx(:), H_matrix) ! out
 
   case default
@@ -78,8 +79,9 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, obsdb, &
-                                       rttov_data, channels, profindex, prof_x, &
-                                       hofxdiags, UseQtsplitRain, hofx, H_matrix)
+                                       rttov_data, channels, profindex, &
+                                       hofxdiags, UseQtsplitRain, FullDiagnostics, &
+                                       hofx, H_matrix)
 
 implicit none
 
@@ -90,9 +92,9 @@ type(c_ptr), value, intent(in)                    :: obsdb          !< observati
 type(ufo_radiancerttov), intent(inout)            :: rttov_data     !< structure for running rttov_k
 integer, intent(in)                               :: channels(:)    !< channels used for this calculation
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex      !< index array for x vector
-real(kind_real), intent(in)                       :: prof_x(:)      !< x vector
 type(ufo_geovals), intent(inout)                  :: hofxdiags      !< model data to pass the jacobian
 logical, intent(in)                               :: UseQtsplitRain !< flag to make qtsplit use rain
+logical, intent(in)                               :: FullDiagnostics
 real(kind_real), intent(out)                      :: hofx(:)        !< BT's
 real(kind_real), intent(out)                      :: H_matrix(:,:)  !< Jacobian
 
@@ -158,7 +160,10 @@ if (profindex % q(1) > 0) then
   nq_levels = profindex % q(2)-profindex % q(1)+1
   allocate(q_kgkg(nq_levels))
 
-  q_kgkg(:) = exp(prof_x(profindex % q(1):profindex % q(2))) / 1000.0_kind_real
+  ! Get humidity data from geovals
+  q_kgkg(:) = zero
+  call ufo_geovals_get_var(geovals, var_q, geoval)
+  q_kgkg(:) = geoval%vals(nlevels:1:-1, 1)
 
   do i = 1, nchans
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_q),"_",channels(i) ! kg/kg
@@ -191,8 +196,14 @@ if (profindex % qt(1) > 0) then
   allocate(dBT_dq(nlevels))
   allocate(dBT_dql(nlevels))
 
-  ! Get qtotal from profile
-  q_kgkg(:) = exp(prof_x(profindex % qt(1):profindex % qt(2))) / 1000.0_kind_real
+  ! Get humidity data from geovals
+  q_kgkg(:) = zero
+  call ufo_geovals_get_var(geovals, var_q, geoval)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
+  call ufo_geovals_get_var(geovals, var_clw, geoval)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
+  call ufo_geovals_get_var(geovals, var_cli, geoval)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
 
   ! var_prs  = "air_pressure" Pa
   call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
@@ -213,15 +224,18 @@ if (profindex % qt(1) > 0) then
 
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_q), "_", channels(i) ! kg/kg
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    dBT_dq(:) = zero
     dBT_dq(:) = geoval % vals(:,1)
 
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_clw), "_", channels(i) ! kg/kg
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    dBT_dql(:) = zero
     dBT_dql(:) = geoval % vals(:,1)
 
     H_matrix(i,profindex % qt(1):profindex % qt(2)) = &
             (dBT_dq(:)  * dq_dqt(:) + &
              dBT_dql(:) * dql_dqt(:) ) * q_kgkg(:)
+
   end do
 
   ! Clean up
@@ -252,7 +266,9 @@ end if
 ! 2.2) Water vapour - var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
 
 if (profindex % q2 > 0) then
-  s2m_kgkg = exp(prof_x(profindex % q2)) / 1000.0_kind_real
+  s2m_kgkg = zero
+  call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval)
+  s2m_kgkg = geoval%vals(1, 1)
   do i = 1, nchans
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_q2m),"_",channels(i) ! kg/kg
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
@@ -360,12 +376,15 @@ end if
 !END IF
 !
 ! Here for diagnostics
-!call ufo_rttovonedvarcheck_PrintHmatrix( &
-!  nchans,   &           ! in
-!  size(prof_x),  &      ! in
-!  ob % channels_used, & ! in
-!  H_matrix, &           ! in
-!  profindex )           ! in
+
+if (FullDiagnostics) then
+  call ufo_rttovonedvarcheck_PrintHmatrix( &
+    nchans,   &                  ! in
+    profindex % nprofelements, & ! in
+    ob % channels_used, &        ! in
+    H_matrix, &                  ! in
+    profindex )                  ! in
+end if
 
 end subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs
 
@@ -403,8 +422,8 @@ character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PrintHmatrix
 !-------------------------------------------------------------------------------
 
 write( unit=txt_nchans,fmt='(i3)' )  nchans
-write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I13)'
-write( unit=real_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E13.5)'
+write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I30)'
+write( unit=real_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E30.15)'
 
 write(*,*)
 

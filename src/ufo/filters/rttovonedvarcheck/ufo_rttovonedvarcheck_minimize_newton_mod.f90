@@ -125,6 +125,7 @@ real(kind_real), allocatable    :: BackProfile(:)
 real(kind_real), allocatable    :: H_matrix(:,:)
 real(kind_real), allocatable    :: Diffprofile(:)
 real(kind_real), allocatable    :: AbsDiffProfile(:)
+real(kind_real), allocatable    :: Xdiff(:)
 real(kind_real), allocatable    :: Ydiff(:)
 real(kind_real), allocatable    :: Y(:)
 real(kind_real), allocatable    :: Y0(:)
@@ -150,6 +151,7 @@ allocate(BackProfile(nprofelements))
 allocate(H_matrix(nchans,nprofelements))
 allocate(Diffprofile(nprofelements))
 allocate(AbsDiffprofile(nprofelements))
+allocate(Xdiff(nprofelements))
 allocate(Ydiff(nchans))
 allocate(Y(nchans))
 allocate(Y0(nchans))
@@ -219,8 +221,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   !-----------------------------------------------------
 
   ! Profile differences
+  Xdiff(:) = GuessProfile(:) - BackProfile(:)
   Ydiff(:) = ob % yobs(:) - Y(:)
-  Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
   if (self % FullDiagnostics) then
     write(*,*) "Ob BT = "
@@ -231,7 +233,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
   if (self % UseJForConvergence) then
 
-    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+    call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
     Jcost = Jout(1)
 
     ! exit on error
@@ -390,7 +392,7 @@ end do Iterations
 onedvar_success = converged
 
 ! Recalculate final cost - to make sure output when profile has not converged
-call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
 ob % final_cost = Jout(1)
 ob % niter = iter
 
@@ -427,6 +429,7 @@ if (allocated(BackProfile))        deallocate(BackProfile)
 if (allocated(H_matrix))           deallocate(H_matrix)
 if (allocated(Diffprofile))        deallocate(Diffprofile)
 if (allocated(AbsDiffprofile))     deallocate(AbsDiffprofile)
+if (allocated(Xdiff))              deallocate(Xdiff)
 if (allocated(Ydiff))              deallocate(Ydiff)
 if (allocated(Y))                  deallocate(Y)
 if (allocated(Y0))                 deallocate(Y0)

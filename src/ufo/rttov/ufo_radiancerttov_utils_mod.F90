@@ -1862,6 +1862,10 @@ contains
 
     jacobian_needed = .false.
 
+    if (allocated(ystr_diags)) deallocate (ystr_diags)
+    if (allocated(xstr_diags)) deallocate (xstr_diags)
+    if (allocated(ch_diags)) deallocate (ch_diags)
+
      if(hofxdiags%nvar > 0) then
        if (.not. allocated(ystr_diags)) allocate (ystr_diags(hofxdiags%nvar))
        if (.not. allocated(xstr_diags)) allocate (xstr_diags(hofxdiags%nvar))

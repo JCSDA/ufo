@@ -215,7 +215,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       if (nchans_used == 0) then
         write(message, *) "No channels selected for observation number ", &
                jobs, " : skipping"
-        call fckit_log % info(message)
+        call fckit_log % debug(message)
         cycle obs_loop
       end if
 
