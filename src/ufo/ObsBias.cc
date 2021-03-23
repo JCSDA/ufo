@@ -23,6 +23,7 @@
 
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
 
@@ -104,42 +105,6 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 }
 
 // -----------------------------------------------------------------------------
-/// Returns indices of all elements in the range
-/// [\p elements_to_look_for_begin, \p elements_to_look_for_end) in the \p all_elements vector,
-/// in the same order that the former are in.
-/// Throws an exception if at least one of elements looked for is missing
-/// from \p all_elements.
-template<typename T>
-std::vector<int> getAllIndices(const std::vector<T> & all_elements,
-                               typename std::vector<T>::const_iterator elements_to_look_for_begin,
-                               typename std::vector<T>::const_iterator elements_to_look_for_end) {
-  std::vector<int> result;
-  for (typename std::vector<T>::const_iterator sought_it = elements_to_look_for_begin;
-       sought_it != elements_to_look_for_end; ++sought_it) {
-    const T &sought = *sought_it;
-    const auto found_it = std::find(all_elements.begin(), all_elements.end(), sought);
-    if (found_it != all_elements.end()) {
-      result.push_back(std::distance(all_elements.begin(), found_it));
-    } else {
-      const std::string errormsg = "getAllIndices: Can't find element in the vector";
-      throw eckit::BadParameter(errormsg, Here());
-    }
-  }
-  return result;
-}
-
-// -----------------------------------------------------------------------------
-/// Returns indices of all elements in \p elements_to_look_for in the \p all_elements vector,
-/// in the same order that \p elements_to_look_for are in.
-/// Throws an exception if at least one of elements looked for is missing
-/// from \p all_elements.
-template<typename T>
-std::vector<int> getAllIndices(const std::vector<T> & all_elements,
-                               const std::vector<T> & elements_to_look_for) {
-  return getAllIndices(all_elements, elements_to_look_for.begin(), elements_to_look_for.end());
-}
-
-// -----------------------------------------------------------------------------
 
 void ObsBias::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
@@ -168,8 +133,9 @@ void ObsBias::read(const eckit::Configuration & conf) {
     coeffvar.readWithEigenRegular(allbiascoeffs);
 
     // Find indices of predictors and variables/channels that we need in the data read from the file
-    const std::vector<int> pred_idx = getRequiredPredictorIndices(obsgroup);
-    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup);
+    const std::vector<int> pred_idx = getRequiredVariableIndices(obsgroup, "predictors",
+                                      prednames_.begin() + numStaticPredictors_, prednames_.end());
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
 
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbiascoeffs(pred_idx, chan_idx) when Eigen 3.4
@@ -187,41 +153,6 @@ void ObsBias::read(const eckit::Configuration & conf) {
   }
 
   oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-std::vector<int> ObsBias::getRequiredPredictorIndices(const ioda::ObsGroup &obsgroup) const {
-  ioda::Variable predictorsvar = obsgroup.vars.open("predictors");
-  std::vector<std::string> predictors;
-  predictorsvar.read<std::string>(predictors);
-  return getAllIndices(predictors, prednames_.begin() + numStaticPredictors_, prednames_.end());
-}
-
-// -----------------------------------------------------------------------------
-
-std::vector<int> ObsBias::getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup) const {
-  if (vars_.channels().empty()) {
-    // Read all variables from the file into std vector
-    ioda::Variable variablesvar = obsgroup.vars.open("variables");
-    std::vector<std::string> variables;
-    variablesvar.read<std::string>(variables);
-
-    // Find the indices of the ones we need
-    return getAllIndices(variables, vars_.variables());
-  } else {
-    // At present we can label predictors with either the channel number or the variable
-    // name, but not both. So make sure there's only one multi-channel variable.
-    ASSERT(vars_.variables().size() == vars_.channels().size());
-
-    // Read all channels from the file into std vector
-    ioda::Variable channelsvar = obsgroup.vars.open("channels");
-    std::vector<int> channels;
-    channelsvar.read<int>(channels);
-
-    // Find the indices of the ones we need
-    return getAllIndices(channels, vars_.channels());
-  }
 }
 
 // -----------------------------------------------------------------------------

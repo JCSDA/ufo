@@ -9,6 +9,8 @@ set ( utils_files
       DistanceCalculator.h
       EquispacedBinSelector.h
       GeodesicDistanceCalculator.h
+      IodaGroupIndices.cc
+      IodaGroupIndices.h
       MaxNormDistanceCalculator.h
       metoffice/MetOfficeQCFlags.h
       metoffice/MetOfficeObservationIDs.h

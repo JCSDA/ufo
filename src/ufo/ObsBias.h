@@ -27,7 +27,6 @@ namespace oops {
 }
 
 namespace ioda {
-  class ObsGroup;
   class ObsSpace;
   class ObsVector;
 }
@@ -90,14 +89,6 @@ class ObsBias : public util::Printable,
   void print(std::ostream &) const override;
 
   void initPredictor(const eckit::Configuration &predictorConf);
-
-  /// Return the vector of indices of predictors whose coefficients need to be initialized
-  /// from the input file.
-  std::vector<int> getRequiredPredictorIndices(const ioda::ObsGroup &obsgroup) const;
-
-  /// Return the vector of indices of variables or channels whose coefficients need to be
-  /// initialized from the input file.
-  std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup) const;
 
   /// bias correction coefficients (npredictors x nprimitivevariables)
   Eigen::MatrixXf biascoeffs_;

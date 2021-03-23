@@ -14,6 +14,9 @@
 
 #include "ufo/ObsBiasCovariance.h"
 
+#include "ioda/Engines/Factory.h"
+#include "ioda/Layout.h"
+#include "ioda/ObsGroup.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -24,6 +27,7 @@
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/predictors/PredictorBase.h"
+#include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
 
@@ -134,74 +138,46 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
 void ObsBiasCovariance::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBiasCovariance::read from file " << std::endl;
 
-  // Default predictor names from GSI
-  const std::vector<std::string> gsi_predictors = {"constant",
-                                                   "zenith_angle",
-                                                   "cloud_liquid_water",
-                                                   "lapse_rate_order_2",
-                                                   "lapse_rate",
-                                                   "cosine_of_latitude_times_orbit_node",
-                                                   "sine_of_latitude",
-                                                   "emissivity",
-                                                   "scan_angle_order_4",
-                                                   "scan_angle_order_3",
-                                                   "scan_angle_order_2",
-                                                   "scan_angle"
-                                                   };
+  if (conf.has("prior.input file")) {
+    std::string input_filename = conf.getString("prior.input file");
+    // Open an hdf5 file, read only
+    ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
+    ioda::Engines::BackendCreationParameters backendParams;
+    backendParams.fileName = input_filename;
+    backendParams.action   = ioda::Engines::BackendFileActions::Open;
+    backendParams.openMode = ioda::Engines::BackendOpenModes::Read_Only;
 
-  const std::string sensor = conf.getString("sensor");
+    // Create the backend and attach it to an ObsGroup
+    // Use the None DataLyoutPolicy for now to accommodate the current file format
+    ioda::Group backend = constructBackend(backendName, backendParams);
+    ioda::ObsGroup obsgroup = ioda::ObsGroup(backend,
+                   ioda::detail::DataLayoutPolicy::generate(
+                         ioda::detail::DataLayoutPolicy::Policies::None));
 
-  if (conf.has("prior.datain")) {
-    const std::string filename = conf.getString("prior.datain");
-    std::ifstream infile(filename);
+    // Read coefficients error variances into the Eigen array
+    ioda::Variable bcerrvar = obsgroup.vars["bias_coeff_errors"];
+    Eigen::ArrayXXf allbcerrors;
+    bcerrvar.readWithEigenRegular(allbcerrors);
 
-    if (infile.is_open())
-    {
-      int ich;            //  sequential number
-      std::string nusis;  //  sensor/instrument/satellite
-      int nuchan;         //  channel number
-      float number;       //  QCed obs number from previous cycle
+    // Read nobs into Eigen array
+    ioda::Variable nobsvar = obsgroup.vars["number_obs_assimilated"];
+    Eigen::ArrayXf nobsassim;
+    nobsvar.readWithEigenRegular(nobsassim);
 
-      // This function can only be used for bias correction of a single multi-channel variables.
-      // Anna's comment: we'll need to update the code here to use ioda files instead of
-      // GSI txt files.
-      ASSERT(vars_.size() == vars_.channels().size());
+    // Find indices of predictors and variables/channels that we need in the data read from the file
+    const std::vector<int> pred_idx = getRequiredVariableIndices(obsgroup, "predictors",
+                                              prednames_.begin(), prednames_.end());
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
 
-      float par;
-      while (infile >> ich)
-      {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> number;
-        if (nusis == sensor) {
-          auto ijob = std::find(vars_.channels().begin(), vars_.channels().end(), nuchan);
-          if (ijob != vars_.channels().end()) {
-            int j = std::distance(vars_.channels().begin(), ijob);
-            obs_num_[j] = static_cast<int>(number);
-
-            for (auto & item : gsi_predictors) {
-              infile >> par;
-              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
-              if (ipred != prednames_.end()) {
-                int p = std::distance(prednames_.begin(), ipred);
-                analysis_variances_.at(j*prednames_.size() + p) = static_cast<double>(par);
-              }
-            }
-          } else {
-            for (auto & item : gsi_predictors)
-              infile >> par;
-          }
-        } else {
-          for (auto & item : gsi_predictors)
-            infile >> par;
-        }
+    // Filter predictors and channels that we need
+    // FIXME: may be possible by indexing allbcerrors(pred_idx, chan_idx) when Eigen 3.4
+    // is available
+    for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
+      obs_num_[jvar] = nobsassim(var_idx[jvar]);
+      for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+        analysis_variances_[jvar*pred_idx.size()+jpred] =
+             allbcerrors(pred_idx[jpred], var_idx[jvar]);
       }
-      infile.close();
-      oops::Log::trace() << "ObsBiasCovariance::read from prior file: "
-                         << filename << " Done " << std::endl;
-    } else {
-      oops::Log::error() << "Unable to open file : " << filename << std::endl;
-      ABORT("Unable to open bias correction coeffs variance prior file ");
     }
   }
 
