@@ -38,11 +38,7 @@
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/VariableAssignment.h"
-#include "ufo/filters/VariableConversion.h"
-#include "ufo/filters/variabletransforms/HumidityRelative.h"
-#include "ufo/filters/variabletransforms/HumiditySpecific.h"
-#include "ufo/filters/variabletransforms/WindComponents.h"
-#include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
+#include "ufo/filters/VariableTransforms.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -97,22 +93,14 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            DerivativeCheckMaker("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            ShipTrackCheckMaker("Ship Track Check");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HumidityRelative> >
-           HumidityRelativeMaker("Relative Humidity");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HumiditySpecific> >
-           HumiditySpecificMaker("Specific Humidity");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::StuckCheck> >
            StuckCheckMaker("Stuck Check");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
-           WindComponentsMaker("Wind Components");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
-           WindSpeedAndDirectionMaker("Wind Speed And Direction");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::GNSSROOneDVarCheck> >
            GNSSROOneDVarCheckMaker("GNSS-RO 1DVar Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableAssignment> >
            variableAssignmentMaker("Variable Assignment");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableConversion> >
-           VariableConversionMaker("Variable Conversion");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableTransforms> >
+           VariableTransformsMaker("Variable Transforms");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileBackgroundCheck> >
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileFewObsCheck> >

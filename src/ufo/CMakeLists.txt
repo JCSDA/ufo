@@ -78,7 +78,7 @@ add_subdirectory( aerosols )
 add_subdirectory( timeoper )
 add_subdirectory( profile )
 add_subdirectory( groundgnss )
-add_subdirectory( calculate )
+add_subdirectory( variabletransforms )
 add_subdirectory( scatwind )
 add_subdirectory( sattcwv )
 add_subdirectory( compositeoper )
@@ -106,7 +106,7 @@ list( APPEND ufo_src_files
     ${timeoper_src_files}
     ${profile_src_files}
     ${groundgnss_src_files}
-    ${calculate_src_files}
+    ${variabletransforms_src_files}
     ${scatwind_src_files}
     ${sattcwv_src_files}
     ${compositeoper_src_files}

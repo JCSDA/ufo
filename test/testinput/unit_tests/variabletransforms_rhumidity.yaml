@@ -8,16 +8,17 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Relative Humidity      # calculate relative humidity from specific humidity (also T, P)
-#   method_for_RH: NOAA            # option not needed, because default is NOAA
-    save: true                     # option is false by default, setting true saves the calculated output
-  compareVariables:                # test output matches precalculated values
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"] # calculate relative humidity from specific humidity (also T, P)
+                                    # using Default method and default Formulation (Roger 1989)
+  compareVariables:                 # test output matches precalculated values
     - reference:
         name: relative_humidity_NOAA@TestReference
       test:
         name: relative_humidity@DerivedValue
       absTol: 1.0e-5
   passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
+
 # Exercise the method using UKMO saturation vapor pressure method.
 - obs space:
     name: test_relative_humidity2
@@ -25,9 +26,28 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Relative Humidity
-    method_for_RH: UKMO
-    save: true
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"]
+    Method: UKMO                 # Using UKMO method and UKMO default formulation 
+  compareVariables:              # test output matches precalculated values
+    - reference:
+        name: relative_humidity_UKMO@TestReference
+      test:
+        name: relative_humidity@DerivedValue
+      absTol: 1.0e-5
+  passedBenchmark: 99
+
+# Exercise the method using UKMO saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity2
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"]
+    Method: UKMO                 # Using UKMO method 
+    Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_UKMO@TestReference
@@ -35,6 +55,7 @@ observations:
         name: relative_humidity@DerivedValue
       absTol: 1.0e-5
   passedBenchmark: 99
+
 # Exercise the method using the Walko saturation vapor pressure method.
 - obs space:
     name: test_relative_humidity3
@@ -42,9 +63,9 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Relative Humidity
-    method_for_RH: Walko
-    save: true
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"]
+    Formulation: Walko
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_Walko@TestReference
@@ -52,6 +73,7 @@ observations:
         name: relative_humidity@DerivedValue
       absTol: 1.0e-5
   passedBenchmark: 99
+
 # Exercise the method using the Murphy saturation vapor pressure method.
 - obs space:
     name: test_relative_humidity4
@@ -59,9 +81,9 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Relative Humidity
-    method_for_RH: Murphy
-    save: true
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"]
+    Formulation: Murphy
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_Murphy@TestReference

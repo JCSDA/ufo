@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_VARIABLECONVERSION_H_
-#define UFO_FILTERS_VARIABLECONVERSION_H_
+#ifndef UFO_FILTERS_VARIABLETRANSFORMS_H_
+#define UFO_FILTERS_VARIABLETRANSFORMS_H_
 
 #include <memory>
 #include <ostream>
@@ -28,35 +28,35 @@ class ObsSpace;
 }
 
 namespace ufo {
-class VariableConversionParameters;
+class VariableTransformsParameters;
 }
 
 namespace ufo {
 
 /// \brief Main filter to apply some variable convertion.
 ///
-/// See VariableConversionParameters for the documentation of the available
+/// See variabletransformsParameters for the documentation of the available
 /// parameters and options.
 ///
 /// \par Important:
 /// Any new variable created is assigned to the observation space with the
 /// "@DerivedValue" tag.
 ///
-class VariableConversion : public FilterBase,
-                           private util::ObjectCounter<VariableConversion> {
+class VariableTransforms : public FilterBase,
+                           private util::ObjectCounter<VariableTransforms> {
  public:
-  static const std::string classname() { return "ufo::VariableConversion"; }
+  static const std::string classname() { return "ufo::VariableTransforms"; }
   // This Constructor function initializes an instance of the
   // filter based on options specified in the YAML configuration file.
-  VariableConversion(ioda::ObsSpace &, const eckit::Configuration &,
+  VariableTransforms(ioda::ObsSpace &, const eckit::Configuration &,
                      std::shared_ptr<ioda::ObsDataVector<int>>,
                      std::shared_ptr<ioda::ObsDataVector<float>>);
   // Destructor
-  ~VariableConversion();
+  ~VariableTransforms();
 
  private:
   /// Configurable options
-  std::unique_ptr<VariableConversionParameters> options_;
+  std::unique_ptr<VariableTransformsParameters> options_;
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
@@ -65,4 +65,4 @@ class VariableConversion : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_VARIABLECONVERSION_H_
+#endif  // UFO_FILTERS_VARIABLETRANSFORMS_H_

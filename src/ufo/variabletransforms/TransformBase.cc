@@ -8,19 +8,22 @@
 #include <map>
 #include <string>
 #include "oops/util/Logger.h"
-#include "ufo/calculate/CalculateBase.h"
+#include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
 
-CalculateBase::CalculateBase(const VariableConversionParameters& options,
+TransformBase::TransformBase(const VariableTransformsParameters& options,
                              ioda::ObsSpace& os,
                              const std::shared_ptr<ioda::ObsDataVector<int>>& flags)
     : options_(options), obsdb_(os) , flags_(*flags) {
   method_ = formulas::resolveMethods(options.Method.value());
+  formulation_  = formulas::resolveFormulations(options.Formulation.value(),
+                                                options.Method.value());
+  UseValidDataOnly_ = options.UseValidDataOnly.value();
   obsName_ = os.obsname();
 }
 
-void CalculateBase::filterObservation(const std::string &variableName,
+void TransformBase::filterObservation(const std::string &variableName,
                                        std::vector<float> &obsVector) const {
   if (flags_.has(variableName)) {
     const float missing = missingValueFloat;
@@ -35,7 +38,7 @@ void CalculateBase::filterObservation(const std::string &variableName,
   }
 }
 
-void CalculateBase::getObservation(const std::string &originalTag, const std::string &varName,
+void TransformBase::getObservation(const std::string &originalTag, const std::string &varName,
                                    std::vector<float> &obsVector, bool require) const {
   const size_t nlocs = obsdb_.nlocs();
 
@@ -43,36 +46,36 @@ void CalculateBase::getObservation(const std::string &originalTag, const std::st
     obsVector = std::vector<float>(nlocs);
     obsdb_.get_db("DerivedValue", varName, obsVector);
     // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
-    filterObservation(varName, obsVector);
+    if (UseValidDataOnly()) filterObservation(varName, obsVector);
   } else if (obsdb_.has(originalTag, varName)) {
     obsVector = std::vector<float>(nlocs);
     obsdb_.get_db(originalTag, varName, obsVector);
     // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
-    filterObservation(varName, obsVector);
+    if (UseValidDataOnly()) filterObservation(varName, obsVector);
   }
 
   if (require && obsVector.empty()) {
-    throw eckit::BadValue("The parameter `" + varName +
+    throw eckit::BadValue("The parameter `" + varName + "@" + originalTag +
                           "` does not exist in the ObsSpace ", Here());
   }
 }
 
-CalculateFactory::CalculateFactory(const std::string& name) {
+TransformFactory::TransformFactory(const std::string& name) {
   if (getMakers().find(name) != getMakers().end())
     throw eckit::BadParameter(
-        name + " already registered in ufo::CalculateFactory.", Here());
+        name + " already registered in ufo::TransformFactory.", Here());
 
   getMakers()[name] = this;
 }
 
-std::unique_ptr<CalculateBase> CalculateFactory::create(
-    const std::string& name, const VariableConversionParameters& options,
+std::unique_ptr<TransformBase> TransformFactory::create(
+    const std::string& name, const VariableTransformsParameters& options,
     ioda::ObsSpace& os, const std::shared_ptr<ioda::ObsDataVector<int>>& flags) {
 
-  oops::Log::trace() << "          --> CalculateFactory::create" << std::endl;
+  oops::Log::trace() << "          --> TransformFactory::create" << std::endl;
   oops::Log::trace() << "              --> name: " << name << std::endl;
 
-  typename std::map<std::string, CalculateFactory*>::iterator jloc =
+  typename std::map<std::string, TransformFactory*>::iterator jloc =
       getMakers().find(name);
 
   if (jloc == getMakers().end()) {
@@ -81,18 +84,18 @@ std::unique_ptr<CalculateBase> CalculateFactory::create(
       makerNameList += "\n  " + makerDetails.first;
     std::cout << "       --> makerNameList" << makerNameList << std::endl;
     std::cout << "                        " << name
-              << " does not exist in ufo::CalculateFactory. "
+              << " does not exist in ufo::TransformFactory. "
               << "Possible values:" << makerNameList << std::endl;
 
     throw eckit::BadParameter(name +
-                                  " does not exist in ufo::CalculateFactory. "
+                                  " does not exist in ufo::TransformFactory. "
                                   "Possible values:" +
                                   makerNameList,
                               Here());
   }
 
-  std::unique_ptr<CalculateBase> ptr = jloc->second->make(options, os, flags);
-  oops::Log::trace() << "CalculateBase::create done" << std::endl;
+  std::unique_ptr<TransformBase> ptr = jloc->second->make(options, os, flags);
+  oops::Log::trace() << "TransformBase::create done" << std::endl;
 
   return ptr;
 }

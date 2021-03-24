@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_CALCULATE_CALCULATEBASE_H_
-#define UFO_CALCULATE_CALCULATEBASE_H_
+#ifndef UFO_VARIABLETRANSFORMS_TRANSFORMBASE_H_
+#define UFO_VARIABLETRANSFORMS_TRANSFORMBASE_H_
 
 #include <algorithm>
 #include <cmath>
@@ -28,9 +28,9 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
-#include "ufo/calculate/Formulas.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/filters/VariableConversionParameters.h"
+#include "ufo/filters/VariableTransformsParameters.h"
+#include "ufo/variabletransforms/Formulas.h"
 
 namespace ioda {
 template <typename DATATYPE>
@@ -40,38 +40,43 @@ class ObsVector;
 }
 
 namespace ufo {
-class VariableConversionParameters;
+class VariableTransformsParameters;
 }
 
 namespace ufo {
 
 /// \brief Base class for variable conversion
-class CalculateBase {
+class TransformBase {
  public:
-  CalculateBase(const VariableConversionParameters &options,
+  TransformBase(const VariableTransformsParameters &options,
                 ioda::ObsSpace &os,
                 const std::shared_ptr<ioda::ObsDataVector<int>>& flags);
   /// Destructor
-  virtual ~CalculateBase() {}
+  virtual ~TransformBase() {}
   /// Run variable conversion
-  virtual void runCalculate() = 0;
+  virtual void runTransform() = 0;
 
  private:
   void filterObservation(const std::string &variable, std::vector<float> &obsVector) const;
   /// Method used for the calculation
-  formulas::Method method_;
+  formulas::MethodFormulation method_;
+  formulas::MethodFormulation formulation_;
+  bool UseValidDataOnly_;
   /// The observation name
   std::string obsName_;
 
  protected:  // variables
   void getObservation(const std::string &originalTag, const std::string &varName,
                       std::vector<float> &obsVector, bool require = false) const;
-  /// subclasses to access Method used for the calculation
-  formulas::Method method() const { return method_; }
+  /// subclasses to access Method and formualtion used for the calculation
+  formulas::MethodFormulation method() const { return method_; }
+  formulas::MethodFormulation formulation() const { return formulation_; }
+  bool UseValidDataOnly() const { return UseValidDataOnly_; }
+  void SetUseValidDataOnly(bool t) {UseValidDataOnly_ = t; }
   /// subclasses to access the observation name
   std::string obsName() const { return obsName_; }
   /// Configurable parameters
-  const VariableConversionParameters &options_;
+  const VariableTransformsParameters &options_;
   /// Observation space
   ioda::ObsSpace &obsdb_;
   const ioda::ObsDataVector<int> &flags_;
@@ -81,40 +86,40 @@ class CalculateBase {
   const std::string outputTag = "DerivedValue";
 };
 
-/// \brief Calculate factory
-class CalculateFactory {
+/// \brief Transform factory
+class TransformFactory {
  public:
-  static std::unique_ptr<CalculateBase> create(
-      const std::string &, const VariableConversionParameters &,
+  static std::unique_ptr<TransformBase> create(
+      const std::string &, const VariableTransformsParameters &,
       ioda::ObsSpace &, const std::shared_ptr<ioda::ObsDataVector<int>> &);
-  virtual ~CalculateFactory() = default;
+  virtual ~TransformFactory() = default;
 
  protected:
-  explicit CalculateFactory(const std::string &);
+  explicit TransformFactory(const std::string &);
 
  private:
-  virtual std::unique_ptr<CalculateBase> make(
-      const VariableConversionParameters &, ioda::ObsSpace &,
+  virtual std::unique_ptr<TransformBase> make(
+      const VariableTransformsParameters &, ioda::ObsSpace &,
       const std::shared_ptr<ioda::ObsDataVector<int>> &) = 0;
-  static std::map<std::string, CalculateFactory *> &getMakers() {
-    static std::map<std::string, CalculateFactory *> makers_;
+  static std::map<std::string, TransformFactory *> &getMakers() {
+    static std::map<std::string, TransformFactory *> makers_;
     return makers_;
   }
 };
 
-/// \brief Calculate maker
+/// \brief Transform maker
 template <class T>
-class CalculateMaker : public CalculateFactory {
-  virtual std::unique_ptr<CalculateBase> make(
-      const VariableConversionParameters &options, ioda::ObsSpace &os,
+class TransformMaker : public TransformFactory {
+  virtual std::unique_ptr<TransformBase> make(
+      const VariableTransformsParameters &options, ioda::ObsSpace &os,
       const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
-    return std::unique_ptr<CalculateBase>(new T(options, os, flags));
+    return std::unique_ptr<TransformBase>(new T(options, os, flags));
   }
 
  public:
-  explicit CalculateMaker(const std::string &name) : CalculateFactory(name) {}
+  explicit TransformMaker(const std::string &name) : TransformFactory(name) {}
 };
 
 }  // namespace ufo
 
-#endif  // UFO_CALCULATE_CALCULATEBASE_H_
+#endif  // UFO_VARIABLETRANSFORMS_TRANSFORMBASE_H_

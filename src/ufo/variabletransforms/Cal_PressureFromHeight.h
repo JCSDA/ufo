@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_CALCULATE_CAL_PRESSUREFROMHEIGHT_H_
-#define UFO_CALCULATE_CAL_PRESSUREFROMHEIGHT_H_
+#ifndef UFO_VARIABLETRANSFORMS_CAL_PRESSUREFROMHEIGHT_H_
+#define UFO_VARIABLETRANSFORMS_CAL_PRESSUREFROMHEIGHT_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
-#include "ufo/calculate/CalculateBase.h"
+#include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
 
@@ -25,15 +25,15 @@ namespace ufo {
 * template.
 * To date there is only the UKMO formulation available.
 *
-* See VariableConversionParameters for filter setup.
+* See VariableTransformsParameters for filter setup.
 */
-class Cal_PressureFromHeightForProfile : public CalculateBase {
+class Cal_PressureFromHeightForProfile : public TransformBase {
  public:
-  Cal_PressureFromHeightForProfile(const VariableConversionParameters &options,
+  Cal_PressureFromHeightForProfile(const VariableTransformsParameters &options,
                                    ioda::ObsSpace &os,
                                    const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
-  void runCalculate() override;
+  void runTransform() override;
 
  private:
   // list of specific implementation(s) - This is controlled by "method"
@@ -45,15 +45,15 @@ class Cal_PressureFromHeightForProfile : public CalculateBase {
 *
 * \details To date there is only the UKMO formulation available.
 *
-* See VariableConversionParameters for filter setup.
+* See VariableTransformsParameters for filter setup.
 */
-class Cal_PressureFromHeightForICAO : public CalculateBase {
+class Cal_PressureFromHeightForICAO : public TransformBase {
  public:
-  Cal_PressureFromHeightForICAO(const VariableConversionParameters &options,
+  Cal_PressureFromHeightForICAO(const VariableTransformsParameters &options,
                                 ioda::ObsSpace &os,
                                 const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
-  void runCalculate() override;
+  void runTransform() override;
 
  private:
   // list of specific implementation(s) - This is controled by "method"
@@ -61,4 +61,4 @@ class Cal_PressureFromHeightForICAO : public CalculateBase {
 };
 }  // namespace ufo
 
-#endif  // UFO_CALCULATE_CAL_PRESSUREFROMHEIGHT_H_
+#endif  // UFO_VARIABLETRANSFORMS_CAL_PRESSUREFROMHEIGHT_H_

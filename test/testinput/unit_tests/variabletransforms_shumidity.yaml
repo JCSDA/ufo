@@ -8,9 +8,9 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
     simulated variables: [relative_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Specific Humidity         # calculate specific humidity from relative humidity
-#   method_for_RH: NOAA               # option not needed, because default is NOAA
-    save: true                        # option is false by default, setting true saves the calculated output
+  - filter: Variable Transforms
+    Transform: ["SpecificHumidity"]   # calculate specific humidity from relative humidity
+                                      # using Default method and default Formulation (Roger 1989)
   compareVariables:                   # test output matches precalculated values
     - reference:
         name: specific_humidity_NOAA@TestReference
@@ -18,15 +18,16 @@ observations:
         name: specific_humidity@DerivedValue
       absTol: 1.0e-7
   passedBenchmark: 99
+
 - obs space:
     name: test_specific_humidity2
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
     simulated variables: [relative_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Specific Humidity         # calculate specific humidity from relative humidity
-    method_for_RH: UKMO               # option not needed, because default is NOAA
-    save: true                        # option is false by default, setting true saves the calculated output
+  - filter: Variable Transforms
+    Transform: ["SpecificHumidity"]   # calculate specific humidity from relative humidity
+    Method: UKMO                      # Using UKMO method and UKMO default formulation 
   compareVariables:                   # test output matches precalculated values
     - reference:
         name: specific_humidity_UKMO@TestReference
@@ -34,15 +35,34 @@ observations:
         name: specific_humidity@DerivedValue
       absTol: 1.0e-7
   passedBenchmark: 99
+
 - obs space:
     name: test_specific_humidity3
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
     simulated variables: [relative_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Specific Humidity         # calculate specific humidity from relative humidity
-    method_for_RH: Walko              # option not needed, because default is NOAA
-    save: true                        # option is false by default, setting true saves the calculated output
+  - filter: Variable Transforms
+    Transform: ["SpecificHumidity"]   # calculate specific humidity from relative humidity
+    Method: UKMO                      # Using UKMO method and UKMO default formulation 
+    Formulation: Sonntag              # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
+  compareVariables:                   # test output matches precalculated values
+    - reference:
+        name: specific_humidity_UKMO@TestReference
+      test:
+        name: specific_humidity@DerivedValue
+      absTol: 1.0e-7
+  passedBenchmark: 99
+
+- obs space:
+    name: test_specific_humidity4
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
+    simulated variables: [relative_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: ["SpecificHumidity"]    # calculate specific humidity from relative humidity
+    Formulation: Walko              
   compareVariables:                   # test output matches precalculated values
     - reference:
         name: specific_humidity_Walko@TestReference
@@ -50,15 +70,16 @@ observations:
         name: specific_humidity@DerivedValue
       absTol: 1.0e-7
   passedBenchmark: 99
+
 - obs space:
-    name: test_specific_humidity4
+    name: test_specific_humidity5
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
     simulated variables: [relative_humidity, air_temperature, surface_pressure]
   obs filters:
-  - filter: Specific Humidity         # calculate specific humidity from relative humidity
-    method_for_RH: Murphy             # option not needed, because default is NOAA
-    save: true                        # option is false by default, setting true saves the calculated output
+  - filter: Variable Transforms
+    Transform: ["SpecificHumidity"]
+    Formulation: Murphy              
   compareVariables:                   # test output matches precalculated values
     - reference:
         name: specific_humidity_Murphy@TestReference

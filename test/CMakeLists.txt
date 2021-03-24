@@ -239,10 +239,6 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
-  testinput/variableConversion_SondePressureFromHeight.yaml
-  testinput/variableConversion_SondePressureFromHeightICAO.yaml
-  testinput/variabletransform_windcomponents.yaml
-  testinput/variabletransform_windspeedanddirection.yaml
   testinput/windprof.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
@@ -251,8 +247,12 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
   testinput/unit_tests/function_wdirdiff.yaml
-  testinput/unit_tests/variabletransform_rhumidity.yaml
-  testinput/unit_tests/variabletransform_shumidity.yaml
+  testinput/unit_tests/variabletransforms_rhumidity.yaml
+  testinput/unit_tests/variabletransforms_shumidity.yaml
+  testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml
+  testinput/unit_tests/variabletransforms_SondePressureFromHeightICAO.yaml
+  testinput/unit_tests/variabletransforms_windcomponents.yaml
+  testinput/unit_tests/variabletransforms_windspeedanddirection.yaml
 )
 
 
@@ -1707,16 +1707,16 @@ ecbuild_add_test( TARGET  test_ufo_qc_variableassignment
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_variableConversion_SondePressureFromHeight
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondePressureFromHeight
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/variableConversion_SondePressureFromHeight.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_variableConversion_SondePressureFromHeightICAO
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondePressureFromHeightICAO
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/variableConversion_SondePressureFromHeightICAO.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_SondePressureFromHeightICAO.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1991,30 +1991,30 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_OPScomparison
 
 # Test Variable Transforms
 
-ecbuild_add_test( TARGET  test_ufo_variabletransform_windcomponents
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_windcomponents
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/variabletransform_windcomponents.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_windcomponents.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_variabletransform_windspeedanddirection
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_windspeedanddirection
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/variabletransform_windspeedanddirection.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_windspeedanddirection.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_variabletransform_humidityrelative
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/unit_tests/variabletransform_rhumidity.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_rhumidity.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_variabletransform_humidityspecific
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityspecific
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/unit_tests/variabletransform_shumidity.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_shumidity.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
