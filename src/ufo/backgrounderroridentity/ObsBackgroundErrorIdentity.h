@@ -79,9 +79,6 @@ class ObsBackgroundErrorIdentityParameters : public oops::Parameters {
 ///         vertical coordinate: geopotential_height  # coordinate used for obs value interpolation
 ///       # operator used to evaluate background errors
 ///       - name: BackgroundErrorIdentity
-///         vertical coordinate: geopotential_height  # coordinate used for bg error interpolation
-///         interpolation levels: background_error_geopotential_height
-///
 class ObsBackgroundErrorIdentity : public ObsOperatorBase,
                                      private util::ObjectCounter<ObsBackgroundErrorIdentity> {
  public:
