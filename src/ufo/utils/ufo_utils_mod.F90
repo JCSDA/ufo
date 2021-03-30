@@ -24,6 +24,7 @@ public Ops_SatRad_Qsplit
 public Ops_Cholesky
 public ufo_utils_iogetfreeunit
 public InvertMatrix
+public cmp_strings
 
 contains
 
@@ -1335,6 +1336,79 @@ end if
 9999 continue
 
 end subroutine InvertMatrix
+
+!-------------------------------------------------------------------------------
+! This function will comapre two strings while avoiding trim in order to speed
+! up the string comparison. This will allow for trailing blanks on either string
+! to count for a match.
+!
+! Since the strings may be different lengths coming in (due to trailing blanks)
+! a helper function (cmp_ordered_strings) is called with the shorter string first
+! which helps simplify the logic of the comparison.
+
+function cmp_strings(str1, str2)
+  implicit none
+
+  logical :: cmp_strings
+  character(len=*) :: str1
+  character(len=*) :: str2
+
+  if (len(str1) <= len(str2)) then
+    cmp_strings = cmp_ordered_strings(str1, str2)
+  else
+    cmp_strings = cmp_ordered_strings(str2, str1)
+  endif
+
+  return
+end function cmp_strings
+
+!-------------------------------------------------------------------------------
+! This is a helper function for the public cmp_strings function. It is intended
+! for this function to be called with the arguments of cmp_strings, with the shorter
+! of the two strings in the first argument.
+!
+! The algorithm is to compare each character one by one between each string. Then if
+! one string is longer, continue looking at that string an make sure the remainder
+! consists of blanks before calling it a match between the strings. Knowing that the
+! first argument is the shorter of the two stings helps simplify the code doing the check.
+!
+! The trim call is avoided since it allocates, copies strings and deallocates which
+! collectively are operations that are too expensive.
+
+function cmp_ordered_strings(shorter_str, longer_str)
+  implicit none
+
+  logical :: cmp_ordered_strings
+  character(len=*) :: shorter_str
+  character(len=*) :: longer_str
+
+  integer :: i
+  integer :: j
+
+  ! Check each character from the beginning of the strings to the length of the
+  ! shorter string. Exit the loop right away if a mis-match occurs to save time.
+  cmp_ordered_strings = .true.
+  do i = 1, len(shorter_str)
+    if (shorter_str(i:i) /= longer_str(i:i)) then
+      cmp_ordered_strings = .false.
+      exit
+    endif
+  enddo
+
+  ! If cmp_ordered_strings is false we can return immediately. If true, then we need to check
+  ! that the remainder of the longer string constists of all blank spaces before
+  ! declaring the strings equal.
+  if (cmp_ordered_strings) then
+    do j = i, len(longer_str)
+      if (longer_str(j:j) /= " ") then
+        cmp_ordered_strings = .false.
+        exit
+      endif
+    enddo
+  endif
+
+  return
+end function cmp_ordered_strings
 
 !-------------------------------------------------------------------------------
 

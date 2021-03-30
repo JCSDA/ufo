@@ -16,6 +16,7 @@ use crtm_module
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use obsspace_mod
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 private
@@ -494,7 +495,6 @@ end subroutine ufo_crtm_skip_profiles
 ! ------------------------------------------------------------------------------
 
 SUBROUTINE Load_Atm_Data(n_Profiles, n_Layers, geovals, atm, conf)
-
 implicit none
 
 integer, intent(in) :: n_Profiles, n_Layers
@@ -534,9 +534,9 @@ character(max_string) :: err_msg
 
   do jspec = 1, conf%n_Absorbers
     ! O3 Absorber has special treatment for Aerosols
-    if ( trim(conf%Absorbers(jspec)) == trim(var_oz) .AND. &
+    if (cmp_strings(conf%Absorbers(jspec), var_oz) .AND. &
       ufo_vars_getindex(geovals%variables, var_oz) < 0 .AND. &
-      TRIM(conf%aerosol_option) /= "" ) then
+      (.NOT. cmp_strings(conf%aerosol_option,""))) then
       do k1 = 1, n_Profiles
         atm(k1)%Absorber(1:n_Layers, jspec) = ozone_default_value
       end do
@@ -762,7 +762,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
   end do
   
   !Sea_Surface_Salinity
-  if (TRIM(conf%salinity_option) == "on") THEN
+  if (cmp_strings(conf%salinity_option, "on")) THEN
     call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
     do k1 = 1, n_Profiles
       sfc(k1)%Salinity = geoval%vals(1, k1)
@@ -858,19 +858,19 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
     INTEGER :: ivar
 
-    IF (TRIM(aerosol_option) == "aerosols_gocart_default") THEN
+    IF (cmp_strings(aerosol_option, "aerosols_gocart_default")) THEN
        varname=var_rh
        CALL ufo_geovals_get_var(geovals, varname, geoval)
        rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_default
-    ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_merra_2") THEN
+    ELSEIF (cmp_strings(aerosol_option, "aerosols_gocart_merra_2")) THEN
        varname=var_rh
        CALL ufo_geovals_get_var(geovals, varname, geoval)
        rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_merra_2
-    ELSEIF (TRIM(aerosol_option) == "aerosols_other") THEN
+    ELSEIF (cmp_strings(aerosol_option, "aerosols_other")) THEN
        CALL assign_other
     ELSE
        message = 'this aerosol not implemented - check later'
@@ -1142,7 +1142,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER i
      getindex=-1
      DO i=1,SIZE(names)
-        IF(TRIM(usrname)==TRIM(names(i))) THEN
+        IF(cmp_strings(usrname, names(i))) THEN
            getindex=i
            EXIT
         ENDIF

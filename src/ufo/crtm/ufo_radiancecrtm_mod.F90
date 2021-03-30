@@ -50,6 +50,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_setup(self, f_confOper, channels)
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 class(ufo_radiancecrtm),   intent(inout) :: self
@@ -85,7 +86,7 @@ logical :: request_cldfrac
    nvars_in = nvars_in + 1
  end if
  ! if sss is in obs options + sss
- if (TRIM(self%conf%salinity_option) == "on") then
+ if (cmp_strings(self%conf%salinity_option, "on")) then
    nvars_in = nvars_in + 1
  end if
 
@@ -107,7 +108,7 @@ logical :: request_cldfrac
    self%varin(ind) = var_cldfrac
    ind = ind + 1
  end if
- if (TRIM(self%conf%salinity_option) == "on") then
+ if (cmp_strings(self%conf%salinity_option, "on")) then
    self%varin(ind) = var_sfc_sss
    ind = ind + 1
  end if
@@ -133,6 +134,7 @@ end subroutine ufo_radiancecrtm_delete
 
 subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
 use fckit_mpi_module,   only: fckit_mpi_comm
+use ufo_utils_mod,      only: cmp_strings
 
 implicit none
 
@@ -448,7 +450,7 @@ logical :: jacobian_needed
       !============================================
       ! Diagnostics used for QC and bias correction
       !============================================
-      if (trim(xstr_diags(jvar)) == "") then
+      if (cmp_strings(xstr_diags(jvar), "")) then
          ! forward h(x) diags
          select case(ystr_diags(jvar))
             ! variable: optical_thickness_of_atmosphere_layer_CH

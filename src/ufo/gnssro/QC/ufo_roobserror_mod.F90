@@ -86,6 +86,7 @@ subroutine ufo_roobserror_prior(self, model_nobs, model_nlevs, air_temperature, 
     geopotential_height)
 
 use fckit_log_module, only : fckit_log
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 
@@ -181,7 +182,7 @@ case ("bending_angle")
   case ("MetOffice")
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with the Met Office method"
     call fckit_log%info(err_msg)
-    if (trim(self % rmatrix_filename) == "") then
+    if (cmp_strings(self % rmatrix_filename, "")) then
       err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
       call abor1_ftn(err_msg)
     end if

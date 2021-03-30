@@ -185,6 +185,7 @@ end subroutine ufo_vars_read
 ! ------------------------------------------------------------------------------
 
 integer function ufo_vars_getindex(vars, varname)
+use ufo_utils_mod, only: cmp_strings
 implicit none
 character(len=*), intent(in) :: vars(:)
 character(len=*), intent(in) :: varname
@@ -194,7 +195,7 @@ integer :: ivar
 ufo_vars_getindex = -1
 
 do ivar = 1, size(vars)
-  if (trim(vars(ivar)) == trim(varname)) then
+  if (cmp_strings(vars(ivar), varname)) then
     ufo_vars_getindex = ivar
     exit
   endif

@@ -96,6 +96,7 @@ end subroutine ufo_rttovonedvarcheck_delete
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geovals, apply)
+  use ufo_utils_mod, only: cmp_strings
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
@@ -162,7 +163,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
 
   ! Check if cloud retrievals needed
   do ii = 1, size(self % retrieval_variables)
-    if (trim(self % retrieval_variables(ii)) == "cloud_top_pressure") then
+    if (cmp_strings(self % retrieval_variables(ii), "cloud_top_pressure")) then
       write(*,*) "Simple cloud is part of the state vector"
       cloud_retrieval = .true.
     end if

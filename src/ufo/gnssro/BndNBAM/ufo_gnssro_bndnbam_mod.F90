@@ -19,6 +19,7 @@ module ufo_gnssro_bndnbam_mod
   use gnssro_mod_grids,  only : get_coordinate_value
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
+  use ufo_utils_mod, only: cmp_strings 
 
   implicit none
   public             :: ufo_gnssro_BndNBAM
@@ -270,7 +271,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 !     (2) super-refaction
 !     (2.1) GSI style super refraction check
-      if(trim(self%roconf%super_ref_qc) == "NBAM") then
+      if(cmp_strings(self%roconf%super_ref_qc, "NBAM")) then
 
         obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
 
@@ -306,7 +307,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
         end if ! obsImpH <= six
 
 !    ROPP style super refraction check
-     else if(trim(self%roconf%super_ref_qc) == "ECMWF") then
+     else if(cmp_strings(self%roconf%super_ref_qc, "ECMWF")) then
 
        sr_hgt_idx = 1
        do k = nlev, 2, -1
@@ -338,7 +339,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     end do obs_loop
   end do rec_loop
 
-  if (trim(self%roconf%super_ref_qc) == "NBAM" .and. self%roconf%sr_steps > 1 ) then
+  if (cmp_strings(self%roconf%super_ref_qc, "NBAM") .and. self%roconf%sr_steps > 1 ) then
      rec_loop2: do irec = 1, nrecs
 
        if (obs_max(irec) > 0 ) then

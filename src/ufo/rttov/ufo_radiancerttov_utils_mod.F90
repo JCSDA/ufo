@@ -23,7 +23,7 @@ module ufo_radiancerttov_utils_mod
   use ufo_constants_mod
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_basis_mod, only: ufo_basis
-  use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat
+  use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat, cmp_strings
   use obsspace_mod
 
   implicit none
@@ -208,10 +208,10 @@ contains
 
     if (f_confOper%has("GeoVal_type")) then
       call f_confOper%get_or_die("GeoVal_type",str)
-      if (trim(str) == 'MetO' .or. trim(str) == 'SatRad') then
+      if (cmp_strings(str, 'MetO') .or. cmp_strings(str, 'SatRad')) then
         varin_default => varin_default_satrad
         varin_satrad = .true.
-      elseif(trim(str) == 'CRTM') then
+      elseif(cmp_strings(str, 'CRTM')) then
         varin_default => varin_default_crtm
         varin_satrad = .false.
       else
@@ -1598,7 +1598,7 @@ contains
     if (PS_configuration) then
 
       ! Set RTTOV options that different from default and are true for all MetO configurations up to PS45
-      if (trim(default_opts_set(1:4)) == 'UKMO') then
+      if (cmp_strings(default_opts_set(1:4), 'UKMO')) then
         self % rttov_opts % config % verbose                 = .false. ! true if (ProcessMode > VerboseMode .OR. RTTOV_Verbosity > 0)
         self % rttov_opts % config % do_checkinput           = .false. ! we will use the more thorough and verbose user_checkinput
       
@@ -1676,7 +1676,7 @@ contains
       ! Diagnostics used for QC and bias correction
       !============================================
 
-      if (trim(xstr_diags(jvar)) == "") then
+      if (cmp_strings(xstr_diags(jvar), "")) then
         ! forward h(x) diags
         select case(trim(ystr_diags(jvar)))
 
@@ -1697,13 +1697,13 @@ contains
 
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
-              if(trim(ystr_diags(jvar)) == var_opt_depth) then
+              if(cmp_strings(ystr_diags(jvar), var_opt_depth)) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
                 hofxdiags%geovals(jvar)%vals(:,prof) = od_level(1:nlevels-1) - od_level(2:nlevels) ! defined +ve 
-              else if (trim(ystr_diags(jvar)) == var_lvl_transmit) then
+              else if (cmp_strings(ystr_diags(jvar), var_lvl_transmit)) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % transmission % tau_levels(1:nlevels-1,chan) - &
                                                        RTProf % transmission%tau_levels(2:,chan)
-              else if (trim(ystr_diags(jvar)) == var_lvl_weightfunc) then
+              else if (cmp_strings(ystr_diags(jvar), var_lvl_weightfunc)) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
                   hofxdiags%geovals(jvar)%vals(:,prof))
@@ -1729,17 +1729,17 @@ contains
             prof = chanprof(ichan)%prof
 
             if(chan == ch_diags(jvar)) then
-              if(trim(ystr_diags(jvar)) == var_radiance) then
+              if(cmp_strings(ystr_diags(jvar), var_radiance)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % total(ichan)
-              else if(trim(ystr_diags(jvar)) == var_tb_clr) then
+              else if(cmp_strings(ystr_diags(jvar), var_tb_clr)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % bt_clear(ichan)
-              else if(trim(ystr_diags(jvar)) == var_tb) then
+              else if(cmp_strings(ystr_diags(jvar), var_tb)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % bt(ichan)
-              else if(trim(ystr_diags(jvar)) == var_pmaxlev_weightfunc ) then
+              else if(cmp_strings(ystr_diags(jvar), var_pmaxlev_weightfunc)) then
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
                   Wfunc(:))
                 hofxdiags%geovals(jvar)%vals(1,prof) = maxloc(Wfunc(:), DIM=1) ! scalar not array(1)
-              else if(trim(ystr_diags(jvar)) == var_total_transmit) then
+              else if(cmp_strings(ystr_diags(jvar), var_total_transmit)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % transmission % tau_total(ichan)
               end if
             endif
@@ -1758,7 +1758,7 @@ contains
 
         end select
 
-      else if (trim(ystr_diags(jvar)) == var_tb) then
+      else if (cmp_strings(ystr_diags(jvar), var_tb)) then
         ! var_tb jacobians
         select case (trim(xstr_diags(jvar)))
 

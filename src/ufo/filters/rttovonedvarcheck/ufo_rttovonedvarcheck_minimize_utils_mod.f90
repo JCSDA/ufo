@@ -17,7 +17,7 @@ use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
-use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat
+use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
 
 implicit none
 private
@@ -256,7 +256,7 @@ nlevels = profindex % nlevels
 if (profindex % t(1) > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_ts) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_ts, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(nlevels:1:-1,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
 end if
@@ -266,7 +266,7 @@ end if
 if (profindex % q(1) > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_q) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_q, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(nlevels:1:-1,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
                                                   1000.0_kind_real ! ln(g/kg) => kg/kg
@@ -305,19 +305,19 @@ if (profindex % qt(1) > 0) then
   ! Assign values to geovals
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_q) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_q, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = q(:)
 
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_clw) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_clw, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = ql(:)
 
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_cli) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_cli, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
@@ -337,7 +337,7 @@ end if
 if (profindex % t2 > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_sfc_t2m) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_sfc_t2m, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % t2) ! K
 end if
@@ -347,7 +347,7 @@ end if
 if (profindex % q2 > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_sfc_q2m) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_sfc_q2m, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = EXP (prof_x(profindex % q2)) / 1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
@@ -356,7 +356,7 @@ end if
 if (profindex % pstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_sfc_p2m) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_sfc_p2m, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % pstar) * 100.0_kind_real
 end if
@@ -365,7 +365,7 @@ end if
 if (profindex % tstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_sfc_tskin) == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_sfc_tskin, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if
@@ -390,7 +390,7 @@ end if
 !  varname = "eastward_wind"
 !  gv_index = 0
 !  do i=1,geovals%nvar
-!    if (varname == trim(geovals%variables(i))) gv_index = i
+!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
 !  end do
 !  geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % windspeed)
 !end if
@@ -513,7 +513,7 @@ if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
   ! Assign values to geovals q
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
@@ -550,7 +550,7 @@ if (profindex % q2 > 0) then
   ! Assign values to geovals q
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(1,1) = q(1)
 
@@ -593,7 +593,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_q)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
@@ -601,7 +601,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_clw)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = ql(:)
 
@@ -609,7 +609,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_cli)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
@@ -660,7 +660,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_ts)
      do i=1,geovals%nvar
-       if (varname == trim(geovals%variables(i))) gv_index = i
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(level_1000hPa,1) = temperature(level_1000hPa)
 
@@ -668,7 +668,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_sfc_t2m)
      do i=1,geovals%nvar
-       if (varname == trim(geovals%variables(i))) gv_index = i
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(1,1) = temperature_2m
 
@@ -676,7 +676,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_sfc_tskin)
      do i=1,geovals%nvar
-       if (varname == trim(geovals%variables(i))) gv_index = i
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(1,1) = skin_t
 
@@ -712,14 +712,14 @@ endif
 !  varname = trim(var_u)  ! m/s
 !  gv_index = 0
 !  do i=1,geovals%nvar
-!    if (varname == trim(geovals%variables(i))) gv_index = i
+!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
 !  end do
 !  geovals%geovals(gv_index)%vals(1,1) = new_u_wind
 !
 !  varname = trim(var_v)  ! m/s
 !  gv_index = 0
 !  do i=1,geovals%nvar
-!    if (varname == trim(geovals%variables(i))) gv_index = i
+!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
 !  end do
 !  geovals%geovals(gv_index)%vals(1,1) = new_v_wind
 !

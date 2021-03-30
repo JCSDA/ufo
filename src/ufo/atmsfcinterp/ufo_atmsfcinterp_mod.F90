@@ -78,6 +78,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use thermo_utils_mod, only: calc_theta, gsi_tp_to_qs 
   use ufo_constants_mod, only: grav, rv, rd, rd_over_cp, von_karman
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use ufo_utils_mod, only: cmp_strings
   use obsspace_mod
   use iso_c_binding
   implicit none
@@ -177,7 +178,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
         case("air_temperature", "virtual_temperature")
           psit = gzsoz0 - psih
           psitz = gzzoz0 - psihz
-          if (trim(geovar) == "air_temperature") then
+          if (cmp_strings(geovar, "air_temperature")) then
             ttmp1 = th1
             ttmpg = thg
           else

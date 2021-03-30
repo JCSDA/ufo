@@ -623,6 +623,7 @@ use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 use ufo_locations_mod
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -697,7 +698,7 @@ do ivar = 1, self%nvar-1
          end select init_option
 
          ! currently only temperture is implemented
-         if (trim(self%variables(ivar)) == trim(var_tv)) then
+         if (cmp_strings(self%variables(ivar), var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
             self%geovals(ivar)%vals(ival,iloc) = t0

@@ -135,6 +135,7 @@ subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, hofxdiags)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
 use ieee_arithmetic,    only: ieee_is_nan
+use ufo_utils_mod,      only: cmp_strings
 
 implicit none
 
@@ -418,7 +419,7 @@ real(kind_real), allocatable :: Wfunc(:)
       !============================================
       ! Diagnostics used for QC and bias correction
       !============================================
-      if (trim(xstr_diags(jvar)) == "") then
+      if (cmp_strings(xstr_diags(jvar), "")) then
          ! forward h(x) diags
          select case(ystr_diags(jvar))
             ! variable: optical_thickness_of_atmosphere_layer_CH
