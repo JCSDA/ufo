@@ -21,6 +21,7 @@
 #include "ioda/ObsVector.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "oops/util/missingValues.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -37,14 +38,18 @@ namespace test {
 
 void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
                     const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out) {
+  float missing = util::missingValue(missing);
   /// Loop through variables and calculate rms for each variable
   for (size_t ivar = 0; ivar < vals.nvars() ; ++ivar) {
     for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
-      vals[ivar][jj] -= ref[ivar][jj];
+      if (vals[ivar][jj] != missing && ref[ivar][jj] != missing) {
+        vals[ivar][jj] -= ref[ivar][jj];
+      } else {
+        vals[ivar][jj] = missing;
+      }
     }
-    std::vector<double> temp(vals[ivar].begin(), vals[ivar].end());
-    int nobs = ospace.distribution().globalNumNonMissingObs(temp);
-    double rms = ospace.distribution().dot_product(temp, temp);
+    int nobs = ospace.distribution().globalNumNonMissingObs(vals[ivar]);
+    float rms = ospace.distribution().dot_product(vals[ivar], vals[ivar]);
     if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
     rms_out[ivar] = rms;
   }
