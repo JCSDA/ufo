@@ -358,12 +358,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
 
 /// init QC and error
-  std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
-    (new oops::ObsDataVector<ufo::ObsTraits, float>(obspace,
-             obspace.obsvariables(), "ObsError"));
+  ObsVector_ obserr(obspace, "ObsError");
   std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
-    qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace,
-             obspace.obsvariables()));
+    qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
   ObsFilters_ filters(obspace, params.obsFilters, qcflags, obserr);
@@ -439,7 +436,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 
   qcflags->save("EffectiveQC");
   const std::string errname = "EffectiveError";
-  obserr->save(errname);
+  obserr.save(errname);
 
 //  Compare with known results
   bool atLeastOneBenchmarkFound = false;
