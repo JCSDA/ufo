@@ -252,3 +252,17 @@ observations:
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
 #  var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
   passedBenchmark: 18 # variable2 and variable3 should be rejected at locations 1, 3, 5, 6, 7 and 8
+- obs space:
+    name: Where using datetimes
+    simulated variables: [brightness_temperature]
+    channels: 20
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4
+  obs filters:
+    - filter: BlackList
+      where:
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 2018-04-14T21:00:00Z
+        maxvalue: 2018-04-14T22:00:00Z
+  failedBenchmark: 17

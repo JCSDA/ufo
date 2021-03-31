@@ -17,6 +17,7 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/ParameterTraitsAnyOf.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/PartialDateTime.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -38,12 +39,14 @@ class WhereParameters : public oops::Parameters {
   /// Select locations at which the condition variable is greater than or equal to the specified
   /// value. Can be set to an int, float or datetime in the ISO 8601 format (if any datetime
   /// components are zero, they are ignored).
-  oops::OptionalParameter<util::AnyOf<int, float, std::string>> minvalue{"minvalue", this};
+  oops::OptionalParameter<util::AnyOf<int, float, util::PartialDateTime>> minvalue{
+    "minvalue", this};
 
   /// Select locations at which the condition variable is less than or equal to the specified
   /// value. Can be set to an int, float or datetime in the ISO 8601 format (if any datetime
   /// components are zero, they are ignored).
-  oops::OptionalParameter<util::AnyOf<int, float, std::string>> maxvalue{"maxvalue", this};
+  oops::OptionalParameter<util::AnyOf<int, float, util::PartialDateTime>> maxvalue{
+    "maxvalue", this};
 
   /// Select locations at which the condition variable takes one of the specified values. For
   /// integer variables, this can be an integer, range of integers (e.g. `3-5`) or a

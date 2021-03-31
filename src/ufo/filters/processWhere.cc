@@ -17,7 +17,6 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/PartialDateTime.h"
 #include "oops/util/wildcard.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
@@ -54,16 +53,14 @@ void processWhereMinMax(const std::vector<T> & data,
 
 // -----------------------------------------------------------------------------
 void processWhereMinMax(const std::vector<util::DateTime> & data,
-                        const std::string & vmin, const std::string & vmax,
+                        const util::PartialDateTime & vmin, const util::PartialDateTime & vmax,
                         std::vector<bool> & mask) {
-  const std::string not_set_value = "0000-00-00T00:00:00Z";
+  const util::PartialDateTime not_set_value {};
 
   if (vmin != not_set_value || vmax != not_set_value) {
-    util::PartialDateTime pdt_vmin(vmin), pdt_vmax(vmax);
-
     for (size_t jj = 0; jj < data.size(); ++jj) {
-      if (vmin != not_set_value && pdt_vmin > data[jj]) mask[jj] = false;
-      if (vmax != not_set_value && pdt_vmax < data[jj]) mask[jj] = false;
+      if (vmin != not_set_value && vmin > data[jj]) mask[jj] = false;
+      if (vmax != not_set_value && vmax < data[jj]) mask[jj] = false;
     }
   }
 }
@@ -147,16 +144,11 @@ void applyMinMax(std::vector<bool> & where, WhereParameters const & parameters,
 template <>
 void applyMinMax<util::DateTime>(std::vector<bool> & where, WhereParameters const & parameters,
                                  ObsFilterData const & filterdata, Variable const & varname) {
-  const std::string not_set_value("0000-00-00T00:00:00Z");
-
-  // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
-  std::string vmin = not_set_value;
+  util::PartialDateTime vmin {}, vmax {}, not_set_value {};
   if (parameters.minvalue.value() != boost::none)
-    vmin = parameters.minvalue.value()->as<std::string>();
-  // Set vmax to the value of the 'maxvalue' option if it exists; if not, leave vmax unchanged.
-  std::string vmax = not_set_value;
+    vmin = parameters.minvalue.value()->as<util::PartialDateTime>();
   if (parameters.maxvalue.value() != boost::none)
-    vmax = parameters.maxvalue.value()->as<std::string>();
+    vmax = parameters.maxvalue.value()->as<util::PartialDateTime>();
 
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {

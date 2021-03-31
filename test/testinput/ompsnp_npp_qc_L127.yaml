@@ -51,12 +51,12 @@ observations:
     where:
     - variable:
         name:  latitude@MetaData
-      minvalue: -90.
-      maxvalue: 90.
+      minvalue: -90.0
+      maxvalue: 90.0
     - variable:
         name:  longitude@MetaData
-      minvalue: -180.
-      maxvalue: 360.
+      minvalue: -180.0
+      maxvalue: 360.0
   - filter: Bounds Check
     filter variables:
     - name: integrated_layer_ozone_in_air
@@ -66,4 +66,4 @@ observations:
     filter variables:
     - name: integrated_layer_ozone_in_air
     absolute threshold: 10.0
-  passedBenchmark: 4925 # out of 6490 
+  passedBenchmark: 4925 # out of 6490
