@@ -4,13 +4,13 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 add_subdirectory( ZenithTotalDelayMetOffice )
-add_subdirectory( RefROPP1D )
+add_subdirectory( ZenithTotalDelayROPP )
 
 PREPEND( _p_metoffice_files  "groundgnss/ZenithTotalDelayMetOffice" ${groundgnssmetoffice_src_files}  )
-PREPEND( _p_refropp1d_files  "groundgnss/RefROPP1D" ${refropp1d_src_files} )
+PREPEND( _p_groundgnssropp_files  "groundgnss/ZenithTotalDelayROPP" ${groundgnssropp_src_files} )
 
 set ( groundgnss_src_files
-      ${_p_refropp1d_files}
       ${_p_metoffice_files}
+      ${_p_groundgnssropp_files}
       PARENT_SCOPE
 )
