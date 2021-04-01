@@ -72,6 +72,7 @@ void testPredictor() {
 
     /// Calculate predictor values
     const std::size_t npreds = predictor_names.size();
+    EXPECT(npreds > 0);
     std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(ospace));
 
     const Predictors & predictors = ybias.predictors();
