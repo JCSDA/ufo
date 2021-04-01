@@ -18,4 +18,3 @@ observations:
       predictors:
       - name: constant
   tolerance: 1.0e-16
-

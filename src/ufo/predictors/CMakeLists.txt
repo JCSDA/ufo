@@ -14,6 +14,8 @@ set ( predictor_files
   Emissivity.cc
   LapseRate.h
   LapseRate.cc
+  Legendre.h
+  Legendre.cc
   ScanAngle.h
   ScanAngle.cc
   SineOfLatitude.h
