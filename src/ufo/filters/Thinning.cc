@@ -41,7 +41,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
                            std::vector<std::vector<bool>> & flagged) const {
   // get local and global number of locations
   const size_t nlocs = obsdb_.nlocs();
-  const size_t gnlocs = obsdb_.gnlocs();
+  const size_t gnlocs = obsdb_.globalNumLocs();
 
   // get global indices of the local locations
   const std::vector<std::size_t> & gindex = obsdb_.index();
