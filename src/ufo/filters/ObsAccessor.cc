@@ -167,9 +167,7 @@ std::vector<size_t> ObsAccessor::getRecordIds() const {
 }
 
 size_t ObsAccessor::totalNumObservations() const {
-  size_t totalNumObs = obsdb_->nlocs();
-  obsDistribution_->sum(totalNumObs);
-  return totalNumObs;
+  return obsdb_->globalNumLocs();
 }
 
 RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
