@@ -37,6 +37,7 @@
 #include "test/TestEnvironment.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/ObsBiasParameters.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -117,7 +118,7 @@ class ObsTypeParameters : public oops::Parameters {
   oops::OptionalParameter<eckit::LocalConfiguration> obsDiagnostics{"obs diagnostics", this};
 
   /// Options used to configure the observation bias.
-  oops::Parameter<eckit::LocalConfiguration> obsBias{"obs bias", eckit::LocalConfiguration(), this};
+  oops::Parameter<ObsBiasParameters> obsBias{"obs bias", {}, this};
 
   /// Indices of observations expected to pass quality control.
   ///

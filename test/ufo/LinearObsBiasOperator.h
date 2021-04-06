@@ -49,8 +49,12 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     // initialize obs bias objects
     eckit::LocalConfiguration biasConf = conf.getSubConfiguration("obs bias");
     eckit::LocalConfiguration targetBiasConf = conf.getSubConfiguration("target obs bias");
-    const ObsBias bias(odb, biasConf);
-    const ObsBias targetBias(odb, targetBiasConf);
+    ObsBiasParameters biasParams;
+    ObsBiasParameters targetBiasParams;
+    biasParams.validateAndDeserialize(biasConf);
+    targetBiasParams.validateAndDeserialize(targetBiasConf);
+    const ObsBias bias(odb, biasParams);
+    const ObsBias targetBias(odb, targetBiasParams);
 
     // read geovals from the file
     const eckit::LocalConfiguration gconf(conf, "geovals");
@@ -75,7 +79,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     biasOperator.setTrajectory(geovals, bias, ydiags);
 
     // set the bias increment to the difference between two obs biases initialised earlier
-    ObsBiasIncrement biasInc(odb, biasConf);
+    ObsBiasIncrement biasInc(odb, biasParams);
     biasInc.diff(targetBias, bias);
 
     // apply the linear obs bias operator

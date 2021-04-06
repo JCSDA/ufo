@@ -19,8 +19,6 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/mhs_metop-c_geoval_2020110112_m.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_mhs_metop-c.2020110106.nc4
-    sensor: *Sensor_ID
-    jobs: *channels
     variational bc:
       predictors:
       - name: constant

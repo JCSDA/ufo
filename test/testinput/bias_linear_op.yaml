@@ -21,7 +21,6 @@ observations:
       predictors:
         - name: constant
         - name: sine_of_latitude
-    covariance: {}
   target obs bias:
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
     variational bc:

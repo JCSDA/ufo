@@ -34,48 +34,39 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
-                                     const eckit::Configuration & biasConf)
+                                     const Parameters_ & params)
   : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(0),
     preconditioner_(0),
     ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
-  if (biasConf.has("variational bc.predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    biasConf.get("variational bc.predictors", confs);
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], vars_));
-      prednames_.push_back(pred->name());
-    }
+  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
+    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(conf, vars_));
+    prednames_.push_back(pred->name());
   }
 
   if (prednames_.size()*vars_.size() > 0) {
-    const eckit::LocalConfiguration biasCovConf = biasConf.getSubConfiguration("covariance");
+    if (params.covariance.value() == boost::none)
+      throw eckit::UserError("obs bias.covariance section missing from the YAML file");
+    const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
 
     // Get the minimal required filtered obs number
-    minimal_required_obs_number_ =
-      biasCovConf.getUnsigned("minimal required obs number");
+    minimal_required_obs_number_ = biasCovParams.minimalRequiredObsNumber;
 
     // Override the variance range if provided
-    if (biasCovConf.has("variance range")) {
-      const std::vector<double>
-        range = biasCovConf.getDoubleVector("variance range");
+    {
+      const std::vector<double> &range = biasCovParams.varianceRange.value();
       ASSERT(range.size() == 2);
       smallest_variance_ = range[0];
       largest_variance_ = range[1];
     }
 
-    // Override the preconditioning step size  if provided
-    if (biasCovConf.has("step size")) {
-      step_size_ = biasCovConf.getDouble("step size");
-    }
+    // Override the preconditioning step size if provided
+    step_size_ = biasCovParams.stepSize;
 
     // Override the largest analysis variance if provided
-    if (biasCovConf.has("largest analysis variance")) {
-      largest_analysis_variance_ =
-        biasCovConf.getDouble("largest analysis variance");
-    }
+    largest_analysis_variance_ = biasCovParams.largestAnalysisVariance;
 
     // Initialize the variances to upper limit
     variances_.resize(prednames_.size() * vars_.size());
@@ -98,18 +89,18 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
 
     // Initializes from given prior
-    if (biasCovConf.has("prior")) {
+    if (biasCovParams.prior.value() != boost::none) {
+      const ObsBiasCovariancePriorParameters &priorParams = *biasCovParams.prior.value();
+
       // Get default inflation ratio
-      const double inflation_ratio =
-        biasCovConf.getDouble("prior.inflation.ratio");
+      const double inflation_ratio = priorParams.inflation.value().ratio;
 
       // Check the large inflation ratio when obs number < minimal_required_obs_number
-      const double large_inflation_ratio =
-        biasCovConf.getDouble("prior.inflation.ratio for small dataset");
+      const double large_inflation_ratio = priorParams.inflation.value().ratioForSmallDataset;
 
       // read in Variances prior (analysis_variances_) and number of obs. (obs_num_)
       // from previous cycle
-      this->read(biasCovConf);
+      this->read(priorParams);
 
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance
@@ -135,15 +126,14 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::read(const eckit::Configuration & conf) {
+void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
   oops::Log::trace() << "ObsBiasCovariance::read from file " << std::endl;
 
-  if (conf.has("prior.input file")) {
-    std::string input_filename = conf.getString("prior.input file");
+  if (params.inputFile.value() != boost::none) {
     // Open an hdf5 file, read only
     ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
     ioda::Engines::BackendCreationParameters backendParams;
-    backendParams.fileName = input_filename;
+    backendParams.fileName = *params.inputFile.value();
     backendParams.action   = ioda::Engines::BackendFileActions::Open;
     backendParams.openMode = ioda::Engines::BackendOpenModes::Read_Only;
 

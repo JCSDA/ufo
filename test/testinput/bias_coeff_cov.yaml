@@ -37,7 +37,7 @@ observations:
       - name: scan_angle
     covariance:
       minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
+      variance range: [1.0e-6, 10.0]
       step size: 1.0e-4
       largest analysis variance: 10000.0
       prior:

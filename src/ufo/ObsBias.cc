@@ -29,24 +29,18 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
+ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
   : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
-  if (conf.has("static bc.predictors")) {
-    const eckit::LocalConfiguration predsConf(conf, "static bc.predictors");
-    for (const eckit::LocalConfiguration &conf : predsConf.getSubConfigurations()) {
-      initPredictor(conf);
-      ++numStaticPredictors_;
-    }
+  for (const eckit::LocalConfiguration &conf : params.staticBC.value().predictors.value()) {
+    initPredictor(conf);
+    ++numStaticPredictors_;
   }
-  if (conf.has("variational bc.predictors")) {
-    const eckit::LocalConfiguration predsConf(conf, "variational bc.predictors");
-    for (const eckit::LocalConfiguration &conf : predsConf.getSubConfigurations()) {
-      initPredictor(conf);
-      ++numVariablePredictors_;
-    }
+  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
+    initPredictor(conf);
+    ++numVariablePredictors_;
   }
 
   if (prednames_.size() * vars_.size() > 0) {
@@ -54,7 +48,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
     // are not stored; they are always equal to 1.)
     biascoeffs_ = Eigen::MatrixXf::Zero(numVariablePredictors_, vars_.size());
     // Read or initialize bias coefficients
-    this->read(conf);
+    this->read(params);
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
@@ -106,17 +100,14 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::read(const eckit::Configuration & conf) {
+void ObsBias::read(const Parameters_ & params) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
 
-  // Bias coefficients input file name
-  std::string input_filename;
-  if (conf.has("input file")) {
-    input_filename = conf.getString("input file");
-    // Open an hdf5 file, read only
+  if (params.inputFile.value() != boost::none) {
+    // Open an hdf5 file with bias coefficients, read only
     ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
     ioda::Engines::BackendCreationParameters backendParams;
-    backendParams.fileName = input_filename;
+    backendParams.fileName = *params.inputFile.value();
     backendParams.action   = ioda::Engines::BackendFileActions::Open;
     backendParams.openMode = ioda::Engines::BackendOpenModes::Read_Only;
 
@@ -157,7 +148,7 @@ void ObsBias::read(const eckit::Configuration & conf) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::write(const eckit::Configuration & conf) const {
+void ObsBias::write(const Parameters_ & params) const {
   oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
 }
 

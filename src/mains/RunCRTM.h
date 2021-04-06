@@ -63,7 +63,10 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       const eckit::LocalConfiguration gconf(conf[jj], "geovals");
       const GeoVaLs_ gval(gconf, obsdb[jj], hop.requiredVars());
 
-      const ObsAuxCtrl_ ybias(obsdb[jj], conf[jj]);
+      eckit::LocalConfiguration biasconf = conf[jj].getSubConfiguration("obs bias");
+      typename ObsAuxCtrl_::Parameters_ biasparams;
+      biasparams.validateAndDeserialize(biasconf);
+      const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
 
       ObsVector_ hofx(obsdb[jj]);
       ObsDiags_ diag(obsdb[jj], hop.locations(), diagvars);

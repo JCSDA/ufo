@@ -45,18 +45,20 @@ void testObsBiasCovarianceDetails() {
 
     // Setup ObsBias
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
-    ObsBias ybias(odb, biasconf);
+    ObsBiasParameters biasparams;
+    biasparams.validateAndDeserialize(biasconf);
+    ObsBias ybias(odb, biasparams);
 
     // Setup ObsBiasIncrements
     eckit::LocalConfiguration biaserrconf = biasconf.getSubConfiguration("covariance");
-    ObsBiasIncrement ybias_inc(odb, biasconf);
+    ObsBiasIncrement ybias_inc(odb, biasparams);
     ObsBiasIncrement ybias_inc_2(ybias_inc);
     ObsBiasIncrement ybias_inc_3(ybias_inc);
     ybias_inc_2.zero();
     ybias_inc_3.zero();
 
     // Setup ObsBiasCovariance (include reading from file)
-    ObsBiasCovariance ybias_cov(odb, biasconf);
+    ObsBiasCovariance ybias_cov(odb, biasparams);
 
     // Randomize increments
     ybias_cov.randomize(ybias_inc);

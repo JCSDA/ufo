@@ -61,7 +61,10 @@ void testObsDiagnostics() {
   const GeoVaLs gval(gconf, ospace, hop.requiredVars());
 
   // initialize bias correction
-  const ObsBias ybias(ospace, conf);
+  eckit::LocalConfiguration biasconf = conf.getSubConfiguration("obs bias");
+  ObsBiasParameters biasparams;
+  biasparams.validateAndDeserialize(biasconf);
+  const ObsBias ybias(ospace, biasparams);
 
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);

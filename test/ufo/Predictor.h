@@ -48,7 +48,9 @@ void testPredictor() {
 
     /// initialize bias correction
     eckit::LocalConfiguration bconf(conf, "obs bias");
-    const ObsBias ybias(ospace, bconf);
+    ObsBiasParameters bparams;
+    bparams.validateAndDeserialize(bconf);
+    const ObsBias ybias(ospace, bparams);
     // get predictor names
     std::vector<std::string> predictor_names = ybias.requiredPredictors();
 

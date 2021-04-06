@@ -16,6 +16,7 @@
 
 #include "oops/util/Printable.h"
 
+#include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
@@ -35,9 +36,11 @@ namespace ufo {
 /// Contains increments to bias correction coefficients
 class ObsBiasIncrement : public util::Printable {
  public:
+  typedef ObsBiasParameters Parameters_;
+
 // Constructor, destructor
   ObsBiasIncrement(const ioda::ObsSpace & odb,
-                   const eckit::Configuration & biasConf);
+                   const Parameters_ & params);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
 
 // Linear algebra operators

@@ -20,6 +20,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
@@ -42,17 +43,19 @@ namespace ufo {
 class ObsBias : public util::Printable,
                 private util::ObjectCounter<ObsBias> {
  public:
+  typedef ObsBiasParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsBias";}
 
-  ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBias(ioda::ObsSpace &, const Parameters_ &);
   ObsBias(const ObsBias &, const bool);
 
   ObsBias & operator+=(const ObsBiasIncrement &);
   ObsBias & operator=(const ObsBias &);
 
   /// Read bias correction coefficients from file
-  void read(const eckit::Configuration &);
-  void write(const eckit::Configuration &) const;
+  void read(const Parameters_ &);
+  void write(const Parameters_ &) const;
   double norm() const;
   std::size_t size() const {return biascoeffs_.size();}
 

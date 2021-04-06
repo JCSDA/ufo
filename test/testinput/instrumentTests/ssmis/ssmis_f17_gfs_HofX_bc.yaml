@@ -21,7 +21,6 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_geoval_2020110112_m.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_ssmis_f17.nc4
-    jobs: *channels
     variational bc:
       predictors:
       - name: constant

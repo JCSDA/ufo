@@ -16,6 +16,7 @@ observations:
         options:
           preconditioner: 0.01
       - name: sine_of_latitude
+  obs bias test:
     norm: 0.0
     relative tolerance: 0.0
 
@@ -30,6 +31,7 @@ observations:
     variational bc:
       predictors:
       - name: emissivity
+  obs bias test:
     norm: 2.521706721918669
     relative tolerance: 1.e-7
 
@@ -44,6 +46,7 @@ observations:
     variational bc:
       predictors:
       - name: emissivity
+  obs bias test:
     norm: 0.9845241512216701
     relative tolerance: 1.e-7
 
@@ -59,6 +62,7 @@ observations:
       predictors:
       - name: emissivity
       - name: constant
+  obs bias test:
     norm: 0.8470894100411567
     relative tolerance: 1.e-7
 
@@ -95,5 +99,6 @@ observations:
         options:
           order: 2
       - name: scan_angle
+  obs bias test:
     norm: 2.8888588267029465
     relative tolerance: 1.e-7
