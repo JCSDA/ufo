@@ -1,23 +1,22 @@
 ! (C) British Crown Copyright 2020 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module containing the full b-matrix data type and methods for the 1D-Var.
 
-module ufo_rttovonedvarcheck_bmatrix_mod
+module ufo_metoffice_bmatrixstatic_mod
 
 use fckit_log_module, only : fckit_log
 use kinds
-use ufo_constants_mod, only: zero, one 
-use ufo_rttovonedvarcheck_constants_mod
+use ufo_constants_mod, only: zero, one
 use ufo_utils_mod, only : ufo_utils_iogetfreeunit, InvertMatrix
 use ufo_vars_mod
 
 implicit none
 private
 
-type, public :: ufo_rttovonedvarcheck_bmatrix
+type, public :: ufo_metoffice_bmatrixstatic
   logical :: status                                 !< status indicator
   integer :: nbands                                 !< number of latitude bands
   integer :: nsurf                                  !< number of surface type variations
@@ -32,12 +31,66 @@ type, public :: ufo_rttovonedvarcheck_bmatrix
   real(kind=kind_real), pointer :: south(:)         !< s limit of each latitude band
   real(kind=kind_real), pointer :: north(:)         !< n limit of each latitude band
 contains
-  procedure :: setup  => ufo_rttovonedvarcheck_bmatrix_setup
-  procedure :: delete => ufo_rttovonedvarcheck_bmatrix_delete
-  procedure :: reset  => ufo_rttovonedvarcheck_reset_covariances
-end type ufo_rttovonedvarcheck_bmatrix
+  procedure :: setup  => ufo_metoffice_bmatrixstatic_setup
+  procedure :: delete => ufo_metoffice_bmatrixstatic_delete
+  procedure :: reset  => ufo_metoffice_bmatrixstatic_reset
+end type ufo_metoffice_bmatrixstatic
 
-character(len=max_string)     :: message
+character(len=200)     :: message
+
+!-----------------------------------------------------------------------------
+! 1. 1d-var profile elements
+!-----------------------------------------------------------------------------
+
+! define id codes for 1d-var retrieval fields.
+! a list of these fieldtype codes is always present in the header of the bmatrix
+! file and it's that list which decides the form of the retrieval vector.
+!
+! new definitions should be made in conjunction with the profileinfo_type
+! structure found in ufo_rttovonedvarcheck_profindex_mod.F90.
+
+integer, parameter, public :: nfieldtypes_ukmo = 19 !< number of fieldtypes
+integer, parameter, public :: &
+  ufo_metoffice_fieldtype_t          =  1, &   !< temperature
+  ufo_metoffice_fieldtype_q          =  2, &   !< specific humidity profile
+  ufo_metoffice_fieldtype_t2         =  3, &   !< surface air temperature
+  ufo_metoffice_fieldtype_q2         =  4, &   !< surface spec humidity
+  ufo_metoffice_fieldtype_tstar      =  5, &   !< surface skin temperature
+  ufo_metoffice_fieldtype_pstar      =  6, &   !< surface pressure
+  ufo_metoffice_fieldtype_o3total    =  7, &   !< total column ozone - not currently setup
+  ufo_metoffice_fieldtype_not_used   =  8, &   !< not currently in use - not currently setup
+  ufo_metoffice_fieldtype_ql         =  9, &   !< liquid water profile - not currently setup
+  ufo_metoffice_fieldtype_qt         = 10, &   !< total water profile
+  ufo_metoffice_fieldtype_windspeed  = 11, &   !< surface wind speed
+  ufo_metoffice_fieldtype_o3profile  = 12, &   !< ozone - not currently setup
+  ufo_metoffice_fieldtype_lwp        = 13, &   !< liquid water path - not currently setup
+  ufo_metoffice_fieldtype_mwemiss    = 14, &   !< microwave emissivity - not currently setup
+  ufo_metoffice_fieldtype_qi         = 15, &   !< ice profile - not currently setup
+  ufo_metoffice_fieldtype_cloudtopp  = 16, &   !< single-level cloud top pressure
+  ufo_metoffice_fieldtype_cloudfrac  = 17, &   !< effective cloud fraction
+  ufo_metoffice_fieldtype_emisspc    = 18, &   !< emissivity prinipal components - not currently setup
+  ufo_metoffice_fieldtype_cf         = 19      !< cloud fraction profile - not currently setup
+
+character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_ukmo) = &
+  (/ var_ts,                 &
+     var_q,                  &
+     var_sfc_t2m,            &
+     var_sfc_q2m,            &
+     var_sfc_tskin,          &
+     var_sfc_p2m,            &
+     'ozone (total column)', &
+     '[unused field type] ', &
+     var_clw,                &
+     'q total             ', &
+     var_sfc_wspeed,         &
+     'ozone (profile)     ', &
+     'liquid water path   ', &
+     var_sfc_emiss,          &
+     var_cli,                &
+     'cloud top pressure  ', &
+     'cloud fraction      ', &
+     'emissivity pcs      ', &
+     var_cldfrac /)
 
 contains
 
@@ -48,10 +101,10 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_bmatrix_setup(self, variables, filepath, qtotal_flag)
+subroutine ufo_metoffice_bmatrixstatic_setup(self, variables, filepath, qtotal_flag)
 
 implicit none
-class(ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self !< B-matrix Covariance
+class(ufo_metoffice_bmatrixstatic), intent(inout) :: self !< B-matrix Covariance
 character(len=*), intent(in)       :: variables(:) !< Model variables in B matrix
 character(len=*), intent(in)       :: filepath     !< Path to B matrix file
 logical, intent(in)                :: qtotal_flag  !< Flag for qtotal
@@ -65,7 +118,7 @@ logical                       :: testing = .false.
 integer                       :: ii, jj
 logical                       :: match
 
-call fckit_log % info("ufo_rttovonedvarcheck_bmatrix_setup start")
+call fckit_log % info("ufo_metoffice_bmatrixstatic_setup start")
 
 call cpu_time(t1)
 
@@ -96,15 +149,15 @@ do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
     if (self % fields(ii,1) == fields_in(jj)) match = .true.
   end do
   if (.not. match) then
-    write(*,*) "input model variables do not have ",fieldtype_text(self % fields(ii,1))
+    write(*,*) "input model variables do not have ",ufo_metoffice_fieldtype_text(self % fields(ii,1))
     call abor1_ftn("rttovonedvarcheck not all the model data is available for the b-matrix")
   end if
 end do
 
-write(message,*) "ufo_rttovonedvarcheck_bmatrix_setup cpu time = ",(t2-t1)
+write(message,*) "ufo_metoffice_bmatrixstatic_setup cpu time = ",(t2-t1)
 call fckit_log % info(message)
 
-end subroutine ufo_rttovonedvarcheck_bmatrix_setup
+end subroutine ufo_metoffice_bmatrixstatic_setup
 
 ! ------------------------------------------------------------------------------------------------
 !> Routine to delete and squash the 1D-Var B-matrix
@@ -115,12 +168,12 @@ end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
+subroutine ufo_metoffice_bmatrixstatic_delete(self)
 
 implicit none
-class(ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self  !< B-matrix Covariance
+class(ufo_metoffice_bmatrixstatic), intent(inout) :: self  !< B-matrix Covariance
 
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_bmatrix_delete"
+character(len=*), parameter :: RoutineName = "ufo_metoffice_bmatrixstatic_delete"
 
 self % status = .false.
 self % nbands = 0
@@ -135,7 +188,7 @@ if ( associated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
 if ( associated(self % south)       ) deallocate( self % south       )
 if ( associated(self % north)       ) deallocate( self % north       )
 
-end subroutine ufo_rttovonedvarcheck_bmatrix_delete
+end subroutine ufo_metoffice_bmatrixstatic_delete
 
 ! ------------------------------------------------------------------------------------------------
 !> \brief Routine to initialize the 1D-Var B-matrix
@@ -151,7 +204,7 @@ subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
 implicit none
 
 ! subroutine arguments:
-type(ufo_rttovonedvarcheck_bmatrix), intent(out) :: self !< B-matrix Covariance 
+type(ufo_metoffice_bmatrixstatic), intent(out) :: self !< B-matrix Covariance
 
 character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
 
@@ -224,7 +277,7 @@ subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
 implicit none
 
 ! subroutine arguments:
-type (ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self !< B-matrix covariance
+type (ufo_metoffice_bmatrixstatic), intent(inout) :: self !< B-matrix covariance
 integer, intent(in)                :: fileunit           !< free file unit number
 integer, optional, intent(in)      :: b_elementsused(:)  !< optional: list of elements used
 integer, optional, intent(inout)   :: fieldlist(:)       !< optional: list of fields used
@@ -298,7 +351,7 @@ call fckit_log % debug(message)
 if (nbfields > 0) then
   call fckit_log % debug('order of fields and number of elements in each:')
   do i = 1, nbfields
-    write (message, '(i0,a)') bfields(i,2), ' x ' // fieldtype_text(bfields(i,1))
+    write (message, '(i0,a)') bfields(i,2), ' x ' // ufo_metoffice_fieldtype_text(bfields(i,1))
     call fckit_log % debug(message)
   end do
 end if
@@ -318,7 +371,7 @@ end if
 ! this method is to provide the element numbers explicitly in the argument
 ! b_elementsused.
 
-allocate (self % fields(nfieldtypes,2))
+allocate (self % fields(nfieldtypes_ukmo,2))
 self % fields(:,:) = 0
 self % status = .true.
 nelements = 0
@@ -360,8 +413,8 @@ if (present (fieldlist)) then
     do i = 1, size (fieldlist)
       if (fieldlist(i) /= 0) then
         write (fieldtype, '(i0)') fieldlist(i)
-        if (fieldlist(i) > 0 .and. fieldlist(i) <= nfieldtypes) then
-          write (message, '(a)') trim (fieldtype_text(fieldlist(i))) // &
+        if (fieldlist(i) > 0 .and. fieldlist(i) <= nfieldtypes_ukmo) then
+          write (message, '(a)') trim (ufo_metoffice_fieldtype_text(fieldlist(i))) // &
             ' (fieldtype ' // trim (adjustl (fieldtype)) // ')'
           call fckit_log % debug(message)
         else
@@ -375,7 +428,7 @@ if (present (fieldlist)) then
 
   call fckit_log % debug('b matrix fields used to define the retrieval profile vector:')
   do i = 1, nbfields
-    write (message, '(a)') fieldtype_text(bfields(i,1))
+    write (message, '(a)') ufo_metoffice_fieldtype_text(bfields(i,1))
     call fckit_log % debug(message)
   end do
 
@@ -519,13 +572,13 @@ end subroutine rttovonedvarcheck_covariance_GetBmatrix
 !!
 !! \date 08/09/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_reset_covariances(self, latitude, & ! in
+subroutine ufo_metoffice_bmatrixstatic_reset(self, latitude, & ! in
                                       b_matrix, b_inverse, b_sigma ) ! out
 
 implicit none
 
 ! Subroutine arguments
-class(ufo_rttovonedvarcheck_bmatrix), intent(in) :: self !< B-matrix covariance
+class(ufo_metoffice_bmatrixstatic), intent(in) :: self !< B-matrix covariance
 real(kind_real), intent(in)  :: latitude
 real(kind_real), intent(out) :: b_matrix(:,:)
 real(kind_real), intent(out) :: b_inverse(:,:)
@@ -581,7 +634,7 @@ b_sigma(:) = self % sigma(:,band)
 !
 !end if
 
-end subroutine ufo_rttovonedvarcheck_reset_covariances
+end subroutine ufo_metoffice_bmatrixstatic_reset
 
 ! ------------------------------------------------------------------------------------------------
 !> Create a subset of the b-matrix.  Used for testing.
@@ -598,10 +651,10 @@ integer, allocatable, intent(inout) :: fields_in(:) !< Array to specify fields u
 character(len=*), intent(in)        :: variables(:) !< Model variables in B matrix
 logical, intent(in)                 :: qtotal_flag  !< Flag for qtotal
 
-character(len=max_string) :: varname
+character(len=MAXVARLEN)  :: varname
 integer                   :: jvar
 integer                   :: nmvars, counter
-character(len=max_string) :: message
+character(len=200)        :: message
 logical                   :: clw_present = .false.
 logical                   :: ciw_present = .false.
 
@@ -647,7 +700,7 @@ do jvar = 1, nmvars
 
     case (var_clw)
       clw_present = .true.
-      if (.NOT. qtotal_flag) then 
+      if (.NOT. qtotal_flag) then
         call abor1_ftn("rttovonedvarcheck not setup for independent clw yet")
       end if
 
@@ -694,4 +747,4 @@ end subroutine rttovonedvarcheck_create_fields_in
 
 ! ------------------------------------------------------------------------------------------------
 
-end module ufo_rttovonedvarcheck_bmatrix_mod
+end module ufo_metoffice_bmatrixstatic_mod

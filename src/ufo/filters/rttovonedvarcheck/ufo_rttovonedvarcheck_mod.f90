@@ -15,8 +15,9 @@ use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
 use ufo_geovals_mod
+use ufo_metoffice_bmatrixstatic_mod
+use ufo_metoffice_rmatrixradiance_mod
 use ufo_radiancerttov_mod
-use ufo_rttovonedvarcheck_bmatrix_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_minimize_newton_mod
@@ -25,7 +26,6 @@ use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_obs_mod
 use ufo_rttovonedvarcheck_pcemis_mod
 use ufo_rttovonedvarcheck_profindex_mod
-use ufo_rttovonedvarcheck_rmatrix_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_vars_mod
@@ -107,11 +107,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
   type(ufo_rttovonedvarcheck_obs)        :: obs            ! data for all observations read from db
-  type(ufo_rttovonedvarcheck_bmatrix)    :: full_bmatrix   ! full bmatrix read from file
+  type(ufo_metoffice_bmatrixstatic)      :: full_bmatrix   ! full bmatrix read from file
   type(ufo_geovals)                      :: local_geovals  ! geoval for one observation
   type(ufo_rttovonedvarcheck_ob)         :: ob             ! observation data for a single observation
   type(ufo_rttovonedvarcheck_profindex)  :: prof_index     ! index for mapping geovals to 1d-var state profile
-  type(ufo_rttovonedvarcheck_rmatrix)    :: full_rmatrix   ! full r_matrix read from file
+  type(ufo_metoffice_rmatrixradiance)    :: full_rmatrix   ! full r_matrix read from file
   type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix    ! r_submatrix object
   type(ufo_geovals)                      :: hofxdiags      ! hofxdiags containing jacobian
   type(ufo_rttovonedvarcheck_pcemis), target :: IR_pcemis  ! Infrared principal components object

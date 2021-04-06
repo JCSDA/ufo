@@ -8,10 +8,6 @@
 module ufo_rttovonedvarcheck_constants_mod
 
 use kinds
-use ufo_vars_mod, only : var_ts, var_q, var_sfc_t2m, var_sfc_q2m, &
-                         var_sfc_tskin, var_sfc_p2m, var_clw, &
-                         var_sfc_wspeed, var_cli, var_sfc_emiss, &
-                         var_cldfrac
 
 implicit none
 private
@@ -28,61 +24,7 @@ integer, parameter, public :: &
   RTIce  = 2    !< integer for seaice surface type
 
 !-----------------------------------------------------------------------------
-! 2. 1d-var profile elements
-!-----------------------------------------------------------------------------
-
-! define id codes for 1d-var retrieval fields.
-! a list of these fieldtype codes is always present in the header of the bmatrix
-! file and it's that list which decides the form of the retrieval vector.
-!
-! new definitions should be made in conjunction with the profileinfo_type
-! structure found in ufo_rttovonedvarcheck_profindex_mod.F90.
-
-integer, parameter, public :: nfieldtypes = 19 !< number of fieldtypes
-integer, parameter, public :: &
-  fieldtype_t          =  1, &   !< temperature
-  fieldtype_q          =  2, &   !< specific humidity profile
-  fieldtype_t2         =  3, &   !< surface air temperature
-  fieldtype_q2         =  4, &   !< surface spec humidity
-  fieldtype_tstar      =  5, &   !< surface skin temperature
-  fieldtype_pstar      =  6, &   !< surface pressure
-  fieldtype_o3total    =  7, &   !< total column ozone - not currently setup
-  fieldtype_not_used   =  8, &   !< not currently in use - not currently setup
-  fieldtype_ql         =  9, &   !< liquid water profile - not currently setup
-  fieldtype_qt         = 10, &   !< total water profile
-  fieldtype_windspeed  = 11, &   !< surface wind speed
-  fieldtype_o3profile  = 12, &   !< ozone - not currently setup
-  fieldtype_lwp        = 13, &   !< liquid water path - not currently setup
-  fieldtype_mwemiss    = 14, &   !< microwave emissivity - not currently setup
-  fieldtype_qi         = 15, &   !< ice profile - not currently setup
-  fieldtype_cloudtopp  = 16, &   !< single-level cloud top pressure
-  fieldtype_cloudfrac  = 17, &   !< effective cloud fraction
-  fieldtype_emisspc    = 18, &   !< emissivity prinipal components - not currently setup
-  fieldtype_cf         = 19      !< cloud fraction profile - not currently setup
-
-character(len=*), parameter, public :: fieldtype_text(nfieldtypes) = &
-  (/ var_ts,                 &
-     var_q,                  &
-     var_sfc_t2m,            &
-     var_sfc_q2m,            &
-     var_sfc_tskin,          &
-     var_sfc_p2m,            &
-     'ozone (total column)', &
-     '[unused field type] ', &
-     var_clw,                &
-     'q total             ', &
-     var_sfc_wspeed,         &
-     'ozone (profile)     ', &
-     'liquid water path   ', &
-     var_sfc_emiss,          &
-     var_cli,                &
-     'cloud top pressure  ', &
-     'cloud fraction      ', &
-     'emissivity pcs      ', &
-     var_cldfrac /)
-
-!-----------------------------------------------------------------------------
-! 3. Physical Constants
+! 2. Physical Constants
 !-----------------------------------------------------------------------------
 
 real(kind_real), parameter, public :: &
@@ -90,7 +32,7 @@ real(kind_real), parameter, public :: &
   MinTemperature  =    70.0_kind_real       !< Minimum temperature ( K )
 
 !-----------------------------------------------------------------------------
-! 4. Information for emissivity retrieval
+! 3. Information for emissivity retrieval
 ! This is not currently available but has been left in for future development
 !-----------------------------------------------------------------------------
 

@@ -12,8 +12,18 @@ set ( utils_files
       IodaGroupIndices.cc
       IodaGroupIndices.h
       MaxNormDistanceCalculator.h
+      metoffice/MetOfficeBMatrixStatic.cc
+      metoffice/MetOfficeBMatrixStatic.h
+      metoffice/MetOfficeBMatrixStatic.interface.h
+      metoffice/MetOfficeBMatrixStatic.interface.F90
       metoffice/MetOfficeQCFlags.h
+      metoffice/MetOfficeRMatrixRadiance.cc
+      metoffice/MetOfficeRMatrixRadiance.h
+      metoffice/MetOfficeRMatrixRadiance.interface.h
+      metoffice/MetOfficeRMatrixRadiance.interface.F90
       metoffice/MetOfficeObservationIDs.h
+      metoffice/ufo_metoffice_bmatrixstatic_mod.f90
+      metoffice/ufo_metoffice_rmatrixradiance_mod.f90
       OperatorUtils.cc
       OperatorUtils.h
       parameters/ParameterTraitsVariable.cc

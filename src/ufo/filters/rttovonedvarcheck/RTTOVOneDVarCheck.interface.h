@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_INTERFACE_H_
 #define UFO_FILTERS_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_INTERFACE_H_
 
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 // Forward declarations
@@ -21,16 +22,14 @@ namespace ioda {
 
 namespace ufo {
 
-typedef int F90onedvarcheck;
-
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_rttovonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &,
+  void ufo_rttovonedvarcheck_create_f90(F90obfilter &, const ioda::ObsSpace &,
                       const eckit::Configuration &, const int &, const int &,
                       oops::Variables &, const int &, const int &);
-  void ufo_rttovonedvarcheck_delete_f90(F90onedvarcheck &);
-  void ufo_rttovonedvarcheck_apply_f90(const F90onedvarcheck &, const eckit::Configuration &,
+  void ufo_rttovonedvarcheck_delete_f90(F90obfilter &);
+  void ufo_rttovonedvarcheck_apply_f90(const F90obfilter &, const eckit::Configuration &,
                                        const oops::Variables &, const oops::Variables &,
                                        const F90goms &, const int &, const char &);
 }  // extern C

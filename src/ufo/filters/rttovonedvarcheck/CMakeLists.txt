@@ -8,7 +8,6 @@ set ( rttovonedvarcheck_files
     RTTOVOneDVarCheck.cc
     RTTOVOneDVarCheck.interface.F90
     RTTOVOneDVarCheck.interface.h
-    ufo_rttovonedvarcheck_bmatrix_mod.f90
     ufo_rttovonedvarcheck_constants_mod.f90
     ufo_rttovonedvarcheck_minimize_jacobian_mod.f90
     ufo_rttovonedvarcheck_minimize_ml_mod.f90
@@ -17,7 +16,6 @@ set ( rttovonedvarcheck_files
     ufo_rttovonedvarcheck_mod.f90
     ufo_rttovonedvarcheck_pcemis_mod.f90
     ufo_rttovonedvarcheck_profindex_mod.f90
-    ufo_rttovonedvarcheck_rmatrix_mod.f90
     ufo_rttovonedvarcheck_rsubmatrix_mod.f90
     ufo_rttovonedvarcheck_ob_mod.f90
     ufo_rttovonedvarcheck_obs_mod.f90

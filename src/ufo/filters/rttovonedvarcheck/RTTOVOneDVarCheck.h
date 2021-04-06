@@ -56,7 +56,7 @@ class RTTOVOneDVarCheck : public FilterBase,
   RTTOVOneDVarCheck(ioda::ObsSpace &, const Parameters_ &,
                   std::shared_ptr<ioda::ObsDataVector<int> >,
                   std::shared_ptr<ioda::ObsDataVector<float> >);
-  ~RTTOVOneDVarCheck();
+  ~RTTOVOneDVarCheck() override;
 
  private:
   void print(std::ostream &) const override;
@@ -64,8 +64,7 @@ class RTTOVOneDVarCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::onedvar;}
 
-  F90onedvarcheck key_;
-  const eckit::LocalConfiguration config_;
+  F90obfilter keyRTTOVOneDVarCheck_;
   std::vector<int> channels_;
   oops::Variables retrieved_vars_;
   oops::Variables hoxdiags_retrieved_vars_;

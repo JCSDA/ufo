@@ -5,16 +5,15 @@
 
 !> Fortran derived type to hold data for the observation covariance
 
-module ufo_rttovonedvarcheck_rmatrix_mod
+module ufo_metoffice_rmatrixradiance_mod
 
 use kinds
 use netcdf
-use ufo_rttovonedvarcheck_constants_mod, only: max_string
 
 implicit none
 private
 
-type, public :: ufo_rttovonedvarcheck_rmatrix
+type, public :: ufo_metoffice_rmatrixradiance
   integer, allocatable         :: channels(:) !< array with instruemnt channel numbers
   integer                      :: wmo_id      !< wmo id for satellite
   integer                      :: rtype       !< type of r-matrix (1=full; 2=diagonal)
@@ -24,8 +23,9 @@ type, public :: ufo_rttovonedvarcheck_rmatrix
 contains
   procedure :: setup  => rmatrix_setup
   procedure :: delete => rmatrix_delete
+  procedure :: print => rmatrix_print
 
-end type ufo_rttovonedvarcheck_rmatrix
+end type ufo_metoffice_rmatrixradiance
 
 ! ------------------------------------------------------------------------------
 contains
@@ -39,7 +39,7 @@ contains
 subroutine rmatrix_setup(self, filename)
 
 implicit none
-class(ufo_rttovonedvarcheck_rmatrix), intent(inout) :: self !< Full R matrix structure
+class(ufo_metoffice_rmatrixradiance), intent(inout) :: self !< Full R matrix structure
 character(len=*), intent(in)  :: filename !< Path to input filename
 
 integer :: error  ! error code for read
@@ -88,8 +88,7 @@ if (error /= 0) call abor1_ftn("error in reading the rmatrix errors")
 error = nf90_close(lun)
 if (error /= 0) call abor1_ftn("error in closing the rmatrix")
 
-write(*,*) "Successfully opened and close r matrix netcdf file"
-call rmatrix_print(self)
+write(*,*) "Successfully opened, read and closed r matrix netcdf file"
 
 end subroutine rmatrix_setup
 
@@ -103,7 +102,7 @@ end subroutine rmatrix_setup
 subroutine rmatrix_delete(self)
 
 implicit none
-class(ufo_rttovonedvarcheck_rmatrix), intent(inout) :: self  !< Full R matrix structure
+class(ufo_metoffice_rmatrixradiance), intent(inout) :: self  !< Full R matrix structure
 
 if (allocated(self % channels)) deallocate(self % channels)
 if (allocated(self % errors))   deallocate(self % errors)
@@ -120,7 +119,7 @@ end subroutine rmatrix_delete
 subroutine rmatrix_print(self)
 
 implicit none
-class(ufo_rttovonedvarcheck_rmatrix), intent(inout) :: self  !< Full R matrix structure
+class(ufo_metoffice_rmatrixradiance), intent(inout) :: self  !< Full R matrix structure
 
 write(*,*) "wmo_id = ", self % wmo_id
 write(*,*) "rtype = ", self % rtype
@@ -129,4 +128,4 @@ write(*,*) "errors = ", self % errors(:)
 
 end subroutine rmatrix_print
 
-end module ufo_rttovonedvarcheck_rmatrix_mod
+end module ufo_metoffice_rmatrixradiance_mod

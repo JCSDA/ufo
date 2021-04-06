@@ -18,6 +18,8 @@ typedef int F90goms;
 typedef int F90hop;
 // Observation bias key type
 typedef int F90obias;
+// Observation filter key type
+typedef int F90obfilter;
 
 }  // namespace ufo
 #endif  // UFO_FORTRAN_H_

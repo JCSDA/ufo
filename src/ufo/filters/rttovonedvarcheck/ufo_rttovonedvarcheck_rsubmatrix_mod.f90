@@ -9,7 +9,7 @@ module ufo_rttovonedvarcheck_rsubmatrix_mod
 
 use kinds
 use ufo_rttovonedvarcheck_constants_mod, only: max_string
-use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_metoffice_rmatrixradiance_mod
 
 implicit none
 private
@@ -50,7 +50,7 @@ implicit none
 class(ufo_rttovonedvarcheck_rsubmatrix), intent(inout) :: self
 integer, intent(in)                             :: nchans
 integer, intent(in)                             :: channels(:)
-type(ufo_rttovonedvarcheck_rmatrix), intent(in) :: full_rmatrix
+type(ufo_metoffice_rmatrixradiance), intent(in) :: full_rmatrix
 
 character(len=*), parameter :: &
       routinename = "rsubmatrix_setup"

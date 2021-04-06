@@ -48,8 +48,8 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   }
 
   // Setup Fortran object
-  ufo_rttovonedvarcheck_create_f90(key_, obsdb, parameters_.toConfiguration(), channels_.size(),
-                                   channels_[0], retrieved_vars_, QCflags::onedvar, QCflags::pass);
+  ufo_rttovonedvarcheck_create_f90(keyRTTOVOneDVarCheck_, obsdb, parameters_.toConfiguration(),
+              channels_.size(), channels_[0], retrieved_vars_, QCflags::onedvar, QCflags::pass);
 
   // Create hofxdiags
   for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {
@@ -70,7 +70,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
 // -----------------------------------------------------------------------------
 
 RTTOVOneDVarCheck::~RTTOVOneDVarCheck() {
-  ufo_rttovonedvarcheck_delete_f90(key_);
+  ufo_rttovonedvarcheck_delete_f90(keyRTTOVOneDVarCheck_);
   oops::Log::trace() << "RTTOVOneDVarCheck destructed" << std::endl;
 }
 
@@ -78,7 +78,7 @@ RTTOVOneDVarCheck::~RTTOVOneDVarCheck() {
 
 void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
-                               std::vector<std::vector<bool>> & flagged) const {
+                               std::vector<std::vector<bool>> &) const {
   oops::Log::trace() << "RTTOVOneDVarCheck Filter starting" << std::endl;
 
 // Get GeoVaLs
@@ -98,7 +98,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   flags_->save("FortranQC");    // temporary measure as per ROobserror qc
 
 // Pass it all to fortran
-  ufo_rttovonedvarcheck_apply_f90(key_, parameters_.ModOptions.value(),
+  ufo_rttovonedvarcheck_apply_f90(keyRTTOVOneDVarCheck_, parameters_.ModOptions.value(),
                                   variables, hoxdiags_retrieved_vars_,
                                   gvals->toFortran(),
                                   apply_char.size(), apply_char[0]);

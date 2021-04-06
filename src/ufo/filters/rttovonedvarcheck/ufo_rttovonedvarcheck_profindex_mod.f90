@@ -9,7 +9,7 @@ module ufo_rttovonedvarcheck_profindex_mod
 
 use kinds
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_bmatrix_mod
+use ufo_metoffice_bmatrixstatic_mod
 use ufo_rttovonedvarcheck_constants_mod
 
 implicit none
@@ -78,7 +78,7 @@ implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_profindex), intent(inout) :: self    !< profindex structure
-type(ufo_rttovonedvarcheck_bmatrix), intent(in)       :: bmatrix !< state error covariances
+type(ufo_metoffice_bmatrixstatic), intent(in)         :: bmatrix !< state error covariances
 integer, intent(in)                                   :: nlevels !< number of model levels
 
 ! local constants:
@@ -110,69 +110,69 @@ do j = 1, bmatrix % nfields
    !atmosphere (set start and end points for multi-level fields)
    !----------
 
-    case( fieldtype_t )
+    case( ufo_metoffice_fieldtype_t )
       self % t(1)         = firstelement
       self % t(2)         = lastelement
 
-    case( fieldtype_q )
+    case( ufo_metoffice_fieldtype_q )
       self % q(1)         = firstelement
       self % q(2)         = lastelement
 
-    case( fieldtype_ql )
-      call abor1_ftn("fieldtype_ql: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_ql )
+      call abor1_ftn("ufo_metoffice_fieldtype_ql: Not currently implemented aborting")
 
-    case( fieldtype_qi )
-      call abor1_ftn("fieldtype_qi: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_qi )
+      call abor1_ftn("ufo_metoffice_fieldtype_qi: Not currently implemented aborting")
 
-    case( fieldtype_cf )
-      call abor1_ftn("fieldtype_cf: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_cf )
+      call abor1_ftn("ufo_metoffice_fieldtype_cf: Not currently implemented aborting")
 
-    case( fieldtype_qt )
+    case( ufo_metoffice_fieldtype_qt )
       self % qt(1)        = firstelement
       self % qt(2)        = lastelement
 
-    case( fieldtype_o3profile )
-      call abor1_ftn("fieldtype_o3profile: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_o3profile )
+      call abor1_ftn("ufo_metoffice_fieldtype_o3profile: Not currently implemented aborting")
 
-    case( fieldtype_o3total )
-      call abor1_ftn("fieldtype_o3total: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_o3total )
+      call abor1_ftn("ufo_metoffice_fieldtype_o3total: Not currently implemented aborting")
 
    !-------
    !surface
    !-------
 
-    case( fieldtype_t2 )
+    case( ufo_metoffice_fieldtype_t2 )
       self % t2         = firstelement
 
-    case( fieldtype_q2 )
+    case( ufo_metoffice_fieldtype_q2 )
       self % q2         = firstelement
 
-    case( fieldtype_tstar )
+    case( ufo_metoffice_fieldtype_tstar )
       self % tstar      = firstelement
 
-    case( fieldtype_pstar )
+    case( ufo_metoffice_fieldtype_pstar )
       self % pstar      = firstelement
 
-    case( fieldtype_windspeed )
-      call abor1_ftn("fieldtype_windspeed: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_windspeed )
+      call abor1_ftn("ufo_metoffice_fieldtype_windspeed: Not currently implemented aborting")
 
-    case( fieldtype_mwemiss )
-      call abor1_ftn("fieldtype_mwemiss: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_mwemiss )
+      call abor1_ftn("ufo_metoffice_fieldtype_mwemiss: Not currently implemented aborting")
 
-    case( fieldtype_emisspc )
-      call abor1_ftn("fieldtype_emisspc: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_emisspc )
+      call abor1_ftn("ufo_metoffice_fieldtype_emisspc: Not currently implemented aborting")
 
    !------------------------------------
    !cloud (single-level grey cloud only)
    !------------------------------------
 
-    case( fieldtype_cloudtopp )
-      call abor1_ftn("fieldtype_cloudtopp: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_cloudtopp )
+      call abor1_ftn("ufo_metoffice_fieldtype_cloudtopp: Not currently implemented aborting")
 
-    case( fieldtype_cloudfrac )
-      call abor1_ftn("fieldtype_cloudfrac: Not currently implemented aborting")
+    case( ufo_metoffice_fieldtype_cloudfrac )
+      call abor1_ftn("ufo_metoffice_fieldtype_cloudfrac: Not currently implemented aborting")
 
-    case( fieldtype_not_used ) ! currently unused
+    case( ufo_metoffice_fieldtype_not_used ) ! currently unused
       continue
 
     case default

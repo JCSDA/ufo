@@ -149,6 +149,7 @@ list( APPEND ufo_test_input
   testinput/processwhere.yaml
   testinput/parameters.yaml
   testinput/primitive_variables.yaml
+  testinput/metoffice_radiance_error_matrices.yaml
   testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_bayesianbackgroundqcflags.yaml
@@ -2423,6 +2424,13 @@ ecbuild_add_test( TARGET  test_ufo_operator_utils
 ecbuild_add_test( TARGET  test_ufo_primitive_variables
                   SOURCES mains/TestPrimitiveVariables.cc
                   ARGS    "testinput/primitive_variables.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test the met office radiance read in
+ecbuild_add_test( TARGET  test_ufo_metoffice_error_matrices
+                  SOURCES mains/TestMetOfficeRadianceErrorMatrices.cc
+                  ARGS    "testinput/metoffice_radiance_error_matrices.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
