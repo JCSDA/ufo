@@ -69,8 +69,6 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   invars_ += Variable("air_pressure@GeoVaLs");
   invars_ += Variable("air_temperature@GeoVaLs");
   invars_ += Variable("tropopause_pressure@GeoVaLs");
-  invars_ += Variable("latitude@GeoVaLs");
-  invars_ += Variable("longitude@GeoVaLs");
 }
 
 // -----------------------------------------------------------------------------
