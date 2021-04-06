@@ -12,9 +12,9 @@ obs space:
 obs operator:
   name: GnssroBndNBAM
   obs options:
+    use_compress: 1
     sr_steps: 2
     vertlayer: full
-    use_compress: 1
     super_ref_qc: NBAM
 obs filters:
 - filter: Domain Check
@@ -25,10 +25,20 @@ obs filters:
       name: impact_height@MetaData
     minvalue: 0
     maxvalue: 50000
+- filter: Bounds Check
+  filter variables:
+  - name: [bending_angle]
+  where:
+  - variable:
+      name: occulting_sat_id@MetaData
+    is_in: 3-5
+  test variables:
+  - name: impact_height@MetaData
+  minvalue: 8000
 - filter: ROobserror
   filter variables:
   - name: bending_angle
-  errmodel: NRL
+  errmodel: NBAM
 - filter: Background Check RONBAM
   filter variables:
   - name: [bending_angle]
