@@ -241,6 +241,7 @@ list( APPEND ufo_test_input
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
+  testinput/unit_tests/function_clwret_ssmis.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
   testinput/unit_tests/function_lam_domaincheck_circle.yaml
@@ -2081,6 +2082,13 @@ ecbuild_add_test( TARGET  test_ufo_function_clwret
 ecbuild_add_test( TARGET  test_ufo_function_clwret_atms
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_clwret_atms.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret_ssmis
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_clwret_ssmis.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)

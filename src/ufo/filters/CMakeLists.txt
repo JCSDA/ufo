@@ -123,6 +123,8 @@ set ( filters_files
       obsfunctions/CLWMatchIndexMW.h
       obsfunctions/CLWRetMW.cc
       obsfunctions/CLWRetMW.h
+      obsfunctions/CLWRetMW_SSMIS.cc
+      obsfunctions/CLWRetMW_SSMIS.h
       obsfunctions/CLWRetSymmetricMW.cc
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/SIRetMW.cc

@@ -13,6 +13,7 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
@@ -32,6 +33,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
                                      const ObsBias & biascoeffs, ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "ObsBiasOperator::computeObsBias starting" << std::endl;
 
+  const double missing = util::missingValue(missing);
   const Predictors & predictors = biascoeffs.predictors();
   const std::size_t npreds = predictors.size();
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
@@ -75,8 +77,10 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
       // axpy
       const double beta = biascoeffs(jp, jvar);
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
-        ybias[jl*nvars+jvar] += biasTerm[jl];
+        if (predData[jp][jl*nvars+jvar] != missing) {
+          biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
+          ybias[jl*nvars+jvar] += biasTerm[jl];
+        }
       }
       // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
       const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
