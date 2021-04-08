@@ -1,12 +1,12 @@
 /*
  * (C) Copyright 2017-2021 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_RTTOVCPP_OBSRADIANCERTTOVCPP_H_
-#define UFO_RTTOVCPP_OBSRADIANCERTTOVCPP_H_
+#ifndef UFO_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_
+#define UFO_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/ObsOperatorBase.h"
+#include "ufo/LinearObsOperatorBase.h"
 
 #include "rttov/wrapper/RttovSafe.h"
 
@@ -31,20 +31,25 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsBias;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// RadianceRTTOVCPP observation operator class
-class ObsRadianceRTTOVCPP : public ObsOperatorBase,
-                   private util::ObjectCounter<ObsRadianceRTTOVCPP> {
+/// RadianceRTTOV TL/AD observation operator class
+class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
+                   private util::ObjectCounter<ObsRadianceRTTOVCPPTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsRadianceRTTOVCPP";}
+  static const std::string classname() {return "ufo::ObsRadianceRTTOVCPPTLAD";}
 
-  ObsRadianceRTTOVCPP(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsRadianceRTTOVCPP();
+  ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsRadianceRTTOVCPPTLAD();
 
-// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  // Calculate Jacobian H(x_g) of obs operator
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
+  // Calculate dy = H dx
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  // Calculate H^T dy
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
 // Other: declare variable function with return type of oops:Variables
   const oops::Variables & requiredVars() const override {return varin_;}
@@ -56,6 +61,7 @@ class ObsRadianceRTTOVCPP : public ObsOperatorBase,
   std::string        CoefFileName;
   std::vector<int>   channels_;
   mutable std::size_t        nlevels;  // need this in order to allocate dx
+  std::vector<bool>  skip_profile;
 
 // Declare a RttovSafe object for one single sensor
   mutable rttov::RttovSafe  aRttov_ = rttov::RttovSafe();
@@ -64,4 +70,4 @@ class ObsRadianceRTTOVCPP : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_RTTOVCPP_OBSRADIANCERTTOVCPP_H_
+#endif  // UFO_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_

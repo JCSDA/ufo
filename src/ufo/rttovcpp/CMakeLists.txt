@@ -6,6 +6,8 @@
 set ( rttovcpp_files
     ObsRadianceRTTOVCPP.h
     ObsRadianceRTTOVCPP.cc
+    ObsRadianceRTTOVCPPTLAD.h
+    ObsRadianceRTTOVCPPTLAD.cc
     rttovcpp_interface.h
     rttovcpp_interface.cc
 )

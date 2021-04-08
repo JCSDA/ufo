@@ -6,6 +6,7 @@ observations:
     name: RTTOVCPP
     SensorID: noaa_19_amsua
     CoefPath: Data/
+#    linear obs operator:
   obs space:
     name: noaa_19_amsua
     obsdatain:
@@ -18,7 +19,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_rttovcpp.nc4
   vector ref: HofX
   tolerance: 1.e-7
-#  linear obs operator test:
-#    coef TL: 1.e-3
-#    tolerance TL: 1.0e-3
-#    tolerance AD: 1.0e-11
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
