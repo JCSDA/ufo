@@ -143,7 +143,7 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::allSumInPlace() {
-  odb_.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
+  odb_.distribution().allReduceInPlace(biascoeffsinc_, eckit::mpi::sum());
 }
 
 // -----------------------------------------------------------------------------

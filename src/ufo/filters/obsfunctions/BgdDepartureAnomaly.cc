@@ -92,8 +92,8 @@ void BgdDepartureAnomaly::compute(const ObsFilterData & in,
 
   size_t nobslow = obsdb.distribution().globalNumNonMissingObs(obslow);
   size_t nobshigh = obsdb.distribution().globalNumNonMissingObs(obshigh);
-  obsdb.distribution().sum(MeanOmbLow);
-  obsdb.distribution().sum(MeanOmbHigh);
+  obsdb.distribution().allReduceInPlace(MeanOmbLow, eckit::mpi::sum());
+  obsdb.distribution().allReduceInPlace(MeanOmbHigh, eckit::mpi::sum());
 
   MeanOmbLow = MeanOmbLow / nobslow;
   MeanOmbHigh = MeanOmbHigh / nobshigh;

@@ -456,7 +456,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
     size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
-    ufoObsSpace.distribution().sum(passed);
+    ufoObsSpace.distribution().allReduceInPlace(passed, eckit::mpi::sum());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
 
@@ -473,7 +473,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     atLeastOneBenchmarkFound = true;
     const size_t failedBenchmark = *params.failedBenchmark.value();
     size_t failed = numNonzero(qcflags->obsdatavector());
-    ufoObsSpace.distribution().sum(failed);
+    ufoObsSpace.distribution().allReduceInPlace(failed, eckit::mpi::sum());
     EXPECT_EQUAL(failed, failedBenchmark);
   }
 
@@ -494,7 +494,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
       size_t flagged = numEqualTo(qcflags->obsdatavector(), flag);
-      ufoObsSpace.distribution().sum(flagged);
+      ufoObsSpace.distribution().allReduceInPlace(flagged, eckit::mpi::sum());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }
   }

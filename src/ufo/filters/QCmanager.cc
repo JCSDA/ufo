@@ -135,26 +135,26 @@ void QCmanager::print(std::ostream & os) const {
     }
 
     const ioda::Distribution & distribution = obsdb_.distribution();
-    distribution.sum(iobs);
-    distribution.sum(ipass);
-    distribution.sum(imiss);
-    distribution.sum(ipreq);
-    distribution.sum(ibnds);
-    distribution.sum(iwhit);
-    distribution.sum(iblck);
-    distribution.sum(iherr);
-    distribution.sum(ifgss);
-    distribution.sum(iclw);
-    distribution.sum(iprof);
-    distribution.sum(ignss);
-    distribution.sum(ithin);
-    distribution.sum(idiffref);
-    distribution.sum(iseaice);
-    distribution.sum(itrack);
-    distribution.sum(ibuddy);
-    distribution.sum(idydx);
-    distribution.sum(ionedvar);
-    distribution.sum(ibayesianQC);
+    distribution.allReduceInPlace(iobs, eckit::mpi::sum());
+    distribution.allReduceInPlace(ipass, eckit::mpi::sum());
+    distribution.allReduceInPlace(imiss, eckit::mpi::sum());
+    distribution.allReduceInPlace(ipreq, eckit::mpi::sum());
+    distribution.allReduceInPlace(ibnds, eckit::mpi::sum());
+    distribution.allReduceInPlace(iwhit, eckit::mpi::sum());
+    distribution.allReduceInPlace(iblck, eckit::mpi::sum());
+    distribution.allReduceInPlace(iherr, eckit::mpi::sum());
+    distribution.allReduceInPlace(ifgss, eckit::mpi::sum());
+    distribution.allReduceInPlace(iclw, eckit::mpi::sum());
+    distribution.allReduceInPlace(iprof, eckit::mpi::sum());
+    distribution.allReduceInPlace(ignss, eckit::mpi::sum());
+    distribution.allReduceInPlace(ithin, eckit::mpi::sum());
+    distribution.allReduceInPlace(idiffref, eckit::mpi::sum());
+    distribution.allReduceInPlace(iseaice, eckit::mpi::sum());
+    distribution.allReduceInPlace(itrack, eckit::mpi::sum());
+    distribution.allReduceInPlace(ibuddy, eckit::mpi::sum());
+    distribution.allReduceInPlace(idydx, eckit::mpi::sum());
+    distribution.allReduceInPlace(ionedvar, eckit::mpi::sum());
+    distribution.allReduceInPlace(ibayesianQC, eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
