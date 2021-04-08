@@ -139,7 +139,7 @@ ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
 		     LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
-                     HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/ufo
+                     HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
 

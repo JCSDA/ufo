@@ -135,6 +135,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_cris_optics.yaml
   testinput/obsdiag_crtm_iasi_jacobian.yaml
   testinput/obsdiag_crtm_iasi_optics.yaml
+  testinput/obserror_assign_unittests.yaml
   testinput/obsfilterdata.yaml
   testinput/omi_aura.yaml
   testinput/omi_aura_flipz.yaml
@@ -164,7 +165,6 @@ list( APPEND ufo_test_input
   testinput/qc_met_office_buddy_check.yaml
   testinput/qc_met_office_buddy_check_unittests.yaml
   testinput/qc_met_office_buddy_pair_finder.yaml
-  testinput/qc_recursive_splitter.yaml
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_performaction.yaml
   testinput/qc_poisson_disk_thinning.yaml
@@ -498,6 +498,7 @@ ecbuild_add_test( TARGET  test_ufo_obsfilterdata
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
@@ -1809,7 +1810,7 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   SOURCES mains/TestRecursiveSplitter.cc
                   # This test doesn't need a configuration file, but oops::Run::Run() requires
                   # a path to a configuration file to be passed in the first command-line parameter.
-                  ARGS    "testinput/qc_recursive_splitter.yaml"
+                  ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1824,6 +1825,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_stuckcheck_unittests
 ecbuild_add_test( TARGET  test_ufo_temporalthinning
                   SOURCES mains/TestTemporalThinning.cc
                   ARGS    "testinput/qc_temporal_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_obserror_assign_unittests
+                  SOURCES mains/TestObsErrorAssign.cc
+                  ARGS    "testinput/obserror_assign_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)

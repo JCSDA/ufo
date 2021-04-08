@@ -65,6 +65,8 @@ set ( filters_files
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
+      obsfunctions/DrawObsErrorFromFile.cc
+      obsfunctions/DrawObsErrorFromFile.h
       Thinning.cc
       Thinning.h
       TemporalThinning.cc

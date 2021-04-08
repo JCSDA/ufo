@@ -46,6 +46,8 @@ set ( utils_files
       VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
+      ObsErrorNetcdfHandler.cc
+      ObsErrorNetcdfHandler.h
 )
 
 PREPEND( _p_utils_files       "utils"       ${utils_files} )

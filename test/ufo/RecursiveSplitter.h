@@ -8,6 +8,8 @@
 #ifndef TEST_UFO_RECURSIVESPLITTER_H_
 #define TEST_UFO_RECURSIVESPLITTER_H_
 
+#include "ufo/utils/RecursiveSplitter.h"
+
 #include <iomanip>
 #include <memory>
 #include <set>
@@ -17,7 +19,6 @@
 #include "eckit/testing/Test.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
-#include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {
 namespace test {
@@ -46,6 +47,24 @@ Groups getMultiElementGroups(const RecursiveSplitter &splitter) {
   }
   return groups;
 }
+
+
+void orderedComparison(const RecursiveSplitter &splitter,
+                       const std::vector<std::vector<int>> &expected) {
+  int groupInd = -1;
+  int iterInd = -1;
+  for (const auto &g : splitter.groups()) {
+    groupInd++;
+    iterInd = -1;
+    for (auto index : g) {
+      iterInd++;
+      std::cout << "group: " << groupInd << " index: " << index << " expected index: " <<
+        expected[groupInd][iterInd] << std::endl;
+      EXPECT_EQUAL(index, expected[groupInd][iterInd]);
+    }
+  }
+}
+
 
 CASE("ufo/RecursiveSplitter/ZeroIds") {
   RecursiveSplitter splitter(0);
@@ -189,6 +208,33 @@ CASE("ufo/RecursiveSplitter/StringCategories") {
     EXPECT_EQUAL(multiElementGroups, expectedMultiElementGroups);
   }
 }
+
+CASE("ufo/RecursiveSplitter/Recurse") {
+  std::vector<int> orig{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  RecursiveSplitter splitter(10);
+
+  // First grouping
+  std::vector<int> categories{1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+  splitter.groupBy(categories);
+  std::vector<std::vector<int>> expected{{5, 6, 7, 8, 9}, {0, 1, 2, 3, 4}};
+  orderedComparison(splitter, expected);
+
+  // Second grouping
+  categories = {1, 1, 0, 2, 2, 2, 2, 0, 1, 1};
+  splitter.groupBy(categories);
+  expected = {{7}, {8, 9}, {5, 6}, {2}, {0, 1}, {3, 4}};
+  orderedComparison(splitter, expected);
+
+  // Final sorting of groups
+  categories = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};  // effectively reverse ordering of final groups
+  splitter.sortGroupsBy(
+    [&categories](auto indexA, auto indexB) {
+      return categories[indexA] < categories[indexB];
+    });
+  expected = {{7}, {9, 8}, {6, 5}, {2}, {1, 0}, {4, 3}};
+  orderedComparison(splitter, expected);
+}
+
 
 class RecursiveSplitter : public oops::Test {
  public:

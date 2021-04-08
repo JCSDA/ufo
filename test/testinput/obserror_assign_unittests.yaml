@@ -1,0 +1,213 @@
+Assign constant observation error value:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 100000, 90000, 80000, 90000, 100000]
+  station_id: [ 1, 1, 1, 1, 1]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error parameter: 1.2
+  expected_obserror: [1.2, 1.2, 1.2, 1.2, 1.2]
+Assign observation error from NetCDF variance; 1 exact 1; linear:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 2, 4, 6, 8, 10]
+  observation_type: [0, 1, 2, 3, 4]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
+          interpolation:
+          - name: observation_type@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: linear
+  expected_obserror_variance: [375.5, 601, 242.5, 175, 337]
+Assign observation error from NetCDF variance; 1 exact; 1 nearest:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 1, 2, 4, 13, 35]
+  observation_type: [0, 1, 2, 3, 4]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
+          interpolation:
+          - name: observation_type@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: nearest
+  expected_obserror_variance: [278, 755, 397, 846, 676]
+Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  satellite_id:      [ 0, 0,  1, 1,  1 ]
+  processing_center: [ 0, 1,  0, 1,  0 ]
+  latitude_band:     [ 6, 11, 4, 30, 7 ]
+  channel_number:    [ 0, 1,  2, 3,  4 ]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
+          interpolation:
+          - name: channel_number@MetaData
+            method: exact
+          - name: satellite_id@MetaData
+            method: exact
+          - name: processing_center@MetaData
+            method: exact
+          - name: latitude_band@MetaData
+            method: nearest
+  expected_obserror_variance: [685, 431, 771, 25, 805]
+Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrating yaml order respected with sorting:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  satellite_id:      [ 0, 0,  1, 1,  1 ]
+  processing_center: [ 0, 1,  0, 1,  0 ]
+  latitude_band:     [ 6, 11, 4, 30, 7 ]
+  channel_number:    [ 0, 1,  2, 3,  4 ]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
+          interpolation:
+          - name: processing_center@MetaData
+            method: exact
+          - name: satellite_id@MetaData
+            method: exact
+          - name: latitude_band@MetaData
+            method: nearest
+          - name: channel_number@MetaData
+            method: exact
+  expected_obserror_variance: [685, 431, 771, 25, 805]
+Assign observation error from NetCDF full matrix 2D; 1 exact:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  channel_number:    [ 2, 0, 4, 7, 5 ]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_2d_fullr.nc
+          interpolation:
+          - name: channel_number@MetaData
+            method: exact
+  expected_obserror_variance: [88, 685, 798, 618, 544]
+Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [2, 4, 6, 8, 9]
+  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: exact
+          - name: datetime@MetaData
+            method: exact
+  expected_obserror_variance: [278, 487, 917, 178, 289]
