@@ -26,21 +26,21 @@ obs bias:
       options:
         tlapse: *seviri_m11_tlapse
     - name: emissivity
-#   - name: scan_angle
-#     options:
-#       var_name: scan_position
-#       order: 4
-#   - name: scan_angle
-#     options:
-#       var_name: scan_position
-#       order: 3
-#   - name: scan_angle
-#     options:
-#       var_name: scan_position
-#       order: 2
-#   - name: scan_angle
-#     options:
-#       var_name: scan_position
+    - name: scan_angle
+      options:
+        var_name: scan_position
+        order: 4
+    - name: scan_angle
+      options:
+        var_name: scan_position
+        order: 3
+    - name: scan_angle
+      options:
+        var_name: scan_position
+        order: 2
+    - name: scan_angle
+      options:
+        var_name: scan_position
 obs filters:
 #  Observation Range Sanity Check
 - filter: Bounds Check
