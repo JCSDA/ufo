@@ -137,11 +137,15 @@ endif( ${geos-aero_FOUND} )
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-		     LIBS     ${UFO_LIBS_DEP}
+		             PUBLIC_LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
                      HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
+
+target_include_directories(ufo INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+                                         $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
+                                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 if (${rttov_FOUND})
   target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
