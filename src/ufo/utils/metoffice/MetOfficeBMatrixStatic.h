@@ -39,8 +39,9 @@ class MetOfficeBMatrixStatic : public util::Printable,
 
   explicit MetOfficeBMatrixStatic(const eckit::Configuration &);
 
-  size_t getindex(const float);
-  void multiply(const float, const Eigen::MatrixXf &, Eigen::MatrixXf &);
+  size_t getindex(const float) const;
+  size_t getsize(void) const;
+  void multiply(const float, const Eigen::MatrixXf &, Eigen::MatrixXf &) const;
 
  private:
   void print(std::ostream &) const override;

@@ -42,8 +42,13 @@ MetOfficeBMatrixStatic::MetOfficeBMatrixStatic(const eckit::Configuration & conf
   oops::Log::trace() << "MetOfficeBMatrixStatic constructor end" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/// \brief Return bmatrix size (number of rows or columns of square matrix)
+size_t MetOfficeBMatrixStatic::getsize(void) const {
+  return nelements_;
+}
+// -----------------------------------------------------------------------------
 /// \brief Find bmatrix band index for a given latitude
-size_t MetOfficeBMatrixStatic::getindex(const float latitude) {
+size_t MetOfficeBMatrixStatic::getindex(const float latitude) const {
   auto lower = std::lower_bound(northlimits_.begin(), northlimits_.end(), latitude);
   return std::distance(northlimits_.begin(), lower);
 }
@@ -51,7 +56,7 @@ size_t MetOfficeBMatrixStatic::getindex(const float latitude) {
 /// \brief Multiply input matrix by bmatrix array based on latitude
 void MetOfficeBMatrixStatic::multiply(const float lat,
                                       const Eigen::MatrixXf & in,
-                                      Eigen::MatrixXf & out) {
+                                      Eigen::MatrixXf & out) const {
   size_t index = this->getindex(lat);
   out = elements_[index] * in;
 }

@@ -36,7 +36,7 @@ class MetOfficeRMatrixRadiance : public util::Printable,
 
   explicit MetOfficeRMatrixRadiance(const eckit::Configuration &);
 
-  void add(const std::vector<int> &, const Eigen::MatrixXf &, Eigen::MatrixXf &);
+  void add(const std::vector<int> &, const Eigen::MatrixXf &, Eigen::MatrixXf &) const;
 
  private:
   void print(std::ostream &) const override;

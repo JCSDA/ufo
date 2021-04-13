@@ -153,6 +153,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/CloudCostFunction.cc
+      obsfunctions/CloudCostFunction.h
       obsfunctions/CloudDetectMinResidualAVHRR.cc
       obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc

@@ -42,6 +42,8 @@ set ( utils_files
       StringUtils.cc
       StringUtils.h
       ufo_utils_mod.F90
+      ufo_utils.interface.F90
+      ufo_utils.interface.h
       VertInterp.interface.F90
       VertInterp.interface.h
       vert_interp.F90

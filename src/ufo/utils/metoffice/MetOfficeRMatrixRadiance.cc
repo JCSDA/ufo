@@ -45,10 +45,10 @@ MetOfficeRMatrixRadiance::MetOfficeRMatrixRadiance(const eckit::Configuration & 
   oops::Log::trace() << "MetOfficeRMatrixRadiance constructor end" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/// \brief Add r matrix error onto input array
+/// \brief Add r matrix variance onto input array
 void MetOfficeRMatrixRadiance::add(const std::vector<int> & chans_used,
                                    const Eigen::MatrixXf & in,
-                                   Eigen::MatrixXf & out) {
+                                   Eigen::MatrixXf & out) const {
   int matrows = in.rows();
   int matcols = in.cols();
   oops::Log::debug() << "matrows, matcols = " << matrows << " " << matcols << std::endl;
@@ -57,15 +57,13 @@ void MetOfficeRMatrixRadiance::add(const std::vector<int> & chans_used,
   out = in;
   if (rtype_ == 2) {
     for (size_t ichan = 0; ichan < chans_used.size(); ++ichan) {
-      std::vector<int>::iterator it;
-      it = std::find(channels_.begin(), channels_.end(), chans_used[ichan]);
+      auto it = std::find(channels_.begin(), channels_.end(), chans_used[ichan]);
       if (it == channels_.end()) {
         oops::Log::error() << "Channel not found in R-matrix: "
                            << chans_used[ichan] << std::endl;
         ABORT("Invalid channel specified for R-matrix");
       } else {
         size_t index = it - channels_.begin();
-        oops::Log::error() << "index = " << index << std::endl;
         out(ichan, ichan) += errors_[index] * errors_[index];
       }
     }
