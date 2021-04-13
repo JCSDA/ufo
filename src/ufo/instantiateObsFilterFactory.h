@@ -19,6 +19,7 @@
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
 #include "ufo/filters/ImpactHeightCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
+#include "ufo/filters/ModelObThreshold.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
 #include "ufo/filters/ObsDerivativeCheck.h"
@@ -65,6 +66,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            backgroundCheckMaker("Background Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DifferenceCheck> >
            differenceCheckMaker("Difference Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ModelObThreshold> >
+           ModelObThresholdMaker("ModelOb Threshold");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ROobserror> >
            ROobserrorMaker("ROobserror");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Thinning> >

@@ -36,6 +36,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      ModelObThreshold.cc
+      ModelObThreshold.h
       MWCLWCheck.cc
       MWCLWCheck.h
       ObsDiagnosticsWriter.cc

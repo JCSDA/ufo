@@ -111,6 +111,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t ibuddy   = 0;
     size_t ionedvar  = 0;
     size_t ibayesianQC = 0;
+    size_t imodelob  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if ((*flags_)[jj][jobs] == QCflags::pass)    ++ipass;
@@ -132,6 +133,7 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
       if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
       if ((*flags_)[jj][jobs] == QCflags::bayesianQC) ++ibayesianQC;
+      if ((*flags_)[jj][jobs] == QCflags::modelobthresh) ++imodelob;
     }
 
     const ioda::Distribution & distribution = obsdb_.distribution();
@@ -155,6 +157,7 @@ void QCmanager::print(std::ostream & os) const {
     distribution.allReduceInPlace(idydx, eckit::mpi::sum());
     distribution.allReduceInPlace(ionedvar, eckit::mpi::sum());
     distribution.allReduceInPlace(ibayesianQC, eckit::mpi::sum());
+    distribution.allReduceInPlace(imodelob, eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
@@ -177,12 +180,14 @@ void QCmanager::print(std::ostream & os) const {
       if (ionedvar  > 0) os << info << ionedvar  << " removed by 1D Var check." << std::endl;
       if (ibayesianQC  > 0) os << info << ibayesianQC
                                << " removed by Bayesian background check." << std::endl;
+      if (imodelob  > 0) os << info << imodelob  << " removed by ModelOb threshold" << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + iprof + ifgss + \
-           ignss + idiffref + iseaice + itrack + ibuddy + idydx  + ionedvar + ibayesianQC == iobs);
+           ignss + idiffref + iseaice + itrack + ibuddy + idydx  + ionedvar + ibayesianQC + \
+           imodelob == iobs);
   }
 }
 
