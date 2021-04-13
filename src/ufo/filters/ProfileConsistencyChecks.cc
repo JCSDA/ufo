@@ -51,6 +51,15 @@ namespace ufo {
       allvars_ += Variables(reqGeoVaLs, "GeoVaLs");
     }
 
+    // Add the names of any required obs diagnostics to \c allvars_.
+    // The names of the required obs diagnostics are listed in the \c getObsDiagNames() function
+    // of each check (which returns an empty set by default).
+    const auto &requiredObsDiagNames = profileChecker.getObsDiagNames();
+    if (requiredObsDiagNames.size() > 0) {
+      ufo::Variables reqObsDiags(requiredObsDiagNames);
+      allvars_ += Variables(reqObsDiags, "ObsDiag");
+    }
+
     if (options_.compareWithOPS.value()) {
       const auto &validationGeoVaLNames = profileChecker.getValidationGeoVaLNames();
       if (validationGeoVaLNames.size() > 0) {
@@ -145,8 +154,7 @@ namespace ufo {
     print(oops::Log::trace());
 
     // Handles individual profile data
-    ProfileDataHandler profileDataHandler(obsdb_,
-                                          data_.getGeoVaLs(),
+    ProfileDataHandler profileDataHandler(data_,
                                           options_.DHParameters,
                                           apply,
                                           flagged);

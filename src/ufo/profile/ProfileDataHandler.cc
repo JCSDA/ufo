@@ -5,30 +5,34 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "oops/util/missingValues.h"
+
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
-  ProfileDataHandler::ProfileDataHandler(ioda::ObsSpace &obsdb,
-                                         const GeoVaLs* const geovals,
+  ProfileDataHandler::ProfileDataHandler(const ObsFilterData &data,
                                          const DataHandlerParameters &options,
                                          const std::vector <bool> &apply,
                                          std::vector<std::vector<bool>> &flagged)
-    : obsdb_(obsdb),
-      geovals_(geovals),
+    : obsdb_(data.obsspace()),
+      geovals_(data.getGeoVaLs()),
+      obsdiags_(data.getObsDiags()),
       options_(options),
       flagged_(flagged)
   {
-    profileIndices_.reset(new ProfileIndices(obsdb, options, apply));
-    entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb, options));
+    profileIndices_.reset(new ProfileIndices(obsdb_, options, apply));
+    entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb_, options));
   }
 
   void ProfileDataHandler::resetProfileInformation()
   {
     profileData_.clear();
     GeoVaLData_.clear();
+    obsDiagData_.clear();
   }
 
   void ProfileDataHandler::initialiseNextProfile()
@@ -187,6 +191,39 @@ namespace ufo {
       return GeoVaLData_[variableName];
     }
   }
+
+  std::vector <float>& ProfileDataHandler::getObsDiag(const std::string &fullname)
+  {
+    if (obsDiagData_.find(fullname) != obsDiagData_.end()) {
+      // If the ObsDiag vector is already present, return it.
+      return obsDiagData_[fullname];
+    } else {
+      std::string varname;
+      std::string groupname;
+      ufo::splitVarGroup(fullname, varname, groupname);
+      std::vector <float> vec_ObsDiag;
+      // Attempt to retrieve variable vector from entire sample.
+      // If it is not present, the vector will remain empty.
+      std::vector <float> &vec_all = entireSampleDataHandler_->get<float>(fullname);
+      // If the vector is empty, attempt to fill it from the ObsDiags
+      // (if they are present and have the required variable).
+      if (vec_all.empty() &&
+          obsdiags_ &&
+          obsdb_.nlocs() > 0 &&
+          obsdiags_->has(varname)) {
+        vec_all.assign(obsdb_.nlocs(), util::missingValue(1.0f));
+        obsdiags_->get(vec_all, varname);
+      }
+      // If the ObsDiags vector for the entire sample is not empty,
+      // fill the values for this profile.
+      if (!vec_all.empty()) {
+        getProfileIndicesInEntireSample(groupname);
+        for (const auto& profileIndex : profileIndicesInEntireSample_)
+          vec_ObsDiag.emplace_back(vec_all[profileIndex]);
+      }
+      // Add ObsDiag vector to map (even if it is empty).
+      obsDiagData_.emplace(fullname, std::move(vec_ObsDiag));
+      return obsDiagData_[fullname];
+    }
+  }
 }  // namespace ufo
-
-

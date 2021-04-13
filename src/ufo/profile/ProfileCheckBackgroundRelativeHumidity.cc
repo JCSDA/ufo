@@ -30,7 +30,7 @@ namespace ufo {
     const std::vector <float> &rhBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_relative_humidity);
     const std::vector <float> &rhBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_relative_humidity);
+      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_relative_humidity);
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_relative_humidity);
     std::vector <float> &rhPGEBd =

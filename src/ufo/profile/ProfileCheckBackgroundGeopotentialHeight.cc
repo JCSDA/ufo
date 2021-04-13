@@ -34,7 +34,7 @@ namespace ufo {
     const std::vector <float> &zBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <float> &zBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_geopotential_height);
+      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_geopotential_height);
     std::vector <float> &zPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
     std::vector <float> &zPGEBd =

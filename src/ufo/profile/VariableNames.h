@@ -44,13 +44,18 @@ struct VariableNames
 
   // Background errors
 
-  static constexpr const char* const bkgerr_air_temperature = "air_temperature@BkgError";
-  static constexpr const char* const bkgerr_relative_humidity = "relative_humidity@BkgError";
-  static constexpr const char* const bkgerr_eastward_wind = "eastward_wind@BkgError";
-  static constexpr const char* const bkgerr_northward_wind = "northward_wind@BkgError";
-  static constexpr const char* const bkgerr_geopotential_height = "geopotential_height@BkgError";
+  static constexpr const char* const bkgerr_air_temperature =
+    "air_temperature_background_error@ObsDiag";
+  static constexpr const char* const bkgerr_relative_humidity =
+    "relative_humidity_background_error@ObsDiag";
+  static constexpr const char* const bkgerr_eastward_wind =
+    "eastward_wind_background_error@ObsDiag";
+  static constexpr const char* const bkgerr_northward_wind =
+    "northward_wind_background_error@ObsDiag";
+  static constexpr const char* const bkgerr_geopotential_height =
+    "geopotential_height_background_error@ObsDiag";
   static constexpr const char* const bkgerr_dew_point_temperature =
-    "dew_point_temperature@BkgError";
+    "dew_point_temperature_background_error@ObsDiag";
 
   // Probability of gross error
 

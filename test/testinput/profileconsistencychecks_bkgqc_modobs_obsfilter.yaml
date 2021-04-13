@@ -31,6 +31,13 @@ observations:
     ModelLevels: true
   HofX: HofX
   obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_obsdiagnostics_modobs.nc4
+    variables:
+    - name: air_temperature_background_error@ObsDiag
+    - name: relative_humidity_background_error@ObsDiag
+    - name: eastward_wind_background_error@ObsDiag
+    - name: northward_wind_background_error@ObsDiag
+    - name: geopotential_height_background_error@ObsDiag
   passedBenchmark: 140
   benchmarkFlag: 15
   flaggedBenchmark: 212

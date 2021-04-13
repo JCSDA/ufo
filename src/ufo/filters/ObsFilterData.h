@@ -84,6 +84,8 @@ class ObsFilterData : public util::Printable,
   ioda::ObsSpace & obsspace() const {return obsdb_;}
   //! Returns reference to GeoVaLs required by 1DVar
   const GeoVaLs * getGeoVaLs() const {return gvals_;}
+  //! Returns reference to ObsDiagnostics
+  const ObsDiagnostics * getObsDiags() const {return diags_;}
  private:
   void print(std::ostream &) const;
   bool hasVector(const std::string &, const std::string &) const;

@@ -42,6 +42,12 @@ namespace ufo {
 
     /// Fill variables in validator
     void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
+
+    /// List of names of required obs diagnostics.
+    oops::Variables getObsDiagNames() override {
+      return oops::Variables({ufo::VariableNames::bkgerr_eastward_wind,
+            ufo::VariableNames::bkgerr_northward_wind});
+    }
   };
 }  // namespace ufo
 

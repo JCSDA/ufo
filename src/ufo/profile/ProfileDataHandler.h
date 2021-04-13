@@ -22,6 +22,7 @@
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
 #include "ufo/profile/DataHandlerParameters.h"
@@ -37,6 +38,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 }
 
 namespace ufo {
@@ -46,8 +48,7 @@ namespace ufo {
   /// then the relevant data corresponding to this profile are extracted.
   class ProfileDataHandler {
    public:
-    ProfileDataHandler(ioda::ObsSpace &obsdb,
-                       const GeoVaLs* const geovals,
+    ProfileDataHandler(const ObsFilterData &data,
                        const DataHandlerParameters &options,
                        const std::vector <bool> &apply,
                        std::vector<std::vector<bool>> &flagged);
@@ -147,6 +148,9 @@ namespace ufo {
     /// Get GeoVaLs for a particular profile.
     std::vector <float>& getGeoVaLVector(const std::string &variableName);
 
+    /// Get ObsDiags for a particular profile.
+    std::vector <float>& getObsDiag(const std::string &variableName);
+
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
     void resetProfileIndices() {profileIndices_->reset();}
@@ -191,11 +195,17 @@ namespace ufo {
     /// Container of GeoVaLs in the current profile.
     std::unordered_map <std::string, std::vector <float>> GeoVaLData_;
 
+    /// Container of ObsDiags in the current profile.
+    std::unordered_map <std::string, std::vector <float>> obsDiagData_;
+
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
     /// GeoVaLs loaded by the filter.
     const GeoVaLs* const geovals_;
+
+    /// ObsDiags loaded by the filter.
+    const ObsDiagnostics* const obsdiags_;
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;

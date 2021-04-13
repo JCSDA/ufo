@@ -24,6 +24,7 @@
 #include "oops/util/Expect.h"
 #include "oops/util/FloatCompare.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/Variables.h"
@@ -57,6 +58,8 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+
+  ObsFilterData filterdata(obsspace);
 
   ioda::ObsVector hofx(obsspace);
 
@@ -144,8 +147,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     EXPECT_THROWS(entireSampleDataHandler.get<int>(ufo::VariableNames::obs_air_pressure));
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(obsspace,
-                                          geovals.get(),
+    ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
                                           flagged);
@@ -167,8 +169,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     entireSampleDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(obsspace,
-                                          geovals.get(),
+    ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
                                           flagged);
@@ -231,8 +232,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(obsspace,
-                                          geovals.get(),
+    ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
                                           flagged);
@@ -315,8 +315,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(obsspace,
-                                          geovals.get(),
+    ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
                                           flagged);

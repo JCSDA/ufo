@@ -60,6 +60,9 @@ namespace ufo {
     /// Get vector of validation GeoVaL names for all checks.
     oops::Variables getValidationGeoVaLNames() const {return validationGeoVaLNames_;}
 
+    /// Get vector of obs diagnostic names for all checks.
+    oops::Variables getObsDiagNames() const {return obsDiagNames_;}
+
    private:
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
@@ -78,6 +81,9 @@ namespace ufo {
 
     /// Names of all validation GeoVaLs.
     oops::Variables validationGeoVaLNames_;
+
+    /// Names of all required obs diagnostics.
+    oops::Variables obsDiagNames_;
   };
 }  // namespace ufo
 
