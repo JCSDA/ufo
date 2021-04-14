@@ -39,6 +39,8 @@ type, public :: ufo_rttovonedvarcheck
   integer                          :: nmvars !< number of variables being used in the retrieval
   integer                          :: nchans !< maximum number of channels (channels can be removed by previous qc checks)
   integer(c_int), allocatable      :: channels(:) !< integer list of channels
+  integer                          :: StartOb !< starting ob number for testing
+  integer                          :: FinishOb !< finishing ob number for testing
   logical                          :: qtotal !< flag to enable total humidity retrievals
   logical                          :: UseQtsplitRain !< flag to choose whether to split rain in qsplit routine
   logical                          :: RTTOV_mwscattSwitch !< flag to switch on RTTOV-scatt
@@ -46,6 +48,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
+  logical                          :: Store1DVarLWP !< Output the LWP if the profile converges
   logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
   logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
@@ -130,6 +133,9 @@ call f_conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
 ! Flag to use cold water check to adjust starting surface parameters
 call f_conf % get_or_die("UseColdSurfaceCheck", self % UseColdSurfaceCheck)
 
+! Flag to output the LWP if the profile converges
+call f_conf % get_or_die("Store1DVarLWP", self % Store1DVarLWP)
+
 ! Flag to turn on full diagnostics
 call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
 
@@ -153,6 +159,12 @@ call f_conf % get_or_die("CostConvergenceFactor", self % Cost_ConvergenceFactor)
 
 ! Maximum number of iterations for internal Marquardt-Levenberg loop
 call f_conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
+
+! Starting observation number for loop - used for testing
+call f_conf % get_or_die("StartOb", self % StartOb)
+
+! Finishing observation number for loop - used for testing
+call f_conf % get_or_die("FinishOb", self % FinishOb)
 
 ! Default emissivity value to use over land
 call f_conf % get_or_die("EmissLandDefault", self % EmissLandDefault)

@@ -916,6 +916,7 @@ contains
     integer                                     :: prof_start
     integer                                     :: nprofiles
     integer                                     :: nlevels
+    logical                                     :: variable_present
 
     if(present(prof_start1)) then
       prof_start = prof_start1
@@ -942,29 +943,52 @@ contains
 
       nlevels = size(profiles(1)%p)
 
-      !RTTOV convention 0-max (coef dependent). Nadir = 0 deg
+      ! sensor zenith - RTTOV convention 0-max (coef dependent). Nadir = 0 deg
       call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
-      if (any(TmpVar(prof_start:prof_start + nprofiles - 1) < 0.)) then
+      if (any(TmpVar(prof_start:prof_start + nprofiles - 1) < zero)) then
         profiles(1:nprofiles)%zenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
         ! DAR need to make a modification to azangle here then?
       else
         profiles(1:nprofiles)%zenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
       endif
 
-      !RTTOV convention is 0-360 deg. E=+90
-      call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar)
-      profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
-
-      call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar)
-      if (any(TmpVar(prof_start:prof_start + nprofiles - 1) < 0.)) then
-        profiles(1:nprofiles)%sunzenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
-        ! DAR need to make a modification to sunazangle here then?
+      ! sensor azimuth - convention is 0-360 deg. E=+90
+      variable_present = obsspace_has(obss, "MetaData", "sensor_azimuth_angle")
+      if (variable_present) then
+        call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar)
+        profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
       else
-        profiles(1:nprofiles)%sunzenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
-      endif
+        write(message,'(A)') 'MetaData azimuth angle not in database: setting to zero'
+        call fckit_log%info(message)
+        profiles(1:nprofiles)%azangle = zero
+      end if
 
-      call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar)
-      profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+      ! solar zenith
+      variable_present = obsspace_has(obss, "MetaData", "solar_zenith_angle")
+      if (variable_present) then
+        call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar)
+        if (any(TmpVar(prof_start:prof_start + nprofiles - 1) < 0.)) then
+          profiles(1:nprofiles)%sunzenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
+          ! DAR need to make a modification to sunazangle here then?
+        else
+          profiles(1:nprofiles)%sunzenangle = abs(TmpVar(prof_start:prof_start + nprofiles - 1))
+        endif
+      else
+        write(message,'(A)') 'MetaData solar zenith angle not in database: setting to zero'
+        call fckit_log%info(message)
+        profiles(1:nprofiles)%sunzenangle = zero
+      end if
+
+      ! solar azimuth
+      variable_present = obsspace_has(obss, "MetaData", "solar_azimuth_angle")
+      if (variable_present) then
+        call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar)
+        profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+      else
+        write(message,'(A)') 'MetaData solar azimuth angle not in database: setting to zero'
+        call fckit_log%info(message)
+        profiles(1:nprofiles)%sunazangle = zero
+      end if
 
       deallocate(TmpVar)
 

@@ -29,6 +29,7 @@ public ufo_rttovonedvarcheck_check_geovals
 public ufo_rttovonedvarcheck_CostFunction
 public ufo_rttovonedvarcheck_CheckIteration
 public ufo_rttovonedvarcheck_CheckCloudyIteration
+public ufo_rttovonedvarcheck_PrintIterInfo
 
 character(len=max_string) :: message
 
@@ -69,6 +70,7 @@ integer                      :: nlevels
 integer                      :: ii
 real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: emiss_pc(:)
+real(kind_real)              :: u, v               ! components for windspeed calculation
 
 !-------------------------------------------------------------------------------
 
@@ -162,14 +164,16 @@ end if
 !  prof_x(profindex % cloudfrac) = ob % cloudfrac
 !end if
 
-! This has been left in for future development
-! windspeed. Remember that all wind have been transferred to u and v is set to zero
-! for windspeed retrievals
-! var_u = "eastward_wind"
-!if (profindex % windspeed > 0) then
-!  call ufo_geovals_get_var(geovals, var_u, geoval)
-!  prof_x(profindex % windspeed) = geoval%vals(1, 1)
-!end if
+! Windspeed - var_u = "eastward_wind"
+!           - var_v = "northward_wind"
+!           - windsp = sqrt (u*u + v*v)
+if (profindex % windspeed > 0) then
+  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  u = geoval % vals(1, 1)
+  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  v = geoval % vals(1, 1)
+  prof_x(profindex % windspeed) = sqrt(u ** 2 + v ** 2)
+end if
 
 !----------------------------
 ! 4. Emissivities
@@ -237,6 +241,7 @@ real(kind_real), allocatable :: q(:)
 real(kind_real), allocatable :: ql(:)
 real(kind_real), allocatable :: qi(:)
 real(kind_real), allocatable :: emiss_pc(:)
+real(kind_real)              :: u, v, windsp  ! variable needed for the windspeed calculation
 
 !-------------------------------------------------------------------------------
 
@@ -382,18 +387,38 @@ end if
 !  ob % cloudfrac = prof_x(profindex % cloudfrac)
 !end if
 
-! This has been left in for future development
 ! windspeed
-!if (profindex % windspeed > 0) THEN
-!  ! Remember that we transfer all wind to u and set v to zero for
-!  ! windspeed retrieval.
-!  varname = "eastward_wind"
-!  gv_index = 0
-!  do i=1,geovals%nvar
-!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-!  end do
-!  geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % windspeed)
-!end if
+if (profindex % windspeed > 0) then
+  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  u = geoval % vals(1, 1)
+  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  v = geoval % vals(1, 1)
+  windsp = sqrt (u ** 2 + v ** 2)
+
+  ! The ratio of new windsp to old windsp gives the fractional change.
+  ! This is then applied to each component of the wind.
+  if (windsp > zero) then
+    u = u * (prof_x(profindex % windspeed) / windsp)
+    v = v * (prof_x(profindex % windspeed) / windsp)
+  else
+    u = zero
+    v = zero
+  end if
+
+  ! Write back updated u component
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (trim(var_u) == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(1,1) = u
+
+  ! Write back updated v component
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (trim(var_v) == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(1,1) = v
+end if
 
 !----------------------------
 ! 4. Emissivities
@@ -455,10 +480,6 @@ real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
 real(kind_real), allocatable :: ql(:)
 real(kind_real), allocatable :: qi(:)
-real(kind_real)              :: u_wind
-real(kind_real)              :: v_wind
-real(kind_real)              :: new_u_wind
-real(kind_real)              :: new_v_wind
 real(kind_real)              :: skin_t, pressure_2m, temperature_2m, NewT
 integer                      :: level_1000hpa, level_950hpa
 
@@ -683,47 +704,6 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
    endif
 
 endif
-
-!-------
-! 2. Wind
-! This has been left in for future development
-!-------
-
-! RTTOV is isotropic, therefore if we only want to retrieve a "total" windspeed,
-! with no directional information, we can put all the wind into u and set v to
-! zero. If we are not retrieving windspeed, we just leave u and v separate to
-! avoid confusion.
-
-!if (profindex % windspeed > 0) THEN
-!  ! Get winds from geovals
-!  varname = trim(var_u)  ! m/s
-!  call ufo_geovals_get_var(geovals, varname, geoval)
-!  u_wind = geoval%vals(1,1)
-!
-!  varname = trim(var_v)  ! m/s
-!  call ufo_geovals_get_var(geovals, varname, geoval)
-!  v_wind = geoval%vals(1,1)
-!
-!  ! Convert to "total" windspeed
-!  new_u_wind = sqrt(u_wind * u_wind + v_wind * v_wind)
-!  new_v_wind = zero
-!
-!  ! Write back to geovals
-!  varname = trim(var_u)  ! m/s
-!  gv_index = 0
-!  do i=1,geovals%nvar
-!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-!  end do
-!  geovals%geovals(gv_index)%vals(1,1) = new_u_wind
-!
-!  varname = trim(var_v)  ! m/s
-!  gv_index = 0
-!  do i=1,geovals%nvar
-!    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-!  end do
-!  geovals%geovals(gv_index)%vals(1,1) = new_v_wind
-!
-!end if
 
 ! Tidy up
 if (allocated(temperature))    deallocate(temperature)
@@ -1071,14 +1051,16 @@ subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
   geovals,       & ! in
   profindex,     & ! in
   nlevels_1dvar, & ! in
-  OutOfRange )     ! out
+  OutOfRange,    & ! out
+  OutLWP         ) ! out
 
 implicit none
 
-type(ufo_geovals), intent(in)    :: geovals
+type(ufo_geovals), intent(in)          :: geovals
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
-integer, intent(in)              :: nlevels_1dvar
-logical, intent(out)             :: OutOfRange
+integer, intent(in)                    :: nlevels_1dvar
+logical, intent(out)                   :: OutOfRange
+real(kind_real), optional, intent(out) :: OutLWP
 
 ! Local variables:
 real(kind_real) :: LWP
@@ -1180,7 +1162,76 @@ if (any(ciw(:) > zero) .or. &
 
 end if
 
+if (present(OutLWP)) OutLWP = LWP
+
 end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
+
+!-----------------------------------------------------------
+!> Print detailed information for each iteration for diagnostics
+!!
+!! \author Met Office
+!!
+!! \date 29/03/2021: Created
+!!
+subroutine ufo_rttovonedvarcheck_PrintIterInfo(yob, hofx, channels, &
+                                         guessprofile, backprofile, &
+                                         diffprofile, binv, hmatrix)
+
+implicit none
+
+real(kind_real), intent(in)       :: yob(:)
+real(kind_real), intent(in)       :: hofx(:)
+integer, intent(in)               :: channels(:)
+real(kind_real), intent(in)       :: guessprofile(:)
+real(kind_real), intent(in)       :: backprofile(:)
+real(kind_real), intent(in)       :: diffprofile(:)
+real(kind_real), intent(in)       :: binv(:,:) ! (nprofelements,nprofelements)
+real(kind_real), intent(in)       :: hmatrix(:,:) ! (nchans,nprofelements)
+
+integer :: obs_size, profile_size, ii, jj
+character(len=12) :: chans_fmt, prof_fmt
+character(len=3) :: txt_nchans, txt_nprof
+character(len=10) :: int_fmt
+
+obs_size = size(yob)
+write( unit=txt_nchans,fmt='(i3)' ) obs_size
+write( unit=chans_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E30.16)'
+write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I30)'
+
+profile_size = size(guessprofile)
+write( unit=txt_nprof,fmt='(i3)' ) profile_size
+write( unit=prof_fmt,fmt='(a)' ) '(' // trim(txt_nprof) // 'E30.16)'
+
+write(*,*) "Start print iter info"
+
+! Print obs info
+write(*,"(2A30)") "yob", "hofx"
+do ii = 1, obs_size
+  write(*,"(2E30.16)") yob(ii),hofx(ii)
+end do
+
+! Print profile info
+write(*,"(3A30)") "guessprofile", "backprofile", "diffprofile"
+do ii = 1, profile_size
+  write(*,"(3E30.16)") guessprofile(ii),backprofile(ii), diffprofile(ii)
+end do
+
+! Print b inv
+write(*,"(2A30)") "B inverse"
+do ii = 1, profile_size
+    write(*,prof_fmt) binv(:,ii)
+end do
+
+! Print hmatrix
+write(*,"(2A30)") "hmatrix"
+write(*, int_fmt) channels(:)
+do ii = 1, profile_size
+    write(*,chans_fmt) hmatrix(:,ii)
+end do
+
+write(*,*) "Finished print iter info"
+
+end subroutine ufo_rttovonedvarcheck_PrintIterInfo
 
 ! ----------------------------------------------------------
 

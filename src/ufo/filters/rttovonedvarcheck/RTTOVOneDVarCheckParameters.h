@@ -68,6 +68,9 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Reset low level temperatures over seaice and cold, low land
   oops::Parameter<bool> UseColdSurfaceCheck{"UseColdSurfaceCheck", false, this};
 
+  /// Output the LWP if the profile converges
+  oops::Parameter<bool> Store1DVarLWP{"Store1DVarLWP", false, this};
+
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};
 
@@ -83,6 +86,12 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
 
   /// Maximum number of iterations for internal Marquardt-Levenberg loop
   oops::Parameter<int> MaxMLIterations{"MaxMLIterations", 7, this};
+
+  /// Starting observation to run through 1d-var, subsetting for testing
+  oops::Parameter<int> StartOb{"StartOb", 0, this};
+
+  /// Final observation to run through 1d-var, subsetting for testing
+  oops::Parameter<int> FinishOb{"FinishOb", 0, this};
 
   /// Convergence factor used when the absolute difference in the profile is used
   /// to determine convergence.

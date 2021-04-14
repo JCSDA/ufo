@@ -37,6 +37,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
   real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
   real(kind_real)      :: final_cost !< final cost at solution
+  real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
   real(kind_real), allocatable :: background_T(:) !< background temperature used by qsplit
@@ -139,6 +140,7 @@ self % solar_azimuth_angle = missing
 self % cloudtopp = 500.0_kind_real
 self % cloudfrac = zero
 self % final_cost = missing
+self % LWP = missing
 self % retrievecloud = .false.
 self % mwscatt = .false.
 self % mwscatt_totalice = .false.

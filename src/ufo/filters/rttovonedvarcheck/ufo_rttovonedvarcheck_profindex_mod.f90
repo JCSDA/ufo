@@ -154,7 +154,7 @@ do j = 1, bmatrix % nfields
       self % pstar      = firstelement
 
     case( ufo_metoffice_fieldtype_windspeed )
-      call abor1_ftn("ufo_metoffice_fieldtype_windspeed: Not currently implemented aborting")
+      self % windspeed  = firstelement
 
     case( ufo_metoffice_fieldtype_mwemiss )
       call abor1_ftn("ufo_metoffice_fieldtype_mwemiss: Not currently implemented aborting")

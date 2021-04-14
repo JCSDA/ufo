@@ -312,6 +312,15 @@ Iterations: do iter = 1, self % max1DVarIterations
                                     b_matrix,                  &
                                     r_matrix,                  &
                                     inversionStatus)
+                                    
+    if (self % FullDiagnostics) then
+      write(*,*) "After newton fewchans start"
+      call ufo_rttovonedvarcheck_PrintIterInfo(ob % yobs(:), Y(:), &
+                           ob % channels_used, guessprofile, &
+                           backprofile, diffprofile, b_inv, h_matrix )
+      write(*,*) "After newton fewchans finish"
+    end if                                    
+                                    
   end if
 
   if (inversionStatus /= 0) then
@@ -347,7 +356,7 @@ Iterations: do iter = 1, self % max1DVarIterations
         call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
                                               profile_index,      & ! in
                                               self % nlevels,     & ! in
-                                              OutOfRange )
+                                              OutOfRange )          ! out
 
     end if
 
@@ -399,6 +408,19 @@ ob % niter = iter
 ! Pass output profile, final BTs and final cost out
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
+
+  ! Recalculate final cost - to make sure output when using profile convergence
+  call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+  ob % final_cost = Jout(1)
+
+  ! If lwp output required then recalculate
+  if (self % Store1DVarLWP) then
+    call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
+                                            profile_index,    & ! in
+                                            self % nlevels,   & ! in
+                                            OutOfRange,       & ! out
+                                            OutLWP = ob % LWP ) ! out
+  end if
 
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
@@ -666,5 +688,7 @@ call Ops_Cholesky (U,             &
                    Status)
 
 end subroutine ufo_rttovonedvarcheck_NewtonManyChans
+
+!---------------------------------------------------
 
 end module ufo_rttovonedvarcheck_minimize_newton_mod

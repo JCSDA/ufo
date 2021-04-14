@@ -300,7 +300,7 @@ Iterations: do iter = 1, self % max1DVarIterations
         call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
                                               profile_index,      & ! in
                                               self % nlevels,     & ! in
-                                              OutOfRange )
+                                              OutOfRange )          ! out
 
     end if                                                                                  
 
@@ -351,6 +351,15 @@ if (converged) then
   ! Recalculate final cost - to make sure output when using profile convergence
   call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
   ob % final_cost = Jout(1)
+
+  ! If lwp output required then recalculate
+  if (self % Store1DVarLWP) then
+    call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
+                                            profile_index,    & ! in
+                                            self % nlevels,   & ! in
+                                            OutOfRange,       & ! out
+                                            OutLWP = ob % LWP ) ! out
+  end if
 
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))

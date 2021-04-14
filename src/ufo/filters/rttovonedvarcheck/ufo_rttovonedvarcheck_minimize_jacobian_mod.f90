@@ -114,6 +114,7 @@ real(kind_real), allocatable :: dBT_dq(:)
 real(kind_real), allocatable :: dBT_dql(:)
 character(len=max_string)    :: varname
 real(c_double)               :: BT(size(ob % channels_all))
+real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
 
 nchans = size(channels)
 
@@ -286,18 +287,32 @@ if (profindex % pstar > 0) then
   end do
 end if
 
-! This has been left in for future development
 ! 2.4) Windspeed - var_u = "eastward_wind"
-! Remember that all wind has been transferred to u and v is set to zero for
-! windspeed retrieval.
+!                - var_v = "northward_wind"
+!                - windsp = sqrt (u*u + v*v)
 
-!if (profindex % windspeed > 0) then
-!  do i = 1, nchans
-!    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_u),"_",channels(i)
-!    call ufo_geovals_get_var(hofxdiags, varname, geoval)
-!    H_matrix(i,profindex % windspeed) = geoval % vals(1,1)
-!  end do
-!end if
+if (profindex % windspeed > 0) then
+  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  u = geoval % vals(1, 1)
+  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  v = geoval % vals(1, 1)
+  windsp = sqrt (u ** 2 + v ** 2)
+
+  do i = 1, nchans
+    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_u),"_",channels(i)
+    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    dBT_du = geoval % vals(1,1)
+    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_v),"_",channels(i)
+    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    dBT_dv = geoval % vals(1,1)
+    if (windsp > zero) then
+      ! directional derivation of the Jacobian
+      H_matrix(i,profindex % windspeed) = (dBT_du * u + dBT_dv * v) / windsp
+    else
+      H_matrix(i,profindex % windspeed) = zero
+    end if
+  end do
+end if
 
 ! 2.5) Skin temperature - var_sfc_tskin = "skin_temperature"  ! (K)
 

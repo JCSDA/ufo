@@ -40,11 +40,13 @@ real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angl
 integer, allocatable         :: surface_type(:) ! surface type
 integer, allocatable         :: niter(:)        ! number of iterations
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
+real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
+logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_obs_setup
@@ -105,6 +107,7 @@ allocate(self % sol_azi(self % iloc))
 allocate(self % surface_type(self % iloc))
 allocate(self % niter(self % iloc))
 allocate(self % final_cost(self % iloc))
+allocate(self % LWP(self % iloc))
 allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % output_profile(nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
@@ -119,17 +122,19 @@ self % lat(:) = missing
 self % lon(:) = missing
 self % elevation(:) = missing
 self % sat_zen(:) = missing
-self % sat_azi(:) = missing
-self % sol_zen(:) = missing
-self % sol_azi(:) = missing
-self % surface_type = RTSea
-self % niter = 0
-self % final_cost = missing
+self % sat_azi(:) = zero
+self % sol_zen(:) = zero
+self % sol_azi(:) = zero
+self % surface_type(:) = RTSea
+self % niter(:) = 0
+self % final_cost(:) = missing
+self % LWP(:) = missing
 self % emiss(:,:) = zero
 self % output_profile(:,:) = missing
 self % output_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
+self % Store1DVarLWP = config % Store1DVarLWP
 
 ! read in observations and associated errors / biases for full ObsSpace
 do jvar = 1, config % nchans
@@ -217,24 +222,25 @@ class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_delete"
 
 ! deallocate arrays
-if (allocated(self % QCflags))    deallocate(self % QCflags)
-if (allocated(self % yobs))       deallocate(self % yobs)
-if (allocated(self % ybias))      deallocate(self % ybias)
-if (allocated(self % lat))        deallocate(self % lat)
-if (allocated(self % lon))        deallocate(self % lon)
-if (allocated(self % elevation))  deallocate(self % elevation)
-if (allocated(self % sat_zen))    deallocate(self % sat_zen)
-if (allocated(self % sat_azi))    deallocate(self % sat_azi)
-if (allocated(self % sol_zen))    deallocate(self % sol_zen)
-if (allocated(self % sol_azi))    deallocate(self % sol_azi)
-if (allocated(self % surface_type)) deallocate(self % surface_type)
-if (allocated(self % niter))      deallocate(self % niter)
-if (allocated(self % final_cost))   deallocate(self % final_cost)
-if (allocated(self % emiss))        deallocate(self % emiss)
+if (allocated(self % QCflags))        deallocate(self % QCflags)
+if (allocated(self % yobs))           deallocate(self % yobs)
+if (allocated(self % ybias))          deallocate(self % ybias)
+if (allocated(self % lat))            deallocate(self % lat)
+if (allocated(self % lon))            deallocate(self % lon)
+if (allocated(self % elevation))      deallocate(self % elevation)
+if (allocated(self % sat_zen))        deallocate(self % sat_zen)
+if (allocated(self % sat_azi))        deallocate(self % sat_azi)
+if (allocated(self % sol_zen))        deallocate(self % sol_zen)
+if (allocated(self % sol_azi))        deallocate(self % sol_azi)
+if (allocated(self % surface_type))   deallocate(self % surface_type)
+if (allocated(self % niter))          deallocate(self % niter)
+if (allocated(self % final_cost))     deallocate(self % final_cost)
+if (allocated(self % LWP))            deallocate(self % LWP)
+if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
-if (allocated(self % output_BT))  deallocate(self % output_BT)
+if (allocated(self % output_BT))      deallocate(self % output_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
-if (allocated(self % calc_emiss)) deallocate(self % calc_emiss)
+if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 
 end subroutine ufo_rttovonedvarcheck_obs_delete
 
@@ -408,10 +414,14 @@ do jvar = 1, nchans
   call obsspace_put_db(obsdb, "OneDVarBack", trim(var), self % background_BT(jvar,:))
 end do
 
-! Output final cost at solution
+! Output Diagnostics
 call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
 nobs = size(self % final_cost(:))
 call obsspace_put_db(obsdb, "OneDVar", "n_iterations", self % niter(:))
+
+if (self % Store1DVarLWP) then
+  call obsspace_put_db(obsdb, "OneDVar", "LWP", self % LWP(:))
+end if
 
 !--
 ! Output Retrieved profiles into ObsSpace
@@ -469,7 +479,6 @@ end if
 ! 10) Total ozone - no planned implementation
 ! 11) Cloud top pressure
 ! 12) Cloud fraction
-! 13) LWP
 ! 14) IWP only meaningful is mwscattswitch is activated which means model levels too....
 ! 15) Microwave emissivity
 ! 16/17) QC related not being ported.

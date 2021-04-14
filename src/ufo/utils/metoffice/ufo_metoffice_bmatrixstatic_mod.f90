@@ -704,8 +704,8 @@ do jvar = 1, nmvars
         call abor1_ftn("rttovonedvarcheck not setup for independent clw yet")
       end if
 
-    case ("surface_wind_speed") ! surface wind speed
-      call abor1_ftn("rttovonedvarcheck not setup for surface windspeed yet")
+    case (var_u, var_v)
+      fields_in(counter) = 11 ! surface wind speed
 
     ! 12 - o3profile is not implmented yet
     ! 13 - lwp (liquid water path) is not implmented yet

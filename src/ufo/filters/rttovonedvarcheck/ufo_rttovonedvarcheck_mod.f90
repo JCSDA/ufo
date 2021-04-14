@@ -180,12 +180,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
 
+  ! Decide on loop parameters - testing
+  if (self % StartOb == 0) self % StartOb = 1
+  if (self % FinishOb == 0) self % FinishOb = obs % iloc
+  if (self % StartOb > self % FinishOb) then
+    write(message,*) "start loop ",self % StartOb," is greater than finish loop ",self % FinishOb
+    call abor1_ftn(message)
+  end if
+
   ! ------------------------------------------
   ! 2. Beginning main observation loop
   ! ------------------------------------------
   write(*,*) "Beginning loop over observations: ",trim(self%qcname)
   apply_count = 0
-  obs_loop: do jobs = 1, obs % iloc
+  obs_loop: do jobs = self % StartOb, self % FinishOb
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
@@ -288,6 +296,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       obs % background_BT(:, jobs) = ob % background_BT(:)
       obs % output_profile(:,jobs) = ob % output_profile(:)
       obs % final_cost(jobs) = ob % final_cost
+      obs % LWP(jobs) = ob % LWP
       obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization
