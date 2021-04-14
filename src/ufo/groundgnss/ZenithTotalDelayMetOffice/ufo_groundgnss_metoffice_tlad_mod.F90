@@ -85,7 +85,12 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   integer                      :: nstate             ! The size of the state vector
   integer                      :: iobs               ! Loop variable, observation number
   integer                      :: nobs               ! Number of observations
+  integer                      :: ilev               ! Loop variable, vertical level number
   real(kind_real), allocatable :: zStation(:)
+  real(kind_real), allocatable :: pressure(:)        ! Model background values of air pressure (monotonic order)
+  real(kind_real), allocatable :: humidity(:)        ! Model background specific humidity  (in pressure monotonic order)
+  real(kind_real), allocatable :: za(:)              ! Model heights of rho levs (in pressure monotonic order)
+  real(kind_real), allocatable :: zb(:)              ! Model heights of theta levs (in pressure monotonic order)
 
   integer, parameter                 :: max_string = 800
   character(max_string)              :: message                 ! General message for output
@@ -103,10 +108,17 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
 ! Keep copy of dimensions
-  self % nlevP = prs % nval
+  self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
 
+! Check whether the pressure levels are in descending order
+  self%iflip = 0
+  IF (prs % vals(1,1)-prs % vals(self%nlevp,1) < 0.0) THEN
+    self%iflip = 1
+    WRITE(message, *) "Pressure is in ascending order. Rrorder the variables in vertical direction"
+    CALL fckit_log % warning(message)
+  END IF
 
 
 ! Get the meta-data from the observations
@@ -117,16 +129,34 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
 
   nstate = prs % nval + q % nval
   ALLOCATE(self % K(1:self%nlocs, 1:nstate))
-
+  ALLOCATE(pressure(1:self%nlevp)) 
+  ALLOCATE(humidity(1:self%nlevq))
+  ALLOCATE(za(1:self%nlevp))
+  ALLOCATE(zb(1:self%nlevq))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
-      CALL groundgnss_jacobian_interface(prs % nval,                   &   ! Number of pressure levels
-                                         q % nval,                     &   ! Number of specific humidity levels
-                                         rho_heights % vals(:,iobs),   &   ! Heights of the pressure levels
-                                         theta_heights % vals(:,iobs), &   ! Heights of the specific humidity levels
-                                         q % vals(:,iobs),             &   ! Values of the specific humidity
-                                         prs % vals(:,iobs),           &   ! Values of the pressure
+      IF (self%iflip == 1) THEN
+        do ilev = 1, self%nlevp
+          pressure(ilev) = prs % vals(self%nlevp-ilev+1,iobs)
+          za(ilev) = rho_heights % vals(self%nlevp-ilev+1,iobs)
+        end do
+        do ilev = 1, self%nlevq
+          humidity(ilev) = q % vals(self%nlevq-ilev+1,iobs)
+          zb(ilev) = theta_heights % vals(self%nlevq-ilev+1,iobs)
+        end do
+      ELSE
+        pressure = prs % vals(:,iobs)
+        humidity = q % vals(:,iobs)
+        za = rho_heights % vals(:,iobs)
+        zb = theta_heights % vals(:,iobs)
+      END IF
+      CALL groundgnss_jacobian_interface(self % nlevp,                 &   ! Number of pressure levels
+                                         self % nlevq,                 &   ! Number of specific humidity levels
+                                         za(1:self%nlevp),             &   ! Heights of the pressure levels
+                                         zb(1:self%nlevq),             &   ! Heights of the specific humidity levels
+                                         humidity(1:self%nlevq),       &   ! Values of the specific humidity
+                                         pressure(1:self%nlevp),       &   ! Values of the pressure
                                          zStation(iobs),               &   ! Station height
                                          iobs,                         &   ! Ob number
                                          self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
@@ -161,9 +191,13 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
 ! Local variables
   integer                      :: iobs      ! Loop variable, observation number
   integer                      :: nlocs     ! Number of observations
+  integer                      :: ilev      ! Loop variable, pressure level number
+  integer                      :: iflip     ! Index for vertical flip
   character(max_string)        :: err_msg   ! Message to be output
   type(ufo_geoval), pointer    :: q_d       ! Increment to the specific humidity
   type(ufo_geoval), pointer    :: prs_d     ! Increment to the air pressure
+  real(kind_real), allocatable :: pressure_d(:) ! Increment to the air pressure (monotonic order)
+  real(kind_real), allocatable :: humidity_d(:) ! Increment to the specific humidity  (in pressure monotonic order)
   real(kind_real), allocatable :: x_d(:)    ! Increment to the complete state
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_tl: begin"
@@ -188,16 +222,33 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   nlocs = self % nlocs ! number of observations
 
   allocate(x_d(1:prs_d%nval+q_d%nval))
+  allocate(pressure_d(1:self % nlevp)) 
+  allocate(humidity_d(1:self % nlevq))
+
 ! Loop through the obs, calculating the increment to the observation
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
+ 
+    IF (iflip == 1) THEN
+      do ilev = 1, self % nlevp
+        pressure_d(ilev) = prs_d % vals(self % nlevp-ilev+1,iobs)
+      end do
+      do ilev = 1, self % nlevq
+        humidity_d(ilev) = q_d % vals(self % nlevq-ilev+1,iobs)
+      end do
+    ELSE
+      pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
+      humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
+    END IF
 
-    x_d(1:prs_d%nval) = prs_d % vals(:,iobs)
-    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = q_d % vals(:,iobs)
+    x_d(1:prs_d%nval) = pressure_d
+    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = humidity_d
     hofx(iobs) = SUM(self % K(iobs,:) * x_d)
 
   end do obs_loop
 
   deallocate(x_d)
+  deallocate(pressure_d)
+  deallocate(humidity_d)
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_tl: complete"
   call fckit_log%info(err_msg)
@@ -232,7 +283,11 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   type(ufo_geoval), pointer    :: q_d      ! Pointer to the specific humidity perturbations
   type(ufo_geoval), pointer    :: prs_d    ! Pointer to the pressure perturbations
   integer                      :: iobs     ! Loop variable, observation number
+  integer                      :: ilev     ! Loop variable, pressure level number
+  integer                      :: iflip    ! Index for vertical flip 
   real(kind_real), allocatable :: x_d(:)   ! Perturbation to the full model state
+  real(kind_real), allocatable :: pressure_d(:)  ! Perturbation to pressure (monotonic order)
+  real(kind_real), allocatable :: humidity_d(:)  ! Perturbation to specific humidity  (in pressure monotonic order)
   character(max_string)        :: err_msg  ! Message to be output
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: begin"
@@ -272,19 +327,36 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
 
   missing = missing_value(missing)
   allocate(x_d(1:prs_d%nval + q_d%nval))
+  allocate(pressure_d(1:prs_d%nval))
+  allocate(humidity_d(1:q_d%nval))
 
 ! Loop through the obs, calculating the increment to the model state
   obs_loop: do iobs = 1, self % nlocs
 
     if (hofx(iobs) /= missing) then
         x_d = self % K(iobs,:) * hofx(iobs)
-        prs_d % vals(:,iobs) = x_d(1:prs_d%nval)
-        q_d % vals(:,iobs) = x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+        pressure_d(1:prs_d%nval) = x_d(1:prs_d%nval)
+        humidity_d(1:q_d%nval) = x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
     end if
+
+    if (iflip == 1) then
+      do ilev = 1, self % nlevp
+        prs_d % vals(self % nlevp-ilev+1,iobs) = pressure_d(ilev)
+      end do
+      do ilev = 1, self % nlevq
+        q_d % vals(self % nlevq-ilev+1,iobs) = humidity_d(ilev)
+      end do
+    else
+      prs_d % vals(:,iobs) = pressure_d(1:self % nlevp)
+      q_d % vals(:,iobs) = humidity_d(1:self % nlevq)
+    end if
+
 
   end do obs_loop
 
   deallocate(x_d)
+  deallocate(pressure_d)
+  deallocate(humidity_d)
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: complete"
   call fckit_log%info(err_msg)
@@ -305,7 +377,7 @@ subroutine ufo_groundgnss_metoffice_tlad_delete(self)
   character(len=*), parameter :: myname_="ufo_groundgnss_metoffice_tlad_delete"
 
   self%nlocs = 0
-  self%nlevP = 0
+  self%nlevp = 0
   self%nlevq = 0
   if (allocated(self%K)) deallocate(self%K)
   self%ltraj = .false.
@@ -316,7 +388,7 @@ end subroutine ufo_groundgnss_metoffice_tlad_delete
 !-------------------------------------------------------------------------
 ! Interface for calculating the K-matrix for calculating TL/AD
 !-------------------------------------------------------------------------
-SUBROUTINE groundgnss_jacobian_interface(nlevP, &
+SUBROUTINE groundgnss_jacobian_interface(nlevp, &
                               nlevq,            &
                               za,               &
                               zb,               &
@@ -328,12 +400,12 @@ SUBROUTINE groundgnss_jacobian_interface(nlevP, &
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevP            ! The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevp            ! The number of model pressure levels
 INTEGER, INTENT(IN)            :: nlevq            ! The number of model theta levels
 REAL(kind_real), INTENT(IN)    :: za(:)            ! The geometric height of the model pressure levels
 REAL(kind_real), INTENT(IN)    :: zb(:)            ! The geometric height of the model theta levels
 REAL(kind_real), INTENT(IN)    :: q(1:nlevq)       ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: prs(1:nlevP)     ! The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     ! The model values that are being perturbed
 REAL(kind_real), INTENT(IN)    :: zStation         ! Station height
 INTEGER, INTENT(IN)            :: iobs             ! Ob number
 REAL(kind_real), INTENT(INOUT) :: K(:,:)           ! The calculated K matrix
@@ -347,23 +419,23 @@ REAL(kind_real)              :: refrac(nlevq)      ! model refractivity on theta
 ! Local variables
 !
 INTEGER                      :: nstate             ! Number of levels in state vector
-REAL(kind_real)              :: x(1:nlevP+nlevq)   ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)   ! state vector
 LOGICAL                      :: refracerr          ! Whether we encountered an error in calculating the refractivity
 CHARACTER(LEN=200)           :: err_msg            ! Output message
 
 REAL(kind_real)              :: pN(nlevq)          ! Presure on theta levels
 
 ! Set up the size of the state
-nstate = nlevP + nlevq
-x(1:nlevP) = prs
-x(nlevP+1:nstate) = q
+nstate = nlevp + nlevq
+x(1:nlevp) = prs
+x(nlevp+1:nstate) = q
 
 
 refracerr = .FALSE.
 
 ! Calculate the refractivity
 CALL ufo_refractivity(nlevq,     &
-                      nlevP,     &
+                      nlevp,     &
                       za,        &
                       zb,        &
                       x,         &
@@ -374,7 +446,7 @@ CALL ufo_refractivity(nlevq,     &
 IF (.NOT. refracerr) THEN
     ! Calculate the K-matrix (Jacobian)
     CALL Groundgnss_GetK(nstate,    &
-                         nlevP,     &
+                         nlevp,     &
                          nlevq,     &
                          za,        &
                          zb,        &
@@ -399,7 +471,7 @@ END SUBROUTINE groundgnss_jacobian_interface
 ! Calculate the K-matrix (Jacobian)
 !-------------------------------------------------------------------------
 SUBROUTINE Groundgnss_GetK(nstate,   &
-                          nlevP,     &
+                          nlevp,     &
                           nlevq,     &
                           za,        &
                           zb,        &
@@ -416,7 +488,7 @@ SUBROUTINE Groundgnss_GetK(nstate,   &
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)             :: nstate
-INTEGER, INTENT(IN)             :: nlevP          ! The number of model pressure levels
+INTEGER, INTENT(IN)             :: nlevp          ! The number of model pressure levels
 INTEGER, INTENT(IN)             :: nlevq          ! The number of model theta levels
 REAL(kind_real), INTENT(IN)     :: za(:)          ! The geometric height of the model pressure levels
 REAL(kind_real), INTENT(IN)     :: zb(:)          ! The geometric height of the model theta levels
@@ -442,7 +514,7 @@ INTEGER           :: Level             ! Used for iteration over levels
 INTEGER           :: Lowest_Level      ! Lowest height level
 INTEGER           :: FirstNeg          ! First negative
 
-REAL(kind_real)              :: p_local(nlevP)         ! pressure on rho levels (with no negative pressures)
+REAL(kind_real)              :: p_local(nlevp)         ! pressure on rho levels (with no negative pressures)
 REAL(kind_real)              :: pN(nlevq)              ! pressure on theta levels
 REAL(kind_real)              :: LocalZenithDelay       ! Zenith Total Delay
 REAL(kind_real)              :: h_diff, station_diff   ! Height diff, station height diff
@@ -460,13 +532,13 @@ REAL(kind_real)              :: dztd_drefsta           ! derivative of ZTD wrt s
 REAL(kind_real), ALLOCATABLE :: dp_local_dPin(:,:)     ! derivative of pressure rho levels wrt pressure
 REAL(kind_real), ALLOCATABLE :: dztd_dpN(:)            ! array for derivative w.r.t top theta level
 REAL(kind_real)              :: dztd_dq(nlevq)         ! The calculated K matrix
-REAL(kind_real)              :: dztd_dp(nlevP)         ! The calculated K matrix
+REAL(kind_real)              :: dztd_dp(nlevp)         ! The calculated K matrix
 REAL(kind_real), ALLOCATABLE :: dpN_dP(:,:)            ! derivative of pressure theta wrt pressure
 REAL(kind_real), ALLOCATABLE :: dztd_dref(:)           ! derivative of ZTD wrt refrac
 REAL(kind_real), ALLOCATABLE :: x1(:,:)                ! Matrix placeholder
 REAL(kind_real), ALLOCATABLE :: x2(:)                  ! Matrix placeholder
 
-REAL(kind_real)              :: P(nlevP)               ! Pressure
+REAL(kind_real)              :: P(nlevp)               ! Pressure
 REAL(kind_real)              :: q(nlevq)               ! Humidity
 REAL(kind_real), PARAMETER   :: hpa_to_pa = 100.0      ! hPa to Pascal conversion
 REAL(kind_real), PARAMETER   :: PressScale = 6000.0    ! Pressure scale height
@@ -480,14 +552,14 @@ character(max_string)        :: message                ! General message for out
 ! 0. Initialise variables
 !-------------------------------------------------------
 
-ALLOCATE (dref_dP(nlevq,nlevP))
+ALLOCATE (dref_dP(nlevq,nlevp))
 ALLOCATE (dref_dq(nlevq,nlevq))
-ALLOCATE (dpN_dP(nlevq,nlevP))
+ALLOCATE (dpN_dP(nlevq,nlevp))
 ALLOCATE (dztd_dref(nlevq))
 ALLOCATE (dztd_dpN(nlevq))
-ALLOCATE (x2(nlevP))
-ALLOCATE (x1(nlevq,nlevP))
-ALLOCATE (dp_local_dPin(nlevP,nlevP))
+ALLOCATE (x2(nlevp))
+ALLOCATE (x1(nlevq,nlevp))
+ALLOCATE (dp_local_dPin(nlevp,nlevp))
 
 ! Initialise matrices
 
@@ -508,9 +580,9 @@ LocalZenithDelay = 0.0
 StationRefrac    = 0.0
 
 
-!nstate = nlevP + nlevq
-P(:) = x(1:nlevP)
-q(:) = x(nlevP + 1:nstate)
+!nstate = nlevp + nlevq
+P(:) = x(1:nlevp)
+q(:) = x(nlevp + 1:nstate)
 
 
 ! If negative pressures exist, replace these
@@ -518,7 +590,7 @@ q(:) = x(nlevP + 1:nstate)
 ! = 6km) from the highest positive pressure.
 
 FirstNeg = 0
-DO Level=1, nlevP
+DO Level=1, nlevp
   IF (Level==1) THEN
     p_local(Level) = P(Level)
     dp_local_dPin(Level,Level) = 1.0
@@ -541,7 +613,7 @@ END DO
 ! Calculate Pressure on theta
 ! Assume ln(p) linear with height
 
-DO Level = 1, nlevP-1
+DO Level = 1, nlevp-1
 
   z_weight1 = (za(Level+1) - zb(Level)) / (za(Level+1) - za(Level))
   z_weight2 = 1.0 - z_weight1
@@ -556,7 +628,7 @@ END DO
 ! Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
 
 CALL ufo_refractivityDeriv (nlevq,     &
-                            nlevP,     &
+                            nlevp,     &
                             za,        &
                             zb,        &
                             pN,        &
@@ -570,7 +642,7 @@ CALL ufo_refractivityDeriv (nlevq,     &
 ! In Layer where station height lies, define lowest level required for
 ! iteration and integration
 
-DO Level = 1, nlevP-1
+DO Level = 1, nlevp-1
   IF (zb(Level) > zStation) THEN
     Lowest_Level = Level
     EXIT
@@ -691,8 +763,8 @@ x1 = MATMUL(dPn_dP, dp_local_dPin)
 x2 = MATMUL(dztd_dpN, x1)
 dztd_dp = x2 + dztd_dp
 
-K(iobs,1:nlevP)  = dztd_dp
-K(iobs, nlevP + 1:nstate) = dztd_dq
+K(iobs,1:nlevp)  = dztd_dp
+K(iobs, nlevp + 1:nstate) = dztd_dq
 
 DEALLOCATE (dp_local_dPin)
 DEALLOCATE (x1)
