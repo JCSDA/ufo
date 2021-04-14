@@ -18,6 +18,8 @@ set ( predictor_files
   LapseRate.cc
   Legendre.h
   Legendre.cc
+  OrbitalAngle.h
+  OrbitalAngle.cc
   ScanAngle.h
   ScanAngle.cc
   SineOfLatitude.h

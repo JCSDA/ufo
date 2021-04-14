@@ -149,6 +149,7 @@ list( APPEND ufo_test_input
   testinput/ompstc_npp_flipz.yaml
   testinput/ompslp_npp.yaml
   testinput/operatorutils.yaml
+  testinput/orbital_angle_predictor.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
   testinput/primitive_variables.yaml
@@ -2736,6 +2737,14 @@ ecbuild_add_test( TARGET  test_constant_predictor
                   DEPENDS test_Predictor.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+
+ecbuild_add_test( TARGET  test_orbital_angle_predictor
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+                  ARGS    "testinput/orbital_angle_predictor.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_legendre_predictor
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
                   ARGS    "testinput/legendre_predictor.yaml"
@@ -2843,6 +2852,7 @@ if( ${rttov_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
+rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 )
 
