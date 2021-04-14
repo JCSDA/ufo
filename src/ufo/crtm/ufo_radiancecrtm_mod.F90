@@ -37,11 +37,11 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(21), parameter :: varin_default = &
+ character(len=maxvarlen), dimension(19), parameter :: varin_default = &
                             (/var_ts, var_prs, var_prsi,                                  &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
-                              var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
+                              var_sfc_vegfrac, var_sfc_lai,                               &
                               var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
                               var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
 
@@ -78,7 +78,8 @@ logical :: request_cldfrac
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ ! 2 for sfc_wind_geovars parsing
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds + 2
  request_cldfrac = &
    self%conf%n_Clouds > 0 .and. &
    self%conf%Cloud_Fraction < 0.0
@@ -110,6 +111,17 @@ logical :: request_cldfrac
  end if
  if (cmp_strings(self%conf%salinity_option, "on")) then
    self%varin(ind) = var_sfc_sss
+   ind = ind + 1
+ end if
+ if (trim(self%conf%sfc_wind_geovars) == 'vector') then
+   self%varin(ind) = var_sfc_wspeed
+   ind = ind + 1
+   self%varin(ind) = var_sfc_wdir
+   ind = ind + 1
+ else if (trim(self%conf%sfc_wind_geovars) == 'uv') then
+   self%varin(ind) = var_sfc_u
+   ind = ind + 1
+   self%varin(ind) = var_sfc_v
    ind = ind + 1
  end if
 

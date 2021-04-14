@@ -64,6 +64,7 @@ integer(c_int),               intent(in)    :: channels(:)  !List of channels to
 integer :: nvars_in
 integer :: ind, jspec
 type(fckit_configuration) :: f_confOpts,f_confLinOper
+character(max_string) :: err_msg
 
  call f_confOper%get_or_die("obs options",f_confOpts)
  call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper)
@@ -96,6 +97,12 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
    self%varin(ind) = self%conf%Surfaces(jspec)
    ind = ind + 1
  end do
+ if ( (ufo_vars_getindex(self%varin, var_sfc_wspeed) > 0 .or. &
+       ufo_vars_getindex(self%varin, var_sfc_wdir) > 0) .and. &
+      trim(self%conf_traj%sfc_wind_geovars) /= "vector") then
+   write(err_msg,*) 'ufo_radiancecrtm_tlad_setup error: sfc_wind_geovars not supported in tlad --> ', self%conf_traj%sfc_wind_geovars
+   call abor1_ftn(err_msg)
+ end if
 
  ! save channels
  allocate(self%channels(size(channels)))

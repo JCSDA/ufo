@@ -41,6 +41,7 @@ obs space:
 obs operator:
   name: CRTM
   Absorbers: [H2O,O3,CO2]
+  SurfaceWindGeoVars: uv
   obs options:
     Sensor_ID: cris-fsr_npp
     EndianType: little_endian

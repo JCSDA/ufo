@@ -13,8 +13,8 @@ use kinds
 
 use crtm_module
 
-use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use ufo_vars_mod
 use obsspace_mod
 use ufo_utils_mod, only: cmp_strings
 
@@ -80,6 +80,7 @@ type crtm_conf
  integer :: inspect
  character(len=MAXVARLEN) :: aerosol_option
  character(len=255) :: salinity_option
+  character(len=MAXVARLEN) :: sfc_wind_geovars
 end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
@@ -148,11 +149,14 @@ END INTERFACE qsmith
 
  character(len=MAXVARLEN), parameter :: &
       UFO_Surfaces(4) = &
-         [ var_sfc_wtmp, var_sfc_wspeed,var_sfc_wdir, var_sfc_sss]
+         [ var_sfc_wtmp, var_sfc_wspeed, var_sfc_wdir, var_sfc_sss]
 
  character(len=MAXVARLEN), parameter :: & 
       CRTM_Surfaces(4) = &
          [  character(len=MAXVARLEN):: 'Water_Temperature', 'Wind_Speed', 'Wind_Direction', 'Salinity' ]
+
+ character(len=MAXVARLEN), parameter :: &
+      ValidSurfaceWindGeoVars(2) = [character(len=MAXVARLEN) :: 'vector', 'uv']
 
 contains
 
@@ -315,6 +319,18 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
    conf%Surfaces(jspec) = UFO_Surfaces(ivar)
 
  end do
+
+ ! select between two surface wind geovals options
+ ! valid options: vector [default], uv
+ if (f_confOper%get('SurfaceWindGeoVars', str)) then
+   conf%sfc_wind_geovars = str
+ else
+   conf%sfc_wind_geovars = 'vector'
+ endif
+ if (ufo_vars_getindex(ValidSurfaceWindGeoVars, conf%sfc_wind_geovars) < 1) then
+   write(message,*) 'crtm_conf_setup error: invalid SurfaceWindGeoVars ',trim(str)
+   call abor1_ftn(message)
+ end if
 
  ! Sea_Surface_Salinity
  !---------
@@ -604,7 +620,7 @@ type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
 type(crtm_conf),             intent(in)    :: conf
 
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval, u, v
 integer :: k1, n1
 integer :: iLand
 
@@ -648,17 +664,38 @@ real(kind_real), allocatable :: ObsTb(:,:)
   end do
   deallocate(ObsTb)
 
-  !Wind_Speed
-  call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Wind_Speed = geoval%vals(1, k1)
-  end do
+  if (ufo_vars_getindex(geovals%variables, var_sfc_wspeed) > 0 .and. &
+      ufo_vars_getindex(geovals%variables, var_sfc_wdir) > 0) then
+    ! Directly use model-provided wind speed and direction
+    !Wind_Speed
+    call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Speed = geoval%vals(1, k1)
+    end do
 
-  !Wind_Direction
-  call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Wind_Direction = geoval%vals(1, k1)
-  end do
+    !Wind_Direction
+    call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Direction = geoval%vals(1, k1)
+    end do
+  else if (ufo_vars_getindex(geovals%variables, var_sfc_u) > 0 .and. &
+      ufo_vars_getindex(geovals%variables, var_sfc_v) > 0) then
+    ! Convert 2d wind components to speed and direction
+    call ufo_geovals_get_var(geovals, var_sfc_u, u)
+    call ufo_geovals_get_var(geovals, var_sfc_v, v)
+
+    !Wind_Speed
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Speed = sqrt(u%vals(1, k1)**2 + v%vals(1, k1)**2)
+    end do
+
+    !Wind_Direction
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Direction = uv_to_wdir(u%vals(1, k1), v%vals(1, k1))
+    end do
+  else
+    call abor1_ftn('Load_Sfc_Data error: missing surface wind geovals')
+  end if
 
   !Water_Coverage
   call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
@@ -867,6 +904,51 @@ end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
+!> \brief Determines the wind direction from U and V components
+!!
+!! \details **uv_to_wdir** Calculates the wind direction, as measured clockwise
+!! from north, similar to an azimuth angle.  Takes the eastward and northward
+!! wind component magnitudes, respectively, as arguments.
+!! Due to the azimuthal convention used here, the inverse equations are:
+!! u = w * cos(wdir * deg2rad)
+!! v = w * sin(wdir * deg2rad)
+!! where w is the wind speed
+function uv_to_wdir(u, v) result(wdir)
+
+use ufo_constants_mod, only: zero, one, two, pi, rad2deg
+
+implicit none
+
+real (kind=kind_real), intent(in) :: u !< eastward_wind
+real (kind=kind_real), intent(in) :: v !< northward_wind
+real (kind=kind_real) :: wdir
+real (kind=kind_real) :: windratio, windangle
+integer :: iquadrant
+real(kind=kind_real),parameter:: windscale = 999999.0_kind_real
+real(kind=kind_real),parameter:: windlimit = 0.0001_kind_real
+real(kind=kind_real),parameter:: quadcof(4,2) = &
+  reshape((/zero,  one,  one,  two, &
+            one,  -one,  one, -one/), (/4,2/))
+
+  if (u >= zero .and. v >= zero) iquadrant = 1
+  if (u >= zero .and. v <  zero) iquadrant = 2
+  if (u <  zero .and. v >= zero) iquadrant = 4
+  if (u <  zero .and. v <  zero) iquadrant = 3
+
+  if (abs(v) >= windlimit) then
+    windratio = u / v
+  else
+    windratio = zero
+    if (abs(u) > windlimit) then
+      windratio = windscale * u
+    endif
+  endif
+  windangle = atan(abs(windratio))   ! wind azimuth is in radians
+  wdir = ( quadcof(iquadrant, 1) * pi + windangle * quadcof(iquadrant, 2) ) * rad2deg
+
+end function uv_to_wdir
+
+! -----------------------------------------------------------------------------
 
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      &aerosol_option,atm)

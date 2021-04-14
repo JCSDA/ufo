@@ -63,6 +63,8 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "surface_wind_s
 character(len=MAXVARLEN), public, parameter :: var_sfc_wdir    = "surface_wind_from_direction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_u10     = "uwind_at_10m"
 character(len=MAXVARLEN), public, parameter :: var_sfc_v10     = "vwind_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_u       = "surface_eastward_wind"
+character(len=MAXVARLEN), public, parameter :: var_sfc_v       = "surface_northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "leaf_area_index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "volume_fraction_of_condensed_water_in_soil"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "soil_temperature"

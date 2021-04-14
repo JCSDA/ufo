@@ -7,6 +7,7 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
       Clouds: [Water]
