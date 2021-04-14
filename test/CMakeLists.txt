@@ -86,6 +86,7 @@ list( APPEND ufo_test_input
   testinput/gmi_crtm.yaml
   testinput/gmi_clw_ret.yaml
   testinput/gmi_qc_filters.yaml
+  testinput/gmi_scan_angles.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
   testinput/geos_aod.yaml
@@ -606,6 +607,20 @@ if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_linopr_crtm_gmi
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                       ARGS    "testinput/gmi_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_crtm_gmi_scan_angles
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/gmi_scan_angles.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_gmi_scan_angles
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/gmi_scan_angles.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )

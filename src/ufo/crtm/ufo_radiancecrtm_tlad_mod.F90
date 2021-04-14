@@ -169,6 +169,14 @@ type(CRTM_Options_type),    allocatable :: Options(:)
 ! Define the K-MATRIX variables
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
+!for gmi
+type(CRTM_Geometry_type),   allocatable :: geo_hf(:)
+type(CRTM_Atmosphere_type), allocatable :: atm_Ka(:,:)
+type(CRTM_Surface_type),    allocatable :: sfc_Ka(:,:)
+type(CRTM_RTSolution_type), allocatable :: rtsa(:,:)
+type(CRTM_RTSolution_type), allocatable :: rts_Ka(:,:)
+integer :: lch
+
 ! Used to parse hofxdiags
 character(len=MAXVARLEN) :: varstr
 character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
@@ -295,7 +303,12 @@ real(kind_real), allocatable :: Wfunc(:)
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
    call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
-   call Load_Geom_Data(obss,geo)
+   if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+      allocate( geo_hf( self%n_Profiles ))
+      call Load_Geom_Data(obss,geo,geo_hf)
+   else
+      call Load_Geom_Data(obss,geo)
+   endif
 
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------
@@ -335,6 +348,52 @@ real(kind_real), allocatable :: Wfunc(:)
                              Options       )  ! Input
    message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
    call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+   if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+      allocate( atm_Ka( self%n_Channels, self%n_Profiles ),               &
+                sfc_Ka( self%n_Channels, self%n_Profiles ),   &
+                rts_Ka( self%n_Channels, self%n_Profiles ),   &
+                rtsa( self%n_Channels, self%n_Profiles ),     &
+                STAT = alloc_stat )
+      message = 'Error allocating K structure arrays rtsa, atm_Ka ......'
+      call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
+      !! save resutls for gmi channels 1-9.
+      atm_Ka = self%atm_K
+      sfc_Ka = self%sfc_K
+      rts_Ka = rts_K
+      rtsa   = rts
+      ! Zero the K-matrix OUTPUT structures
+      ! -----------------------------------
+      call CRTM_Atmosphere_Zero( self%atm_K )
+      call CRTM_Surface_Zero( self%sfc_K )
+      ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+      ! -------------------------------------------------------------
+      rts_K%Radiance               = ZERO
+      rts_K%Brightness_Temperature = ONE
+      ! Call the K-matrix model
+      ! -----------------------
+      err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
+                                sfc         , &  ! FORWARD  Input
+                                rts_K       , &  ! K-MATRIX Input
+                                geo_hf        , &  ! Input
+                                chinfo(n:n) , &  ! Input
+                                self%atm_K  , &  ! K-MATRIX Output
+                                self%sfc_K  , &  ! K-MATRIX Output
+                                rts         , &  ! FORWARD  Output
+                                Options       )  ! Input
+      message = 'Error calling CRTM (setTraj, geo_hf) K-Matrix Model for '&
+                //TRIM(self%conf_traj%SENSOR_ID(n))
+      call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+      !! replace data for gmi channels 1-9 by early results calculated with geo.
+      do lch = 1, size(self%channels)
+         if ( self%channels(lch) <= 9 ) then
+            self%atm_K(lch,:) = atm_Ka(lch,:)
+            self%sfc_K(lch,:) = sfc_Ka(lch,:)
+            rts_K(lch,:) = rts_Ka(lch,:)
+            rts(lch,:)   = rtsa(lch,:)
+         endif
+      enddo
+      deallocate(atm_Ka,sfc_Ka,rts_Ka,rtsa)
+   endif ! cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')
 
    !call CRTM_RTSolution_Inspect(rts)
 
@@ -588,6 +647,7 @@ real(kind_real), allocatable :: Wfunc(:)
    ! Deallocate all arrays
    ! ---------------------
    deallocate(geo, atm, sfc, rts, rts_K, Options, STAT = alloc_stat)
+   if(allocated(geo_hf)) deallocate(geo_hf)
    message = 'Error deallocating structure arrays (setTraj)'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 

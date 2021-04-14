@@ -773,14 +773,17 @@ end subroutine Load_Sfc_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Geom_Data(obss,geo)
+subroutine Load_Geom_Data(obss,geo,geo_hf)
 
 implicit none
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
+type(CRTM_Geometry_type), intent(inout), optional :: geo_hf(:)
 real(kind_real), allocatable :: TmpVar(:)
 integer :: nlocs
+character(kind=c_char,len=101) :: obsname
 
+ call obsspace_obsname(obss, obsname)
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
@@ -817,6 +820,33 @@ integer :: nlocs
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
     geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
+!read geophysical values for gmi high frequency channels 10-13.
+ if (cmp_strings(trim(obsname),'GMI-GPM') .or. cmp_strings(trim(obsname),'gmi_gpm')) then
+    if ( present(geo_hf) ) then
+       geo_hf = geo
+       if (obsspace_has(obss, "MetaData", "sensor_zenith_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle1", TmpVar)
+          geo_hf(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
+       endif
+       if (obsspace_has(obss, "MetaData", "solar_zenith_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "solar_zenith_angle1", TmpVar)
+          geo_hf(:)%Source_Zenith_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "sensor_azimuth_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle1", TmpVar)
+          geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "solar_azimuth_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle1", TmpVar)
+          geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "sensor_view_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_view_angle1", TmpVar)
+          geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
+       endif
+    endif
+ endif
+ 
  deallocate(TmpVar)
 
 end subroutine Load_Geom_Data

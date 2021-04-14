@@ -1,0 +1,35 @@
+window begin: 2020-11-14T21:00:00Z
+window end: 2020-11-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2020111500.nc4
+    obsdataout:
+      obsfile: Data/gmi_gpm_obs_2020111500_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020111500.nc4
+# One scan angle
+# rms ref: 218.10222468021257
+# Two scan angles (ch 1-9 & 10-13)
+  rms ref: 218.19693688899761
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 5.0e-3
+    tolerance AD: 1.0e-11
