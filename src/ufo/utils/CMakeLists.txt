@@ -24,6 +24,8 @@ set ( utils_files
       metoffice/MetOfficeObservationIDs.h
       metoffice/ufo_metoffice_bmatrixstatic_mod.f90
       metoffice/ufo_metoffice_rmatrixradiance_mod.f90
+      NetCDFInterpolator.cc
+      NetCDFInterpolator.h
       OperatorUtils.cc
       OperatorUtils.h
       parameters/ParameterTraitsVariable.cc
@@ -48,8 +50,6 @@ set ( utils_files
       VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
-      ObsErrorNetcdfHandler.cc
-      ObsErrorNetcdfHandler.h
 )
 
 PREPEND( _p_utils_files       "utils"       ${utils_files} )

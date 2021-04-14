@@ -60,7 +60,13 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   bfparam.deserialize(filterConf);
 
   ufo::BlackList filter(obsspace, bfparam, qcflags, obserr);
-  filter.preProcess();
+  if (conf.has("expectExceptionWithMessage")) {
+    const std::string msg = conf.getString("expectExceptionWithMessage");
+    EXPECT_THROWS_MSG(filter.preProcess(), msg.c_str());
+    return;
+  } else {
+    filter.preProcess();
+  }
 
   std::vector<float> expectedObsError;
   if (conf.has("expected_obserror")) {

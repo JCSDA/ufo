@@ -5,12 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_UTILS_OBSERRORNETCDFHANDLER_H_
-#define UFO_UTILS_OBSERRORNETCDFHANDLER_H_
+#ifndef UFO_UTILS_NETCDFINTERPOLATOR_H_
+#define UFO_UTILS_NETCDFINTERPOLATOR_H_
 
 #include <algorithm>           // sort
 #include <limits>              // std::numeric_limits
 #include <list>                // list
+#include <sstream>             // stringstream
 #include <string>
 #include <unordered_map>
 #include <utility>             // pair
@@ -20,12 +21,14 @@
 #include "Eigen/Dense"         // Eigen Arrays and Matrices
 
 #include "eckit/exception/Exceptions.h"
-#include "ioda/Engines/Factory.h"
-#include "ioda/Group.h"
-#include "ioda/ObsGroup.h"
 #include "oops/util/Logger.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/RecursiveSplitter.h"
+
+namespace ioda {
+class Variable;
+}
+
 
 namespace ufo {
 
@@ -35,22 +38,27 @@ enum class InterpMethod {
 };
 
 
-/// \brief Observation error NetCDF handler, performing extract and interpolation to derive the
-/// observation error (error standard deviation).
-/// \details The NetCDF format is as follows:
-///   - The observation error data variable from the file will be identified by a name
-///     with @ErrorVariance suffix in the varname.
-///   - Any number of variables are supported of types: int; float and string (inc. DateTime).
-///   - Dimensionality of the observation error is currently limited to 1D, 2D or 3D.
-///     - 1D or 2D corresponding to the diagonal only variance.
-///     - 2D or 3D corresponding to the error covariance matrix defined.
-///   - Variables (coordinates) are expected to be 1D only.
-///   - An error covariance matrix is defined by the presence of a local attribute, full = "true" on
-///     the error variance variable, otherwise the file is assumed to describe diagonals only.
-///     - For an error covariance, the first dimension is collapsed as a consequence of extracting
-///       the diagonals.
+/// \brief This class makes it possible to extract and interpolate data from an array held in a
+/// NetCDF file and indexed by one or more coordinates corresponding to ObsSpace variables.
 ///
-/// Here is an example NetCDF metadata describing variance (diagonals only) with multi-variant:
+/// \details The NetCDF file should have the following structure:
+///   - It should contain exactly one variable whose name ends with the `@<group>` suffix, where
+///     <group> is the value of the `group` parameter passed to the class constructor. This is the
+///     array that will be interpolated. It should be of the type `float`.
+///   - For most types of data, the above array should be 1D or 2D. As a special case,
+///     if this class is used to interpolate variances, the file may contain a full 2D covariance
+///     matrix or a stack of such matrices stored as a 3D array, with variances located on the
+///     diagonal of each matrix. In that case, the array should be equipped with a `full` attribute
+///     of type `string` set to `"true"`. Only the diagonal elements (`A[i, i]` for a 2D array and
+///     `A[i, i, k]` for a 3D array) will be used for interpolation.
+///   - 1D coordinates must be defined for each dimension of the array to be interpolated.
+///     Coordinates can be of type `int`, `float` and `string`. Datetimes should be represented
+///     as ISO 8601 strings. Auxiliary coordinates are supported, i.e. there can be more than one
+///     coordinate per dimension. Coordinate names should correspond to names of ObsSpace variables.
+///
+/// Here is an example NetCDF metadata describing a file encoding the dependence of the diagonal
+/// elements of a covariance matrix (with rows and columns corresponding to certain air pressures)
+/// on the observation type:
 /// \code
 /// dimensions:
 ///   air_pressure@MetaData = 10 ;
@@ -63,7 +71,11 @@ enum class InterpMethod {
 ///   int observation_type@MetaData(index) ;
 /// \endcode
 ///
-/// Here is an example NetCDF metadata describing a multi-variant error covariance matrix:
+/// Here is an example NetCDF metadata describing a file encoding the dependence of a full
+/// covariance matrix (with rows and columns corresponding to channel numbers) on multiple
+/// variables (`latitude_band@MetaData`, `processing_center@MetaData` and
+/// `satellite_id@MetaData(index)`):
+///
 /// \code
 /// dimensions:
 ///   channel_number = 10 ;
@@ -73,6 +85,7 @@ enum class InterpMethod {
 ///   float air_temperature@ErrorVariance(channel_number, channel_number@MetaData, index) ;
 ///     air_temperature@ErrorVariance:coordinates = "latitude_band@MetaData \
 ///         processing_center@MetaData satellite_id@MetaData" ;
+///     string air_temperature@ErrorVariance:full = "true" ;
 ///   int index(index) ;
 ///   int channel_number(channel_number) ;
 ///   int channel_number@MetaData(channel_number@MetaData) ;
@@ -81,13 +94,11 @@ enum class InterpMethod {
 ///   int satellite_id@MetaData(index) ;
 /// \endcode
 ///
-/// Notice how a channel_number describes the outsermost two dimensions.  Since the very outermost
-/// dimension is collapsed, it's name does not have to match anything from our ObsSpace as it is
+/// Notice how a channel_number describes the outermost two dimensions.  Since the very outermost
+/// dimension is collapsed, its name does not have to match anything from our ObsSpace as it is
 /// discarded after extracting the diagonals.
 ///
 /// Here is a summary of particulars to the interpolation algorithms available:
-/// - Linear interpolation takes place between values of variance.  We then determine
-///   its square root in order to return the standard deviation observation error (@ObsError).
 /// - Nearest neighbour 'interpolation' chooses the **first** nearest value to be found in the case
 ///   of equidistant neighbours of different values. The algorithm will then return the one or more
 ///   locations corresponding to this nearest value.  Let's illustrate by extracting the nearest
@@ -97,16 +108,17 @@ enum class InterpMethod {
 ///
 ///   Both 1 and 2 are equidtstant, but we take the first found equidistant neighbour (1), then
 ///   return all indices matching this neighbour (indices 0 and 1 in this case).
-class ObsErrorNetCDFHandler
+class NetCDFInterpolator
 {
  public:
-  /// \brief Create an object representing a NetCDF handle to an observation error variance.
-  /// \details This object is capable of sorting the data from this file; extracting the relevant
-  /// values for a given observation as well as performing linear interpolation to finally derive
-  /// our observation error value.  See class documentation for further details on the expected
-  /// structure of the NetCDF.
-  /// \param[in] filepath is the file-path to the observation variance file.
-  explicit ObsErrorNetCDFHandler(const std::string &filepath);
+  /// \brief Create an object that can be used to interpolate data loaded from a NetCDF file.
+  /// \details This object is capable of sorting the data from this file extracting the relevant
+  /// values for a given observation as well as performing linear interpolation to derive the final
+  /// value. See class documentation for further details on the expected structure of the NetCDF
+  /// file.
+  /// \param[in] filepath Path to the NetCDF file.
+  /// \param[in] group Group containing the variable to be interpolated.
+  explicit NetCDFInterpolator(const std::string &filepath, const std::string &group);
 
   /// \brief Update the instruction on how to sort the data for the provided variable name.
   /// \details This works iteratively by further splitting the RecurssiveSplitter sub-groups
@@ -120,10 +132,10 @@ class ObsErrorNetCDFHandler
   /// RecursiveSplitter.sortGroupsBy is used.
   void scheduleSort(const std::string &varName, const InterpMethod &method);
 
-  /// \brief Finalise the sort, sorting each of the coordinates describing the variance, as well
-  /// as the variance itself.
+  /// \brief Finalise the sort, sorting each of the coordinates indexing the axes of the array to
+  /// be interpolated, as well as that array itself.
   /// \details Utilising the instructions provided by the user calling the scheduleSort() member
-  /// function, we now physically sort the variance array itself along with all coordinates which
+  /// function, we now physically sort the array itself along with all coordinates which
   /// describe it.
   /// \internal Applies the RecurssiveSplitter object and neccessarily creates copies to achieve
   /// this sort.
@@ -150,34 +162,36 @@ class ObsErrorNetCDFHandler
         exactMatch(varName, obVal);
         break;
       case InterpMethod::LINEAR:
-        obErrorVal_ = getObsErrorValue(varName, obVal);
-        obErrorValSet_ = true;
+        result_ = getResult(varName, obVal);
+        resultSet_ = true;
         break;
       case InterpMethod::NEAREST:
         nearestMatch(varName, obVal);
         break;
       default:
-        throw eckit::UserError("Only Linear, nearest and exact interpolation methods supported.",
+        throw eckit::UserError("Only linear, nearest and exact interpolation methods supported.",
                                Here());
     }
     ++extractMapIter_;
   }
 
-  /// \brief Fetch the observation error value.
-  /// \details This will only be succesful if previous calls to extract() have resulted in a single
+  /// \brief Fetch the final interpolated value.
+  /// \details This will only be succesful if previous calls to extract() have produced a single
   /// value to return.
-  float getObsErrorValue();
+  float getResult();
 
  private:
-  /// \brief Fetch the observation error variance at a 'location'.
-  /// \details Fetching the observation error variance at a 'location' (obVal) is to linearly
-  /// interpolate to the location along the coordinate of specified name which describes the
-  /// observation variance.
+  /// \brief Fetch the final interpolated value at the 'location' `obVal`.
+  ///
+  /// \details It is assumed that previous calls to extract() have extracted a single 1D slice of
+  /// the interpolated array parallel to the axis `varName`. This function returns the value
+  /// produced by piecewise linear interpolation of this slice at the point `obVal`.
+  ///
   /// \param[in] varName is the variable name (NetCDF coordinate name) that we will be using to
   /// perform the interpolation.
   /// \param[in] obVal is the interpolation location.
   template<typename T>
-  float getObsErrorValue(const std::string &varName, const T &obVal) {
+  float getResult(const std::string &varName, const T &obVal) {
     // Fetch corresponding NetCDF var data and the dimension mapping
     int dimIndex;
     const std::vector<T> &ncdfVal = getVarDim<T>(varName, dimIndex);
@@ -186,7 +200,7 @@ class ObsErrorNetCDFHandler
     int sizeDim0 = constrainedRanges_[0].end - constrainedRanges_[0].begin;
     int sizeDim1 = constrainedRanges_[1].end - constrainedRanges_[1].begin;
     if ((dimIndex == 1 && !(sizeDim1 > 1 && sizeDim0 == 1)) ||
-        !(sizeDim0 > 1 && sizeDim1 == 1)) {
+        (dimIndex == 0 && !(sizeDim0 > 1 && sizeDim1 == 1))) {
       throw eckit::Exception("Linear interpolation failed - data must be 1D.", Here());
     }
 
@@ -208,21 +222,21 @@ class ObsErrorNetCDFHandler
       // No interpolation required (is equal)
       float res;
       if (dimIndex == 1) {
-        res = static_cast<float>(obserrData2D_(constrainedRanges_[0].begin, nnIndex));
+        res = static_cast<float>(interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex));
       } else {
-        res = static_cast<float>(obserrData2D_(nnIndex, constrainedRanges_[1].begin));
+        res = static_cast<float>(interpolatedArray2D_(nnIndex, constrainedRanges_[1].begin));
       }
       return res;
     }
     // Linearly interpolate between these two indices.
-    auto zUpper = *(obserrData2D_.data());
-    auto zLower = *(obserrData2D_.data());
+    auto zUpper = *(interpolatedArray2D_.data());
+    auto zLower = *(interpolatedArray2D_.data());
     if (dimIndex == 1) {
-      zUpper = obserrData2D_(constrainedRanges_[0].begin, nnIndex);
-      zLower = obserrData2D_(constrainedRanges_[0].begin, nnIndex-1);
+      zUpper = interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex);
+      zLower = interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex-1);
     } else {
-      zUpper = obserrData2D_(nnIndex, constrainedRanges_[1].begin);
-      zLower = obserrData2D_(nnIndex-1, constrainedRanges_[1].begin);
+      zUpper = interpolatedArray2D_(nnIndex, constrainedRanges_[1].begin);
+      zLower = interpolatedArray2D_(nnIndex-1, constrainedRanges_[1].begin);
     }
     float res = ((static_cast<float>(obVal - ncdfVal[nnIndex-1]) /
                   static_cast<float>(ncdfVal[nnIndex] - ncdfVal[nnIndex-1])) *
@@ -230,13 +244,13 @@ class ObsErrorNetCDFHandler
     return res;
   }
 
-  float getObsErrorValue(const std::string &varName, const std::string &obVal) {
+  float getResult(const std::string &varName, const std::string &obVal) {
     throw eckit::UserError("VarName: " + varName +
                            " - linear interpolation not compatible with string type.", Here());
   }
 
   /// \brief Update our extract constraint based on a nearest match against the specified
-  /// coordinate associated with the observation variance.
+  /// coordinate associated with the array to be interpolated.
   /// \details
   ///
   /// Method:
@@ -303,7 +317,7 @@ class ObsErrorNetCDFHandler
   }
 
   /// \brief Update our extract constraint based on an exact match against the specified coordinate
-  /// associated with the observation variance.
+  /// associated with the array to be interpolated.
   /// \param[in] varName is the variable name (NetCDF coordinate name) that we match against.
   /// \param[in] obVal is the value to match, against the NetCDF coordinate of name 'varName'.
   template<typename T>
@@ -323,9 +337,10 @@ class ObsErrorNetCDFHandler
              static_cast<int>(bounds.second - ncdfVal.begin())};
 
     if (range.begin == range.end) {
-      throw eckit::Exception(
-        "No match found for exact match extraction of " + varName,
-        Here());
+      std::stringstream msg;
+      msg << "No match found for exact match extraction of value '" << obVal
+          << "' of the variable '" << varName << "'";
+      throw eckit::Exception(msg.str(), Here());
     }
     oops::Log::debug() << "Exact match; name: " << varName << " range: " <<
       range.begin << "," << range.end << std::endl;
@@ -334,10 +349,10 @@ class ObsErrorNetCDFHandler
   /// \brief Reset the extraction range for this object.
   /// \details Each time an exactMatch or nearestMatch call is made for one or more variable,
   /// the extraction range is further constrained to match our updated match conditions.  After
-  /// the final 'extract' is made (i.e. an observation error is derived) it is desirable to reset
+  /// the final 'extract' is made (i.e. an interpolated value is derived) it is desirable to reset
   /// the extraction range by calling this method.
   /// \internal This is called by the getObsErrorValue member functions just before returning the
-  /// observation error.
+  /// interpolated value.
   void resetExtract();
 
   /// \brief Fetch the NetCDF coordinate data of specified name.
@@ -378,15 +393,13 @@ class ObsErrorNetCDFHandler
       const std::string &varName,
       const std::list<std::pair<std::string, ioda::Variable>> &coordinates);
 
-  /// \brief Perform any load from the NetCDF (the variance data, coordinates etc.)
-  void load();
+  /// \brief Load all data from the NetCDF file.
+  void load(const std::string &filepath, const std::string &interpolatedArrayGroup);
 
-  std::string filepath_;
-  ioda::Group group_;
-  std::string obsErrorName_;
+  std::string interpolatedArrayName_;
 
-  // Dimension names of our observation error variance.
-  std::vector<std::string> obErrorDimnames_;
+  // Names of dimensions of the array to be interpolated.
+  std::vector<std::string> interpolatedArrayDimnames_;
   // Object represent the extraction range in both dimensions.
   struct Range {int begin, end;};
   std::array<Range, 2> constrainedRanges_;
@@ -398,10 +411,10 @@ class ObsErrorNetCDFHandler
                                     std::vector<std::string>
                                    >
                     > coordsVals_;
-  // Our variance
-  Eigen::ArrayXXf obserrData2D_;
-  float obErrorVal_;
-  bool obErrorValSet_;
+  // The array to be interpolated.
+  Eigen::ArrayXXf interpolatedArray2D_;
+  float result_;
+  bool resultSet_;
   // Container for re-ordering our data
   std::vector<ufo::RecursiveSplitter> splitter_;
 
@@ -416,4 +429,4 @@ class ObsErrorNetCDFHandler
 
 }  // namespace ufo
 
-#endif  // UFO_UTILS_OBSERRORNETCDFHANDLER_H_
+#endif  // UFO_UTILS_NETCDFINTERPOLATOR_H_

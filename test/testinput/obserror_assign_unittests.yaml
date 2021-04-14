@@ -20,7 +20,7 @@ Assign constant observation error value:
       name: assign error
       error parameter: 1.2
   expected_obserror: [1.2, 1.2, 1.2, 1.2, 1.2]
-Assign observation error from NetCDF variance; 1 exact 1; linear:
+Assign observation error from NetCDF variance; 1 exact; 1 linear (along the first axis):
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -50,6 +50,36 @@ Assign observation error from NetCDF variance; 1 exact 1; linear:
           - name: air_pressure@MetaData
             method: linear
   expected_obserror_variance: [375.5, 601, 242.5, 175, 337]
+Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the second axis):
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -6, -6, -6, -4 ]
+        lons: [ 30, 35, 40, 45 ]
+        datetimes: [ '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z' ]
+      obs errors: [1.0]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_latitude_longitude.nc
+          interpolation:
+          - name: latitude@MetaData
+            method: nearest
+          - name: longitude@MetaData
+            method: linear
+  expected_obserror_variance: [1, 1.5, 2, 5.5]
 Assign observation error from NetCDF variance; 1 exact; 1 nearest:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -211,3 +241,59 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
           - name: datetime@MetaData
             method: exact
   expected_obserror_variance: [278, 487, 917, 178, 289]
+Assign observation error from NetCDF variance; attempt at using 'nearest' for strings:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [2, 4, 6, 8, 9]
+  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
+          interpolation:
+          - name: StringVar@MetaData
+            method: nearest
+  expectExceptionWithMessage: Nearest match not compatible with string type
+Assign observation error from NetCDF variance; attempt at using 'linear' for strings:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [2, 4, 6, 8, 9]
+  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
+          interpolation:
+          - name: StringVar@MetaData
+            method: linear
+  expectExceptionWithMessage: linear interpolation not compatible with string type
