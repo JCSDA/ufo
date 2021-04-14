@@ -239,6 +239,8 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_average_windspeed_OPScomparison.yaml
   testinput/profileconsistencychecks_average_relativehumidity_obsfilter.yaml
   testinput/profileconsistencychecks_average_relativehumidity_OPScomparison.yaml
+  testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml
+  testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
@@ -501,7 +503,6 @@ ecbuild_add_test( TARGET  test_ufo_obsfilterdata
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
                   ARGS    "testinput/variables.yaml"
@@ -581,6 +582,20 @@ if( crtm_FOUND )
                       DEPENDS test_ObsFilters.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
+    ecbuild_add_test( TARGET  test_ufo_ssmis_f17_gfs_backgroundcheck_bc_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data)	
+
+    ecbuild_add_test( TARGET  test_ufo_ssmis_f17_gfs_backgroundcheck_nbc_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data)						  
+				  
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_gmi
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/gmi_crtm.yaml"

@@ -71,13 +71,14 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
-
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> obsbias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
   std::string test_hofx = parameters_.test_hofx.value();
 
 // Get function absolute threshold
+
   if (parameters_.functionAbsoluteThreshold.value()) {
 //  Get function absolute threshold info from configuration
     const Variable &rtvar = parameters_.functionAbsoluteThreshold.value()->front();
@@ -98,7 +99,6 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
 //        Threshold for current observation
           float zz = function_abs_threshold[jv][jobs];
-
 //        Check distance from background
           if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs]) > zz) {
             flagged[jv][jobs] = true;
@@ -117,15 +117,25 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
       std::vector<float> thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
+      std::vector<float> bc_factor(obsdb_.nlocs(), 0.0);
+
       if (parameters_.absoluteThreshold.value())
         abs_thr = getScalarOrFilterData(*parameters_.absoluteThreshold.value(), data_);
       if (parameters_.threshold.value())
         thr = getScalarOrFilterData(*parameters_.threshold.value(), data_);
 
+//    Bias Correction parameter
+      if (parameters_.BiasCorrectionFactor.value())
+        bc_factor = getScalarOrFilterData(*parameters_.BiasCorrectionFactor.value(), data_);
+
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
           ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
+          if (parameters_.BiasCorrectionFactor.value()) {
+            ASSERT(obsbias[jv][jobs] != util::missingValue(obsbias[jv][jobs]));
+            bc_factor[jobs] = bc_factor[jobs]*obsbias[jv][jobs];
+          }
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
 //        Threshold for current observation
@@ -134,7 +144,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
           ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
 //        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs]) > zz) {
+          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs] - bc_factor[jobs]) > zz) {
             flagged[jv][jobs] = true;
           }
         }
