@@ -153,6 +153,7 @@ list( APPEND ufo_test_input
   testinput/orbital_angle_predictor.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
+  testinput/parameters_older_eckit.yaml
   testinput/primitive_variables.yaml
   testinput/metoffice_radiance_error_matrices.yaml
   testinput/qc_actions.yaml
@@ -2469,11 +2470,20 @@ if( crtm_FOUND )
 endif( crtm_FOUND )
 
 # Test Parameters
-ecbuild_add_test( TARGET  test_ufo_parameters
-                  SOURCES mains/TestParameters.cc
-                  ARGS    "testinput/parameters.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
+if (eckit_VERSION VERSION_GREATER_EQUAL 1.16)
+  ecbuild_add_test( TARGET  test_ufo_parameters
+                    SOURCES mains/TestParameters.cc
+                    ARGS    "testinput/parameters.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    LIBS    ufo)
+else()
+  # Due to changes in eckit 1.16 a different input file is required.
+  ecbuild_add_test( TARGET  test_ufo_parameters
+                    SOURCES mains/TestParameters.cc
+                    ARGS    "testinput/parameters_older_eckit.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    LIBS    ufo)
+endif()
 
 # Test piecewise linear interpolation
 ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
