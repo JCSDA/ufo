@@ -38,6 +38,8 @@ struct InterpMethodParameterTraitsHelper {
   static constexpr util::NamedEnumerator<InterpMethod> namedValues[] = {
     { InterpMethod::EXACT, "exact" },
     { InterpMethod::NEAREST, "nearest" },
+    { InterpMethod::LEAST_UPPER_BOUND, "least upper bound" },
+    { InterpMethod::GREATEST_LOWER_BOUND, "greatest lower bound" },
     { InterpMethod::LINEAR, "linear" }
   };
 };

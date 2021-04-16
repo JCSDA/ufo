@@ -9,6 +9,7 @@
 #define UFO_UTILS_NETCDFINTERPOLATOR_H_
 
 #include <algorithm>           // sort
+#include <functional>          // greater
 #include <limits>              // std::numeric_limits
 #include <list>                // list
 #include <sstream>             // stringstream
@@ -32,9 +33,36 @@ class Variable;
 
 namespace ufo {
 
-
+/// \brief Method used by the NetCDFInterpolator to map the value of an ObsSpace variable to
+/// a range of slices of the interpolated array along the dimension indexed by that variable.
 enum class InterpMethod {
-  EXACT, NEAREST, LINEAR
+  /// \brief Select slices where the indexing coordinate matches exactly the value of the
+  /// corresponding ObsSpace variable.
+  ///
+  /// This is the only method that can be used for variables of type 'string'.
+  EXACT,
+
+  /// \brief Select slices where the indexing coordinate is closest to the value of the
+  /// corresponding ObsSpace variable.
+  ///
+  /// In case of a tie (e.g. if the value of the ObsSpace variable is 3 and the coordinate contains
+  /// values 2 and 4, but not 3), the smaller of the candidate coordinate values is used (in this
+  /// example, 2).
+  NEAREST,
+
+  /// \brief Select slices corresponding to the least value of the indexing coordinate
+  /// greater than or equal to the value of the corresponding ObsSpace variable.
+  LEAST_UPPER_BOUND,
+
+  /// \brief Select slices corresponding to the greatest value of the indexing coordinate
+  /// less than or equal to the value of the corresponding ObsSpace variable.
+  GREATEST_LOWER_BOUND,
+
+  /// \brief Perform a piecewise linear interpolation along the dimension indexed by the ObsSpace
+  /// variable.
+  ///
+  /// This method can only be used for the last indexing variable.
+  LINEAR
 };
 
 
@@ -168,8 +196,15 @@ class NetCDFInterpolator
       case InterpMethod::NEAREST:
         nearestMatch(varName, obVal);
         break;
+      case InterpMethod::LEAST_UPPER_BOUND:
+        leastUpperBoundMatch(varName, obVal);
+        break;
+      case InterpMethod::GREATEST_LOWER_BOUND:
+        greatestLowerBoundMatch(varName, obVal);
+        break;
       default:
-        throw eckit::UserError("Only linear, nearest and exact interpolation methods supported.",
+        throw eckit::UserError("Only 'linear', 'nearest', 'exact', 'least upper bound' and "
+                               "'greatest lower bound' interpolation methods supported.",
                                Here());
     }
     ++extractMapIter_;
@@ -346,8 +381,94 @@ class NetCDFInterpolator
       range.begin << "," << range.end << std::endl;
   }
 
+  /// \brief Update our extract constraint based on a least-upper-bound match against the specified
+  /// coordinate associated with the array to be interpolated.
+  ///
+  /// \param[in] varName is the variable name (NetCDF coordinate name) that we match against.
+  /// \param[in] obVal is the value to match, against the NetCDF coordinate of name 'varName'.
+  template<typename T>
+  void leastUpperBoundMatch(const std::string &varName, const T &obVal) {
+    // Fetch corresponding NetCDF var data and the dimension mapping
+    int dimIndex;
+    const std::vector<T> &ncdfVal = getVarDim<T>(varName, dimIndex);
+
+    // Constrain our index range in the relevant dimension.
+    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
+
+    // Find index of the first ncdfVal >= obVal
+    typedef typename std::vector<T>::const_iterator It;
+    const It rangeBegin(ncdfVal.begin() + range.begin);
+    const It rangeEnd(ncdfVal.begin() + range.end);
+
+    const It leastUpperBoundIt = std::lower_bound(rangeBegin, rangeEnd, obVal);
+    if (leastUpperBoundIt == rangeEnd) {
+      std::stringstream msg;
+      msg << "No match found for 'least upper bound' extraction of value '" << obVal
+          << "' of the variable '" << varName << "'";
+      throw eckit::Exception(msg.str(), Here());
+    }
+
+    // Find the range of items with the same value of this coordinate
+    const auto bounds = std::equal_range(rangeBegin, rangeEnd, *leastUpperBoundIt);
+    range = {static_cast<int>(bounds.first - ncdfVal.begin()),
+             static_cast<int>(bounds.second - ncdfVal.begin())};
+    oops::Log::debug() << "Least upper bound match; name: " << varName << " range: "
+                       << range.begin << "," << range.end << std::endl;
+  }
+
+  void leastUpperBoundMatch(const std::string &varName, const std::string &obVal) {
+    throw eckit::UserError("The 'least upper bound' method cannot be used for string variables.",
+                           Here());
+  }
+
+  /// \brief Update our extract constraint based on a greatest-lower-bound match against the
+  /// specified coordinate associated with the array to be interpolated.
+  ///
+  /// \param[in] varName is the variable name (NetCDF coordinate name) that we match against.
+  /// \param[in] obVal is the value to match, against the NetCDF coordinate of name 'varName'.
+  template<typename T>
+  void greatestLowerBoundMatch(const std::string &varName, const T &obVal) {
+    // Fetch corresponding NetCDF var data and the dimension mapping
+    int dimIndex;
+    const std::vector<T> &ncdfVal = getVarDim<T>(varName, dimIndex);
+
+    // Constrain our index range in the relevant dimension.
+    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
+
+    // Find index of the last ncdfVal <= obVal
+
+    typedef typename std::vector<T>::const_reverse_iterator ReverseIt;
+    typedef std::greater<T> Compare;
+    const ReverseIt reverseRangeBegin(ncdfVal.begin() + range.end);
+    const ReverseIt reverseRangeEnd(ncdfVal.begin() + range.begin);
+
+    const ReverseIt greatestLowerBoundIt =
+        std::lower_bound(reverseRangeBegin, reverseRangeEnd, obVal, Compare());
+    if (greatestLowerBoundIt == reverseRangeEnd) {
+      std::stringstream msg;
+      msg << "No match found for 'greatest lower bound' extraction of value '" << obVal
+          << "' of the variable '" << varName << "'";
+      throw eckit::Exception(msg.str(), Here());
+    }
+
+    // Find the range of items with the same value of this coordinate
+    const auto bounds = std::equal_range(ncdfVal.begin() + range.begin,
+                                         ncdfVal.begin() + range.end,
+                                         *greatestLowerBoundIt);
+    range = {static_cast<int>(bounds.first - ncdfVal.begin()),
+             static_cast<int>(bounds.second - ncdfVal.begin())};
+    oops::Log::debug() << "Greatest lower bound match; name: " << varName << " range: "
+                       << range.begin << "," << range.end << std::endl;
+  }
+
+  void greatestLowerBoundMatch(const std::string &varName, const std::string &obVal) {
+    throw eckit::UserError("The 'greatest lower bound' method cannot be used for string variables.",
+                           Here());
+  }
+
   /// \brief Reset the extraction range for this object.
-  /// \details Each time an exactMatch or nearestMatch call is made for one or more variable,
+  /// \details Each time an exactMatch, nearestMatch, leastUpperBoundMatch or
+  /// greatestLowerBoundMatch call is made for one or more variable,
   /// the extraction range is further constrained to match our updated match conditions.  After
   /// the final 'extract' is made (i.e. an interpolated value is derived) it is desirable to reset
   /// the extraction range by calling this method.
