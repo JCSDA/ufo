@@ -64,6 +64,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(kind_real), allocatable            :: obsLat(:), obsImpP(:),obsLocR(:), obsGeoid(:), obsValue(:)
   integer(c_size_t), allocatable          :: obsRecnum(:)
   real(kind_real), allocatable            :: temperature(:)
+  real(kind_real), allocatable            :: humidity(:),refractivity(:),pressure(:)
+  real(kind_real)                         :: temp, geop
   real(kind_real)                         :: wf
   integer                                 :: wi, wi2
   real(kind_real)                         :: grids(ngrd)
@@ -92,6 +94,14 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   allocate(temperature(nlocs))
   temperature = missing
+  if (trim(self%roconf%output_diags) .eq. "true") then
+     allocate(humidity(nlocs))      ! at obs location
+     allocate(pressure(nlocs))      ! at obs location
+     allocate(refractivity(nlocs))  ! at obs location
+     humidity = missing
+     pressure = missing
+     refractivity = missing
+  endif
   allocate(super_refraction_flag(nlocs))
   super_refraction_flag = 0
   allocate(LayerIdx(nlocs))
@@ -261,13 +271,21 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !     save the obs vertical location index (unit: model layer)
       LayerIdx(iobs) = min(max(1, int(sIndx)), nlev)
 
-!     calculating temperature at obs location to obs space for BackgroundCheck RONBAM
+!     calculating virtual temperature at obs location to obs space for BackgroundCheck RONBAM
       indx=sIndx
       wi=min(max(1,indx),nlev)
       wi2=max(1,min(indx+1,nlev))
       wf=sIndx-float(wi)
       wf=max(zero,min(wf,one))
       temperature(iobs)=gesTv(wi,iobs)*(one-wf)+gesTv(wi2,iobs)*wf
+      if (trim(self%roconf%output_diags) .eq. "true") then
+         humidity(iobs)= gesQ(wi,iobs)*(one-wf)+gesQ(wi2,iobs)*wf 
+         temp          = gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf 
+         geop          = gesZ(wi,iobs)*(one-wf)+gesZ(wi2,iobs)*wf
+         pressure(iobs)= gesP(wi,iobs)/exp(two*grav*(geop-gesZ(wi,iobs))/(rd*(temperature(iobs)+gesTv(wi,iobs))))
+         call compute_refractivity(temp, humidity(iobs), pressure(iobs),   &
+                                 refractivity(iobs), self%roconf%use_compress)
+      end if
 
 !     (2) super-refaction
 !     (2.1) GSI style super refraction check
@@ -383,12 +401,20 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   call fckit_log%info(err_msg)
   end if ! end check if ZERO OBS
 
-! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
-  call obsspace_put_db(obss, "MetaData", "temperature", temperature)
+! putting virtual temeprature at obs location to obs space for BackgroundCheck RONBAM
+  call obsspace_put_db(obss, "MetaData", "virtual_temperature", temperature)
 ! putting super refraction flag to obs space 
   call obsspace_put_db(obss, "SRflag",   "bending_angle", super_refraction_flag)
 ! saving obs vertical model layer postion for later
   call obsspace_put_db(obss, "LayerIdx",   "bending_angle", LayerIdx)
+  if (trim(self%roconf%output_diags) .eq. "true") then
+      call obsspace_put_db(obss, "ObsDiag", "specific_humidity", humidity)
+      call obsspace_put_db(obss, "ObsDiag", "refractivity", refractivity)
+      call obsspace_put_db(obss, "ObsDiag", "pressure", pressure)
+      deallocate(humidity)
+      deallocate(pressure)
+      deallocate(refractivity)
+  end if
   deallocate(super_refraction_flag)
   deallocate(temperature)
   deallocate(LayerIdx)
