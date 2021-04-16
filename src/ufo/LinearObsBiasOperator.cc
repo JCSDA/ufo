@@ -71,7 +71,7 @@ void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
   // For each channel: ( nlocs X 1 ) = ( nlocs X npreds ) * ( npreds X 1 )
   for (std::size_t jch = 0; jch < nvars; ++jch) {
     for (std::size_t jp = 0; jp < npreds; ++jp) {
-      const double beta = biascoeffinc[jch*npreds + jp];
+      const double beta = biascoeffinc(jp, jch);
       /// axpy
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
         ybiasinc[jl*nvars+jch] += predData_[jp][jl*nvars+jch] * beta;
@@ -106,7 +106,7 @@ void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
     // For each channel: ( npreds X 1 ) = ( npreds X nlocs ) * ( nlocs X 1 )
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        biascoeffinc[jch*npreds + jp] += predData_[jp][jl*nvars+jch] * tmp(jl);
+        biascoeffinc(jp, jch) += predData_[jp][jl*nvars+jch] * tmp(jl);
       }
     }
     // zero out for next job

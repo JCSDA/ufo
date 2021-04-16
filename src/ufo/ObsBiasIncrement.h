@@ -8,11 +8,8 @@
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
 
-#include <memory>
 #include <string>
 #include <vector>
-
-#include "eckit/config/LocalConfiguration.h"
 
 #include "oops/util/Printable.h"
 
@@ -21,16 +18,9 @@
 
 namespace ioda {
   class ObsSpace;
-  class ObsVector;
-}
-
-namespace ioda {
-  class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
   class ObsBias;
 
 /// Contains increments to bias correction coefficients
@@ -38,12 +28,11 @@ class ObsBiasIncrement : public util::Printable {
  public:
   typedef ObsBiasParameters Parameters_;
 
-// Constructor, destructor
   ObsBiasIncrement(const ioda::ObsSpace & odb,
                    const Parameters_ & params);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
 
-// Linear algebra operators
+  // Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
   void zero();
   ObsBiasIncrement & operator=(const ObsBiasIncrement &);
@@ -53,20 +42,29 @@ class ObsBiasIncrement : public util::Printable {
   void axpy(const double, const ObsBiasIncrement &);
   double dot_product_with(const ObsBiasIncrement &) const;
 
-// I/O and diagnostics
+  // I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
 
-  double & operator[](const unsigned int ii) {return biascoeffsinc_[ii];}
-  const double & operator[](const unsigned int ii) const {return biascoeffsinc_[ii];}
+  /// Return the coefficient of predictor \p jpred for variable \p jvar.
+  double operator()(size_t jpred, size_t jvar) const {
+    return biascoeffsinc_(jvar*prednames_.size() + jpred);
+  }
+  double & operator()(size_t jpred, size_t jvar) {
+    return biascoeffsinc_(jvar*prednames_.size() + jpred);
+  }
 
-// Serialize and deserialize
+  /// Return bias coefficient increments
+  const Eigen::VectorXd & data() const {return biascoeffsinc_;}
+  Eigen::VectorXd & data() {return biascoeffsinc_;}
+
+  // Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
-  void serialize(std::vector<double> &) const {}
-  void deserialize(const std::vector<double> &, std::size_t &) {}
+  void serialize(std::vector<double> &) const;
+  void deserialize(const std::vector<double> &, std::size_t &);
 
-// Operator
+  // Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
   /// Reduce (sum) all bias correction coefficients increments
@@ -77,7 +75,8 @@ class ObsBiasIncrement : public util::Printable {
 
   const ioda::ObsSpace & odb_;
 
-  std::vector<double> biascoeffsinc_;
+  /// Bias coefficient increments
+  Eigen::VectorXd biascoeffsinc_;
   std::vector<std::string> prednames_;
 
   /// Variables that need to be bias-corrected

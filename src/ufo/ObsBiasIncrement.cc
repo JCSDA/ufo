@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2019 UCAR
+ * (C) Copyright 2018-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,17 +8,11 @@
 #include "ufo/ObsBiasIncrement.h"
 
 #include <iomanip>
-#include <set>
+#include <memory>
 
 #include "eckit/mpi/Comm.h"
-
 #include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-
-#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
-
 #include "ufo/ObsBias.h"
 
 namespace ufo {
@@ -37,8 +31,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
   }
 
   // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size() * vars_.size());
-  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
+  biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
 
   oops::Log::trace() << "ObsBiasIncrement::create done." << std::endl;
 }
@@ -50,14 +43,11 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
     prednames_(other.prednames_), vars_(other.vars_) {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
 
-  // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size() * vars_.size());
-
   // Copy the bias coefficients data, or fill in with zeros
   if (copy) {
     biascoeffsinc_ = other.biascoeffsinc_;
   } else {
-    std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
+    biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
   }
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
@@ -66,15 +56,13 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::diff(const ObsBias & b1, const ObsBias & b2) {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj]= b1[jj] - b2[jj];
+  biascoeffsinc_ = b1.data() - b2.data();
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::zero() {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj]= 0.0;
+  biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
 }
 
 // -----------------------------------------------------------------------------
@@ -91,69 +79,74 @@ ObsBiasIncrement & ObsBiasIncrement::operator=(const ObsBiasIncrement & rhs) {
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator+=(const ObsBiasIncrement & rhs) {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj] += rhs[jj];
+  biascoeffsinc_ += rhs.biascoeffsinc_;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator-=(const ObsBiasIncrement & rhs) {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj] -= rhs[jj];
+  biascoeffsinc_ -= rhs.biascoeffsinc_;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator*=(const double fact) {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj] *= fact;
+  biascoeffsinc_ *= fact;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::axpy(const double fact, const ObsBiasIncrement & rhs) {
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
-    biascoeffsinc_[jj] += fact * rhs[jj];
+  biascoeffsinc_ += fact * rhs.biascoeffsinc_;
 }
 
 // -----------------------------------------------------------------------------
 
 double ObsBiasIncrement::dot_product_with(const ObsBiasIncrement & rhs) const {
-  double zz = 0.0;
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj) {
-    zz += biascoeffsinc_[jj] * rhs[jj];
-  }
-  return zz;
+  return biascoeffsinc_.dot(rhs.biascoeffsinc_);
 }
 
 // -----------------------------------------------------------------------------
 
 double ObsBiasIncrement::norm() const {
   double zz = 0.0;
-  for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj) {
-    zz += biascoeffsinc_[jj] * biascoeffsinc_[jj];
+  if (biascoeffsinc_.size() > 0) {
+    zz = biascoeffsinc_.norm()/std::sqrt(biascoeffsinc_.size());
   }
-  if (biascoeffsinc_.size() > 0) zz = std::sqrt(zz/biascoeffsinc_.size());
   return zz;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::allSumInPlace() {
-  odb_.distribution().allReduceInPlace(biascoeffsinc_, eckit::mpi::sum());
+  std::vector<double> buffer(biascoeffsinc_.data(),
+                             biascoeffsinc_.data() + biascoeffsinc_.size());
+  odb_.distribution().allReduceInPlace(buffer, eckit::mpi::sum());
+  biascoeffsinc_ = Eigen::Map<Eigen::VectorXd>(buffer.data(), buffer.size());
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::serialize(std::vector<double> &) const {
+  throw eckit::NotImplemented("ufo::ObsBiasIncrement::serialize not implemented", Here());
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::deserialize(const std::vector<double> &, std::size_t &) {
+  throw eckit::NotImplemented("ufo::ObsBiasIncrement::deserialize not implemented", Here());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::print(std::ostream & os) const {
   if (this->serialSize() > 0) {
-    // map bias coeffs to eigen matrix (writable)
+    // map bias coeffs to eigen matrix
     Eigen::Map<const Eigen::MatrixXd>
       coeffs(biascoeffsinc_.data(), prednames_.size(), vars_.size());
-
     os << "ObsBiasIncrement::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < prednames_.size(); ++p) {

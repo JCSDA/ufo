@@ -553,6 +553,7 @@ if( crtm_FOUND )
 
     ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      MPI     2
                       ARGS    "testinput/amsua_crtm_bc.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x

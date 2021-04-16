@@ -35,7 +35,7 @@ namespace ufo {
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                      const Parameters_ & params)
-  : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(0),
+  : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(),
     preconditioner_(0),
     ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
@@ -69,8 +69,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
     largest_analysis_variance_ = biasCovParams.largestAnalysisVariance;
 
     // Initialize the variances to upper limit
-    variances_.resize(prednames_.size() * vars_.size());
-    std::fill(variances_.begin(), variances_.end(), largest_variance_);
+    variances_ = Eigen::VectorXd::Constant(prednames_.size()*vars_.size(), largest_variance_);
 
     // Initialize the hessian contribution to zero
     ht_rinv_h_.resize(prednames_.size() * vars_.size());
@@ -284,9 +283,7 @@ void ObsBiasCovariance::multiply(const ObsBiasIncrement & dx1,
                                  ObsBiasIncrement & dx2) const {
   oops::Log::trace() << "ObsBiasCovariance::multiply starts" << std::endl;
 
-  for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-    dx2[jj] = dx1[jj] * variances_[jj];
-  }
+  dx2.data().array() = dx1.data().array() * variances_.array();
 
   oops::Log::trace() << "ObsBiasCovariance::multiply is done" << std::endl;
 }
@@ -297,9 +294,7 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & dx1,
                                         ObsBiasIncrement & dx2) const {
   oops::Log::trace() << "ObsBiasCovariance::inverseMultiply starts" << std::endl;
 
-  for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-    dx2[jj] = dx1[jj] / variances_[jj];
-  }
+  dx2.data().array() = dx1.data().array() / variances_.array();
 
   oops::Log::trace() << "ObsBiasCovariance::inverseMultiply is done" << std::endl;
 }
@@ -311,7 +306,7 @@ void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   if (dx) {
     static util::NormalDistribution<double> dist(variances_.size());
     for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-      dx[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
     }
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;

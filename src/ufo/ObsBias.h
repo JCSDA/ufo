@@ -63,11 +63,12 @@ class ObsBias : public util::Printable,
   ///
   /// Note: \p jpred may be the index of a static or a variable predictor.
   double operator()(size_t jpred, size_t jvar) const {
-    return jpred < numStaticPredictors_ ? 1.0 : biascoeffs_(jpred - numStaticPredictors_, jvar);
+    return jpred < numStaticPredictors_ ?
+           1.0 : biascoeffs_[index(jpred - numStaticPredictors_, jvar)];
   }
 
-  /// Return the ii'th element of the flattened array of coefficients of *variable* predictors.
-  double operator[](const unsigned int ii) const {return biascoeffs_(ii);}
+  /// Return bias correction coefficients (for *variable* predictors)
+  const Eigen::VectorXd & data() const {return biascoeffs_;}
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
@@ -91,10 +92,13 @@ class ObsBias : public util::Printable,
  private:
   void print(std::ostream &) const override;
 
+  /// index in the flattened biascoeffs_ for predictor \p jpred and variable \p jvar
+  size_t index(size_t jpred, size_t jvar) const {return jvar*numVariablePredictors_ + jpred;}
+
   void initPredictor(const eckit::Configuration &predictorConf);
 
   /// bias correction coefficients (npredictors x nprimitivevariables)
-  Eigen::MatrixXf biascoeffs_;
+  Eigen::VectorXd biascoeffs_;
 
   /// bias correction predictors
   Predictors predictors_;

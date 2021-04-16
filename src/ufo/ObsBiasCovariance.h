@@ -79,7 +79,7 @@ class ObsBiasCovariance : public util::Printable,
   std::vector<double> analysis_variances_;
 
 // Error variances
-  std::vector<double> variances_;
+  Eigen::VectorXd variances_;
 
 // Smallest variance value
   double smallest_variance_ = ObsBiasCovarianceParameters::defaultSmallestVariance();

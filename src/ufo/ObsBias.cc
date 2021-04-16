@@ -46,7 +46,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
   if (prednames_.size() * vars_.size() > 0) {
     // Initialize the coefficients of variable predictors to 0. (Coefficients of static predictors
     // are not stored; they are always equal to 1.)
-    biascoeffs_ = Eigen::MatrixXf::Zero(numVariablePredictors_, vars_.size());
+    biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
     // Read or initialize bias coefficients
     this->read(params);
   }
@@ -66,7 +66,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_ = Eigen::MatrixXf::Zero(numVariablePredictors_, vars_.size());
+  biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -77,8 +77,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
-  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj)
-    biascoeffs_(jj) += dx[jj];
+  biascoeffs_ += dx.data();
   return *this;
 }
 
@@ -131,10 +130,10 @@ void ObsBias::read(const Parameters_ & params) {
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbiascoeffs(pred_idx, chan_idx) when Eigen 3.4
     // is available
+
     for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
-         biascoeffs_(jpred, jvar) =
-             allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
+         biascoeffs_[index(jpred, jvar)] = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
       }
     }
   } else {
@@ -163,9 +162,7 @@ double ObsBias::norm() const {
   zz += numUnitCoeffs * numUnitCoeffs;
 
   // Variable predictors
-  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj) {
-    zz += biascoeffs_(jj) * biascoeffs_(jj);
-  }
+  zz += biascoeffs_.squaredNorm();
 
   // Compute average and take square root
   const int numCoeffs = numUnitCoeffs + biascoeffs_.size();
@@ -186,7 +183,9 @@ std::vector<std::shared_ptr<const PredictorBase>> ObsBias::variablePredictors() 
 
 void ObsBias::print(std::ostream & os) const {
   if (this->size() > 0) {
-    // map bias coeffs to eigen matrix (writable)
+    // map bias coeffs to eigen matrix
+    Eigen::Map<const Eigen::MatrixXd>
+      coeffs(biascoeffs_.data(), numVariablePredictors_, vars_.size());
     os << "ObsBias::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < numStaticPredictors_; ++p) {
@@ -202,11 +201,11 @@ void ObsBias::print(std::ostream & os) const {
     for (std::size_t p = 0; p < numVariablePredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[numStaticPredictors_ + p]
          << ":  Min= " << std::setw(15) << std::setprecision(8)
-         << biascoeffs_.row(p).minCoeff()
+         << coeffs.row(p).minCoeff()
          << ",  Max= " << std::setw(15) << std::setprecision(8)
-         << biascoeffs_.row(p).maxCoeff()
+         << coeffs.row(p).maxCoeff()
          << ",  Norm= " << std::setw(15) << std::setprecision(8)
-         << biascoeffs_.row(p).norm()
+         << coeffs.row(p).norm()
          << std::endl;
     }
     os << "---------------------------------------------------------------" << std::endl;
