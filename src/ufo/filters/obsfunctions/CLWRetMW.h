@@ -68,6 +68,13 @@ class CLWRetMWParameters : public oops::Parameters {
   /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
   oops::OptionalParameter<int> ch37h{"clwret_ch37h", this};
   oops::OptionalParameter<int> ch37v{"clwret_ch37v", this};
+
+  /// For retrieving AMSR2 cloud liquid water.
+  oops::OptionalParameter<int> ch18h{"clwret_ch18h", this};
+  oops::OptionalParameter<int> ch18v{"clwret_ch18v", this};
+  oops::OptionalParameter<int> ch36h{"clwret_ch36h", this};
+  oops::OptionalParameter<int> ch36v{"clwret_ch36v", this};
+  oops::OptionalParameter<std::vector<float>> origbias{"sys_bias", this};
 };
 
 ///
@@ -98,6 +105,11 @@ class CLWRetMW : public ObsFunctionBase {
                                std::vector<float> &);
   static void CIret_37v37h_diff(const std::vector<float> &,
                                const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               std::vector<float> &);
+  static void clw_retr_amsr2(const std::vector<float> &,
                                const std::vector<float> &,
                                const std::vector<float> &,
                                const std::vector<float> &,

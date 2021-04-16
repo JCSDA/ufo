@@ -33,7 +33,9 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
   // Get variable group types for CLW retrieval from option
   ASSERT(options_.varGroup.value().size() == 1 || options_.varGroup.value().size() == 2);
   ASSERT((options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) ||
-         (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none));
+         (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) ||
+         (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none  &&
+          options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none));
 
   if (options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) {
     // For AMSUA and ATMS retrievals
@@ -68,6 +70,22 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
     // Include list of required data from ObsDiag
     invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
 
+    // Include list of required data from GeoVaLs
+    invars_ += Variable("water_area_fraction@GeoVaLs");
+  } else if (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none &&
+             options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none) {
+    const std::vector<int> channels = {options_.ch18v.value().get(), options_.ch18h.value().get(),
+                                       options_.ch36v.value().get(), options_.ch36h.value().get()};
+    ASSERT(options_.ch18v.value().get() != 0 && options_.ch18h.value().get() != 0 &&
+           options_.ch36v.value().get() != 0 && options_.ch36h.value().get() != 0 &&
+           channels.size() == 4);
+    const std::vector<float> &sys_bias = options_.origbias.value().get();
+    ASSERT(options_.origbias.value() != boost::none);
+    // Include list of required data from ObsSpace
+    for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
+      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+    }
+    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
     // Include list of required data from GeoVaLs
     invars_ += Variable("water_area_fraction@GeoVaLs");
   }
@@ -181,6 +199,65 @@ void CLWRetMW::compute(const ObsFilterData & in,
       // Compute cloud index
       CIret_37v37h_diff(bt_clr_37v, bt_clr_37h, water_frac, bt37v, bt37h, out[igrp]);
     }
+  // -------------------- amsr2 ---------------------------
+  } else if (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none &&
+             options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none) {
+    const std::vector<int> channels = {options_.ch18v.value().get(), options_.ch18h.value().get(),
+                                       options_.ch36v.value().get(), options_.ch36h.value().get()};
+    const int jch18v = 0;
+    const int jch18h = 1;
+    const int jch36v = 2;
+    const int jch36h = 3;
+    // systematic bias for channels 1-14.
+    const std::vector<float> &sys_bias = options_.origbias.value().get();
+    // Calculate retrieved cloud liquid water
+    std::vector<float> bt18v(nlocs), bt18h(nlocs), bt36v(nlocs), bt36h(nlocs);
+
+    for (size_t igrp = 0; igrp < ngrps; ++igrp) {
+      // Get data based on group type
+      const Variable btVar("brightness_temperature@" + vargrp[igrp], channels);
+      in.get(btVar[jch18v], bt18v);
+      in.get(btVar[jch18h], bt18h);
+      in.get(btVar[jch36v], bt36v);
+      in.get(btVar[jch36h], bt36h);
+      // Get bias based on group type
+      if (options_.addBias.value() == vargrp[igrp]) {
+        std::vector<float> bias18v(nlocs), bias18h(nlocs);
+        std::vector<float> bias36v(nlocs), bias36h(nlocs);
+        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+            [jch36v])) {
+          const Variable testBias("brightness_temperature@" + options_.testBias.value(), channels);
+          in.get(testBias[jch18v], bias18v);
+          in.get(testBias[jch18h], bias18h);
+          in.get(testBias[jch36v], bias36v);
+          in.get(testBias[jch36h], bias36h);
+        } else {
+          bias18v.assign(nlocs, 0.0f);
+          bias18h.assign(nlocs, 0.0f);
+          bias36v.assign(nlocs, 0.0f);
+          bias36h.assign(nlocs, 0.0f);
+        }
+        // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
+        // correction
+        if (options_.addBias.value() == "ObsValue") {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt18v[iloc] = bt18v[iloc] - bias18v[iloc];
+            bt18h[iloc] = bt18h[iloc] - bias18h[iloc];
+            bt36v[iloc] = bt36v[iloc] - bias36v[iloc];
+            bt36h[iloc] = bt36h[iloc] - bias36h[iloc];
+          }
+        }
+      }
+      // correct systematic bias.
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        bt18v[iloc] = bt18v[iloc] - sys_bias[6];
+        bt18h[iloc] = bt18h[iloc] - sys_bias[7];
+        bt36v[iloc] = bt36v[iloc] - sys_bias[10];
+        bt36h[iloc] = bt36h[iloc] - sys_bias[11];
+      }
+      // Compute cloud index
+      clw_retr_amsr2(bt18v, bt18h, bt36v, bt36h, out[igrp]);
+    }
   }
 }
 
@@ -249,6 +326,40 @@ void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
   }
 }
 
+// -----------------------------------------------------------------------------
+/// \brief Retrieve AMSR2_GCOM-W1 cloud liquid water.
+///  This retrieval function is taken from the subroutine "retrieval_amsr2()" in GSI.
+void CLWRetMW::clw_retr_amsr2(const std::vector<float> & bt18v,
+                                         const std::vector<float> & bt18h,
+                                         const std::vector<float> & bt36v,
+                                         const std::vector<float> & bt36h,
+                                         std::vector<float> & out) {
+  float clw;
+  std::vector<float> pred_var_clw(2);
+  // intercepts
+  const float a0_clw = -0.65929;
+  // regression coefficients
+  float regr_coeff_clw[3] = {-0.00013, 1.64692, -1.51916};
+
+  for (size_t iloc = 0; iloc < bt18v.size(); ++iloc) {
+    if (bt18v[iloc] <= bt18h[iloc]) {
+      out[iloc] = getBadValue();
+    } else if (bt36v[iloc] <= bt36h[iloc]) {
+      out[iloc] = getBadValue();
+    } else {
+      // Calculate predictors
+      pred_var_clw[0] = log(bt18v[iloc] - bt18h[iloc]);
+      pred_var_clw[1] = log(bt36v[iloc] - bt36h[iloc]);
+      clw = a0_clw + bt36h[iloc]*regr_coeff_clw[0];
+      for (size_t nvar_clw=0; nvar_clw < pred_var_clw.size(); ++nvar_clw) {
+        clw = clw + (pred_var_clw[nvar_clw] * regr_coeff_clw[nvar_clw+1]);
+      }
+      clw = std::max(0.0f, clw);
+      clw = std::min(6.0f, clw);
+      out[iloc] = clw;
+    }
+  }
+}
 // -----------------------------------------------------------------------------
 const ufo::Variables & CLWRetMW::requiredVariables() const {
   return invars_;

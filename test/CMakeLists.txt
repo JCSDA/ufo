@@ -14,6 +14,9 @@ list( APPEND ufo_test_input
   testinput/airs_crtm.yaml
   testinput/airs_qc_filters.yaml
   testinput/amsr2_rttov_qc.yaml
+  testinput/amsr2_crtm.yaml
+  testinput/amsr2_clw_ret.yaml
+  testinput/amsr2_qc.yaml
   testinput/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
@@ -769,6 +772,34 @@ if( crtm_FOUND )
                       ARGS    "testinput/aod_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_crtm_amsr2
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/amsr2_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_amsr2
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/amsr2_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_amsr2_clw_ret
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsr2_clw_ret.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_amsr2_qc
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsr2_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
     if( ${geos-aero_FOUND} )
@@ -2790,6 +2821,8 @@ EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/amsr2_gcom-w1.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsr2_gcom-w1.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_metop-a.SpcCoeff.bin
