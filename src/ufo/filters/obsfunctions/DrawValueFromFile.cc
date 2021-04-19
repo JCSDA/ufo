@@ -4,8 +4,8 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-
 #include "eckit/exception/Exceptions.h"
+#include "oops/util/IntSetParser.h"
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 
 
@@ -38,7 +38,12 @@ DrawValueFromFile::DrawValueFromFile(const eckit::LocalConfiguration &config)
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[intParam->name.value()] = method;
     }
-
+    // Get channels from options
+    if (options_.chlist.value() != boost::none) {
+        std::set<int> channels = options_.chlist.value().get();
+        channels_ = {std::make_move_iterator(std::begin(channels)),
+                     std::make_move_iterator(std::end(channels))};
+    }
     fpath_ = options_.fpath.value();
     allvars_  = Variables(interpSubConfs);
 }
@@ -69,9 +74,12 @@ class ExtractVisitor : public boost::static_visitor<void> {
 void DrawValueFromFile::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
   const float missing = util::missingValue(missing);
-  ASSERT(out.nvars() == 1);
 
   NetCDFInterpolator interpolator{fpath_, options_.group};
+
+  // Channel number handling
+  if (options_.chlist.value() != boost::none)
+    interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT);
 
   ObData obData;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
@@ -101,17 +109,18 @@ void DrawValueFromFile::compute(const ObsFilterData & in,
   // Finalise (apply) sort by calling with no arguments.
   interpolator.sort();
 
-  int jvar = 0;
-  if (out.nvars() != 1) {
-    throw eckit::NotImplemented("Multichannel variables not yet supported.", Here());
-  }
-  for (size_t iloc = 0; iloc < in.nlocs(); ++iloc) {
-    // Perform any extraction methods (exact, nearest and linear interp.)
-    for (auto &od : obData) {
-      ExtractVisitor visitor(interpolator, iloc);
-      boost::apply_visitor(visitor, od.second);
+  for (size_t jvar = 0; jvar < out.nvars(); ++jvar) {
+    for (size_t iloc = 0; iloc < in.nlocs(); ++iloc) {
+      if (options_.chlist.value() != boost::none)
+        interpolator.extract(channels_[jvar]);
+
+      // Perform any extraction methods (exact, nearest and linear interp.)
+      for (auto &od : obData) {
+        ExtractVisitor visitor(interpolator, iloc);
+        boost::apply_visitor(visitor, od.second);
+      }
+      out[jvar][iloc] = interpolator.getResult();
     }
-    out[static_cast<size_t>(jvar)][iloc] = interpolator.getResult();
   }
 }
 

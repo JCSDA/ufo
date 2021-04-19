@@ -58,7 +58,7 @@ void orderedComparison(const RecursiveSplitter &splitter,
     iterInd = -1;
     for (auto index : g) {
       iterInd++;
-      std::cout << "group: " << groupInd << " index: " << index << " expected index: " <<
+      oops::Log::debug() << "group: " << groupInd << " index: " << index << " expected index: " <<
         expected[groupInd][iterInd] << std::endl;
       EXPECT_EQUAL(index, expected[groupInd][iterInd]);
     }

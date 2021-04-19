@@ -87,8 +87,8 @@ void NetCDFInterpolator::sort() {
           ind++;
           oops::Log::debug() << "Sort index dim0; index-from: " << ind << " index-to: " <<
             index << std::endl;
-          for (int j = 0; j < interpolatedArray2D_.cols(); j++) {
-            sortedArray(ind, j) = interpolatedArray2D_(static_cast<int>(index), j);
+          for (Eigen::Index j = 0; j < interpolatedArray2D_.cols(); j++) {
+            sortedArray(ind, j) = interpolatedArray2D_(static_cast<Eigen::Index>(index), j);
           }
         }
       }
@@ -101,8 +101,8 @@ void NetCDFInterpolator::sort() {
           ind++;
           oops::Log::debug() << "Sort index dim1; index-from: " << ind << " index-to: " <<
             index << std::endl;
-          for (int i = 0; i < interpolatedArray2D_.rows(); i++) {
-            sortedArray(i, ind) = interpolatedArray2D_(i, static_cast<int>(index));
+          for (Eigen::Index i = 0; i < interpolatedArray2D_.rows(); i++) {
+            sortedArray(i, ind) = interpolatedArray2D_(i, static_cast<Eigen::Index>(index));
           }
         }
       }
@@ -182,7 +182,6 @@ std::vector<std::string> NetCDFInterpolator::fetchDimNameMapping(
     const ioda::Variable &variable,
     const std::string &varName,
     const std::list<std::pair<std::string, ioda::Variable>> &coordinates) {
-  variable.getBasicType();
   std::vector<std::string> dimnames;
   if (variable.isDimensionScale()) {
     // Variable corresponds to the dimension name so maps to itself (it's a dimension coordinate).

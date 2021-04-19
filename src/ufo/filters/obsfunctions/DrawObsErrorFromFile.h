@@ -25,15 +25,16 @@ namespace ufo {
 ///     - Filter: Perform Action
 ///       filter variables:
 ///       - name: air_temperature
+///         channels: &all_channels 1-3
 ///       action:
 ///         name: assign error
 ///         error function:
 ///           name: DrawObsErrorFromFile@ObsFunction
+///           channels: *all_channels
 ///           options:
 ///             file: <filepath>
+///             channels: *all_channels
 ///             interpolation:
-///             - name: channel_number@MetaData
-///               method: exact
 ///             - name: satellite_id@MetaData
 ///               method: exact
 ///             - name: processing_center@MetaData
@@ -42,6 +43,8 @@ namespace ufo {
 ///               method: linear
 /// \endcode
 ///
+/// Note that channel number extraction is implicit, using the channels selected and performed as
+/// an exact match before any user defined interpolation takes place.
 class DrawObsErrorFromFile : public ObsFunctionBase {
  public:
   static const std::string classname() {return "DrawObsErrorFromFile";}

@@ -10,6 +10,7 @@
 
 #include <algorithm>     // transform
 #include <list>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>       // pair
@@ -78,8 +79,13 @@ class DrawValueFromFileParametersWithoutGroup : public oops::Parameters {
   /// Path to the file containing the data to interpolate.
   oops::RequiredParameter<std::string> fpath{"file", this};
   /// List of interpolation variables and associated methods (exact, linear and nearest supported)
+  /// Note that channel numbers is handled implicitly by the "channels" (see below).
   oops::RequiredParameter<std::vector<InterpolationParameters>> interpolation{"interpolation",
                                                                               this};
+  /// List of channel numbers (then deriving an observation error per channel)
+  /// If this option is provided, the channel number is implicitly prepended to the list of
+  /// interpolation variables and matched exactly.
+  oops::OptionalParameter<std::set<int>> chlist{"channels", this};
 };
 
 
@@ -108,12 +114,12 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 ///       - name: interpolated_value@DerivedValue
 ///         function:
 ///           name: DrawValueFromFile@ObsFunction
+///           channels: 1-3
 ///           options:
 ///             file: <filepath>
+///             channels: 1-3
 ///             group: DerivedValue
 ///             interpolation:
-///             - name: channel_number@MetaData
-///               method: exact
 ///             - name: satellite_id@MetaData
 ///               method: exact
 ///             - name: processing_center@MetaData
@@ -122,6 +128,8 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 ///               method: linear
 /// \endcode
 ///
+/// Note that channel number extraction is implicit, using the channels selected and performed as
+/// an exact match before any user defined interpolation takes place.
 class DrawValueFromFile : public ObsFunctionBase {
  public:
   static const std::string classname() {return "DrawValueFromFile";}
@@ -143,6 +151,7 @@ class DrawValueFromFile : public ObsFunctionBase {
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
+  std::vector<int> channels_;
 
   static std::string get_full_name(const ufo::Variable &variable) {
     std::string name = variable.variable();
