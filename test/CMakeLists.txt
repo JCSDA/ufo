@@ -123,6 +123,7 @@ list( APPEND ufo_test_input
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
+  testinput/interpolate_data_from_file_predictor.yaml
   testinput/legendre_predictor.yaml
   testinput/locations.yaml
   testinput/metar_qc_filters.yaml
@@ -2808,6 +2809,13 @@ ecbuild_add_test( TARGET  test_legendre_predictor
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_Predictor.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_interpolate_data_from_file_predictor
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+                  ARGS    "testinput/interpolate_data_from_file_predictor.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 #####################################################################
 # Files for CRTM tests

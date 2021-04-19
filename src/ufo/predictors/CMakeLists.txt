@@ -14,6 +14,8 @@ set ( predictor_files
   CosineOfLatitudeTimesOrbitNode.cc
   Emissivity.h
   Emissivity.cc
+  InterpolateDataFromFile.h
+  InterpolateDataFromFile.cc
   LapseRate.h
   LapseRate.cc
   Legendre.h

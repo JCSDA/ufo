@@ -1,0 +1,26 @@
+window begin: 2010-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_interpolate_data_from_file_predictors.nc4
+    simulated variables: [air_temperature, eastward_wind, northward_wind, specific_humidity]
+  obs bias:
+    static bc:
+      predictors:
+      - name: interpolate_data_from_file
+        options:
+          corrected variables:
+          - name: air_temperature
+            file: Data/ufo/testinput_tier_1/bias_interpolation_air_temperature.nc4
+            interpolation:
+            - name: station_id@MetaData
+              method: exact
+          - name: specific_humidity
+            file: Data/ufo/testinput_tier_1/bias_interpolation_specific_humidity.nc4
+            interpolation:
+            - name: station_id@MetaData
+              method: exact
+  tolerance: 1.0e-16

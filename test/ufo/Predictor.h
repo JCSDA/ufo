@@ -46,7 +46,7 @@ void testPredictor() {
     ioda::ObsSpace &ospace = Test_::obspace()[jj].obsspace();
     const eckit::Configuration &conf = typeconfs[jj];
 
-    /// initialize bias correction
+    // initialize bias correction
     eckit::LocalConfiguration bconf(conf, "obs bias");
     ObsBiasParameters bparams;
     bparams.validateAndDeserialize(bconf);
@@ -54,13 +54,20 @@ void testPredictor() {
     // get predictor names
     std::vector<std::string> predictor_names = ybias.requiredPredictors();
 
-    /// read geovals from the file
-    eckit::LocalConfiguration gconf(conf, "geovals");
+    // Initialize GeoVaLs
     oops::Variables gvars;
     gvars += ybias.requiredVars();
-    const GeoVaLs gval(gconf, ospace, gvars);
+    std::unique_ptr<const GeoVaLs> gval;
+    if (gvars.size() > 0) {
+      // Read GeoVaLs from a file
+      eckit::LocalConfiguration gconf(conf, "geovals");
+      gval.reset(new GeoVaLs(gconf, ospace, gvars));
+    } else {
+      // Create an empty GeoVaLs object
+      gval.reset(new GeoVaLs(ospace.comm()));
+    }
 
-    /// read Obs diagnostics from file
+    // initialize Obs diagnostics
     oops::Variables diagvars;
     diagvars += ybias.requiredHdiagnostics();
     std::vector<float> lons(ospace.nlocs());
@@ -72,14 +79,14 @@ void testPredictor() {
     Locations locs(lons, lats, times, ospace.comm());
     ObsDiagnostics ydiags(ospace, locs, diagvars);
 
-    /// Calculate predictor values
+    // Calculate predictor values
     const std::size_t npreds = predictor_names.size();
     EXPECT(npreds > 0);
     std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(ospace));
 
     const Predictors & predictors = ybias.predictors();
     for (std::size_t p = 0; p < npreds; ++p) {
-      predictors[p]->compute(ospace, gval, ydiags, predData[p]);
+      predictors[p]->compute(ospace, *gval, ydiags, predData[p]);
       predData[p].save(predictors[p]->name() + "Predictor");
     }
 
