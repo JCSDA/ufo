@@ -33,6 +33,7 @@
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
+#include "ufo/filters/SatName.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
@@ -56,6 +57,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            preQCMaker("PreQC");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainCheck> >
            domainCheckMaker("Domain Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::SatName> >
+           satnameCheckMaker("satname");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsBoundsCheck> >
            boundsCheckMaker("Bounds Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BlackList> >

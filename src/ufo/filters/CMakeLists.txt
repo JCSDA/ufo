@@ -64,6 +64,8 @@ set ( filters_files
       ProfileConsistencyCheckParameters.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
+      SatName.h
+      SatName.cc
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h

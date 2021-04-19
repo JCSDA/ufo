@@ -197,6 +197,7 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
+  testinput/satname.yaml
   testinput/sattcwv.yaml
   testinput/satwind.yaml
   testinput/satwind_metoffice.yaml
@@ -1522,6 +1523,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gen_profilebackgroundcheck
 ecbuild_add_test( TARGET  test_ufo_qc_gen_profilefewobservationscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_profile_fewobs_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_satname                
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/satname.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
