@@ -52,31 +52,11 @@ void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
                                              ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasTL starts." << std::endl;
 
-  const size_t nlocs  = ybiasinc.nlocs();
-  const size_t nvars  = ybiasinc.nvars();
   const size_t npreds = predData_.size();
 
-  /* ybiasinc memory layout (nlocs X nvars)
-   *     ch1    ch2    ch3     ch4
-   * Loc --------------------------
-   *  0 | 0      1      2       3
-   *  1 | 4      5      6       7
-   *  2 | 8      9     10      11 
-   *  3 |12     13     14      15
-   *  4 |16     17     18      19
-   * ...|
-  */
-
   ybiasinc.zero();
-  // For each channel: ( nlocs X 1 ) = ( nlocs X npreds ) * ( npreds X 1 )
-  for (std::size_t jch = 0; jch < nvars; ++jch) {
-    for (std::size_t jp = 0; jp < npreds; ++jp) {
-      const double beta = biascoeffinc(jp, jch);
-      /// axpy
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        ybiasinc[jl*nvars+jch] += predData_[jp][jl*nvars+jch] * beta;
-      }
-    }
+  for (size_t jpred = 0; jpred < npreds; ++jpred) {
+    ybiasinc.axpy(biascoeffinc.coefficients(jpred), predData_[jpred]);
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasTL done." << std::endl;

@@ -48,9 +48,6 @@ class ObsBiasIncrement : public util::Printable {
   double norm() const;
 
   /// Return the coefficient of predictor \p jpred for variable \p jvar.
-  double operator()(size_t jpred, size_t jvar) const {
-    return biascoeffsinc_(jvar*prednames_.size() + jpred);
-  }
   double & operator()(size_t jpred, size_t jvar) {
     return biascoeffsinc_(jvar*prednames_.size() + jpred);
   }
@@ -58,6 +55,16 @@ class ObsBiasIncrement : public util::Printable {
   /// Return bias coefficient increments
   const Eigen::VectorXd & data() const {return biascoeffsinc_;}
   Eigen::VectorXd & data() {return biascoeffsinc_;}
+
+  // We could store coefficients in a different order. Then it would
+  // be easier to extract part of the existing vector.
+  std::vector<double> coefficients(size_t jpred) const {
+    std::vector<double> coeffs(vars_.size());
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      coeffs[jvar] = biascoeffsinc_(jvar*prednames_.size() + jpred);
+    }
+    return coeffs;
+  }
 
   // Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
