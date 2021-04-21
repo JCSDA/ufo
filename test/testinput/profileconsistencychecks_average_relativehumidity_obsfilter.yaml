@@ -27,6 +27,6 @@ observations:
     PrintStationID: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 1572
+  passedBenchmark: 1574
   benchmarkFlag: 15
-  flaggedBenchmark: 35
+  flaggedBenchmark: 33

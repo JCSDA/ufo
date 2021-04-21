@@ -157,6 +157,7 @@ namespace ufo {
     ProfileDataHandler profileDataHandler(data_,
                                           options_.DHParameters,
                                           apply,
+                                          filtervars,
                                           flagged);
 
     // (Optionally) validates check results against OPS values

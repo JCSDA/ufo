@@ -86,17 +86,7 @@ namespace ufo {
           if (obsdb_.has(groupname, varname)) obsdb_.get_db(groupname, varname, vec_all);
         }
 
-        // If the vector contains entirely missing values, clear it.
-        const T missingValue = util::missingValue(missingValue);  // Missing value for type T.
-        bool allMissing = true;  // Signifies all elements in the vector are missing.
-        for (size_t idx = 0; allMissing && idx < vec_all.size(); ++idx)
-          allMissing = vec_all[idx] == missingValue;
-        if (allMissing) {
-          oops::Log::debug() << "All elements of " << fullname << " are missing" << std::endl;
-          vec_all.clear();
-        }
-
-        // Add vector to map (even if it is empty).
+        // Add vector to map.
         entireSampleData_.emplace(fullname, std::move(vec_all));
         return boost::get<std::vector<T>> (entireSampleData_[fullname]);
       }

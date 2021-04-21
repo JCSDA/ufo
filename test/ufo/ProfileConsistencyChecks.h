@@ -59,6 +59,8 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
+  const Variables filtervars = Variables(obsspace.obsvariables());
+
   ObsFilterData filterdata(obsspace);
 
   ioda::ObsVector hofx(obsspace);
@@ -150,6 +152,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
+                                          filtervars,
                                           flagged);
     // Obtain profile data
     profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -172,6 +175,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
+                                          filtervars,
                                           flagged);
     ProfileCheckValidator profileCheckValidator(options);
 
@@ -235,6 +239,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
+                                          filtervars,
                                           flagged);
 
     // Get interpolation options for each profile.
@@ -318,6 +323,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     ProfileDataHandler profileDataHandler(filterdata,
                                           options.DHParameters,
                                           apply,
+                                          filtervars,
                                           flagged);
 
     for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {

@@ -147,7 +147,7 @@ Wrong number of entries per profile, background:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]

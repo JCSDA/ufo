@@ -21,6 +21,9 @@ namespace ufo {
   {
     this->reset();
 
+    // Determine unique profile numbers.
+    uniqueProfileNums_.insert(profileNums_.begin(), profileNums_.end());
+
     // If not sorting observations, ensure number of profiles is consistent
     // with quantity reported by obsdb.
     // (If sorting is imposed, nothing is assumed about the ordering of the input data
@@ -117,6 +120,12 @@ namespace ufo {
         std::advance(profidx_current_, 1);
       }
     }
+  }
+
+  size_t ProfileIndices::getProfileNumCurrent() const
+  {
+    const auto &it = uniqueProfileNums_.find(profileNumCurrent_);
+    return std::distance(uniqueProfileNums_.begin(), it);
   }
 
   void ProfileIndices::validateTotalNumProf() {

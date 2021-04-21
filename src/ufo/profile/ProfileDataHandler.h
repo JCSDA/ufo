@@ -51,6 +51,7 @@ namespace ufo {
     ProfileDataHandler(const ObsFilterData &data,
                        const DataHandlerParameters &options,
                        const std::vector <bool> &apply,
+                       const Variables &filtervars,
                        std::vector<std::vector<bool>> &flagged);
 
     /// Retrieve a vector containing the requested variable for the current profile.
@@ -209,6 +210,9 @@ namespace ufo {
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;
+
+    /// Filter variables
+    const Variables &filtervars_;
 
     /// Flagged values
     std::vector<std::vector<bool>> &flagged_;

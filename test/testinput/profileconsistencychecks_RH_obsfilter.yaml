@@ -27,6 +27,6 @@ observations:
     BChecks_Skip: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 9586
+  passedBenchmark: 9654
   benchmarkFlag: 15
-  flaggedBenchmark: 136
+  flaggedBenchmark: 68

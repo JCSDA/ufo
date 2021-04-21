@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <ostream>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -51,8 +52,8 @@ namespace ufo {
     /// Return number of levels to which QC checks should be applied.
     int getNumProfileLevels() const {return numProfileLevels_;}
 
-    /// Get number of current profile.
-    size_t getProfileNumCurrent() const {return profileNumCurrent_;}
+    /// Get number of current profile, accounting for distribution across processors.
+    size_t getProfileNumCurrent() const;
 
     /// Reset profile indices to point to the beginning of the sample.
     void reset();
@@ -73,6 +74,9 @@ namespace ufo {
 
     /// Profile numbers for the entire sample.
     const std::vector <size_t> profileNums_;
+
+    /// Unique profile numbers for the entire sample.
+    std::set <size_t> uniqueProfileNums_;
 
     /// Profile index map.
     typedef std::map<std::size_t, std::vector<std::size_t>> ProfIdxMap;

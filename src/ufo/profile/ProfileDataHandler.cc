@@ -17,11 +17,13 @@ namespace ufo {
   ProfileDataHandler::ProfileDataHandler(const ObsFilterData &data,
                                          const DataHandlerParameters &options,
                                          const std::vector <bool> &apply,
+                                         const Variables &filtervars,
                                          std::vector<std::vector<bool>> &flagged)
     : obsdb_(data.obsspace()),
       geovals_(data.getGeoVaLs()),
       obsdiags_(data.getObsDiags()),
       options_(options),
+      filtervars_(filtervars),
       flagged_(flagged)
   {
     profileIndices_.reset(new ProfileIndices(obsdb_, options, apply));
@@ -139,25 +141,46 @@ namespace ufo {
       if (groupname == "QCFlags") {
         oops::Log::debug() << " " << fullname << std::endl;
 
+        // Obtain QC flags
         const std::vector <int> &Flags = get<int>(fullname);
+        if (Flags.empty()) continue;
         getProfileIndicesInEntireSample(groupname);
 
-        size_t idx = 0;
-        for (const auto& profileIndex : profileIndicesInEntireSample_) {
-          // Please note this concise code relies on both FlagsElem::FinalRejectFlag
-          // and FlagsWholeObReport::FinalRejectReport being equal to the same value
-          // (as is the case in OPS).
-          // If one or both values change, and clash with another flag in the enum,
-          // this will have to be rewritten.
-          if (!Flags.empty() &&
-              (Flags[idx] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag ||
-               Flags[idx] & ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport)) {
-            oops::Log::debug() << "  " << profileIndex << std::endl;
-            // Flag all variables
-            for (size_t jv = 0; jv < flagged_.size(); ++jv)
-              flagged_[jv][profileIndex] = true;
+        // Determine index of varname in the filter variables.
+        // If it is not present then the variable will not be flagged individually.
+        size_t idxvar = filtervars_.size();
+        for (size_t idx = 0; idx < idxvar; ++idx) {
+          if (filtervars_[idx].variable() == varname) {
+            idxvar = idx;
+            break;
           }
-          idx++;
+        }
+
+        // If varname is observation_report then all filter variables will be rejected.
+        bool isObservationReport = varname == "observation_report";
+
+        // Index of elements in this profile.
+        size_t idxprof = 0;
+        // Loop over indices of elements in entire profile sample.
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
+          // Flag all filter variables if the whole observation has been rejected.
+          if (isObservationReport &&
+              Flags[idxprof] & ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport) {
+            oops::Log::debug() << "  Reject all variables, index " << profileIndex << std::endl;
+            for (size_t jvar = 0; jvar < filtervars_.size(); ++jvar)
+              flagged_[jvar][profileIndex] = true;
+            // Move to next element in the profile.
+            idxprof++;
+            continue;
+          }
+          // Flag variable if its specific value has been rejected.
+          if (idxvar < filtervars_.size() &&
+              Flags[idxprof] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) {
+            oops::Log::debug() << "  Reject " << varname
+                               << ", index " << profileIndex << std::endl;
+            flagged_[idxvar][profileIndex] = true;
+          }
+          idxprof++;
         }
       }
     }

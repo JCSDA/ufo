@@ -37,11 +37,11 @@ namespace ufo {
     std::vector <int> &vFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
 
-    if (!oops::allVectorsSameNonZeroSize(ObsType, pressures)) {
+    if (!oops::allVectorsSameNonZeroSize(ObsType, pressures, uFlags, vFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Time checks will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(ObsType, pressures)
+                           << oops::listOfVectorSizes(ObsType, pressures, uFlags, vFlags)
                            << std::endl;
       return;
     }
