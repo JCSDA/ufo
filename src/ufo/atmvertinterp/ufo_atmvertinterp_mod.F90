@@ -13,7 +13,7 @@ use ufo_vars_mod
      type(oops_variables), public :: geovars 
      type(oops_variables), public :: obsvars 
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
-     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
+     logical, public :: set_surfaceobs, use_ln ! if T, use ln(v_coord) not v_coord
    contains
      procedure :: setup  => atmvertinterp_setup_
      procedure :: simobs => atmvertinterp_simobs_
@@ -30,7 +30,7 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   class(ufo_atmvertinterp), intent(inout) :: self
   type(fckit_configuration), intent(in)   :: grid_conf
 
-  character(kind=c_char,len=:), allocatable :: coord_name
+  character(kind=c_char,len=:), allocatable :: obstypes, coord_name
   integer :: ivar, nvars
 
   !> Size of variables
@@ -51,6 +51,12 @@ subroutine atmvertinterp_setup_(self, grid_conf)
       self%use_ln  = .true.
   endif
   call self%geovars%push_back(self%v_coord)
+
+  self%set_surfaceobs=.false.
+  if ( grid_conf%has("observation type") ) then
+    call grid_conf%get_or_die("observation type",obstypes)
+    if( trim(obstypes).eq.'surface') self%set_surfaceobs=.true.
+  endif
 
 end subroutine atmvertinterp_setup_
 
@@ -94,10 +100,18 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   do iobs = 1, nlocs
     if (self%use_ln) then
       tmp = log(vcoordprofile%vals(:,iobs))
-      tmp2 = log(obsvcoord(iobs))
+      if(self%set_surfaceobs) then
+       tmp2=maxval(tmp) ! surface pressure
+      else 
+       tmp2 = log(obsvcoord(iobs))
+      endif
     else
       tmp = vcoordprofile%vals(:,iobs)
-      tmp2 = obsvcoord(iobs)
+      if(self%set_surfaceobs) then
+       tmp2=minval(tmp) ! surface altitude 
+      else
+       tmp2 = obsvcoord(iobs)
+      endif 
     end if
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
   enddo
