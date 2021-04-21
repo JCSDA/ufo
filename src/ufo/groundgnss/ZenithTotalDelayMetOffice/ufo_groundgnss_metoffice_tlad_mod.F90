@@ -225,6 +225,8 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   allocate(pressure_d(1:self % nlevp)) 
   allocate(humidity_d(1:self % nlevq))
 
+  iflip = self%iflip
+
 ! Loop through the obs, calculating the increment to the observation
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
  
@@ -329,6 +331,8 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   allocate(x_d(1:prs_d%nval + q_d%nval))
   allocate(pressure_d(1:prs_d%nval))
   allocate(humidity_d(1:q_d%nval))
+
+  iflip = self%iflip
 
 ! Loop through the obs, calculating the increment to the model state
   obs_loop: do iobs = 1, self % nlocs
