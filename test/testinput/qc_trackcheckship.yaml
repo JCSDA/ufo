@@ -57,7 +57,7 @@ observations:
       - 247
       - 248
   flaggedBenchmark: 35
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Ship
     obsdatain:
@@ -81,7 +81,7 @@ observations:
     - 91
     - 92
   flaggedBenchmark: 6
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 # Like in the first test, but without grouping observations into records
 - obs space:
     name: Ship
@@ -100,7 +100,7 @@ observations:
       name: station_id@MetaData
   flaggedObservationsBenchmark: *referenceFlaggedObsIds
   flaggedBenchmark: 35
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 # Like in the first test, but with observations grouped into records (perversely) by
 # a variable other than station_id
 - obs space:
@@ -122,4 +122,4 @@ observations:
       name: station_id@MetaData
   flaggedObservationsBenchmark: *referenceFlaggedObsIds
   flaggedBenchmark: 35
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track

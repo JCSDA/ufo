@@ -27,5 +27,5 @@ observations:
   HofX: HofX
   obs diagnostics:
   passedBenchmark: 5549
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 93

@@ -39,5 +39,5 @@ observations:
     - name: northward_wind_background_error@ObsDiag
     - name: geopotential_height_background_error@ObsDiag
   passedBenchmark: 328
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 24

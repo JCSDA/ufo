@@ -26,7 +26,7 @@ observations:
       - 21
       - 22
   flaggedBenchmark: 8
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Ship
     obsdatain:
@@ -40,7 +40,7 @@ observations:
     time stuck tolerance: PT2M
   flaggedObservationsBenchmark: *referenceFlaggedObsIds
   flaggedBenchmark: 8
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Ship
     obsdatain:
@@ -53,7 +53,7 @@ observations:
     number stuck tolerance: 7
     time stuck tolerance: PT2H
   flaggedBenchmark: 0
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Ship
     obsdatain:
@@ -67,4 +67,4 @@ observations:
     number stuck tolerance: 8
     time stuck tolerance: PT2M
   flaggedBenchmark: 0
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track

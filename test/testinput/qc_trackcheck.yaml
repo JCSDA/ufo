@@ -63,7 +63,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 36
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -129,7 +129,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 47
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -198,7 +198,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 50
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -299,7 +299,7 @@ observations:
       - 2094
       - 2099
   flaggedBenchmark: 82
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -352,7 +352,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 34
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -373,7 +373,7 @@ observations:
       - 193
       - 195
   flaggedBenchmark: 2
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -426,7 +426,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 34
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space:
     name: Aircraft
     obsdatain:
@@ -477,7 +477,7 @@ observations:
       - 2089
       - 2098
   flaggedBenchmark: 32
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space: # No grouping into records
     name: Aircraft
     obsdatain:
@@ -496,7 +496,7 @@ observations:
       name: station_id@MetaData
   flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
 - obs space: # Group into records (perversely) by something else than the station ID
     name: Aircraft
     obsdatain:
@@ -517,4 +517,4 @@ observations:
       name: station_id@MetaData
   flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
-  benchmarkFlag: 12 # track
+  benchmarkFlag: 21 # track
