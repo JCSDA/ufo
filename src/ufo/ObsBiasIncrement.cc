@@ -22,7 +22,7 @@ namespace ufo {
 ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
   : odb_(odb), vars_(odb.obsvariables()) {
-  oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
+  oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory
   for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
@@ -33,7 +33,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
   // initialize bias coefficient perturbations
   biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
 
-  oops::Log::trace() << "ObsBiasIncrement::create done." << std::endl;
+  oops::Log::trace() << "ufo::ObsBiasIncrement::create done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
   : odb_(other.odb_),
     prednames_(other.prednames_), vars_(other.vars_) {
-  oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
+  oops::Log::trace() << "ufo::ObsBiasIncrement::copy ctor starting" << std::endl;
 
   // Copy the bias coefficients data, or fill in with zeros
   if (copy) {
@@ -50,7 +50,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
     biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
   }
 
-  oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
+  oops::Log::trace() << "ufo::ObsBiasIncrement::copy ctor done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -130,14 +130,18 @@ void ObsBiasIncrement::allSumInPlace() {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasIncrement::serialize(std::vector<double> &) const {
-  throw eckit::NotImplemented("ufo::ObsBiasIncrement::serialize not implemented", Here());
+void ObsBiasIncrement::serialize(std::vector<double> & vect) const {
+  if (this->serialSize() > 0) {
+    throw eckit::NotImplemented("ufo::ObsBiasIncrement::serialize not implemented", Here());
+  }
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasIncrement::deserialize(const std::vector<double> &, std::size_t &) {
-  throw eckit::NotImplemented("ufo::ObsBiasIncrement::deserialize not implemented", Here());
+void ObsBiasIncrement::deserialize(const std::vector<double> & vect, std::size_t & index) {
+  if (this->serialSize() > 0) {
+    throw eckit::NotImplemented("ufo::ObsBiasIncrement::deserialize not implemented", Here());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -147,7 +151,7 @@ void ObsBiasIncrement::print(std::ostream & os) const {
     // map bias coeffs to eigen matrix
     Eigen::Map<const Eigen::MatrixXd>
       coeffs(biascoeffsinc_.data(), prednames_.size(), vars_.size());
-    os << "ObsBiasIncrement::print " << std::endl;
+    os << "ufo::ObsBiasIncrement::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < prednames_.size(); ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
@@ -160,7 +164,7 @@ void ObsBiasIncrement::print(std::ostream & os) const {
          << std::endl;
     }
     os << "---------------------------------------------------------------" << std::endl;
-    os << "ObsBiasIncrement::print done" << std::endl;
+    os << "ufo::ObsBiasIncrement::print done" << std::endl;
   }
 }
 
