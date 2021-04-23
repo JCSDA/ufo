@@ -12,6 +12,7 @@ list( APPEND ufo_src_files
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
     instantiateObsFilterFactory.h
+    instantiateObsLocFactory.h
     LinearObsBiasOperator.cc
     LinearObsBiasOperator.h
     LinearObsOperator.cc
@@ -58,6 +59,7 @@ add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( predictors )
 add_subdirectory( filters )
+add_subdirectory( obslocalization )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
@@ -91,6 +93,7 @@ list( APPEND ufo_src_files
     ${basis_src_files}
     ${predictor_src_files}
     ${filters_src_files}
+    ${obslocalization_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
     ${atmvertinterplay_src_files}
