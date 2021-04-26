@@ -2,11 +2,11 @@ obs operator:
   name: SfcPCorrected
   da_psfc_scheme: UKMO
 obs space:
-  name: ship
+  name: sfcship
   obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/ship.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/sfcship.{{window_begin}}.nc4
   obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).ship.{{window_begin}}.nc4
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).sfcship.{{window_begin}}.nc4
   simulated variables: [surface_pressure] #, air_temperature, specific_humidity]
 obs filters:
 # Observation Range Sanity Check
