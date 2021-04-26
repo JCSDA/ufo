@@ -806,6 +806,16 @@ real(kind_real), allocatable :: ObsTb(:,:)
     end do
   end if
 
+  ! Update Ice_Coverage and Land_Coverage for
+  ! Soil_Type or Vegetation_Type corresponding to Glacial land ice
+  do k1 = 1, n_Profiles
+    if (sfc(k1)%Land_Coverage > ZERO .and. &
+       (sfc(k1)%Soil_Type == 9 .or. sfc(k1)%Vegetation_Type == 13)) then
+      sfc(k1)%Ice_Coverage = min(sfc(k1)%Ice_Coverage + sfc(k1)%Land_Coverage, ONE)
+      sfc(k1)%Land_Coverage = ZERO
+    end if
+  end do
+
 end subroutine Load_Sfc_Data
 
 ! ------------------------------------------------------------------------------
