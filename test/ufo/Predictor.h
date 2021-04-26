@@ -26,6 +26,7 @@
 #include "oops/interface/ObsOperator.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "oops/util/Expect.h"
 #include "oops/util/IntSetParser.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "ufo/ObsTraits.h"
@@ -79,6 +80,8 @@ void testPredictor() {
     Locations locs(lons, lats, times, ospace.comm());
     ObsDiagnostics ydiags(ospace, locs, diagvars);
 
+    bool expect_error_message = false;
+
     // Calculate predictor values
     const std::size_t npreds = predictor_names.size();
     EXPECT(npreds > 0);
@@ -86,14 +89,24 @@ void testPredictor() {
 
     const Predictors & predictors = ybias.predictors();
     for (std::size_t p = 0; p < npreds; ++p) {
+      if (conf.has("expectExceptionWithMessage")) {
+        const std::string msg = conf.getString("expectExceptionWithMessage");
+        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, predData[p]), msg.c_str());
+        expect_error_message = true;
+        break;
+      }
       predictors[p]->compute(ospace, *gval, ydiags, predData[p]);
       predData[p].save(predictors[p]->name() + "Predictor");
+    }
+
+    if (expect_error_message) {
+      continue;
     }
 
     // Read in tolerance from yaml
     const double tol = conf.getDouble("tolerance");
 
-    //  Get output variable names and read test data
+    // Get output variable names and read test data
     // Note prepend predictor_ to predictor names to distingush
     // predictor reference from obsbias reference
     std::vector<std::string> vars;
@@ -109,7 +122,7 @@ void testPredictor() {
     }
 
     /// For each predictor for each variable compare computed predictor values to reference
-    std::vector<float> testData(ospace.nlocs());
+    std::vector<double> testData(ospace.nlocs());
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       const std::size_t nlocs = predData[jp].nlocs();
       for (std::size_t jv = 0; jv < nvars; ++jv) {

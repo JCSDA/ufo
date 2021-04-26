@@ -26,6 +26,8 @@ set ( predictor_files
   ScanAngle.cc
   SineOfLatitude.h
   SineOfLatitude.cc
+  Thickness.h
+  Thickness.cc
 )
 
 PREPEND( _p_predictor_files     "predictors"            ${predictor_files} )
