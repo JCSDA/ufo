@@ -108,14 +108,6 @@ phases:
       - cd /jcsda/ufo-bundle
       - ls
 
-      - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
-      - sed -i 's/BRANCH develop //' CMakeLists.txt
-      - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
-      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA-internal/ropp-test.git" )' CMakeLists.txt
-      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA-internal/geos-aero.git" )' CMakeLists.txt
-
   build:
     commands:
       - echo Executing build phase

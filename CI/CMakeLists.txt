@@ -32,6 +32,8 @@ ecbuild_bundle( PROJECT saber GIT "https://github.com/JCSDA-internal/saber.git" 
 ecbuild_bundle( PROJECT crtm GIT "https://github.com/JCSDA-internal/crtm.git" )
 ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA-internal/ioda.git" )
 ecbuild_bundle( PROJECT rttov  GIT "https://github.com/JCSDA-internal/rttov.git" )
+ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA-internal/ropp-test.git" )
+ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA-internal/geos-aero.git" )
 ecbuild_bundle( PROJECT ufo  GIT "https://github.com/JCSDA-internal/ufo.git" )
 
 
@@ -45,4 +47,3 @@ ecbuild_bundle_finalize()
 
 include(cmake/cdash-integration.cmake)
 include(CTest)
-

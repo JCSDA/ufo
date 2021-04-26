@@ -35,45 +35,12 @@ phases:
       - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
       - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
 
-      - echo MPI setup for Docker
-      - mkdir -p /var/run/sshd
-      - ssh-keygen -A
-      - sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
-      - sed -i 's/#RSAAuthentication yes/RSAAuthentication yes/g' /etc/ssh/sshd_config
-      - sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-
-      - groupadd jcsda -g 9999
-      - useradd jcsdauser
-      - mkdir -p /jcsda /build_container
-      - chown -R jcsdauser:jcsda /build_container  /usr/local
-      - chmod 6755 /jcsda /build_container /usr/local
-
-      - mkdir /jcsda/.ssh ; echo "StrictHostKeyChecking no" > /jcsda/.ssh/config
-      - mkdir -p /jcsda/.openmpi
-      - mkdir -p /home/jcsdauser/.openmpi
-
-      - cp CI/default-mca-params.conf /home/jcsdauser/.openmpi/mca-params.conf
-      - cat /home/jcsdauser/.openmpi/mca-params.conf
-      - chown -R jcsdauser:jcsda /jcsda/
-
-      - su - jcsdauser -c "ssh-keygen -f /jcsda/.ssh/id_rsa -t rsa -N ''
-        && chmod 600 /jcsda/.ssh/config
-        && chmod 700 /jcsda/.ssh
-        && cp /jcsda/.ssh/id_rsa.pub /jcsda/.ssh/authorized_keys
-        && echo MPI setup for Docker done"
-      - su - jcsdauser -c "echo $CC
-        && echo $CXX
-        && echo $FC
-        && whereis mpicc"
-
   pre_build:
     commands:
       - echo Executing pre_build phase
       - git lfs install # creates .gitconfig
-      - cp ~/.gitconfig /home/jcsdauser/
+      - mkdir -p /jcsda/ufo-bundle
 
-      - cd CI
- 
       #  Set crtm branch name
       - export CRTM_JEDI_BRANCH="v2.3-jedi"
 
@@ -85,6 +52,7 @@ phases:
         echo "CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH_FORK}";
         fi
 
+      - cd CI
       ##  public repos
       # ufo
       - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
@@ -134,16 +102,6 @@ phases:
       - cp -r cmake /jcsda/ufo-bundle/
       - cd /jcsda/ufo-bundle
 
-      - ls -lt /jcsda/ufo-bundle/ufo
-      - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
-      - sed -i 's/BRANCH develop //' CMakeLists.txt
-      - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
-      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
-      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
-      - cat CMakeLists.txt
-
       - chmod -R 777 /jcsda/ufo-bundle
       - ls -lt /jcsda/ufo-bundle
   build:
@@ -153,20 +111,11 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
-      - gcc --version
-      - g++ --version
-      - gfortran --version
-      - which gfortran
-      - which gcc
-      - which g++
-      - ls /usr/local/bin
-      - echo $PATH
-
-      - su - jcsdauser -c "cd /build_container
+      - su - jedi -c "cd /home/jedi
         && echo $CC
         && echo $CXX
         && echo $FC
-        && CC=mpicc CXX=mpicxx FC=mpifort 
+        && CC=mpicc CXX=mpicxx FC=mpifort
         && cmake  -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_GPROF=ON -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
@@ -177,8 +126,8 @@ phases:
         fi
       - echo $BUILD_STATUS
 
-      - su - jcsdauser -c "CC=mpicc CXX=mpicxx FC=mpifort
-        && cd /build_container/ufo
+      - su - jedi -c "CC=mpicc CXX=mpicxx FC=mpifort
+        && cd /home/jedi/ufo
         && ctest"
 
   post_build:
@@ -187,12 +136,12 @@ phases:
       - echo $CODEBUILD_BUILD_SUCCEEDING
       - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
         then echo "Build passed, rerunning failed tests";
-        su - jcsdauser -c "cd /build_container/ufo
+        su - jedi -c "cd /home/jedi/ufo
         && ctest -VV --rerun-failed";
         else echo "Build failed";
         fi
       - echo 'Connect to CodeCov'
-      - cd /build_container/ufo
+      - cd /home/jedi/ufo
       - pwd
       - ls
       - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh
