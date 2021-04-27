@@ -21,7 +21,7 @@ namespace ufo {
 
 ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
-  : odb_(odb), vars_(odb.obsvariables()) {
+  : vars_(odb.obsvariables()) {
   oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory
@@ -39,8 +39,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
-  : odb_(other.odb_),
-    prednames_(other.prednames_), vars_(other.vars_) {
+  : prednames_(other.prednames_), vars_(other.vars_) {
   oops::Log::trace() << "ufo::ObsBiasIncrement::copy ctor starting" << std::endl;
 
   // Copy the bias coefficients data, or fill in with zeros
@@ -117,15 +116,6 @@ double ObsBiasIncrement::norm() const {
     zz = biascoeffsinc_.norm()/std::sqrt(biascoeffsinc_.size());
   }
   return zz;
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBiasIncrement::allSumInPlace() {
-  std::vector<double> buffer(biascoeffsinc_.data(),
-                             biascoeffsinc_.data() + biascoeffsinc_.size());
-  odb_.distribution().allReduceInPlace(buffer, eckit::mpi::sum());
-  biascoeffsinc_ = Eigen::Map<Eigen::VectorXd>(buffer.data(), buffer.size());
 }
 
 // -----------------------------------------------------------------------------

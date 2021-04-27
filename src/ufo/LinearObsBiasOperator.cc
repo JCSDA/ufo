@@ -69,32 +69,11 @@ void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
                                              const ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD starts." << std::endl;
 
-  const size_t nlocs  = ybiasinc.nlocs();
-  const size_t nvars  = ybiasinc.nvars();
   const size_t npreds = predData_.size();
 
-  // map bias coeffs to eigen matrix (writable)
-  std::size_t indx;
-  Eigen::VectorXd tmp = Eigen::VectorXd::Zero(nlocs, 1);
-  for (std::size_t jch = 0; jch < nvars; ++jch) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      indx = jl*nvars+jch;
-      if (ybiasinc[indx] != util::missingValue(ybiasinc[indx])) {
-        tmp(jl) = ybiasinc[indx];
-      }
-    }
-    // For each channel: ( npreds X 1 ) = ( npreds X nlocs ) * ( nlocs X 1 )
-    for (std::size_t jp = 0; jp < npreds; ++jp) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        biascoeffinc(jp, jch) += predData_[jp][jl*nvars+jch] * tmp(jl);
-      }
-    }
-    // zero out for next job
-    tmp.setConstant(0.0);
+  for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
+    biascoeffinc.updateCoeff(jpred, predData_[jpred].multivar_dot_product_with(ybiasinc));
   }
-
-  // Sum across the processros
-  biascoeffinc.allSumInPlace();
 
   oops::Log::trace() << "LinearObsBiasOperator::computeAD done." << std::endl;
 }

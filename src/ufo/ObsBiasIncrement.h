@@ -47,23 +47,26 @@ class ObsBiasIncrement : public util::Printable {
   void write(const eckit::Configuration &) const {}
   double norm() const;
 
-  /// Return the coefficient of predictor \p jpred for variable \p jvar.
-  double & operator()(size_t jpred, size_t jvar) {
-    return biascoeffsinc_(jvar*prednames_.size() + jpred);
-  }
-
   /// Return bias coefficient increments
   const Eigen::VectorXd & data() const {return biascoeffsinc_;}
   Eigen::VectorXd & data() {return biascoeffsinc_;}
 
   // We could store coefficients in a different order. Then it would
   // be easier to extract part of the existing vector.
+  /// Return bias coefficient increments for predictor with index \p jpred
   std::vector<double> coefficients(size_t jpred) const {
     std::vector<double> coeffs(vars_.size());
     for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
       coeffs[jvar] = biascoeffsinc_(jvar*prednames_.size() + jpred);
     }
     return coeffs;
+  }
+  /// Increment bias coeffiecient increments for predictor with index \p jpred
+  /// with \p coeffs
+  void updateCoeff(size_t jpred, const std::vector<double> &coeffs) {
+    for (size_t jj = 0; jj < vars_.size(); ++jj) {
+      biascoeffsinc_[jj*prednames_.size() + jpred] += coeffs[jj];
+    }
   }
 
   // Serialize and deserialize
@@ -74,13 +77,8 @@ class ObsBiasIncrement : public util::Printable {
   // Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
-  /// Reduce (sum) all bias correction coefficients increments
-  void allSumInPlace();
-
  private:
   void print(std::ostream &) const;
-
-  const ioda::ObsSpace & odb_;
 
   /// Bias coefficient increments
   Eigen::VectorXd biascoeffsinc_;
