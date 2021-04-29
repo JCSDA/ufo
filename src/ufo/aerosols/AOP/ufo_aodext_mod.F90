@@ -49,7 +49,7 @@ character(len=maxvarlen) :: err_msg
 integer :: j
    j = 1 
    do while(j < nprofiles) 
-       if(obs_wavelength >= bkg_wavelengths(j) .and.\
+       if(obs_wavelength >= bkg_wavelengths(j) .and.&
           obs_wavelength < bkg_wavelengths(j+1)) then
           if (bracket == 1) then
               b_channel = j
@@ -60,7 +60,7 @@ integer :: j
               call abor1_ftn(err_msg)
           endif
           j = j+ 1
-       else if(obs_wavelength > bkg_wavelengths(j) .and.\
+       else if(obs_wavelength > bkg_wavelengths(j) .and.&
             obs_wavelength <= bkg_wavelengths(j+1)) then
           if (bracket == 1) then
               b_channel = j
