@@ -14,10 +14,12 @@ observations:
        RTTOV_apply_reg_limits: true # for compatibility with previous
                                     # version of this test
        SatRad_compatibility: true # default
+       InspectProfileNumber: 1
        Sensor_ID: noaa_20_atms
        CoefficientPath: Data/
        UseRHwaterForQC: true # default
        UseColdSurfaceCheck: true # default
+       prof_by_prof: false # default
   obs space:
     name: atms_n20
     obsdatain:
@@ -49,6 +51,7 @@ observations:
        CoefficientPath: Data/
        UseRHwaterForQC: false # non-default
        UseColdSurfaceCheck: false # non-default
+       prof_by_prof: true # non-default
   obs space:
     name: atms_n20
     obsdatain:

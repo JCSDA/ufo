@@ -87,6 +87,7 @@ observations:
       UseColdSurfaceCheck: &UseColdSurfaceCheck2 false # non-default
       Sensor_ID: *sensor_id
       CoefficientPath: Data/
+      QtSplitRain: false
   obs space:
     name: atms_n20
     obsdatain:

@@ -178,21 +178,22 @@ if (variable_present) then
 end if
 
 ! Read in elevation for all obs
-variable_present = obsspace_has(config % obsdb, "MetaData", "elevation")
-if (variable_present) then
+if (obsspace_has(config % obsdb, "MetaData", "elevation")) then
   call obsspace_get_db(config % obsdb, "MetaData", "elevation", self % elevation(:))
+else if (obsspace_has(config % obsdb, "MetaData", "surface_height")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "surface_height", self % elevation(:))
+else if (obsspace_has(config % obsdb, "MetaData", "model_orography")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "model_orography", self % elevation(:))
+else if (ufo_vars_getindex(geovals % variables, 'surface_altitude') > 0) then
+  call ufo_geovals_get_var(geovals, 'surface_altitude', geoval)
+  self % elevation(:) = geoval%vals(1, 1)
 else
-  model_surface_present = obsspace_has(config % obsdb, "MetaData", "model_surface")
-  if (model_surface_present) then
-    call obsspace_get_db(config % obsdb, "MetaData", "model_surface", self % elevation(:))
-  else
-    self % elevation(:) = zero
-  end if
-end if
+  self % elevation(:) = zero
+endif
 
 ! Read in surface type from model data
 call ufo_geovals_get_var(geovals, "surface_type", geoval)
-self % surface_type(:) = geoval%vals(1,:)
+self % surface_type(:) = geoval%vals(1, 1)
 
 ! Setup emissivity
 if (config % pcemiss) then
