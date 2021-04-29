@@ -9,6 +9,7 @@
 #define UFO_PREDICTORS_INTERPOLATEDATAFROMFILE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -78,7 +79,12 @@ class InterpolateDataFromFile : public PredictorBase {
  private:
   /// `obsFunctions_[varName]` is the ObsFunction that will calculate the predictions for variable
   /// `varName`.
-  std::map<std::string, DrawValueFromFile> obsFunctions_;
+  // The map is storing unique_ptrs to make it possible to compile this code with GCC 4.8.5,
+  // whose STL implementation is affected by LWG 2397
+  // (http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#2397), later resolved by
+  // amending the C++11 standard as described in N4387
+  // (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4387.html).
+  std::map<std::string, std::unique_ptr<DrawValueFromFile>> obsFunctions_;
 };
 
 }  // namespace ufo
