@@ -34,8 +34,6 @@ set ( profile_files
       ProfileCheckBase.h
       ProfileCheckBasic.cc
       ProfileCheckBasic.h
-      ProfileCheckHistory.cc
-      ProfileCheckHistory.h
       ProfileCheckHydrostatic.cc
       ProfileCheckHydrostatic.h
       ProfileCheckInterpolation.cc
@@ -52,16 +50,16 @@ set ( profile_files
       ProfileCheckTime.h
       ProfileCheckUInterp.cc
       ProfileCheckUInterp.h
+      ProfileCheckUInterpAlternative.cc
+      ProfileCheckUInterpAlternative.h
       ProfileCheckUnstableLayer.cc
       ProfileCheckUnstableLayer.h
       ProfileCheckValidator.cc
       ProfileCheckValidator.h
-      ProfileDataBase.cc
-      ProfileDataBase.h
       ProfileDataHandler.cc
       ProfileDataHandler.h
-      ProfileDataHistory.cc
-      ProfileDataHistory.h
+      ProfileDataHolder.cc
+      ProfileDataHolder.h
       ProfileIndices.cc
       ProfileIndices.h
       ProfilePressure.cc

@@ -39,6 +39,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
+  class ProfileDataHolder;
 }
 
 namespace ufo {
@@ -67,15 +68,16 @@ namespace ufo {
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
 
-        if (profileData_.find(fullname) != profileData_.end()) {
+        auto it_profileData = profileData_.find(fullname);
+        if (it_profileData != profileData_.end()) {
           // If the vector is already present, return it.
           // If the type T is incorrect then boost::get will return an exception;
           // provide additional information if that occurs.
           try {
-            return boost::get<std::vector<T>> (profileData_[fullname]);
+            return boost::get<std::vector<T>> (it_profileData->second);
           } catch (boost::bad_get) {
-            throw eckit::BadParameter("Template parameter passed to boost::get"
-                                      " probably has the wrong type", Here());
+            throw eckit::BadParameter("Template parameter passed to boost::get for " +
+                                      fullname + " probably has the wrong type", Here());
           }
         } else {
           std::vector <T> vec_prof;  // Vector storing data for current profile.
@@ -106,9 +108,10 @@ namespace ufo {
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
         // Check whether vector is already in map.
-        if (profileData_.find(fullname) != profileData_.end()) {
+        auto it_profileData = profileData_.find(fullname);
+        if (it_profileData != profileData_.end()) {
           // Replace vector in map.
-          profileData_[fullname] = vec_in;
+          it_profileData->second = vec_in;
         } else {
           // Add vector to map.
           profileData_.emplace(fullname, vec_in);
@@ -155,6 +158,14 @@ namespace ufo {
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
     void resetProfileIndices() {profileIndices_->reset();}
+
+    /// Produce a vector of all profiles, loading the requested variables into each one.
+    std::vector <ProfileDataHolder> produceProfileVector
+      (const std::vector <std::string> &variableNamesInt,
+       const std::vector <std::string> &variableNamesFloat,
+       const std::vector <std::string> &variableNamesString,
+       const std::vector <std::string> &variableNamesGeoVaLs,
+       const std::vector <std::string> &variableNamesObsDiags);
 
    private:  // functions
     /// Reset profile information (vectors and corresponding names).

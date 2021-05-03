@@ -84,7 +84,7 @@ namespace ufo {
         valuesToCompare_float_.insert({
             ufo::VariableNames::DC,
             ufo::VariableNames::ETol});
-      } else if (check == "UInterp") {
+      } else if (check == "UInterp" || check == "UInterpAlternative") {
         valuesToCompare_int_.insert({
             ufo::VariableNames::counter_NumSamePErrObs,
             ufo::VariableNames::counter_NumInterpErrObs,

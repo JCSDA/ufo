@@ -65,15 +65,16 @@ namespace ufo {
         const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
 
         std::vector <T> vec_all;  // Vector storing data for entire sample.
-        if (entireSampleData_.find(fullname) != entireSampleData_.end()) {
+        auto it_entireSampleData = entireSampleData_.find(fullname);
+        if (it_entireSampleData != entireSampleData_.end()) {
           // If the vector is already present, return it.
           // If the type T is incorrect then boost::get will return an exception.
           // Provide additional information if that occurs.
           try {
-            return boost::get<std::vector<T>> (entireSampleData_[fullname]);
+            return boost::get<std::vector<T>> (it_entireSampleData->second);
           } catch (boost::bad_get) {
-            throw eckit::BadParameter("Template parameter passed to boost::get "
-                                      "probably has the wrong type", Here());
+            throw eckit::BadParameter("Template parameter passed to boost::get for " +
+                                      fullname + " probably has the wrong type", Here());
           }
         } else if (obsdb_.has(groupname, varname) || optional) {
           // Initially fill the vector with the default value for the type T.
@@ -101,8 +102,9 @@ namespace ufo {
     template <typename T>
       void initialiseVector(const std::string fullname)
       {
-        if (entireSampleData_.find(fullname) == entireSampleData_.end() ||
-            (entireSampleData_.find(fullname) != entireSampleData_.end() &&
+        auto it_entireSampleData = entireSampleData_.find(fullname);
+        if (it_entireSampleData == entireSampleData_.end() ||
+            (it_entireSampleData != entireSampleData_.end() &&
              get<T>(fullname).size() == 0)) {
           std::string varname;
           std::string groupname;

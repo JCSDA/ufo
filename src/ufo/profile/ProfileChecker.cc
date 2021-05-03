@@ -95,15 +95,17 @@ namespace ufo {
             profileDataHandler.resetProfileIndices();
           // Run check
           profileCheck->runCheck(profileDataHandler);
-          // Fill validation information if required
-          if (options_.compareWithOPS.value()) {
-            profileCheck->fillValidationData(profileDataHandler);
-          }
-          // Do not proceed if basic checks failed
-          if (!profileCheck->getResult() && check == "Basic") {
-            oops::Log::debug() << "Basic checks failed" << std::endl;
-            setBasicCheckResult(false);
-            break;
+          // Actions taken if a single profile was processed.
+          if (!profileCheck->runOnEntireSample()) {
+            // Fill validation information if required
+            if (options_.compareWithOPS.value())
+              profileCheck->fillValidationData(profileDataHandler);
+            // Do not proceed if basic checks failed
+            if (!profileCheck->getResult() && check == "Basic") {
+              oops::Log::debug() << "Basic checks failed" << std::endl;
+              setBasicCheckResult(false);
+              break;
+            }
           }
         }
       } else {

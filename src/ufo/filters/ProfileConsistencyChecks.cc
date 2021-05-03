@@ -115,12 +115,6 @@ namespace ufo {
 
       // Update information, including the 'flagged' vector, for this profile.
       profileDataHandler.updateProfileInformation();
-
-      // Optionally compare check results with OPS values
-      if (options_.compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
-        profileCheckValidator.validate(profileDataHandler, obsdb_.comm().size());
-        nMismatches_.emplace_back(profileCheckValidator.getMismatches());
-      }
     }
 
     // Write various quantities to the obsdb.
@@ -138,11 +132,17 @@ namespace ufo {
    ProfileChecker &profileChecker,
    const CheckSubgroup &subGroupChecks) const
   {
+    oops::Log::debug() << "Running checks on entire profile sample..." << std::endl;
+
     // Run checks
     profileChecker.runChecks(profileDataHandler,
                              subGroupChecks);
 
-    // todo: add remaining routines
+    // Write various quantities to the obsdb.
+    profileDataHandler.writeQuantitiesToObsdb();
+
+    oops::Log::debug() << "... Finished running checks" << std::endl;
+    oops::Log::debug() << std::endl;
   }
 
   // -----------------------------------------------------------------------------
@@ -181,6 +181,16 @@ namespace ufo {
                                 profileCheckValidator,
                                 profileChecker,
                                 checkSubgroup);
+      }
+    }
+
+    // Optionally compare check results with OPS values
+    if (options_.compareWithOPS.value()) {
+      profileDataHandler.resetProfileIndices();
+      for (int jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
+        profileDataHandler.initialiseNextProfile();
+        profileCheckValidator.validate(profileDataHandler, obsdb_.comm().size());
+        nMismatches_.emplace_back(profileCheckValidator.getMismatches());
       }
     }
   }

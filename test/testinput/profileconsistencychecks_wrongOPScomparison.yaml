@@ -114,6 +114,26 @@ Wrong number of entries per profile, UInterp:
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
 
+#UInterpAlternative: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, UInterpAlternative:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_uinterp.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["UInterpAlternative"]
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue"]
+
 #RH: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, RH:

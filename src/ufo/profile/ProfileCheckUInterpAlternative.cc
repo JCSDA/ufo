@@ -1,40 +1,77 @@
 /*
- * (C) Crown copyright 2020, Met Office
+ * (C) Crown copyright 2021, Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/profile/ProfileCheckUInterp.h"
+#include "ufo/profile/ProfileCheckUInterpAlternative.h"
 #include "ufo/profile/VariableNames.h"
+
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileDataHolder.h"
 
 namespace ufo {
 
-  static ProfileCheckMaker<ProfileCheckUInterp> makerProfileCheckUInterp_("UInterp");
+  static ProfileCheckMaker<ProfileCheckUInterpAlternative>
+  makerProfileCheckUInterpAlternative_("UInterpAlternative");
 
-  ProfileCheckUInterp::ProfileCheckUInterp
+  ProfileCheckUInterpAlternative::ProfileCheckUInterpAlternative
   (const ProfileConsistencyCheckParameters &options)
     : ProfileCheckBase(options),
     ProfileStandardLevels(options)
   {}
 
-  void ProfileCheckUInterp::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUInterpAlternative::runCheck(ProfileDataHandler &profileDataHandler)
   {
-    oops::Log::debug() << " U interpolation check" << std::endl;
+    oops::Log::debug() << " Alternative U interpolation check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    // Produce vector of profiles containing data for the alternative U interpolation check.
+    std::vector <ProfileDataHolder> profiles =
+      profileDataHandler.produceProfileVector
+      ({ufo::VariableNames::qcflags_eastward_wind,
+          ufo::VariableNames::counter_NumSamePErrObs,
+          ufo::VariableNames::counter_NumInterpErrObs},
+        {ufo::VariableNames::obs_air_pressure,
+            ufo::VariableNames::obs_eastward_wind,
+            ufo::VariableNames::obs_northward_wind},
+        {ufo::VariableNames::station_ID},
+        {ufo::VariableNames::geovals_pressure,
+            ufo::VariableNames::geovals_pressure_rho},
+        {});
+
+    const size_t nprofs = profileDataHandler.getObsdb().nrecs();
+    profileDataHandler.resetProfileIndices();
+    for (size_t jprof = 0; jprof < nprofs; ++jprof) {
+      oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
+      profileDataHandler.initialiseNextProfile();
+      auto& profile = profiles[jprof];
+      runCheckOnProfile(profile);
+      // Fill validation information if required.
+      if (options_.compareWithOPS.value())
+        fillValidationData(profileDataHandler);
+      // Move values from profile to the associated ProfileDataHandler.
+      profile.moveValuesToHandler();
+      // Update information, including the 'flagged' vector, for this profile.
+      profileDataHandler.updateProfileInformation();
+    }
+  }
+
+  void ProfileCheckUInterpAlternative::runCheckOnProfile(ProfileDataHolder &profile)
+  {
+    const int numProfileLevels = profile.getNumProfileLevels();
     const std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profile.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &uObs =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
+      profile.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &vObs =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
+      profile.get<float>(ufo::VariableNames::obs_northward_wind);
     std::vector <int> &uFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profile.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &NumSamePErrObs =
-      profileDataHandler.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
+      profile.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
     std::vector <int> &NumInterpErrObs =
-      profileDataHandler.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
+      profile.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs, uFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -149,7 +186,7 @@ namespace ufo {
     if (NumErrors > 0) NumInterpErrObs[0]++;
   }
 
-  void ProfileCheckUInterp::fillValidationData(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUInterpAlternative::fillValidationData(ProfileDataHandler &profileDataHandler)
   {
     profileDataHandler.set(ufo::VariableNames::StdLev, std::move(StdLev_));
     profileDataHandler.set(ufo::VariableNames::SigAbove, std::move(SigAbove_));

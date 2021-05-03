@@ -73,7 +73,7 @@ namespace ufo {
     /// Groups of variables which are on model levels.
     oops::Parameter<std::vector<std::string>> groups_modellevels
       {"groups_modellevels",
-          {"ModelLevelsDerivedValue", "ModelLevelsFlags"}, this};
+          {"ModelLevelsDerivedValue", "ModelLevelsFlags", "ModelLevelsQCFlags"}, this};
 
     /// Groups of variables which are on model rho levels.
     oops::Parameter<std::vector<std::string>> groups_modelrholevels

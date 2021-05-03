@@ -11,6 +11,7 @@
 #include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
@@ -89,8 +90,9 @@ namespace ufo {
 
       if (groupname == "QCFlags" ||
           groupname == "ModelLevelsFlags" ||
+          groupname == "ModelLevelsQCFlags" ||
           groupname == "ModelRhoLevelsFlags" ||
-          fullname == ufo::VariableNames::counter_NumAnyErrors) {
+          groupname == "Counters") {
         const std::vector <int>& profileData = get<int>(fullname);
         getProfileIndicesInEntireSample(groupname);
         std::vector <int>& entireSampleData = entireSampleDataHandler_->get<int>(fullname);
@@ -101,8 +103,11 @@ namespace ufo {
         }
       } else if (groupname == "Corrections" ||
                  groupname == "DerivedValue" ||
+                 groupname == "GrossErrorProbability" ||
+                 groupname == "GrossErrorProbabilityBuddyCheck" ||
                  groupname == "ModelLevelsDerivedValue" ||
-                 groupname == "ModelRhoLevelsDerivedValue") {
+                 groupname == "ModelRhoLevelsDerivedValue" ||
+                 fullname == ufo::VariableNames::obs_air_pressure) {
         const std::vector <float>& profileData = get<float>(fullname);
         getProfileIndicesInEntireSample(groupname);
         std::vector <float>& entireSampleData = entireSampleDataHandler_->get<float>(fullname);
@@ -188,9 +193,10 @@ namespace ufo {
 
   std::vector <float>& ProfileDataHandler::getGeoVaLVector(const std::string &variableName)
   {
-    if (GeoVaLData_.find(variableName) != GeoVaLData_.end()) {
+    auto it_GeoVaLData = GeoVaLData_.find(variableName);
+    if (it_GeoVaLData != GeoVaLData_.end()) {
       // If the GeoVaL vector is already present, return it.
-      return GeoVaLData_[variableName];
+      return it_GeoVaLData->second;
     } else {
       std::vector <float> vec_GeoVaL_column;
       // Only fill the GeoVaL vector if the required GeoVaLs are present
@@ -217,9 +223,10 @@ namespace ufo {
 
   std::vector <float>& ProfileDataHandler::getObsDiag(const std::string &fullname)
   {
-    if (obsDiagData_.find(fullname) != obsDiagData_.end()) {
+    auto it_obsDiagData = obsDiagData_.find(fullname);
+    if (it_obsDiagData != obsDiagData_.end()) {
       // If the ObsDiag vector is already present, return it.
-      return obsDiagData_[fullname];
+      return it_obsDiagData->second;
     } else {
       std::string varname;
       std::string groupname;
@@ -248,5 +255,28 @@ namespace ufo {
       obsDiagData_.emplace(fullname, std::move(vec_ObsDiag));
       return obsDiagData_[fullname];
     }
+  }
+
+  std::vector <ProfileDataHolder> ProfileDataHandler::produceProfileVector
+  (const std::vector <std::string> &variableNamesInt,
+   const std::vector <std::string> &variableNamesFloat,
+   const std::vector <std::string> &variableNamesString,
+   const std::vector <std::string> &variableNamesGeoVaLs,
+   const std::vector <std::string> &variableNamesObsDiags)
+  {
+    profileIndices_->reset();
+    std::vector <ProfileDataHolder> profiles;
+    oops::Log::debug() << "Filling vector of profiles" << std::endl;
+    for (size_t jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
+      initialiseNextProfile();
+      ProfileDataHolder profile(*this);
+      profile.fill(variableNamesInt,
+                   variableNamesFloat,
+                   variableNamesString,
+                   variableNamesGeoVaLs,
+                   variableNamesObsDiags);
+      profiles.emplace_back(profile);
+    }
+    return profiles;
   }
 }  // namespace ufo

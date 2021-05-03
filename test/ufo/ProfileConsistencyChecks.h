@@ -43,6 +43,7 @@
 
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/ProfileVerticalAveraging.h"
 #include "ufo/profile/ProfileVerticalInterpolation.h"
 #include "ufo/profile/VariableNames.h"
@@ -377,6 +378,41 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       for (size_t jlev = 0; jlev < ZMax.size(); ++jlev)
         EXPECT(oops::is_close_relative(ZMax[jlev], expected_ZMax[jlev], 1e-14f));
     }
+  }
+
+  // Test the profile data holder.
+  const bool testProfileDataHolder =
+    conf.getBool("testProfileDataHolder", false);
+  if (testProfileDataHolder) {
+    ProfileConsistencyCheckParameters options;
+    options.deserialize(conf);
+
+    std::vector<bool> apply(obsspace.nlocs(), true);
+    std::vector<std::vector<bool>> flagged;
+    ProfileDataHandler profileDataHandler(filterdata,
+                                          options.DHParameters,
+                                          apply,
+                                          filtervars,
+                                          flagged);
+
+    // Create a ProfileDataHolder and request some variables.
+    ProfileDataHolder profileDataHolder(profileDataHandler);
+    profileDataHolder.fill({ufo::VariableNames::qcflags_air_temperature},
+                           {ufo::VariableNames::obs_air_pressure},
+                           {ufo::VariableNames::station_ID},
+                           {ufo::VariableNames::geovals_pressure},
+                           {ufo::VariableNames::bkgerr_air_temperature});
+
+    // Get GeoVaLs
+    profileDataHolder.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+
+    // Attempt to access data with incorrect type.
+    EXPECT_THROWS(profileDataHolder.get<int>(ufo::VariableNames::obs_air_pressure));
+
+    // Attempt to access nonexistent data.
+    EXPECT_THROWS(profileDataHolder.get<int>("wrong@MetaData"));
+    EXPECT_THROWS(profileDataHolder.getGeoVaLVector("wrong@MetaData"));
+    EXPECT_THROWS(profileDataHolder.getObsDiagVector("wrong@MetaData"));
   }
 }
 
