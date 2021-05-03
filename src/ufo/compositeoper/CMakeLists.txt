@@ -6,6 +6,9 @@
 set ( compositeoper_files
     ObsComposite.h
     ObsComposite.cc
+    ObsCompositeParameters.h
+    ObsCompositeTLAD.h
+    ObsCompositeTLAD.cc
 )
 PREPEND( _p_compositeoper_files     "compositeoper"     ${compositeoper_files} )
 

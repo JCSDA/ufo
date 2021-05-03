@@ -15,9 +15,6 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/ObsOperatorBase.h"
 
@@ -35,16 +32,6 @@ namespace ufo {
   class GeoVaLs;
   class Locations;
   class ObsDiagnostics;
-
-class ObsCompositeParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsCompositeParameters, Parameters)
-
- public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
-  /// A list of configuration options for each operator used to simulate a subset of variables.
-  oops::RequiredParameter<std::vector<eckit::LocalConfiguration>> components{"components", this};
-};
 
 /// \brief A collection of observation operators used to simulate different variables.
 ///

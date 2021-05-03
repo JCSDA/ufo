@@ -8,6 +8,7 @@
 #include "ufo/atmvertinterp/ObsAtmVertInterpTLAD.h"
 
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -17,6 +18,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -28,7 +30,13 @@ ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
   : LinearObsOperatorBase(odb), keyOperAtmVertInterp_(0), varin_()
 {
-  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, config, odb.obsvariables(), varin_);
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+
+  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, config,
+                                   operatorVars_,
+                                   operatorVarIndices.data(), operatorVarIndices.size(),
+                                   varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpTLAD created" << std::endl;
 }

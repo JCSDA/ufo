@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -45,6 +45,11 @@ class LinearObsOperatorBase : public util::Printable,
 
 /// Operator input required from Model
   virtual const oops::Variables & requiredVars() const = 0;
+
+/// \brief List of variables simulated by this operator.
+///
+/// The default implementation returns the list of all simulated variables in the ObsSpace.
+  virtual oops::Variables simulatedVars() const;
 
 /// \brief The space containing the observations to be simulated by this operator.
   const ioda::ObsSpace &obsspace() const { return odb_; }

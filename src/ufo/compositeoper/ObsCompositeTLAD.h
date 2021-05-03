@@ -1,20 +1,21 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Crown copyright 2021, Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_IDENTITY_OBSIDENTITYTLAD_H_
-#define UFO_IDENTITY_OBSIDENTITYTLAD_H_
+#ifndef UFO_COMPOSITEOPER_OBSCOMPOSITETLAD_H_
+#define UFO_COMPOSITEOPER_OBSCOMPOSITETLAD_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/identity/ObsIdentityTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -33,36 +34,32 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// Identity TL/AD observation operator class
-class ObsIdentityTLAD : public LinearObsOperatorBase,
-                        private util::ObjectCounter<ObsIdentityTLAD> {
+/// Composite TL/AD observation operator class
+class ObsCompositeTLAD : public LinearObsOperatorBase,
+                        private util::ObjectCounter<ObsCompositeTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsIdentityTLAD";}
+  static const std::string classname() { return "ufo::ObsCompositeTLAD"; }
 
-  ObsIdentityTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsIdentityTLAD();
+  ObsCompositeTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ~ObsCompositeTLAD() override;
 
-  // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
-  // Other
-  const oops::Variables & requiredVars() const override {return varin_;}
+  const oops::Variables & requiredVars() const override { return requiredVars_; }
 
-  oops::Variables simulatedVars() const override {return operatorVars_;}
-
-  int & toFortran() {return keyOperObsIdentity_;}
-  const int & toFortran() const {return keyOperObsIdentity_;}
+  oops::Variables simulatedVars() const override;
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperObsIdentity_;
-  oops::Variables varin_;
-  oops::Variables operatorVars_;
+
+ private:
+  std::vector<std::unique_ptr<LinearObsOperatorBase>> components_;
+  oops::Variables requiredVars_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_IDENTITY_OBSIDENTITYTLAD_H_
+#endif  // UFO_COMPOSITEOPER_OBSCOMPOSITETLAD_H_

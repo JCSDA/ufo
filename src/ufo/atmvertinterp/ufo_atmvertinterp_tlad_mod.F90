@@ -16,7 +16,9 @@ module ufo_atmvertinterp_tlad_mod
 
   type, public :: ufo_atmvertinterp_tlad
   private
-    type(oops_variables), public :: obsvars
+    type(oops_variables), public :: obsvars ! Variables to be simulated
+    integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                     ! simulated variables in the ObsSpace
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
     real(kind_real), allocatable :: wf(:)
@@ -55,12 +57,14 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   self%use_ln = .false.
 
   if( grid_conf%has("vertical coordinate") ) then
-      call grid_conf%get_or_die("vertical coordinate",coord_name)
-      self%v_coord = coord_name
-      if( trim(self%v_coord) .eq. var_prs ) self%use_ln = .true.
+    call grid_conf%get_or_die("vertical coordinate",coord_name)
+    self%v_coord = coord_name
+    if( (self%v_coord .eq. var_prs) .or. (self%v_coord .eq. var_prsi) ) then
+      self%use_ln = .true.
+    endif
   else  ! default
-      self%v_coord = var_prs
-      self%use_ln  = .true.
+    self%v_coord = var_prs
+    self%use_ln  = .true.
   endif
 
   !> Determine observation vertical coordinate.
@@ -135,13 +139,16 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),         intent(inout) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
 
-  integer :: iobs, ivar
+  integer :: iobs, iobsvar, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
 
-  do ivar = 1, nvars
+  do iobsvar = 1, size(self%obsvarindices)
+    ! Get the index of the row of hofx to fill
+    ivar = self%obsvarindices(iobsvar)
+
     ! Get the name of input variable in geovals
-    geovar = self%geovars%variable(ivar)
+    geovar = self%geovars%variable(iobsvar)
 
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
@@ -164,16 +171,19 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),            intent(in)    :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in)    :: obss
 
-  integer :: iobs, ivar
+  integer :: iobs, iobsvar, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
   real(c_double) :: missing
 
   missing = missing_value(missing)
 
-  do ivar = 1, nvars
+  do iobsvar = 1, size(self%obsvarindices)
+    ! Get the index of the row of hofx to fill
+    ivar = self%obsvarindices(iobsvar)
+
     ! Get the name of input variable in geovals
-    geovar = self%geovars%variable(ivar)
+    geovar = self%geovars%variable(iobsvar)
 
     ! Get pointer to profile for this variable in geovals
     call ufo_geovals_get_var(geovals, geovar, profile)

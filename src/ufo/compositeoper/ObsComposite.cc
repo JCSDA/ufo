@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/compositeoper/ObsCompositeParameters.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
