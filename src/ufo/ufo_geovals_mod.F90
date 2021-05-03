@@ -643,7 +643,8 @@ endif
 
 ! The last variable should be the ln pressure coordinate.  That's
 ! where we get the height information for the analytic init
-if (trim(self%variables(self%nvar)) /= trim(var_prs)) then
+if (self%variables(self%nvar) /= var_prs .and. &
+    self%variables(self%nvar) /= var_prsi) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
 endif
 
