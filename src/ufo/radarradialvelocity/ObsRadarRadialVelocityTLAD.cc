@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsRadarRadialVelocityTLAD>
 
 ObsRadarRadialVelocityTLAD::ObsRadarRadialVelocityTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperRadarRadialVelocity_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperRadarRadialVelocity_(0), varin_()
 {
   ufo_radarradialvelocity_tlad_setup_f90(keyOperRadarRadialVelocity_,
                                             config, odb.obsvariables(), varin_);
@@ -48,7 +48,8 @@ void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals,
                     const ObsBias & bias, ObsDiagnostics &) {
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::setTrajectory entering" << std::endl;
 
-  ufo_radarradialvelocity_tlad_settraj_f90(keyOperRadarRadialVelocity_, geovals.toFortran(), odb_);
+  ufo_radarradialvelocity_tlad_settraj_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),
+                                           obsspace());
 
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::setTrajectory exiting" << std::endl;
 }
@@ -57,8 +58,8 @@ void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals,
 
 void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec)
                                  const {
-  ufo_radarradialvelocity_simobs_tl_f90(keyOperRadarRadialVelocity_, geovals.toFortran(), odb_,
-                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+  ufo_radarradialvelocity_simobs_tl_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),
+                                        obsspace(), ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::simulateObsTL exiting" << std::endl;
 }
@@ -67,8 +68,8 @@ void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::Ob
 
 void ObsRadarRadialVelocityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec)
                                  const {
-  ufo_radarradialvelocity_simobs_ad_f90(keyOperRadarRadialVelocity_, geovals.toFortran(), odb_,
-                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+  ufo_radarradialvelocity_simobs_ad_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),
+                                        obsspace(), ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::simulateObsAD exiting" << std::endl;
 }

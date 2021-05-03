@@ -56,7 +56,6 @@ class ObsTimeOperTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   std::unique_ptr<LinearObsOperatorBase> actualoperator_;
-  const ioda::ObsSpace& odb_;
   std::vector<std::vector<float>> timeWeights_;
 };
 

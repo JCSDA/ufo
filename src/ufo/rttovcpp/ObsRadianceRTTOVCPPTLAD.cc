@@ -31,7 +31,7 @@ static LinearObsOperatorMaker<ObsRadianceRTTOVCPPTLAD> makerRTTOVCPPTL_("RTTOVCP
 
 ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), varin_()
 {
   // Increment fields to be requested from getvalues and stored in geovals
   const std::vector<std::string> vv{
@@ -66,7 +66,7 @@ ObsRadianceRTTOVCPPTLAD::~ObsRadianceRTTOVCPPTLAD() {
 void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                             ObsDiagnostics &) {
 //
-  ufo::rttovcpp_interface(geovals, odb_, aRttov_, CoefFileName, channels_,
+  ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, CoefFileName, channels_,
                           nlevels, skip_profile);
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::setTrajectory done" << std::endl;

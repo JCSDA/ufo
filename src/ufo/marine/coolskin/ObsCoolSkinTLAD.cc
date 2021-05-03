@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsCoolSkinTLAD> makerCoolSkinTL_("CoolSkin");
 // -----------------------------------------------------------------------------
 
 ObsCoolSkinTLAD::ObsCoolSkinTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_temperature",
                                     "net_downwelling_shortwave_radiation",
@@ -49,21 +49,23 @@ ObsCoolSkinTLAD::~ObsCoolSkinTLAD() {
 
 void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                     ObsDiagnostics &) {
-  ufo_CoolSkin_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_CoolSkin_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsCoolSkinTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_CoolSkin_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_CoolSkin_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
+                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: tangent linear observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_CoolSkin_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_CoolSkin_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
+                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: adjoint observation operator run" << std::endl;
 }
 

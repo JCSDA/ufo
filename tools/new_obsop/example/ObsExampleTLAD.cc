@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsExampleTLAD> makerExampleTL_("Example");
 
 ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   ufo_example_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
   oops::Log::trace() << "ObsExampleTLAD created" << std::endl;
@@ -42,14 +42,14 @@ ObsExampleTLAD::~ObsExampleTLAD() {
 
 void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                    ObsDiagnostics & ydiags) {
-  ufo_example_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_, ydiags.toFortran());
+  ufo_example_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace(), ydiags.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: TL observation operator run" << std::endl;
 }
@@ -57,7 +57,7 @@ void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 // -----------------------------------------------------------------------------
 
 void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: adjoint observation operator run" << std::endl;
 }

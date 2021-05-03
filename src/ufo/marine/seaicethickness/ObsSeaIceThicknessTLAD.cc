@@ -26,7 +26,7 @@ static LinearObsOperatorMaker<ObsSeaIceThicknessTLAD> makerSeaIceThicknessTL_("S
 
 ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_ice_category_area_fraction",
                                     "sea_ice_category_thickness"};
@@ -46,14 +46,14 @@ ObsSeaIceThicknessTLAD::~ObsSeaIceThicknessTLAD() {
 
 void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                            ObsDiagnostics &) {
-  ufo_seaicethickness_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_seaicethickness_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_seaicethickness_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_seaicethickness_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: TL observation operator run" << std::endl;
 }
@@ -61,7 +61,7 @@ void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVec
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_seaicethickness_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_seaicethickness_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: adjoint observation operator run" << std::endl;
 }

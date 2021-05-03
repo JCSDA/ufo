@@ -56,7 +56,6 @@ class ObsGnssroBndROPP1DTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOperGnssroBndROPP1D_;
-  const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
 

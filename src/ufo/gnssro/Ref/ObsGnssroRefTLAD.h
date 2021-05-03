@@ -56,7 +56,6 @@ class ObsGnssroRefTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOperGnssroRef_;
-  const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
 

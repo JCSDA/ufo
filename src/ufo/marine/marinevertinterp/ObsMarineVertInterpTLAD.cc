@@ -24,7 +24,7 @@ static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_(
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
                                                  const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   ufo_marinevertinterp_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
 
@@ -42,14 +42,14 @@ ObsMarineVertInterpTLAD::~ObsMarineVertInterpTLAD() {
 
 void ObsMarineVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                             ObsDiagnostics &) {
-  ufo_marinevertinterp_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_marinevertinterp_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_marinevertinterp_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_marinevertinterp_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: TL observation operator run" << std::endl;
 }
@@ -57,7 +57,7 @@ void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVe
 // -----------------------------------------------------------------------------
 
 void ObsMarineVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_marinevertinterp_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_marinevertinterp_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: adjoint observation operator run" << std::endl;
 }

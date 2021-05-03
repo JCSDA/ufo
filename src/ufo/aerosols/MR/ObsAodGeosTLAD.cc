@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsAodGeosTLAD> makerAodGeosTL_("AodGeos");
 
 ObsAodGeosTLAD::ObsAodGeosTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   ufo_aodgeos_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
 
@@ -44,14 +44,14 @@ ObsAodGeosTLAD::~ObsAodGeosTLAD() {
 void ObsAodGeosTLAD::setTrajectory(const GeoVaLs & geovals,
                                    const ObsBias & bias, ObsDiagnostics &) {
   oops::Log::trace() << "ObsAodGeosTLAD: trajectory entering" << std::endl;
-  ufo_aodgeos_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_aodgeos_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsAodGeosTLAD: set trajectory exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodGeosTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_aodgeos_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_aodgeos_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodGeosTLAD: TL observation operator run" << std::endl;
 }
@@ -59,7 +59,7 @@ void ObsAodGeosTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 // -----------------------------------------------------------------------------
 
 void ObsAodGeosTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_aodgeos_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_aodgeos_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodGeosTLAD: adjoint observation operator run" << std::endl;
 }

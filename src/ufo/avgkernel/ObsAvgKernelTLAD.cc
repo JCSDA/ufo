@@ -26,7 +26,7 @@ static LinearObsOperatorMaker<ObsAvgKernelTLAD> makerAvgKernelTL_("AvgKernel");
 
 ObsAvgKernelTLAD::ObsAvgKernelTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAvgKernel_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperAvgKernel_(0), varin_()
 {
   ufo_avgkernel_tlad_setup_f90(keyOperAvgKernel_, config, odb.obsvariables(), varin_);
 
@@ -46,7 +46,7 @@ void ObsAvgKernelTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bi
                                          ObsDiagnostics &) {
   oops::Log::trace() << "ObsAvgKernelTLAD::setTrajectory entering" << std::endl;
 
-  ufo_avgkernel_tlad_settraj_f90(keyOperAvgKernel_, geovals.toFortran(), odb_);
+  ufo_avgkernel_tlad_settraj_f90(keyOperAvgKernel_, geovals.toFortran(), obsspace());
 
   oops::Log::trace() << "ObsAvgKernelTLAD::setTrajectory exiting" << std::endl;
 }
@@ -54,7 +54,7 @@ void ObsAvgKernelTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bi
 // -----------------------------------------------------------------------------
 
 void ObsAvgKernelTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_avgkernel_simobs_tl_f90(keyOperAvgKernel_, geovals.toFortran(), odb_,
+  ufo_avgkernel_simobs_tl_f90(keyOperAvgKernel_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsAvgKernelTLAD::simulateObsTL exiting" << std::endl;
@@ -63,7 +63,7 @@ void ObsAvgKernelTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & 
 // -----------------------------------------------------------------------------
 
 void ObsAvgKernelTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_avgkernel_simobs_ad_f90(keyOperAvgKernel_, geovals.toFortran(), odb_,
+  ufo_avgkernel_simobs_ad_f90(keyOperAvgKernel_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsAvgKernelTLAD::simulateObsAD exiting" << std::endl;

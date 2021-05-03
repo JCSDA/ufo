@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsGnssroRefTLAD> makerGnssroRefTL_("GnssroRef");
 // -----------------------------------------------------------------------------
 
 ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperGnssroRef_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperGnssroRef_(0), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "obs options");
 
@@ -50,20 +50,20 @@ ObsGnssroRefTLAD::~ObsGnssroRefTLAD() {
 
 void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                      ObsDiagnostics &) {
-  ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), odb_);
+  ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
+  ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
+  ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 

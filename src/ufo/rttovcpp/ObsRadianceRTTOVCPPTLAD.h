@@ -56,7 +56,6 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
 
  private:
   void print(std::ostream &) const override;
-  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
   std::string        CoefFileName;
   std::vector<int>   channels_;

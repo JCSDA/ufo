@@ -26,7 +26,7 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
-  : keyOperObsIdentity_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperObsIdentity_(0), varin_()
 {
   ufo_identity_tlad_setup_f90(keyOperObsIdentity_, config, odb.obsvariables(), varin_);
 
@@ -44,14 +44,14 @@ ObsIdentityTLAD::~ObsIdentityTLAD() {
 
 void ObsIdentityTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                     ObsDiagnostics &) {
-  ufo_identity_tlad_settraj_f90(keyOperObsIdentity_, geovals.toFortran(), odb_);
+  ufo_identity_tlad_settraj_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsIdentityTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_identity_simobs_tl_f90(keyOperObsIdentity_, geovals.toFortran(), odb_,
+  ufo_identity_simobs_tl_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentityTLAD: TL observation operator run" << std::endl;
 }
@@ -59,7 +59,7 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 // -----------------------------------------------------------------------------
 
 void ObsIdentityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_identity_simobs_ad_f90(keyOperObsIdentity_, geovals.toFortran(), odb_,
+  ufo_identity_simobs_ad_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator run" << std::endl;
 }

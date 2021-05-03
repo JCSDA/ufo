@@ -26,7 +26,7 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerVertInterpTL_("VertInte
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperAtmVertInterp_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperAtmVertInterp_(0), varin_()
 {
   ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, config, odb.obsvariables(), varin_);
 
@@ -46,7 +46,7 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
                                          ObsDiagnostics &) {
   oops::Log::trace() << "ObsAtmVertInterpTLAD::setTrajectory entering" << std::endl;
 
-  ufo_atmvertinterp_tlad_settraj_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_);
+  ufo_atmvertinterp_tlad_settraj_f90(keyOperAtmVertInterp_, geovals.toFortran(), obsspace());
 
   oops::Log::trace() << "ObsAtmVertInterpTLAD::setTrajectory exiting" << std::endl;
 }
@@ -54,7 +54,7 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
+  ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsAtmVertInterpTLAD::simulateObsTL exiting" << std::endl;
@@ -63,7 +63,7 @@ void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
+  ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
   oops::Log::trace() << "ObsAtmVertInterpTLAD::simulateObsAD exiting" << std::endl;

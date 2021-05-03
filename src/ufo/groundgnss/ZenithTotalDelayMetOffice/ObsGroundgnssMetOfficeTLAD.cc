@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsGroundgnssMetOfficeTLAD>
 
 ObsGroundgnssMetOfficeTLAD::ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGroundgnssMetOffice_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperGroundgnssMetOffice_(0), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "obs options");
   const eckit::Configuration * configc = &obsOptions;
@@ -54,23 +54,24 @@ ObsGroundgnssMetOfficeTLAD::~ObsGroundgnssMetOfficeTLAD() {
 
 void ObsGroundgnssMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                            ObsDiagnostics &) {
-  ufo_groundgnss_metoffice_tlad_settraj_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(), odb_);
+  ufo_groundgnss_metoffice_tlad_settraj_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
+                                            obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssMetOfficeTLAD::simulateObsTL(
         const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_groundgnss_metoffice_simobs_tl_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+  ufo_groundgnss_metoffice_simobs_tl_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
+                                         obsspace(), ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssMetOfficeTLAD::simulateObsAD(
         GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_groundgnss_metoffice_simobs_ad_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+  ufo_groundgnss_metoffice_simobs_ad_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
+                                         obsspace(), ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

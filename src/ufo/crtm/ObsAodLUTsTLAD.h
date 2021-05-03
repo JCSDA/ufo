@@ -56,7 +56,6 @@ class ObsAodLUTsTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOperAodLUTs_;
-  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
 

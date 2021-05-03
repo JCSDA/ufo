@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsGnssroBndNBAMTLAD> makerGnssroBndNBAMTL_("Gnssr
 
 ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
@@ -64,20 +64,20 @@ ObsGnssroBndNBAMTLAD::~ObsGnssroBndNBAMTLAD() {
 
 void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                          ObsDiagnostics &) {
-  ufo_gnssro_bndnbam_tlad_settraj_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_);
+  ufo_gnssro_bndnbam_tlad_settraj_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndnbam_simobs_tl_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_,
+  ufo_gnssro_bndnbam_simobs_tl_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndnbam_simobs_ad_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_,
+  ufo_gnssro_bndnbam_simobs_ad_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 

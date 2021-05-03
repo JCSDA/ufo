@@ -56,7 +56,6 @@ class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOper_;
-  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
 

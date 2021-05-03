@@ -32,9 +32,10 @@ static LinearObsOperatorMaker<ObsTimeOperTLAD> makerTimeOperTL_("TimeOperLinInte
 
 ObsTimeOperTLAD::ObsTimeOperTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
-  : actualoperator_(LinearObsOperatorFactory::create(
+  : LinearObsOperatorBase(odb),
+    actualoperator_(LinearObsOperatorFactory::create(
                     odb, eckit::LocalConfiguration(config, "obs operator"))),
-    odb_(odb), timeWeights_(timeWeightCreate(odb, config))
+    timeWeights_(timeWeightCreate(odb, config))
 {
   oops::Log::trace() << "ObsTimeOperTLAD created" << std::endl;
 }
@@ -55,7 +56,7 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(odb_.comm()), gv2(odb_.comm());
+  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory split geovals gv1 "
@@ -86,7 +87,7 @@ void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(odb_.comm()), gv2(odb_.comm());
+  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL split geovals gv1 "
@@ -115,7 +116,7 @@ void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(odb_.comm()), gv2(odb_.comm());
+  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD split geovals gv1 "

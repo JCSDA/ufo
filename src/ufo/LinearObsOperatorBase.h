@@ -34,7 +34,8 @@ class ObsDiagnostics;
 class LinearObsOperatorBase : public util::Printable,
                               private boost::noncopyable {
  public:
-  LinearObsOperatorBase() {}
+  explicit LinearObsOperatorBase(const ioda::ObsSpace & odb)
+    : odb_(odb) {}
   virtual ~LinearObsOperatorBase() {}
 
 /// Obs Operator
@@ -45,8 +46,14 @@ class LinearObsOperatorBase : public util::Printable,
 /// Operator input required from Model
   virtual const oops::Variables & requiredVars() const = 0;
 
+/// \brief The space containing the observations to be simulated by this operator.
+  const ioda::ObsSpace &obsspace() const { return odb_; }
+
  private:
   virtual void print(std::ostream &) const = 0;
+
+ private:
+  const ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------
