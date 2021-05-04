@@ -134,7 +134,7 @@ subroutine identity_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
 
     if (.not.(allocated(point%vals))) then
       point%nval=1
-      allocate(point%vals(1,size(hofx,1)))
+      allocate(point%vals(1,size(hofx,2)))
       point%vals = 0.0
     end if
 
