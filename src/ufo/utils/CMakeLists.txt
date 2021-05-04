@@ -6,6 +6,12 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      dataextractor/DataExtractorBackend.h
+      dataextractor/DataExtractorCSVBackend.h
+      dataextractor/DataExtractorCSVBackend.cc
+      dataextractor/DataExtractorInput.h
+      dataextractor/DataExtractorNetCDFBackend.h
+      dataextractor/DataExtractorNetCDFBackend.cc
       DistanceCalculator.h
       EquispacedBinSelector.h
       GeodesicDistanceCalculator.h
