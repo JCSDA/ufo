@@ -188,12 +188,36 @@ call ufo_geovals_get_var(geovals, var_lw_rad , S_ns )
 call ufo_geovals_get_var(geovals, var_sea_fric_vel , u )
 
 ! If called from a model interface, allocate adjoint variables
-if (.not. allocated(Td%vals))    allocate(Td%vals(1,nobs));   Td%vals = 0.0
-if (.not. allocated(R_nl%vals))  allocate(R_nl%vals(1,nobs)); R_nl%vals = 0.0
-if (.not. allocated(H_I%vals))   allocate(H_I%vals(1,nobs));  H_I%vals = 0.0
-if (.not. allocated(H_s%vals))   allocate(H_s%vals(1,nobs));  H_s%vals = 0.0
-if (.not. allocated(S_ns%vals))  allocate(S_ns%vals(1,nobs)); S_ns%vals = 0.0
-if (.not. allocated(u%vals))     allocate(u%vals(1,nobs));    u%vals = 0.0
+if (.not. allocated(Td%vals)) then
+    allocate(Td%vals(1,nobs))
+    Td%nval = 1
+    Td%vals = 0.0
+end if
+if (.not. allocated(R_nl%vals)) then
+    allocate(R_nl%vals(1,nobs))
+    R_nl%nval = 1
+    R_nl%vals = 0.0
+end if
+if (.not. allocated(H_I%vals)) then
+    allocate(H_I%vals(1,nobs))
+    H_I%nval = 1
+    H_I%vals = 0.0
+end if
+if (.not. allocated(H_s%vals)) then
+    allocate(H_s%vals(1,nobs))
+    H_s%nval = 1
+    H_s%vals = 0.0
+end if
+if (.not. allocated(S_ns%vals)) then
+    allocate(S_ns%vals(1,nobs))
+    S_ns%nval = 1
+    S_ns%vals = 0.0
+  end if
+if (.not. allocated(u%vals)) then
+    allocate(u%vals(1,nobs))
+    u%nval = 1
+    u%vals = 0.0
+end if
 
 ! Apply adjoint obs operator
 do iobs = 1, nobs

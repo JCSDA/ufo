@@ -287,27 +287,35 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
 
     ! check if sea layer thickness variable is in geovals get it and zero it out
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
-    
+
     nlev = self%nval
     nlocs = self%nlocs
-    
-    if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, size(hofx,1)))
-    if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, size(hofx,1)))
-    if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, size(hofx,1)))    
 
-    ! Layer thickness is not a control variable: zero it out!
-    dlayerthick%vals=0.0
+    if (.not. allocated(dtemp%vals)) then
+       allocate(dtemp%vals(nlev, size(hofx,1)))
+       dtemp%nval = nlev
+       dtemp%vals = 0.0
+    end if
+    if (.not. allocated(dsalt%vals)) then
+      allocate(dsalt%vals(nlev, size(hofx,1)))
+      dsalt%nval = nlev
+      dsalt%vals = 0.0
+    end if
+    if (.not. allocated(dlayerthick%vals)) then
+       allocate(dlayerthick%vals(nlev, size(hofx,1)))
+       dlayerthick%nval = nlev
+       dlayerthick%vals = 0.0
+       ! Layer thickness is not a control variable: it stays zeroed out!
+    end if
 
     ! backward sea temperature profile obs operator
-    dtemp%vals = 0.0
-    dsalt%vals = 0.0
     do iobs = 1, size(hofx,1)
 
        if (hofx(iobs) /= missing) then
           lono = self%lono(iobs)
           lato = self%lato(iobs)
           deptho = self%deptho(iobs)
-      
+
           ! Adjoint obs operator
           dtp = 0.0
           dsp = 0.0
