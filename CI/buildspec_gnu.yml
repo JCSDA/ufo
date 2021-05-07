@@ -52,6 +52,11 @@ phases:
         echo "CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH_FORK}";
         fi
 
+      # Upload branch name and commit sha as CodeBuild artifact to S3
+      - mkdir -p /jcsda/artifacts
+      - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
+      - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > /jcsda/artifacts/commit_sha.txt
+
       - cd CI
       ##  public repos
       # ufo
@@ -100,11 +105,13 @@ phases:
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
-      - cd /jcsda/ufo-bundle
+      # cdash upload setup
+      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle/
 
       - chmod -R 777 /jcsda/ufo-bundle
-      - ls -lt /jcsda/ufo-bundle
+
   build:
+    on-failure: CONTINUE
     commands:
       - echo Executing build phase
       - echo $CODEBUILD_BUILD_SUCCEEDING
@@ -116,32 +123,64 @@ phases:
         && echo $CXX
         && echo $FC
         && CC=mpicc CXX=mpicxx FC=mpifort
-        && cmake  -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_GPROF=ON -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
-        && cd ufo
+        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/ufo-bundle/"
+
+
+      # configure and build
+      - su - jedi -c "cd /home/jedi/ufo
+        && export FC=mpifort
+        && export CC=mpicc
+        && export CXX=mpicxx
+        && cp ../DartConfiguration.tcl .
+        && sed -i 's/ufo-bundle/ufo-bundle\/ufo/' DartConfiguration.tcl
+        && sed -i 's/jedi/jedi\/ufo/' DartConfiguration.tcl
+        && cat DartConfiguration.tcl
         && make -j4"
 
+      - echo $CODEBUILD_BUILD_SUCCEEDING
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];
         then export BUILD_STATUS="1";
         echo "Build passed";
         fi
       - echo $BUILD_STATUS
 
+      # run ctest
       - su - jedi -c "CC=mpicc CXX=mpicxx FC=mpifort
         && cd /home/jedi/ufo
-        && ctest"
+        && ctest -C RelWithDebInfo -D ExperimentalTest"
+
+    finally:
+      # upload ctest report to CDASH
+      - su - jedi -c "cd /home/jedi/ufo
+        && export FC=mpifort
+        && export CC=mpicc
+        && export CXX=mpicxx
+        && ctest -C RelWithDebInfo -D ExperimentalSubmit -M Continuous -- --track Continuous --group Continuous"
 
   post_build:
     commands:
       - echo Executing post_build phase
       - echo $CODEBUILD_BUILD_SUCCEEDING
-      - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
-        then echo "Build passed, rerunning failed tests";
-        su - jedi -c "cd /home/jedi/ufo
-        && ctest -VV --rerun-failed";
+      - echo $BUILD_STATUS
+
+      # upload find cdash url and upload it as CodeBuild artifact to S3
+      - if [ "$BUILD_STATUS" = "1" ];
+        then echo "Build & tests passed, find cdash url";
+        bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing;
+        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing);
+        echo $url;
+        echo ${url} > /jcsda/artifacts/cdash-url.txt;
+        cat /jcsda/artifacts/cdash-url.txt;
         else echo "Build failed";
         fi
+
       - echo 'Connect to CodeCov'
       - cd /home/jedi/ufo
       - pwd
       - ls
       - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh
+
+artifacts:
+  files:
+    - '/jcsda/artifacts/*'
+  name: ufo-gnu-url

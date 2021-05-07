@@ -22,10 +22,6 @@ phases:
       - echo $CODEBUILD_WEBHOOK_EVENT
       - echo $CODEBUILD_WEBHOOK_TRIGGER
       - echo $CODEBUILD_WEBHOOK_BASE_REF
- 
-  pre_build:
-    commands:
-      - echo Executing pre_build phase
 
       # Codebuild only runs on PUSH events if HEAD_REF
       # is refs/heads/develop (merge to develop). In this
@@ -40,7 +36,10 @@ phases:
       - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
       - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
 
-      - cd CI
+  pre_build:
+    commands:
+      - echo Executing pre_build phase
+
       - . /etc/profile.d/intel.sh
 
       #  Set crtm branch name
@@ -54,6 +53,12 @@ phases:
         echo "CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH_FORK}";
         fi
 
+      # Upload branch name and commit sha as CodeBuild artifact to S3
+      - mkdir -p /jcsda/artifacts
+      - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
+      - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > /jcsda/artifacts/commit_sha.txt
+
+      - cd CI
       ##  public repos
       # ufo
       - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
@@ -101,12 +106,14 @@ phases:
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
+      # cdash upload setup
+      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle/
+
       - chmod -R 777 /jcsda/ufo-bundle
 
   build:
     commands:
       - echo Executing build phase
-      ## cannot source /etc/bash.bashrc so copy what's there for jscdauser
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
@@ -116,8 +123,18 @@ phases:
         && export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
         && export PATH=/usr/local/lib:$PATH
         && cd /home/jedi
-        && ecbuild /jcsda/ufo-bundle/
+        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/ufo-bundle/"
+
+      - su - jedi -c "export CC=mpiicc
+        && export FC=mpiifort
+        && export CXX=mpiicpc
+        && export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+        && export PATH=/usr/local/lib:$PATH
         && cd /home/jedi/ufo
+        && cp ../DartConfiguration.tcl .
+        && sed -i 's/ufo-bundle/ufo-bundle\/ufo/' DartConfiguration.tcl
+        && sed -i 's/jedi/jedi\/ufo/' DartConfiguration.tcl
+        && cat DartConfiguration.tcl
         && make -j4"
 
       - echo $CODEBUILD_BUILD_SUCCEEDING
@@ -127,27 +144,43 @@ phases:
         fi
       - echo $BUILD_STATUS
 
+      # run ctest
       - su - jedi -c "export CC=mpiicc
         && export FC=mpiifort
         && export CXX=mpiicpc
         && export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
         && export PATH=/usr/local/lib:$PATH
         && cd /home/jedi/ufo
-        && ctest"
+        && ctest -C RelWithDebInfo -D ExperimentalTest"
 
-  post_build:
-    commands:
-      - echo Executing post_build phase
-      - echo $CODEBUILD_BUILD_SUCCEEDING
-
-      - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
-        then echo "Build passed, rerun failed tests";
-        su - jedi -c "export CC=mpiicc
+    finally:
+      # upload ctest report to CDASH
+      - su - jedi -c "export CC=mpiicc
         && export FC=mpiifort
         && export CXX=mpiicpc
         && export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
         && export PATH=/usr/local/lib:$PATH
         && cd /home/jedi/ufo
-        && ctest -VV --rerun-failed";
+        && ctest -C RelWithDebInfo -D ExperimentalSubmit -M Continuous -- --track Continuous --group Continuous"
+
+  post_build:
+    commands:
+      - echo Executing post_build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - echo $BUILD_STATUS
+
+      # upload find cdash url and upload it as CodeBuild artifact to S3
+      - if [ "$BUILD_STATUS" = "1" ];
+        then echo "Build & tests passed, find cdash url";
+        bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing;
+        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing);
+        echo $url;
+        echo ${url} > /jcsda/artifacts/cdash-url.txt;
+        cat /jcsda/artifacts/cdash-url.txt;
         else echo "Build failed";
         fi
+
+artifacts:
+  files:
+    - '/jcsda/artifacts/*'
+  name: ufo-intel-url
