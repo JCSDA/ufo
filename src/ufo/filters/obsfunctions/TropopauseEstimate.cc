@@ -66,10 +66,9 @@ void TropopauseEstimate::compute(const ObsFilterData & in,
   std::vector<util::DateTime> datetimes;
   in.get(Variable("datetime@MetaData"), datetimes);
 
+  // If datetimes is empty, then we should just exit because there is nothing we can do otherwise.
   if (datetimes.empty()) {
-    std::string errString = "The datetimes vector is empty, fatal error.";
-    oops::Log::error() << errString;
-    throw eckit::BadValue(errString);
+    return;
   }
 
   int year, month, day, hour, minute, second, day_peak;

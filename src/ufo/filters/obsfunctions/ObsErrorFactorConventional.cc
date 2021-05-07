@@ -101,10 +101,9 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
   std::vector<util::DateTime> ob_datetime(nlocs);
   data.get(Variable("datetime@MetaData"), ob_datetime);
 
+  // Due to splitting across CPUs, it is possible we have zero obs, so just return nothing.
   if (ob_datetime.empty()) {
-    std::string errString = "The datetimes vector is empty, fatal error.";
-    oops::Log::error() << errString;
-    throw eckit::BadValue(errString);
+    return;
   }
 
   // Get GeoVals of air pressure [Pa] in vertical column
