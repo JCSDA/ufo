@@ -5,6 +5,8 @@
 
 set ( obslocalization_files
       ObsLocGC99.h
+      ObsLocSOAR.h
+      ObsLocalization.h
       ObsLocParameters.cc
       ObsLocParameters.h
 )

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCGC99_H_
-#define UFO_OBSLOCALIZATION_OBSLOCGC99_H_
+#ifndef UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
+#define UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
 
 #include <algorithm>
 #include <memory>
@@ -27,7 +27,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/generic/gc99.h"
+#include "oops/generic/soar.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/obslocalization/ObsLocalization.h"
@@ -35,13 +35,13 @@
 
 namespace ufo {
 
-/// Horizontal Gaspari-Cohn observation space localization
+/// Horizontal SOAR observation space localization
 template<class MODEL>
-class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
+class ObsLocSOAR: public ufo::ObsLocalization<MODEL> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
-  ObsLocGC99(const eckit::Configuration &, const ioda::ObsSpace &);
+  ObsLocSOAR(const eckit::Configuration &, const ioda::ObsSpace &);
 
   /// compute localization and save localization values in \p obsvector and
   /// localization flags (1: outside of localization; 0: inside localization area)
@@ -55,22 +55,20 @@ class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsLocGC99<MODEL>::ObsLocGC99(const eckit::Configuration & config,
+ObsLocSOAR<MODEL>::ObsLocSOAR(const eckit::Configuration & config,
                               const ioda::ObsSpace & obsspace):
        ObsLocalization<MODEL>::ObsLocalization(config, obsspace) {
   const ObsLocParameters & options = ObsLocalization<MODEL>::localizationOptions();
-  oops::Log::debug() <<  "Gaspari-Cohn horizontal localization with " << options.lengthscale
-     << " lengthscale" << std::endl;
+  oops::Log::debug()<< "SOAR horizontal localization with " << options.SOARexpDecayH
+     << " soar decay" << std::endl;
 }
-
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocGC99<MODEL>::computeLocalization(const GeometryIterator_ & i,
+void ObsLocSOAR<MODEL>::computeLocalization(const GeometryIterator_ & i,
                                             ioda::ObsDataVector<int> & outside,
                                             ioda::ObsVector & locvector) const {
-  oops::Log::trace() << "ObsLocGC99::computeLocalization" << std::endl;
-
+  oops::Log::trace() << "ObsLocSOAR::computeLocalization" << std::endl;
   // do distance search and compute box-car locvector
   ObsLocalization<MODEL>::computeLocalization(i, outside, locvector);
 
@@ -79,9 +77,10 @@ void ObsLocGC99<MODEL>::computeLocalization(const GeometryIterator_ & i,
   const std::vector<double> & horizontalObsdist = ObsLocalization<MODEL>::horizontalObsdist();
   const ObsLocParameters  & options = ObsLocalization<MODEL>::localizationOptions();
 
+  const double SOARexpDecayH = options.SOARexpDecayH;
   const size_t nvars = locvector.nvars();
   for (size_t jlocal = 0; jlocal < localobs.size(); ++jlocal) {
-    double locFactor = oops::gc99(horizontalObsdist[jlocal] / options.lengthscale);
+    double locFactor = oops::soar(horizontalObsdist[jlocal]*SOARexpDecayH);
     // obsdist is calculated at each location; need to update R for each variable
     for (size_t jvar = 0; jvar < nvars; ++jvar) {
       locvector[jvar + localobs[jlocal] * nvars] *= locFactor;
@@ -92,12 +91,12 @@ void ObsLocGC99<MODEL>::computeLocalization(const GeometryIterator_ & i,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocGC99<MODEL>::print(std::ostream & os) const {
-  const ObsLocParameters  & options = ObsLocalization<MODEL>::localizationOptions();
-  os << "Gaspari-Cohn horizontal localization with " << options.lengthscale
-     << " lengthscale" << std::endl;
+void ObsLocSOAR<MODEL>::print(std::ostream & os) const {
+  const ObsLocParameters & options = ObsLocalization<MODEL>::localizationOptions();
+  os << "SOAR horizontal localization with " << options.SOARexpDecayH
+     << " soar decay" << std::endl;
 }
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCGC99_H_
+#endif  // UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
