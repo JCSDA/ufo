@@ -213,22 +213,22 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ncat = self%icethick%nval
-if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then
-   if (ncat < 1) then
-     write(err_msg,*) myname_, ' unknown number of categories'
-     call abor1_ftn(err_msg)
-   endif
-   if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
-   if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
-end if
+if (ncat < 1) then
+  write(err_msg,*) myname_, ' unknown number of categories'
+  call abor1_ftn(err_msg)
+endif
+if (.not. allocated(icefrac_d%vals)) then
+  icefrac_d%nval = ncat
+  allocate(icefrac_d%vals(ncat,size(hofx,1)))
+  icefrac_d%vals = 0.0
+endif
+if (.not. allocated(icethick_d%vals)) then
+  icethick_d%nval = ncat
+  allocate(icethick_d%vals(ncat, size(hofx,1)))
+  icethick_d%vals = 0.0
+endif
 
 ! backward sea ice thickness obs operator
-
-if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
-if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
-
-icethick_d%vals = 0.0
-icefrac_d%vals = 0.0
 
 select case (trim(self%obsvars%variable(1)))
 case ("sea_ice_freeboard")
