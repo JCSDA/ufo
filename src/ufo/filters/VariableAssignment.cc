@@ -58,12 +58,17 @@ void assignFunction(const ufo::Variable &function,
   ioda::ObsDataVector<float> newValues(data.obsspace(), variable.toOopsVariables());
   data.get(function, newValues);
 
+  const VariableType missing = util::missingValue(VariableType());
+  const float missingfloat = util::missingValue(float());
   for (size_t ival = 0; ival < values.nvars(); ++ival) {
     std::vector<VariableType> &currentValues = values[ival];
     const ioda::ObsDataRow<float> &currentNewValues = newValues[ival];
-    for (size_t iloc = 0; iloc < apply.size(); ++iloc)
-      if (apply[iloc])
+    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
+      if (apply[iloc] && currentNewValues[iloc] != missingfloat)
         currentValues[iloc] = static_cast<VariableType>(currentNewValues[iloc]);
+      if (apply[iloc] && currentNewValues[iloc] == missingfloat)
+        currentValues[iloc] = missing;
+    }
   }
 }
 

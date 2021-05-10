@@ -265,6 +265,73 @@ observations:
     reference:
       name: assigned_int_variable_4@TestReference
 
+## Test Conditional ObsFunction "add on" - Example 1
+## Float variable assignment including multiple where in a case
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by the Condtional ObsFunction to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: conditional_assignment_variable_0@MetaData
+      type: float
+      function:
+        name: Conditional@ObsFunction
+        options:
+          defaultvalue: 9.0
+          cases:
+          - where:
+            - variable:
+                name: float_variable_1@MetaData
+              minvalue: 4
+            - variable:
+                name: float_variable_2@MetaData
+              minvalue: -11.75
+            value: 75.5
+          - where:
+            - variable:
+                name: int_variable_1@MetaData
+              is_in: 1
+            value: 3.0
+  compareVariables:
+  - test:
+      name: conditional_assignment_variable_0@MetaData
+    reference:
+      name: assigned_float_variable_1@TestReference
+
+## Test Conditional ObsFunction "add on" - Example 2
+## Cast to integer and no default value
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by the Condtional ObsFunction to a new int variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: conditional_assignment_variable_1@MetaData
+      type: int
+      function:
+        name: Conditional@ObsFunction
+        options:
+          cases:
+          - where:
+            - variable:
+                name: float_variable_1@MetaData
+              minvalue: 4.0
+              maxvalue: 8.0
+            value: 75
+          # This next where clause shouldn't affect the output
+          # because firstmatchingcase = true by default
+          - where:
+            - variable:
+                name: int_variable_1@MetaData
+              is_in: 2
+            value: 2
+  compareVariables:
+  - test:
+      name: conditional_assignment_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_2@TestReference
+
 ## Tests on the obsspace with multiple channels
 
 - obs space: &MultichannelObsSpace
@@ -422,6 +489,44 @@ observations:
       name: new_variable_4@MetaData
     reference:
       name: assigned_float_variable_7@TestReference
+
+## Test Conditional ObsFunction "add on" - Example 3
+## Create array for multiple channels
+## test firstmatchingcase flag
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign values produced by the Condtional ObsFunction for multiple channels
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: conditional_assignment_new@MetaData
+      channels: 1, 4
+      type: float
+      function:
+        name: Conditional@ObsFunction
+        options:
+          firstmatchingcase: false
+          defaultvalue: -10.0
+          cases:
+          - where:
+            - variable:
+                name: float_variable_1@MetaData
+              minvalue: 4.0
+            value: 75.5
+          - where:
+            - variable:
+                name: float_variable_2@MetaData
+              maxvalue: 6.25
+            value: -12.0
+  compareVariables:
+  - test:
+      name: conditional_assignment_new_1@MetaData
+    reference:
+      name: assigned_float_variable_2@TestReference
+  - test:
+      name: conditional_assignment_new_4@MetaData
+    reference:
+      name: assigned_float_variable_2@TestReference
 
 - obs space: &ObsSpace
     name: Try to assign a string to a float variable

@@ -137,6 +137,8 @@ set ( filters_files
       obsfunctions/CLWRetMW_SSMIS.h
       obsfunctions/CLWRetSymmetricMW.cc
       obsfunctions/CLWRetSymmetricMW.h
+      obsfunctions/Conditional.cc
+      obsfunctions/Conditional.h
       obsfunctions/SIRetMW.cc
       obsfunctions/SIRetMW.h
       obsfunctions/SIRetSymmetricMW.cc
