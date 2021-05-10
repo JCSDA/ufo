@@ -509,11 +509,13 @@ call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_get_var(self, varname, geoval)
 
 if (lev<1 .or. lev>size(geoval%vals,1)) then
-  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'level out of range:',lev,size(geoval%vals,1)
+  write(err_msg,*)'ufo_geovals_get_f90 "',trim(varname),'" level out of range: 1~', &
+                  size(geoval%vals,1), ', lev=', lev
   call abor1_ftn(err_msg)
 endif
 if (nlocs /= size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'error locs number:',nlocs,size(geoval%vals,2)
+  write(err_msg,*)'ufo_geovals_get_f90 "',trim(varname),'" error locs number:',nlocs,&
+                  ' /= ',size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
 

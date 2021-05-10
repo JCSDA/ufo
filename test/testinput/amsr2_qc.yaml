@@ -35,7 +35,6 @@ observations:
       channels: 1-14
     minvalue: 50.0
     maxvalue: 340.0
-# passedBenchmark: 91210
   - filter: Domain Check
     filter variables:
     - name: brightness_temperature
@@ -44,20 +43,23 @@ observations:
     - variable:
         name: water_area_fraction@GeoVaLs
       minvalue: 1
-# passedBenchmark: 90482
     - variable:
         name: surface_temperature_where_sea@GeoVaLs
       minvalue: 275
-# passedBenchmark: 83706
     - variable:
         name: surface_wind_speed@GeoVaLs
       maxvalue: 12
-# passedBenchmark: 76202
     - variable:
         name: latitude@MetaData
       minvalue: -60.0
       maxvalue: 60.0
-# passedBenchmark: 74270
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-14
+    test variables:
+    - name: TotalColumnVaporGuess@ObsFunction
+    minvalue: 10.0
   #  Ckeck CLW retrievals from observations 
   - filter: Bounds Check
     filter variables:
@@ -88,7 +90,6 @@ observations:
         sys_bias: *amsr2_sys_bias
         clwret_types: [HofX]
     maxvalue: 1.0
-# passedBenchmark: 73528
   - filter: Difference Check
     filter variables:
     - name: brightness_temperature
@@ -113,7 +114,6 @@ observations:
         clwret_types: [HofX]
     minvalue: -0.5
     maxvalue: 0.5
-# passedBenchmark: 72562
   - filter: BlackList
     filter variables:
     - name: brightness_temperature
@@ -170,4 +170,4 @@ observations:
     absolute threshold: 50
     action:
       name: reject
-  passedBenchmark: 49646
+  passedBenchmark: 45736
