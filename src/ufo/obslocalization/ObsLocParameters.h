@@ -82,10 +82,6 @@ class ObsLocParameters : public oops::Parameters {
   /// Localization lengthscale (find all obs within the distance from reference point)
   oops::RequiredParameter<double> lengthscale{"lengthscale", this};
 
-  /// if SOAR function is used for horizontal localization, this is the decay parameter
-  // the default value will return soar=1 for almost any distance
-  oops::Parameter<double> SOARexpDecayH{"soar horizontal decay", 1e-15, this};
-
   /// Method for searching for nearest points: brute force or KD-tree
   oops::Parameter<SearchMethod> searchMethod{"search method", SearchMethod::BRUTEFORCE, this};
 

@@ -61,7 +61,7 @@ class ObsLocalization: public util::Printable {
   mutable std::vector<double> obsdist_;
   mutable std::vector<int> localobs_;
 
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
 
   /// KD-tree for searching for local obs
   std::unique_ptr<KDTree> kd_;

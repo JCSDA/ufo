@@ -8,30 +8,19 @@
 #ifndef UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
 #define UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
 
-#include <algorithm>
-#include <memory>
 #include <ostream>
-#include <string>
-#include <utility>
 #include <vector>
 
-#include "atlas/util/Earth.h"
-
 #include "eckit/config/Configuration.h"
-#include "eckit/container/KDTree.h"
-#include "eckit/geometry/Point2.h"
-#include "eckit/geometry/Point3.h"
-#include "eckit/geometry/UnitSphere.h"
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/generic/soar.h"
-#include "oops/util/Printable.h"
 
 #include "ufo/obslocalization/ObsLocalization.h"
-#include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/obslocalization/ObsLocSOARParameters.h"
 
 namespace ufo {
 
@@ -50,7 +39,9 @@ class ObsLocSOAR: public ufo::ObsLocalization<MODEL> {
                            ioda::ObsVector & obsvector) const override;
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+
+  ObsLocSOARParameters options_;
 };
 // -----------------------------------------------------------------------------
 
@@ -58,8 +49,8 @@ template<typename MODEL>
 ObsLocSOAR<MODEL>::ObsLocSOAR(const eckit::Configuration & config,
                               const ioda::ObsSpace & obsspace):
        ObsLocalization<MODEL>::ObsLocalization(config, obsspace) {
-  const ObsLocParameters & options = ObsLocalization<MODEL>::localizationOptions();
-  oops::Log::debug()<< "SOAR horizontal localization with " << options.SOARexpDecayH
+  options_.deserialize(config);
+  oops::Log::debug()<< "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -75,9 +66,8 @@ void ObsLocSOAR<MODEL>::computeLocalization(const GeometryIterator_ & i,
   // return refs to internals of ObsLocalization
   const std::vector<int> & localobs = ObsLocalization<MODEL>::localobs();
   const std::vector<double> & horizontalObsdist = ObsLocalization<MODEL>::horizontalObsdist();
-  const ObsLocParameters  & options = ObsLocalization<MODEL>::localizationOptions();
 
-  const double SOARexpDecayH = options.SOARexpDecayH;
+  const double SOARexpDecayH = options_.SOARexpDecayH;
   const size_t nvars = locvector.nvars();
   for (size_t jlocal = 0; jlocal < localobs.size(); ++jlocal) {
     double locFactor = oops::soar(horizontalObsdist[jlocal]*SOARexpDecayH);
@@ -92,8 +82,7 @@ void ObsLocSOAR<MODEL>::computeLocalization(const GeometryIterator_ & i,
 
 template<typename MODEL>
 void ObsLocSOAR<MODEL>::print(std::ostream & os) const {
-  const ObsLocParameters & options = ObsLocalization<MODEL>::localizationOptions();
-  os << "SOAR horizontal localization with " << options.SOARexpDecayH
+  os << "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }
 

@@ -8,27 +8,16 @@
 #ifndef UFO_OBSLOCALIZATION_OBSLOCGC99_H_
 #define UFO_OBSLOCALIZATION_OBSLOCGC99_H_
 
-#include <algorithm>
-#include <memory>
 #include <ostream>
-#include <string>
-#include <utility>
 #include <vector>
 
-#include "atlas/util/Earth.h"
-
 #include "eckit/config/Configuration.h"
-#include "eckit/container/KDTree.h"
-#include "eckit/geometry/Point2.h"
-#include "eckit/geometry/Point3.h"
-#include "eckit/geometry/UnitSphere.h"
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/generic/gc99.h"
-#include "oops/util/Printable.h"
 
 #include "ufo/obslocalization/ObsLocalization.h"
 #include "ufo/obslocalization/ObsLocParameters.h"
@@ -50,7 +39,7 @@ class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
                            ioda::ObsVector & obsvector) const override;
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
 };
 // -----------------------------------------------------------------------------
 
