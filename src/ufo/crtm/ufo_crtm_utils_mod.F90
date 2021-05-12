@@ -105,7 +105,7 @@ END INTERFACE qsmith
          [ var_mixr, var_co2, var_oz ]
 
  ! copy of ABSORBER_ID_NAME defined in CRTM_Atmosphere_Define
- character(len=*), parameter :: &
+ character(len=MAXVARLEN), parameter :: &
       CRTM_Absorbers(N_VALID_ABSORBER_IDS) = &
          ABSORBER_ID_NAME(1:N_VALID_ABSORBER_IDS)
  integer, parameter :: &
@@ -133,7 +133,7 @@ END INTERFACE qsmith
             , [N_VALID_CLOUD_CATEGORIES,2] )
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
- character(len=*), parameter :: &
+ character(len=MAXVARLEN), parameter :: &
       CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
          CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
  integer, parameter :: &
