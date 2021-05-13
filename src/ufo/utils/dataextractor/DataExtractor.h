@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_UTILS_NETCDFINTERPOLATOR_H_
-#define UFO_UTILS_NETCDFINTERPOLATOR_H_
+#ifndef UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
+#define UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
 
 #include <algorithm>           // sort
 #include <functional>          // greater
@@ -36,7 +36,7 @@ namespace ufo {
 
 class DataExtractorBackend;
 
-/// \brief Method used by the NetCDFInterpolator to map the value of an ObsSpace variable to
+/// \brief Method used by the DataExtractor to map the value of an ObsSpace variable to
 /// a range of slices of the interpolated array along the dimension indexed by that variable.
 enum class InterpMethod {
   /// \brief Select slices where the indexing coordinate matches exactly the value of the
@@ -73,8 +73,7 @@ enum class InterpMethod {
 ///
 /// Currently the following file formats are supported: NetCDF and CSV. See
 /// DataExtractorNetCDFBackend and DataExtractorCSVBackend for more information about these
-/// formats. This class will soon be renamed to DataExtractor (to reflect the fact that NetCDF is
-/// no longer the only supported format).
+/// formats.
 ///
 /// In both cases, the files will contain a _payload array_ (the array from which data will be
 /// extracted) and one or more _coordinate arrays_ indexing the payload array. This class makes it
@@ -106,7 +105,7 @@ enum class InterpMethod {
 ///
 ///   Both 1 and 2 are equidistant, but we take the first found equidistant neighbour (1), then
 ///   return all indices matching this neighbour (indices 0 and 1 in this case).
-class NetCDFInterpolator
+class DataExtractor
 {
  public:
   /// \brief Create an object that can be used to extract data loaded from a file.
@@ -115,7 +114,7 @@ class NetCDFInterpolator
   /// value.
   /// \param[in] filepath Path to the input file.
   /// \param[in] group Group containing the payload variable.
-  explicit NetCDFInterpolator(const std::string &filepath, const std::string &group);
+  explicit DataExtractor(const std::string &filepath, const std::string &group);
 
   /// \brief Update the instruction on how to sort the data for the provided variable name.
   /// \details This works iteratively by further splitting the RecursiveSplitter sub-groups
@@ -509,4 +508,4 @@ class NetCDFInterpolator
 
 }  // namespace ufo
 
-#endif  // UFO_UTILS_NETCDFINTERPOLATOR_H_
+#endif  // UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_

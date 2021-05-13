@@ -55,7 +55,7 @@ DrawValueFromFile::~DrawValueFromFile() {}
 
 class ExtractVisitor : public boost::static_visitor<void> {
  public:
-  ExtractVisitor(NetCDFInterpolator &interpolator,
+  ExtractVisitor(DataExtractor &interpolator,
                  const size_t &iloc) :
     interpolator(interpolator), iloc(iloc) {}
 
@@ -65,7 +65,7 @@ class ExtractVisitor : public boost::static_visitor<void> {
     interpolator.extract(obVal);
   }
 
-  NetCDFInterpolator &interpolator;
+  DataExtractor &interpolator;
   const size_t &iloc;
 };
 
@@ -75,7 +75,7 @@ void DrawValueFromFile::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
   const float missing = util::missingValue(missing);
 
-  NetCDFInterpolator interpolator{fpath_, options_.group};
+  DataExtractor interpolator{fpath_, options_.group};
 
   // Channel number handling
   if (options_.chlist.value() != boost::none)

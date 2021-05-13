@@ -17,7 +17,7 @@ namespace ufo {
 
 /// \brief Derive observation error from a file representing the variance or the covariance
 /// matrix.
-/// \details See NetCDFInterpolator for details on the format of this file.
+/// \details See DataExtractor for details on the format of this file.
 ///
 /// ### example configurations: ###
 ///

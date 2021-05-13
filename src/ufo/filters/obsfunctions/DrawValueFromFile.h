@@ -23,7 +23,7 @@
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/NetCDFInterpolator.h"
+#include "ufo/utils/dataextractor/DataExtractor.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
@@ -104,7 +104,7 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// \brief Produce values by interpolating an array loaded from a NetCDF file, indexed by
 /// coordinates whose names correspond to ObsSpace variables.
 ///
-/// \details See NetCDFInterpolator for details on the format of this file.
+/// \details See DataExtractor for details on the format of this file.
 ///
 /// ### example configurations: ###
 ///

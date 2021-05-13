@@ -11,10 +11,10 @@
 
 #include "ioda/Misc/SFuncs.h"
 
+#include "ufo/utils/dataextractor/DataExtractor.h"
 #include "ufo/utils/dataextractor/DataExtractorCSVBackend.h"
 #include "ufo/utils/dataextractor/DataExtractorInput.h"
 #include "ufo/utils/dataextractor/DataExtractorNetCDFBackend.h"
-#include "ufo/utils/NetCDFInterpolator.h"
 
 /// \brief Boost visitor which allows us to sort a vector.
 class SortUpdateVisitor : public boost::static_visitor<void> {
@@ -61,7 +61,7 @@ class SortVisitor : public boost::static_visitor<void> {
 
 namespace ufo {
 
-NetCDFInterpolator::NetCDFInterpolator(const std::string &filepath, const std::string &group) {
+DataExtractor::DataExtractor(const std::string &filepath, const std::string &group) {
   // Read the data from the file
   load(filepath, group);
   // Start by constraining to the full range of our data
@@ -72,7 +72,7 @@ NetCDFInterpolator::NetCDFInterpolator(const std::string &filepath, const std::s
 }
 
 
-void NetCDFInterpolator::load(const std::string &filepath,
+void DataExtractor::load(const std::string &filepath,
                               const std::string &interpolatedArrayGroup) {
   std::unique_ptr<DataExtractorBackend> backend = createBackendFor(filepath);
   DataExtractorInput input = backend->loadData(interpolatedArrayGroup);
@@ -82,7 +82,7 @@ void NetCDFInterpolator::load(const std::string &filepath,
   interpolatedArray2D_ = std::move(input.payloadArray);
 }
 
-std::unique_ptr<DataExtractorBackend> NetCDFInterpolator::createBackendFor(
+std::unique_ptr<DataExtractorBackend> DataExtractor::createBackendFor(
     const std::string &filepath) {
   const std::string lowercasePath = eckit::StringTools::lower(filepath);
   if (eckit::StringTools::endsWith(lowercasePath, ".nc") ||
@@ -96,7 +96,7 @@ std::unique_ptr<DataExtractorBackend> NetCDFInterpolator::createBackendFor(
 }
 
 
-void NetCDFInterpolator::sort() {
+void DataExtractor::sort() {
   Eigen::ArrayXXf sortedArray = interpolatedArray2D_;
   nextCoordToExtractBy_ = coordsToExtractBy_.begin();
 
@@ -144,7 +144,7 @@ void NetCDFInterpolator::sort() {
 }
 
 
-void NetCDFInterpolator::scheduleSort(const std::string &varName, const InterpMethod &method) {
+void DataExtractor::scheduleSort(const std::string &varName, const InterpMethod &method) {
   // Map any names of the form var@Group to Group/var
   const std::string canonicalVarName = ioda::convertV1PathToV2Path(varName);
 
@@ -159,7 +159,7 @@ void NetCDFInterpolator::scheduleSort(const std::string &varName, const InterpMe
 }
 
 
-void NetCDFInterpolator::resetExtract() {
+void DataExtractor::resetExtract() {
   constrainedRanges_[0].begin = 0;
   constrainedRanges_[0].end = static_cast<int>(interpolatedArray2D_.rows());
   constrainedRanges_[1].begin = 0;
@@ -169,7 +169,7 @@ void NetCDFInterpolator::resetExtract() {
 }
 
 
-float NetCDFInterpolator::getResult() {
+float DataExtractor::getResult() {
   // Fetch the result
   if (resultSet_) {
     // This was derived from linear interpolation so return it.

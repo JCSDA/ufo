@@ -6,6 +6,8 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      dataextractor/DataExtractor.h
+      dataextractor/DataExtractor.cc
       dataextractor/DataExtractorBackend.h
       dataextractor/DataExtractorCSVBackend.h
       dataextractor/DataExtractorCSVBackend.cc
@@ -30,8 +32,6 @@ set ( utils_files
       metoffice/MetOfficeObservationIDs.h
       metoffice/ufo_metoffice_bmatrixstatic_mod.f90
       metoffice/ufo_metoffice_rmatrixradiance_mod.f90
-      NetCDFInterpolator.cc
-      NetCDFInterpolator.h
       OperatorUtils.cc
       OperatorUtils.h
       parameters/ParameterTraitsVariable.cc

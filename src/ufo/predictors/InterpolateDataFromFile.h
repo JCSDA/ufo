@@ -68,7 +68,7 @@ class InterpolateDataFromFileParameters : public oops::Parameters {
 ///
 /// It is possible to make the bias correction dependent on more than one ObsSpace variable and to
 /// use a different matching method than `exact`. For more details, see the documentation of
-/// DrawValueFromFile and NetCDFInterpolator.
+/// DrawValueFromFile and DataExtractor.
 class InterpolateDataFromFile : public PredictorBase {
  public:
   InterpolateDataFromFile(const eckit::Configuration &, const oops::Variables &);
