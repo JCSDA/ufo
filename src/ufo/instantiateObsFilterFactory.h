@@ -12,6 +12,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "ufo/filters/AcceptList.h"
 #include "ufo/filters/BackgroundCheck.h"
+#include "ufo/filters/BayesianBackgroundCheck.h"
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
@@ -67,6 +68,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            rejectListMaker("RejectList");  // alternative name
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::BackgroundCheck> >
            backgroundCheckMaker("Background Check");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::BayesianBackgroundCheck> >
+           BayesianBackgroundCheckMaker("Bayesian Background Check");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::DifferenceCheck> >
            differenceCheckMaker("Difference Check");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ModelObThreshold> >

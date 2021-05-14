@@ -163,6 +163,7 @@ list( APPEND ufo_test_input
   testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_bayesianbackgroundqcflags.yaml
+  testinput/qc_bayesian_background_check.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_velocitycheck.yaml
   testinput/qc_defer_to_post.yaml
@@ -1514,6 +1515,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_actions
 ecbuild_add_test( TARGET  test_ufo_qc_gen_backgroundcheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_backgroundcheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gen_bayesianbackgroundcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_bayesian_background_check.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

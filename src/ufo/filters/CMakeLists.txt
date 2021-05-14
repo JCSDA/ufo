@@ -8,6 +8,8 @@ set ( filters_files
       BackgroundCheck.h
       BayesianBackgroundQCFlags.cc
       BayesianBackgroundQCFlags.h
+      BayesianBackgroundCheck.cc
+      BayesianBackgroundCheck.h
       BlackList.cc
       BlackList.h
       DifferenceCheck.cc
