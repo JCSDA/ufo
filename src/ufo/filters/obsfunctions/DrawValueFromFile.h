@@ -61,12 +61,18 @@ struct ParameterTraits<ufo::InterpMethod> :
 namespace ufo {
 
 /// \brief How to identify the relevant elements of the interpolated array along a dimension
-/// associated with a particular variable.
+/// indexed by a particular variable.
 class InterpolationParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(InterpolationParameters, Parameters)
 
  public:
+  /// Name of the indexing variable (e.g. `latitude@MetaData`).
   oops::RequiredParameter<std::string> name{"name", this};
+
+  /// Method used to map the value of a variable to a range of slices of the interpolated array
+  /// along the dimension indexed by that variable.
+  ///
+  /// \see InterpMethod for the list of supported methods.
   oops::RequiredParameter<InterpMethod> method{"method", this};
 };
 
@@ -78,7 +84,8 @@ class DrawValueFromFileParametersWithoutGroup : public oops::Parameters {
  public:
   /// Path to the file containing the data to interpolate.
   oops::RequiredParameter<std::string> fpath{"file", this};
-  /// List of interpolation variables and associated methods (exact, linear and nearest supported)
+
+  /// List of interpolation variables and associated methods.
   /// Note that channel numbers is handled implicitly by the "channels" (see below).
   oops::RequiredParameter<std::vector<InterpolationParameters>> interpolation{"interpolation",
                                                                               this};
@@ -101,7 +108,7 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 };
 
 
-/// \brief Produce values by interpolating an array loaded from a NetCDF file, indexed by
+/// \brief Produce values by interpolating an array loaded from a file, indexed by
 /// coordinates whose names correspond to ObsSpace variables.
 ///
 /// \details See DataExtractor for details on the format of this file.
@@ -109,7 +116,7 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// ### example configurations: ###
 ///
 /// \code{.yaml}
-///     - Filter: Variable Assignment
+///     - filter: Variable Assignment
 ///       assignments:
 ///       - name: interpolated_value@DerivedValue
 ///         function:

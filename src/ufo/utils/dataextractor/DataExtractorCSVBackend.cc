@@ -30,9 +30,14 @@ namespace ufo
 
 namespace {
 
+/// Number of header rows in CSV files.
 const size_t numHeaderRows = 2;
 
-/// Visitor whose operator() takes a vector and appends to it the value passed to the constructor.
+/// Representation of missing values in CSV files (same as in NetCDF's CDL).
+const char *missingValuePlaceholder = "_";
+
+/// Visitor whose operator() takes a vector and appends to it the value passed to the constructor
+/// (treating "_" as a placeholder for "missing value").
 class AppendValueVisitor : public boost::static_visitor<void> {
  public:
   explicit AppendValueVisitor(const eckit::Value &value) :
@@ -40,16 +45,29 @@ class AppendValueVisitor : public boost::static_visitor<void> {
   {}
 
   void operator()(std::vector<int> &values) const {
-    // NOLINTNEXTLINE(runtime/int): It's not our fault that eckit uses the 'long long' type...
-    values.push_back(static_cast<int>(value_.as<long long>()));
+    int value;
+    if (value_.as<std::string>() == missingValuePlaceholder)
+      value = util::missingValue(value);
+    else
+      // NOLINTNEXTLINE(runtime/int): It's not our fault that eckit uses the 'long long' type...
+      value = static_cast<int>(value_.as<long long>());
+    values.push_back(value);
   }
 
   void operator()(std::vector<float> &values) const {
-    values.push_back(static_cast<float>(value_.as<double>()));
+    float value;
+    if (value_.as<std::string>() == missingValuePlaceholder)
+      value = util::missingValue(value);
+    else
+      value = static_cast<float>(value_.as<double>());
+    values.push_back(value);
   }
 
   void operator()(std::vector<std::string> &values) const {
-    values.push_back(value_.as<std::string>());
+    std::string value = value_.as<std::string>();
+    if (value == missingValuePlaceholder)
+      value = util::missingValue(value);
+    values.push_back(value);
   }
 
  private:

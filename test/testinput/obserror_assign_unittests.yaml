@@ -280,6 +280,40 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
           - name: datetime@MetaData
             method: exact
   expected_obserror_variance: [278, 487, 917, 178, 289]
+  Assign observation error from NetCDF file; data types float, int and string; missing values:
+    window begin: 2000-01-01T00:00:00Z
+    window end: 2030-01-01T00:00:00Z
+    obs space:
+      name: Aircraft
+      simulated variables: [air_temperature]
+      generate:
+        list:
+          lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
+          lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
+          datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                       '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                       '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                       '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+        obs errors: [1.0]
+    air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+    StringVar: [south, south, south, south, north, north, north, north]
+    ObsError assign:
+      filter variables:
+      - name: air_temperature
+      action:
+        name: assign error
+        error function:
+          name: DrawObsErrorFromFile@ObsFunction
+          options:
+            file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.nc
+            interpolation:
+            - name: StringVar@MetaData
+              method: exact
+            - name: air_pressure@MetaData
+              method: exact
+            - name: longitude@MetaData
+              method: exact
+    expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from NetCDF variance; attempt at using 'nearest' for strings:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -396,6 +430,36 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
           - name: station_id@MetaData
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6]
+Assign observation error from NetCDF variance; no match found for an 'exact' variable:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 2, 4, 6, 8, 10]
+  observation_type: [1000, 1, 2, 3, 4]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
+          interpolation:
+          - name: observation_type@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: linear
+  expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'observation_type@MetaData'
 Assign observation error from NetCDF variance; no match found for a 'least upper bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -692,6 +756,40 @@ Assign observation error from CSV file; data type datetime; payload of type int:
           - name: datetime@MetaData
             method: exact
   expected_obserror_variance: [3, 4, 1, 2]
+Assign observation error from CSV file; data types float, int and string; missing values:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
+        lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+  StringVar: [south, south, south, south, north, north, north, north]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.csv
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: exact
+          - name: longitude@MetaData
+            method: exact
+  expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from CSV file; no column with @ErrorVariance suffix:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -962,3 +1060,37 @@ Assign observation error from CSV file; unsupported data type:
           - name: StringVar@MetaData
             method: exact
   expectExceptionWithMessage: Unsupported data type 'color'
+Assign observation error from CSV file; data types float, int and string; missing values:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
+        lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+  StringVar: [south, south, south, south, north, north, north, north]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.csv
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: exact
+          - name: longitude@MetaData
+            method: exact
+  expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]

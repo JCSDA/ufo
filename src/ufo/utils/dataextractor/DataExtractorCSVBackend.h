@@ -46,8 +46,16 @@ namespace ufo
 /// of each column must match the data type of the corresponding ObsSpace variable. The payload
 /// column must be of type `float` or `int`. The column order does not matter.
 ///
-/// Special case: a column containing channel numbers (which aren't stored in a separate ObsSpace
-/// variable) should be labelled `channel_number@MetaData` or `MetaData/channel_number`.
+/// Notes:
+///
+/// 1. A column containing channel numbers (which aren't stored in a separate ObsSpace variable)
+///    should be labelled `channel_number@MetaData` or `MetaData/channel_number`.
+///
+/// 2. Single underscores serve as placeholders for missing values; for example, the following row
+///
+///        ABC,_,_
+///
+///    contains missing values in the second and third columns.
 ///
 /// To continue the example above, suppose the file shown earlier is passed to the
 /// DrawValueFromFile ObsFunction configured in the following way:

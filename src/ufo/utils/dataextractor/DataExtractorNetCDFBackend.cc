@@ -23,6 +23,7 @@
 #include "ioda/Misc/SFuncs.h"   // for convertV1PathToV2Path
 
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/utils/dataextractor/DataExtractorInput.h"
 #include "ufo/utils/dataextractor/DataExtractorNetCDFBackend.h"
@@ -56,15 +57,37 @@ std::vector<std::string> fetchDimNameMapping(
   return dimnames;
 }
 
+/// \brief Add variable `var` of type `T` to `coordsVals` under key `key`.
+template<typename T>
+void updateVariable(const std::string &key, ioda::Variable var,
+                    DataExtractorInput::Coordinates &coordsVals) {
+  // Read the variable from the input file
+  std::vector<T> values = var.readAsVector<T>();
+
+  // Replace source fill values with corresponding missing marks
+  if (var.hasFillValue()) {
+    ioda::detail::FillValueData_t sourceFvData = var.getFillValue();
+    const T sourceFillValue = ioda::detail::getFillValue<T>(sourceFvData);
+    // TODO(someone): This won't call the correct overload for datetimes (which are treated
+    // as strings by ioda-engines).
+    const T oopsFillValue = util::missingValue(oopsFillValue);
+    if (oopsFillValue != sourceFillValue)
+      std::replace(values.begin(), values.end(), sourceFillValue, oopsFillValue);
+  }
+
+  // Store the variable in coordsVals_
+  coordsVals.emplace(key, std::move(values));
+}
+
 /// \brief Add variable `var` to `coordsVals` under key `key`.
 void update(const std::string &key, ioda::Variable var,
             DataExtractorInput::Coordinates &coordsVals) {
   if (var.isA<int>()) {
-    coordsVals.emplace(key, var.readAsVector<int>());
+    updateVariable<int>(key, var, coordsVals);
   } else if (var.isA<float>()) {
-    coordsVals.emplace(key, var.readAsVector<float>());
+    updateVariable<float>(key, var, coordsVals);
   } else if (var.isA<std::string>()) {
-    coordsVals.emplace(key, var.readAsVector<std::string>());
+    updateVariable<std::string>(key, var, coordsVals);
   } else {
     throw eckit::Exception("Data type not yet supported.", Here());
   }

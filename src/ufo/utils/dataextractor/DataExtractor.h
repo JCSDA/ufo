@@ -24,6 +24,7 @@
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
@@ -41,6 +42,10 @@ class DataExtractorBackend;
 enum class InterpMethod {
   /// \brief Select slices where the indexing coordinate matches exactly the value of the
   /// corresponding ObsSpace variable.
+  ///
+  /// If no match is found, an exception is thrown unless there are slices where the indexing
+  /// coordinate is set to the missing value placeholder; in this case these slices are selected
+  /// instead. This can be used to define a fallback value (used if there is no exact match).
   ///
   /// This is the only method that can be used for variables of type 'string'.
   EXACT,
@@ -342,6 +347,15 @@ class DataExtractor
     auto bounds = std::equal_range(varValues.begin() + range.begin,
                                    varValues.begin() + range.end,
                                    obVal);
+    if (bounds.first == bounds.second) {
+      // No matching coordinate found. If the coordinate contains a 'missing value' entry,
+      // use it as a fallback. (If it doesn't, the 'bounds' range will stay empty, so an error will
+      // be reported).
+      bounds = std::equal_range(varValues.begin() + range.begin,
+                                varValues.begin() + range.end,
+                                util::missingValue(obVal));
+    }
+
     range = {static_cast<int>(bounds.first - varValues.begin()),
              static_cast<int>(bounds.second - varValues.begin())};
 
