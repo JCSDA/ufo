@@ -65,15 +65,15 @@ add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
 add_subdirectory( avgkernel )
-if( ${crtm_FOUND} )
+if( crtm_FOUND )
     add_subdirectory( crtm )
-endif( ${crtm_FOUND} )
+endif()
 add_subdirectory( radarreflectivity )
 add_subdirectory( radarradialvelocity )
-if( ${rttov_FOUND} )
+if( rttov_FOUND )
     add_subdirectory( rttov )
     add_subdirectory( rttovcpp )
-endif( ${rttov_FOUND} )
+endif()
 add_subdirectory( gnssro )
 add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
@@ -118,38 +118,58 @@ list( APPEND ufo_src_files
     ${backgrounderroridentity_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
-list( APPEND UFO_LIBS_DEP oops ioda ioda_engines ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
-if( ${crtm_FOUND} )
-    list( APPEND UFO_LIBS_DEP crtm )
-endif( ${crtm_FOUND} )
-if( ${gsw_FOUND} )
-    list( APPEND UFO_LIBS_DEP gsw )
-endif( ${gsw_FOUND} )
-if( ${rttov_FOUND} )
-    list( APPEND UFO_LIBS_DEP rttov )
-endif( ${rttov_FOUND} )
 
-if( ${ropp-ufo_FOUND} )
-    list( APPEND UFO_LIBS_DEP ropp-ufo )
-endif( ${ropp-ufo_FOUND} )
-
-if( ${geos-aero_FOUND} )
-    list( APPEND UFO_LIBS_DEP geos-aero )
-endif( ${geos-aero_FOUND} )
-
-
+## Create Library target
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-		             PUBLIC_LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
                      HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}
-                     LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
 
-target_include_directories(ufo INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-                                         $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
-                                         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+## Link dependencies
+target_link_libraries(ufo PUBLIC MPI::MPI_C MPI::MPI_CXX MPI::MPI_Fortran)
+target_link_libraries(ufo PUBLIC Boost::boost)
+target_link_libraries(ufo PUBLIC NetCDF::NetCDF_C NetCDF::NetCDF_Fortran)
+target_link_libraries(ufo PUBLIC Eigen3::Eigen)
+target_link_libraries(ufo PUBLIC gsl::gsl-lite)
+target_link_libraries(ufo PUBLIC eckit)
+target_link_libraries(ufo PUBLIC fckit)
+target_link_libraries(ufo PUBLIC ioda)
+target_link_libraries(ufo PUBLIC oops)
 
-if (${rttov_FOUND})
-  target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
+# Optional dependencies
+if(crtm_FOUND)
+    target_link_libraries(ufo PUBLIC crtm)
 endif()
+
+if(gsw_FOUND)
+    target_link_libraries(ufo PUBLIC gsw)
+endif()
+
+if(rttov_FOUND)
+    target_link_libraries(ufo PUBLIC rttov)
+    target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
+endif()
+
+if(ropp-ufo_FOUND)
+    target_link_libraries(ufo PUBLIC ropp-ufo)
+endif()
+
+if(geos-aero_FOUND)
+    target_link_libraries(ufo PUBLIC geos-aero)
+endif()
+
+
+## Include paths
+target_include_directories(ufo PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+                                      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+
+## Fortran modules
+set(MODULE_DIR ${PROJECT_NAME}/module)
+set_target_properties(${PROJECT_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR})
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR}/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/${MODULE_DIR})
+target_include_directories(${PROJECT_NAME} INTERFACE
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${MODULE_DIR}>
+                            $<INSTALL_INTERFACE:${MODULE_DIR}>)
+
