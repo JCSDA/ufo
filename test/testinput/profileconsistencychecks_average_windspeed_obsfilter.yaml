@@ -22,7 +22,7 @@ observations:
     filter variables:
     - name: eastward_wind
     - name: northward_wind
-    Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
+    Checks: ["Basic", "AveragePressureLegacy", "AverageWindSpeed"]
     compareWithOPS: false
     flagBasicChecksFail: true
     PrintStationID: true

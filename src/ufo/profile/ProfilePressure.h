@@ -44,9 +44,6 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
-
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
       return oops::Variables({ufo::VariableNames::geovals_orog,

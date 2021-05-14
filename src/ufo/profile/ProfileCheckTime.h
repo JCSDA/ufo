@@ -36,9 +36,6 @@ namespace ufo {
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
-
-    /// Fill variables in validator
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
   };
 }  // namespace ufo
 

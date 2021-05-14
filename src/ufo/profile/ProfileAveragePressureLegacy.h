@@ -5,14 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_PROFILE_PROFILEAVERAGEPRESSURE_H_
-#define UFO_PROFILE_PROFILEAVERAGEPRESSURE_H_
+#ifndef UFO_PROFILE_PROFILEAVERAGEPRESSURELEGACY_H_
+#define UFO_PROFILE_PROFILEAVERAGEPRESSURELEGACY_H_
 
 #include <algorithm>
 #include <cmath>
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
+#include "ufo/profile/ProfileCheckValidator.h"
+#include "ufo/profile/ProfileDataHandler.h"
 
 namespace ioda {
   class ObsSpace;
@@ -20,26 +22,22 @@ namespace ioda {
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
-  class ProfileDataHandler;
-  class ProfileDataHolder;
 }
 
 namespace ufo {
 
   /// \brief Profile QC: apply various transformations to observed and model pressures.
   /// The transformed pressures are used in subsequent profile averaging routines.
-  class ProfileAveragePressure : public ProfileCheckBase {
+  /// This is a legeacy routine that will eventually be removed.
+  class ProfileAveragePressureLegacy : public ProfileCheckBase {
    public:
-    explicit ProfileAveragePressure(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAveragePressureLegacy(const ProfileConsistencyCheckParameters &options);
 
-    /// Run check on all profiles.
+    /// Run check.
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator.
-    void fillValidationData(ProfileDataHolder &profileDataHolder);
-
-    /// Run this check on the entire sample?
-    bool runOnEntireSample() override {return true;}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
@@ -66,12 +64,7 @@ namespace ufo {
     void bigPressureGaps(const std::vector <float> &pressures,
                          const int ObsType,
                          std::vector <float> &bigPgaps);
-
-    /// Run check on a profile in the original ObsSpace and
-    /// put the averaged data into the corresponding profile in the extended ObsSpace.
-    void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
-                            ProfileDataHolder &profileExtended);
   };
 }  // namespace ufo
 
-#endif  // UFO_PROFILE_PROFILEAVERAGEPRESSURE_H_
+#endif  // UFO_PROFILE_PROFILEAVERAGEPRESSURELEGACY_H_

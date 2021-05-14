@@ -111,18 +111,19 @@ namespace ufo {
         auto it_profileData = profileData_.find(fullname);
         if (it_profileData != profileData_.end()) {
           // Replace vector in map.
-          it_profileData->second = vec_in;
+          it_profileData->second = std::move(vec_in);
         } else {
           // Add vector to map.
-          profileData_.emplace(fullname, vec_in);
+          profileData_.emplace(fullname, std::move(vec_in));
         }
         entireSampleDataHandler_->initialiseVector<T>(fullname);
         // Transfer this profile's data into the entire sample.
         getProfileIndicesInEntireSample(groupname);
         std::vector <T>& entireSampleData = entireSampleDataHandler_->get<T>(fullname);
+        const std::vector <T>& profileData = this->get<T>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
-          updateValueIfPresent(vec_in, idx, entireSampleData, profileIndex);
+          updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
           idx++;
         }
       }
@@ -166,6 +167,9 @@ namespace ufo {
        const std::vector <std::string> &variableNamesString,
        const std::vector <std::string> &variableNamesGeoVaLs,
        const std::vector <std::string> &variableNamesObsDiags);
+
+    /// Read values from a collection of profiles and update information related to each one.
+    void updateAllProfiles(std::vector <ProfileDataHolder> &profiles);
 
    private:  // functions
     /// Reset profile information (vectors and corresponding names).

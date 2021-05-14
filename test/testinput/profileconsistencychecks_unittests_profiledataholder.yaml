@@ -12,6 +12,8 @@ ProfileDataHolder:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
+    extension:
+      average profiles onto model levels: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile_geovals.nc4
   obs diagnostics:

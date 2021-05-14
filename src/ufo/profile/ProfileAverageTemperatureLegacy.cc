@@ -10,120 +10,42 @@
 #include <string>
 #include <utility>
 
-#include "ufo/profile/ProfileAverageTemperature.h"
-#include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileDataHolder.h"
+#include "ufo/profile/ProfileAverageTemperatureLegacy.h"
 #include "ufo/profile/ProfileVerticalAveraging.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
 
 namespace ufo {
 
-  static ProfileCheckMaker<ProfileAverageTemperature>
-  makerProfileAverageTemperature_("AverageTemperature");
+  static ProfileCheckMaker<ProfileAverageTemperatureLegacy>
+  makerProfileAverageTemperatureLegacy_("AverageTemperatureLegacy");
 
-  ProfileAverageTemperature::ProfileAverageTemperature
+  ProfileAverageTemperatureLegacy::ProfileAverageTemperatureLegacy
   (const ProfileConsistencyCheckParameters &options)
     : ProfileCheckBase(options)
   {}
 
-  void ProfileAverageTemperature::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileAverageTemperatureLegacy::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Temperature averaging" << std::endl;
 
-    // Produce vector of profiles containing data for the temperature averaging.
-    std::vector <std::string> variableNamesInt =
-      {ufo::VariableNames::qcflags_air_temperature,
-       ufo::VariableNames::qcflags_relative_humidity,
-       ufo::VariableNames::counter_NumGapsT,
-       ufo::VariableNames::extended_obs_space,
-       ufo::VariableNames::modellevels_average_air_temperature_qcflags};
-    std::vector <std::string> variableNamesFloat =
-      {ufo::VariableNames::obs_air_temperature,
-       ufo::VariableNames::obscorrection_air_temperature,
-       ufo::VariableNames::pgebd_air_temperature,
-       ufo::VariableNames::LogP_derived,
-       ufo::VariableNames::bigPgaps_derived,
-       ufo::VariableNames::modellevels_ExnerP_rho_derived,
-       ufo::VariableNames::modellevels_ExnerP_derived,
-       ufo::VariableNames::modellevels_logP_rho_derived,
-       ufo::VariableNames::modellevels_logP_derived,
-       ufo::VariableNames::modellevels_air_temperature_derived,
-       ufo::VariableNames::modellevels_average_air_temperature_derived};
-    std::vector <std::string> variableNamesGeoVaLs =
-      {ufo::VariableNames::geovals_potential_temperature};
-
-    if (options_.compareWithOPS.value()) {
-      variableNamesInt.insert
-        (variableNamesInt.end(),
-         {"OPS_" + std::string(ufo::VariableNames::modellevels_average_air_temperature_qcflags)});
-      variableNamesFloat.insert
-        (variableNamesFloat.end(),
-         {"OPS_" + std::string(ufo::VariableNames::modellevels_air_temperature_derived),
-             "OPS_"
-             + std::string(ufo::VariableNames::modellevels_average_air_temperature_derived)});
-      variableNamesGeoVaLs.insert
-        (variableNamesGeoVaLs.end(),
-        {ufo::VariableNames::geovals_air_temperature,
-            ufo::VariableNames::geovals_average_air_temperature,
-            ufo::VariableNames::geovals_average_air_temperature_qcflags});
-    }
-
-    std::vector <ProfileDataHolder> profiles =
-      profileDataHandler.produceProfileVector
-      (variableNamesInt,
-       variableNamesFloat,
-       {},
-       variableNamesGeoVaLs,
-       {});
-
-    // Run temperature averaging on each profile in the original ObsSpace,
-    // saving averaged output to the equivalent extended profile.
-    const size_t halfnprofs = profileDataHandler.getObsdb().nrecs() / 2;
-    for (size_t jprof = 0; jprof < halfnprofs; ++jprof) {
-      oops::Log::debug() << "  Profile " << (jprof + 1) << " / " << halfnprofs << std::endl;
-      auto& profileOriginal = profiles[jprof];
-      auto& profileExtended = profiles[jprof + halfnprofs];
-      runCheckOnProfiles(profileOriginal, profileExtended);
-    }
-
-    // Fill validation information if required.
-    if (options_.compareWithOPS.value()) {
-      oops::Log::debug() << " Filling validation data" << std::endl;
-      for (size_t jprof = 0; jprof < halfnprofs * 2; ++jprof) {
-        fillValidationData(profiles[jprof]);
-      }
-    }
-
-    // Update data handler with profile information.
-    oops::Log::debug() << " Updating data handler" << std::endl;
-    profileDataHandler.updateAllProfiles(profiles);
-  }
-
-  void ProfileAverageTemperature::runCheckOnProfiles(ProfileDataHolder &profileOriginal,
-                                                     ProfileDataHolder &profileExtended)
-  {
-    // Check the two profiles are in the correct section of the ObsSpace.
-    profileOriginal.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
-    profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
-
-    const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     // Do not perform averaging if there is just one reported level.
     if (numProfileLevels <= 1)
       return;
 
     const std::vector <float> &tObs =
-      profileOriginal.get<float>(ufo::VariableNames::obs_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tPGEBd =
-      profileOriginal.get<float>(ufo::VariableNames::pgebd_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_air_temperature);
     std::vector <int> &tFlags =
-      profileOriginal.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
-      profileOriginal.get<int>(ufo::VariableNames::qcflags_relative_humidity);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     const std::vector <float> &tObsCorrection =
-      profileOriginal.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     std::vector <int> &NumGapsT =
-       profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsT);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumGapsT);
 
     if (!oops::allVectorsSameNonZeroSize(tObs, tPGEBd, tFlags, rhFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -141,24 +63,24 @@ namespace ufo {
 
     // Obtain GeoVaLs potential temperature.
     const std::vector <float> &potempGeoVaLs =
-      profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_potential_temperature);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_potential_temperature);
     if (potempGeoVaLs.empty())
       throw eckit::BadValue("Potential temperature GeoVaLs vector is empty.", Here());
     const size_t numModelLevels = potempGeoVaLs.size();
 
     // Obtain vectors that were produced in the AveragePressure routine.
     const std::vector <float> &ExnerPA =
-      profileExtended.get<float>(ufo::VariableNames::modellevels_ExnerP_rho_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_ExnerP_rho_derived);
     const std::vector <float> &ExnerPB =
-      profileExtended.get<float>(ufo::VariableNames::modellevels_ExnerP_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_ExnerP_derived);
     const std::vector <float> &LogPA =
-      profileExtended.get<float>(ufo::VariableNames::modellevels_logP_rho_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_logP_rho_derived);
     const std::vector <float> &LogPB =
-      profileExtended.get<float>(ufo::VariableNames::modellevels_logP_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_logP_derived);
     const std::vector <float> &RepLogP =
-      profileOriginal.get<float>(ufo::VariableNames::LogP_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
     const std::vector <float> &BigGap =
-      profileOriginal.get<float>(ufo::VariableNames::bigPgaps_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
 
     if (!oops::allVectorsSameNonZeroSize(ExnerPA, LogPA) ||
         !oops::allVectorsSameNonZeroSize(ExnerPB, LogPB) ||
@@ -308,46 +230,42 @@ namespace ufo {
     }
 
     // Store the model temperature.
-    profileExtended.set<float>
+    profileDataHandler.set<float>
       (ufo::VariableNames::modellevels_air_temperature_derived, std::move(tModBkg));
 
     // Store the temperature averaged onto model levels.
-    profileExtended.set<float>
+    profileDataHandler.set<float>
       (ufo::VariableNames::modellevels_average_air_temperature_derived, std::move(tModObs));
 
     // Store the QC flags associated with temperature averaging.
-    profileExtended.set<int>
+    profileDataHandler.set<int>
       (ufo::VariableNames::modellevels_average_air_temperature_qcflags, std::move(tFlagsModObs));
   }
 
-  void ProfileAverageTemperature::fillValidationData(ProfileDataHolder &profile)
+  void ProfileAverageTemperatureLegacy::fillValidationData
+  (ProfileDataHandler &profileDataHandler)
   {
     // Retrieve, then save, the OPS versions of model temperature,
     // temperature averaged onto model levels,
     // and the QC flags associated with the averaging process.
-    profile.set<float>
+    profileDataHandler.set<float>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_air_temperature_derived),
-       std::move(profile.getGeoVaLVector
+       std::move(profileDataHandler.getGeoVaLVector
                  (ufo::VariableNames::geovals_air_temperature)));
 
-    profile.set<float>
+    profileDataHandler.set<float>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_air_temperature_derived),
-       std::move(profile.getGeoVaLVector
+       std::move(profileDataHandler.getGeoVaLVector
                  (ufo::VariableNames::geovals_average_air_temperature)));
 
     // The QC flags are stored as floats but are converted to integers here.
-    // Due to the loss of precision, 5 must be added to the missing value.
     const std::vector <float>& average_air_temperature_qcflags_float =
-      profile.getGeoVaLVector
-      (ufo::VariableNames::geovals_average_air_temperature_qcflags);
+      profileDataHandler.getGeoVaLVector
+      (ufo::VariableNames::modellevels_average_air_temperature_qcflags);
     std::vector <int> average_air_temperature_qcflags_int
       (average_air_temperature_qcflags_float.begin(),
        average_air_temperature_qcflags_float.end());
-    std::replace(average_air_temperature_qcflags_int.begin(),
-                 average_air_temperature_qcflags_int.end(),
-                 -2147483648L,
-                 -2147483643L);
-    profile.set<int>
+    profileDataHandler.set<int>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_air_temperature_qcflags),
        std::move(average_air_temperature_qcflags_int));
   }

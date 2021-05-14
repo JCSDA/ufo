@@ -75,4 +75,20 @@ namespace ufo {
       profileDataHandler_.set<std::string>(variable, std::move(this->get<std::string>(variable)));
     profileData_.clear();
   }
+
+  void ProfileDataHolder::checkObsSpaceSection(ufo::ObsSpaceSection section)
+  {
+    // If extended_obs_space is not present this will throw an exception.
+    const auto &extended_obs_space = this->get<int>(ufo::VariableNames::extended_obs_space);
+    if (section == ufo::ObsSpaceSection::Original &&
+        std::find(extended_obs_space.begin(),
+                  extended_obs_space.end(), 1) != extended_obs_space.end())
+      throw eckit::BadValue("This profile is expected to be in the original ObsSpace "
+                            "but has been labelled as being in the extended ObsSpace.", Here());
+    if (section == ufo::ObsSpaceSection::Extended &&
+        std::find(extended_obs_space.begin(),
+                  extended_obs_space.end(), 0) != extended_obs_space.end())
+      throw eckit::BadValue("This profile is expected to be in the extended ObsSpace "
+                            "but has been labelled as being in the original ObsSpace.", Here());
+  }
 }  // namespace ufo

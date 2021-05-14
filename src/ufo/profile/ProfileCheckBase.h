@@ -44,8 +44,13 @@ namespace ufo {
     /// Run check
     virtual void runCheck(ProfileDataHandler &profileDataHandler) = 0;
 
-    /// Fill variables in validator
-    virtual void fillValidationData(ProfileDataHandler &profileDataHandler) = 0;
+    /// Fill variables in validator using a ProfileDataHandler.
+    /// This function will only be called for subclasses of ProfileCheckBase
+    /// whose runOnEntireSample() implementation returns false.
+    /// If runOnEntireSample() returns true, the subclass needs
+    /// to handle the storage of validation data on its own.
+    /// For an example see the ProfileAveragePressure class.
+    virtual void fillValidationData(ProfileDataHandler &profileDataHandler) {}
 
     /// Get result of check (default fail)
     virtual bool getResult() {return false;}

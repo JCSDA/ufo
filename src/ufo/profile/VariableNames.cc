@@ -71,6 +71,7 @@ constexpr const char* const ufo::VariableNames::Time;
 constexpr const char* const ufo::VariableNames::Zstation;
 constexpr const char* const ufo::VariableNames::LevelType;
 constexpr const char* const ufo::VariableNames::InstrType;
+constexpr const char* const ufo::VariableNames::extended_obs_space;
 
 // QC flags
 
@@ -172,23 +173,23 @@ constexpr const char* const ufo::VariableNames::geovals_average_relative_humidit
 
 // Derived values on model levels
 
-constexpr const char* const ufo::VariableNames::geovals_logP_derived;
-constexpr const char* const ufo::VariableNames::geovals_ExnerP_derived;
-constexpr const char* const ufo::VariableNames::geovals_air_temperature_derived;
+constexpr const char* const ufo::VariableNames::modellevels_logP_derived;
+constexpr const char* const ufo::VariableNames::modellevels_ExnerP_derived;
+constexpr const char* const ufo::VariableNames::modellevels_air_temperature_derived;
 
 // Averaged values on model levels
 
-constexpr const char* const ufo::VariableNames::average_air_temperature_derived;
-constexpr const char* const ufo::VariableNames::average_eastward_wind_derived;
-constexpr const char* const ufo::VariableNames::average_northward_wind_derived;
-constexpr const char* const ufo::VariableNames::average_relative_humidity_derived;
-constexpr const char* const ufo::VariableNames::average_air_temperature_qcflags;
-constexpr const char* const ufo::VariableNames::average_eastward_wind_qcflags;
-constexpr const char* const ufo::VariableNames::average_northward_wind_qcflags;
-constexpr const char* const ufo::VariableNames::average_relative_humidity_qcflags;
+constexpr const char* const ufo::VariableNames::modellevels_average_air_temperature_derived;
+constexpr const char* const ufo::VariableNames::modellevels_average_eastward_wind_derived;
+constexpr const char* const ufo::VariableNames::modellevels_average_northward_wind_derived;
+constexpr const char* const ufo::VariableNames::modellevels_average_relative_humidity_derived;
+constexpr const char* const ufo::VariableNames::modellevels_average_air_temperature_qcflags;
+constexpr const char* const ufo::VariableNames::modellevels_average_eastward_wind_qcflags;
+constexpr const char* const ufo::VariableNames::modellevels_average_northward_wind_qcflags;
+constexpr const char* const ufo::VariableNames::modellevels_average_relative_humidity_qcflags;
 
 // Derived values on model rho levels
 
-constexpr const char* const ufo::VariableNames::geovals_logP_rho_derived;
-constexpr const char* const ufo::VariableNames::geovals_logPWB_rho_derived;
-constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho_derived;
+constexpr const char* const ufo::VariableNames::modellevels_logP_rho_derived;
+constexpr const char* const ufo::VariableNames::modellevels_logPWB_rho_derived;
+constexpr const char* const ufo::VariableNames::modellevels_ExnerP_rho_derived;

@@ -12,6 +12,9 @@
 
 #include "ufo/profile/ProfileAveragePressure.h"
 
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileDataHolder.h"
+
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
 
 namespace ufo {
@@ -63,13 +66,79 @@ namespace ufo {
   {
     oops::Log::debug() << " Pressure transformation" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+    // Produce vector of profiles containing data for the pressure transformation.
+    std::vector <std::string> variableNamesFloat =
+      {ufo::VariableNames::obs_air_pressure,
+       ufo::VariableNames::LogP_derived,
+       ufo::VariableNames::bigPgaps_derived,
+       ufo::VariableNames::modellevels_logP_rho_derived,
+       ufo::VariableNames::modellevels_logP_derived,
+       ufo::VariableNames::modellevels_ExnerP_rho_derived,
+       ufo::VariableNames::modellevels_ExnerP_derived};
+    std::vector <std::string> variableNamesGeoVaLs =
+      {ufo::VariableNames::geovals_pressure,
+       ufo::VariableNames::geovals_pressure_rho};
+
+    if (options_.compareWithOPS.value()) {
+      variableNamesFloat.insert
+        (variableNamesFloat.end(),
+         {"OPS_" + std::string(ufo::VariableNames::modellevels_logP_rho_derived),
+             "OPS_" + std::string(ufo::VariableNames::modellevels_logP_derived),
+             "OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_rho_derived),
+             "OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_derived)});
+      variableNamesGeoVaLs.insert
+        (variableNamesGeoVaLs.end(),
+         {ufo::VariableNames::geovals_logP_rho,
+             ufo::VariableNames::geovals_logP,
+             ufo::VariableNames::geovals_ExnerP_rho,
+             ufo::VariableNames::geovals_ExnerP});
+    }
+
+    std::vector <ProfileDataHolder> profiles =
+      profileDataHandler.produceProfileVector
+      ({ufo::VariableNames::qcflags_observation_report,
+          ufo::VariableNames::ObsType,
+          ufo::VariableNames::extended_obs_space},
+        variableNamesFloat,
+        {},
+        variableNamesGeoVaLs,
+        {});
+
+    // Run pressure transformation on each profile in the original ObsSpace,
+    // saving transformed output to the equivalent extended profile.
+    const size_t halfnprofs = profileDataHandler.getObsdb().nrecs() / 2;
+    for (size_t jprof = 0; jprof < halfnprofs; ++jprof) {
+      oops::Log::debug() << "  Profile " << (jprof + 1) << " / " << halfnprofs << std::endl;
+      auto& profileOriginal = profiles[jprof];
+      auto& profileExtended = profiles[jprof + halfnprofs];
+      runCheckOnProfiles(profileOriginal, profileExtended);
+    }
+
+    // Fill validation information if required.
+    if (options_.compareWithOPS.value()) {
+      for (size_t jprof = 0; jprof < halfnprofs * 2; ++jprof)
+        fillValidationData(profiles[jprof]);
+    }
+
+    // Update data handler with profile information.
+    oops::Log::debug() << " Updating data handler" << std::endl;
+    profileDataHandler.updateAllProfiles(profiles);
+  }
+
+  void ProfileAveragePressure::runCheckOnProfiles(ProfileDataHolder &profileOriginal,
+                                                  ProfileDataHolder &profileExtended)
+  {
+    // Check the two profiles are in the correct section of the ObsSpace.
+    profileOriginal.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
+    profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
+
+    const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
     const std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileOriginal.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <int> &ObsType =
-      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
+      profileOriginal.get<int>(ufo::VariableNames::ObsType);
     const std::vector <int> &ReportFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
+      profileOriginal.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, ObsType, ReportFlags)) {
       std::stringstream errorMessage;
@@ -110,13 +179,13 @@ namespace ufo {
 
       // Calculate log(P) and Exner pressure for GeoVaLs on rho levels.
       const std::vector <float> &geovals_pressure_rho =
-        profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
+        profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
       logPressure(geovals_pressure_rho, geovals_logP_rho);
       ExnerPressure(geovals_pressure_rho, geovals_ExnerP_rho);
 
       // Calculate log(P) and Exner pressure for GeoVaLs on theta levels.
       const std::vector <float> &geovals_pressure =
-        profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+        profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
       // Require these GeoVaLs to be present (unlike the case on rho levels).
       if (geovals_pressure.empty())
         throw eckit::BadValue("geovals_pressure is empty", Here());
@@ -125,38 +194,39 @@ namespace ufo {
     }
 
     // Store the transformed pressures on reported levels.
-    profileDataHandler.set<float>(ufo::VariableNames::LogP_derived, std::move(logP));
-    profileDataHandler.set<float>(ufo::VariableNames::bigPgaps_derived, std::move(bigPgaps));
+    profileOriginal.set<float>(ufo::VariableNames::LogP_derived, std::move(logP));
+    profileOriginal.set<float>(ufo::VariableNames::bigPgaps_derived, std::move(bigPgaps));
 
     // Store the transformed pressures on model levels.
-    profileDataHandler.set<float>(ufo::VariableNames::geovals_logP_rho_derived,
-                                  std::move(geovals_logP_rho));
-    profileDataHandler.set<float>(ufo::VariableNames::geovals_logP_derived,
-                                  std::move(geovals_logP));
-    profileDataHandler.set<float>(ufo::VariableNames::geovals_ExnerP_rho_derived,
-                                  std::move(geovals_ExnerP_rho));
-    profileDataHandler.set<float>(ufo::VariableNames::geovals_ExnerP_derived,
-                                  std::move(geovals_ExnerP));
+    profileExtended.set<float>(ufo::VariableNames::modellevels_logP_rho_derived,
+                               std::move(geovals_logP_rho));
+    profileExtended.set<float>(ufo::VariableNames::modellevels_logP_derived,
+                               std::move(geovals_logP));
+    profileExtended.set<float>(ufo::VariableNames::modellevels_ExnerP_rho_derived,
+                               std::move(geovals_ExnerP_rho));
+    profileExtended.set<float>(ufo::VariableNames::modellevels_ExnerP_derived,
+                               std::move(geovals_ExnerP));
   }
 
-  void ProfileAveragePressure::fillValidationData(ProfileDataHandler &profileDataHandler)
+  void ProfileAveragePressure::fillValidationData(ProfileDataHolder &profile)
   {
     // Retrieve, then save, the OPS versions of the transformed pressures on model levels.
-    profileDataHandler.set<float>
-      ("OPS_" + std::string(ufo::VariableNames::geovals_logP_rho_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+    profile.set<float>
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_logP_rho_derived),
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_logP_rho)));
-    profileDataHandler.set<float>
-      ("OPS_" + std::string(ufo::VariableNames::geovals_logP_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+    profile.set<float>
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_logP_derived),
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_logP)));
-    profileDataHandler.set<float>
-      ("OPS_" + std::string(ufo::VariableNames::geovals_ExnerP_rho_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+    profile.set<float>
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_rho_derived),
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_ExnerP_rho)));
-    profileDataHandler.set<float>
-      ("OPS_" + std::string(ufo::VariableNames::geovals_ExnerP_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+    profile.set<float>
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_derived),
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_ExnerP)));
   }
+
 }  // namespace ufo

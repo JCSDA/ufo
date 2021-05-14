@@ -67,9 +67,9 @@ namespace ufo {
 
     // Obtain vectors that were produced in the AveragePressure routine.
     const std::vector <float> &LogPA =
-      profileDataHandler.get<float>(ufo::VariableNames::geovals_logP_rho_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_logP_rho_derived);
     const std::vector <float> &LogPB =
-      profileDataHandler.get<float>(ufo::VariableNames::geovals_logP_derived);
+      profileDataHandler.get<float>(ufo::VariableNames::modellevels_logP_derived);
     const std::vector <float> &RepLogP =
       profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
     const std::vector <float> &BigGap =
@@ -131,7 +131,8 @@ namespace ufo {
     // If the temperature averaging was previously performed,
     // potentially reject further relative humidity observations.
     const std::vector <float> &tModObs =
-      profileDataHandler.get<float>(ufo::VariableNames::average_air_temperature_derived);
+      profileDataHandler.get<float>
+      (ufo::VariableNames::modellevels_average_air_temperature_derived);
     if (!tModObs.empty()) {
       // Reject the average relative humidity if the equivalent averaged temperature
       // is less than a particular threshold.
@@ -161,11 +162,11 @@ namespace ufo {
 
     // Store the relative humidity averaged onto model levels.
     profileDataHandler.set<float>
-      (ufo::VariableNames::average_relative_humidity_derived, std::move(rhModObs));
+      (ufo::VariableNames::modellevels_average_relative_humidity_derived, std::move(rhModObs));
 
     // Store the QC flags associated with the relative humidity averaging.
     profileDataHandler.set<int>
-      (ufo::VariableNames::average_relative_humidity_qcflags, std::move(rhFlagsModObs));
+      (ufo::VariableNames::modellevels_average_relative_humidity_qcflags, std::move(rhFlagsModObs));
   }
 
   void ProfileAverageRelativeHumidity::fillValidationData(ProfileDataHandler &profileDataHandler)
@@ -173,7 +174,7 @@ namespace ufo {
     // Retrieve, then save, the OPS versions of relative humidity averaged onto model levels,
     // and the QC flags associated with the averaging process.
     profileDataHandler.set<float>
-      ("OPS_" + std::string(ufo::VariableNames::average_relative_humidity_derived),
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_average_relative_humidity_derived),
        std::move(profileDataHandler.getGeoVaLVector
                  (ufo::VariableNames::geovals_average_relative_humidity)));
 
@@ -185,7 +186,7 @@ namespace ufo {
       (average_relative_humidity_qcflags_float.begin(),
        average_relative_humidity_qcflags_float.end());
     profileDataHandler.set<int>
-      ("OPS_" + std::string(ufo::VariableNames::average_relative_humidity_qcflags),
+      ("OPS_" + std::string(ufo::VariableNames::modellevels_average_relative_humidity_qcflags),
        std::move(average_relative_humidity_qcflags_int));
   }
 }  // namespace ufo

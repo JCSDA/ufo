@@ -10,6 +10,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "boost/variant.hpp"
@@ -18,6 +19,8 @@
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
+
+  enum class ObsSpaceSection {Original, Extended};
 
   /// \brief Profile data holder class.
   ///
@@ -67,11 +70,29 @@ namespace ufo {
     /// Retrieve an ObsDiag vector if it is present. If not, throw an exception.
     std::vector <float>& getObsDiagVector(const std::string& fullname);
 
+    /// Set values in a vector.
+    template <typename T>
+      void set(const std::string &fullname, std::vector<T> &&vec_in)
+      {
+        // Check whether vector is already in map.
+        auto it_profileData = profileData_.find(fullname);
+        if (it_profileData != profileData_.end()) {
+          // Replace vector in map.
+          it_profileData->second = std::move(vec_in);
+        } else {
+          // Add vector to map.
+          profileData_.emplace(fullname, std::move(vec_in));
+        }
+      }
+
     /// Get number of profile levels for this profile.
     int getNumProfileLevels() const {return static_cast<int>(numProfileLevels_);}
 
     /// Move all values to the associated ProfileDataHandler.
     void moveValuesToHandler();
+
+    /// Check this profile is in the expected ObsSpace section (original or extended).
+    void checkObsSpaceSection(ufo::ObsSpaceSection section);
 
    private:
     /// Number of profile levels

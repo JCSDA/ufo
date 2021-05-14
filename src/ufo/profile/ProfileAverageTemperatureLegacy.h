@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_PROFILE_PROFILEAVERAGETEMPERATURE_H_
-#define UFO_PROFILE_PROFILEAVERAGETEMPERATURE_H_
+#ifndef UFO_PROFILE_PROFILEAVERAGETEMPERATURELEGACY_H_
+#define UFO_PROFILE_PROFILEAVERAGETEMPERATURELEGACY_H_
 
 #include <algorithm>
 #include <cmath>
@@ -41,9 +41,10 @@ namespace ufo {
   /// using linear interpolation of temperature between the layer boundaries.
   /// This increment is added to the background value to produce
   /// the averaged observation value.
-  class ProfileAverageTemperature : public ProfileCheckBase {
+  class ProfileAverageTemperatureLegacy : public ProfileCheckBase {
    public:
-    explicit ProfileAverageTemperature(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAverageTemperatureLegacy
+      (const ProfileConsistencyCheckParameters &options);
 
     /// Average temperature observations onto model levels and store the results.
     /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
@@ -51,10 +52,7 @@ namespace ufo {
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator (for comparison with OPS output).
-    void fillValidationData(ProfileDataHolder &profileDataHolder);
-
-    /// Run this check on the entire sample?
-    bool runOnEntireSample() override {return true;}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
@@ -66,13 +64,7 @@ namespace ufo {
             ufo::VariableNames::geovals_average_air_temperature,
             ufo::VariableNames::geovals_average_air_temperature_qcflags
             });}
-
-   private:
-    /// Run check on a profile in the original ObsSpace and
-    /// put the averaged data into the corresponding profile in the extended ObsSpace.
-    void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
-                            ProfileDataHolder &profileExtended);
   };
 }  // namespace ufo
 
-#endif  // UFO_PROFILE_PROFILEAVERAGETEMPERATURE_H_
+#endif  // UFO_PROFILE_PROFILEAVERAGETEMPERATURELEGACY_H_

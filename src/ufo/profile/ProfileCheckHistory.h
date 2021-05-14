@@ -36,9 +36,6 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
-
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
   };

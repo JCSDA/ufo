@@ -27,34 +27,50 @@ namespace ufo {
     oops::Log::debug() << " Alternative U interpolation check" << std::endl;
 
     // Produce vector of profiles containing data for the alternative U interpolation check.
+    std::vector <std::string> variableNamesInt =
+      {ufo::VariableNames::qcflags_eastward_wind,
+       ufo::VariableNames::counter_NumSamePErrObs,
+       ufo::VariableNames::counter_NumInterpErrObs};
+    std::vector <std::string> variableNamesFloat =
+      {ufo::VariableNames::obs_air_pressure,
+       ufo::VariableNames::obs_eastward_wind,
+       ufo::VariableNames::obs_northward_wind};
+    if (options_.compareWithOPS.value()) {
+      variableNamesInt.insert(variableNamesInt.end(),
+                              {ufo::VariableNames::StdLev,
+                                  ufo::VariableNames::SigAbove,
+                                  ufo::VariableNames::SigBelow,
+                                  ufo::VariableNames::LevErrors,
+                                  ufo::VariableNames::NumStd,
+                                  ufo::VariableNames::NumSig});
+      variableNamesFloat.insert(variableNamesFloat.end(),
+                                {ufo::VariableNames::uInterp,
+                                    ufo::VariableNames::vInterp,
+                                    ufo::VariableNames::LogP});
+    }
+
     std::vector <ProfileDataHolder> profiles =
       profileDataHandler.produceProfileVector
-      ({ufo::VariableNames::qcflags_eastward_wind,
-          ufo::VariableNames::counter_NumSamePErrObs,
-          ufo::VariableNames::counter_NumInterpErrObs},
-        {ufo::VariableNames::obs_air_pressure,
-            ufo::VariableNames::obs_eastward_wind,
-            ufo::VariableNames::obs_northward_wind},
-        {ufo::VariableNames::station_ID},
-        {ufo::VariableNames::geovals_pressure,
-            ufo::VariableNames::geovals_pressure_rho},
-        {});
+      (variableNamesInt,
+       variableNamesFloat,
+       {},
+       {},
+       {});
 
+    // Run alternative U interpolation check on each profile.
     const size_t nprofs = profileDataHandler.getObsdb().nrecs();
-    profileDataHandler.resetProfileIndices();
     for (size_t jprof = 0; jprof < nprofs; ++jprof) {
       oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
-      profileDataHandler.initialiseNextProfile();
       auto& profile = profiles[jprof];
       runCheckOnProfile(profile);
       // Fill validation information if required.
       if (options_.compareWithOPS.value())
-        fillValidationData(profileDataHandler);
-      // Move values from profile to the associated ProfileDataHandler.
-      profile.moveValuesToHandler();
-      // Update information, including the 'flagged' vector, for this profile.
-      profileDataHandler.updateProfileInformation();
+        fillValidationData(profile);
     }
+
+    // Update data handler with profile information.
+    oops::Log::debug() << " Updating data handler" << std::endl;
+    profileDataHandler.updateAllProfiles(profiles);
   }
 
   void ProfileCheckUInterpAlternative::runCheckOnProfile(ProfileDataHolder &profile)
@@ -186,18 +202,18 @@ namespace ufo {
     if (NumErrors > 0) NumInterpErrObs[0]++;
   }
 
-  void ProfileCheckUInterpAlternative::fillValidationData(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUInterpAlternative::fillValidationData(ProfileDataHolder &profile)
   {
-    profileDataHandler.set(ufo::VariableNames::StdLev, std::move(StdLev_));
-    profileDataHandler.set(ufo::VariableNames::SigAbove, std::move(SigAbove_));
-    profileDataHandler.set(ufo::VariableNames::SigBelow, std::move(SigBelow_));
-    profileDataHandler.set(ufo::VariableNames::LevErrors, std::move(LevErrors_));
-    profileDataHandler.set(ufo::VariableNames::uInterp, std::move(uInterp_));
-    profileDataHandler.set(ufo::VariableNames::vInterp, std::move(vInterp_));
-    profileDataHandler.set(ufo::VariableNames::LogP, std::move(LogP_));
-    std::vector <int> NumStd(profileDataHandler.getNumProfileLevels(), std::move(NumStd_));
-    std::vector <int> NumSig(profileDataHandler.getNumProfileLevels(), std::move(NumSig_));
-    profileDataHandler.set(ufo::VariableNames::NumStd, std::move(NumStd));
-    profileDataHandler.set(ufo::VariableNames::NumSig, std::move(NumSig));
+    profile.set(ufo::VariableNames::StdLev, std::move(StdLev_));
+    profile.set(ufo::VariableNames::SigAbove, std::move(SigAbove_));
+    profile.set(ufo::VariableNames::SigBelow, std::move(SigBelow_));
+    profile.set(ufo::VariableNames::LevErrors, std::move(LevErrors_));
+    profile.set(ufo::VariableNames::uInterp, std::move(uInterp_));
+    profile.set(ufo::VariableNames::vInterp, std::move(vInterp_));
+    profile.set(ufo::VariableNames::LogP, std::move(LogP_));
+    std::vector <int> NumStd(profile.getNumProfileLevels(), std::move(NumStd_));
+    std::vector <int> NumSig(profile.getNumProfileLevels(), std::move(NumSig_));
+    profile.set(ufo::VariableNames::NumStd, std::move(NumStd));
+    profile.set(ufo::VariableNames::NumSig, std::move(NumSig));
   }
 }  // namespace ufo

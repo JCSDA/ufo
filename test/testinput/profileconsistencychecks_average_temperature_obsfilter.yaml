@@ -9,14 +9,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_temperature_obs.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_temperature_obs_extended.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
+    extension:
+      average profiles onto model levels: 71
   geovals:
-    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals_extended.nc4
   obs filters:
   - filter: Profile Consistency Checks
     filter variables:

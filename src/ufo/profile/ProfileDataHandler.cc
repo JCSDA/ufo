@@ -10,6 +10,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
+#include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/VariableNames.h"
@@ -278,5 +279,18 @@ namespace ufo {
       profiles.emplace_back(profile);
     }
     return profiles;
+  }
+
+  void ProfileDataHandler::updateAllProfiles(std::vector <ProfileDataHolder> &profiles)
+  {
+    this->resetProfileIndices();
+    for (size_t jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
+      this->initialiseNextProfile();
+      auto& profile = profiles[jprof];
+      // Move values from profile to this object.
+      profile.moveValuesToHandler();
+      // Update information, including the 'flagged' vector, for this profile.
+      this->updateProfileInformation();
+    }
   }
 }  // namespace ufo

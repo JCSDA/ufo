@@ -9,6 +9,7 @@
 #define UFO_PROFILE_PROFILECHECKUINTERPALTERNATIVE_H_
 
 #include <algorithm>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -37,7 +38,7 @@ namespace ufo {
     void runCheckOnProfile(ProfileDataHolder &profile);
 
     /// Fill variables in validator
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
+    void fillValidationData(ProfileDataHolder &profileDataHolder);
 
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}

@@ -21,7 +21,7 @@ observations:
   - filter: Profile Consistency Checks
     filter variables:
     - name: relative_humidity
-    Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    Checks: ["Basic", "AveragePressureLegacy", "AverageTemperatureLegacy", "AverageRelativeHumidity"]
     compareWithOPS: false
     flagBasicChecksFail: true
     PrintStationID: true

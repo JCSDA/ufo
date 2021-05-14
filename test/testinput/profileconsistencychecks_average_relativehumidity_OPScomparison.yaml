@@ -17,7 +17,7 @@ Sondes:
     filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    Checks: ["Basic", "AveragePressureLegacy", "AverageTemperatureLegacy", "AverageRelativeHumidity"]
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true

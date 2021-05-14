@@ -23,9 +23,6 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
-
     /// Return result of basic checks
     bool getResult() override {return result_;}
 

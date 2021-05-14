@@ -10,7 +10,9 @@
 
 #include <iomanip>
 #include <memory>
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
@@ -335,7 +337,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       const auto &coordIn = profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
       const auto &bigGap = profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
       const auto &coordOut = profileDataHandler.get<float>
-        (ufo::VariableNames::geovals_logPWB_rho_derived);
+        (ufo::VariableNames::modellevels_logPWB_rho_derived);
       const float DZFrac = 0.5;
       const ProfileAveraging::Method method =
         ProfileAveraging::Method::Averaging;
@@ -362,7 +364,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       // The name of the OPS variables are hardcoded because they are purely used for testing.
       // todo(ctgh): check whether any hardcoded names can be substituted.
       const auto &expected_flagsOut =
-        profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsFlags");
+        profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsQCFlags");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
         EXPECT(flagsOut[jlev] == expected_flagsOut[jlev]);
       const auto &expected_valuesOut =
@@ -395,9 +397,11 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
                                           filtervars,
                                           flagged);
 
+    profileDataHandler.initialiseNextProfile();
+
     // Create a ProfileDataHolder and request some variables.
     ProfileDataHolder profileDataHolder(profileDataHandler);
-    profileDataHolder.fill({ufo::VariableNames::qcflags_air_temperature},
+    profileDataHolder.fill({ufo::VariableNames::extended_obs_space},
                            {ufo::VariableNames::obs_air_pressure},
                            {ufo::VariableNames::station_ID},
                            {ufo::VariableNames::geovals_pressure},
@@ -413,6 +417,23 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     EXPECT_THROWS(profileDataHolder.get<int>("wrong@MetaData"));
     EXPECT_THROWS(profileDataHolder.getGeoVaLVector("wrong@MetaData"));
     EXPECT_THROWS(profileDataHolder.getObsDiagVector("wrong@MetaData"));
+
+    // Check this profile has been marked as being in the correct section of the ObsSpace.
+    profileDataHolder.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
+    EXPECT_THROWS(profileDataHolder.checkObsSpaceSection(ufo::ObsSpaceSection::Extended));
+
+    // Advance to the profile in the extended section and perform the same check.
+    profileDataHandler.initialiseNextProfile();
+    ProfileDataHolder profileDataHolderExt(profileDataHandler);
+    profileDataHolderExt.fill({ufo::VariableNames::extended_obs_space}, {}, {}, {}, {});
+    EXPECT_THROWS(profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Original));
+    profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
+
+    // Exercise the set routine
+    std::vector <int> int1 {1};
+    profileDataHolder.set<int>("test", std::move(int1));
+    std::vector <int> int2 {1};
+    profileDataHolder.set<int>("test", std::move(int2));
   }
 }
 
