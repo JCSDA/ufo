@@ -7,6 +7,7 @@ observations:
     obs options:
       vert_interp_ops: true
       pseudo_ops: true
+      min_temp_grad: 1.0e-6
   obs space:
     name: GnssroBnd
     obsdatain:

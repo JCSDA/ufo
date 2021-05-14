@@ -7,6 +7,7 @@ observations:
     obs options:
       vert_interp_ops: true
       pseudo_ops: true
+      min_temp_grad: 1.0e-6
   obs space:
     name: GnssroBnd
     obsdatain:
@@ -66,6 +67,7 @@ observations:
     defer to post: true
     vert_interp_ops: true
     pseudo_ops: true
+    min_temp_grad: 1.0e-6
     capsupersat: false
     cost_funct_test: 2
     Delta_ct2: 1
@@ -84,6 +86,7 @@ observations:
     obs options:
       vert_interp_ops: false
       pseudo_ops: false
+      min_temp_grad: 1.0e-6
   obs space:
     name: GnssroBnd
     obsdatain:
@@ -143,6 +146,7 @@ observations:
     defer to post: true
     vert_interp_ops: false
     pseudo_ops: false
+    min_temp_grad: 1.0e-6
     capsupersat: false
     cost_funct_test: 2
     Delta_ct2: 1

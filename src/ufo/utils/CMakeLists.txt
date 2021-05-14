@@ -45,6 +45,7 @@ set ( utils_files
       ProbabilityOfGrossErrorParameters.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
+      RefractivityCalculator.F90
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc

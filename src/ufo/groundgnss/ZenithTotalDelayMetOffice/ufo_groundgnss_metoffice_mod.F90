@@ -18,8 +18,8 @@ use ufo_basis_mod,     only: ufo_basis
 use obsspace_mod
 use missing_values_mod
 use ufo_groundgnss_ukmo_utils_mod
-use ufo_refractivity_utils_mod
 use fckit_log_module,  only : fckit_log
+use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
 
 implicit none
 public             :: ufo_groundgnss_metoffice
@@ -27,6 +27,9 @@ private
 
   !> Fortran derived type for groundgnss trajectory
 type, extends(ufo_basis) :: ufo_groundgnss_MetOffice
+  logical :: vert_interp_ops
+  logical :: pseudo_ops
+  real(kind_real) :: min_temp_grad
   contains
     procedure :: setup     => ufo_groundgnss_metoffice_setup
     procedure :: simobs    => ufo_groundgnss_metoffice_simobs
@@ -44,6 +47,7 @@ use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_MetOffice), intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
+call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_groundgnss_metoffice_setup
 
@@ -104,7 +108,7 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   iflip = 0
   IF (prs % vals(1,1)-prs % vals(nlevp,1) < 0.0) THEN
     iflip = 1
-    WRITE(message, *) "Pressure is in ascending order. Rrorder the variables in vertical direction"
+    WRITE(message, *) "Pressure is in ascending order. Reorder the variables in vertical direction"
     CALL fckit_log % warning(message)
   END IF
 
@@ -141,14 +145,15 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
       zb = theta_heights % vals(:,iobs)
     END IF
 
-    call Ops_Groundgnss_ForwardModel(nlevp, &
-                                     nlevq, &
-                                     za(1:nlevp), &
-                                     zb(1:nlevq), &
-                                     pressure(1:nlevp), &
-                                     humidity(1:nlevq), &
-                                     1, &
-                                     zStation(iobs), &
+    call Ops_Groundgnss_ForwardModel(nlevp,                &
+                                     nlevq,                &
+                                     za(1:nlevp),          &
+                                     zb(1:nlevq),          &
+                                     pressure(1:nlevp),    &
+                                     humidity(1:nlevq),    &
+                                     self % min_temp_grad, &
+                                     1,                    &
+                                     zStation(iobs),       &
                                      hofx(iobs))
 
     write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
@@ -170,14 +175,15 @@ end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,    &
-                                       nlevq,    &
-                                       za,       &
-                                       zb,       &
-                                       pressure, &
-                                       humidity, &
-                                       nobs,     &
-                                       zStation, &
+SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                & 
+                                       nlevq,                &
+                                       za,                   &
+                                       zb,                   &
+                                       pressure,             &
+                                       humidity,             &
+                                       gbgnss_min_temp_grad, &
+                                       nobs,                 &
+                                       zStation,             &
                                        Model_ZTD)
 
 INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
@@ -186,6 +192,7 @@ REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
 REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
 REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
 REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
+REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations
 
 REAL(kind_real), INTENT(IN)    :: zStation               ! Station heights
@@ -196,9 +203,9 @@ REAL(kind_real), INTENT(INOUT) :: Model_ZTD              ! Model forecast of the
 ! 
 
 REAL(kind_real)                  :: pN(nlevq)            ! Presure on theta levels
-REAL(kind_real)                  :: refrac(nlevq)        ! Refraction
+REAL(kind_real), ALLOCATABLE     :: refrac(:)            ! Model refractivity
 LOGICAL                          :: refracerr            ! Refraction error
-
+INTEGER                          :: nRefLevels           ! Number of levels in refractivity calculation
 REAL(kind_real)                  :: TopCorrection        ! Zenith Total Delay Top of atmos correction
 ! 
 ! Local parameters
@@ -213,6 +220,8 @@ REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 character(max_string)        :: message           ! General message for output
 
+REAL(kind_real), ALLOCATABLE :: model_heights(:)  ! Geopotential heights of the refractivity levels (not needed for this oper)
+
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
@@ -221,22 +230,24 @@ IF (nlevp /= nlevq + 1) THEN
     call abor1_ftn(err_msg)
 END IF
 
+CALL ufo_calculate_refractivity(nlevp,                &
+                                nlevq,                &
+                                za,                   &
+                                zb,                   &
+                                pressure,             &
+                                humidity,             &
+                                .TRUE.,               & ! vert_interp_ops
+                                .FALSE.,              & ! pseudo_ops
+                                gbgnss_min_temp_grad, &
+                                refracerr,            &
+                                nRefLevels,           &
+                                refrac,               &
+                                model_heights)
 
-nstate = nlevp + nlevq
-x(1:nlevp) = pressure
-x(nlevp+1:nstate) = humidity
-
-CALL ufo_refractivity(nlevq,     &
-                      nlevp,     &
-                      za,        &
-                      zb,        &
-                      x,         &
-                      pN,        &
-                      refracerr, &
-                      refrac)
-
-CALL Ops_groundgnss_TopCorrection(pN,    &
-                                  nlevq, &
+CALL Ops_groundgnss_TopCorrection(pressure,    &
+                                  nlevq,       &
+                                  za,          &
+                                  zb,          &
                                   TopCorrection)
 
 

@@ -3,7 +3,7 @@
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
 
-!> Thae main Fortran module for implementing the GNSS-RO onedvar check
+!> The main Fortran module for implementing the GNSS-RO onedvar check
 
 module ufo_gnssroonedvarcheck_mod
 
@@ -48,6 +48,7 @@ type, public :: ufo_gnssroonedvarcheck
   character(len=800)        :: bmatrix_filename  !< Location of the B-matrix file
   logical                   :: pseudo_ops        !< Whether to use pseudo levels in forward operator
   logical                   :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
+  real(kind_real)           :: min_temp_grad     !< The minimum vertical temperature gradient allowed
 end type ufo_gnssroonedvarcheck
 
 ! ------------------------------------------------------------------------------
@@ -64,10 +65,10 @@ contains
 subroutine ufo_gnssroonedvarcheck_create(self, obsspace, f_conf, onedvarflag)
 
   implicit none
-  type(ufo_gnssroonedvarcheck), intent(inout) :: self        !< gnssroonedvarcheck main object
-  type(c_ptr), value, intent(in)             :: obsspace     !< observation database pointer
-  type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
-  integer(c_int), intent(in)                 :: onedvarflag  !< flag for qc manager
+  type(ufo_gnssroonedvarcheck), intent(inout) :: self         !< gnssroonedvarcheck main object
+  type(c_ptr), value, intent(in)              :: obsspace     !< observation database pointer
+  type(fckit_configuration), intent(in)       :: f_conf       !< yaml file contents
+  integer(c_int), intent(in)                  :: onedvarflag  !< flag for qc manager
 
   character(len=:), allocatable :: temp_str1
 
@@ -88,6 +89,7 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, f_conf, onedvarflag)
   self % bmatrix_filename = temp_str1
   call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
   call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
+  call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_gnssroonedvarcheck_create
 
@@ -270,6 +272,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
                               Ob,                      &   ! Structure containing the observation information
                               self % pseudo_ops,       &   ! Whether to use pseudo-levels in calculation
                               self % vert_interp_ops,  &   ! Whether to interpolate using ln(p) or exner
+                              self % min_temp_grad,    &   ! Minimum vertical temperature gradient allowed
                               self % Zmin,             &   ! Minimum vertical level to accept observations
                               self % Zmax,             &   ! Maximum vertical level to accept observations
                               self % cost_funct_test,  &   ! Threshold value for the cost function convergence test

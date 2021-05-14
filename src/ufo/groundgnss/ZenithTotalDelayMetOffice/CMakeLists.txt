@@ -15,7 +15,6 @@ set (  groundgnssmetoffice_src_files
        ufo_groundgnss_metoffice_mod.F90
        ufo_groundgnss_metoffice_utils_mod.F90
        ufo_groundgnss_metoffice_tlad_mod.F90
-       ufo_refractivity_utils_mod.F90
 PARENT_SCOPE
 )
 

@@ -47,8 +47,9 @@ SUBROUTINE Ops_GPSRO_rootsolv_BA (nstate,        &   ! size of state vector
                                   Iter_max,      &   ! Max number of iterations
                                   Delta,         &   !
                                   Delta_ct2,     &   !
-                                  GPSRO_pseudo_ops,      &
-                                  GPSRO_vert_interp_ops, &
+                                  GPSRO_pseudo_ops,      & ! Whether to use pseudo levels
+                                  GPSRO_vert_interp_ops, & ! Whether to vertically interpolate using exner or ln(p)
+                                  GPSRO_min_temp_grad, &   ! Minimum vertical temperature gradient allowed
                                   capsupersat,   &
                                   O_Bdiff,       &   ! observed -background bending angle value
                                   RO_Rad_Curv,   &   ! Radius of curvature of ellipsoid
@@ -60,12 +61,10 @@ SUBROUTINE Ops_GPSRO_rootsolv_BA (nstate,        &   ! size of state vector
 
 
 USE ufo_gnssro_ukmo1d_utils_mod, only: &
-    Ops_GPSRO_Refrac, &
     Ops_GPSROcalc_alpha, &
     Ops_GPSROcalc_nr
 
 USE ufo_gnssro_bendmetoffice_tlad_utils_mod, only: &
-    Ops_GPSRO_RefracK, &
     Ops_GPSROcalc_alphaK, &
     Ops_GPSROcalc_nrK
 
@@ -80,6 +79,10 @@ USE ufo_gnssroonedvarcheck_eval_derivs_mod, only: &
 
 USE ufo_utils_mod, only: &
     InvertMatrix, Ops_Cholesky
+
+use ufo_utils_refractivity_calculator, only: &
+    ufo_calculate_refractivity, &
+    ufo_refractivity_kmat
 
 IMPLICIT NONE
 
@@ -102,6 +105,7 @@ REAL(kind_real), INTENT(IN)    :: Om1(:,:)
 REAL(kind_real), INTENT(IN)    :: Delta
 LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops
 LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops
+REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad
 LOGICAL, INTENT(IN)            :: capsupersat
 INTEGER, INTENT(OUT)           :: it
 REAL(kind_real), INTENT(OUT)   :: x(:)
@@ -116,62 +120,63 @@ REAL(kind_real), INTENT(OUT)   :: O_Bdiff     ! Measure of O-B for whole profile
 REAL(kind_real), INTENT(IN)    :: RO_Rad_Curv
 REAL(kind_real), INTENT(IN)    :: Latitude
 REAL(kind_real), INTENT(IN)    :: RO_geoid_und
-REAL(kind_real), INTENT(INOUT) :: Tb(nb)
-REAL(kind_real), INTENT(INOUT) :: Ts(nb)
+REAL(kind_real), INTENT(INOUT) :: Tb(nlevq)
+REAL(kind_real), INTENT(INOUT) :: Ts(nlevq)
 REAL(kind_real), INTENT(INOUT) :: DFS         ! Measure of degrees of freesom of signal for whole profile
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSRO_rootsolv_BA"
-INTEGER, PARAMETER          :: max_string = 800
+CHARACTER(len=*), PARAMETER  :: RoutineName = "Ops_GPSRO_rootsolv_BA"
+INTEGER, PARAMETER           :: max_string = 800
 
-LOGICAL                     :: MARQ
-INTEGER                     :: i
-INTEGER                     :: it_marq
-INTEGER                     :: ErrorCode
-REAL(kind_real)                        :: J_old
-REAL(kind_real)                        :: J_min
-REAL(kind_real)                        :: pen_ob
-REAL(kind_real)                        :: pen_back
-REAL(kind_real)                        :: xold(nstate)
-REAL(kind_real)                        :: x_temp(nstate)
-REAL(kind_real)                        :: xmin(nstate)
-REAL(kind_real)                        :: ymin(nobs)
-REAL(kind_real)                        :: lambda
-REAL(kind_real)                        :: lamp1
-REAL(kind_real)                        :: d2J_dx2(nstate,nstate)
-REAL(kind_real)                        :: dJ_dx(nstate)
-REAL(kind_real)                        :: diag_d2J(nstate)
-REAL(kind_real)                        :: Kmat(Nobs,nstate)
-REAL(kind_real)                        :: dx(nstate)
-REAL(kind_real)                        :: Conv_Test
-REAL(kind_real)                        :: ct2
-REAL(kind_real)                        :: ct3
-REAL(kind_real)                        :: d2                         ! measure of step taken
-REAL(kind_real)                        :: sdx(nstate)
-REAL(kind_real)                        :: OK(Nobs,nstate)            ! O^-1 * Kmat
-REAL(kind_real)                        :: KOK(nstate,nstate)         ! KT *O^-1 *K
-REAL(kind_real)                        :: AKOK(nstate,nstate)        ! Amat * above
-REAL(kind_real)                        :: Refmodel(nb)               ! model refractivity on theta levels
-REAL(kind_real), ALLOCATABLE           :: nr(:)
-REAL(kind_real), ALLOCATABLE           :: dref_dp(:,:)
-REAL(kind_real), ALLOCATABLE           :: dref_dq(:,:)
-REAL(kind_real), ALLOCATABLE           :: dnr_dref(:,:)
-REAL(kind_real), ALLOCATABLE           :: dalpha_dref(:,:)
-REAL(kind_real), ALLOCATABLE           :: dalpha_dnr(:,:)
-REAL(kind_real), ALLOCATABLE           :: m1(:,:)
-REAL(kind_real)                        :: T(nb)
+LOGICAL                      :: MARQ
+INTEGER                      :: i
+INTEGER                      :: it_marq
+INTEGER                      :: ErrorCode
+REAL(kind_real)              :: J_old
+REAL(kind_real)              :: J_min
+REAL(kind_real)              :: pen_ob
+REAL(kind_real)              :: pen_back
+REAL(kind_real)              :: xold(nstate)
+REAL(kind_real)              :: x_temp(nstate)
+REAL(kind_real)              :: xmin(nstate)
+REAL(kind_real)              :: ymin(nobs)
+REAL(kind_real)              :: lambda
+REAL(kind_real)              :: lamp1
+REAL(kind_real)              :: d2J_dx2(nstate,nstate)
+REAL(kind_real)              :: dJ_dx(nstate)
+REAL(kind_real)              :: diag_d2J(nstate)
+REAL(kind_real)              :: Kmat(Nobs,nstate)
+REAL(kind_real)              :: dx(nstate)
+REAL(kind_real)              :: Conv_Test
+REAL(kind_real)              :: ct2
+REAL(kind_real)              :: ct3
+REAL(kind_real)              :: d2                         ! measure of step taken
+REAL(kind_real)              :: sdx(nstate)
+REAL(kind_real)              :: OK(Nobs,nstate)            ! O^-1 * Kmat
+REAL(kind_real)              :: KOK(nstate,nstate)         ! KT *O^-1 *K
+REAL(kind_real)              :: AKOK(nstate,nstate)        ! Amat * above
+REAL(kind_real), ALLOCATABLE :: nr(:)
+REAL(kind_real), ALLOCATABLE :: dref_dp(:,:)
+REAL(kind_real), ALLOCATABLE :: dref_dq(:,:)
+REAL(kind_real), ALLOCATABLE :: dnr_dref(:,:)
+REAL(kind_real), ALLOCATABLE :: dalpha_dref(:,:)
+REAL(kind_real), ALLOCATABLE :: dalpha_dnr(:,:)
+REAL(kind_real), ALLOCATABLE :: m1(:,:)
+REAL(kind_real)              :: T(nlevq)
+REAL(kind_real)              :: pressure(1:nlevp)
+REAL(kind_real)              :: humidity(1:nlevq)
 
-REAL(kind_real), ALLOCATABLE           :: z_pseudo(:)
-REAL(kind_real), ALLOCATABLE           :: N_pseudo(:)
-INTEGER :: nb_pseudo
-CHARACTER(LEN=max_string)   :: message
+REAL(kind_real), ALLOCATABLE :: model_heights(:)
+REAL(kind_real), ALLOCATABLE :: refractivity(:)
+INTEGER                      :: nRefLevels
+CHARACTER(LEN=max_string)    :: message
 
 !--------------
 ! 1. Initialise
 !--------------
 
 IF (GPSRO_pseudo_ops) THEN
-  ALLOCATE(nr(2 * nb - 1))
+  ALLOCATE(nr(2 * nlevq - 1))
   ALLOCATE(dref_dp(2 * nlevq - 1,nlevp))
   ALLOCATE(dref_dq(2 * nlevq - 1,nlevq))
   ALLOCATE(dnr_dref(2 * nlevq - 1,2 * nlevq - 1))
@@ -179,7 +184,7 @@ IF (GPSRO_pseudo_ops) THEN
   ALLOCATE(dalpha_dnr(nobs,2 * nlevq - 1))
   ALLOCATE(m1(nobs,2 * nlevq - 1))
 ELSE
-  ALLOCATE(nr(nb))
+  ALLOCATE(nr(nlevq))
   ALLOCATE(dref_dp(nlevq,nlevp))
   ALLOCATE(dref_dq(nlevq,nlevq))
   ALLOCATE(dnr_dref(nlevq,nlevq))
@@ -250,64 +255,43 @@ Iteration_loop: DO
   !  1.  First calculate model refractivity on theta levels
   
   ! Unpack the solution to p and q, changing units
-  
-  x_temp(1:nlevp) = 100 * x(1:nlevp)
-  x_temp(nlevp+1:nlevp+nlevq) = 0.001 * x(nlevp+1:nlevp+nlevq)
+  pressure = 100 * x(1:nlevp)
+  humidity = 0.001 * x(nlevp+1:nlevp+nlevq)
 
-  CALL Ops_GPSRO_Refrac (nlevp,    &
-                         nlevq,    &
-                         za,       &
-                         zb,       &
-                         x_temp,   &
-                         GPSRO_vert_interp_ops, &
-                         GPSRO_pseudo_ops, &
-                         BAerr,    &
-                         Refmodel, &
-                         T,        &
-                         z_pseudo, &
-                         N_pseudo, &
-                         nb_pseudo)
+  CALL ufo_calculate_refractivity (nlevp,                  &
+                                   nlevq,                  &
+                                   za,                     &
+                                   zb,                     &
+                                   pressure,               &
+                                   humidity,               &
+                                   GPSRO_pseudo_ops,       &
+                                   GPSRO_vert_interp_ops,  &
+                                   GPSRO_min_temp_grad,    &
+                                   BAerr,                  &
+                                   nRefLevels,             &
+                                   refractivity,           &
+                                   model_heights,          &
+                                   T)
 
   ! no point proceeding further if ...
   IF (BAerr) EXIT
 
-  ! Pseudo levels
-  IF (GPSRO_pseudo_ops) THEN
-    !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
-    CALL Ops_GPSROcalc_nr (z_pseudo,     &           ! geopotential heights of pseudo levels
-                           nb_pseudo,    &           ! number of model+pseudo-levels
-                           RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                           Latitude,     &           ! latitude at observation
-                           RO_geoid_und, &           ! geoid undulation above WGS-84
-                           n_pseudo,     &           ! refractivity of model on model+pseudo levels
-                           nr)                       ! Calculated model impact parameters
+  !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
+  CALL Ops_GPSROcalc_nr (nRefLevels,    &           ! number of refractivity levels
+                         model_heights, &           ! geopotential heights of refractivity levels
+                         refractivity,  &           ! calculated refractivity
+                         RO_Rad_Curv,   &           ! radius of curvature of earth at observation
+                         Latitude,      &           ! latitude at observation
+                         RO_geoid_und,  &           ! geoid undulation above WGS-84
+                         nr)                        ! Calculated model impact parameters
 
-    !  3.  Calculate model bending angle on observation impact parameters
-    CALL Ops_GPSROcalc_alpha (nobs,      &      ! size of ob. vector
-                              nb_pseudo, &      ! no. of refractivity levels
-                              zobs,      &      ! obs impact parameters
-                              n_pseudo,  &      ! refractivity values on model+pseudo levels
-                              nr,        &      ! index * radius product
-                              ycalc)            ! forward modelled bending angle
-  ! Model levels only
-  ELSE
-    !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
-    CALL Ops_GPSROcalc_nr (zb,           &           ! geopotential heights of model levels
-                           nb,           &           ! number of levels in zb
-                           RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                           Latitude,     &           ! latitude at observation
-                           RO_geoid_und, &           ! geoid undulation above WGS-84
-                           Refmodel,     &           ! refractivity of model on model levels
-                           nr)                       ! Calculated model impact parameters
-
-    !  3.  Calculate model bending angle on observation impact parameters
-    CALL Ops_GPSROcalc_alpha (nobs,     &      ! size of ob. vector
-                              nb,       &      ! no. of refractivity levels
-                              zobs,     &      ! obs impact parameters
-                              Refmodel, &      ! refractivity values on model levels
-                              nr,       &      ! index * radius product
-                              ycalc)           ! forward modelled bending angle
-  END IF
+  !  3.  Calculate model bending angle on observation impact parameters
+  CALL Ops_GPSROcalc_alpha (nobs,         &      ! size of ob. vector
+                            nRefLevels,   &      ! no. of refractivity levels
+                            zobs,         &      ! obs impact parameters
+                            refractivity, &      ! refractivity values on model+pseudo levels
+                            nr,           &      ! index * radius product
+                            ycalc)               ! forward modelled bending angle
 
   ! Store the bending angle values calculated with `x(:)=xb(:)'
 
@@ -358,71 +342,43 @@ Iteration_loop: DO
     MARQ = .FALSE.
 
     ! Evaluate the K matrix for current x
-    ! Pseudo levels
-    IF (GPSRO_pseudo_ops) THEN
-      !  1.  Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
-      ! Note: p and q were unpacked from x earlier in the loop
+    ! 1.  Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
+    ! Note: pressure and humidity were unpacked from x earlier in the loop
 
-      CALL Ops_GPSRO_RefracK(nlevp,           &
-                             nlevq,           &
-                             nb_pseudo,       &
-                             za,              &
-                             zb,              &
-                             x,               &
-                             GPSRO_pseudo_ops,      &
-                             GPSRO_vert_interp_ops, &
-                             dref_dP,         &
-                             dref_dq)
+    CALL ufo_refractivity_kmat(nlevp,                 &
+                               nlevq,                 &
+                               nRefLevels,            &
+                               za,                    &
+                               zb,                    &
+                               pressure,              &
+                               humidity,              &
+                               GPSRO_pseudo_ops,      &
+                               GPSRO_vert_interp_ops, &
+                               GPSRO_min_temp_grad,   &
+                               dref_dP,               &
+                               dref_dq)
 
-      !  2.  Calculate the gradient of nr wrt ref
-      CALL Ops_GPSROcalc_nrK (z_pseudo,     &           ! geopotential heights of pseudo levels
-                              nb_pseudo,    &           ! number of pseudo levels
-                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                              Latitude,     &           ! latitude at observation
-                              RO_geoid_und, &           ! geoid undulation above WGS-84
-                              n_pseudo,     &           ! refractivity of model on pseudo levels
-                              dnr_dref)                 ! out
+    ! Change the units for the K-matrices
+    dref_dP(:,:) = 1.0E2 * dref_dP(:,:)   ! hPa
+    dref_dq(:,:) = 1.0E-3 * dref_dq(:,:)  ! g/kg
 
-      !  3.  Calculate the gradient of bending angle wrt ref and nr
-      CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector
-                                 nb_pseudo,   &      ! no. of refractivity pseudo levels
-                                 zobs,        &      ! obs impact parameters
-                                 n_pseudo,    &      ! refractivity values on pseudo levels
-                                 nr,          &      ! index * radius product
-                                 dalpha_dref, &      ! out
-                                 dalpha_dnr)         ! out
-    ! Normal model levels
-    ELSE
-      !  1.  Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
-      CALL Ops_GPSRO_RefracK(nlevp,           &
-                             nlevq,           &
-                             nb,              &
-                             za,              &
-                             zb,              &
-                             x,               &
-                             GPSRO_pseudo_ops,      &
-                             GPSRO_vert_interp_ops, &
-                             dref_dP,         &
-                             dref_dq)
+    !  2.  Calculate the gradient of nr wrt ref
+    CALL Ops_GPSROcalc_nrK (model_heights, &           ! geopotential heights of pseudo levels
+                            nRefLevels,    &           ! number of pseudo levels
+                            RO_Rad_Curv,  &           ! radius of curvature of earth at observation
+                            Latitude,     &           ! latitude at observation
+                            RO_geoid_und, &           ! geoid undulation above WGS-84
+                            refractivity,     &           ! refractivity of model on pseudo levels
+                            dnr_dref)                 ! out
 
-      !  2.  Calculate the gradient of nr wrt ref
-      CALL Ops_GPSROcalc_nrK (zb,           &           ! geopotential heights of model levels
-                              nb,           &           ! number of levels in zb
-                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                              Latitude,     &           ! latitude at observation
-                              RO_geoid_und, &           ! geoid undulation above WGS-84
-                              Refmodel,     &           ! refractivity of model on model levels
-                              dnr_dref)                 ! out
-
-      !  3.  Calculate the gradient of bending angle wrt ref and nr
-      CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector
-                                 nb,          &      ! no. of refractivity levels
-                                 zobs,        &      ! obs impact parameters
-                                 Refmodel,    &      ! refractivity values on model levels
-                                 nr,          &      ! index * radius product
-                                 dalpha_dref, &      ! out
-                                 dalpha_dnr)         ! out
-    END IF
+    !  3.  Calculate the gradient of bending angle wrt ref and nr
+    CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector
+                               nRefLevels,   &      ! no. of refractivity pseudo levels
+                               zobs,        &      ! obs impact parameters
+                               refractivity,    &      ! refractivity values on pseudo levels
+                               nr,          &      ! index * radius product
+                               dalpha_dref, &      ! out
+                               dalpha_dnr)         ! out
 
     ! Calculate overall gradient of bending angle wrt p and q
 

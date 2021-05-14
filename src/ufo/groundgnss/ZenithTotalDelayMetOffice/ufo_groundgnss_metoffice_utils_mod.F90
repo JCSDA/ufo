@@ -38,7 +38,7 @@ SUBROUTINE Ops_Groundgnss_ZTD  (nlevq,    &
 
 IMPLICIT NONE
     
-    INTEGER, INTENT(IN)               :: nlevq           ! no. of theta levels
+    INTEGER, INTENT(IN)               :: nlevq           ! no. of temperature/theta levels
     REAL(kind_real), INTENT(IN)       :: refrac(:)       ! refractivty
     REAL(kind_real), INTENT(IN)       :: zb(:)           ! The geometric height of the model theta levels
     REAL(kind_real), INTENT(IN)       :: zStation        ! Station heights
@@ -114,18 +114,37 @@ IMPLICIT NONE
 END SUBROUTINE Ops_Groundgnss_ZTD
 
 
-SUBROUTINE Ops_groundgnss_TopCorrection(pN,    &
+SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
                                         nlevq, &
+                                        za,    &
+                                        zb,    &
                                         TopCorrection)
 					
     IMPLICIT NONE
     
-    REAL(kind_real), INTENT(IN)      :: pN(:)              ! Presure on theta levels
-    INTEGER, INTENT(IN)              :: nlevq              ! no. of theta levels
+    REAL(kind_real), INTENT(IN)      :: P(:)               ! Pressure on pressure (rho) levels
+    INTEGER, INTENT(IN)              :: nlevq              ! no. of temperature/theta levels
+    REAL(kind_real), INTENT(IN)      :: za(:)              ! heights of pressure (rho) levels
+    REAL(kind_real), INTENT(IN)      :: zb(:)              ! Heights of temperature/theta levels
     REAL(kind_real), INTENT(INOUT)   :: TopCorrection      ! ZTD Top of atmos correction
 
+
+    INTEGER                          :: Level              ! Loop counter
+    REAL(kind_real)                  :: pN(nlevq)          ! Pressure on theta levels
+    REAL(kind_real)                  :: pwt1               ! Weighting variable
+    REAL(kind_real)                  :: pwt2               ! Weighting variable
     REAL(kind_real)                  :: TCconstant         ! Top correction constant
     REAL(kind_real), PARAMETER       :: hpa_to_pa = 100.0  ! hPa to Pascal conversion
+    
+    
+    DO Level = 1, nlevq
+	
+        pwt1 = (za(Level + 1) - zb(Level)) / (za(Level + 1) - za(Level))
+        pwt2 = 1.0 - pwt1
+
+        pN(Level) = EXP (pwt1 * LOG (P(Level)) + pwt2 * LOG (P(Level + 1)))
+
+    END DO
 
     TCconstant = (refrac_scale * n_alpha * rd)/ (hpa_to_pa * grav)
     

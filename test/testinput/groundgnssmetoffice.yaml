@@ -5,6 +5,7 @@ observations:
 - obs operator: 
     name: GroundgnssMetOffice
     obs options:
+      min_temp_grad: 1.0e-6
   obs space: 
     name: Groundgnss
     obsdatain: 

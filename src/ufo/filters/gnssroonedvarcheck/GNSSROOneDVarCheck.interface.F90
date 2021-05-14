@@ -93,8 +93,6 @@ subroutine ufo_gnssroonedvarcheck_apply_c(c_self, c_geovals, c_nobs, c_apply) &
 
 implicit none
 integer(c_int), intent(in)     :: c_self          !< self - input
-!type(c_ptr), value, intent(in) :: c_vars          !< list of variables - input
-!type(c_ptr), value, intent(in) :: c_retvars       !< list of retrieval variables - input
 integer(c_int), intent(in)     :: c_geovals       !< Geovals - input
 integer(c_int), intent(in)     :: c_nobs          !< number of observations - input
 character(c_char), intent(in)  :: c_apply(c_nobs) !< apply flag (converted to logical) - input

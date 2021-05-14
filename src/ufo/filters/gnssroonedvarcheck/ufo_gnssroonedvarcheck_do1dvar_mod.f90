@@ -29,6 +29,7 @@ SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
                                  Ob,                     &
                                  GPSRO_pseudo_ops,       &
                                  GPSRO_vert_interp_ops,  &
+                                 GPSRO_min_temp_grad,    &
                                  GPSRO_Zmin,             &
                                  GPSRO_Zmax,             &
                                  GPSRO_cost_funct_test,  &   ! Threshold value for the cost function convergence test
@@ -51,6 +52,9 @@ use ufo_gnssroonedvarcheck_utils_mod, only: &
 use ufo_gnssroonedvarcheck_rootsolv_mod, only: &
     Ops_GPSRO_rootsolv_BA
 
+use ufo_utils_refractivity_calculator, only: &
+    ufo_calculate_refractivity
+
 IMPLICIT NONE
 
 ! Subroutine arguments:
@@ -62,6 +66,7 @@ TYPE (SingleBg_type), INTENT(INOUT) :: Back
 TYPE (SingleOb_type), INTENT(INOUT) :: Ob
 LOGICAL, INTENT(IN)                 :: GPSRO_pseudo_ops
 LOGICAL, INTENT(IN)                 :: GPSRO_vert_interp_ops
+REAL(kind_real), INTENT(IN)         :: GPSRO_min_temp_grad
 REAL(kind_real), INTENT(IN)         :: GPSRO_Zmin
 REAL(kind_real), INTENT(IN)         :: GPSRO_Zmax
 REAL(kind_real), INTENT(IN)         :: GPSRO_cost_funct_test
@@ -100,6 +105,9 @@ REAL(kind_real), ALLOCATABLE        :: yb(:)
 REAL(kind_real), ALLOCATABLE        :: ycalc(:)
 REAL(kind_real), ALLOCATABLE        :: Om1(:,:)
 INTEGER, ALLOCATABLE                :: index_packed(:)
+REAL(kind_real), ALLOCATABLE        :: model_heights(:)           ! Heights of model and pseudo-levels
+REAL(kind_real), ALLOCATABLE        :: refractivity(:)            ! Refractivity on model and pseudo_levels
+INTEGER                             :: nRefLevels                 ! Number of levs to calculate ref on
 CHARACTER(LEN=max_string)           :: message
 
 REAL(kind_real) :: temp_rad_curv     ! Temporary store of the earth's radius of curvature
@@ -119,13 +127,26 @@ OM1_error = .FALSE.
 
 Ob % BendingAngle(:) % PGEFinal = 1.0
 
-! Set the background vector xb
-
-xb(1:nlevp) = 1.0E-2 * Back % p(:)          ! in h/Pa
-xb(nlevp + 1:nlevp+nlevq) = 1.0E3 * Back % q(:)    ! in g/kg
-
 ! Calculate refractivity on theta levels, to find appropriate
 ! impact height vertical range
+
+CALL ufo_calculate_refractivity (nlevp,                  &
+                                 nlevq,                  &
+                                 Back % za,              &
+                                 Back % zb,              &
+                                 Back % p,               &
+                                 Back % q,               &
+                                 GPSRO_pseudo_ops,       &
+                                 GPSRO_vert_interp_ops,  &
+                                 GPSRO_min_temp_grad,    &
+                                 BAerr,                  &
+                                 nRefLevels,             &
+                                 refractivity,           &
+                                 model_heights)
+
+! Set the background vector
+xb(1:nlevp) = 1.0E-2 * Back % p(:)          ! in hPa
+xb(nlevp + 1:nlevp+nlevq) = 1.0E3 * Back % q(:)    ! in g/kg
 
 ! Set size of obs vector used in 1D- Var
 
@@ -210,6 +231,7 @@ IF (nobs > 0) THEN
                                 GPSRO_Delta_ct2,           &    !
                                 GPSRO_pseudo_ops,          &
                                 GPSRO_vert_interp_ops,     &
+                                GPSRO_min_temp_grad,       &
                                 capsupersat,               &
                                 O_Bdiff,                   &    ! observed -background BA value
                                 temp_rad_curv,             &    ! Radius of curvature of ellipsoid

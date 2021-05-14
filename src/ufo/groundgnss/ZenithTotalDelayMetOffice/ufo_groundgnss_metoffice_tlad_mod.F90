@@ -16,8 +16,9 @@ use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
 use missing_values_mod
-use ufo_refractivity_utils_mod
 use fckit_log_module, only : fckit_log
+use ufo_utils_refractivity_calculator, only: &
+    ufo_calculate_refractivity, ufo_refractivity_kmat
 
 
 
@@ -27,16 +28,19 @@ use ufo_constants_mod, only: &
     n_alpha,                 &    ! Refractivity constant a
     n_beta
 
-integer, parameter         :: max_string=800
+integer, parameter             :: max_string=800
 
 !> Fortran derived type for groundgnss trajectory
-type, extends(ufo_basis_tlad)   ::  ufo_groundgnss_metoffice_tlad
+type, extends(ufo_basis_tlad)  ::  ufo_groundgnss_metoffice_tlad
   private
 
-  integer                       :: nlevp, nlevq, nlocs, iflip
-  real(kind_real), allocatable  :: K(:,:)
-  real(kind_real), allocatable  :: dztd_dp(:,:)
-  real(kind_real), allocatable  :: dztd_dq(:,:)
+  integer                      :: nlevp, nlevq, nlocs, iflip
+  real(kind_real), allocatable :: K(:,:)
+  real(kind_real), allocatable :: dztd_dp(:,:)
+  real(kind_real), allocatable :: dztd_dq(:,:)
+  logical :: vert_interp_ops
+  logical :: pseudo_ops
+  real(kind_real) :: min_temp_grad
   contains
     procedure :: setup      => ufo_groundgnss_metoffice_setup
     procedure :: delete     => ufo_groundgnss_metoffice_tlad_delete
@@ -57,6 +61,7 @@ use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_metoffice_tlad), intent(inout) :: self
 type(fckit_configuration),            intent(in)    :: f_conf
+call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_groundgnss_metoffice_setup
 
@@ -86,7 +91,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   integer                      :: iobs               ! Loop variable, observation number
   integer                      :: nobs               ! Number of observations
   integer                      :: ilev               ! Loop variable, vertical level number
-  real(kind_real), allocatable :: zStation(:)
+  real(kind_real), allocatable :: zStation(:)        ! The station height
   real(kind_real), allocatable :: pressure(:)        ! Model background values of air pressure (monotonic order)
   real(kind_real), allocatable :: humidity(:)        ! Model background specific humidity  (in pressure monotonic order)
   real(kind_real), allocatable :: za(:)              ! Model heights of rho levs (in pressure monotonic order)
@@ -116,7 +121,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   self%iflip = 0
   IF (prs % vals(1,1)-prs % vals(self%nlevp,1) < 0.0) THEN
     self%iflip = 1
-    WRITE(message, *) "Pressure is in ascending order. Rrorder the variables in vertical direction"
+    WRITE(message, *) "Pressure is in ascending order. Reorder the variables in vertical direction"
     CALL fckit_log % warning(message)
   END IF
 
@@ -159,6 +164,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
                                          pressure(1:self%nlevp),       &   ! Values of the pressure
                                          zStation(iobs),               &   ! Station height
                                          iobs,                         &   ! Ob number
+                                         self % min_temp_grad,         &   ! Minimum temperature gradient allowed
                                          self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
 
   end do obs_loop
@@ -189,16 +195,16 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   character(len=*), parameter  :: myname_="ufo_groundgnss_metoffice_simobs_tl"
 
 ! Local variables
-  integer                      :: iobs      ! Loop variable, observation number
-  integer                      :: nlocs     ! Number of observations
-  integer                      :: ilev      ! Loop variable, pressure level number
-  integer                      :: iflip     ! Index for vertical flip
-  character(max_string)        :: err_msg   ! Message to be output
-  type(ufo_geoval), pointer    :: q_d       ! Increment to the specific humidity
-  type(ufo_geoval), pointer    :: prs_d     ! Increment to the air pressure
+  integer                      :: iobs          ! Loop variable, observation number
+  integer                      :: nlocs         ! Number of observations
+  integer                      :: ilev          ! Loop variable, pressure level number
+  integer                      :: iflip         ! Index for vertical flip
+  character(max_string)        :: err_msg       ! Message to be output
+  type(ufo_geoval), pointer    :: q_d           ! Increment to the specific humidity
+  type(ufo_geoval), pointer    :: prs_d         ! Increment to the air pressure
   real(kind_real), allocatable :: pressure_d(:) ! Increment to the air pressure (monotonic order)
   real(kind_real), allocatable :: humidity_d(:) ! Increment to the specific humidity  (in pressure monotonic order)
-  real(kind_real), allocatable :: x_d(:)    ! Increment to the complete state
+  real(kind_real), allocatable :: x_d(:)        ! Increment to the complete state
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_tl: begin"
   call fckit_log%info(err_msg)
@@ -281,16 +287,16 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   character(len=*), parameter     :: myname_="ufo_groundgnss_metoffice_simobs_ad"
 
 ! Local variables
-  real(c_double)               :: missing  ! Missing data values
-  type(ufo_geoval), pointer    :: q_d      ! Pointer to the specific humidity perturbations
-  type(ufo_geoval), pointer    :: prs_d    ! Pointer to the pressure perturbations
-  integer                      :: iobs     ! Loop variable, observation number
-  integer                      :: ilev     ! Loop variable, pressure level number
-  integer                      :: iflip    ! Index for vertical flip 
-  real(kind_real), allocatable :: x_d(:)   ! Perturbation to the full model state
-  real(kind_real), allocatable :: pressure_d(:)  ! Perturbation to pressure (monotonic order)
-  real(kind_real), allocatable :: humidity_d(:)  ! Perturbation to specific humidity  (in pressure monotonic order)
-  character(max_string)        :: err_msg  ! Message to be output
+  real(c_double)               :: missing       ! Missing data values
+  type(ufo_geoval), pointer    :: q_d           ! Pointer to the specific humidity perturbations
+  type(ufo_geoval), pointer    :: prs_d         ! Pointer to the pressure perturbations
+  integer                      :: iobs          ! Loop variable, observation number
+  integer                      :: ilev          ! Loop variable, pressure level number
+  integer                      :: iflip         ! Index for vertical flip
+  real(kind_real), allocatable :: x_d(:)        ! Perturbation to the full model state
+  real(kind_real), allocatable :: pressure_d(:) ! Perturbation to pressure (monotonic order)
+  real(kind_real), allocatable :: humidity_d(:) ! Perturbation to specific humidity  (in pressure monotonic order)
+  character(max_string)        :: err_msg       ! Message to be output
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: begin"
   call fckit_log%info(err_msg)
@@ -400,25 +406,28 @@ SUBROUTINE groundgnss_jacobian_interface(nlevp, &
                               prs,              &
                               zStation,         &
                               iobs,             &
+                              gbgnss_min_temp_grad, &
                               K)
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevp            ! The number of model pressure levels
-INTEGER, INTENT(IN)            :: nlevq            ! The number of model theta levels
-REAL(kind_real), INTENT(IN)    :: za(:)            ! The geometric height of the model pressure levels
-REAL(kind_real), INTENT(IN)    :: zb(:)            ! The geometric height of the model theta levels
-REAL(kind_real), INTENT(IN)    :: q(1:nlevq)       ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: zStation         ! Station height
-INTEGER, INTENT(IN)            :: iobs             ! Ob number
-REAL(kind_real), INTENT(INOUT) :: K(:,:)           ! The calculated K matrix
+INTEGER, INTENT(IN)            :: nlevP                 ! The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevq                 ! The number of model theta levels
+REAL(kind_real), INTENT(IN)    :: za(:)                 ! The geometric height of the model pressure levels
+REAL(kind_real), INTENT(IN)    :: zb(:)                 ! The geometric height of the model theta levels
+REAL(kind_real), INTENT(IN)    :: q(1:nlevq)            ! The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: prs(1:nlevP)          ! The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: zStation              ! Station height
+REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad  ! The minimum temperature gradient which is used
+INTEGER, INTENT(IN)            :: iobs                  ! Ob number
+
+REAL(kind_real), INTENT(INOUT) :: K(:,:)                ! The calculated K matrix
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 !
 
-REAL(kind_real)              :: T(1:nlevq)         ! Temperature on model levels
-REAL(kind_real)              :: refrac(nlevq)      ! model refractivity on theta levels
+REAL(kind_real)                :: T(1:nlevq)            ! Temperature on model levels
+REAL(kind_real), ALLOCATABLE   :: refrac(:)             ! model refractivity on theta levels
 !
 ! Local variables
 !
@@ -429,36 +438,43 @@ CHARACTER(LEN=200)           :: err_msg            ! Output message
 
 REAL(kind_real)              :: pN(nlevq)          ! Presure on theta levels
 
-! Set up the size of the state
-nstate = nlevp + nlevq
-x(1:nlevp) = prs
-x(nlevp+1:nstate) = q
+REAL(kind_real), ALLOCATABLE :: model_heights(:)   ! Geopotential heights of the refractivity levels (not needed for this oper)
+INTEGER                      :: nRefLevels         ! Number of levels in refractivity calculation
 
+! Set up the size of the state
+nstate = nlevP + nlevq
 
 refracerr = .FALSE.
 
 ! Calculate the refractivity
-CALL ufo_refractivity(nlevq,     &
-                      nlevp,     &
-                      za,        &
-                      zb,        &
-                      x,         &
-                      pN,        &
-                      refracerr, &
-                      refrac)
+CALL ufo_calculate_refractivity(nlevp,                &
+                                nlevq,                &
+                                za,                   &
+                                zb,                   &
+                                prs,                  &
+                                q,                    &
+                                .TRUE.,               & ! vert_interp_ops
+                                .FALSE.,              & ! pseudo_ops
+                                gbgnss_min_temp_grad, &
+                                refracerr,            &
+                                nRefLevels,           &
+                                refrac,               &
+                                model_heights)
 
 IF (.NOT. refracerr) THEN
     ! Calculate the K-matrix (Jacobian)
-    CALL Groundgnss_GetK(nstate,    &
-                         nlevp,     &
-                         nlevq,     &
-                         za,        &
-                         zb,        &
-                         x,         &
-                         zStation,  &
-                         iobs,      &
-                         refracerr, &
-                         refrac,    &
+    CALL Groundgnss_GetK(nstate,               &
+                         nlevP,                &
+                         nlevq,                &
+                         za,                   &
+                         zb,                   &
+                         prs,                  &
+                         q,                    &
+                         zStation,             &
+                         iobs,                 &
+                         gbgnss_min_temp_grad, &
+                         refracerr,            &
+                         refrac,               &
                          K)
 ELSE
     K = 0
@@ -474,16 +490,18 @@ END SUBROUTINE groundgnss_jacobian_interface
 !-------------------------------------------------------------------------
 ! Calculate the K-matrix (Jacobian)
 !-------------------------------------------------------------------------
-SUBROUTINE Groundgnss_GetK(nstate,   &
-                          nlevp,     &
-                          nlevq,     &
-                          za,        &
-                          zb,        &
-                          x,         &
-                          zStation,  &
-                          iobs,      &
-                          refracerr, &
-                          refrac,    &
+SUBROUTINE Groundgnss_GetK(nstate,              &
+                          nlevP,                &
+                          nlevq,                &
+                          za,                   &
+                          zb,                   &
+                          P,                    &
+                          q,                    &
+                          zStation,             &
+                          iobs,                 &
+                          gbgnss_min_temp_grad, &
+                          refracerr,            &
+                          refrac,               &
                           K)
 
 !
@@ -492,19 +510,21 @@ SUBROUTINE Groundgnss_GetK(nstate,   &
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)             :: nstate
-INTEGER, INTENT(IN)             :: nlevp          ! The number of model pressure levels
-INTEGER, INTENT(IN)             :: nlevq          ! The number of model theta levels
-REAL(kind_real), INTENT(IN)     :: za(:)          ! The geometric height of the model pressure levels
-REAL(kind_real), INTENT(IN)     :: zb(:)          ! The geometric height of the model theta levels
-REAL(kind_real), INTENT(IN)     :: x(:)           ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)     :: zStation       ! Station height
-INTEGER, INTENT(IN)             :: iobs           ! Ob number
-LOGICAL, INTENT(INOUT)          :: refracerr      ! Whether we encountered an error in calculating the refractivity
-REAL(kind_real), INTENT(INOUT)  :: refrac(:)      ! Model refractivity on theta levels - returned from forward model
-REAL(kind_real), INTENT(INOUT)  :: K(:,:)         ! The calculated K matrix
+INTEGER, INTENT(IN)             :: nlevP                  ! The number of model pressure levels
+INTEGER, INTENT(IN)             :: nlevq                  ! The number of model theta levels
+REAL(kind_real), INTENT(IN)     :: za(:)                  ! The geometric height of the model pressure levels
+REAL(kind_real), INTENT(IN)     :: zb(:)                  ! The geometric height of the model theta levels
+REAL(kind_real), INTENT(IN)     :: P(:)                   ! The model pressure values
+REAL(kind_real), INTENT(IN)     :: q(:)                   ! The model humidity values
+REAL(kind_real), INTENT(IN)     :: zStation               ! Station height
+INTEGER, INTENT(IN)             :: iobs                   ! Ob number
+REAL(kind_real), INTENT(IN)     :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
+LOGICAL, INTENT(INOUT)          :: refracerr              ! Whether we encountered an error in calculating the refractivity
+REAL(kind_real), INTENT(IN)     :: refrac(:)              ! Model refractivity on theta levels - returned from forward model
+REAL(kind_real), INTENT(INOUT)  :: K(:,:)                 ! The calculated K matrix
 
-REAL(kind_real), ALLOCATABLE    :: dref_dP(:, :)  ! Partial derivative of refractivity wrt. pressure
-REAL(kind_real), ALLOCATABLE    :: dref_dq(:, :)  ! Partial derivative of refractivity wrt. specific humidity
+REAL(kind_real), ALLOCATABLE    :: dref_dP(:, :)          ! Partial derivative of refractivity wrt. pressure
+REAL(kind_real), ALLOCATABLE    :: dref_dq(:, :)          ! Partial derivative of refractivity wrt. specific humidity
 
 
 ! Local constants
@@ -536,14 +556,12 @@ REAL(kind_real)              :: dztd_drefsta           ! derivative of ZTD wrt s
 REAL(kind_real), ALLOCATABLE :: dp_local_dPin(:,:)     ! derivative of pressure rho levels wrt pressure
 REAL(kind_real), ALLOCATABLE :: dztd_dpN(:)            ! array for derivative w.r.t top theta level
 REAL(kind_real)              :: dztd_dq(nlevq)         ! The calculated K matrix
-REAL(kind_real)              :: dztd_dp(nlevp)         ! The calculated K matrix
-REAL(kind_real), ALLOCATABLE :: dpN_dP(:,:)            ! derivative of pressure theta wrt pressure
+REAL(kind_real)              :: dztd_dp(nlevP)         ! The calculated K matrix
+REAL(kind_real), ALLOCATABLE :: dPb_dP(:,:)            ! derivative of pressure theta wrt pressure
 REAL(kind_real), ALLOCATABLE :: dztd_dref(:)           ! derivative of ZTD wrt refrac
 REAL(kind_real), ALLOCATABLE :: x1(:,:)                ! Matrix placeholder
 REAL(kind_real), ALLOCATABLE :: x2(:)                  ! Matrix placeholder
 
-REAL(kind_real)              :: P(nlevp)               ! Pressure
-REAL(kind_real)              :: q(nlevq)               ! Humidity
 REAL(kind_real), PARAMETER   :: hpa_to_pa = 100.0      ! hPa to Pascal conversion
 REAL(kind_real), PARAMETER   :: PressScale = 6000.0    ! Pressure scale height
 CHARACTER(LEN=200)           :: err_msg                ! Output message
@@ -558,7 +576,7 @@ character(max_string)        :: message                ! General message for out
 
 ALLOCATE (dref_dP(nlevq,nlevp))
 ALLOCATE (dref_dq(nlevq,nlevq))
-ALLOCATE (dpN_dP(nlevq,nlevp))
+ALLOCATE (dPb_dP(nlevq,nlevp))
 ALLOCATE (dztd_dref(nlevq))
 ALLOCATE (dztd_dpN(nlevq))
 ALLOCATE (x2(nlevp))
@@ -571,7 +589,7 @@ dref_dq(:,:)   = 0.0
 dref_dP(:,:)   = 0.0
 dztd_dref(:)   = 0.0
 dztd_dpN(:)    = 0.0
-dpN_dP(:,:)    = 0.0
+dPb_dP(:,:)    = 0.0
 dztd_dq(:)     = 0.0
 dztd_dp(:)     = 0.0
 x1(:,:)        = 0.0
@@ -582,12 +600,6 @@ pN(:)          = 0.0
 
 LocalZenithDelay = 0.0
 StationRefrac    = 0.0
-
-
-!nstate = nlevp + nlevq
-P(:) = x(1:nlevp)
-q(:) = x(nlevp + 1:nstate)
-
 
 ! If negative pressures exist, replace these
 ! and any above with values calculated as an exponential decay (scale height
@@ -624,24 +636,28 @@ DO Level = 1, nlevp-1
 
   pN(Level) = EXP(z_weight1 * LOG(p_local(Level)) + z_weight2 * LOG(p_local(Level+1)))
 
-  dpN_dP(Level,Level) = pN(Level) * z_weight1 / p_local(Level)
-  dpN_dP(Level,Level+1) = pN(Level) * z_weight2 / p_local(Level+1)
+  dPb_dP(Level,Level) = pN(Level) * z_weight1 / p_local(Level)
+  dPb_dP(Level,Level+1) = pN(Level) * z_weight2 / p_local(Level+1)
 
 END DO
 
 ! Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
 
-CALL ufo_refractivityDeriv (nlevq,     &
-                            nlevp,     &
-                            za,        &
-                            zb,        &
-                            pN,        &
-                            x,         &
-                            refracerr, &
-                            refrac,    &
-                            dpN_dP,    &
-                            dref_dP,   &
-                            dref_dq)
+CALL ufo_refractivity_kmat (nlevP,                &
+                            nlevq,                &
+                            nlevq,                &
+                            za,                   &
+                            zb,                   &
+                            P,                    &
+                            q,                    &
+                            .False.,              & !pseudo_ops
+                            .TRUE.,               & ! vert_interp_ops
+                            gbgnss_min_temp_grad, &
+                            dref_dP,              &
+                            dref_dq,              &
+                            dPb_dP)
+                            
+                            
 
 ! In Layer where station height lies, define lowest level required for
 ! iteration and integration
@@ -763,22 +779,21 @@ dztd_dp(:) = MATMUL(dztd_dp,dp_local_dPin)
 ! First add in dZTD/dp for the top correction, which only depends on top level theta pressure
 
 dztd_dpN(nlevq) = refrac_scale * n_alpha * rd / (hpa_to_pa * grav)
-x1 = MATMUL(dPn_dP, dp_local_dPin)
+x1 = MATMUL(dPb_dP, dp_local_dPin)
 x2 = MATMUL(dztd_dpN, x1)
 dztd_dp = x2 + dztd_dp
 
-K(iobs,1:nlevp)  = dztd_dp
-K(iobs, nlevp + 1:nstate) = dztd_dq
+K(iobs, 1:nlevp)  = dztd_dp
+K(iobs, nlevp+1:nstate) = dztd_dq
 
 DEALLOCATE (dp_local_dPin)
 DEALLOCATE (x1)
 DEALLOCATE (x2)
 DEALLOCATE (dztd_dpN)
 DEALLOCATE (dztd_dref)
-DEALLOCATE (dpN_dP)
+DEALLOCATE (dPb_dP)
 DEALLOCATE (dref_dq)
 DEALLOCATE (dref_dP)
-
 
 END SUBROUTINE Groundgnss_GetK
 
