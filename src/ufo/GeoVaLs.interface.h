@@ -20,6 +20,11 @@ namespace ioda {
   class ObsSpace;
 }
 
+namespace oops {
+  class Variables;
+}
+
+
 namespace ufo {
   class Locations;
 

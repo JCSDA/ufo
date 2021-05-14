@@ -672,6 +672,10 @@ do ivar = 1, self%nvar-1
 
          init_option: select case (trim(ic))
 
+         case ("invent_state")
+
+           t0 = cos(deg_to_rad * lons(iloc) ) * cos(rlat)
+
          case ("dcmip-test-1-1")
 
             call test1_advection_deformation(rlon,rlat,p0,kz,0,u0,v0,w0,&
@@ -698,7 +702,7 @@ do ivar = 1, self%nvar-1
 
          end select init_option
 
-         ! currently only temperture is implemented
+         ! currently only temperature is implemented
          if (cmp_strings(self%variables(ivar), var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
