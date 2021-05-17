@@ -370,7 +370,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       const auto &expected_valuesOut =
         profileDataHandler.get<float>("OPS_eastward_wind@ModelLevelsDerivedValue");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
-        EXPECT(oops::is_close_relative(valuesOut[jlev], expected_valuesOut[jlev], 1e-4f));
+        EXPECT(oops::is_close_relative(valuesOut[jlev], expected_valuesOut[jlev], 1e-3f));
       const auto &expected_ZMin =
         profileDataHandler.get<float>("OPS_LogP_u_Min@ModelLevelsDerivedValue");
       for (size_t jlev = 0; jlev < ZMin.size(); ++jlev)
