@@ -87,6 +87,7 @@ add_subdirectory( sattcwv )
 add_subdirectory( compositeoper )
 add_subdirectory( backgrounderrorvertinterp )
 add_subdirectory( backgrounderroridentity )
+add_subdirectory( categoricaloper )
 
 list( APPEND ufo_src_files
     ${utils_src_files}
@@ -116,6 +117,7 @@ list( APPEND ufo_src_files
     ${compositeoper_src_files}
     ${backgrounderrorvertinterp_src_files}
     ${backgrounderroridentity_src_files}
+    ${categoricaloper_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 

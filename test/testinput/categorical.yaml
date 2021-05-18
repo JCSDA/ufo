@@ -1,0 +1,451 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+# The value of `rms ref` is calculated for most of the cases below by determining the
+# rms values for each variable and operator separately and combining them as follows:
+# sqrt((rms(air_temperature)^2 + rms(eastward_wind)^2 + rms(northward_wind)^2) / 3).
+#
+# The individual rms values are:
+# - eastward_wind: VertInterp: 24.343567787559724, Identity: 7.6217412865213365
+# - northward_wind: VertInterp: 5.5678287067725627, Identity: 5.7432477706044107
+# - air_temperature: Identity: 294.79799709699643
+#
+# Two of the cases use a mixture of Identity and Composite operators for different
+# station_ids. In those cases the rms ref is taken directly from the output rms value.
+# It has been verified that each of these rms values is different to the rms values
+# obtained when only one of the operators is used. This indicates that the
+# categorical operator is performing as expected.
+
+observations:
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Composite operator used for all values of the categorical variable.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Composite",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# Categorical variable is record_number@MetaData.
+# Composite operator used as fallback.
+# Composite operator used for all values of the categorical variable.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: record_number
+    fallback operator: "Composite"
+    categorised operators: {"261": "Composite",
+    "159": "Composite",
+    "637": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# No operators assigned to values of the categorical variable, so the fallback will be used everywhere.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {}
+    operator configurations:
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Identity operator used for one value of the categorical variable.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Identity"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.58276494804048
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Identity operator used for all values of the categorical variable.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Identity",
+    "54857": "Identity",
+    "94332": "Identity",
+    "96935": "Identity"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.29086384535719
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Composite and Identity operators used for different values of the categorical variable.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Identity",
+    "54857": "Composite",
+    "94332": "Identity",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.37753256777677
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Composite operator used for all values of the categorical variable.
+# Duplicate entry in categorised operators list (expect this to have no effect).
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Composite",
+    "94332": "Composite",
+    "96935": "Composite",
+    "54857": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# Categorical variable is station_id@MetaData.
+# Composite operator used as fallback.
+# Composite operator used for all values of the categorical variable.
+# Duplicate entry in operator configurations list (expect this to have no effect).
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Composite",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# An invalid operator is provided for the fallback operator, so expect an exception to be thrown.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Nonexistent"
+    categorised operators: {"47418": "Composite",
+    "54857": "Composite",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  expect constructor to throw exception with message: The operator Nonexistent has not been configured
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# An invalid operator is provided for one of the categorised operators, so expect an exception to be thrown.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: station_id
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Nonexistent",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  expect constructor to throw exception with message: The operator Nonexistent has not been configured
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# Incorrect type of categorical variable, so expect an exception to be thrown.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: air_pressure
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Nonexistent",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  expect constructor to throw exception with message: The categorical variable must be a vector of either strings or integers
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
+
+# A nonexistent categorical variable is provided, so expect an exception to be thrown.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind, northward_wind, air_temperature]
+  obs operator:
+    name: Categorical
+    categorical variable: Nonexistent
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Nonexistent",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+    - name: Composite
+      components:
+       - name: Identity
+         variables:
+         - name: air_temperature
+       - name: VertInterp
+         variables:
+         - name: northward_wind
+         - name: eastward_wind
+  expect constructor to throw exception with message: The categorical variable Nonexistent does not exist
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 170.81126924331446
+  tolerance: 1.0e-06
