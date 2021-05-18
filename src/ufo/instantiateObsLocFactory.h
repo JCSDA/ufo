@@ -8,21 +8,19 @@
 #ifndef UFO_INSTANTIATEOBSLOCFACTORY_H_
 #define UFO_INSTANTIATEOBSLOCFACTORY_H_
 
-#include "oops/interface/ObsLocalization.h"
+#include "oops/base/ObsLocalizationBase.h"
 #include "ufo/obslocalization/ObsLocalization.h"
 #include "ufo/obslocalization/ObsLocGC99.h"
 #include "ufo/obslocalization/ObsLocSOAR.h"
+#include "ufo/ObsTraits.h"
 
 namespace ufo {
-template<typename MODEL, typename OBS> void instantiateObsLocFactory() {
-  static oops::ObsLocalizationMaker<MODEL, OBS,
-                                    oops::ObsLocalization<MODEL, OBS, ufo::ObsLocGC99<MODEL>> >
+template<typename MODEL> void instantiateObsLocFactory() {
+  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsLocGC99<MODEL>>
            maker_("Gaspari-Cohn");
-  static oops::ObsLocalizationMaker<MODEL, OBS,
-                                   oops::ObsLocalization<MODEL, OBS, ufo::ObsLocSOAR<MODEL>> >
+  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsLocSOAR<MODEL>>
            makerSOAR_("SOAR");
-  static oops::ObsLocalizationMaker<MODEL, OBS,
-                                    oops::ObsLocalization<MODEL, OBS, ufo::ObsLocalization<MODEL>> >
+  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsLocalization<MODEL>>
            makerBoxCar_("Box car");
 }
 

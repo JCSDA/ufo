@@ -27,15 +27,16 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/util/Printable.h"
+#include "oops/base/ObsLocalizationBase.h"
 
 #include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/ObsTraits.h"
 
 namespace ufo {
 
 /// Horizontal Box car observation space localization
 template<class MODEL>
-class ObsLocalization: public util::Printable {
+class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
@@ -49,8 +50,8 @@ class ObsLocalization: public util::Printable {
   /// compute localization and save localization values in \p obsvector and
   /// localization flags (1: outside of localization; 0: inside localization area)
   /// in \p outside
-  virtual void computeLocalization(const GeometryIterator_ &, ioda::ObsDataVector<int> & outside,
-                           ioda::ObsVector & obsvector) const;
+  void computeLocalization(const GeometryIterator_ &, ioda::ObsDataVector<int> & outside,
+                           ioda::ObsVector & obsvector) const override;
 
   const std::vector<int> & localobs() const {return localobs_;}
   const std::vector<double> & horizontalObsdist() const {return obsdist_;}
