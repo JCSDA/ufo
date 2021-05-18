@@ -121,7 +121,7 @@ subroutine lam_domaincheck_circle_c(c_cenlat, c_cenlon, c_radius, &
   ! calculate great-circle distance using haversine formula
   dlat = half*abs(lat - cenlat)
   dlon = half*abs(lon - cenlon)
-  rr = sqrt( sin(dlon)**2 + cos(lon)*cos(cenlon)*sin(dlat)**2 )
+  rr = sqrt( sin(dlat)**2 + cos(lat)*cos(cenlat)*sin(dlon)**2 )
   rr = two*asin(rr)*mean_earth_rad
 
   ! use rr to determine if mask is 1 (good) or 0 (bad)
