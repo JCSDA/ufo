@@ -61,8 +61,8 @@ end subroutine ufo_sattcwv_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_sattcwv_simobs_c(c_key_self, c_key_geovals, c_obsspace, &
-                     c_nobs, c_hofx) bind(c,name='ufo_sattcwv_simobs_f90')
+subroutine ufo_sattcwv_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
+                      bind(c,name='ufo_sattcwv_simobs_f90')
 use, intrinsic :: iso_c_binding, only: c_ptr
 implicit none
 integer(c_int), intent(in) :: c_key_self

@@ -3028,6 +3028,12 @@ ecbuild_add_test( TARGET test_ufo_opr_sattcwv
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
+ecbuild_add_test( TARGET test_ufo_linopr_sattcwv
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/sattcwv.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 # Test predictors
 ecbuild_add_test( TARGET  test_constant_predictor
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x

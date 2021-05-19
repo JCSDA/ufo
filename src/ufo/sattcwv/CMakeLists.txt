@@ -10,8 +10,12 @@ set (  sattcwv_files
        SatTCWV.interface.h
        SatTCWV.interface.F90
        ufo_SatTCWV_mod.F90
+       SatTCWVTLAD.h
+       SatTCWVTLAD.cc
+       SatTCWVTLAD.interface.h
+       SatTCWVTLAD.interface.F90
+       ufo_SatTCWV_tlad_mod.F90
 )
-
 PREPEND( _p_sattcwv_files    "sattcwv"    ${sattcwv_files} )
 
 set ( sattcwv_src_files
