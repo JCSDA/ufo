@@ -24,7 +24,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -60,7 +60,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -95,7 +95,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -127,7 +127,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -160,7 +160,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -196,7 +196,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -233,7 +233,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -271,7 +271,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -314,7 +314,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -349,7 +349,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -384,7 +384,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical
@@ -419,7 +419,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
   obs operator:
     name: Categorical

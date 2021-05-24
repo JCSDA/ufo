@@ -84,6 +84,7 @@ type(ufo_rttovonedvarcheck_pcemis)            :: ir_pcemis  !< Infrared principa
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_init"
 real(kind_real)             :: missing
 integer                     :: jvar    !< counters
+integer                     :: jobs    !< counters
 character(len=max_string)   :: var
 character(len=max_string)   :: varname
 logical                     :: variable_present = .false.
@@ -150,6 +151,17 @@ do jvar = 1, config % nchans
   end if
 
 end do
+
+! The obs bias may contain missing values, and the intention is for those
+! entries to be zero. Go through the bias data and replace the missing values
+! with zero.
+do jobs = 1, self % iloc
+  do jvar = 1, config % nchans
+    if (self % ybias(jvar, jobs) == missing) then
+      self % ybias(jvar, jobs) = zero
+    endif
+  enddo
+enddo
 
 if (.not. variable_present) write(*,*) "Using uncorrected brightness temperature"
 

@@ -9,7 +9,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
@@ -34,7 +34,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
@@ -67,7 +67,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp

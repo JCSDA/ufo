@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: test_sfcp_inflation
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/2020100106_metars_small.nc
+      obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
     obsdataout:
       obsfile: Data/2020100106_metars_small_out.nc
     simulated variables: [surface_pressure, air_temperature]

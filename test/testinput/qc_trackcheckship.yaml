@@ -8,7 +8,7 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -61,7 +61,7 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -86,7 +86,7 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -106,7 +106,7 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "latitude" ]
     simulated variables: [air_temperature]

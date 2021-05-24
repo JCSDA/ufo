@@ -8,7 +8,7 @@ observations:
     obs space:
       name: GSISfcModel
       obsdatain:
-        obsfile: Data/ioda/testinput_tier_1/gsisfc_tsen_obs_2018041500_m.nc4
+        obsfile: Data/ufo/testinput_tier_1/gsisfc_tsen_obs_2018041500_m.nc4
       obsdataout:
         obsfile: Data/gsisfc_tsen_2018041500_m_out.nc4
       simulated variables: [air_temperature]
@@ -22,7 +22,7 @@ observations:
     obs space:
       name: GSISfcModel
       obsdatain:
-        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
+        obsfile: Data/ufo/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
       obsdataout:
         obsfile: Data/gsisfc_uv_fact10_2018041500_m_out.nc4
       simulated variables: [eastward_wind, northward_wind]
@@ -36,7 +36,7 @@ observations:
     obs space:
       name: GSISfcModel
       obsdatain:
-        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
+        obsfile: Data/ufo/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
       obsdataout:
         obsfile: Data/gsisfc_uv_2018041500_m_out.nc4
       simulated variables: [eastward_wind, northward_wind]

@@ -18,7 +18,7 @@
 #include "eckit/utils/StringTools.h"
 
 #include "ioda/core/ObsData.h"  // for ObsDtype
-#include "ioda/Misc/SFuncs.h"   // for convertV1PathToV2Path
+#include "ioda/Misc/StringFuncs.h"   // for convertV1PathToV2Path
 
 #include "oops/util/Logger.h"
 

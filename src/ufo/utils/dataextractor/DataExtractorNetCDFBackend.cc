@@ -20,7 +20,7 @@
 
 #include "ioda/Engines/HH.h"
 #include "ioda/Group.h"
-#include "ioda/Misc/SFuncs.h"   // for convertV1PathToV2Path
+#include "ioda/Misc/StringFuncs.h"   // for convertV1PathToV2Path
 
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
@@ -37,7 +37,7 @@ namespace {
 std::vector<std::string> fetchDimNameMapping(
     const ioda::Variable &variable,
     const std::string &varName,
-    const std::list<std::pair<std::string, ioda::Variable>> &coordinates) {
+    const std::list<ioda::Named_Variable> &coordinates) {
   std::vector<std::string> dimnames;
   if (variable.isDimensionScale()) {
     // Variable corresponds to the dimension name so maps to itself (it's a dimension coordinate).
@@ -51,7 +51,7 @@ std::vector<std::string> fetchDimNameMapping(
       if (item.size() != 1)
         throw eckit::Exception("Variable '" + varName + "' has a multi-dimensional coordinate. "
                                "This is not supported.", Here());
-      dimnames.emplace_back(item[0].first);
+      dimnames.emplace_back(item[0].name);
     }
   }
   return dimnames;
@@ -166,12 +166,13 @@ DataExtractorInput DataExtractorNetCDFBackend::loadData(
 
   // Loop over ALL coords and fetch the corresponding Variable object.
   std::unordered_map<std::string, ioda::Variable> coords;
+  std::list<ioda::Named_Variable> lcoords;
   for (const auto &coord_name : vars) {
     ioda::Variable cvar = group.vars[coord_name];
     coords.emplace(coord_name, cvar);
+    ioda::Named_Variable v{coord_name, cvar};
+    lcoords.push_back(v);
   }
-  // Turn this into a list of pairs - ioda engines works with this.
-  std::list<std::pair<std::string, ioda::Variable>> lcoords(coords.begin(), coords.end());
 
   // Process the metadata of the array to be interpolated
   // --------------------------------

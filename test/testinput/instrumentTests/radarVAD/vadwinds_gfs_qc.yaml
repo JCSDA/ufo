@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: vadwinds_QC
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/vadwind_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020110112_m.nc4
       obsgrouping:
         group variables: ["station_id", "datetime"]
         sort variable: "air_pressure"

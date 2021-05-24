@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: SeaIceThickness
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/cryosat2-2018-04-15.nc
+      obsfile: Data/ufo/testinput_tier_1/cryosat2-2018-04-15.nc
     simulated variables: [sea_ice_thickness]
   obs operator:
     name: SeaIceThickness
@@ -22,7 +22,7 @@ observations:
 - obs space:
     name: SeaIceThickness
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/cryosat2-2018-04-15.nc
+      obsfile: Data/ufo/testinput_tier_1/cryosat2-2018-04-15.nc
     simulated variables: [sea_ice_freeboard]
   obs operator:
     name: SeaIceThickness

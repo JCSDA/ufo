@@ -10,7 +10,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM.nc4
     simulated variables: [bending_angle]
@@ -28,7 +28,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF.nc4
     simulated variables: [bending_angle]
@@ -48,7 +48,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL.nc4
     simulated variables: [bending_angle]
@@ -66,7 +66,7 @@ observations:
   obs space:
    name: GnssroRef
    obsdatain:
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
    obsdataout:
      obsfile: Data/gnssro_ref_2018041500_s_errNBAM.nc4
    simulated variables: [refractivity]

@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-       obsfile: Data/ioda/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+       obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
     obsdataout:
       obsfile:  Data/satwind_obs__1d_2020100106_noinv_out.nc4
     simulated variables: [eastward_wind]

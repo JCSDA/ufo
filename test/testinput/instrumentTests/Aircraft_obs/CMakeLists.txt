@@ -15,7 +15,7 @@ ufo_add_test(     NAME    instrument_aircraft_gfs_HofX
                   LIBS    ufo
                   LABELS  aircraft instrument HofX
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 # H(x) with QC
 #ufo_add_test(     TARGET  test_ufo_aircraft_gfs_qc

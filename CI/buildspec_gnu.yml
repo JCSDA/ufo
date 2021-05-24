@@ -102,6 +102,9 @@ phases:
       #gsw
       - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH gsw /jcsda/ufo-bundle develop
 
+      # ufo-test
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo-data $CODEBUILD_GIT_BRANCH ufo-data /jcsda/ufo-bundle develop
+
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/

@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: test_sfcp_inflation
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/2020100106_metars_small.nc
+      obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc

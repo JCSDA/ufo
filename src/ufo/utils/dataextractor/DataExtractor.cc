@@ -9,7 +9,7 @@
 
 #include "eckit/utils/StringTools.h"
 
-#include "ioda/Misc/SFuncs.h"
+#include "ioda/Misc/StringFuncs.h"
 
 #include "ufo/utils/dataextractor/DataExtractor.h"
 #include "ufo/utils/dataextractor/DataExtractorCSVBackend.h"

@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: aircraft_QC_wind
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
 #     obsgrouping:
 #       group variables: ["tail_number"]  # Does not exist yet in IODA obs file.
 #       sort variable: "air_pressure"
@@ -211,7 +211,7 @@ observations:
 - obs space:
     name: aircraft_QC_temp
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020110112_m.nc4
@@ -347,7 +347,7 @@ observations:
 - obs space:
     name: aircraft_QC_moisture
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
     simulated variables: [specific_humidity]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020110112_m.nc4

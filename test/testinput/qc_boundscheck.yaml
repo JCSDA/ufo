@@ -257,7 +257,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 20
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4
   obs filters:
     - filter: BlackList
       where:

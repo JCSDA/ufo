@@ -17,7 +17,7 @@ observations:
   obs space:
     name: gmi_gpm
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2020111500.nc4
+      obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020111500.nc4
     obsdataout:
       obsfile: Data/gmi_gpm_obs_2020111500_out.nc4
     simulated variables: [brightness_temperature]

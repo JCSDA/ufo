@@ -11,7 +11,7 @@ observations:
   obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
     obsdataout:
       obsfile: Data/satwind_obs_1d_2020100106_noinv_linopr_test_out.nc4
     simulated variables: [eastward_wind, northward_wind]

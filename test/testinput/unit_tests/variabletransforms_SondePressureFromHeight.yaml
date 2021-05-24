@@ -9,7 +9,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/met_office_conversion_height2pressure.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_height2pressure.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "datetime"

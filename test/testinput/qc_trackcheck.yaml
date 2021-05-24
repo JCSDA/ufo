@@ -12,7 +12,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -67,7 +67,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -133,7 +133,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -202,7 +202,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -303,7 +303,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -356,7 +356,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -377,7 +377,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -430,7 +430,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
@@ -481,7 +481,7 @@ observations:
 - obs space: # No grouping into records
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -500,7 +500,7 @@ observations:
 - obs space: # Group into records (perversely) by something else than the station ID
     name: Aircraft
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "latitude" ]
     simulated variables: [specific_humidity]

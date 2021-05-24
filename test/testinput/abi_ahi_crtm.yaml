@@ -14,7 +14,7 @@ observations:
   obs space:
     name: ahi_himawari8
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/ahi_himawari8_obs_2019042306_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/ahi_himawari8_obs_2019042306_m.nc4
     obsdataout:
       obsfile: Data/ahi_himawari8_obs_2019042306_m_out.nc4
     simulated variables: [brightness_temperature]
@@ -39,7 +39,7 @@ observations:
   obs space:
     name: abi_g16
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/abi_g16_obs_2019042306_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/abi_g16_obs_2019042306_m.nc4
     obsdataout:
       obsfile: Data/abi_g16_obs_2019042306_m_out.nc4
     simulated variables: [brightness_temperature]

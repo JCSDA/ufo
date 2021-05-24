@@ -10,7 +10,7 @@ observations:
   obs space:
     name: OzoneLayer
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/omi_aura_obs_2019101700_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/omi_aura_obs_2019101700_m.nc4
     obsdataout:
       obsfile: Data/omi_aura_obs_2019101700_m_out.nc4
     simulated variables: [integrated_layer_ozone_in_air]

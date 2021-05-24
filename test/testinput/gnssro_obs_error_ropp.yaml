@@ -8,7 +8,7 @@ observations:
   obs space:
    name: ROPP1D
    obsdatain:
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
    simulated variables: [bending_angle]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -28,7 +28,7 @@ observations:
   obs space:
    name: ROPP2D
    obsdatain:
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
    simulated variables: [bending_angle]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4

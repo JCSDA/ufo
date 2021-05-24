@@ -4,7 +4,7 @@ window end: 2030-01-01T00:00:00Z
 obs space:
   name: test data
   obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/ahi_himawari8_obs_2019042306_s.nc4
+    obsfile: Data/ufo/testinput_tier_1/ahi_himawari8_obs_2019042306_s.nc4
   simulated variables: [brightness_temperature]
 cases:
   Empty list:

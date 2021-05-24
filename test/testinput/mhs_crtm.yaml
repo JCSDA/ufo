@@ -15,7 +15,7 @@ observations:
   obs space:
     name: mhs_n19
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/mhs_n19_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/mhs_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-5
   geovals:

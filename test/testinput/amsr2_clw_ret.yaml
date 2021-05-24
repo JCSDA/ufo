@@ -17,15 +17,11 @@ observations:
   obs space:
     name: amsr2_gcom-w1
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/amsr2_gcom-w1_obs_2020111500.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020111500.nc4
     obsdataout:
       obsfile: Data/amsr2_gcom-w1_obs_2020111500_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-14
-    sys_bias: &amsr2_sys_bias [0.4800, 3.0737, 0.7433, 3.6430,
-                               3.5304, 4.4270, 5.1448, 5.0785,
-                               4.9763, 9.3215, 2.5789, 5.5274,
-                               0.6641, 1.3674]
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020111500.nc4
   obs filters:
@@ -46,7 +42,10 @@ observations:
         clwret_ch18h: 8
         clwret_ch36v: 11
         clwret_ch36h: 12
-        sys_bias: *amsr2_sys_bias
+        sys_bias: &amsr2_sys_bias [0.4800, 3.0737, 0.7433, 3.6430,
+                                   3.5304, 4.4270, 5.1448, 5.0785,
+                                   4.9763, 9.3215, 2.5789, 5.5274,
+                                   0.6641, 1.3674]
         clwret_types: [ObsValue]
     maxvalue: 999.0
   - filter: Bounds Check

@@ -30,6 +30,7 @@
 
 namespace ioda {
 class Variable;
+struct Named_Variable;
 }
 
 

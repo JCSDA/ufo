@@ -23,9 +23,9 @@ observations:
   obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     obsdataout:
-      obsfile: Data/atms_npp_obs_2019123000_m_rttov_out.nc4
+      obsfile: Data/atms_n20_obs_2019123000_m_rttov1_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22 
   geovals:
@@ -55,9 +55,9 @@ observations:
   obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     obsdataout:
-      obsfile: Data/atms_npp_obs_2019123000_m_rttov_out.nc4
+      obsfile: Data/atms_n20_obs_2019123000_m_rttov2_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22 
   geovals:

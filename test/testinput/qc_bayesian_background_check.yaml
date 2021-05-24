@@ -7,7 +7,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/bayesianbgcheck_filter_testdata.nc4
     obsdataout:
-      obsfile: Data/ufo/testinput_tier_1/qc_bayesian_background_check_testout_seaice.nc4
+      obsfile: Data/qc_bayesian_background_check_testout_seaice.nc4
     simulated variables: [ice_area_fraction]
   HofX: HofX
   obs diagnostics:
@@ -26,7 +26,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/bayesianbgcheck_filter_testdata.nc4
     obsdataout:
-      obsfile: Data/ufo/testinput_tier_1/qc_bayesian_background_check_testout_surface.nc4
+      obsfile: Data/qc_bayesian_background_check_testout_surface.nc4
     simulated variables: [air_temperature_at_2m,
                           eastward_wind,
                           northward_wind]

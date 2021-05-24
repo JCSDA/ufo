@@ -10,7 +10,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "impact_height"
@@ -30,7 +30,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "impact_height"
@@ -49,7 +49,7 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "impact_height"

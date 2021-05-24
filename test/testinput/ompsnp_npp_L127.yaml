@@ -10,7 +10,7 @@ observations:
   obs space:
     name: OzoneLayer
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/ompsnp_npp_obs_2020051712_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/ompsnp_npp_obs_2020051712_m.nc4
       obsgrouping:
         group variables: ["latitude"]
         sort variable: "air_pressure"

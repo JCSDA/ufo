@@ -7,7 +7,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_biaspred_redo_scan.nc4
     obsdataout:
-      obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2019123000_m_rttov_out_bias.nc4
+      obsfile: Data/atms_npp_obs_2019123000_m_rttov_out_bias.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-22
   geovals:

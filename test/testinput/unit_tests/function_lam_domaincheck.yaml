@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: regional_domain_check
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
     obsdataout:
       obsfile: Data/lam_domaincheck_sondes_tv_obs_2018041500_m.nc4
     simulated variables: [virtual_temperature]

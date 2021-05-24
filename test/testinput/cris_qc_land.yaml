@@ -13,8 +13,8 @@ observations:
   obs space:
     name: cris-fsr_npp
     obsdatain:
-#      obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
-      obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
+#      obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
+      obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
 #    obsdataout:
 #      obsfile: Data/iasi_metop-a_obs_2018041500_m_qc_out.nc4
 #      obsfile: Data/iasi_metop-a_obs_2018041500_m_unittest_out.nc4

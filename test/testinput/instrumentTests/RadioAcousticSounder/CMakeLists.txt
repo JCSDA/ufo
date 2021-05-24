@@ -15,5 +15,5 @@ ecbuild_add_test( TARGET  test_ufo_instrument_rass_gfs_HofX
                   LABELS  rass HofX instrument
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
                   LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 

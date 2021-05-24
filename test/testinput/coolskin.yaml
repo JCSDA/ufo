@@ -11,7 +11,7 @@ observations:
   obs space:
     name: CoolSkin
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/coolskin_fake_obs_2018041500.nc
+      obsfile: Data/ufo/testinput_tier_1/coolskin_fake_obs_2018041500.nc
     simulated variables: [sea_surface_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/coolskin_fake_geovals_2018041500.nc

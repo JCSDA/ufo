@@ -7,7 +7,7 @@ observations:
   obs space:
     name: Scatwind
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/scatwind_obs_1d_2020100106.nc4
+      obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_2020100106.nc4
     obsdataout:
       obsfile: Data/scatwind_obs_1d_2020100106_opr_test_out.nc4
     simulated variables: [eastward_wind, northward_wind]

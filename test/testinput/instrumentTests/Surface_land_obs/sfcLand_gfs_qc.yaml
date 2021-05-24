@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: surface_pressure_QC
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/sfc_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020110112_m.nc4
     obsdataout:
       obsfile: Data/sfc_obs_2020120112_out.nc
     simulated variables: [surface_pressure, air_temperature]

@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: surface_METAR
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     obsdataout:
       obsfile: Data/sfc_obs_2018041500_metars_small_out.nc
     simulated variables: [air_temperature, surface_pressure, specific_humidity, eastward_wind, northward_wind]

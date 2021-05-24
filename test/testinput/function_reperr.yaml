@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: ADT
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/synthetic-adt-2018041500.nc
+      obsfile: Data/ufo/testinput_tier_1/synthetic-adt-2018041500.nc
     obsdataout:
       obsfile: Data/synthetic-adt-2018041500_function_output.nc
     simulated variables: [obs_absolute_dynamic_topography]

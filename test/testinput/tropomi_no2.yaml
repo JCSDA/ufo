@@ -4,7 +4,7 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
     simulated variables: [nitrogen_dioxide_in_tropospheric_column]
   obs operator:
     name: AvgKernel
@@ -40,7 +40,7 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
     simulated variables: [nitrogen_dioxide_in_total_column]
   obs operator:
     name: AvgKernel

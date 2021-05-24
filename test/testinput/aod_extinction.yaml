@@ -9,7 +9,7 @@ observations:
       obs space:
         name: AodExt
         obsdatain:
-          obsfile: Data/ioda/testinput_tier_1/nnr_aod_3ch_obs_2018041500_m.nc4
+          obsfile: Data/ufo/testinput_tier_1/nnr_aod_3ch_obs_2018041500_m.nc4
         simulated variables: [Total_Aerosol_Optical_Depth_470, Total_Aerosol_Optical_Depth_550, Total_Aerosol_Optical_Depth_870]    
       obs bias: {}
       geovals:

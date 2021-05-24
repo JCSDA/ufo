@@ -8,7 +8,7 @@ observations:
   obs space:
     name: OzoneLevel
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/ompslp_npp_obs_2019101700_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/ompslp_npp_obs_2019101700_m.nc4
     obsdataout:
       obsfile: Data/ompslp_npp_obs_2019101700_m_out.nc4
     simulated variables: [mole_fraction_of_ozone_in_air]
