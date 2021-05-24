@@ -227,6 +227,54 @@ Wrong number of entries per profile, temperature averaging:
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
 
+#Wind speed averaging: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["ObsValue"]
+  BypassMismatchComparison: true
+
+#Relative humidity averaging: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_average_geovals.nc4
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "AveragePressure", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["ObsValue"]
+  BypassMismatchComparison: true
+
 #A group variable is not chosen, throwing an exception
 No group variable chosen:
   window begin: 2000-01-01T00:00:00Z

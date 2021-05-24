@@ -11,6 +11,8 @@
 #include <utility>
 
 #include "ufo/profile/ProfileAverageWindSpeed.h"
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/ProfileVerticalAveraging.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
@@ -29,28 +31,109 @@ namespace ufo {
   {
     oops::Log::debug() << " Wind speed averaging" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+    // Produce vector of profiles containing data for the wind speed averaging.
+    std::vector <std::string> variableNamesInt =
+      {ufo::VariableNames::qcflags_eastward_wind,
+       ufo::VariableNames::qcflags_northward_wind,
+       ufo::VariableNames::counter_NumGapsU,
+       ufo::VariableNames::counter_NumGapsUWP,
+       ufo::VariableNames::ObsType,
+       ufo::VariableNames::extended_obs_space,
+       ufo::VariableNames::modellevels_average_eastward_wind_qcflags,
+       ufo::VariableNames::modellevels_average_northward_wind_qcflags};
+    std::vector <std::string> variableNamesFloat =
+      {ufo::VariableNames::obs_eastward_wind,
+       ufo::VariableNames::obs_northward_wind,
+       ufo::VariableNames::pgebd_eastward_wind,
+       ufo::VariableNames::LogP_derived,
+       ufo::VariableNames::bigPgaps_derived,
+       ufo::VariableNames::modellevels_logP_derived,
+       ufo::VariableNames::modellevels_average_eastward_wind_derived,
+       ufo::VariableNames::modellevels_average_northward_wind_derived};
+    std::vector <std::string> variableNamesGeoVaLs =
+      {ufo::VariableNames::geovals_surface_pressure};
+
+    if (options_.compareWithOPS.value()) {
+      variableNamesInt.insert
+        (variableNamesInt.end(),
+         {"OPS_" +
+             std::string(ufo::VariableNames::modellevels_average_eastward_wind_qcflags),
+             "OPS_" +
+             std::string(ufo::VariableNames::modellevels_average_northward_wind_qcflags)});
+      variableNamesFloat.insert
+        (variableNamesFloat.end(),
+         {"OPS_" +
+             std::string(ufo::VariableNames::modellevels_average_eastward_wind_derived),
+             "OPS_" +
+             std::string(ufo::VariableNames::modellevels_average_northward_wind_derived)});
+      variableNamesGeoVaLs.insert
+        (variableNamesGeoVaLs.end(),
+        {ufo::VariableNames::geovals_average_eastward_wind,
+            ufo::VariableNames::geovals_average_eastward_wind_qcflags,
+            ufo::VariableNames::geovals_average_northward_wind,
+            ufo::VariableNames::geovals_average_northward_wind_qcflags});
+    }
+
+    std::vector <ProfileDataHolder> profiles =
+      profileDataHandler.produceProfileVector
+      (variableNamesInt,
+       variableNamesFloat,
+       {},
+       variableNamesGeoVaLs,
+       {});
+
+    // Run wind speed averaging on each profile in the original ObsSpace,
+    // saving averaged output to the equivalent extended profile.
+    const size_t halfnprofs = profileDataHandler.getObsdb().nrecs() / 2;
+    for (size_t jprof = 0; jprof < halfnprofs; ++jprof) {
+      oops::Log::debug() << "  Profile " << (jprof + 1) << " / " << halfnprofs << std::endl;
+      auto& profileOriginal = profiles[jprof];
+      auto& profileExtended = profiles[jprof + halfnprofs];
+      runCheckOnProfiles(profileOriginal, profileExtended);
+    }
+
+    // Fill validation information if required.
+    if (options_.compareWithOPS.value()) {
+      oops::Log::debug() << " Filling validation data" << std::endl;
+      for (size_t jprof = 0; jprof < halfnprofs * 2; ++jprof) {
+        fillValidationData(profiles[jprof]);
+      }
+    }
+
+    // Update data handler with profile information.
+    oops::Log::debug() << " Updating data handler" << std::endl;
+    profileDataHandler.updateAllProfiles(profiles);
+  }
+
+  void ProfileAverageWindSpeed::runCheckOnProfiles(ProfileDataHolder &profileOriginal,
+                                                   ProfileDataHolder &profileExtended)
+  {
+    // Check the two profiles are in the correct section of the ObsSpace.
+    profileOriginal.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
+    profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
+
+    const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
     // Do not perform averaging if there is just one reported level.
     if (numProfileLevels <= 1)
       return;
 
     const std::vector <float> &uObs =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
+      profileOriginal.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &vObs =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
+      profileOriginal.get<float>(ufo::VariableNames::obs_northward_wind);
     const std::vector <float> &uPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_eastward_wind);
+      profileOriginal.get<float>(ufo::VariableNames::pgebd_eastward_wind);
     std::vector <int> &uFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileOriginal.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileOriginal.get<int>(ufo::VariableNames::qcflags_northward_wind);
     std::vector <int> &NumGapsU =
-       profileDataHandler.get<int>(ufo::VariableNames::counter_NumGapsU);
+       profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsU);
     // Number of gaps for wind profilers.
     std::vector <int> &NumGapsUWP =
-       profileDataHandler.get<int>(ufo::VariableNames::counter_NumGapsUWP);
+       profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsUWP);
     const std::vector <int> &ObsType =
-      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
+      profileOriginal.get<int>(ufo::VariableNames::ObsType);
 
     if (!oops::allVectorsSameNonZeroSize(uObs, vObs,
                                          uPGEBd,
@@ -71,20 +154,17 @@ namespace ufo {
 
     // Obtain GeoVaLs surface pressure and eastward wind speed.
     std::vector <float> &geovals_surface_pressure =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_surface_pressure);
-    std::vector <float> &geovals_eastward_wind =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_surface_pressure);
-    if (geovals_surface_pressure.empty() || geovals_eastward_wind.empty())
-      throw eckit::BadValue("At least one GeoVaLs vector is empty.", Here());
-    const size_t numModelRhoLevels = geovals_eastward_wind.size();
+      profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_surface_pressure);
+    if (geovals_surface_pressure.empty())
+      throw eckit::BadValue("Surface pressure GeoVaLs vector is empty.", Here());
 
     // Obtain vectors that were produced in the AveragePressure routine.
     const std::vector <float> &LogPB =
-      profileDataHandler.get<float>(ufo::VariableNames::modellevels_logP_derived);
+      profileExtended.get<float>(ufo::VariableNames::modellevels_logP_derived);
     const std::vector <float> &RepLogP =
-      profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
+      profileOriginal.get<float>(ufo::VariableNames::LogP_derived);
     const std::vector <float> &BigGap =
-      profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
+      profileOriginal.get<float>(ufo::VariableNames::bigPgaps_derived);
 
     if (LogPB.empty() ||
         !oops::allVectorsSameNonZeroSize(RepLogP, BigGap)) {
@@ -101,9 +181,8 @@ namespace ufo {
 
     // Create concatenated vector of log(pressure) on both surface and upper-air levels
     // for use in the wind speed averaging.
-    std::vector <float> LogPWB(LogPB.size() + 1);
-    LogPWB[0] = std::log(geovals_surface_pressure[0]);
-    LogPWB.insert(LogPWB.begin() + 1, LogPB.begin(), LogPB.end());
+    std::vector <float> LogPWB = LogPB;
+    LogPWB.insert(LogPWB.begin(), std::log(geovals_surface_pressure[0]));
 
     // Flag reported value if the probability of gross error is too large.
     // Values which have been flagged here, or previously, are not used in the averaging routines.
@@ -154,53 +233,62 @@ namespace ufo {
                              NumGaps);
 
     // Store the eastward wind speed averaged onto model levels.
-    profileDataHandler.set<float>
+    profileExtended.set<float>
       (ufo::VariableNames::modellevels_average_eastward_wind_derived, std::move(uModObs));
 
     // Store the QC flags associated with the eastward wind averaging.
-    profileDataHandler.set<int>
+    profileExtended.set<int>
       (ufo::VariableNames::modellevels_average_eastward_wind_qcflags, std::move(uFlagsModObs));
 
     // Store the northward wind speed averaged onto model levels.
-    profileDataHandler.set<float>
+    profileExtended.set<float>
       (ufo::VariableNames::modellevels_average_northward_wind_derived, std::move(vModObs));
 
     // Store the QC flags associated with the northward wind averaging.
-    profileDataHandler.set<int>
+    profileExtended.set<int>
       (ufo::VariableNames::modellevels_average_northward_wind_qcflags, std::move(vFlagsModObs));
   }
 
-  void ProfileAverageWindSpeed::fillValidationData(ProfileDataHandler &profileDataHandler)
+  void ProfileAverageWindSpeed::fillValidationData(ProfileDataHolder &profile)
   {
     // Retrieve, then save, the OPS versions of
     // eastward and northward wind averaged onto model levels,
     // and the QC flags associated with the averaging process.
-    profileDataHandler.set<float>
+    profile.set<float>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_eastward_wind_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_average_eastward_wind)));
-    profileDataHandler.set<float>
+    profile.set<float>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_northward_wind_derived),
-       std::move(profileDataHandler.getGeoVaLVector
+       std::move(profile.getGeoVaLVector
                  (ufo::VariableNames::geovals_average_northward_wind)));
 
     // The QC flags are stored as floats but are converted to integers here.
+    // Due to the loss of precision, 5 must be added to the missing value.
     const std::vector <float>& average_eastward_wind_qcflags_float =
-      profileDataHandler.getGeoVaLVector
+      profile.getGeoVaLVector
       (ufo::VariableNames::geovals_average_eastward_wind_qcflags);
     std::vector <int> average_eastward_wind_qcflags_int
       (average_eastward_wind_qcflags_float.begin(),
        average_eastward_wind_qcflags_float.end());
-    profileDataHandler.set<int>
+    std::replace(average_eastward_wind_qcflags_int.begin(),
+                 average_eastward_wind_qcflags_int.end(),
+                 -2147483648L,
+                 -2147483643L);
+    profile.set<int>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_eastward_wind_qcflags),
        std::move(average_eastward_wind_qcflags_int));
     const std::vector <float>& average_northward_wind_qcflags_float =
-      profileDataHandler.getGeoVaLVector
+      profile.getGeoVaLVector
       (ufo::VariableNames::geovals_average_northward_wind_qcflags);
     std::vector <int> average_northward_wind_qcflags_int
       (average_northward_wind_qcflags_float.begin(),
        average_northward_wind_qcflags_float.end());
-    profileDataHandler.set<int>
+    std::replace(average_northward_wind_qcflags_int.begin(),
+                 average_northward_wind_qcflags_int.end(),
+                 -2147483648L,
+                 -2147483643L);
+    profile.set<int>
       ("OPS_" + std::string(ufo::VariableNames::modellevels_average_northward_wind_qcflags),
        std::move(average_northward_wind_qcflags_int));
   }

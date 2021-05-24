@@ -50,7 +50,10 @@ namespace ufo {
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator (for comparison with OPS output).
-    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
+    void fillValidationData(ProfileDataHolder &profileDataHolder);
+
+    /// Run this check on the entire sample?
+    bool runOnEntireSample() override {return true;}
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
@@ -61,6 +64,12 @@ namespace ufo {
       return oops::Variables({ufo::VariableNames::geovals_average_relative_humidity,
             ufo::VariableNames::geovals_average_relative_humidity_qcflags
             });}
+
+   private:
+    /// Run check on a profile in the original ObsSpace and
+    /// put the averaged data into the corresponding profile in the extended ObsSpace.
+    void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
+                            ProfileDataHolder &profileExtended);
   };
 }  // namespace ufo
 
