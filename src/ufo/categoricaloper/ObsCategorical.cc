@@ -72,7 +72,7 @@ ObsCategorical::ObsCategorical(const ioda::ObsSpace & odb,
          parameters.operatorConfigurations.value()) {
     std::unique_ptr<ObsOperatorBase> op(ObsOperatorFactory::create(odb, operatorConfig));
     requiredVars_ += op->requiredVars();
-    components_.insert({operatorConfig.getString("name"), std::move(op)});
+    components_.emplace(std::make_pair(operatorConfig.getString("name"), std::move(op)));
   }
 
   // Check the fallback operator has been configured.
