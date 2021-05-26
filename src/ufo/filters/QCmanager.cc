@@ -136,7 +136,7 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::modelobthresh) ++imodelob;
     }
 
-    const ioda::Distribution & distribution = obsdb_.distribution();
+    const ioda::Distribution & distribution = *obsdb_.distribution();
     distribution.allReduceInPlace(iobs, eckit::mpi::sum());
     distribution.allReduceInPlace(ipass, eckit::mpi::sum());
     distribution.allReduceInPlace(imiss, eckit::mpi::sum());

@@ -48,8 +48,8 @@ void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & 
         vals[ivar][jj] = missing;
       }
     }
-    int nobs = ospace.distribution().globalNumNonMissingObs(vals[ivar]);
-    float rms = ospace.distribution().dot_product(vals[ivar], vals[ivar]);
+    int nobs = ospace.distribution()->globalNumNonMissingObs(vals[ivar]);
+    float rms = ospace.distribution()->dot_product(vals[ivar], vals[ivar]);
     if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
     rms_out[ivar] = rms;
   }

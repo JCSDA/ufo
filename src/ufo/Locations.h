@@ -8,11 +8,13 @@
 #ifndef UFO_LOCATIONS_H_
 #define UFO_LOCATIONS_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "eckit/mpi/Comm.h"
+#include "ioda/distribution/Distribution.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -31,7 +33,8 @@ class Locations : public util::Printable,
 
   /// \brief constructor from passed \p lons, \p lats, \p times
   Locations(const std::vector<float> & lons, const std::vector<float> & lats,
-            const std::vector<util::DateTime> & times, const eckit::mpi::Comm &);
+            const std::vector<util::DateTime> & times,
+            const std::shared_ptr<const ioda::Distribution>);
   /// \brief constructor used in oops tests
   Locations(const eckit::Configuration &, const eckit::mpi::Comm &);
 
@@ -45,7 +48,7 @@ class Locations : public util::Printable,
   size_t size() const;
 
   /// accessor to the MPI communicator
-  const eckit::mpi::Comm & getComm() const {return comm_;}
+  const eckit::mpi::Comm & getComm() const {return dist_->comm();}
   /// accessor to observation longitudes (on current MPI task)
   const std::vector<float> & lons() const {return lons_;}
   /// accessor to observation latitudes (on current MPI task)
@@ -57,7 +60,7 @@ class Locations : public util::Printable,
  private:
   void print(std::ostream & os) const override;
 
-  const eckit::mpi::Comm & comm_;      /// MPI communicator associated with these locations
+  std::shared_ptr<const ioda::Distribution> dist_;   /// observations MPI distribution
   std::vector<float> lons_;            /// longitudes on current MPI task
   std::vector<float> lats_;            /// latitudes on current MPI task
   std::vector<util::DateTime> times_;  /// times of observations on current MPI task

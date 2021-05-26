@@ -53,7 +53,7 @@ class RecursiveSplitter;
 /// each other (according to the criterion specified when the ObsAccessor was constructed).
 class ObsAccessor {
  public:
-  ~ObsAccessor();  // defined in the .cc file
+  ~ObsAccessor() = default;
   ObsAccessor(const ObsAccessor &) = delete;
   ObsAccessor(ObsAccessor &&) = default;
   ObsAccessor & operator=(const ObsAccessor &) = delete;
@@ -191,8 +191,7 @@ class ObsAccessor {
 
  private:
   const ioda::ObsSpace *obsdb_;
-  std::unique_ptr<const ioda::Distribution> inefficientDistribution_;
-  const ioda::Distribution *obsDistribution_;
+  std::shared_ptr<const ioda::Distribution> obsDistribution_;
 
   GroupBy groupBy_;
   boost::optional<Variable> categoryVariable_;

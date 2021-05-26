@@ -77,7 +77,7 @@ void testPredictor() {
     ospace.get_db("MetaData", "latitude", lats);
     ospace.get_db("MetaData", "longitude", lons);
     ospace.get_db("MetaData", "datetime", times);
-    Locations locs(lons, lats, times, ospace.comm());
+    Locations locs(lons, lats, times, ospace.distribution());
     ObsDiagnostics ydiags(ospace, locs, diagvars);
 
     bool expect_error_message = false;

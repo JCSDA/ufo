@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_unique.hpp>
-
 #include "ioda/distribution/InefficientDistribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -76,18 +74,12 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
     // processes and we can use an InefficientDistribution rather than the distribution taken from
     // obsdb_. Which in this case is *efficient*!
     eckit::LocalConfiguration emptyConfig;
-    inefficientDistribution_ = boost::make_unique<ioda::InefficientDistribution>(obsdb_->comm(),
+    obsDistribution_ = std::make_shared<ioda::InefficientDistribution>(obsdb_->comm(),
                                                         emptyConfig);
-    obsDistribution_ = inefficientDistribution_.get();
     oops::Log::trace() << "ObservationAccessor: no MPI communication necessary" << std::endl;
   } else {
-    obsDistribution_ = &obsdb.distribution();
+    obsDistribution_ = obsdb.distribution();
   }
-}
-
-ObsAccessor::~ObsAccessor() {
-  // Defined here rather than in the header file, since here the definition of
-  // InefficientDistribution is visible and so inefficientDistribution_ can be correctly destructed.
 }
 
 ObsAccessor ObsAccessor::toAllObservations(

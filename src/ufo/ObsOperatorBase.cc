@@ -26,7 +26,7 @@ std::unique_ptr<Locations> ObsOperatorBase::locations() const {
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
   odb_.get_db("MetaData", "datetime", times);
-  return std::unique_ptr<Locations>(new Locations(lons, lats, times, odb_.comm()));
+  return std::unique_ptr<Locations>(new Locations(lons, lats, times, odb_.distribution()));
 }
 
 // -----------------------------------------------------------------------------

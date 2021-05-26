@@ -72,7 +72,8 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     odb.get_db("MetaData", "latitude", lats);
     odb.get_db("MetaData", "longitude", lons);
     odb.get_db("MetaData", "datetime", times);
-    ObsDiagnostics ydiags(odb, Locations(lons, lats, times, odb.comm()), requiredHdiagnostics);
+    ObsDiagnostics ydiags(odb, Locations(lons, lats, times, odb.distribution()),
+                          requiredHdiagnostics);
 
     // set TL trajectory to the geovals and the bias coeff. from the files
     LinearObsBiasOperator biasOperator(odb);

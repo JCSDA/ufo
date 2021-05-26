@@ -91,19 +91,19 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   // Collect indices of observations retained by all processes
   size_t offset = obsspace.nlocs();
-  obsspace.distribution().exclusiveScan(offset);
+  obsspace.distribution()->exclusiveScan(offset);
 
   std::vector<size_t> vecRetainedGlobalObsIndices = retainedObsIndices;
   for (size_t &index : vecRetainedGlobalObsIndices)
     index += offset;
-  obsspace.distribution().allGatherv(vecRetainedGlobalObsIndices);
+  obsspace.distribution()->allGatherv(vecRetainedGlobalObsIndices);
   std::set<size_t> retainedGlobalObsIndices(vecRetainedGlobalObsIndices.begin(),
                                             vecRetainedGlobalObsIndices.end());
 
   // Collect pressures from all processes
   std::vector<float> pressures(obsspace.nlocs());
   obsspace.get_db("MetaData", "air_pressure", pressures);
-  obsspace.distribution().allGatherv(pressures);
+  obsspace.distribution()->allGatherv(pressures);
 
   // Collect categories from all processes
   std::vector<int> categories(obsspace.nlocs(), 0);
@@ -113,7 +113,7 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
     splitVarGroup(filterConf.getString("category_variable.name"), name, group);
     obsspace.get_db(group, name, categories);
   }
-  obsspace.distribution().allGatherv(categories);
+  obsspace.distribution()->allGatherv(categories);
 
   // Check distances between observations
   const float minAllowedDistance = filterConf.getFloat("min_vertical_spacing");

@@ -71,7 +71,7 @@ std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations() const {
     }
   }
   ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, odb_, lons.size(), lons[0], lats[0]);
-  std::unique_ptr<Locations> locs(new Locations(lons, lats, times, odb_.comm()));
+  std::unique_ptr<Locations> locs(new Locations(lons, lats, times, odb_.distribution()));
 
   return locs;
 }

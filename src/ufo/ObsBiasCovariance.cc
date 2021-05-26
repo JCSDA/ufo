@@ -206,7 +206,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       }
 
       // Sum across the processors
-      odb_.distribution().allReduceInPlace(obs_num_, eckit::mpi::sum());
+      odb_.distribution()->allReduceInPlace(obs_num_, eckit::mpi::sum());
 
       const float missing = util::missingValue(missing);
 
@@ -245,7 +245,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       }
 
       // Sum the hessian contributions across the tasks
-      odb_.distribution().allReduceInPlace(ht_rinv_h_, eckit::mpi::sum());
+      odb_.distribution()->allReduceInPlace(ht_rinv_h_, eckit::mpi::sum());
     }
 
     // reset variances for bias predictor coeff. based on current data count

@@ -23,8 +23,9 @@ namespace ufo {
 // -------------------------------------------------------------------------------------------------
 
 Locations::Locations(const std::vector<float> & lons, const std::vector<float> & lats,
-                     const std::vector<util::DateTime> & times, const eckit::mpi::Comm & comm)
-  : comm_(comm), lons_(lons), lats_(lats), times_(times) {
+                     const std::vector<util::DateTime> & times,
+                     const std::shared_ptr<const ioda::Distribution> dist)
+  : dist_(dist), lons_(lons), lats_(lats), times_(times) {
   ASSERT(lons_.size() == lats_.size());
   ASSERT(lats_.size() == times_.size());
   oops::Log::trace() << "ufo::Locations::Locations done" << std::endl;
@@ -51,13 +52,14 @@ Locations::Locations(const std::vector<float> & lons, const std::vector<float> &
  */
 
 Locations::Locations(const eckit::Configuration & conf,
-                     const eckit::mpi::Comm & comm) : comm_(comm) {
+                     const eckit::mpi::Comm & comm) {
   const eckit::LocalConfiguration obsconf(conf, "obs space");
   const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
   const util::DateTime end = util::DateTime(conf.getString("window end"));
 
   ioda::ObsSpace obspace(obsconf, comm, bgn, end, oops::mpi::myself());
   const size_t nlocs = obspace.nlocs();
+  dist_ = obspace.distribution();
 
   lats_.resize(nlocs);
   lons_.resize(nlocs);

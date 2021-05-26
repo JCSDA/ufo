@@ -199,8 +199,8 @@ void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
 //!
 //! \param qcFlags
 //!   Vector of quality control flags for all observations.
-//! \param comm
-//!   The MPI communicator used by the ObsSpace.
+//! \param obsDisttribution
+//!   The MPI distribution used by the ObsSpace.
 //! \param globalIdxFromLocalIdx
 //!   A vector whose ith element is the global index of ith observation held by this process.
 //! \param predicate
@@ -448,7 +448,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &passedObsBenchmark =
         *params.passedObservationsBenchmark.value();
     const std::vector<size_t> passedObs = getPassedObservationIndices(
-          qcflags->obsdatavector(), ufoObsSpace.distribution(), ufoObsSpace.index());
+          qcflags->obsdatavector(), *ufoObsSpace.distribution(), ufoObsSpace.index());
     EXPECT_EQUAL(passedObs, passedObsBenchmark);
   }
 
@@ -456,7 +456,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
     size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
-    ufoObsSpace.distribution().allReduceInPlace(passed, eckit::mpi::sum());
+    ufoObsSpace.distribution()->allReduceInPlace(passed, eckit::mpi::sum());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
 
@@ -465,7 +465,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &failedObsBenchmark =
         *params.failedObservationsBenchmark.value();
     const std::vector<size_t> failedObs = getFailedObservationIndices(
-          qcflags->obsdatavector(), ufoObsSpace.distribution(), ufoObsSpace.index());
+          qcflags->obsdatavector(), *ufoObsSpace.distribution(), ufoObsSpace.index());
     EXPECT_EQUAL(failedObs, failedObsBenchmark);
   }
 
@@ -473,7 +473,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     atLeastOneBenchmarkFound = true;
     const size_t failedBenchmark = *params.failedBenchmark.value();
     size_t failed = numNonzero(qcflags->obsdatavector());
-    ufoObsSpace.distribution().allReduceInPlace(failed, eckit::mpi::sum());
+    ufoObsSpace.distribution()->allReduceInPlace(failed, eckit::mpi::sum());
     EXPECT_EQUAL(failed, failedBenchmark);
   }
 
@@ -485,7 +485,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       const std::vector<size_t> &flaggedObsBenchmark =
           *params.flaggedObservationsBenchmark.value();
       const std::vector<size_t> flaggedObs =
-          getFlaggedObservationIndices(qcflags->obsdatavector(), ufoObsSpace.distribution(),
+          getFlaggedObservationIndices(qcflags->obsdatavector(), *ufoObsSpace.distribution(),
                                        ufoObsSpace.index(), flag);
       EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
     }
@@ -494,7 +494,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
       size_t flagged = numEqualTo(qcflags->obsdatavector(), flag);
-      ufoObsSpace.distribution().allReduceInPlace(flagged, eckit::mpi::sum());
+      ufoObsSpace.distribution()->allReduceInPlace(flagged, eckit::mpi::sum());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }
   }
