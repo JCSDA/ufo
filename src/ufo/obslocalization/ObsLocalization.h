@@ -88,7 +88,7 @@ ObsLocalization<MODEL>::ObsLocalization(const eckit::Configuration & config,
 
   // check that this distribution supports local obs space
   // TODO(travis) this has been moved to computeLocalization as a quick fix for a bug.
-  distName_ = obsspace.distribution().name();
+  distName_ = obsspace.distribution()->name();
 
   const size_t nlocs = obsspace.nlocs();
   // Get latitudes and longitudes of all observations.
