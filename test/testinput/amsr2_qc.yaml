@@ -56,6 +56,13 @@ observations:
     test variables:
     - name: TotalColumnVaporGuess@ObsFunction
     minvalue: 10.0
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-14
+    test variables:
+    - name: SunGlintAngle@ObsFunction
+    minvalue: 20.0
   #  Ckeck CLW retrievals from observations 
   - filter: Bounds Check
     filter variables:
@@ -169,4 +176,4 @@ observations:
     absolute threshold: 50
     action:
       name: reject
-  passedBenchmark: 45736
+  passedBenchmark: 45464
