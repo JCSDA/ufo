@@ -3,8 +3,9 @@ window end: 2019-05-22T22:05:00Z
 
 observations:
 - obs operator:
-    name: RadarReflectivity
-    VertCoord: geopotential_height
+    name: VertInterp
+    vertical coordinate: geopotential_height
+    observation vertical coordinate: height
   obs space:
     name: Radar
     obsdatain:

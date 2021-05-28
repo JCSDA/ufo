@@ -68,7 +68,6 @@ add_subdirectory( avgkernel )
 if( crtm_FOUND )
     add_subdirectory( crtm )
 endif()
-add_subdirectory( radarreflectivity )
 add_subdirectory( radarradialvelocity )
 if( rttov_FOUND )
     add_subdirectory( rttov )
@@ -106,7 +105,6 @@ list( APPEND ufo_src_files
     ${gnssro_src_files}
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
-    ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
     ${timeoper_src_files}
     ${profile_src_files}
