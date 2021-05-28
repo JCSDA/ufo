@@ -209,9 +209,10 @@ void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
 template <typename Predicate>
 std::vector<size_t> getObservationIndicesWhere(
     const ObsTraits::ObsDataVector<int> &qcFlags,
-    const ioda::Distribution &obsDistribution,
+    const eckit::mpi::Comm &comm,
     const std::vector<size_t> &globalIdxFromLocalIdx,
     const Predicate &predicate) {
+  // Among the locations held on the calling process, identify those that satisfy the predicate.
   std::vector<size_t> indices;
   for (size_t locIndex = 0; locIndex < qcFlags.nlocs(); ++locIndex) {
     bool satisfied = false;
@@ -226,9 +227,13 @@ std::vector<size_t> getObservationIndicesWhere(
     }
   }
 
+  // Convert the local location indices to global ones.
   convertLocalObsIndicesToGlobal(indices, globalIdxFromLocalIdx);
-  obsDistribution.allGatherv(indices);
+  // Concatenate the lists of global indices produced on all processes.
+  oops::mpi::allGatherv(comm, indices);
+  // Remove any duplicates (which can occur if some locations are held on more than one process).
   std::sort(indices.begin(), indices.end());
+  indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
   return indices;
 }
 
@@ -239,9 +244,9 @@ std::vector<size_t> getObservationIndicesWhere(
 //! at least one variable.
 //!
 std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
-                                                const ioda::Distribution &obsDistribution,
+                                                const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
-  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
                                     [](int qcFlag) { return qcFlag == 0; });
 }
 
@@ -252,9 +257,9 @@ std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<i
 //! at least one variable.
 //!
 std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
-                                                const ioda::Distribution &obsDistribution,
+                                                const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
-  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
                                     [](int qcFlag) { return qcFlag != 0; });
 }
 
@@ -265,10 +270,10 @@ std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<i
 //! at least one variable.
 //!
 std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
-                                                 const ioda::Distribution &obsDistribution,
+                                                 const eckit::mpi::Comm &comm,
                                                  const std::vector<size_t> &globalIdxFromLocalIdx,
                                                  int flag) {
-  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
                                     [flag](int qcFlag) { return qcFlag == flag; });
 }
 
@@ -289,18 +294,32 @@ size_t numNonzero(const ObsTraits::ObsDataVector<int> & data) {
 }
 
 // -----------------------------------------------------------------------------
-
 //!
-//! Return the number of elements of \p data with at least one component equal to \p value.
+//! Return the number of elements of \p data with at least one component equal to \p value,
+//! Within the patch.
 //!
-size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data, int value) {
+size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data,
+                  const ioda::Distribution &obsDistribution, int value) {
   size_t result = 0;
-  for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
-    for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
-      if (data[varIndex][locIndex] == value)
-        ++result;
+  if (obsDistribution.name() == "Halo") {
+    std::vector<bool> patchObsBool;
+    obsDistribution.patchObs(patchObsBool);
+
+    for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
+      for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
+        if (data[varIndex][locIndex] == value && patchObsBool[locIndex])
+          ++result;
+      }
+    }
+  } else {
+    for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
+      for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
+        if (data[varIndex][locIndex] == value)
+          ++result;
+      }
     }
   }
+
   return result;
 }
 
@@ -448,14 +467,16 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &passedObsBenchmark =
         *params.passedObservationsBenchmark.value();
     const std::vector<size_t> passedObs = getPassedObservationIndices(
-          qcflags->obsdatavector(), *ufoObsSpace.distribution(), ufoObsSpace.index());
+          qcflags->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
     EXPECT_EQUAL(passedObs, passedObsBenchmark);
   }
 
   if (params.passedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
-    size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
+    size_t passed = numEqualTo(qcflags->obsdatavector(),
+                               *ufoObsSpace.distribution(),
+                               ufo::QCflags::pass);
     ufoObsSpace.distribution()->allReduceInPlace(passed, eckit::mpi::sum());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
@@ -465,7 +486,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &failedObsBenchmark =
         *params.failedObservationsBenchmark.value();
     const std::vector<size_t> failedObs = getFailedObservationIndices(
-          qcflags->obsdatavector(), *ufoObsSpace.distribution(), ufoObsSpace.index());
+          qcflags->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
     EXPECT_EQUAL(failedObs, failedObsBenchmark);
   }
 
@@ -485,7 +506,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       const std::vector<size_t> &flaggedObsBenchmark =
           *params.flaggedObservationsBenchmark.value();
       const std::vector<size_t> flaggedObs =
-          getFlaggedObservationIndices(qcflags->obsdatavector(), *ufoObsSpace.distribution(),
+          getFlaggedObservationIndices(qcflags->obsdatavector(), ufoObsSpace.comm(),
                                        ufoObsSpace.index(), flag);
       EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
     }
@@ -493,7 +514,8 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     if (params.flaggedBenchmark.value() != boost::none) {
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
-      size_t flagged = numEqualTo(qcflags->obsdatavector(), flag);
+      size_t flagged = numEqualTo(qcflags->obsdatavector(),
+                                  *ufoObsSpace.distribution(), flag);
       ufoObsSpace.distribution()->allReduceInPlace(flagged, eckit::mpi::sum());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }

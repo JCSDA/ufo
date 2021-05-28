@@ -99,30 +99,30 @@ ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
 
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags) const {
-  size_t obsIdDisplacement = obsdb_->nlocs();
-  obsDistribution_->exclusiveScan(obsIdDisplacement);
+  // TODO(wsmigaj): use std::vector<unsigned char> to save space
+  std::vector<int> globalApply(apply.size());
+  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
+    globalApply[obsId] = apply[obsId] && flags[0][obsId] == QCflags::pass;
+  obsDistribution_->allGatherv(globalApply);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && flags[0][obsId] == QCflags::pass)
-      validObsIds.push_back(obsIdDisplacement + obsId);
-
-  obsDistribution_->allGatherv(validObsIds);
+  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
+    if (globalApply[obsId])
+      validObsIds.push_back(obsId);
 
   return validObsIds;
 }
 
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply) const {
-  size_t obsIdDisplacement = obsdb_->nlocs();
-  obsDistribution_->exclusiveScan(obsIdDisplacement);
+  // TODO(wsmigaj): use std::vector<unsigned char> to save space
+  std::vector<int> globalApply(apply.begin(), apply.end());
+  obsDistribution_->allGatherv(globalApply);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId])
-      validObsIds.push_back(obsIdDisplacement + obsId);
-
-  obsDistribution_->allGatherv(validObsIds);
+  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
+    if (globalApply[obsId])
+      validObsIds.push_back(obsId);
 
   return validObsIds;
 }
@@ -211,14 +211,14 @@ void ObsAccessor::groupObservationsByCategoryVariable(
 void ObsAccessor::flagRejectedObservations(
     const std::vector<bool> &isRejected, std::vector<std::vector<bool> > &flagged) const {
   const size_t localNumObs = obsdb_->nlocs();
-  size_t displacement = localNumObs;
-  obsDistribution_->exclusiveScan(displacement);
-
-  for (std::vector<bool> & variableFlagged : flagged) {
+  for (const std::vector<bool> & variableFlagged : flagged)
     ASSERT(variableFlagged.size() == localNumObs);
-    for (size_t localObsId = 0; localObsId < localNumObs; ++localObsId) {
-      const size_t globalObsId = displacement + localObsId;
-      if (isRejected[globalObsId])
+
+  for (size_t localObsId = 0; localObsId < localNumObs; ++localObsId) {
+    const size_t globalObsId =
+        obsDistribution_->globalUniqueConsecutiveLocationIndex(localObsId);
+    if (isRejected[globalObsId]) {
+      for (std::vector<bool> & variableFlagged : flagged)
         variableFlagged[localObsId] = true;
     }
   }

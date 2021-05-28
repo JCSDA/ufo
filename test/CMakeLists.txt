@@ -18,6 +18,7 @@ list( APPEND ufo_test_input
   testinput/amsr2_crtm.yaml
   testinput/amsr2_clw_ret.yaml
   testinput/amsr2_qc.yaml
+  testinput/amsr2_qc_halo.yaml
   testinput/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
@@ -108,6 +109,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
   testinput/gnssro_obs_error.yaml
+  testinput/gnssro_obs_error_halo.yaml
   testinput/gnssro_obs_error_ropp.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
@@ -184,6 +186,7 @@ list( APPEND ufo_test_input
   testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_poisson_disk_thinning_parallel.yaml
   testinput/qc_preqc.yaml
+  testinput/qc_preqc_halo.yaml
   testinput/qc_profile_background_check.yaml
   testinput/qc_profile_fewobs_check.yaml
   testinput/qc_stuckcheck.yaml
@@ -784,6 +787,14 @@ if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_amsr2_qc
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsr2_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x
+                      TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_amsr2_qc_halo
+                      MPI     4
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsr2_qc_halo.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x
                       TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -1661,6 +1672,14 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_preqc_halo
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_preqc_halo.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_modelobthreshold
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -2905,6 +2924,14 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error_halo
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssro_obs_error_halo.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice_obs_error
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

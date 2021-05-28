@@ -32,23 +32,6 @@
 
 namespace ufo {
 
-namespace {
-
-///
-/// \brief Gather data from all tasks and deliver the combined data to all tasks.
-///
-/// \returns A vector that contains the elements of \p v from process 0 followed by the elements
-/// of \p v from process 1 etc.
-///
-template <typename T>
-std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v) {
-  eckit::mpi::Buffer<T> buffer(comm.size());
-  comm.allGatherv(v.begin(), v.end(), buffer);
-  return buffer.buffer;
-}
-
-}  // namespace
-
 // -----------------------------------------------------------------------------
 
 Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,

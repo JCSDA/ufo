@@ -65,40 +65,35 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   filter.preProcess();
 
-  std::vector<size_t> retainedObsIndices;
+  std::vector<int> isObsRetained(qcflags->nlocs(), 0);
   for (size_t i = 0; i < qcflags->nlocs(); ++i)
-    if ((*qcflags)[0][i] == ufo::QCflags::pass)
-      retainedObsIndices.push_back(i);
+    isObsRetained[i] = ((*qcflags)[0][i] == ufo::QCflags::pass);
 
   if (obsSpaceConf.getString("distribution", "RoundRobin") == "InefficientDistribution") {
     // PART 1: Verify that all ranks have retained the same observations.
     const size_t rootRank = 0;
-    size_t numObsRetainedOnRoot = retainedObsIndices.size();
-    obsspace.comm().broadcast(numObsRetainedOnRoot, rootRank);
+    size_t isObsRetainedSizeOnRoot = isObsRetained.size();
+    obsspace.comm().broadcast(isObsRetainedSizeOnRoot, rootRank);
 
-    std::vector<size_t> retainedObsIndicesOnRoot(numObsRetainedOnRoot);
+    std::vector<int> isObsRetainedOnRoot(isObsRetainedSizeOnRoot);
     if (obsspace.comm().rank() == rootRank) {
-      retainedObsIndicesOnRoot = retainedObsIndices;
+      isObsRetainedOnRoot = isObsRetained;
     }
-    obsspace.comm().broadcast(retainedObsIndicesOnRoot, rootRank);
+    obsspace.comm().broadcast(isObsRetainedOnRoot, rootRank);
 
-    EXPECT_EQUAL(retainedObsIndices, retainedObsIndicesOnRoot);
+    EXPECT_EQUAL(isObsRetained, isObsRetainedOnRoot);
   }
 
   // PART 2: Verify that all retained observations are sufficiently far from each other
   // and that all rejected observations so close to a retained observation that they can't
   // themselves be retained.
 
-  // Collect indices of observations retained by all processes
-  size_t offset = obsspace.nlocs();
-  obsspace.distribution()->exclusiveScan(offset);
-
-  std::vector<size_t> vecRetainedGlobalObsIndices = retainedObsIndices;
-  for (size_t &index : vecRetainedGlobalObsIndices)
-    index += offset;
-  obsspace.distribution()->allGatherv(vecRetainedGlobalObsIndices);
-  std::set<size_t> retainedGlobalObsIndices(vecRetainedGlobalObsIndices.begin(),
-                                            vecRetainedGlobalObsIndices.end());
+  // Collect status of observations on all processes
+  obsspace.distribution()->allGatherv(isObsRetained);
+  std::set<size_t> retainedGlobalObsIndices;
+  for (size_t i = 0; i < isObsRetained.size(); ++i)
+    if (isObsRetained[i])
+      retainedGlobalObsIndices.insert(i);
 
   // Collect pressures from all processes
   std::vector<float> pressures(obsspace.nlocs());
