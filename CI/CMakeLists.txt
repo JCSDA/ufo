@@ -10,7 +10,7 @@
 
 cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
-project( ufo-bundle LANGUAGES C CXX Fortran )
+project( ufo-bundle VERSION 1.0.0 LANGUAGES C CXX Fortran )
 
 find_package(ecbuild)
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_CURRENT_SOURCE_DIR}/ecbuild/cmake;${CMAKE_MODULE_PATH}")
