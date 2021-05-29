@@ -91,8 +91,19 @@ class GeoVaLs : public util::Printable,
   void getAtLocation(std::vector<float> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to int
   void getAtLocation(std::vector<int> &, const std::string &, const int) const;
-  void put(const std::vector<double> &, const std::string &, const int) const;
-
+  /// Put GeoVaLs for double variable \p var at level \p lev.
+  void put(const std::vector<double> & vals, const std::string & var, const int lev) const;
+  /// Put GeoVaLs for float variable \p var at level \p lev.
+  void put(const std::vector<float> & vals, const std::string & var, const int lev) const;
+  /// Put GeoVaLs for int variable \p var at level \p lev.
+  void put(const std::vector<int> & vals, const std::string & var, const int lev) const;
+  /// Put GeoVaLs for double variable \p var at location \p loc.
+  void putAtLocation(const std::vector<double> & vals, const std::string & var,
+                     const int loc) const;
+  /// Put GeoVaLs for float variable \p var at location \p loc.
+  void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc) const;
+  /// Put GeoVaLs for int variable \p var at location \p loc.
+  void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void write(const eckit::Configuration &) const;
   size_t nlocs() const;

@@ -361,14 +361,71 @@ void GeoVaLs::getAtLocation(std::vector<int> & vals,
   oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Put values for a specific variable and level */
+/*! \brief Put double values for a specific variable and level */
 void GeoVaLs::put(const std::vector<double> & vals, const std::string & var, const int lev) const {
   oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
   size_t nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
   ASSERT(vals.size() == nlocs);
   ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
-  oops::Log::trace() << "GeoVaLs::get done" << std::endl;
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put float values for a specific variable and level */
+void GeoVaLs::put(const std::vector<float> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put int values for a specific variable and level */
+void GeoVaLs::put(const std::vector<int> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+/*! \brief Put double values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<double> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
+}
+/*! \brief Put float values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<float> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
+}
+/*! \brief Put int values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<int> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Read GeoVaLs from the file */

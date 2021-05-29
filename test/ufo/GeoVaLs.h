@@ -164,7 +164,8 @@ void testGeoVaLs() {
   }
 }
 
-/// \brief Tests GeoVaLs::allocate, GeoVaLs::put and GeoVaLs::get method (for 2D variables)
+/// \brief Tests GeoVaLs::allocate, GeoVaLs::put, GeoVaLs::get,
+/// GeoVaLs::putAtLocation and GeoVaLs::getAtLocation.
 void testGeoVaLsAllocatePutGet() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   const eckit::LocalConfiguration testconf(conf, "geovals get test");
@@ -200,26 +201,35 @@ void testGeoVaLsAllocatePutGet() {
   EXPECT_EQUAL(gval.nlevs(var1), nlevs1);
   EXPECT_EQUAL(gval.nlevs(var2), nlevs2);
 
-  /// set all values for the first level of 2D variable to an arbitrary number
-  const float fillvalue = 3.0;
-  oops::Log::test() << "Put fill value: " << fillvalue << std::endl;
-  const std::vector<double> refvalues(gval.nlocs(), fillvalue);
-  const std::vector<float>  refvalues_float(refvalues.begin(), refvalues.end());
-  const std::vector<int>    refvalues_int(refvalues.begin(), refvalues.end());
-  gval.put(refvalues, var2, 1);
-
-  /// check that get method returns what we put in geovals
-  std::vector<double> testvalues(gval.nlocs(), 0);
-  gval.get(testvalues, var2);
-  oops::Log::test() << "Get result:        " << testvalues << std::endl;
-  EXPECT_EQUAL(testvalues, refvalues);
+  /// Set all values for the first level of a 2D variable to an arbitrary number with the
+  /// put method. Then check that the get method returns the expected values in each case.
+  /// Do this for several data types.
+  /// (1) doubles
+  const double fillvalue_double = 3.01234567890123;
+  oops::Log::test() << "Put(double) fill value: " << fillvalue_double << std::endl;
+  const std::vector<double> refvalues_double(gval.nlocs(), fillvalue_double);
+  gval.put(refvalues_double, var2, 1);
+  std::vector<double> testvalues_double(gval.nlocs(), 0);
+  gval.get(testvalues_double, var2);
+  oops::Log::test() << "Get(double) result: " << testvalues_double << std::endl;
+  EXPECT_EQUAL(testvalues_double, refvalues_double);
+  /// (2) floats
+  const float fillvalue_float = 4.1f;
+  oops::Log::test() << "Put(float) fill value: " << fillvalue_float << std::endl;
+  const std::vector<float> refvalues_float(gval.nlocs(), fillvalue_float);
+  gval.put(refvalues_float, var2, 1);
   std::vector<float> testvalues_float(gval.nlocs(), 0);
   gval.get(testvalues_float, var2);
   oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
   EXPECT_EQUAL(testvalues_float, refvalues_float);
+  /// (3) ints
+  const int fillvalue_int = 5;
+  oops::Log::test() << "Put(int) fill value: " << fillvalue_int << std::endl;
+  const std::vector<int> refvalues_int(gval.nlocs(), fillvalue_int);
+  gval.put(refvalues_int, var2, 1);
   std::vector<int> testvalues_int(gval.nlocs(), 0);
   gval.get(testvalues_int, var2);
-  oops::Log::test() << "Get(int) result:   " << testvalues_int << std::endl;
+  oops::Log::test() << "Get(int) result: " << testvalues_int << std::endl;
   EXPECT_EQUAL(testvalues_int, refvalues_int);
 
   /// Check that the getAtLocation method returns what we put in the GeoVaLs.
@@ -252,12 +262,82 @@ void testGeoVaLsAllocatePutGet() {
     EXPECT_EQUAL(testvalues_loc_int, refvalues_loc_int);
   }
 
+  /// Check that the putAtLocation method correctly puts values in the GeoVaLs.
+  /// This is similar to the previous test but the putting and getting routines
+  /// are transposed.
+  /// This is done separately for each data type, using different fill values each time.
+  /// (1) doubles
+  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc.
+  oops::Log::test() << "putAtLoction with doubles" << std::endl;
+  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
+    std::vector<double> refvalues_double(gval.nlevs(var1));
+    std::iota(refvalues_double.begin(), refvalues_double.end(), jloc);
+    gval.putAtLocation(refvalues_double, var1, jloc);
+  }
+  oops::Log::test() << "testing putAtLoction with doubles" << std::endl;
+  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
+    // Get the test vector on this level.
+    std::vector <double> testvalues_double(gval.nlocs());
+    gval.get(testvalues_double, var1, jlev + 1);
+    // Recreate reference vector for this level.
+    std::vector <double> refvalues_double(gval.nlocs());
+    std::iota(refvalues_double.begin(), refvalues_double.end(), jlev);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_double, refvalues_double);
+  }
+  /// (2) floats
+  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc + 1.
+  oops::Log::test() << "putAtLoction with floats" << std::endl;
+  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
+    std::vector<float> refvalues_float(gval.nlevs(var1));
+    std::iota(refvalues_float.begin(), refvalues_float.end(), jloc + 1);
+    gval.putAtLocation(refvalues_float, var1, jloc);
+  }
+  oops::Log::test() << "testing putAtLoction with floats" << std::endl;
+  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
+    // Get the test vector on this level.
+    std::vector <float> testvalues_float(gval.nlocs());
+    gval.get(testvalues_float, var1, jlev + 1);
+    // Recreate reference vector for this level.
+    std::vector <float> refvalues_float(gval.nlocs());
+    std::iota(refvalues_float.begin(), refvalues_float.end(), jlev + 1);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_float, refvalues_float);
+  }
+  /// (3) ints
+  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc + 2.
+  oops::Log::test() << "putAtLoction with ints" << std::endl;
+  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
+    std::vector<int> refvalues_int(gval.nlevs(var1));
+    std::iota(refvalues_int.begin(), refvalues_int.end(), jloc + 2);
+    gval.putAtLocation(refvalues_int, var1, jloc);
+  }
+  oops::Log::test() << "testing putAtLoction with ints" << std::endl;
+  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
+    // Get the test vector on this level.
+    // The get method has not been implemented for integers, so get a vector of floats
+    // and convert it.
+    std::vector <float> testvalues_float(gval.nlocs());
+    gval.get(testvalues_float, var1, jlev + 1);
+    std::vector <int> testvalues_int(testvalues_float.begin(), testvalues_float.end());
+    // Recreate reference vector for this level.
+    std::vector <int> refvalues_int(gval.nlocs());
+    std::iota(refvalues_int.begin(), refvalues_int.end(), jlev + 2);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_int, refvalues_int);
+  }
+
   /// Check code paths that throw exceptions for the getAtLocation method.
   std::vector<double> testvalues_loc_wrongsize(gval.nlevs(var1) + 1, 0.0);
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc_wrongsize, var1, 1));
   std::vector<double> testvalues_loc(gval.nlevs(var1), 0.0);
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, -1));
   EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, gval.nlocs()));
+
+  /// Check code paths that throw exceptions for the putAtLocation method.
+  EXPECT_THROWS(gval.putAtLocation(testvalues_loc_wrongsize, var1, 1));
+  EXPECT_THROWS(gval.putAtLocation(testvalues_loc, var1, -1));
+  EXPECT_THROWS(gval.putAtLocation(testvalues_loc, var1, gval.nlocs()));
 
   /// test 3D put and get
   for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
