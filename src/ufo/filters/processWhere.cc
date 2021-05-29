@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "oops/util/FloatCompare.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
@@ -98,6 +99,30 @@ void processWhereIsIn(const std::vector<T> & data,
 }
 
 // -----------------------------------------------------------------------------
+void processWhereIsClose(const std::vector<float> & data,
+                         const float tolerance, const bool relative,
+                         const std::vector<float> & whitelist,
+                         std::vector<bool> & mask) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    bool inlist = false;
+    for (auto testvalue : whitelist) {
+      if (relative) {
+        if (oops::is_close_relative(data[jj], testvalue, tolerance, oops::TestVerbosity::SILENT)) {
+          inlist = true;
+          break;
+        }
+      } else {
+        if (oops::is_close_absolute(data[jj], testvalue, tolerance, oops::TestVerbosity::SILENT)) {
+          inlist = true;
+          break;
+        }
+      }
+    }  // testvalue
+    if (!inlist) mask[jj] = false;
+  }  // jj
+}
+
+// -----------------------------------------------------------------------------
 template <class T>
 void processWhereIsNotIn(const std::vector<T> & data,
                          const std::set<T> & blacklist,
@@ -115,6 +140,31 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (oops::contains(blacklist, data[jj])) mask[jj] = false;
   }
+}
+
+// -----------------------------------------------------------------------------
+void processWhereIsNotClose(const std::vector<float> & data,
+                            const float tolerance, const bool relative,
+                            const std::vector<float> & blacklist,
+                            std::vector<bool> & mask) {
+  const float missing = util::missingValue(missing);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    for (auto testvalue : blacklist) {
+      if (relative) {
+        if (data[jj] == missing || oops::is_close_relative(data[jj], testvalue, tolerance,
+                                                           oops::TestVerbosity::SILENT)) {
+          mask[jj] = false;
+          break;
+        }
+      } else {
+        if (data[jj] == missing || oops::is_close_absolute(data[jj], testvalue, tolerance,
+                                                           oops::TestVerbosity::SILENT)) {
+          mask[jj] = false;
+          break;
+        }
+      }
+    }  // testvalue
+  }  // jj
 }
 
 // -----------------------------------------------------------------------------
@@ -377,6 +427,31 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
           }
         }
 
+//      Apply mask is_close
+        if (currentParams.isClose.value() != boost::none) {
+          if (dtype == ioda::ObsDtype::Float) {
+            std::vector<float> data;
+            filterdata.get(varname, data);
+            if (currentParams.relativetolerance.value() == boost::none &&
+                currentParams.absolutetolerance.value() != boost::none) {
+              processWhereIsClose(data, currentParams.absolutetolerance.value().get(),
+                                  false, currentParams.isClose.value().get(), where);
+            } else if (currentParams.relativetolerance.value() != boost::none &&
+                       currentParams.absolutetolerance.value() == boost::none) {
+              processWhereIsClose(data, currentParams.relativetolerance.value().get(),
+                                  true, currentParams.isClose.value().get(), where);
+            } else {
+              throw eckit::UserError(
+                "For 'is_close' one (and only one) tolerance is needed.",
+                Here());
+            }
+          } else {
+            throw eckit::UserError(
+              "Only float variables may be used for processWhere 'is_close'",
+              Here());
+          }
+        }
+
 //      Apply mask is_not_in
         if (currentParams.isNotIn.value() != boost::none) {
           if (dtype == ioda::ObsDtype::String) {
@@ -388,6 +463,31 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
+              Here());
+          }
+        }
+
+//      Apply mask is_not_close
+        if (currentParams.isNotClose.value() != boost::none) {
+          if (dtype == ioda::ObsDtype::Float) {
+            std::vector<float> data;
+            filterdata.get(varname, data);
+            if (currentParams.relativetolerance.value() == boost::none &&
+                currentParams.absolutetolerance.value() != boost::none) {
+              processWhereIsNotClose(data, currentParams.absolutetolerance.value().get(),
+                                     false, currentParams.isNotClose.value().get(), where);
+            } else if (currentParams.relativetolerance.value() != boost::none &&
+                       currentParams.absolutetolerance.value() == boost::none) {
+              processWhereIsNotClose(data, currentParams.relativetolerance.value().get(),
+                                     true, currentParams.isNotClose.value().get(), where);
+            } else {
+              throw eckit::UserError(
+                "For 'is_close' one (and only one) tolerance is needed.",
+                Here());
+            }
+          } else {
+            throw eckit::UserError(
+              "Only float variables may be used for processWhere 'is_not_close'",
               Here());
           }
         }

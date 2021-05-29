@@ -278,6 +278,34 @@ successful:
         is_in: 0-3
   # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.0e-5
+        is_close_to_any_of: [0.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 5
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.0e-4
+        is_close_to_any_of: [1.0, 2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 2
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.5
+        is_close_to_any_of: [2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 3
+    - where:
+      - variable:
+          name: var4@MetaData
+        relative_tolerance: 0.5
+        is_close_to_any_of: [2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 4
     - where:                       # test is_not_in
       - variable:
           name:  intvar3@MetaData
@@ -326,6 +354,34 @@ successful:
         is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
   # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 7
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.0e-5
+        is_not_close_to_any_of: [0.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 5
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.0e-5
+        is_not_close_to_any_of: [1.0, 2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 8
+    - where:
+      - variable:
+          name: var4@MetaData
+        absolute_tolerance: 1.5
+        is_not_close_to_any_of: [2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 7
+    - where:
+      - variable:
+          name: var4@MetaData
+        relative_tolerance: 0.2
+        is_not_close_to_any_of: [2.0]
+  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+      size where true: 9
     - where:                      # test any_bit_set_of with a single bit specified
       - variable:
           name:  intvar1@MetaData
@@ -455,4 +511,30 @@ user_error_type_handling_is_in:
       - variable:
           name:  var1@MetaData
         matches_any_wildcard: [abc*]
+      size where true: 0
+    - where:                       # test is_not_close_to_any_of for unsupported type (int)
+      - variable:
+          name:  intvar1@MetaData
+        relative_tolerance: 0.2
+        is_not_close_to_any_of: [1]
+      size where true: 0
+    - where:                       # test is_close_to_any_of for unsupported type (int)
+      - variable:
+          name:  intvar1@MetaData
+        absolute_tolerance: 0.2
+        is_close_to_any_of: [1]
+      size where true: 0
+    - where:                       # test is_not_close_to_any_of when both tolerances given
+      - variable:
+          name:  var1@MetaData
+        relative_tolerance: 0.2
+        absolute_tolerance: 0.2
+        is_not_close_to_any_of: [1.5]
+      size where true: 0
+    - where:                       # test is_close_to_any_of when both tolerances given
+      - variable:
+          name:  var1@MetaData
+        relative_tolerance: 0.2
+        absolute_tolerance: 0.2
+        is_close_to_any_of: [1.5]
       size where true: 0
