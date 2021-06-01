@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "oops/util/FloatCompare.h"
+#include "eckit/types/FloatCompare.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
@@ -107,12 +107,13 @@ void processWhereIsClose(const std::vector<float> & data,
     bool inlist = false;
     for (auto testvalue : whitelist) {
       if (relative) {
-        if (oops::is_close_relative(data[jj], testvalue, tolerance, oops::TestVerbosity::SILENT)) {
+        float relativetolerance = testvalue * tolerance;
+        if (eckit::types::is_approximately_equal(data[jj], testvalue, relativetolerance)) {
           inlist = true;
           break;
         }
       } else {
-        if (oops::is_close_absolute(data[jj], testvalue, tolerance, oops::TestVerbosity::SILENT)) {
+        if (eckit::types::is_approximately_equal(data[jj], testvalue, tolerance)) {
           inlist = true;
           break;
         }
@@ -151,14 +152,15 @@ void processWhereIsNotClose(const std::vector<float> & data,
   for (size_t jj = 0; jj < data.size(); ++jj) {
     for (auto testvalue : blacklist) {
       if (relative) {
-        if (data[jj] == missing || oops::is_close_relative(data[jj], testvalue, tolerance,
-                                                           oops::TestVerbosity::SILENT)) {
+        float relativetolerance = testvalue * tolerance;
+        if (data[jj] == missing ||
+            eckit::types::is_approximately_equal(data[jj], testvalue, relativetolerance)) {
           mask[jj] = false;
           break;
         }
       } else {
-        if (data[jj] == missing || oops::is_close_absolute(data[jj], testvalue, tolerance,
-                                                           oops::TestVerbosity::SILENT)) {
+        if (data[jj] == missing ||
+            eckit::types::is_approximately_equal(data[jj], testvalue, tolerance)) {
           mask[jj] = false;
           break;
         }
