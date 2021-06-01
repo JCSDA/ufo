@@ -94,7 +94,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), allocatable :: obselev(:), obshgt(:)
   real(kind_real), parameter :: minroughlen = 1.0e-4_kind_real
   character(len=MAXVARLEN) :: geovar
-  real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2
+  real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2, agl, zbot
   real(kind_real) :: gzsoz0, gzzoz0
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
   real(kind_real) :: ttmp1, ttmpg, eg, qg
@@ -158,16 +158,19 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! calculate convective velocity
     call calc_conv_vel_gsi(u%vals(1,iobs), v%vals(1,iobs), thvg, thv1, V2)
 
-    ! calculate bulk richardson number
-    rib = (grav * phi%vals(1,iobs) / th1) * (thv1 - thvg) / V2
+    ! although there could be first height below sea level, it causes floating-pt-except
+    zbot = max(0.1,phi%vals(1,iobs))                ! bottom model level in meters
+    agl = max(1.0, (obshgt(iobs)-obselev(iobs)))    ! obs height above ground in meters
 
-    gzsoz0 = log(phi%vals(1,iobs)/z0)
-    gzzoz0 = log((obshgt(iobs)-obselev(iobs))/z0)
+    ! calculate bulk richardson number
+    rib = (grav * zbot / th1) * (thv1 - thvg) / V2
+
+    gzsoz0 = log(zbot/z0)
+    gzzoz0 = log(agl/z0)
 
     ! calculate parameters regardless of variable
-    call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,&
-                           thg, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs),&
-                           psim, psih, psimz, psihz)
+    call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,   &
+                           thg, zbot, agl, psim, psih, psimz, psihz)
     do ivar = 1, nvars
       ! Get the name of input variable in geovals
       geovar = self%obsvars%variable(ivar)
@@ -197,8 +200,8 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
           end if
         case("specific_humidity")
           ust = von_karman * sqrt(V2) / (gzsoz0 - psim)
-          psiq = log(von_karman*ust*phi%vals(1,iobs)/ka + phi%vals(1,iobs) / zq0) - psih
-          psiqz = log(von_karman*ust*(obshgt(iobs)-obselev(iobs))/ka + (obshgt(iobs)-obselev(iobs)) / zq0) - psihz
+          psiq = log(von_karman*ust*zbot/ka + zbot/zq0) - psih
+          psiqz = log(von_karman*ust*agl/ka + agl/zq0) - psihz
           hofx(ivar,iobs) = qg + (q%vals(1,iobs) - qg)*psiqz/psiq
       end select
     end do
