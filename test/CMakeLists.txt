@@ -257,6 +257,7 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_average_windspeed_OPScomparison.yaml
   testinput/profileconsistencychecks_average_relativehumidity_obsfilter.yaml
   testinput/profileconsistencychecks_average_relativehumidity_OPScomparison.yaml
+  testinput/profileconsistencychecks_opr_average.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml
   testinput/timeoper.yaml
@@ -1497,6 +1498,13 @@ ecbuild_add_test( TARGET  test_ufo_linopr_composite
 ecbuild_add_test( TARGET  test_ufo_opr_categorical
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/categorical.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_profile_average
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/profileconsistencychecks_opr_average.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )

@@ -11,6 +11,9 @@ set ( profile_files
       ModelHeightCalculator.cc
       ModelHeightCalculator.h
       ModelParameters.h
+      ObsProfileAverage.cc
+      ObsProfileAverage.h
+      ObsProfileAverageParameters.h
       ProfileAveragePressure.cc
       ProfileAveragePressure.h
       ProfileAverageRelativeHumidity.cc
