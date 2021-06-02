@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <memory>
+
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/BgdDepartureAnomaly.h"
@@ -73,30 +76,39 @@ void BgdDepartureAnomaly::compute(const ObsFilterData & in,
   }
 
   // Compute background departures
+
+  // To calculate mean departures, we need to know the number of observations with non-missing
+  // departures (taking into account all MPI ranks)...
+  std::unique_ptr<ioda::Accumulator<size_t>> countAccumulator =
+      obsdb.distribution()->createAccumulator<size_t>();
+
+  // ... and the sum of all non-missing departures
+  enum {OMB_LOW, OMB_HIGH, NUM_OMBS};
+  std::unique_ptr<ioda::Accumulator<std::vector<double>>> totalsAccumulator =
+      obsdb.distribution()->createAccumulator<double>(NUM_OMBS);
+
+  // First, perform local reductions...
   std::vector<float> omblow(nlocs), ombhigh(nlocs);
-  double MeanOmbLow = 0, MeanOmbHigh = 0;
-  int missingVal = 0;
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     if (obslow[iloc] == missing || bgdlow[iloc] == missing ||
         obshigh[iloc] == missing || bgdhigh[iloc] == missing) {
       omblow[iloc] = missing;
       ombhigh[iloc] = missing;
-      missingVal += 1;
     } else {
       omblow[iloc] = obslow[iloc] - bgdlow[iloc];
       ombhigh[iloc] = obshigh[iloc] - bgdhigh[iloc];
-      MeanOmbLow += omblow[iloc];
-      MeanOmbHigh += ombhigh[iloc];
+      totalsAccumulator->addTerm(iloc, OMB_LOW, omblow[iloc]);
+      totalsAccumulator->addTerm(iloc, OMB_HIGH, ombhigh[iloc]);
+      countAccumulator->addTerm(iloc, 1);
     }
   }
+  // ... and then global reductions.
+  const std::size_t count = countAccumulator->computeResult();
+  const std::vector<double> totals = totalsAccumulator->computeResult();
 
-  size_t nobslow = obsdb.distribution()->globalNumNonMissingObs(obslow);
-  size_t nobshigh = obsdb.distribution()->globalNumNonMissingObs(obshigh);
-  obsdb.distribution()->allReduceInPlace(MeanOmbLow, eckit::mpi::sum());
-  obsdb.distribution()->allReduceInPlace(MeanOmbHigh, eckit::mpi::sum());
-
-  MeanOmbLow = MeanOmbLow / nobslow;
-  MeanOmbHigh = MeanOmbHigh / nobshigh;
+  // Calculate the means
+  const double MeanOmbLow = totals[OMB_LOW] / count;
+  const double MeanOmbHigh = totals[OMB_HIGH] / count;
 
   // Compute anomaly difference
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {

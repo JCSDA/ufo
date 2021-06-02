@@ -280,47 +280,44 @@ std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<
 // -----------------------------------------------------------------------------
 
 //!
-//! Return the number of elements of \p data with at least one nonzero component.
+//! Return the number of nonzero elements of \p data (on all MPI ranks, but counting each location
+//! only once even if it is held on multiple ranks).
 //!
-size_t numNonzero(const ObsTraits::ObsDataVector<int> & data) {
-  size_t result = 0;
+size_t numNonzero(const ObsTraits::ObsDataVector<int> & data,
+                  const ioda::Distribution &dist) {
+  auto accumulator = dist.createAccumulator<size_t>();
+  // Local reduction
   for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
+    size_t numNonzerosAtLocation = 0;
     for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
       if (data[varIndex][locIndex] != 0)
-        ++result;
+        ++numNonzerosAtLocation;
     }
+    accumulator->addTerm(locIndex, numNonzerosAtLocation);
   }
-  return result;
+  // Global reduction
+  return accumulator->computeResult();
 }
 
 // -----------------------------------------------------------------------------
 //!
-//! Return the number of elements of \p data with at least one component equal to \p value,
-//! Within the patch.
+//! Return the number of elements of \p data equal to \p value (on all MPI ranks, but counting each
+//! location only once even if it is held on multiple ranks).
 //!
-size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data,
-                  const ioda::Distribution &obsDistribution, int value) {
-  size_t result = 0;
-  if (obsDistribution.name() == "Halo") {
-    std::vector<bool> patchObsBool;
-    obsDistribution.patchObs(patchObsBool);
-
-    for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
-      for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
-        if (data[varIndex][locIndex] == value && patchObsBool[locIndex])
-          ++result;
-      }
+size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data, int value,
+                  const ioda::Distribution &dist) {
+  auto accumulator = dist.createAccumulator<size_t>();
+  // Local reduction
+  for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
+    size_t numHitsAtLocation = 0;
+    for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
+      if (data[varIndex][locIndex] == value)
+        ++numHitsAtLocation;
     }
-  } else {
-    for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
-      for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
-        if (data[varIndex][locIndex] == value)
-          ++result;
-      }
-    }
+    accumulator->addTerm(locIndex, numHitsAtLocation);
   }
-
-  return result;
+  // Global reduction
+  return accumulator->computeResult();
 }
 
 // -----------------------------------------------------------------------------
@@ -474,10 +471,8 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   if (params.passedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
-    size_t passed = numEqualTo(qcflags->obsdatavector(),
-                               *ufoObsSpace.distribution(),
-                               ufo::QCflags::pass);
-    ufoObsSpace.distribution()->allReduceInPlace(passed, eckit::mpi::sum());
+    size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass,
+                               *ufoObsSpace.distribution());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
 
@@ -493,8 +488,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   if (params.failedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t failedBenchmark = *params.failedBenchmark.value();
-    size_t failed = numNonzero(qcflags->obsdatavector());
-    ufoObsSpace.distribution()->allReduceInPlace(failed, eckit::mpi::sum());
+    size_t failed = numNonzero(qcflags->obsdatavector(), *ufoObsSpace.distribution());
     EXPECT_EQUAL(failed, failedBenchmark);
   }
 
@@ -514,9 +508,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     if (params.flaggedBenchmark.value() != boost::none) {
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
-      size_t flagged = numEqualTo(qcflags->obsdatavector(),
-                                  *ufoObsSpace.distribution(), flag);
-      ufoObsSpace.distribution()->allReduceInPlace(flagged, eckit::mpi::sum());
+      size_t flagged = numEqualTo(qcflags->obsdatavector(), flag, *ufoObsSpace.distribution());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }
   }
