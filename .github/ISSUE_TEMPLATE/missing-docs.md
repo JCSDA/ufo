@@ -3,7 +3,7 @@ name: 'Missing Documentation'
 about: 'Use this issue to note missing documentation on ReadTheDocs and/or Doxygen'
 title: "[Documentation]: Give a descriptive title here"
 labels: documentation
-assignees: 'huishao-r', 'rhoneyager', 'mmiesch'
+assignees: huishao-r, rhoneyager, mmiesch
 
 ---
 
