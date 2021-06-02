@@ -35,6 +35,7 @@ namespace QCflags {
   constexpr int onedvar = 25;  // observation failed to converge in 1dvar check
   constexpr int bayesianQC = 26;  // observation failed due to Bayesian background check
   constexpr int modelobthresh = 27;  // observation failed modelob threshold check
+  constexpr int history = 28;  // observation failed when compared with historical data
 };  // namespace QCflags
 
 }  // namespace ufo

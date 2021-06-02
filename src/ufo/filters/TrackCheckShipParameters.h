@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 Met Office UK
+ * (C) Copyright 2021 Met Office UK
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -19,18 +19,15 @@
 
 #include "ufo/filters/TrackCheckUtilsParameters.h"
 
-
-
 namespace ufo {
 
-/// \brief Options controlling the operation of the ship track check filter.
-class TrackCheckShipParameters : public TrackCheckUtilsParameters {
-  OOPS_CONCRETE_PARAMETERS(TrackCheckShipParameters, TrackCheckUtilsParameters)
+class TrackCheckShipCoreParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(TrackCheckShipCoreParameters, Parameters)
 
  public:
   /// Assumed temporal resolution of the observations, i.e. absolute accuracy of the reported
   /// observation times.
-  oops::RequiredParameter<util::Duration> temporalResolution{
+  oops::RequiredParameter<util::Duration> temporalResolution {
     "temporal resolution", this
   };
 
@@ -56,6 +53,20 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "rejection threshold", this
   };
 
+  /// \brief If \p earlyBreakCheck set to true, check will stop early based on the number
+  /// of short-spaced, fast, and bended segments of the track
+  oops::RequiredParameter<bool> earlyBreakCheck {
+    "early break check", this
+  };
+};
+
+/// \brief Options controlling the operation of the ship track check filter.
+class TrackCheckShipParameters : public TrackCheckUtilsParameters {
+  OOPS_CONCRETE_PARAMETERS(TrackCheckShipParameters, TrackCheckUtilsParameters)
+
+ public:
+  TrackCheckShipCoreParameters core{this};
+
   /// The start of an observation window where trace output should be produced. If blank,
   /// the start of the track will be treated as the start of this window.
   oops::OptionalParameter<float> debugWindowStart {
@@ -70,15 +81,10 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
 
   /// The type of input source. This affects the treatment of tracks
   /// with large numbers of short segments between observations.
-  oops::Parameter<int> inputCategory {
-    "input category", 2, this  // 1 for buoy/other fixed input; 2 for ship
+  oops::Parameter<SurfaceObservationSubtype> inputCategory {
+    "input category", SurfaceObservationSubtype::SHPSYN, this
   };
 
-  /// \brief If \p earlyBreakCheck set to true, check will stop early based on the number
-  /// of short-spaced, fast, and bended segments of the track
-  oops::RequiredParameter<bool> earlyBreakCheck {
-    "early break check", this
-  };
 
   /// \brief To be set to \p true if the filter's unit tests are being run
   oops::Parameter<bool> testingMode {

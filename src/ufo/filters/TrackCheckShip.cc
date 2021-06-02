@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 Met Office UK
+ * (C) Copyright 2021 Met Office UK
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -40,7 +40,7 @@ TrackCheckShip::TrackCheckShip(ioda::ObsSpace &obsdb, const Parameters_ &paramet
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
   oops::Log::debug() << "TrackCheckShip: config = " << options_ << std::endl;
-  assert(options_.maxSpeed.value() > 0);
+  assert(options_.core.maxSpeed.value() > 0);
   if (options_.testingMode)
     diagnostics_.reset(new TrackCheckShipDiagnostics());
 }
@@ -55,9 +55,9 @@ double TrackCheckShip::speedEstimate(
     const TrackCheckShipParameters& options) {
   util::Duration temporalDistance = abs(obs1.getTime() -
                                         obs2.getTime());
-  util::Duration tempRes = options.temporalResolution;
+  util::Duration tempRes = options.core.temporalResolution;
   auto dist = distance(obs1, obs2);
-  auto spatialRes = options.spatialResolution;
+  auto spatialRes = options.core.spatialResolution;
   double speedEst = 0.0;
   if (dist > spatialRes) {
     speedEst = (dist - 0.5 * spatialRes) /
@@ -181,7 +181,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
     calculateTrackSegmentProperties(trackObservationsReferences,
                                     CalculationMethod::FIRSTITERATION);
     if (!trackObservationsReferences.empty() &&
-        this->options_.earlyBreakCheck &&
+        this->options_.core.earlyBreakCheck &&
         TrackCheckShip::earlyBreak(trackObservationsReferences, stationId)) {
       continue;
     }
@@ -195,9 +195,9 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
             return a.getObservationStatistics().speed <
             b.getObservationStatistics().speed;});
         auto maxSpeedValue = maxSpeedReferenceIterator->get().getObservationStatistics().speed;
-        if (maxSpeedValue <= (0.8 * options_.maxSpeed.value())) {
+        if (maxSpeedValue <= (0.8 * options_.core.maxSpeed.value())) {
           break;
-        } else if (maxSpeedValue < options_.maxSpeed.value()) {
+        } else if (maxSpeedValue < options_.core.maxSpeed.value()) {
           auto maxSpeedAngle = std::max(
                 (maxSpeedReferenceIterator - 1)->get().getObservationStatistics().angle,
                 maxSpeedReferenceIterator->get().getObservationStatistics().angle);
@@ -213,7 +213,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
       }
       auto rejectedCount = std::count_if(trackObservations.begin(), trackObservations.end(),
                     [](const TrackObservation& a) {return a.rejected();});
-      if (rejectedCount >= options_.rejectionThreshold.value() * trackObservations.size()) {
+      if (rejectedCount >= options_.core.rejectionThreshold.value() * trackObservations.size()) {
         oops::Log::trace() << "CheckShipTrack: track " << stationId << " NumRej " <<
                               rejectedCount << " out of " << trackObservations.size() <<
                               " reports rejected. *** Reject whole track ***\n";
@@ -268,7 +268,8 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
   // if at least half of the track segments have a time difference of less than an hour
   // (if non-buoy), are faster than a configured maximum speed, or exhibit at least a 90
   // degree bend
-  if ((2 * ((options_.inputCategory.value() != 1)  // 1 is input category of buoy
+  if ((2 * ((options_.inputCategory.value() != SurfaceObservationSubtype::BUOY &&
+             options_.inputCategory.value() != SurfaceObservationSubtype::BUOYPROF)
             * trackStats.numShort_ + trackStats.numFast_) + trackStats.numBends_)
       >= (trackObs.size() - 1)) {
     oops::Log::trace() << "ShipTrackCheck: " << trackId << "\n" <<
@@ -309,9 +310,9 @@ void TrackCheckShip::removeFaultyObservation(
   if (observationAfterFastestSegment == track.begin() + 1) {
     // Decide whether ob 0 or 1 agrees best with ob 2
     if (neighborObservationStatistics(0).speedAveraged <=
-        options_.maxSpeed &&
+        options_.core.maxSpeed &&
         (neighborObservationStatistics(1).speed >
-         options_.maxSpeed ||
+         options_.core.maxSpeed ||
          neighborObservationStatistics(1).angle > 45.0)) {
       fail(observationAfterFastestSegment);
       errorCategory = 2;
@@ -321,9 +322,9 @@ void TrackCheckShip::removeFaultyObservation(
     }
   } else if (observationAfterFastestSegment == track.end() - 1) {
     if (neighborObservationStatistics(-1).speedAveraged <=
-        options_.maxSpeed &&
+        options_.core.maxSpeed &&
         (neighborObservationStatistics(-1).speed >
-         options_.maxSpeed ||
+         options_.core.maxSpeed ||
          neighborObservationStatistics(-2).angle > 45.0)) {
       fail(observationAfterFastestSegment - 1);
       errorCategory = 2;
@@ -332,22 +333,22 @@ void TrackCheckShip::removeFaultyObservation(
       errorCategory = 1;
     }
   } else if (neighborObservationStatistics(-1).speed >
-             options_.maxSpeed) {
+             options_.core.maxSpeed) {
     fail(observationAfterFastestSegment - 1);
     errorCategory = 4;
     //  Category 4: both segments surrounding observation have excessive speed
   } else if (neighborObservationStatistics(1).speed >
-             options_.maxSpeed) {
+             options_.core.maxSpeed) {
     fail(observationAfterFastestSegment);
     errorCategory = 4;
   } else if (neighborObservationStatistics(0).speedAveraged >
-             options_.maxSpeed) {
+             options_.core.maxSpeed) {
     fail(observationAfterFastestSegment - 1);
     errorCategory = 5;
     // Category 5: observation before fastest segment would still begin a fast segment
     // if observation after fastest segment were removed
   } else if (neighborObservationStatistics(-1).speedAveraged >
-             options_.maxSpeed) {
+             options_.core.maxSpeed) {
     fail(observationAfterFastestSegment);
     errorCategory = 5;
     // Category 5: observation after fastest segment would still end a fast segment if
@@ -402,12 +403,12 @@ void TrackCheckShip::removeFaultyObservation(
       diagnostics_->storeTimeSum(timeDouble);
     }
     if (distancePrevObsOmitted < distanceCurrentObsOmitted - std::max(
-          options_.spatialResolution.value(), 0.1 * distanceSum)) {
+          options_.core.spatialResolution.value(), 0.1 * distanceSum)) {
       fail(observationAfterFastestSegment - 1);
       errorCategory = 9;
     } else if (distanceCurrentObsOmitted < (
                  distancePrevObsOmitted - std::max(
-                   options_.spatialResolution.value(), 0.1 * distanceSum))) {
+                   options_.core.spatialResolution.value(), 0.1 * distanceSum))) {
       fail(observationAfterFastestSegment);
       errorCategory = 9;
     } else if (timeSum <= four_days && timeSum.toSeconds() > 0 &&
@@ -470,14 +471,14 @@ void TrackCheckShip::removeFaultyObservation(
                             distancePrevObsOmitted * 0.001 << " " <<
                             distanceCurrentObsOmitted * 0.001 << " " <<
                             (distancePrevObsOmitted - distanceCurrentObsOmitted) * 0.001 <<
-                            " " << std::max(options_.spatialResolution.value(),
+                            " " << std::max(options_.core.spatialResolution.value(),
                                               0.1 * distanceSum) *
                             0.001 << "[km]" << std::endl;
     }
   }
   if (errorCategory == 0 || ((rejectedObservation->get().getObservationStatistics().
                               speedAveraged) >
-                             options_.maxSpeed.value())) {
+                             options_.core.maxSpeed.value())) {
     oops::Log::trace() << "CheckShipTrack: cannot decide between station id " <<
                           trackId << " observations " <<
                           (observationAfterFastestSegment - 1)->get().getObservationNumber() <<
@@ -537,7 +538,7 @@ void TrackCheckShip::TrackObservation::calculateTwoObservationValues(
     TrackObservation& prevObs, bool firstIteration,
     const TrackCheckShipParameters &options) {
   this->setDistance(TrackCheckShip::distance(prevObs, *this));
-  (this->observationStatistics_.distance > options.spatialResolution) ?
+  (this->observationStatistics_.distance > options.core.spatialResolution) ?
         this->setSpeed(TrackCheckShip::speedEstimate(*this, prevObs, options)) :
         this->setSpeed(0.0);
   this->setTimeDifference(getTime() - prevObs.getTime());
@@ -569,7 +570,7 @@ void TrackCheckShip::TrackObservation::calculateThreeObservationValues(
   this->setSpeedAveraged(speedEstimate(prevObs, nextObs, options));
   if (std::min(this->observationStatistics_.distance,
                nextObs.observationStatistics_.distance) >
-      options.spatialResolution) {
+      options.core.spatialResolution) {
     this->observationStatistics_.angle = angle(prevObs, *this, nextObs);
   }
   if (firstIteration) {
@@ -622,7 +623,7 @@ void TrackCheckShip::TrackObservation::adjustTwoObservationStatistics
   util::Duration hour{"PT1H"};
   if (getObservationStatistics().timeDifference < hour) {
     getFullTrackStatistics()->numShort_++;
-  } else if (getObservationStatistics().speed >= options.maxSpeed) {
+  } else if (getObservationStatistics().speed >= options.core.maxSpeed) {
     getFullTrackStatistics()->numFast_++;
   } else {
     getFullTrackStatistics()->sumSpeed_ += getObservationStatistics().speed;

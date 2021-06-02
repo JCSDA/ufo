@@ -20,6 +20,9 @@ set ( filters_files
       GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
+      HistoryCheck.cc
+      HistoryCheck.h
+      HistoryCheckParameters.h
       ImpactHeightCheck.cc
       ImpactHeightCheck.h
       ObsBoundsCheck.cc
@@ -89,6 +92,7 @@ set ( filters_files
       TrackCheckShipParameters.h
       TrackCheckUtils.cc
       TrackCheckUtils.h
+      TrackCheckUtilsParameters.cc
       TrackCheckUtilsParameters.h
       Variable.cc
       Variable.h

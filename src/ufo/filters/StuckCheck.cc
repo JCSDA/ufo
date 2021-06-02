@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 Met Office UK
+ * (C) Copyright 2021 Met Office UK
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -28,24 +28,16 @@
 
 namespace ufo {
 
-StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                         std::shared_ptr<ioda::ObsDataVector<int> > flags,
                         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
-  oops::Log::debug() << "StuckCheck: config = " << config << '\n';
-  options_.reset(new StuckCheckParameters());
-  options_->deserialize(config);
-  obsAccessor_.reset(new ObsAccessor(TrackCheckUtils::createObsAccessor(
-                                       options_->stationIdVariable, obsdb_)));
   obsGroupDateTimes_.reset(new std::vector<util::DateTime>);
-  *obsGroupDateTimes_ = obsAccessor_->getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
-  validObsIds_.reset(new std::vector<size_t>);
+  oops::Log::debug() << "StuckCheck: config = " << options_ << '\n';
 }
 
-// Required for the correct destruction of options_, obsAccessor_, obsGroupDateTimes_, and
-// validObsIds_.
+// Required for the correct destruction of ObsGroupDateTimes_.
 StuckCheck::~StuckCheck()
 {}
 
@@ -57,12 +49,15 @@ StuckCheck::~StuckCheck()
 void StuckCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  *validObsIds_ = obsAccessor_->getValidObservationIds(apply);
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
+  *obsGroupDateTimes_ = obsAccessor.getDateTimeVariableFromObsSpace(
+        "MetaData", "datetime");
   // Create groups based on record number (assumed station ID) or category variable
   // (stationIdVariable) or otherwise assume observations all taken by the same station (1 group)
-  RecursiveSplitter splitter = obsAccessor_->splitObservationsIntoIndependentGroups(*validObsIds_);
-  TrackCheckUtils::sortTracksChronologically(*validObsIds_, *obsAccessor_, splitter);
-  std::vector<bool> isRejected(validObsIds_->size(), false);
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+  TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
+  std::vector<bool> isRejected(validObsIds.size(), false);
   std::vector<std::string> filterVariables = filtervars.toOopsVariables().variables();
   // Iterates through observations to see how long each variable is stuck on one observation
   for (std::string const& variable : filterVariables) {
@@ -72,12 +67,12 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
           "StuckCheck Error: ObsValue vector for " + variable + " not found.\n";
       throw std::invalid_argument(errorMessage);
     }
-    const std::vector<float> variableValues = obsAccessor_->getFloatVariableFromObsSpace(
+    const std::vector<float> variableValues = obsAccessor.getFloatVariableFromObsSpace(
           "ObsValue", variable);
     for (auto station : splitter.multiElementGroups()) {
       std::string stationId = std::to_string(stationNumber);
       std::vector<float> variableDataStation = collectStationVariableData(
-            station.begin(), station.end(), variableValues);
+            station.begin(), station.end(), validObsIds, variableValues);
       // the working variable's value associated with the prior observation
       float previousObservationValue;
       float currentObservationValue;
@@ -94,6 +89,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
             if (observationIndex == variableDataStation.size() - 1) {
               StuckCheck::potentiallyRejectStreak(station.begin(),
                                                   station.end(),
+                                                  validObsIds,
                                                   firstSameValueIndex,
                                                   observationIndex,
                                                   isRejected,
@@ -102,6 +98,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
           } else {  // streak ended in the previous observation
             StuckCheck::potentiallyRejectStreak(station.begin(),
                                                 station.end(),
+                                                validObsIds,
                                                 firstSameValueIndex,
                                                 observationIndex - 1,
                                                 isRejected,
@@ -115,7 +112,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
       stationNumber++;
     }
   }
-  obsAccessor_->flagRejectedObservations(isRejected, flagged);
+  obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
 void StuckCheck::print(std::ostream & os) const {
@@ -127,13 +124,14 @@ void StuckCheck::print(std::ostream & os) const {
 std::vector<float> StuckCheck::collectStationVariableData(
     std::vector<size_t>::const_iterator stationObsIndicesBegin,
     std::vector<size_t>::const_iterator stationObsIndicesEnd,
+    const std::vector<size_t> &validObsIds,
     const std::vector<float> &globalData) const {
   std::vector<float> stationData;
   stationData.reserve(stationObsIndicesEnd - stationObsIndicesBegin);
   size_t observationNumber = 0;
   for (std::vector<size_t>::const_iterator it = stationObsIndicesBegin;
        it != stationObsIndicesEnd; ++it) {
-    const size_t obsId = validObsIds_->at(*it);
+    const size_t obsId = validObsIds.at(*it);
     stationData.push_back(globalData[obsId]);
     observationNumber++;
   }
@@ -143,27 +141,28 @@ std::vector<float> StuckCheck::collectStationVariableData(
 void StuckCheck::potentiallyRejectStreak(
     std::vector<size_t>::const_iterator stationIndicesBegin,
     std::vector<size_t>::const_iterator stationIndicesEnd,
+    const std::vector<size_t> &validObsIds,
     size_t startOfStreakIndex,
     size_t endOfStreakIndex,
     std::vector<bool> &isRejected,
     std::string stationId = "") const {
 
-  auto getObservationTime = [this, &stationIndicesBegin] (
+  auto getObservationTime = [this, &stationIndicesBegin, &validObsIds] (
       size_t offsetFromBeginning)->util::DateTime{
-    const size_t obsIndex = validObsIds_->at(*(stationIndicesBegin + offsetFromBeginning));
+    const size_t obsIndex = validObsIds.at(*(stationIndicesBegin + offsetFromBeginning));
     return obsGroupDateTimes_->at(obsIndex);
   };
 
-  auto rejectObservation = [this, &isRejected, &stationIndicesBegin, &stationId](
+  auto rejectObservation = [&validObsIds, &isRejected, &stationIndicesBegin, &stationId](
       size_t observationIndex) {
-    const size_t obsIndex = validObsIds_->at(*(stationIndicesBegin + observationIndex));
+    const size_t obsIndex = validObsIds.at(*(stationIndicesBegin + observationIndex));
     isRejected[obsIndex] = true;
     oops::Log::trace() << "StuckCheck: Observation " << observationIndex <<
                           " rejected from station " << stationId << std::endl;
   };
 
   size_t streakLength = endOfStreakIndex - startOfStreakIndex + 1;
-  if (streakLength <= options_->numberStuckTolerance) {
+  if (streakLength <= options_.core.numberStuckTolerance) {
     return;
   }
 
@@ -173,7 +172,7 @@ void StuckCheck::potentiallyRejectStreak(
     util::DateTime firstStreakObservationTime = getObservationTime(startOfStreakIndex);
     util::DateTime lastStreakObservationTime = getObservationTime(endOfStreakIndex);
     util::Duration streakDuration = lastStreakObservationTime - firstStreakObservationTime;
-    if (streakDuration <= options_->timeStuckTolerance) {
+    if (streakDuration <= options_.core.timeStuckTolerance) {
       return;
     }
   }

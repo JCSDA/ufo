@@ -176,6 +176,7 @@ list( APPEND ufo_test_input
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
+  testinput/qc_historycheck_unittests.yaml
   testinput/qc_met_office_buddy_check.yaml
   testinput/qc_met_office_buddy_check_unittests.yaml
   testinput/qc_met_office_buddy_pair_finder.yaml
@@ -2067,6 +2068,13 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
 ecbuild_add_test( TARGET  test_ufo_qc_stuckcheck_unittests
                   SOURCES mains/TestStuckCheck.cc
                   ARGS    "testinput/qc_stuckcheck_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET test_ufo_qc_historycheck_unittests
+                  SOURCES mains/TestHistoryCheck.cc
+                  ARGS    "testinput/qc_historycheck_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)

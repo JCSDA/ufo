@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 Met Office UK
+ * (C) Copyright 2021 Met Office UK
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -15,9 +15,9 @@
 #include "ufo/filters/TrackCheckUtilsParameters.h"
 
 namespace ufo {
-/// \brief Options controlling the operation of stuck check filter.
-class StuckCheckParameters : public TrackCheckUtilsParameters {
-  OOPS_CONCRETE_PARAMETERS(StuckCheckParameters, TrackCheckUtilsParameters)
+class StuckCheckCoreParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(StuckCheckCoreParameters, Parameters)
+
  public:
   /// The maximum number of observations in a row that can have the same observed value
   /// before the observations may be flagged by this filter.
@@ -31,6 +31,13 @@ class StuckCheckParameters : public TrackCheckUtilsParameters {
   oops::RequiredParameter<util::Duration> timeStuckTolerance {
     "time stuck tolerance", this
   };
+};
+
+/// \brief Options controlling the operation of stuck check filter.
+class StuckCheckParameters : public TrackCheckUtilsParameters {
+  OOPS_CONCRETE_PARAMETERS(StuckCheckParameters, TrackCheckUtilsParameters)
+ public:
+  StuckCheckCoreParameters core{this};
 };
 
 }  // namespace ufo

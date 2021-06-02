@@ -20,6 +20,7 @@
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/StuckCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 
 namespace eckit {
@@ -32,10 +33,6 @@ class ObsSpace;
 }
 
 namespace ufo {
-
-class ObsAccessor;
-class StuckCheckParameters;
-class RecursiveSplitter;
 
 /// Flags sequential observations whose filter variables have streaks of unchanging
 /// measurements over a time span such that the following two conditions are satisfied:
@@ -50,19 +47,19 @@ class RecursiveSplitter;
 class StuckCheck: public FilterBase,
     private util::ObjectCounter<StuckCheck> {
  public:
+  typedef StuckCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::StuckCheck";}
 
-  StuckCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                  std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   ~StuckCheck() override;
 
  private:
-  std::unique_ptr<StuckCheckParameters> options_;
+  Parameters_ options_;
   // Instantiate object for accessing observations that may be held on multiple MPI ranks.
-  std::unique_ptr<ObsAccessor> obsAccessor_;
-  std::unique_ptr<std::vector<size_t>> validObsIds_;
   std::unique_ptr<std::vector<util::DateTime>> obsGroupDateTimes_;
 
   void print(std::ostream &) const override;
@@ -72,9 +69,11 @@ class StuckCheck: public FilterBase,
   std::vector<float> collectStationVariableData(
       std::vector<size_t>::const_iterator stationObsIndicesBegin,
       std::vector<size_t>::const_iterator stationObsIndicesEnd,
+      const std::vector<size_t> &validObsIds,
       const std::vector<float> &globalData) const;
   void potentiallyRejectStreak(std::vector<size_t>::const_iterator stationIndicesBegin,
                                std::vector<size_t>::const_iterator stationIndicesEnd,
+                               const std::vector<size_t> &validObsIds,
                                size_t startOfStreakIndex,
                                size_t endOfStreakIndex,
                                std::vector<bool> &isRejected,

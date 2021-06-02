@@ -115,7 +115,7 @@ Short ship track:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
-    input category: 2
+    input category: 'SHPSYN'
     unit testing mode: true
     temporal resolution: PT10M
     spatial resolution (km): 1
@@ -150,7 +150,7 @@ Short buoy track:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
-    input category: 1
+    input category: 'BUOYPROF'
     unit testing mode: true
     temporal resolution: PT10M
     spatial resolution (km): 1
