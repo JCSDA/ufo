@@ -73,7 +73,7 @@ void testGeoVaLs() {
         GeoVaLs gv_one(gval, ind[i]);
         std::vector<float> gv_val(1);
         gv_one.get(gv_val, var, 1);
-        EXPECT(oops::is_close_absolute(gv_val[0], values[i], oneloctol, verbosity));
+        EXPECT(oops::is_close_absolute(gv_val[0], values[i], oneloctol, 0, verbosity));
       }
     } else {
       oops::Log::trace() << "Test just the constructor for a one location GeoVaLs" << std::endl;
