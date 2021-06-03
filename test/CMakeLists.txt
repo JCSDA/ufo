@@ -483,6 +483,7 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
+                  MPI     2
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_locations

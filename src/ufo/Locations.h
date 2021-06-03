@@ -47,8 +47,8 @@ class Locations : public util::Printable,
   /// size of locations
   size_t size() const;
 
-  /// accessor to the MPI communicator
-  const eckit::mpi::Comm & getComm() const {return dist_->comm();}
+  /// accessor to the observations MPI distribution
+  const std::shared_ptr<const ioda::Distribution> & distribution() const {return dist_;}
   /// accessor to observation longitudes (on current MPI task)
   const std::vector<float> & lons() const {return lons_;}
   /// accessor to observation latitudes (on current MPI task)

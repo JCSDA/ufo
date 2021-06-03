@@ -79,7 +79,9 @@ void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   oops::Log::trace() << gv <<  std::endl;
 
-  GeoVaLs gv1(odb_.comm()), gv2(odb_.comm());
+  GeoVaLs gv1(odb_.distribution(), gv.getVars());
+  GeoVaLs gv2(odb_.distribution(), gv.getVars());
+
   gv.split(gv1, gv2);
 
   oops::Log::trace() << gv1 << std::endl;

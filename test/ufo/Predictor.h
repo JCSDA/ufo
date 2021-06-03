@@ -65,7 +65,7 @@ void testPredictor() {
       gval.reset(new GeoVaLs(gconf, ospace, gvars));
     } else {
       // Create an empty GeoVaLs object
-      gval.reset(new GeoVaLs(ospace.comm()));
+      gval.reset(new GeoVaLs(ospace.distribution(), gvars));
     }
 
     // initialize Obs diagnostics

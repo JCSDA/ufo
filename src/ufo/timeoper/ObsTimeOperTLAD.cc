@@ -56,7 +56,8 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
+  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
+  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory split geovals gv1 "
@@ -87,7 +88,8 @@ void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
+  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
+  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL split geovals gv1 "
@@ -116,7 +118,8 @@ void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().comm()), gv2(obsspace().comm());
+  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
+  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
   geovals.split(gv1, gv2);
 
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD split geovals gv1 "

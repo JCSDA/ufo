@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,11 +8,10 @@
 #ifndef UFO_GEOVALS_H_
 #define UFO_GEOVALS_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "eckit/mpi/Comm.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -26,6 +25,7 @@ namespace eckit {
 
 namespace ioda {
   class ObsSpace;
+  class Distribution;
 }
 
 namespace ufo {
@@ -40,7 +40,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  explicit GeoVaLs(const eckit::mpi::Comm &);
+  GeoVaLs(const std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
   GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
@@ -116,7 +116,7 @@ class GeoVaLs : public util::Printable,
 
   F90goms keyGVL_;
   oops::Variables vars_;
-  const eckit::mpi::Comm & comm_;
+  std::shared_ptr<const ioda::Distribution> dist_;   /// observations MPI distribution
 };
 
 // -----------------------------------------------------------------------------

@@ -21,7 +21,7 @@ integer, parameter :: max_string=800
 public :: ufo_geovals, ufo_geoval
 public :: ufo_geovals_get_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
-public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
+public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
 public :: ufo_geovals_allocate
 public :: ufo_geovals_profmult
 public :: ufo_geovals_reorderzdir
@@ -785,44 +785,6 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod(self, other, gprod, f_comm)
-implicit none
-real(kind_real), intent(inout) :: gprod
-type(ufo_geovals), intent(in) :: self, other
-integer :: ivar, iobs, ival, nval
-real(kind_real) :: prod
-
-type(fckit_mpi_comm), intent(in) :: f_comm
-
-if (.not. self%linit) then
-  call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
-endif
-
-if (.not. other%linit) then
-  call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
-endif
-
-! just something to put in (dot product of the 1st var and 1st element in the profile
-prod=0.0
-do ivar = 1, self%nvar
-  nval = self%geovals(ivar)%nval
-  do ival = 1, nval
-     do iobs = 1, self%nlocs
-      if ((self%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value) .and. &
-          (other%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value)) then
-        prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
-                      other%geovals(ivar)%vals(ival,iobs)
-      endif
-    enddo
-  enddo
-enddo
-
-!Get global dot product
-call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
-
-end subroutine ufo_geovals_dotprod
-
-!-------------------------------------------------------------------------------
 subroutine ufo_geovals_reset_sec_arg(self, other, nlocs)
 implicit none
 type(ufo_geovals), intent(in) :: self

@@ -7,7 +7,6 @@
 module ufo_geovals_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
-use fckit_mpi_module, only: fckit_mpi_comm
 use iso_c_binding
 use ufo_geovals_mod
 use kinds
@@ -349,26 +348,6 @@ end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, c_comm) bind(c,name='ufo_geovals_dotprod_f90')
-implicit none
-integer(c_int), intent(in)     :: c_key_self, c_key_other
-real(c_double), intent(inout)  :: prod
-type(c_ptr), value, intent(in) :: c_comm
-
-type(ufo_geovals), pointer :: self, other
-type(fckit_mpi_comm)       :: f_comm
-
-call ufo_geovals_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_other, other)
-
-f_comm = fckit_mpi_comm(c_comm)
-
-call ufo_geovals_dotprod(self, other, prod, f_comm)
-
-end subroutine ufo_geovals_dotprod_c
-
-! ------------------------------------------------------------------------------
-
 subroutine ufo_geovals_split_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_split_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
@@ -707,16 +686,15 @@ end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
+subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_rank) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
 integer(c_int), intent(in)     :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
-type(c_ptr), value, intent(in) :: c_comm
+integer(c_size_t), intent(in)  :: c_rank   ! mpi rank (to be added to filename)
 
 type(ufo_geovals), pointer :: self
 character(max_string)      :: fout, filename
 
-type(fckit_mpi_comm)          :: comm
 character(len=10)             :: cproc
 integer                       :: ppos
 character(len=:), allocatable :: str
@@ -727,10 +705,7 @@ f_conf = fckit_configuration(c_conf)
 call f_conf%get_or_die("filename",str)
 filename = str
 
-! get the process rank number
-comm = fckit_mpi_comm(c_comm)
-
-write(cproc,fmt='(i4.4)') comm%rank()
+write(cproc,fmt='(i4.4)') c_rank
 
 ! Find the left-most dot in the file name, and use that to pick off the file name
 ! and file extension.

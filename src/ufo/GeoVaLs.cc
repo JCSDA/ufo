@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2019 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,12 +7,15 @@
 
 #include "ufo/GeoVaLs.h"
 
+#include <cassert>
 #include <iomanip>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "ioda/distribution/Accumulator.h"
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
@@ -26,8 +29,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /*! \brief Default constructor - does not allocate fields
 */
-GeoVaLs::GeoVaLs(const eckit::mpi::Comm & comm)
-  : keyGVL_(-1), comm_(comm)
+GeoVaLs::GeoVaLs(const std::shared_ptr<const ioda::Distribution> dist,
+                 const oops::Variables & vars)
+  : keyGVL_(-1), vars_(vars), dist_(dist)
 {
   oops::Log::trace() << "GeoVaLs default constructor starting" << std::endl;
   ufo_geovals_default_constr_f90(keyGVL_);
@@ -46,7 +50,7 @@ GeoVaLs::GeoVaLs(const eckit::mpi::Comm & comm)
  *
  */
 GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), comm_(locs.getComm())
+  : keyGVL_(-1), vars_(vars), dist_(locs.distribution())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, locs.size(), vars_);
@@ -62,7 +66,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
 GeoVaLs::GeoVaLs(const eckit::Configuration & config,
                  const ioda::ObsSpace & obspace,
                  const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), comm_(obspace.comm())
+  : keyGVL_(-1), vars_(vars), dist_(obspace.distribution())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 0, vars_);
@@ -77,7 +81,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
 * create a new GeoVaLs with just one location
 */
 GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
-  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+  : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 1, vars_);
@@ -89,7 +93,7 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
 /*! \brief Copy constructor */
 
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
-  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+  : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 0, vars_);
@@ -209,10 +213,31 @@ GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
 /*! \brief Scalar product of two GeoVaLs */
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
-  double zz;
-  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_);
+  const size_t nlocs = this->nlocs();
+  assert(nlocs == other.nlocs());
+  assert(vars_ == other.vars_);
+  auto accumulator = dist_->createAccumulator<double>();
+  std::vector<double> this_values(nlocs), other_values(nlocs);
+  double missing = util::missingValue(missing);
+  // loop over all variables in geovals
+  for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+    const size_t nlevs = this->nlevs(vars_[jvar]);
+    assert(nlevs == other.nlevs(vars_[jvar]));
+    // loop over all levels for this variable
+    for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+      this->get(this_values, vars_[jvar], jlev+1);
+      other.get(other_values, vars_[jvar], jlev+1);
+      // loop over all locations
+      for (size_t jloc = 0; jloc < nlocs; ++jloc) {
+        if ((this_values[jloc] != missing) && (other_values[jloc] != missing)) {
+          accumulator->addTerm(jloc, this_values[jloc]*other_values[jloc]);
+        }
+      }
+    }
+  }
+  const double dotprod = accumulator->computeResult();
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
-  return zz;
+  return dotprod;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Split two GeoVaLs */
@@ -439,7 +464,7 @@ void GeoVaLs::read(const eckit::Configuration & config,
 /*! \brief Write GeoVaLs to the file */
 void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
-  ufo_geovals_write_file_f90(keyGVL_, config, comm_);
+  ufo_geovals_write_file_f90(keyGVL_, config, dist_->rank());
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------

@@ -8,7 +8,6 @@
 #ifndef UFO_GEOVALS_INTERFACE_H_
 #define UFO_GEOVALS_INTERFACE_H_
 
-#include "eckit/mpi/Comm.h"
 #include "Fortran.h"
 
 // Forward declarations
@@ -56,8 +55,6 @@ extern "C" {
   void ufo_geovals_diff_f90(const F90goms &, const F90goms &);
   void ufo_geovals_schurmult_f90(const F90goms &, const F90goms &);
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);
-  void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &,
-                               const eckit::mpi::Comm &);
   void ufo_geovals_split_f90(const F90goms &, const F90goms &, const F90goms &);
   void ufo_geovals_merge_f90(const F90goms &, const F90goms &, const F90goms &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);
@@ -79,8 +76,7 @@ extern "C" {
   void ufo_geovals_read_file_f90(const F90goms &,
                                  const eckit::Configuration &,
                                  const ioda::ObsSpace &, const oops::Variables &);
-  void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration &,
-                                  const eckit::mpi::Comm &);
+  void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration &, const size_t &);
 }  // extern C
 
 }  // namespace ufo

@@ -56,7 +56,7 @@ void testGeoVaLs() {
 /// Check that GeoVaLs default constructor works
      oops::Log::trace() <<
       "GeoVaLs default constructor - does not allocate fields" << std::endl;
-    GeoVaLs gv_temp(ospace.comm());
+    GeoVaLs gv_temp(ospace.distribution(), ingeovars);
 
 /// Check that GeoVaLs constructor to create a GeoVaLs with one location works
     if (gconf.has("one location check")) {
@@ -123,7 +123,8 @@ void testGeoVaLs() {
     oops::Log::debug()<< "gv dot product with itself after merge " << dp_gv_merged << std::endl;
     EXPECT(abs(dp_gv_merged - 2.0 * dp_gval)/dp_gv_merged < tol);
 
-    GeoVaLs gv1(ospace.comm()), gv2(ospace.comm());
+    GeoVaLs gv1(ospace.distribution(), gv.getVars());
+    GeoVaLs gv2(ospace.distribution(), gv.getVars());
     gv.split(gv1, gv2);
 
     double dp_gv1_split = gv1.dot_product_with(gv1);
