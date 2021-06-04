@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "ioda/core/ObsData.h"
 #include "ioda/core/ParameterTraitsObsDtype.h"
 #include "oops/base/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"

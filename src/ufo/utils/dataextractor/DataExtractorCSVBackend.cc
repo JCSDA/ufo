@@ -17,8 +17,8 @@
 #include "eckit/parser/CSVParser.h"
 #include "eckit/utils/StringTools.h"
 
-#include "ioda/core/ObsData.h"  // for ObsDtype
 #include "ioda/Misc/StringFuncs.h"   // for convertV1PathToV2Path
+#include "ioda/ObsSpace.h"  // for ObsDtype
 
 #include "oops/util/Logger.h"
 
