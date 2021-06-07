@@ -89,7 +89,7 @@ Eigen::ArrayXXf ROobserror::get_geovals(const std::string& var_name) const {
     std::vector<float> single_geoval(nlocs);
     for (int ilev=0; ilev < static_cast<int>(nlevs); ilev++) {
         oops::Log::debug() << "Getting data for level " << ilev+1 << std::endl;
-        data_.getGeoVaLs()->get(single_geoval, Variable(var_name).variable(), ilev+1);
+        data_.getGeoVaLs()->getAtLevel(single_geoval, Variable(var_name).variable(), ilev+1);
         all_geovals.col(ilev) = Eigen::VectorXf::Map(single_geoval.data(), single_geoval.size());
     }
     return all_geovals;

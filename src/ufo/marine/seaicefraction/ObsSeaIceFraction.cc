@@ -48,7 +48,7 @@ void ObsSeaIceFraction::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 1; k < nlevs+1; ++k ) {
-    gv.get(aicen, "sea_ice_category_area_fraction", k);
+    gv.getAtLevel(aicen, "sea_ice_category_area_fraction", k);
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       ovec[i] += aicen[i];
     }

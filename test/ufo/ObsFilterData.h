@@ -172,7 +172,7 @@ void testObsFilterData() {
         std::vector<float> vec;
         data.get(geovars.variable(jvar), nlevs, vec);
         std::vector<float> ref(ospace.nlocs());
-        gval.get(ref, geovars.variable(jvar).variable(), nlevs);
+        gval.getAtLevel(ref, geovars.variable(jvar).variable(), nlevs);
         EXPECT(vec == ref);
       }
     }

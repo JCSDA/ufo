@@ -111,7 +111,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   std::vector<std::vector<float>> tvp;
   std::size_t nlevs = geovals.nlevs("air_temperature");
   for (std::size_t js = 0; js < nlevs; ++js) {
-    geovals.get(pred, "air_temperature", js+1);
+    geovals.getAtLevel(pred, "air_temperature", js+1);
     tvp.push_back(pred);
   }
   nlevs = geovals.nlevs("air_pressure");

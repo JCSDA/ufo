@@ -77,26 +77,34 @@ class GeoVaLs : public util::Printable,
   const oops::Variables & getVars() const {return vars_;}
 
   size_t nlevs(const std::string & var) const;
-  void get(std::vector<float> &, const std::string &, const int) const;
-  void get(std::vector<double> &, const std::string &, const int) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs)
   void get(std::vector<double> &, const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to float
   void get(std::vector<float> &, const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to int
   void get(std::vector<int> &, const std::string & var) const;
+
+  /// Get GeoVaLs at a specified level
+  void getAtLevel(std::vector<double> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified level and convert to float
+  void getAtLevel(std::vector<float> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified level and convert to int
+  void getAtLevel(std::vector<int> &, const std::string &, const int) const;
+
   /// Get GeoVaLs at a specified location
   void getAtLocation(std::vector<double> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to float
   void getAtLocation(std::vector<float> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to int
   void getAtLocation(std::vector<int> &, const std::string &, const int) const;
+
   /// Put GeoVaLs for double variable \p var at level \p lev.
-  void put(const std::vector<double> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<double> & vals, const std::string & var, const int lev) const;
   /// Put GeoVaLs for float variable \p var at level \p lev.
-  void put(const std::vector<float> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<float> & vals, const std::string & var, const int lev) const;
   /// Put GeoVaLs for int variable \p var at level \p lev.
-  void put(const std::vector<int> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<int> & vals, const std::string & var, const int lev) const;
+
   /// Put GeoVaLs for double variable \p var at location \p loc.
   void putAtLocation(const std::vector<double> & vals, const std::string & var,
                      const int loc) const;
@@ -104,6 +112,7 @@ class GeoVaLs : public util::Printable,
   void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc) const;
   /// Put GeoVaLs for int variable \p var at location \p loc.
   void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
+
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void write(const eckit::Configuration &) const;
   size_t nlocs() const;

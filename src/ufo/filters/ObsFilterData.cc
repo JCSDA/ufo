@@ -244,7 +244,7 @@ void ObsFilterData::get(const Variable & varname, const int level,
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
-    gvals_->get(values, var, level);
+    gvals_->getAtLevel(values, var, level);
 ///  For ObsDiag get from ObsDiagnostics
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);

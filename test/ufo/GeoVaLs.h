@@ -72,7 +72,7 @@ void testGeoVaLs() {
       for (std::size_t i = 0; i < ind.size(); ++i) {
         GeoVaLs gv_one(gval, ind[i]);
         std::vector<float> gv_val(1);
-        gv_one.get(gv_val, var, 1);
+        gv_one.getAtLevel(gv_val, var, 1);
         EXPECT(oops::is_close_absolute(gv_val[0], values[i], oneloctol, 0, verbosity));
       }
     } else {
@@ -96,8 +96,8 @@ void testGeoVaLs() {
         sum = 0;
         for (size_t k = 0; k < nlevs; ++k) {
           size_t kk = nlevs - k;
-          gv.get(gvar, ingeovars[i], k+1);
-          gval.get(gvarref, ingeovars[i], kk);
+          gv.getAtLevel(gvar, ingeovars[i], k+1);
+          gval.getAtLevel(gvarref, ingeovars[i], kk);
           for (size_t  j = 0; j < nobs; ++j) {
             gvar[j] = gvar[j] - gvarref[j];
             sum += sum + gvar[j];
@@ -165,7 +165,8 @@ void testGeoVaLs() {
   }
 }
 
-/// \brief Tests GeoVaLs::allocate, GeoVaLs::put, GeoVaLs::get,
+/// \brief Tests GeoVaLs::allocate, GeoVals::put, GeoVaLs::get,
+/// GeoVaLs::putAtLevel, GeoVaLs::getAtLevel,
 /// GeoVaLs::putAtLocation and GeoVaLs::getAtLocation.
 void testGeoVaLsAllocatePutGet() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
@@ -209,7 +210,7 @@ void testGeoVaLsAllocatePutGet() {
   const double fillvalue_double = 3.01234567890123;
   oops::Log::test() << "Put(double) fill value: " << fillvalue_double << std::endl;
   const std::vector<double> refvalues_double(gval.nlocs(), fillvalue_double);
-  gval.put(refvalues_double, var2, 1);
+  gval.putAtLevel(refvalues_double, var2, 1);
   std::vector<double> testvalues_double(gval.nlocs(), 0);
   gval.get(testvalues_double, var2);
   oops::Log::test() << "Get(double) result: " << testvalues_double << std::endl;
@@ -218,7 +219,7 @@ void testGeoVaLsAllocatePutGet() {
   const float fillvalue_float = 4.1f;
   oops::Log::test() << "Put(float) fill value: " << fillvalue_float << std::endl;
   const std::vector<float> refvalues_float(gval.nlocs(), fillvalue_float);
-  gval.put(refvalues_float, var2, 1);
+  gval.putAtLevel(refvalues_float, var2, 1);
   std::vector<float> testvalues_float(gval.nlocs(), 0);
   gval.get(testvalues_float, var2);
   oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
@@ -227,7 +228,7 @@ void testGeoVaLsAllocatePutGet() {
   const int fillvalue_int = 5;
   oops::Log::test() << "Put(int) fill value: " << fillvalue_int << std::endl;
   const std::vector<int> refvalues_int(gval.nlocs(), fillvalue_int);
-  gval.put(refvalues_int, var2, 1);
+  gval.putAtLevel(refvalues_int, var2, 1);
   std::vector<int> testvalues_int(gval.nlocs(), 0);
   gval.get(testvalues_int, var2);
   oops::Log::test() << "Get(int) result: " << testvalues_int << std::endl;
@@ -238,7 +239,7 @@ void testGeoVaLsAllocatePutGet() {
   for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
     std::vector<double> refvalues_loc_double(gval.nlocs());
     std::iota(refvalues_loc_double.begin(), refvalues_loc_double.end(), jlev);
-    gval.put(refvalues_loc_double, var1, jlev+1);
+    gval.putAtLevel(refvalues_loc_double, var1, jlev+1);
   }
   for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
     // Get the test vector at this location.
@@ -279,7 +280,7 @@ void testGeoVaLsAllocatePutGet() {
   for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
     // Get the test vector on this level.
     std::vector <double> testvalues_double(gval.nlocs());
-    gval.get(testvalues_double, var1, jlev + 1);
+    gval.getAtLevel(testvalues_double, var1, jlev + 1);
     // Recreate reference vector for this level.
     std::vector <double> refvalues_double(gval.nlocs());
     std::iota(refvalues_double.begin(), refvalues_double.end(), jlev);
@@ -298,7 +299,7 @@ void testGeoVaLsAllocatePutGet() {
   for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
     // Get the test vector on this level.
     std::vector <float> testvalues_float(gval.nlocs());
-    gval.get(testvalues_float, var1, jlev + 1);
+    gval.getAtLevel(testvalues_float, var1, jlev + 1);
     // Recreate reference vector for this level.
     std::vector <float> refvalues_float(gval.nlocs());
     std::iota(refvalues_float.begin(), refvalues_float.end(), jlev + 1);
@@ -316,11 +317,8 @@ void testGeoVaLsAllocatePutGet() {
   oops::Log::test() << "testing putAtLoction with ints" << std::endl;
   for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
     // Get the test vector on this level.
-    // The get method has not been implemented for integers, so get a vector of floats
-    // and convert it.
-    std::vector <float> testvalues_float(gval.nlocs());
-    gval.get(testvalues_float, var1, jlev + 1);
-    std::vector <int> testvalues_int(testvalues_float.begin(), testvalues_float.end());
+    std::vector <int> testvalues_int(gval.nlocs());
+    gval.getAtLevel(testvalues_int, var1, jlev + 1);
     // Recreate reference vector for this level.
     std::vector <int> refvalues_int(gval.nlocs());
     std::iota(refvalues_int.begin(), refvalues_int.end(), jlev + 2);
@@ -344,10 +342,10 @@ void testGeoVaLsAllocatePutGet() {
   for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
     const float fillvalue = 3.0*(jlev+1);
     const std::vector<double> refvalues(gval.nlocs(), fillvalue);
-    gval.put(refvalues, var1, jlev+1);
+    gval.putAtLevel(refvalues, var1, jlev + 1);
     oops::Log::test() << jlev << " level: put fill value: " << fillvalue << std::endl;
     std::vector<double> testvalues(gval.nlocs(), 0);
-    gval.get(testvalues, var1, jlev+1);
+    gval.getAtLevel(testvalues, var1, jlev + 1);
     oops::Log::test() << jlev << " level: get result: " << testvalues << std::endl;
     EXPECT_EQUAL(testvalues, refvalues);
   }

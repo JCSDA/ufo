@@ -43,7 +43,7 @@ void ObsDiagnostics::allocate(const int nlev, const oops::Variables & vars) {
 void ObsDiagnostics::save(const std::vector<double> & vals,
                           const std::string & var,
                           const int lev) {
-  gdiags_.put(vals, var, lev);
+  gdiags_.putAtLevel(vals, var, lev);
 }
 
 // -----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var) con
 
 void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var,
                          const int lev) const {
-  gdiags_.get(vals, var, lev);
+  gdiags_.getAtLevel(vals, var, lev);
 }
 
 // -----------------------------------------------------------------------------

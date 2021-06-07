@@ -60,7 +60,7 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & 
 
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 1; k < nlevs+1; ++k ) {
-    gv.get(aicen, "sea_ice_category_area_fraction", k);
+    gv.getAtLevel(aicen, "sea_ice_category_area_fraction", k);
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       ovec[i] += aicen[i];
     }
@@ -84,7 +84,7 @@ void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & 
       else
         { aicen[i] = 0.0; }
     }
-    gv.put(aicen, "sea_ice_category_area_fraction", k);
+    gv.putAtLevel(aicen, "sea_ice_category_area_fraction", k);
   }
   oops::Log::trace() << "ObsSeaIceFractionTLAD: adjoint observation operator run" << std::endl;
 }
