@@ -40,7 +40,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
+  GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
   GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);

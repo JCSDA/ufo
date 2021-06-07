@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <iomanip>
+#include <utility>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -29,9 +30,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /*! \brief Default constructor - does not allocate fields
 */
-GeoVaLs::GeoVaLs(const std::shared_ptr<const ioda::Distribution> dist,
+GeoVaLs::GeoVaLs(std::shared_ptr<const ioda::Distribution> dist,
                  const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), dist_(dist)
+  : keyGVL_(-1), vars_(vars), dist_(std::move(dist))
 {
   oops::Log::trace() << "GeoVaLs default constructor starting" << std::endl;
   ufo_geovals_default_constr_f90(keyGVL_);
@@ -218,7 +219,7 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   assert(vars_ == other.vars_);
   auto accumulator = dist_->createAccumulator<double>();
   std::vector<double> this_values(nlocs), other_values(nlocs);
-  double missing = util::missingValue(missing);
+  const double missing = util::missingValue(missing);
   // loop over all variables in geovals
   for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
     const size_t nlevs = this->nlevs(vars_[jvar]);

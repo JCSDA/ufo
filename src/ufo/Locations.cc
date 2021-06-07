@@ -7,6 +7,7 @@
 
 #include "ufo/Locations.h"
 
+#include <utility>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -24,8 +25,8 @@ namespace ufo {
 
 Locations::Locations(const std::vector<float> & lons, const std::vector<float> & lats,
                      const std::vector<util::DateTime> & times,
-                     const std::shared_ptr<const ioda::Distribution> dist)
-  : dist_(dist), lons_(lons), lats_(lats), times_(times) {
+                     std::shared_ptr<const ioda::Distribution> dist)
+  : dist_(std::move(dist)), lons_(lons), lats_(lats), times_(times) {
   ASSERT(lons_.size() == lats_.size());
   ASSERT(lats_.size() == times_.size());
   oops::Log::trace() << "ufo::Locations::Locations done" << std::endl;
