@@ -32,14 +32,17 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_sfcpcorrected_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_sfcpcorrected_setup_f90')
+subroutine ufo_sfcpcorrected_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, c_nobsvars, &
+                                     c_geovars) bind(c,name='ufo_sfcpcorrected_setup_f90')
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 implicit none
-integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), value, intent(in) :: c_conf
-type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
-type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
+integer(c_int), intent(inout)     :: c_key_self
+type(c_ptr), value, intent(in)    :: c_conf
+type(c_ptr), value, intent(in)    :: c_obsvars ! variables to be simulated
+integer(c_int), value, intent(in) :: c_nobsvars
+integer(c_int), intent(in)        :: c_obsvarindices(c_nobsvars)  ! ... and their global indices
+type(c_ptr), value, intent(in)    :: c_geovars ! variables requested from the model
 
 type(ufo_sfcpcorrected), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -48,6 +51,8 @@ call ufo_sfcpcorrected_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
 self%obsvars = oops_variables(c_obsvars)
+allocate(self%obsvarindices(self%obsvars%nvars()))
+self%obsvarindices(:) = c_obsvarindices(:) + 1  ! Convert from C to Fortran indexing
 self%geovars = oops_variables(c_geovars)
 
 call self%setup(f_conf)

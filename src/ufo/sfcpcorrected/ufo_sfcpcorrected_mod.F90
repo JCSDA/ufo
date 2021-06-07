@@ -22,7 +22,9 @@ module ufo_sfcpcorrected_mod
 !> Fortran derived type for the observation type
  type, public :: ufo_sfcpcorrected
  private
-   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: obsvars ! Variables to be simulated
+   integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                    ! simulated variables in the ObsSpace
    type(oops_variables), public :: geovars
    character(len=MAXVARLEN)     :: da_psfc_scheme
  contains
@@ -87,7 +89,7 @@ type(c_ptr), value, intent(in)    :: obss
 ! Local variables
 real(c_double)                    :: missing
 real(kind_real)                   :: H2000 = 2000.0
-integer                           :: nobs, iobs, ivar, k, kbot, idx_geop
+integer                           :: nobs, iobs, ivar, iobsvar, k, kbot, idx_geop
 real(kind_real),    allocatable   :: cor_psfc(:)
 type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
 character(len=*), parameter       :: myname_="ufo_sfcpcorrected_simobs"
@@ -265,7 +267,9 @@ case default
 end select
 
 ! update the obs surface pressure
-do ivar = 1, nvars
+do iobsvar = 1, size(self%obsvarindices)
+   ! Get the index of the row of hofx to fill
+   ivar = self%obsvarindices(iobsvar)
    do iobs = 1, nlocs
       if ( cor_psfc(iobs) /= missing) then
          hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)

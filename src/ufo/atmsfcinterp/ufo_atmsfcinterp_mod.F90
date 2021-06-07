@@ -17,7 +17,9 @@ module ufo_atmsfcinterp_mod
   !> Fortran derived type for the observation type
   type, public :: ufo_atmsfcinterp
   private
-    type(oops_variables), public :: obsvars
+    type(oops_variables), public :: obsvars ! Variables to be simulated
+    integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                      ! simulated variables in the ObsSpace
     type(oops_variables), public :: geovars
     logical :: use_fact10
     real(kind_real) :: magl
@@ -44,6 +46,11 @@ subroutine atmsfcinterp_setup_(self, f_conf)
     self%use_fact10 = .true.
   end if
 
+  nvars = self%obsvars%nvars()
+  do ivar = 1, nvars
+    call self%geovars%push_back(self%obsvars%variable(ivar))
+  enddo
+
   !> add geopotential height
   call self%geovars%push_back(var_z)
   !> need skin temperature for near-surface interpolations
@@ -63,37 +70,36 @@ subroutine atmsfcinterp_setup_(self, f_conf)
   call self%geovars%push_back(var_v)
   call self%geovars%push_back(var_sfc_lfrac)
   if (self%use_fact10)  call self%geovars%push_back(var_sfc_fact10)
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
 
 end subroutine atmsfcinterp_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
   use atmsfc_mod, only : calc_conv_vel_gsi, sfc_wind_fact_gsi, &
                          calc_psi_vars_gsi
   use thermo_utils_mod, only: calc_theta, gsi_tp_to_qs 
   use ufo_constants_mod, only: grav, rv, rd, rd_over_cp, von_karman
-  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, ufo_geovals_copy, ufo_geovals_reorderzdir
   use ufo_utils_mod, only: cmp_strings
   use obsspace_mod
   use iso_c_binding
+  use fckit_log_module, only: fckit_log
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
-  type(ufo_geovals), intent(in)               :: geovals
+  type(ufo_geovals), intent(in)               :: geovals_in
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
   type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, prsi, &
                                tsen, tv, q, u, v, landmask, &
                                profile, rad10
-  integer :: ivar, iobs
+  type(ufo_geovals):: geovals
+  integer :: ivar, iobs, iobsvar
   real(kind_real), allocatable :: obselev(:), obshgt(:)
   real(kind_real), parameter :: minroughlen = 1.0e-4_kind_real
   character(len=MAXVARLEN) :: geovar
+  character(len=MAXVARLEN) :: var_zdir
   real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2, agl, zbot
   real(kind_real) :: gzsoz0, gzzoz0
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
@@ -103,6 +109,19 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real) :: psit, psitz, ust, psiq, psiqz
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
   real(kind_real), parameter :: ka = 2.4e-5_kind_real
+  character(1024) :: debug_msg
+
+  ! Notes:
+  ! (1) Set desired vertical coordinate direction (top2bottom or bottom2top) based
+  !     on vertical coodinate variable and reload geovals according to the set
+  !     direction
+  ! (2) This is done because this observation operator assumes pressure levels
+  !     are from bottom to top (bottom2top) with model pressure(1) for surface and
+  !     model pressure(nsig+1) for model top
+
+  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
+  var_zdir = var_prsi                         ! vertical coordinate variable
+  call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
 
   ! to compute the value near the surface we are going to use
   ! similarity theory which requires a number of near surface parameters
@@ -171,9 +190,13 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! calculate parameters regardless of variable
     call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,   &
                            thg, zbot, agl, psim, psih, psimz, psihz)
-    do ivar = 1, nvars
+
+    do iobsvar = 1, size(self%obsvarindices)
+      ! Get the index of the row of hofx to fill
+      ivar = self%obsvarindices(iobsvar)
+
       ! Get the name of input variable in geovals
-      geovar = self%obsvars%variable(ivar)
+      geovar = self%obsvars%variable(iobsvar)
       ! Get profile for this variable from geovals
       call ufo_geovals_get_var(geovals, geovar, profile)
 

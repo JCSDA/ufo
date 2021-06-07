@@ -8,13 +8,16 @@
 #include "ufo/sfcpcorrected/ObsSfcPCorrected.h"
 
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 
+#include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -26,7 +29,12 @@ ObsSfcPCorrected::ObsSfcPCorrected(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_sfcpcorrected_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+
+  ufo_sfcpcorrected_setup_f90(keyOper_, config,
+                              operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
+                              varin_);
   oops::Log::trace() << "ObsSfcPCorrected created." << std::endl;
 }
 
