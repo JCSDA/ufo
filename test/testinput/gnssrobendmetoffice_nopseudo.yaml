@@ -20,5 +20,5 @@ observations:
   linear obs operator test:
     coef TL: 1.0e-4
     iterations TL:  10
-    tolerance TL: 1.0e-14
-    tolerance AD: 1.0e-14
+    tolerance TL: 1.5e-14
+    tolerance AD: 1.5e-14
