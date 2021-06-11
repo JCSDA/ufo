@@ -155,8 +155,9 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
     }
   }
 
-  // Calculate bias-corrected innovation: Observation - HofX - bias
+  // Calculate bias-corrected innovation: Observation - HofX (HofX includes bias correction)
   std::vector<std::vector<float>> btobs(nchans, std::vector<float>(nlocs));
+  // Still read bias: it's used for correcting clear-sky simulated radiances below
   std::vector<std::vector<float>> bias(nchans, std::vector<float>(nlocs));
   std::vector<std::vector<float>> innov(nchans, std::vector<float>(nlocs));
   std::vector<float> hofx(nlocs);
@@ -165,7 +166,7 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
     in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], bias[ichan]);
     in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], hofx);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      innov[ichan][iloc] = btobs[ichan][iloc] - hofx[iloc] - bias[ichan][iloc];
+      innov[ichan][iloc] = btobs[ichan][iloc] - hofx[iloc];
     }
   }
 

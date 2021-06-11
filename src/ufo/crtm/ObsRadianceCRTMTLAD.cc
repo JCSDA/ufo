@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
-  : keyOperRadianceCRTM_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperRadianceCRTM_(0), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
@@ -53,7 +53,7 @@ ObsRadianceCRTMTLAD::~ObsRadianceCRTMTLAD() {
 
 void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                         ObsDiagnostics & ydiags) {
-  ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+  ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
                                     ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::setTrajectory done" << std::endl;
 }
@@ -61,7 +61,7 @@ void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias &
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+  ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsTL done" << std::endl;
 }
@@ -69,7 +69,7 @@ void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_radiancecrtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+  ufo_radiancecrtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsAD done" << std::endl;
 }

@@ -10,7 +10,6 @@
 #include <set>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -24,16 +23,17 @@ static FilterActionMaker<ROobserrInflation> makerInflateErr_("RONBAMErrInflate")
 
 // -----------------------------------------------------------------------------
 
-ROobserrInflation::ROobserrInflation(const eckit::Configuration & conf)
+ROobserrInflation::ROobserrInflation(const Parameters_ &)
   : allvars_() {
 }
 // -----------------------------------------------------------------------------
 
 void ROobserrInflation::apply(const Variables & vars,
-                         const std::vector<std::vector<bool>> & flagged,
-                         const ObsFilterData & data,
-                         ioda::ObsDataVector<int> & flags,
-                         ioda::ObsDataVector<float> & obserr) const {
+                              const std::vector<std::vector<bool>> & flagged,
+                              const ObsFilterData & data,
+                              int filterQCflag,
+                              ioda::ObsDataVector<int> & flags,
+                              ioda::ObsDataVector<float> & obserr) const {
   const float missing = util::missingValue(missing);
   oops::Log::debug() << " input obserr: " << obserr << std::endl;
   size_t nlocs = data.nlocs();

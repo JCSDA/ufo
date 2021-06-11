@@ -1,0 +1,50 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: &Sensor_ID atms_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: atms_npp
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_obs_2020110112_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_atms_npp.2020110106.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
+        options:
+          preconditioner: 0.01
+      - name: sine_of_latitude
+      - name: lapse_rate
+        options:
+          order: 2
+          tlapse: &atms_npp_tlap Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_tlapmean.txt
+      - name: lapse_rate
+        options:
+          tlapse: *atms_npp_tlap
+      - name: emissivity
+      - name: scan_angle
+        options:
+          order: 4
+      - name: scan_angle
+        options:
+          order: 3
+      - name: scan_angle
+        options:
+          order: 2
+      - name: scan_angle
+  vector ref: GsiHofXBc
+  tolerance: 1.e-7

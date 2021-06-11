@@ -1,0 +1,21 @@
+window begin: 2020-12-30T03:00:00Z
+window end: 2020-12-30T09:00:00Z
+
+observations: 
+- obs operator: 
+    name: SatTCWV
+    obs options:
+  obs space: 
+    name: SatTCWV
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
+    simulated variables: [precipitableWater] 
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/sattcwv_geovals_20201230T0600Z.nc4
+  norm ref: MetOfficeHofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14

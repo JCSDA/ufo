@@ -9,7 +9,7 @@ observations:
   obs space:
     name: SeaSurfaceTemp
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sst_obs-2018-04-15.nc4
+      obsfile: Data/ufo/testinput_tier_1/sst_obs-2018-04-15.nc4
     simulated variables: [sea_surface_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sst_obs-2018-04-15_geovals.nc

@@ -3,7 +3,6 @@ module ufo_constants_mod
 !==========================================================================
 
 use kinds
-use iso_c_binding
 
 implicit none
 real(kind_real), parameter, public :: grav    = 9.80665e+0_kind_real
@@ -64,9 +63,21 @@ real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity c
 real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
 real(kind_real), parameter, public :: m_to_km = 0.001_kind_real
 real(kind_real), parameter, public :: Pa_to_hPa = 0.01_kind_real
-real(kind_real), parameter, public :: min_q = 3e-6
-real(kind_real), parameter, public :: ZeroDegC = 273.15
-real(kind_real), parameter, public :: epsilon = 0.622 ! DARFIX probably!
+
+real(kind_real), parameter, public :: min_q = 3.0e-6_kind_real
+real(kind_real), parameter, public :: ZeroDegC = 273.15_kind_real
+real(kind_real), parameter, public :: epsilon = 0.62198_kind_real ! molecular mass ratio of water (18.01528) to dry air (28.9645)
+
+real(kind_real), parameter, public :: q_mixratio_to_ppmv  = 1.60771704e+6_kind_real
+real(kind_real), parameter, public :: o3_mixratio_to_ppmv = 6.03504e+5_kind_real
+real(kind_real), parameter, public :: co2_mixratio_to_ppmv = 6.58114e+5_kind_real
+real(kind_real), parameter, public :: co_mixratio_to_ppmv  = 1.0340699e+6_kind_real
+real(kind_real), parameter, public :: n2o_mixratio_to_ppmv = 6.58090e+5_kind_real
+real(kind_real), parameter, public :: ch4_mixratio_to_ppmv = 1.80548e+6_kind_real
+real(kind_real), parameter, public :: so2_mixratio_to_ppmv = 4.52118e+5_kind_real ! determined using same method as used in RTTOV but this
+                                                                                  ! constant was never explicitly calculated 
+                                                                                  ! mso2 = 32.065 + 2 * 15.9994 = 64.0638
+
 
 end module ufo_constants_mod
 

@@ -1,0 +1,73 @@
+window begin: 2020-05-17T08:30:00Z
+window end: 2020-05-17T15:30:00Z
+
+observations:
+- obs operator:
+    name: AtmVertInterpLay
+    geovals: [mole_fraction_of_ozone_in_air]
+    coefficients: [0.007886131] # convert from ppmv to DU
+    nlevels: [22]
+  obs space:
+    name: OzoneLayer
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/ompsnp_npp_obs_2020051712_qc.nc4
+      obsgrouping:
+        group variables: ["latitude"]
+        sort variable: "air_pressure"
+        sort order: "ascending"
+    obsdataout:
+      obsfile: Data/ompsnp_npp_obs_2020051712_m_qc_out.nc4
+    simulated variables: [integrated_layer_ozone_in_air]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ompsnp_npp_geoval_2020051712_qc.nc4
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    where:
+    - variable:
+        name: total_ozone_error_flag@MetaData
+      minvalue: 0.1
+      maxvalue: 1.1
+    action:
+      name: reject
+  - filter: BlackList
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    where:
+    - variable:
+        name: total_ozone_error_flag@MetaData
+      minvalue: 2.1     # toss toq>2, there are some 4 and 6
+    action:
+      name: reject
+  - filter: BlackList
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    where:
+    - variable:
+        name: profile_ozone_error_flag@MetaData
+      minvalue: 1.1
+    action:
+      name: reject
+  - filter: Domain Check
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    where:
+    - variable:
+        name:  latitude@MetaData
+      minvalue: -90.0
+      maxvalue: 90.0
+    - variable:
+        name:  longitude@MetaData
+      minvalue: -180.0
+      maxvalue: 360.0
+  - filter: Bounds Check
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    minvalue: 0.000001
+    maxvalue: 1000.0
+  - filter: Background Check
+    filter variables:
+    - name: integrated_layer_ozone_in_air
+    absolute threshold: 10.0
+  passedBenchmark: 4925 # out of 6490

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 UCAR
+ * (C) Copyright 2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -15,11 +15,11 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsBiasOperator.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -29,11 +29,18 @@ namespace ufo {
 
 ObsOperator::ObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
   : oper_(ObsOperatorFactory::create(os, conf)), odb_(os)
-{}
-
-// -----------------------------------------------------------------------------
-
-ObsOperator::~ObsOperator() {}
+{
+  // We use += rather than = to make sure the Variables objects contain no duplicate entries
+  // and the variables are sorted alphabetically.
+  oops::Variables operatorVars;
+  operatorVars += oper_->simulatedVars();
+  oops::Variables obsSpaceVars;
+  obsSpaceVars += os.obsvariables();
+  if (!(operatorVars == obsSpaceVars))
+    throw eckit::UserError("The list of variables simulated by the obs operator differs from "
+                           "the list of simulated variables in the obs space",
+                           Here());
+}
 
 // -----------------------------------------------------------------------------
 
@@ -42,7 +49,10 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
   oper_->simulateObs(gvals, yy, ydiags);
   if (bias) {
     ioda::ObsVector ybias(odb_);
-    bias.computeObsBias(ybias, ydiags, bias.computePredictors(gvals, ydiags));
+    ObsBiasOperator biasoper(odb_);
+    biasoper.computeObsBias(gvals, ybias, bias, ydiags);
+    // update H(x) with bias correction
+    yy += ybias;
     ybias.save("ObsBias");
   }
 }
@@ -55,9 +65,8 @@ const oops::Variables & ObsOperator::requiredVars() const {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsOperator::locations(const util::DateTime & t1,
-                                                  const util::DateTime & t2) const {
-  return oper_->locations(t1, t2);
+std::unique_ptr<Locations> ObsOperator::locations() const {
+  return oper_->locations();
 }
 
 // -----------------------------------------------------------------------------

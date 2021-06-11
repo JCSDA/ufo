@@ -95,7 +95,8 @@ void SIRetMW::compute(const ObsFilterData & in,
       bias90.assign(nlocs, 0.0f);
       bias150.assign(nlocs, 0.0f);
       }
-      // Add bias correction to the assigned group
+      // Add bias correction to the assigned group (only need to do it for ObsValue, since
+      // HofX includes bias correction
       if (options_.addBias.value() == "ObsValue") {
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           bt90[iloc] = bt90[iloc] - bias90[iloc];
@@ -103,8 +104,6 @@ void SIRetMW::compute(const ObsFilterData & in,
         }
       } else {
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          bt90[iloc] = bt90[iloc] + bias90[iloc];
-          bt150[iloc] = bt150[iloc] + bias150[iloc];
           // Temporarily account for ZERO clear-sky BT output from CRTM
           if (clr90[iloc] > -1.0f && clr90[iloc] < 1.0f) {
             clr90[iloc] = bt90[iloc];

@@ -1,0 +1,48 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-15
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
+        options:
+          preconditioner: 0.01
+      - name: sine_of_latitude
+      - name: lapse_rate
+        options:
+          order: 2
+          tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
+      - name: lapse_rate
+        options:
+          tlapse: *amsua19tlap
+      - name: emissivity
+      - name: scan_angle
+        options:
+          order: 4
+      - name: scan_angle
+        options:
+          order: 3
+      - name: scan_angle
+        options:
+          order: 2
+      - name: scan_angle
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+  tolerance: 1.e-7

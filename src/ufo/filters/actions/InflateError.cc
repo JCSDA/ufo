@@ -8,14 +8,12 @@
 #include "ufo/filters/actions/InflateError.h"
 
 #include <algorithm>
-#include <set>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/utils/StringUtils.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
@@ -25,60 +23,81 @@ static FilterActionMaker<InflateError> makerInflateErr_("inflate error");
 
 // -----------------------------------------------------------------------------
 
-InflateError::InflateError(const eckit::Configuration & conf)
-  : allvars_(), conf_(conf) {
-  if (conf_.has("inflation variable")) {
-    allvars_ += Variable(conf_.getSubConfiguration("inflation variable"));
-  }
-  ASSERT(conf_.has("inflation variable") || conf_.has("inflation factor"));
+void InflateErrorParameters::deserialize(util::CompositePath &path,
+                                         const eckit::Configuration &config) {
+  oops::Parameters::deserialize(path, config);
+
+  // These checks should really be done at the validation stage (using JSON Schema),
+  // but this isn't supported yet, so this is better than nothing.
+  if ((inflationFactor.value() == boost::none && inflationVariable.value() == boost::none) ||
+      (inflationFactor.value() != boost::none && inflationVariable.value() != boost::none))
+    throw eckit::UserError(path.path() +
+                           ": Exactly one of the 'inflation factor' and 'inflation variable' "
+                           "options must be present");
 }
 
 // -----------------------------------------------------------------------------
 
+InflateError::InflateError(const Parameters_ & parameters)
+  : allvars_(), parameters_(parameters) {
+  if (parameters_.inflationVariable.value() != boost::none) {
+    allvars_ += *parameters_.inflationVariable.value();
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+/// Inflate ObsError by either a constant inflation factor, or by a varying
+/// inflation variable.
+/// \param vars variables that need to be inflated in the ObsError (filter variables)
+/// \param flagged result of "where" statement: which variables/locations need to be
+///               updated (has the same variables as \p vars, in the same order)
+/// \param data accessor to obs filter data
+/// \param flags QC flags (for all "simulated variables")
+/// \param obserr ObsError (for all "simulated variables")
 void InflateError::apply(const Variables & vars,
                          const std::vector<std::vector<bool>> & flagged,
                          const ObsFilterData & data,
+                         int /*filterQCflag*/,
                          ioda::ObsDataVector<int> & flags,
                          ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " InflateError input obserr: " << obserr << std::endl;
   // If float factor is specified
-  if (conf_.has("inflation factor")) {
-    float factor = conf_.getFloat("inflation factor");
-    for (size_t jv = 0; jv < vars.nvars(); ++jv) {
-      size_t iv = obserr.varnames().find(vars.variable(jv).variable());
-      size_t kv = flags.varnames().find(vars.variable(jv).variable());
+  if (parameters_.inflationFactor.value() != boost::none) {
+    float factor = *parameters_.inflationFactor.value();
+    for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
+      size_t iallvar = obserr.varnames().find(vars.variable(ifiltervar).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs] && flags[kv][jobs] == QCflags::pass) {
-          obserr[iv][jobs] *= factor;
+        if (flagged[ifiltervar][jobs] && flags[iallvar][jobs] == QCflags::pass) {
+          obserr[iallvar][jobs] *= factor;
         }
       }
     }
   // If variable is specified
-  } else if (conf_.has("inflation variable")) {
-    Variable factorvar(conf_.getSubConfiguration("inflation variable"));
+  } else if (parameters_.inflationVariable.value() != boost::none) {
+    const Variable &factorvar = *parameters_.inflationVariable.value();
     ASSERT(factorvar.size() == 1 || factorvar.size() == vars.nvars());
     ioda::ObsDataVector<float> factors(data.obsspace(), factorvar.toOopsVariables());
     data.get(factorvar, factors);
 
     // if inflation factor is 1D variable, apply the same inflation factor to all variables
-    // factor_jv = {0, 0, 0, ..., 0} for all nvars
-    std::vector<size_t> factor_jv(vars.nvars(), 0);
+    // factor_indices = {0, 0, 0, ..., 0} for all nvars
+    std::vector<size_t> factor_indices(vars.nvars(), 0);
 
     // if multiple variables are in the inflation factor, apply different factors to different
     // variables
-    // factor_jv = {0, 1, 2, ..., nvars-1}
+    // factor_indices = {0, 1, 2, ..., nvars-1}
     if (factorvar.size() == vars.nvars()) {
-      std::iota(factor_jv.begin(), factor_jv.end(), 0);
+      std::iota(factor_indices.begin(), factor_indices.end(), 0);
     }
 
     // loop over all variables to update
-    for (size_t jv = 0; jv < vars.nvars(); ++jv) {
+    for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
       // find current variable index in obserr
-      size_t iv = obserr.varnames().find(vars.variable(jv).variable());
-      size_t kv = flags.varnames().find(vars.variable(jv).variable());
+      size_t iallvar = obserr.varnames().find(vars.variable(ifiltervar).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs] && flags[kv][jobs] == QCflags::pass) {
-          obserr[iv][jobs] *= factors[factor_jv[jv]][jobs];
+        if (flagged[ifiltervar][jobs] && flags[iallvar][jobs] == QCflags::pass) {
+          obserr[iallvar][jobs] *= factors[factor_indices[ifiltervar]][jobs];
         }
       }
     }

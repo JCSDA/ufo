@@ -10,9 +10,9 @@ observations:
   obs space:
     name: GnssroBndNBAM
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "record_number"
+        group variables: [ "record_number" ]
         sort variable: "impact_height"
         sort order: "descending"
     obsdataout:

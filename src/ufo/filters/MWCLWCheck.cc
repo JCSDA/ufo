@@ -25,13 +25,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), invars_(config_, "clw variables") {
-  oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
-  const Variable var0(invars_[0] + "@HofX");
-  const Variable var1(invars_[1] + "@HofX");
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters) {
+  oops::Log::debug() << "MWCLWCheck: config = " << parameters_ << std::endl;
+
+  const oops::Variables &invars = parameters_.clwVariables.value();
+  ASSERT(invars.size() == 2);
+  const Variable var0(invars[0] + "@HofX");
+  const Variable var1(invars[1] + "@HofX");
   allvars_ += var0;
   allvars_ += var1;
 }
@@ -52,13 +55,14 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   float amsua_clw(float, float, float);
 
 // Get config
-  std::vector<float> clw_thresholds = config_.getFloatVector("clw_thresholds");
+  const std::vector<float> &clw_thresholds = parameters_.clwThresholds;
 // clw_option controls how the clw is calculated:
 //     1) Use observed BTs
 //     2) Use calculated BTs
 //     3) Symmetric calculation
-  const int clw_option = config_.getInt("clw_option");
-  oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
+  const int clw_option = parameters_.clwOption;
+  const oops::Variables &invars = parameters_.clwVariables.value();
+  oops::Log::debug() << "MWCLWCheck: config = " << parameters_ << std::endl;
 
 // Number of channels to be tested and number of thresholds needs to be the same
   ASSERT(clw_thresholds.size() == filtervars.nvars());
@@ -66,21 +70,17 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     ASSERT(clw_thresholds[jv] != missing);
   }
-// Check we have the correct number of channels to do the CLW calculation
-  ASSERT(invars_.size() == 2);
-// Check clw_option is in range
-  ASSERT(clw_option >= 1 && clw_option <=3);
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars_, "ObsValue");
+  ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars, "ObsValue");
   ioda::ObsDataVector<float> sza(obsdb_, "sensor_zenith_angle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_guess_out(obsdb_, "clws_guess", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_obs_out(obsdb_, "clw_obs", "Diagnostic", false);
 
 //  H(x)
-  const Variable var0(invars_[0] + "@HofX");
-  const Variable var1(invars_[1] + "@HofX");
+  const Variable var0(invars[0] + "@HofX");
+  const Variable var1(invars[1] + "@HofX");
   std::vector<float> hofx0;
   data_.get(var0, hofx0);
   std::vector<float> hofx1;
@@ -141,7 +141,7 @@ float amsua_clw(float tobs1, float tobs2, float sza) {
         tobs1 <= 284.0 && tobs2 <= 284.0 && tobs1 > 0.0 && tobs2 > 0.0) {
       float cossza = cos(M_PI * sza/180.0);
       float d0 = 8.240 - (2.622 - 1.846*cossza)*cossza;
-      clw = cossza*(d0 + d1*log(285.0-tobs1)) + d2*log(285.0-tobs2);
+      clw = cossza*(d0 + d1*std::log(285.0-tobs1)) + d2*std::log(285.0-tobs2);
       clw = std::max(0.0f, clw);
     } else {
       clw = missing;
@@ -153,7 +153,7 @@ float amsua_clw(float tobs1, float tobs2, float sza) {
 // -----------------------------------------------------------------------------
 
 void MWCLWCheck::print(std::ostream & os) const {
-  os << "MWCLWCheck: config = " << config_ << std::endl;
+  os << "MWCLWCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

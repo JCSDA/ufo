@@ -1,0 +1,21 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: windDirAngleDiff
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+# If obs minus model difference of wind direction is more than 50 degrees, reject obs.
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: WindDirAngleDiff@ObsFunction
+      options:
+        test_hofx: GsiHofX
+    maxvalue: 50.0
+  passedBenchmark: 136     # 25 obs missing, 7 rejected by filter, leaving 68x2.

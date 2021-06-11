@@ -19,8 +19,12 @@ use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module, only : fckit_log
-use ufo_gnssro_bendmetoffice_tlad_utils_mod, only: Ops_GPSROcalc_alphaK, Ops_GPSROcalc_nrK, Ops_GPSRO_refracK
-use ufo_gnssro_ukmo1d_utils_mod, only: Ops_GPSROcalc_nr, Ops_GPSRO_refrac
+use ufo_gnssro_bendmetoffice_tlad_utils_mod, only: &
+    Ops_GPSROcalc_alphaK, Ops_GPSROcalc_nrK
+use ufo_gnssro_ukmo1d_utils_mod, only: Ops_GPSROcalc_nr
+use ufo_utils_refractivity_calculator, only: &
+    ufo_calculate_refractivity, ufo_refractivity_kmat
+
 
 integer, parameter         :: max_string=800
 
@@ -29,6 +33,7 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   private
   logical :: vert_interp_ops
   logical :: pseudo_ops
+  real(kind_real) :: min_temp_grad
   integer                       :: nlevp, nlevq, nlocs, iflip
   real(kind_real), allocatable  :: K(:,:)
   contains
@@ -54,6 +59,7 @@ type(fckit_configuration), intent(in)   :: f_conf
 
 call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
 call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
+call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -79,7 +85,6 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer   :: prs                           ! The model geovals - atmospheric pressure
   type(ufo_geoval), pointer   :: rho_heights                   ! The model geovals - heights of the pressure-levels
   type(ufo_geoval), pointer   :: theta_heights                 ! The model geovals - heights of the theta-levels (stores q)
-  integer                     :: nstate                        ! The size of the state vector
   integer                     :: iobs                          ! Loop variable, observation number
 
   real(kind_real), allocatable       :: obsLat(:)              ! Latitude of the observation
@@ -123,41 +128,42 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", impact_param)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
-  nstate = prs % nval + q % nval
-  ALLOCATE(self % K(1:self%nlocs, 1:nstate))
+  ALLOCATE(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
     if (self%iflip == 1) then
-      CALL jacobian_interface(prs % nval, &                     ! Number of pressure levels
-                              q % nval, &                       ! Number of specific humidity levels
+      CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
+                              q % nval, &                            ! Number of specific humidity levels
                               rho_heights % vals(rho_heights%nval:1:-1, iobs), &     ! Heights of the pressure levels
                               theta_heights % vals(theta_heights%nval:1:-1, iobs), & ! Heights of the specific humidity levels
                               q % vals(q%nval:1:-1, iobs), &                         ! Values of the specific humidity
                               prs % vals(prs%nval:1:-1, iobs), &                     ! Values of the pressure
-                              self % pseudo_ops, &              ! Whether to use pseudo-levels in the calculation
-                              self % vert_interp_ops, &         ! Whether to interpolate using log(pressure)
-                              obsLocR(iobs), &                  ! Local radius of curvature of the earth
-                              obsLat(iobs), &                   ! Latitude of the observation
-                              obsGeoid(iobs), &                 ! Geoid undulation at the tangent point
-                              1, &                              ! Number of observations in the profile
-                              impact_param(iobs:iobs), &        ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:nstate))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+                              self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
+                              self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
+                              self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
+                              obsLocR(iobs), &                       ! Local radius of curvature of the earth
+                              obsLat(iobs), &                        ! Latitude of the observation
+                              obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
+                              1, &                                   ! Number of observations in the profile
+                              impact_param(iobs:iobs), &             ! Impact parameter for this observation
+                              self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
     else
-      CALL jacobian_interface(prs % nval, &                     ! Number of pressure levels
-                              q % nval, &                       ! Number of specific humidity levels
-                              rho_heights % vals(:,iobs), &     ! Heights of the pressure levels
-                              theta_heights % vals(:,iobs), &   ! Heights of the specific humidity levels
-                              q % vals(:,iobs), &               ! Values of the specific humidity
-                              prs % vals(:,iobs), &             ! Values of the pressure
-                              self % pseudo_ops, &              ! Whether to use pseudo-levels in the calculation
-                              self % vert_interp_ops, &         ! Whether to interpolate using log(pressure)
-                              obsLocR(iobs), &                  ! Local radius of curvature of the earth
-                              obsLat(iobs), &                   ! Latitude of the observation
-                              obsGeoid(iobs), &                 ! Geoid undulation at the tangent point
-                              1, &                              ! Number of observations in the profile
-                              impact_param(iobs:iobs), &        ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:nstate))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+      CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
+                              q % nval, &                            ! Number of specific humidity levels
+                              rho_heights % vals(:,iobs), &          ! Heights of the pressure levels
+                              theta_heights % vals(:,iobs), &        ! Heights of the specific humidity levels
+                              q % vals(:,iobs), &                    ! Values of the specific humidity
+                              prs % vals(:,iobs), &                  ! Values of the pressure
+                              self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
+                              self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
+                              self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
+                              obsLocR(iobs), &                       ! Local radius of curvature of the earth
+                              obsLat(iobs), &                        ! Latitude of the observation
+                              obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
+                              1, &                                   ! Number of observations in the profile
+                              impact_param(iobs:iobs), &             ! Impact parameter for this observation
+                              self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
     end if
   end do obs_loop
 
@@ -341,7 +347,7 @@ end subroutine ufo_gnssro_bendmetoffice_tlad_delete
 !-------------------------------------------------------------------------
 ! Interface for calculating the K-matrix for calculating TL/AD
 !-------------------------------------------------------------------------
-SUBROUTINE jacobian_interface(nlevP, &
+SUBROUTINE jacobian_interface(nlevp, &
                               nlevq, &
                               za, &
                               zb, &
@@ -349,6 +355,7 @@ SUBROUTINE jacobian_interface(nlevP, &
                               prs, &
                               pseudo_ops, &
                               vert_interp_ops, &
+                              min_temp_grad, &
                               ro_rad_curv, &
                               latitude, &
                               ro_geoid_und, &
@@ -358,7 +365,7 @@ SUBROUTINE jacobian_interface(nlevP, &
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevP            ! The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevp            ! The number of model pressure levels
 INTEGER, INTENT(IN)            :: nlevq            ! The number of model theta levels
 REAL(kind_real), INTENT(IN)    :: za(:)            ! The geometric height of the model pressure levels
 REAL(kind_real), INTENT(IN)    :: zb(:)            ! The geometric height of the model theta levels
@@ -366,102 +373,77 @@ REAL(kind_real), INTENT(IN)    :: q(1:nlevq)       ! The model values that are b
 REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     ! The model values that are being perturbed
 LOGICAL, INTENT(IN)            :: pseudo_ops       ! Whether to use pseudo levels in the calculation
 LOGICAL, INTENT(IN)            :: vert_interp_ops  ! Whether to use exner for the vertical interpolation
+REAL(kind_real), INTENT(IN)    :: min_temp_grad    ! The minimum allowed vertical temperature gradient
 REAL(kind_real), INTENT(IN)    :: ro_rad_curv      ! The earth's radius of curvature at the ob location
 REAL(kind_real), INTENT(IN)    :: latitude         ! The latitude of the ob location
 REAL(kind_real), INTENT(IN)    :: ro_geoid_und     ! The geoid undulation at the ob location
 INTEGER, INTENT(IN)            :: nobs             ! The number of observations in this column
 REAL(kind_real), INTENT(IN)    :: zobs(:)          ! The impact parameters of the column of observations
-REAL(kind_real), INTENT(INOUT) :: K(:,:)         ! The calculated K matrix
+REAL(kind_real), INTENT(INOUT) :: K(:,:)           ! The calculated K matrix
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 !
-REAL(kind_real), ALLOCATABLE :: z_pseudo(:)        ! Heights of the pseudo levels       | Allocated by
-REAL(kind_real), ALLOCATABLE :: N_pseudo(:)        ! Refractivity on the pseudo levels  | Ops_GPSRO_refrac
-INTEGER                      :: nb_pseudo          ! Number of pseudo levels
+REAL(kind_real), ALLOCATABLE :: model_heights(:)   ! Heights of the pseudo levels
+REAL(kind_real), ALLOCATABLE :: refractivity(:)    ! Refractivity on the pseudo levels
+INTEGER                      :: nRefLevels         ! Number of pseudo levels
 REAL(kind_real)              :: T(1:nlevq)         ! Temperature on model levels
 REAL(kind_real), ALLOCATABLE :: nr(:)              ! Model calculation of impact parameters
-REAL(kind_real)              :: ref_model(1:nlevq) ! model refractivity on theta levels
 !
 ! Local variables
 !
-INTEGER                      :: nstate            ! Number of levels in state vector
 INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-INTEGER                      :: nb                ! Number of non-pseudo levs
-REAL(kind_real)              :: x(1:nlevP+nlevQ)  ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 LOGICAL                      :: BAErr             ! Whether we encountered an error in calculating the refractivity
 CHARACTER(LEN=200)           :: err_msg           ! Output message
 
 ! Set up the size of the state
-nstate = nlevP + nlevq
-nb = nlevq
-x(1:nlevP) = prs
-x(nlevP+1:nstate) = q
-
-! If we are using pseudo-levels for the vertical interpolation, then calculate
-! the number of vertical levels
-IF (pseudo_ops) THEN
-    num_pseudo = 2 * nlevq - 1
-ELSE
-    num_pseudo = nlevq
-END IF
-ALLOCATE(nr(1:num_pseudo))
+x(1:nlevp) = prs
+x(nlevp+1:nlevp+nlevq) = q
 
 BAErr = .FALSE.
 
-! Calculate the refractivity
-CALL Ops_GPSRO_refrac (nstate,   &
-                       nlevP,    &
-                       nb,       &
-                       nlevq,    &
-                       za,       &
-                       zb,       &
-                       x,        &
-                       pseudo_ops, &
-                       vert_interp_ops, &
-                       BAerr,    &
-                       ref_model, &
-                       T,        &
-                       z_pseudo, &
-                       N_pseudo, &
-                       nb_pseudo)
+CALL ufo_calculate_refractivity (nlevp,            &
+                                 nlevq,            &
+                                 za,               &
+                                 zb,               &
+                                 prs,              &
+                                 q,                &
+                                 pseudo_ops,       &
+                                 vert_interp_ops,  &
+                                 min_temp_grad,    &
+                                 BAerr,            &
+                                 nRefLevels,       &
+                                 refractivity,     &
+                                 model_heights)
+
+ALLOCATE(nr(1:nRefLevels))
 
 IF (.NOT. BAErr) THEN
-    IF (pseudo_ops) THEN
-        !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
-        CALL Ops_GPSROcalc_nr (z_pseudo,     &           ! geopotential heights of pseudo levels
-                               nb_pseudo,    &           ! number of model+pseudo-levels
-                               RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                               Latitude,     &           ! latitude at observation
-                               RO_geoid_und, &           ! geoid undulation above WGS-84
-                               n_pseudo,     &           ! refractivity of model on model+pseudo levels
-                               nr)                       ! Calculated model impact parameters
-
-    ELSE
-        !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
-        CALL Ops_GPSROcalc_nr (zb,           &           ! geopotential heights of model levels
-                               nb,           &           ! number of levels in zb
-                               RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                               Latitude,     &           ! latitude at observation
-                               RO_geoid_und, &           ! geoid undulation above WGS-84
-                               ref_model,    &           ! refractivity of model on model levels
-                               nr)                       ! Calculated model impact parameters
-    END IF
+    !  2.  Calculate the impact parameter (refractive index * radius) on refractivity levels
+    CALL Ops_GPSROcalc_nr (nRefLevels,    &           ! number of model+pseudo-levels
+                           model_heights, &           ! geopotential heights of pseudo levels
+                           refractivity,  &           ! refractivity of model on model+pseudo levels
+                           RO_Rad_Curv,   &           ! radius of curvature of earth at observation
+                           Latitude,      &           ! latitude at observation
+                           RO_geoid_und,  &           ! geoid undulation above WGS-84
+                           nr)                        ! Calculated model impact parameters
 
     ! Calculate the K-matrix (Jacobian)
-    CALL Ops_GPSRO_GetK(nstate, &
-                        nlevp, &
-                        nb, &
+    CALL Ops_GPSRO_GetK(nlevp, &
+                        nRefLevels, &
                         nlevq, &
                         za, &
                         zb, &
-                        z_pseudo, &
+                        model_heights, &
                         pseudo_ops, &
                         vert_interp_ops, &
-                        x, &
+                        min_temp_grad, &
+                        prs, &
+                        q, &
                         ro_rad_curv, &
                         latitude, &
                         ro_geoid_und, &
-                        ref_model, &
+                        refractivity, &
                         nobs, &
                         zobs, &
                         nr, &
@@ -473,8 +455,8 @@ ELSE
 END IF
 
 DEALLOCATE(nr)
-IF (ALLOCATED(z_pseudo)) DEALLOCATE(z_pseudo)
-IF (ALLOCATED(N_pseudo)) DEALLOCATE(N_pseudo)
+DEALLOCATE(refractivity)
+DEALLOCATE(model_heights)
 
 END SUBROUTINE jacobian_interface
 
@@ -482,16 +464,17 @@ END SUBROUTINE jacobian_interface
 !-------------------------------------------------------------------------
 ! Calculate the K-matrix (Jacobian)
 !-------------------------------------------------------------------------
-SUBROUTINE Ops_GPSRO_GetK(nstate, &
-                          nlevP, &
-                          nb, &
+SUBROUTINE Ops_GPSRO_GetK(nlevp, &
+                          nRefLevels, &
                           nlevq, &
                           za, &
                           zb, &
-                          zb_pseudo, &
+                          model_heights, &
                           pseudo_ops, &
                           vert_interp_ops, &
-                          x, &
+                          min_temp_grad, &
+                          pressure, &
+                          humidity, &
                           ro_rad_curv, &
                           latitude, &
                           ro_geoid_und, &
@@ -505,68 +488,59 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
 !
     IMPLICIT NONE
 
-    INTEGER, INTENT(IN)          :: nstate
-    INTEGER, INTENT(IN)          :: nlevP            ! The number of model pressure levels
-    INTEGER, INTENT(IN)          :: nb
-    INTEGER, INTENT(IN)          :: nlevq         ! The number of model theta levels
-    REAL(kind_real), INTENT(IN)  :: za(:)            ! The geometric height of the model pressure levels
-    REAL(kind_real), INTENT(IN)  :: zb(:)            ! The geometric height of the model theta levels
-    REAL(kind_real), INTENT(IN)  :: zb_pseudo(:)     ! The geometric height of the pseudo/model theta levels
-    LOGICAL, INTENT(IN)          :: pseudo_ops       ! Whether to use pseudo levels in the calculation
-    LOGICAL, INTENT(IN)          :: vert_interp_ops  ! Whether to use exner for the vertical interpolation
-    REAL(kind_real), INTENT(IN)  :: x(:)             ! The model values that are being perturbed
-    REAL(kind_real), INTENT(IN)  :: ro_rad_curv      ! The earth's radius of curvature at the ob location
-    REAL(kind_real), INTENT(IN)  :: latitude         ! The latitude of the ob location
-    REAL(kind_real), INTENT(IN)  :: ro_geoid_und     ! The geoid undulation at the ob location
-    REAL(kind_real), INTENT(IN)  :: ref_model(nb)    ! Model refractivity on theta levels - returned from forward model
-    INTEGER, INTENT(IN)          :: nobs             ! The number of observations in this column
-    REAL(kind_real), INTENT(IN)  :: zobs(:)          ! The impact parameters of the column of observations
-    REAL(kind_real), INTENT(IN)  :: nr(nb)           ! The impact parameters of the model data
-    REAL(kind_real), INTENT(OUT) :: K(nobs,nstate)   ! The calculated K matrix
+    INTEGER, INTENT(IN)          :: nlevp                 ! The number of model pressure levels
+    INTEGER, INTENT(IN)          :: nRefLevels            ! Number of refractivity levels
+    INTEGER, INTENT(IN)          :: nlevq                 ! The number of model theta levels
+    REAL(kind_real), INTENT(IN)  :: za(:)                 ! The geometric height of the model pressure levels
+    REAL(kind_real), INTENT(IN)  :: zb(:)                 ! The geometric height of the model theta levels
+    REAL(kind_real), INTENT(IN)  :: model_heights(:)      ! The geometric height of the refractivity levels
+    LOGICAL, INTENT(IN)          :: pseudo_ops            ! Whether to use pseudo levels in the calculation
+    LOGICAL, INTENT(IN)          :: vert_interp_ops       ! Whether to use exner for the vertical interpolation
+    REAL(kind_real), INTENT(IN)  :: min_temp_grad         ! Minimum allowed vertical temperature gradient
+    REAL(kind_real), INTENT(IN)  :: pressure(nlevp)       ! Model pressure
+    REAL(kind_real), INTENT(IN)  :: humidity(nlevq)       ! Model specific humidity
+    REAL(kind_real), INTENT(IN)  :: ro_rad_curv           ! The earth's radius of curvature at the ob location
+    REAL(kind_real), INTENT(IN)  :: latitude              ! The latitude of the ob location
+    REAL(kind_real), INTENT(IN)  :: ro_geoid_und          ! The geoid undulation at the ob location
+    REAL(kind_real), INTENT(IN)  :: ref_model(nRefLevels) ! Model refractivity on theta levels - returned from forward model
+    INTEGER, INTENT(IN)          :: nobs                  ! The number of observations in this column
+    REAL(kind_real), INTENT(IN)  :: zobs(:)               ! The impact parameters of the column of observations
+    REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)        ! The impact parameters of the model data
+    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   ! The calculated K matrix
 
-    REAL(kind_real)              :: m1(nobs, nb)           ! Intermediate term in the K-matrix calculation
-    REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)          ! Partial derivative of refractivity wrt. pressure
-    REAL(kind_real), ALLOCATABLE :: dref_dq(:, :)          ! Partial derivative of refractivity wrt. specific humidity
-    REAL(kind_real)              :: dnr_dref(nb, nb)       ! Partial derivative of impact parameter wrt. refractivity
-    REAL(kind_real)              :: dalpha_dref(nobs, nb)  ! Partial derivative of bending angle wrt. refractivity
-    REAL(kind_real)              :: dalpha_dnr(nobs, nb)   ! Partial derivative of bending angle wrt. impact parameter
+    REAL(kind_real)              :: m1(nobs, nRefLevels)             ! Intermediate term in the K-matrix calculation
+    REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)                    ! Partial derivative of refractivity wrt. pressure
+    REAL(kind_real), ALLOCATABLE :: dref_dq(:, :)                    ! Partial derivative of refractivity wrt. specific humidity
+    REAL(kind_real)              :: dnr_dref(nRefLevels, nRefLevels) ! Partial derivative of impact parameter wrt. refractivity
+    REAL(kind_real)              :: dalpha_dref(nobs, nRefLevels)    ! Partial derivative of bending angle wrt. refractivity
+    REAL(kind_real)              :: dalpha_dnr(nobs, nRefLevels)     ! Partial derivative of bending angle wrt. impact parameter
 
     !  1.  Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
-    CALL Ops_GPSRO_refracK (nstate,   &
-                            nlevP,    &
-                            nb,       &
-                            nlevq,    &
-                            za,       &
-                            zb,       &
-                            x,        &
-                            pseudo_ops, &
-                            vert_interp_ops, &
-                            dref_dp,  &         !out
-                            dref_dq)            !out
+    CALL ufo_refractivity_kmat(nlevp,      &
+                               nlevq,      &
+                               nRefLevels, &
+                               za,         &
+                               zb,         &
+                               pressure,   &
+                               humidity,   &
+                               pseudo_ops, &
+                               vert_interp_ops, &
+                               min_temp_grad, &
+                               dref_dp,    &       !out
+                               dref_dq)            !out
 
-    IF (pseudo_ops) THEN
-      !  2.  Calculate the gradient of nr wrt ref
-      CALL Ops_GPSROcalc_nrK (zb_pseudo,    &           ! geopotential heights of pseudo levels
-                              nb,           &           ! number of levels in zb
-                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                              Latitude,     &           ! latitude at observation
-                              RO_geoid_und, &           ! geoid undulation above WGS-84
-                              ref_model,    &           ! refractivity of model on model levels
-                              dnr_dref)                 ! out
-    ELSE
-      !  2.  Calculate the gradient of nr wrt ref
-      CALL Ops_GPSROcalc_nrK (zb,           &           ! geopotential heights of model levels
-                              nb,           &           ! number of levels in zb
-                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                              Latitude,     &           ! latitude at observation
-                              RO_geoid_und, &           ! geoid undulation above WGS-84
-                              ref_model,    &           ! refractivity of model on model levels
-                              dnr_dref)                 ! out
-    END IF
+    !  2.  Calculate the gradient of nr wrt ref
+    CALL Ops_GPSROcalc_nrK (model_heights, &       ! geopotential heights of pseudo levels
+                            nRefLevels,    &       ! number of refractivity levels
+                            RO_Rad_Curv,   &       ! radius of curvature of earth at observation
+                            Latitude,      &       ! latitude at observation
+                            RO_geoid_und,  &       ! geoid undulation above WGS-84
+                            ref_model,     &       ! refractivity of model on model levels
+                            dnr_dref)              ! out
 
     !  3.  Calculate the gradient of bending angle wrt ref and nr
     CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector
-                               nb,          &      ! no. of refractivity levels
+                               nRefLevels,  &      ! no. of refractivity levels
                                zobs,        &      ! obs impact parameters
                                ref_model,   &      ! refractivity values on model levels
                                nr,          &      ! index * radius product
@@ -575,8 +549,8 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
 
     ! Calculate overall gradient of bending angle wrt p and q
     m1 = MATMUL (dalpha_dnr,dnr_dref)
-    K(1:nobs, 1:nlevP) = MATMUL (dalpha_dref,dref_dp) + MATMUL (m1,dref_dp)    !P part
-    K(1:nobs, nlevP + 1:nstate) = MATMUL (dalpha_dref,dref_dq) + MATMUL (m1,dref_dq) !q part
+    K(1:nobs, 1:nlevp) = MATMUL (dalpha_dref,dref_dp) + MATMUL (m1,dref_dp)    !P part
+    K(1:nobs, nlevp+1:nlevp+nlevq) = MATMUL (dalpha_dref,dref_dq) + MATMUL (m1,dref_dq) !q part
 
     IF (ALLOCATED(dref_dp)) DEALLOCATE(dref_dp)
     IF (ALLOCATED(dref_dq)) DEALLOCATE(dref_dq)

@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsRadianceRTTOVTLAD> makerRTTOVTL_("RTTOV");
 
 ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
-  : keyOperRadianceRTTOV_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperRadianceRTTOV_(0), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
@@ -53,7 +53,7 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 
 void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                         ObsDiagnostics & ydiags) {
-  ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
+  ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
                                     ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::setTrajectory done" << std::endl;
 }
@@ -61,7 +61,7 @@ void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_radiancerttov_simobs_tl_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
+  ufo_radiancerttov_simobs_tl_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::simulateObsTL done" << std::endl;
 }
@@ -69,7 +69,7 @@ void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_radiancerttov_simobs_ad_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
+  ufo_radiancerttov_simobs_ad_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::simulateObsAD done" << std::endl;
 }

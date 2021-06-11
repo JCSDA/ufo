@@ -1,0 +1,74 @@
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+# rms ref is zero because only the auxiliary levels are tested
+# todo(ctgh): in a future PR, the simulated variables will be treated correctly.
+# When this occurs, use 'vector ref' with the correct reference values.
+
+observations:
+# Standard case.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+    extension:
+      average profiles onto model levels: 71
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+    numIntersectionIterations: 3
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 0
+  tolerance: 1.0e-06
+# Group variables configuration is empty, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+    simulated variables: [air_temperature]
+    extension:
+      average profiles onto model levels: 71
+  expect constructor to throw exception with message: Group variables configuration is empty
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 0
+  tolerance: 1.0e-06
+# Extended ObsSpace is not used, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+  expect constructor to throw exception with message: The extended obs space has not been produced 
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 0
+  tolerance: 1.0e-06

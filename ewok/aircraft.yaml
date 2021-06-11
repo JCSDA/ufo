@@ -1,0 +1,13 @@
+obs space:
+  name: Aircraft
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/aircraft.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).aircraft.{{window_begin}}.nc4
+  simulated variables:
+    - eastward_wind
+    - northward_wind
+    - air_temperature
+    - specific_humidity
+obs operator:
+  name: VertInterp

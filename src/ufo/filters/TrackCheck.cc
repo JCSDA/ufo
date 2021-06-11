@@ -22,6 +22,7 @@
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 #include "oops/util/sqr.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TrackCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 #include "ufo/utils/Constants.h"
@@ -93,15 +94,12 @@ float TrackCheck::TrackObservation::getFailedChecksFraction() {
 }
 
 
-TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
-  oops::Log::debug() << "TrackCheck: config = " << config_ << std::endl;
-
-  options_.reset(new TrackCheckParameters());
-  options_->deserialize(config);
+  oops::Log::debug() << "TrackCheck: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
@@ -111,38 +109,39 @@ TrackCheck::~TrackCheck()
 void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<size_t> validObsIds = TrackCheckUtils::getValidObservationIds(apply, flags_);
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
 
-  RecursiveSplitter splitter(validObsIds.size());
-  TrackCheckUtils::groupObservationsByStation(validObsIds, splitter, config_, obsdb_);
-  TrackCheckUtils::sortTracksChronologically(validObsIds, splitter, obsdb_);
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
 
-  ObsGroupPressureLocationTime obsPressureLoc = collectObsPressuresLocationsTimes();
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+  TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
+
+  ObsGroupPressureLocationTime obsPressureLoc = collectObsPressuresLocationsTimes(obsAccessor);
   PiecewiseLinearInterpolation maxSpeedByPressure = makeMaxSpeedByPressureInterpolation();
 
-  std::vector<bool> isRejected(apply.size(), false);
+  std::vector<bool> isRejected(obsPressureLoc.pressures.size(), false);
   for (auto track : splitter.multiElementGroups()) {
     identifyRejectedObservationsInTrack(track.begin(), track.end(), validObsIds,
                                         obsPressureLoc, maxSpeedByPressure, isRejected);
   }
-  TrackCheckUtils::flagRejectedObservations(isRejected, flagged);
+  obsAccessor.flagRejectedObservations(isRejected, flagged);
 
   if (filtervars.size() != 0) {
     oops::Log::trace() << "TrackCheck: flagged? = " << flagged[0] << std::endl;
   }
 }
 
-TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes() const {
+TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes(
+    const ObsAccessor &obsAccessor) const {
   ObsGroupPressureLocationTime obsPressureLoc;
-  obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsdb_);
-  obsPressureLoc.pressures.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "air_pressure", obsPressureLoc.pressures);
+  obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
+  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
   return obsPressureLoc;
 }
 
 PiecewiseLinearInterpolation TrackCheck::makeMaxSpeedByPressureInterpolation() const {
   const std::map<float, float> &maxSpeedInterpolationPoints =
-      options_->maxSpeedInterpolationPoints.value();
+      options_.maxSpeedInterpolationPoints.value();
 
   std::vector<double> pressures, maxSpeeds;
   pressures.reserve(maxSpeedInterpolationPoints.size());
@@ -215,7 +214,7 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
       const bool firstSweep = obs.numNeighborsVisitedInPreviousSweep(dir) == NO_PREVIOUS_SWEEP;
       const int numNeighborsVisitedInPreviousSweep =
           firstSweep ? 0 : obs.numNeighborsVisitedInPreviousSweep(dir);
-      int numNewDistinctBuddiesToVisit = firstSweep ? options_->numDistinctBuddiesPerDirection : 0;
+      int numNewDistinctBuddiesToVisit = firstSweep ? options_.numDistinctBuddiesPerDirection : 0;
 
       auto getNthNeighbor = [&trackObservations, obsIdx, dir](int n) -> const TrackObservation* {
         const int neighborObsIdx = obsIdx + (dir == FORWARD ? n : -n);
@@ -236,7 +235,7 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
         // need to "undo" checks against rejected observations.
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (neighborObs->rejectedInPreviousSweep()) {
-          CheckResults results = obs.checkAgainstBuddy(*neighborObs, *options_,
+          CheckResults results = obs.checkAgainstBuddy(*neighborObs, options_,
                                                        maxValidSpeedAtPressure, minPressureBetween);
           obs.unregisterCheckResults(results);
           if (results.isBuddyDistinct) {
@@ -250,7 +249,7 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
            neighborObs = getNthNeighbor(++neighborIdx)) {
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (!neighborObs->rejected()) {
-          CheckResults results = obs.checkAgainstBuddy(*neighborObs, *options_,
+          CheckResults results = obs.checkAgainstBuddy(*neighborObs, options_,
                                                        maxValidSpeedAtPressure, minPressureBetween);
           obs.registerCheckResults(results);
           if (results.isBuddyDistinct)
@@ -268,7 +267,7 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
 
   const float maxFailedChecksFraction = *std::max_element(failedChecksFraction.begin(),
                                                           failedChecksFraction.end());
-  const float failedChecksThreshold = options_->rejectionThreshold * maxFailedChecksFraction;
+  const float failedChecksThreshold = options_.rejectionThreshold * maxFailedChecksFraction;
   if (failedChecksThreshold <= 0)
     return TrackCheckUtils::SweepResult::NO_MORE_SWEEPS_REQUIRED;
 
@@ -294,7 +293,7 @@ void TrackCheck::flagRejectedTrackObservations(
 }
 
 void TrackCheck::print(std::ostream & os) const {
-  os << "TrackCheck: config = " << config_ << std::endl;
+  os << "TrackCheck: config = " << options_ << std::endl;
 }
 
 }  // namespace ufo

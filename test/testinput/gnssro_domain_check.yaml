@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_m.nc4
     obsdataout:
       obsfile: Data/gnssro_bndnbam_2018041500_m_output.nc4
     simulated variables: [bending_angle]
@@ -18,18 +18,18 @@ observations:
      # note values in the raw BUFR data files is in km
      - variable:
          name:  earth_radius_of_curvature@MetaData
-       minvalue: 6250000.
-       maxvalue: 6450000.
+       minvalue: 6250000.0
+       maxvalue: 6450000.0
      - variable:
          name:  geoid_height_above_reference_ellipsoid@MetaData
-       minvalue: -200.
-       maxvalue: 200.
+       minvalue: -200.0
+       maxvalue: 200.0
      - variable:
          name:  latitude@MetaData
-       minvalue: -90.
-       maxvalue: 90.
+       minvalue: -90.0
+       maxvalue: 90.0
      - variable:
          name:  longitude@MetaData
-       minvalue: -180.
-       maxvalue: 360.
+       minvalue: -180.0
+       maxvalue: 360.0
   passedBenchmark: 150

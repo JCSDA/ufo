@@ -13,7 +13,9 @@ module ufo_identity_mod
 ! Fortran derived type for the observation type
 !---------------------------------------------------------------------------------------------------
  type, public :: ufo_identity
-   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: obsvars ! Variables to be simulated
+   integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                    ! simulated variables in the ObsSpace
    type(oops_variables), public :: geovars
  contains
    procedure :: setup  => identity_setup_
@@ -50,13 +52,16 @@ subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),     intent(inout)  :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)     :: obss
 
-  integer :: iobs, ivar
+  integer :: iobs, ivar, iobsvar
   type(ufo_geoval), pointer :: point
   character(len=MAXVARLEN) :: geovar
 
-  do ivar = 1, nvars
-    !> Get the name of input variable in geovals
-    geovar = self%geovars%variable(ivar)
+  do iobsvar = 1, size(self%obsvarindices)
+    ! Get the index of the row of hofx to fill
+    ivar = self%obsvarindices(iobsvar)
+
+    ! Get the name of input variable in geovals
+    geovar = self%geovars%variable(iobsvar)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)

@@ -24,6 +24,8 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/missingValues.h"
+
 #include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -59,46 +61,33 @@ namespace ufo {
         std::string varname;
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
-        bool optional = options_.getOptional(groupname);
-        size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+        const bool optional = options_.getOptional(groupname);
+        const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
 
         std::vector <T> vec_all;  // Vector storing data for entire sample.
-        if (entireSampleData_.find(fullname) != entireSampleData_.end()) {
+        auto it_entireSampleData = entireSampleData_.find(fullname);
+        if (it_entireSampleData != entireSampleData_.end()) {
           // If the vector is already present, return it.
           // If the type T is incorrect then boost::get will return an exception.
           // Provide additional information if that occurs.
           try {
-            return boost::get<std::vector<T>> (entireSampleData_[fullname]);
+            return boost::get<std::vector<T>> (it_entireSampleData->second);
           } catch (boost::bad_get) {
-            throw eckit::BadParameter("Template parameter passed to boost::get "
-                                      "probably has the wrong type", Here());
+            throw eckit::BadParameter("Template parameter passed to boost::get for " +
+                                      fullname + " probably has the wrong type", Here());
           }
         } else if (obsdb_.has(groupname, varname) || optional) {
           // Initially fill the vector with the default value for the type T.
           if (entriesPerProfile == 0) {
-            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all));
+            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all, groupname));
           } else {
-            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all));
+            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all, groupname));
           }
           // Retrieve variable from the obsdb if present, overwriting the default value.
           if (obsdb_.has(groupname, varname)) obsdb_.get_db(groupname, varname, vec_all);
         }
 
-        // If the vector contains entirely missing values, clear it.
-        T missingValue;  // Missing value for type T.
-        if (std::is_same<T, int>::value)
-          missingValue = util::missingValue(1);
-        else if (std::is_same<T, float>::value)
-          missingValue = util::missingValue(1.0f);
-        bool allMissing = true;  // Signifies all elements in the vector are missing.
-        for (size_t idx = 0; allMissing && idx < vec_all.size(); ++idx)
-          allMissing = vec_all[idx] == missingValue;
-        if (allMissing) {
-          oops::Log::debug() << "All elements of " << fullname << " are missing" << std::endl;
-          vec_all.clear();
-        }
-
-        // Add vector to map (even if it is empty).
+        // Add vector to map.
         entireSampleData_.emplace(fullname, std::move(vec_all));
         return boost::get<std::vector<T>> (entireSampleData_[fullname]);
       }
@@ -108,7 +97,31 @@ namespace ufo {
     /// configurable list if requred.
     void writeQuantitiesToObsdb();
 
-   private:
+    /// Initialise vector in the entire sample for a variable that is not currently
+    /// stored. Fill the vector with the default value for the data type.
+    template <typename T>
+      void initialiseVector(const std::string fullname)
+      {
+        auto it_entireSampleData = entireSampleData_.find(fullname);
+        if (it_entireSampleData == entireSampleData_.end() ||
+            (it_entireSampleData != entireSampleData_.end() &&
+             get<T>(fullname).size() == 0)) {
+          std::string varname;
+          std::string groupname;
+          ufo::splitVarGroup(fullname, varname, groupname);
+          const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+          std::vector <T> vec_all;  // Vector storing data for entire sample.
+          if (entriesPerProfile == 0) {
+            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all, groupname));
+          } else {
+            vec_all.assign(entriesPerProfile * obsdb_.nrecs(),
+                           defaultValue(vec_all, groupname));
+          }
+          entireSampleData_[fullname] = vec_all;
+        }
+      }
+
+   private:  // functions
     /// Put entire data vector on obsdb.
     template <typename T>
       void putDataVector(const std::string &fullname,
@@ -123,6 +136,7 @@ namespace ufo {
         obsdb_.put_db(groupname, varname, datavec);
       }
 
+   private:  // variables
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
@@ -130,17 +144,26 @@ namespace ufo {
     const DataHandlerParameters &options_;
 
     /// Default value used to fill vector of integers.
-    int defaultValue(const std::vector <int> &vec) {return 0;}
+    int defaultValue(const std::vector <int> &vec, const std::string &groupname);
 
     /// Default value used to fill vector of floats.
-    float defaultValue(const std::vector <float> &vec) {return 0.0f;}
+    float defaultValue(const std::vector <float> &vec, const std::string &groupname);
 
     /// Default value used to fill vector of strings.
-    std::string defaultValue(const std::vector <std::string> &vec) {return "";}
+    std::string defaultValue(const std::vector <std::string> &vec, const std::string &groupname);
 
     /// Container of each variable in the entire data set.
     std::unordered_map <std::string, boost::variant
       <std::vector <int>, std::vector <float>, std::vector <std::string>>> entireSampleData_;
+
+    /// Missing value (int)
+    const int missingValueInt = util::missingValue(missingValueInt);
+
+    /// Missing value (float)
+    const float missingValueFloat = util::missingValue(missingValueFloat);
+
+    /// Missing value (string)
+    const std::string missingValueString = util::missingValue(missingValueString);
   };
 }  // namespace ufo
 

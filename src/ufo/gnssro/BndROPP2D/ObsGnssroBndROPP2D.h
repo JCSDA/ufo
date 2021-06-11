@@ -48,8 +48,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  std::unique_ptr<Locations> locations(const util::DateTime &,
-                                       const util::DateTime &) const override;
+  std::unique_ptr<Locations> locations() const override;
 
   int & toFortran() {return keyOperGnssroBndROPP2D_;}
   const int & toFortran() const {return keyOperGnssroBndROPP2D_;}
@@ -59,6 +58,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   F90hop keyOperGnssroBndROPP2D_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
+  const size_t nhoriz_;
 };
 
 // -----------------------------------------------------------------------------

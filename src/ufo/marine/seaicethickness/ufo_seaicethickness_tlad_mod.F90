@@ -17,6 +17,7 @@ module ufo_seaicethickness_tlad_mod
  use obsspace_mod
  use missing_values_mod
  use oops_variables_mod
+ use ufo_utils_mod, only: cmp_strings
 
  implicit none
  private
@@ -91,7 +92,7 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 ! check if sea ice fraction variables is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 
-if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
+if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
    call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
    self%snowthick= snowthick
 endif
@@ -135,9 +136,9 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 ! check if sea ice thickness variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
-if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
+if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+   rho_wsw = (-self%rho_snow)/self%rho_water  
 endif
 
 ! sea ice thickness obs operator
@@ -200,9 +201,9 @@ if (geovals%nlocs /= size(hofx,1)) then
   call abor1_ftn(err_msg)
 endif
 
-if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
+if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+   rho_wsw = (-self%rho_snow)/self%rho_water   
 endif
 
 if (.not. geovals%linit ) geovals%linit=.true.
@@ -212,22 +213,22 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ncat = self%icethick%nval
-if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then
-   if (ncat < 1) then
-     write(err_msg,*) myname_, ' unknown number of categories'
-     call abor1_ftn(err_msg)
-   endif
-   if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
-   if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
-end if
+if (ncat < 1) then
+  write(err_msg,*) myname_, ' unknown number of categories'
+  call abor1_ftn(err_msg)
+endif
+if (.not. allocated(icefrac_d%vals)) then
+  icefrac_d%nval = ncat
+  allocate(icefrac_d%vals(ncat,size(hofx,1)))
+  icefrac_d%vals = 0.0
+endif
+if (.not. allocated(icethick_d%vals)) then
+  icethick_d%nval = ncat
+  allocate(icethick_d%vals(ncat, size(hofx,1)))
+  icethick_d%vals = 0.0
+endif
 
 ! backward sea ice thickness obs operator
-
-if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
-if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
-
-icethick_d%vals = 0.0
-icefrac_d%vals = 0.0
 
 select case (trim(self%obsvars%variable(1)))
 case ("sea_ice_freeboard")

@@ -10,7 +10,7 @@ observations:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_vs.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_vs.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_vs.nc4

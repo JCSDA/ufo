@@ -12,51 +12,55 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckSign> makerProfileCheckSign_("Sign");
 
-  ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
-                                     const ProfileIndices &profileIndices,
-                                     ProfileDataHandler &profileDataHandler,
-                                     ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+  ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckSign::runCheck()
+  void ProfileCheckSign::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Sign check/correction" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
-    const std::vector <float> &PstarBackgr =
-       profileDataHandler_.get<float>(ufo::VariableNames::PstarBackgr);
+       profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumSignChange =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSignChange);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumSignChange);
     std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
-    if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, PstarBackgr,
+    if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg,
                                          tFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Check will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(pressures, tObs, tBkg, PstarBackgr,
+                           << oops::listOfVectorSizes(pressures, tObs, tBkg,
                                                       tFlags, tObsCorrection)
                            << std::endl;
       return;
     }
 
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    // Obtain air pressure GeoVals.
+    const std::vector <float> &pressureGeoVaLs =
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+    if (pressureGeoVaLs.empty())
+      throw eckit::BadValue("Air pressure GeoVaLs vector is empty.", Here());
+
+    // Pstar is the pressure at the bottom of the upper-air column (following the OPS code).
+    const float Pstar = pressureGeoVaLs[0];
+
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       // Ignore this level if it has been flagged as rejected.
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
-      if (pressures[jlev] <= PstarBackgr[jlev] - options_.SCheck_PstarThresh.value() &&
+      if (pressures[jlev] <= Pstar - options_.SCheck_PstarThresh.value() &&
           tObs[jlev] != missingValueFloat &&
           std::abs(tObs[jlev] - tBkg[jlev]) >= options_.SCheck_tObstBkgThresh.value()) {
         // Change sign of tObs in C and compare to tBkg (also in C)

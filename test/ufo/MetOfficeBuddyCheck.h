@@ -60,13 +60,26 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsSpace, obsSpace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
-  ufo::MetOfficeBuddyCheck filter(obsSpace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
+  ufo::MetOfficeBuddyCheckParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::MetOfficeBuddyCheck filter(obsSpace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   ioda::ObsVector hofx(obsSpace, "HofX");
-  ufo::Locations locations(obsSpace, bgn, end);
-  ufo::ObsDiagnostics obsDiags(obsSpace, locations, oops::Variables());
+  ufo::Locations locations(conf, obsSpace.comm());
+
+  const eckit::LocalConfiguration diagConf = conf.getSubConfiguration("obs diagnostics");
+  oops::Variables diagVars;
+  for (const std::string &name : diagConf.keys())
+    diagVars.push_back(name);
+  ufo::ObsDiagnostics obsDiags(obsSpace, locations, diagVars);
+  obsDiags.allocate(1, diagVars);
+  for (const std::string &name : diagConf.keys()) {
+    const std::vector<double> diag = diagConf.getDoubleVector(name);
+    obsDiags.save(diag, name, 1);
+  }
+
   filter.postFilter(hofx, obsDiags);
 
   const eckit::LocalConfiguration pgeConf(conf, "ExpectedGrossErrorProbabilities");

@@ -13,9 +13,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
@@ -29,16 +27,13 @@ namespace ufo {
 
   class ProfileCheckRH : public ProfileCheckBase {
    public:
-      ProfileCheckRH(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
-                     ProfileDataHandler &profileDataHandler,
-                     ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckRH(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override;
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// Observed pressure for selected levels (hPa)

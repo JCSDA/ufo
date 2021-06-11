@@ -1,0 +1,45 @@
+# Verifies that the BackgroundErrorVertInterp and BackgroundErrorIdentity obs operators can be used
+# together, each evaluating background error estimates of different variables.
+
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+obs space:
+  name: Sondes
+  obsdatain:
+    obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+  simulated variables: [air_temperature, specific_humidity, surface_pressure, northward_wind, eastward_wind]
+obs operator:
+  name: Composite
+  components:
+  # operators used to evaluate H(x)
+  - name: VertInterp
+    variables:
+    - name: air_temperature
+    - name: specific_humidity
+    - name: northward_wind
+    - name: eastward_wind
+  - name: Identity
+    variables:
+    - name: surface_pressure
+  # operators used to evaluate background errors
+  - name: BackgroundErrorVertInterp
+    variables:
+    - name: northward_wind
+    - name: eastward_wind
+    - name: air_temperature
+    - name: specific_humidity
+    observation vertical coordinate: air_pressure
+    vertical coordinate: background_error_air_pressure
+  - name: BackgroundErrorIdentity
+    variables:
+    - name: surface_pressure
+geovals:
+  filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
+obs diagnostics:
+  variables:
+  - northward_wind_background_error
+  - surface_pressure_background_error
+  - specific_humidity_background_error
+reference obs diagnostics:
+  filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_obsdiag_2018041500_s.nc4
+tolerance: 1.e-6

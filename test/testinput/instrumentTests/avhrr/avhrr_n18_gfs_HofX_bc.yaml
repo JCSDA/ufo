@@ -1,0 +1,44 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: &Sensor_ID avhrr3_n18
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: avhrr3_n18
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 3,4,5
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_avhrr3_n18.2020110106.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
+        options:
+          order: 2
+          tlapse: &avhrr_n18_tlap Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_tlapmean.txt
+      - name: lapse_rate
+        options:
+          tlapse: *avhrr_n18_tlap
+      - name: emissivity
+      - name: scan_angle
+        options:
+          order: 4
+      - name: scan_angle
+        options:
+          order: 3
+      - name: scan_angle
+        options:
+          order: 2
+      - name: scan_angle
+  vector ref: GsiHofXBc
+  tolerance: 1.e-6

@@ -93,8 +93,10 @@ contains
   end subroutine ufo_radiancerttov_delete
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
+  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs, &
+                                      hofx, hofxdiags, ob_info)
     use fckit_mpi_module,   only: fckit_mpi_comm
+    use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
 
@@ -105,239 +107,223 @@ contains
 
     real(c_double),        intent(inout)    :: hofx(nvars,nlocs)
     type(ufo_geovals),     intent(inout)    :: hofxdiags    !non-h(x) diagnostics
+    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
 
     real(c_double)                          :: missing
     type(fckit_mpi_comm)                    :: f_comm
 
     ! Local Variables
-    character(*), parameter                 :: ROUTINE_NAME = 'ufo_radiancerttov_simobs'
-    type(ufo_geoval), pointer               :: temp
+    character(*), parameter                 :: routine_name = 'ufo_radiancerttov_simobs'
+    type(rttov_chanprof), allocatable       :: chanprof(:)
+    type(ufo_geoval), pointer               :: geoval_temp
 
-    integer                                 :: nprofiles
-    integer(kind=jpim)                      :: errorstatus              ! Return error status of RTTOV subroutine calls
+    integer                                 :: nprofiles, nlevels
+    integer(kind=jpim)                      :: errorstatus  ! Error status of RTTOV subroutine calls
 
-    integer                                 :: i_inst, nlevels, nchan_total, ichan, iprof, prof
-    integer                                 :: nprof_sim, nprof_max_sim
+    integer                                 :: i_inst, iprof_rttov, iprof, ichan, ichan_sim
+    integer                                 :: nprof_sim, nprof_max_sim, nchan_total
     integer                                 :: prof_start, prof_end
 
     logical                                 :: jacobian_needed
-    logical, allocatable                    :: skip_profiles(:)
-
-    logical                                 :: obs_info
-
-    logical                                 :: layer_quantities
 
     include 'rttov_direct.interface'
     include 'rttov_k.interface'
-    include 'rttov_print_profile.interface'
-    include 'rttov_user_profile_checkinput.interface'
 
-    !DAR: What is this?
-    call obsspace_get_comm(obss, f_comm)
+    write(message,'(A, A, I0, A, I0, A)') trim(routine_name), ': Simulating observations'
+    call fckit_log%debug(message)
 
-    ! Get number of profile and layers from geovals
-    ! ---------------------------------------------
-
-    nprofiles = geovals % nlocs
-    if (ufo_vars_getindex(geovals%variables, var_ts) > 0) then
-      call ufo_geovals_get_var(geovals, var_ts, temp)
-      nlevels = temp % nval
-      layer_quantities = .false.
-    endif
-
-    nullify(temp)
-
+    !Initialisations
     missing = missing_value(missing)
     hofx    = missing
 
-    errorstatus = 0_jpim
-    nchan_total = 0
+    !Return the name and name length of obsspace communicator (from ioda)
+    call obsspace_get_comm(obss, f_comm)
 
-    !DARFIX: This isn't ideal because it's not going to work for multiple instruments but we'll deal with that later
-    nchan_inst = size(self % channels)
-
-    !! Parse hofxdiags%variables into independent/dependent variables and channel
-    !! assumed formats:
-    ! Note this sets jacobian_needed
+    !! Parse hofxdiags%variables into independent/dependent variables and channel assumed formats:
+    ! Note this sets the jacobian_needed flag
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
     !!   non-jacobian var --> <ystr>_<chstr>
-   call parse_hofxdiags(hofxdiags, jacobian_needed) 
+    call parse_hofxdiags(hofxdiags, jacobian_needed)
 
-    Sensor_Loop:do i_inst = 1, self % conf % nSensors
+    ! Get number of profiles and levels from geovals
+    nprofiles = geovals % nlocs
+    call ufo_geovals_get_var(geovals, var_ts, geoval_temp)
+    nlevels = geoval_temp % nval
+    nullify(geoval_temp)
 
-      ! Ensure the options and coefficients are consistent
-      call rttov_user_options_checkinput(errorstatus, self % conf % rttov_opts, &
-        self % conf % rttov_coef_array(i_inst))
+    ! Allocate RTTOV profiles for ALL geovals for the direct calculation
+    write(message,'(A, A, I0, A, I0, A)') &
+      trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
+    call fckit_log%debug(message)
 
-      if (errorstatus /= errorstatus_success) then
-        write(message,'(A, I6)') 'after rttov_user_options_checkinput: error = ',&
-          errorstatus
-        call fckit_log%info(message)
-      end if
+    call self % RTprof % alloc_profs(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
-      ! keep journal of which profiles have no obs data these will be skipped
-      allocate(Skip_Profiles(nprofiles))
-      Skip_Profiles(:) = .false.
-      call ufo_rttov_skip_profiles(nProfiles,nchan_inst,self%channels,obss,Skip_Profiles)
+    !Assign the atmospheric and surface data from the GeoVaLs
+    write(message,'(A, A, I0, A, I0, A)') &
+      trim(routine_name), ': Creating RTTOV profiles from geovals'
+    call fckit_log%debug(message)
+    if(present(ob_info)) then
+      call self % RTprof % setup(geovals,obss,self % conf,ob_info=ob_info)
+    else
+      call self % RTprof % setup(geovals,obss,self % conf)
+    endif
 
-      ! Determine the total number of radiances to simulate (nchan_sim).
-      ! In this example we simulate all specified channels for each profile, but
-      ! in general one can simulate a different number of channels for each profile.
+    !DAR: Removing sensor_loop until it's demonstrated to be needed and properly tested
+    ! at the moment self % channels is a single 1D array so cannot adequately contain more than one set of channels
+!    Sensor_Loop:do i_inst = 1, self % conf % nSensors
+    i_inst = 1
 
-      nprof_max_sim = self % conf % nchan_max_sim / nchan_inst
-      nprof_sim = min(nprof_max_sim, nprofiles)
+    ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
+    nchan_inst = size(self % channels)
 
-      prof_start = 1
-      prof_end = nprofiles
+    ! Maximum number of profiles to be processed by RTTOV per pass
+    if(self % conf % prof_by_prof) then
+      nprof_max_sim = 1
+    else
+      nprof_max_sim = max(1,self % conf % nchan_max_sim / nchan_inst)
+    endif
+    nprof_sim = min(nprof_max_sim, nprofiles)
 
-      !DARFIX should actually be packed count of skip_profiles * SIZE(channels)
+    ! Determine the total number of radiances to simulate (nchan_sim).
+    nchan_sim = nprof_sim * size(self%channels)
+
+    ! Allocate structures for RTTOV direct code (and, if needed, K code)
+    write(message,'(A,A,I0,A,I0,A)') &
+      trim(routine_name), ': Allocating resources for RTTOV direct code: ', nprof_sim, ' and ', nchan_sim, ' channels'
+    call fckit_log%debug(message)
+    call self % RTprof % alloc_direct(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
+
+    if (jacobian_needed) then
+      write(message,'(A,A,I0,A,I0,A)') &
+        trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
+      call fckit_log%debug(message)
+
+      call self % RTprof % alloc_profs_K(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
+      call self % RTprof % alloc_k(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
+    endif
+
+    ! Used for keeping track of profiles for setting emissivity
+    allocate(self % RTprof % chanprof ( nprofiles * nchan_inst ))
+
+    prof_start = 1; prof_end = nprofiles
+    nchan_total = 0
+
+    RTTOV_loop : do while (prof_start <= prof_end)
+
+      ! Reduce number of simulated profiles/channel if at end of the of profiles to be processed
       nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
       nchan_sim = nprof_sim * size(self%channels)
 
-      ! --------------------------------------------------------------------------
-      ! Allocate RTTOV input and output structures
-      ! --------------------------------------------------------------------------
-      if (.not. jacobian_needed) then
-        ! allocate RTTOV resources
-        call self % RTprof % alloc(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
-      else
-        call self % RTprof % alloc(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=2)
-      endif
+      ! allocate and initialise local chanprof structure
+      allocate(chanprof ( nchan_sim ))
+      chanprof(:) % prof = 0
+      chanprof(:) % chan = 0
 
-      self % RTProf % profiles(:) % skin % surftype = -1_jpim
+      ! index for simulated channel
+      ichan_sim = 0_jpim
 
-      do while (prof_start <= prof_end)
-        self % RTprof % chanprof(:) % prof = 0 
-        self % RTprof % chanprof(:) % chan = 0 
+      ! Build the list of profile/channel indices in chanprof
+      do iprof_rttov = 1, nprof_sim
 
-        nchan_sim = 0_jpim
-        nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
+        ! iprof is the index for the full set of RTTOV profiles
+        iprof = prof_start + iprof_rttov - 1
 
-        ! --------------------------------------------------------------------------
-        ! Build the list of profile/channel indices in chanprof
-        ! --------------------------------------------------------------------------
-
-        do iprof = 1, min(nprof_sim, prof_end - prof_start + 1)
-          if(.not. Skip_Profiles(prof_start + iprof - 1)) then
-            do ichan = 1, nchan_inst
-
-              nchan_sim = nchan_sim + 1_jpim
-              self % RTprof % chanprof(nchan_sim) % prof = iprof
-              self % RTprof % chanprof(nchan_sim) % chan = self % channels(ichan)
-            end do
-          else
-            if (debug) write(*,*) 'skipping ', iprof, prof_start + iprof - 1
-          end if
+        do ichan = 1, nchan_inst
+          ichan_sim = ichan_sim + 1_jpim
+          chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
+          chanprof(ichan_sim) % chan = self % channels(ichan)
+          self % RTprof % chanprof(nchan_total + ichan_sim) % prof = iprof ! this refers to the index of the profile from the geoval
+          self % RTprof % chanprof(nchan_total + ichan_sim) % chan = self % channels(ichan)
         end do
+        nchan_sim = ichan_sim
 
-        !Assign the data from the GeoVaLs
-        !--------------------------------
-        
-        obs_info = .false. ! this will be replaced by an optional structure coming from 1DVar
-        if(obs_info) then
-          call load_atm_data_rttov(geovals,obss,self % RTprof % profiles,prof_start,self % conf,layer_quantities,obs_info=obs_info)
-          call load_geom_data_rttov(obss,self % RTprof % profiles,prof_start,obs_info=obs_info)
-        else
-          call load_atm_data_rttov(geovals,obss,self % RTprof % profiles,prof_start,self%conf,layer_quantities)
-          call load_geom_data_rttov(obss,self % RTprof % profiles,prof_start)
-        end if
-
-        ! --------------------------------------------------------------------------
-        ! Set surface emissivity
-        ! --------------------------------------------------------------------------
-
-        call self % RTProf % init_emissivity(self % conf)
-
-        if(self % conf % RTTOV_profile_checkinput) then
-          if (self % conf % inspect > 0) then
-            call rttov_print_profile(self % RTprof % profiles(self % conf % inspect))
-          endif
-
-          ! no error checking, could check multiple profiles in loop but what would be the point
-          call rttov_user_profile_checkinput(rttov_errorstatus, &
-            self % conf % rttov_opts, &
-            self % conf % rttov_coef_array(i_inst), &
-            self % RTprof % profiles(self % conf % inspect))
-        endif
-
-
-        ! --------------------------------------------------------------------------
-        ! Call RTTOV model
-        ! --------------------------------------------------------------------------
-
-        if (jacobian_needed) then
-
-          call rttov_k(                              &
-            errorstatus,                             &! out   error flag
-            self % RTProf % chanprof(nchan_total + 1:nchan_total + nchan_sim), &! in LOCAL channel and profile index structure
-            self % conf % rttov_opts,                     &! in    options structure
-            self % RTProf % profiles,                                &! in    profile array
-            self % RTProf % profiles_k(nchan_total + 1 : nchan_total + nchan_sim), &! in    profile array
-            self % conf % rttov_coef_array(i_inst), &! in    coefficients structure
-            self % RTProf % transmission,                            &! inout computed transmittances
-            self % RTProf % transmission_k,                          &! inout computed transmittances
-            self % RTProf % radiance,                                &! inout computed radiances
-            self % RTProf % radiance_k,                              &! inout computed radiances
-            calcemis    = self % RTProf % calcemis,                  &! in    flag for internal emissivity calcs
-            emissivity  = self % RTProf % emissivity,                &!, &! inout input/output emissivities per channel
-            emissivity_k = self % RTProf % emissivity_k)!,           &! inout input/output emissivities per channel      
-
-          if ( errorstatus /= errorstatus_success ) then
-            write(message,'(A, 2I6)') 'after rttov_k: error ', errorstatus, i_inst
-            call abor1_ftn(message)
-          end if
-
-        else
-          call rttov_direct(                         &
-            errorstatus,                             &! out   error flag
-            self % RTprof % chanprof(1:nchan_sim),        &! in    channel and profile index structure
-            self % conf % rttov_opts,                     &! in    options structure
-            self % RTProf % profiles(1:nprof_sim),                                &! in    profile array
-            self % conf % rttov_coef_array(i_inst), &! in    coefficients structure
-            self % RTProf % transmission,                            &! inout computed transmittances
-            self % RTProf % radiance,                                &! inout computed radiances
-            calcemis    = self % RTProf % calcemis(1:nchan_sim),                  &! in    flag for internal emissivity calcs
-            emissivity  = self % RTProf % emissivity(1:nchan_sim))!,              &! inout input/output emissivities per channel
-
-          if ( errorstatus /= errorstatus_success ) then
-            write(message,'(A, 2I6)') 'after rttov_direct: error ', errorstatus, i_inst
-            call abor1_ftn(message)
-          end if
-        endif ! jacobian_needed
-
-        !DARFIX: This should be available only when debugging
-        ! Write out progress through batch
-        if (debug) write(*,'(A1, i0, A, i0)',ADVANCE="NO") achar(13), prof_start+nprof_sim-1, ' locations processed out of ', geovals%nlocs
-
-        ! Put simulated brightness temperature into hofx
-        ! ----------------------------------------------
-        do ichan=1, nchan_sim, size(self%channels)
-          prof = self % RTProf % chanprof(ichan)%prof
-          hofx(1:size(self%channels),prof_start + prof - 1) = self % RTprof % radiance % bt(ichan:ichan+size(self%channels)-1)
-        enddo
-
-        ! Put simulated diagnostics into hofxdiags
-        ! ----------------------------------------------
-        if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTProf, self % RTProf % chanprof, hofxdiags)
-
-        nchan_total = nchan_total + nchan_sim
-        prof_start = prof_start + nprof_sim
-
+        if(self % conf % RTTOV_profile_checkinput) call self % RTprof % check(self % conf, iprof, i_inst)
+        if(any(self % conf % inspect == iprof)) call self % RTprof % print(self % conf, iprof, i_inst)
+            
       end do
 
-      ! Deallocate structures for rttov_direct
+      ! Set surface emissivity
+      call self % RTProf % init_emissivity(self % conf, prof_start)
 
-      call self % RTprof % alloc(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, asw=0)
+      ! --------------------------------------------------------------------------
+      ! Call RTTOV model
+      ! --------------------------------------------------------------------------
+      !N.B. different from TL/AD as we don't need to retain the full profiles_k so data can be overwritten
 
-      if (errorstatus /= errorstatus_success) then
-        write(message,'(A, 2I6)') &
-          'after rttov_alloc_direct (deallocation): errorstatus, i_inst =', &
-          errorstatus, i_inst
-        call abor1_ftn(message)
-      end if
+      if (jacobian_needed) then
+        call rttov_k(                                                     &
+          errorstatus,                                                    &! out   error flag
+          chanprof(1:nchan_sim),                                          &! in LOCAL channel and profile index structure
+          self % conf % rttov_opts,                                       &! in    options structure
+          self % RTProf % profiles(prof_start:prof_start + nprof_sim -1), &! in    profile array
+          self % RTProf % profiles_k(1:nchan_sim),                        &! in    profile array
+          self % conf % rttov_coef_array(i_inst),                         &! in    coefficients structure
+          self % RTProf % transmission,                                   &! inout computed transmittances
+          self % RTProf % transmission_k,                                 &! inout computed transmittances
+          self % RTProf % radiance,                                       &! inout computed radiances
+          self % RTProf % radiance_k,                                     &! inout computed radiances
+          calcemis    = self % RTProf % calcemis(1:nchan_sim),            &! in    flag for internal emissivity calcs
+          emissivity  = self % RTProf % emissivity(1:nchan_sim),          &!, &! inout input/output emissivities per channel
+          emissivity_k = self % RTProf % emissivity_k(1:nchan_sim))!,     &! inout input/output emissivities per channel
+        
+        if ( errorstatus /= errorstatus_success ) then
+          write(message,'(A, 2I6)') 'after rttov_k: error ', errorstatus, i_inst
+          call abor1_ftn(message)
+        end if
 
-    end do Sensor_Loop
-    write(*,*)
+      else
+        call rttov_direct(                                                &
+          errorstatus,                                                    &! out   error flag
+          chanprof(1:nchan_sim),                                          &! in    channel and profile index structure
+          self % conf % rttov_opts,                                       &! in    options structure
+          self % RTProf % profiles(prof_start:prof_start + nprof_sim -1), &! in    profile array
+          self % conf % rttov_coef_array(i_inst),                         &! in    coefficients structure
+          self % RTProf % transmission,                                   &! inout computed transmittances
+          self % RTProf % radiance,                                       &! inout computed radiances
+          calcemis    = self % RTProf % calcemis(1:nchan_sim),            &! in    flag for internal emissivity calcs
+          emissivity  = self % RTProf % emissivity(1:nchan_sim))!,        &! inout input/output emissivities per channel
+        
+        if ( errorstatus /= errorstatus_success ) then
+          write(message,'(A, 2I6)') 'after rttov_direct: error ', errorstatus, i_inst
+          call abor1_ftn(message)
+        end if
+      endif ! jacobian_needed
+
+      ! Put simulated brightness temperature into hofx
+      do ichan = 1, nchan_sim, size(self%channels)
+        iprof = self % RTProf % chanprof(nchan_total + ichan)%prof
+        hofx(1:size(self%channels),iprof) = self % RTprof % radiance % bt(ichan:ichan+size(self%channels)-1)
+      enddo
+
+      ! Put simulated diagnostics into hofxdiags
+      if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTProf, chanprof, self % conf, hofxdiags)
+
+      ! increment profile and channel counters
+      nchan_total = nchan_total + nchan_sim
+      prof_start = prof_start + nprof_sim
+
+      ! deallocate local chanprof so it can be re-allocated with a different number of channels if reqd.
+      deallocate(chanprof)
+
+    end do RTTOV_loop
+
+    ! Deallocate structures for rttov_direct
+    if(jacobian_needed) then
+      call self % RTprof % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
+      call self % RTprof % alloc_profs_K(errorstatus, self % conf, -1, -1, asw=0)
+    endif
+    call self % RTprof % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
+    call self % RTprof % alloc_profs(errorstatus, self % conf, -1, -1, asw=0)
+
+    deallocate(self % RTprof % chanprof)
+    
+    if (errorstatus /= errorstatus_success) then
+      write(message,'(A, 2I6)') &
+        'after rttov_alloc_direct (deallocation): errorstatus, i_inst =', errorstatus, i_inst
+      call abor1_ftn(message)
+    end if
+    
+  !end do Sensor_Loop
 
   end subroutine ufo_radiancerttov_simobs
 

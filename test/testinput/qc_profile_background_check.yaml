@@ -1,0 +1,100 @@
+window begin: 2020-12-31T23:59:00Z
+window end: 2021-01-01T00:01:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    absolute threshold: 2.5
+  passedBenchmark: 59  # Accepts profiles 1, 2, 4, 6, 7, 9 (note that profile 1 has some missing data)
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    absolute threshold: 1.1  # Accepts profiles 1, 4, 6, 9
+  passedBenchmark: 39
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    absolute threshold: 110  # Accepts all profiles
+  passedBenchmark: 99
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    relative threshold: 1.1
+  passedBenchmark: 59  # Accepts profiles 1, 2, 3, 7, 9, 10
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    relative threshold: 0.5  # Accepts profile 7
+  passedBenchmark: 10
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: [ "record_number" ]
+        sort variable: "latitude"
+        sort order: "descending"
+    simulated variables: [variable]
+  HofX: HofX
+  obs filters:
+  - filter: Profile Background Check
+    filter variables:
+    - name: variable
+    relative threshold: 110  # Accepts all profiles
+  passedBenchmark: 99

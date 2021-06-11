@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsSeaIceFractionTLAD> makerSeaIceFractionTL_("Sea
 
 ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb,
                                              const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_ice_category_area_fraction"};
   varin_.reset(new oops::Variables(vv));
@@ -48,7 +48,7 @@ ObsSeaIceFractionTLAD::~ObsSeaIceFractionTLAD() {
 
 void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                           ObsDiagnostics &) {
-  ufo_seaicelinear_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_seaicelinear_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsSeaIceFractionTLAD: trajectory set" << std::endl;
 }
 
@@ -71,7 +71,8 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & ovec) const {
-  ufo_seaicelinear_alloc_ad_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_seaicelinear_alloc_ad_f90(keyOper_, gv.toFortran(), obsspace(),
+                                ovec.size(), ovec.toFortran());
   int nlocs = ovec.size();
   int nlevs = gv.nlevs("sea_ice_category_area_fraction");
   float miss = 0.0;

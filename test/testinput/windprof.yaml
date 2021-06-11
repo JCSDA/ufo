@@ -12,7 +12,7 @@ observations:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/windprof_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/windprof_obs_2018041500_m.nc4
     obsdataout:
       obsfile: Data/windprof_obs_2018041500_m_out.nc4
     simulated variables: [eastward_wind, northward_wind]

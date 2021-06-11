@@ -16,6 +16,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
+oops::Variables LinearObsOperatorBase::simulatedVars() const {
+  return odb_.obsvariables();
+}
+
+// -----------------------------------------------------------------------------
+
 LinearObsOperatorFactory::LinearObsOperatorFactory(const std::string & name) {
   if (getMakers().find(name) != getMakers().end()) {
     oops::Log::error() << name << " already registered in ufo::LinearObsOperatorFactory."

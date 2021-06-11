@@ -12,7 +12,11 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/filters/Variables.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -20,19 +24,45 @@ class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
+class InflateErrorParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(InflateErrorParameters, FilterActionParametersBase);
+
+ public:
+  oops::OptionalParameter<float> inflationFactor{"inflation factor", this};
+  oops::OptionalParameter<Variable> inflationVariable{"inflation variable", this};
+
+  /// This function is overridden to check that either `inflation factor` or `inflation variable`
+  /// is specified, but not both.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+};
+
+// -----------------------------------------------------------------------------
+/// \brief Observation error inflation action.
+/// \details Inflates Observation error for filter variables by:
+/// - constant (if "inflation factor" is specified in yaml)
+/// - spatially varying filter data (if "inflation variable" is specified in yaml).
+///   If inflation variable is the same size as filter variables, inflation is done
+///   variable by variable (e.g. inflation variable 1 is used to inflate filter
+///   variable 1; inflation variable 2 is used to inflate filter variable 2, etc).
+///   If inflation variable is of size 1, the same inflation variable is used for
+///   updating all filter variables.
 class InflateError : public FilterActionBase {
  public:
-  explicit InflateError(const eckit::Configuration &);
-  ~InflateError() {}
+  /// The type of parameters accepted by the constructor of this action.
+  /// This typedef is used by the FilterActionFactory.
+  typedef InflateErrorParameters Parameters_;
+
+  explicit InflateError(const Parameters_ &);
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
+             const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
+
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+
  private:
-  Variables allvars_;
-  const std::string strfactor_;
-  const eckit::LocalConfiguration conf_;
+  Variables allvars_;            /// variables required to compute inflation
+  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

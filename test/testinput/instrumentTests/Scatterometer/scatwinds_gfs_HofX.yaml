@@ -1,0 +1,15 @@
+window begin: 2020-11-01T11:00:00Z
+window end: 2020-11-01T13:00:00Z
+
+observations:
+- obs operator:
+    name: GSISfcModel
+  obs space:
+    name: Scatwinds
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/scatwind_obs_2020110112_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/scatwind_geoval_2020110112_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-03

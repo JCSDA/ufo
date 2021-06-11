@@ -12,6 +12,8 @@
 #include <memory>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include "eckit/config/Configuration.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -32,6 +34,7 @@ inline util::Duration abs(const util::Duration &duration) {
   return duration.toSeconds() >= 0 ? duration : -duration;
 }
 
+class ObsAccessor;
 class RecursiveSplitter;
 
 namespace TrackCheckUtils {
@@ -78,37 +81,28 @@ class CheckCounter {
   int numChecks_;
 };
 
-std::vector<size_t> getValidObservationIds(
-    const std::vector<bool> &apply,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
-
-void groupObservationsByStation(const std::vector<size_t> &validObsIds,
-                                RecursiveSplitter &splitter,
-                                const eckit::Configuration &config,
-                                const ioda::ObsSpace &obsdb);
-
-void groupObservationsByRecordNumber(const std::vector<size_t> &validObsIds,
-                                     RecursiveSplitter &splitter,
-                                     const ioda::ObsSpace &obsdb);
-
-void groupObservationsByVariable(const Variable &variable,
-                                 const std::vector<size_t> &validObsIds,
-                                 RecursiveSplitter &splitter, const ioda::ObsSpace &obsdb);
-
-template <typename VariableType>
-void groupObservationsByTypedVariable(const Variable &variable,
-                                      const std::vector<size_t> &validObsIds,
-                                      RecursiveSplitter &splitter,
-                                      const ioda::ObsSpace &obsdb);
+/// \brief Create an ObsAccessor object providing access to observations that need to be checked
+/// by the current MPI task.
+///
+/// The composition of this set of observations depends on the value of \p stationIdVariable.
+///
+/// If \p stationIdVariable is empty, observations are assumed to be grouped into tracks by the
+/// record ID. Each MPI rank is guaranteed to hold either all or no observations from a given
+/// record. Thus the returned ObsAccessor gives access to all observations from the records held on
+/// the current MPI rank.
+///
+/// Otherwise, observations are assumed to be grouped into tracks by the variable \p
+/// *stationIdVariable.  If this variable was also used to group observations into records, the
+/// returned ObsAccessor is constructed as if \p stationIdVariable was empty; otherwise, it gives
+/// access to observations held on all MPI ranks.
+ObsAccessor createObsAccessor(const boost::optional<Variable> &stationIdVariable,
+                              const ioda::ObsSpace &obsdb);
 
 void sortTracksChronologically(const std::vector<size_t> &validObsIds,
-                               RecursiveSplitter &splitter,
-                               const ioda::ObsSpace &obsdb);
+                               const ObsAccessor &obsAccessor,
+                               RecursiveSplitter &splitter);
 
-ObsGroupLocationTimes collectObservationsLocations(const ioda::ObsSpace &obsdb);
-
-void flagRejectedObservations(const std::vector<bool> &isRejected,
-                              std::vector<std::vector<bool> > &flagged);
+ObsGroupLocationTimes collectObservationsLocations(const ObsAccessor &obsAccessor);
 
 }  // namespace TrackCheckUtils
 

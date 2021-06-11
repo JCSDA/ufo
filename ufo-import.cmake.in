@@ -1,0 +1,75 @@
+# ufo-import.cmake
+
+include(CMakeFindDependencyMacro)
+
+if( @jedicmake_FOUND@ AND NOT jedicmake_FOUND )
+    find_dependency(jedicmake REQUIRED)
+endif()
+
+if(NOT (MPI_C_FOUND AND MPI_CXX_FOUND AND MPI_Fortran_FOUND))
+    find_dependency(MPI REQUIRED COMPONENTS C CXX Fortran)
+endif()
+
+if(NOT Boost_FOUND)
+    find_dependency(Boost REQUIRED)
+endif()
+
+if(NOT (NetCDF_C_FOUND AND NetCDF_Fortran_FOUND))
+    find_dependency(NetCDF REQUIRED COMPONENTS C Fortran)
+endif()
+
+if(NOT (Eigen3_FOUND OR EIGEN3_FOUND))
+    find_dependency( Eigen3 REQUIRED NO_MODULE HINTS @EIGEN3_ROOT_DIR@ )
+endif()
+
+if(NOT gsl-lite_FOUND)
+    find_dependency(gsl-lite REQUIRED)
+endif()
+
+if(NOT eckit_FOUND)
+    find_dependency(eckit REQUIRED)
+endif()
+
+if(NOT fckit_FOUND)
+    find_dependency(fckit REQUIRED)
+endif()
+
+if(NOT ioda_FOUND)
+    find_dependency(ioda REQUIRED)
+endif()
+
+if(NOT oops_FOUND)
+    find_dependency(oops REQUIRED)
+endif()
+
+# Optional dependencies
+
+if(@crtm_FOUND@ AND NOT crtm_FOUND)
+    find_dependency(crtm REQUIRED)
+endif()
+
+if(@rttov_FOUND@ AND NOT rttov_FOUND)
+    find_dependency(rttov REQUIRED)
+endif()
+
+if(@gsw_FOUND@ AND NOT gsw_FOUND)
+    find_dependency(gsw REQUIRED)
+endif()
+
+if(@ropp-ufo_FOUND@ AND NOT ropp-ufo_FOUND)
+    find_dependency(ropp-ufo REQUIRED)
+endif()
+
+if(@geos-aero_FOUND@ AND NOT geos-aero_FOUND)
+    find_dependency(geos-aero REQUIRED)
+endif()
+
+# Export Fortran compiler version for checking module compatibility
+set(@PROJECT_NAME@_MODULES_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@)
+set(@PROJECT_NAME@_MODULES_Fortran_COMPILER_VERSION @CMAKE_Fortran_COMPILER_VERSION@)
+if(NOT @PROJECT_NAME@_MODULES_Fortran_COMPILER_ID STREQUAL CMAKE_Fortran_COMPILER_ID
+   OR NOT @PROJECT_NAME@_MODULES_Fortran_COMPILER_VERSION VERSION_EQUAL CMAKE_Fortran_COMPILER_VERSION)
+    message(SEND_ERROR "Package @PROJECT_NAME@ provides Fortran modules built with "
+            "${@PROJECT_NAME@_MODULES_Fortran_COMPILER_ID}-${@PROJECT_NAME@_MODULES_Fortran_COMPILER_VERSION} "
+            "but this build for ${PROJECT_NAME} uses incompatible compiler ${CMAKE_Fortran_COMPILER_ID}-${CMAKE_Fortran_COMPILER_VERSION}")
+endif()

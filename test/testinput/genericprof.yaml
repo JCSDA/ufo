@@ -7,7 +7,7 @@ observations:
     obs space:
       name: InsituSalinity
       obsdatain:
-        obsfile: Data/ioda/testinput_tier_1/profile_2018-04-15.nc
+        obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
       simulated variables: [sea_water_salinity]
     geovals:
       filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc

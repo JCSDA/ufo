@@ -32,24 +32,29 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr),
-    abs_threshold_(config_.getString("absolute threshold", "")),
-    threshold_(config_.getString("threshold", "")),
-    function_abs_threshold_()
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "BackgroundCheck constructor" << std::endl;
 
-  if (config_.has("function absolute threshold")) {
-    std::vector<eckit::LocalConfiguration> threshconfs;
-    config_.get("function absolute threshold", threshconfs);
-    function_abs_threshold_ = threshconfs[0].getString("name");
-    allvars_ += ufo::Variables(threshconfs);
+  // Typical use would be HofX group, but during testing, we include option for GsiHofX
+  std::string test_hofx = parameters_.test_hofx.value();
+
+  if (parameters_.functionAbsoluteThreshold.value()) {
+    for (const Variable & var : *(parameters_.functionAbsoluteThreshold.value()))
+      allvars_ += var;
   }
-  allvars_ += Variables(filtervars_, "HofX");
-  ASSERT(abs_threshold_ != "" || threshold_ != "" || function_abs_threshold_ != "");
+  allvars_ += Variables(filtervars_, test_hofx);
+  ASSERT(parameters_.threshold.value() ||
+         parameters_.absoluteThreshold.value() ||
+         parameters_.functionAbsoluteThreshold.value());
+  if (parameters_.functionAbsoluteThreshold.value()) {
+    ASSERT(!parameters_.threshold.value() &&
+           !parameters_.absoluteThreshold.value());
+    ASSERT(!parameters_.functionAbsoluteThreshold.value()->empty());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -66,23 +71,21 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
-
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+  ioda::ObsDataVector<float> obsbias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+  std::string test_hofx = parameters_.test_hofx.value();
 
 // Get function absolute threshold
-  if (function_abs_threshold_ != "") {
-    ASSERT(abs_threshold_ == "" && threshold_ == "");
+
+  if (parameters_.functionAbsoluteThreshold.value()) {
 //  Get function absolute threshold info from configuration
-    std::vector<eckit::LocalConfiguration> threshconfs;
-    config_.get("function absolute threshold", threshconfs);
-    Variable rtvar(threshconfs[0]);
+    const Variable &rtvar = parameters_.functionAbsoluteThreshold.value()->front();
     ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsVariables());
     data_.get(rtvar, function_abs_threshold);
 
-    Variables varhofx(filtervars_, "HofX");
+    Variables varhofx(filtervars_, test_hofx);
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)
@@ -96,18 +99,15 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
 //        Threshold for current observation
           float zz = function_abs_threshold[jv][jobs];
-
-//        Apply bias correction
-          float yy = obs[jv][jobs] - bias[jv][jobs];
-
 //        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[jv][jobs] = true;
+          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs]) > zz) {
+            flagged[jv][jobs] = true;
+          }
         }
       }
     }
   } else {
-    ASSERT(function_abs_threshold_ == "");
-    Variables varhofx(filtervars_, "HofX");
+    Variables varhofx(filtervars_, test_hofx);
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)
@@ -117,14 +117,25 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
       std::vector<float> thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
-      if (abs_threshold_ != "") abs_thr = getScalarOrFilterData(abs_threshold_, data_);
-      if (threshold_ != "")     thr     = getScalarOrFilterData(threshold_, data_);
+      std::vector<float> bc_factor(obsdb_.nlocs(), 0.0);
+
+      if (parameters_.absoluteThreshold.value())
+        abs_thr = getScalarOrFilterData(*parameters_.absoluteThreshold.value(), data_);
+      if (parameters_.threshold.value())
+        thr = getScalarOrFilterData(*parameters_.threshold.value(), data_);
+
+//    Bias Correction parameter
+      if (parameters_.BiasCorrectionFactor.value())
+        bc_factor = getScalarOrFilterData(*parameters_.BiasCorrectionFactor.value(), data_);
 
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
-          size_t iobs = observed.size() * jobs + iv;
           ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
+          if (parameters_.BiasCorrectionFactor.value()) {
+            ASSERT(obsbias[jv][jobs] != util::missingValue(obsbias[jv][jobs]));
+            bc_factor[jobs] = bc_factor[jobs]*obsbias[jv][jobs];
+          }
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
 //        Threshold for current observation
@@ -132,11 +143,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
             std::min(abs_thr[jobs], thr[jobs] * (*obserr_)[iv][jobs]);
           ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
-//        Apply bias correction
-          float yy = obs[jv][jobs] - bias[jv][jobs];
-
 //        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[jv][jobs] = true;
+          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs] - bc_factor[jobs]) > zz) {
+            flagged[jv][jobs] = true;
+          }
         }
       }
     }

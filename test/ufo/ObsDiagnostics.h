@@ -28,6 +28,14 @@
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperator.h"
 
+namespace eckit
+{
+  // Don't use the contracted output for this type: the current implementation works only
+  // with integer types.
+  // TODO(wsmigaj) Report this as a bug in eckit.
+  template <> struct VectorPrintSelector<float> { typedef VectorPrintSimple selector; };
+}  // namespace eckit
+
 namespace ufo {
 namespace test {
 
@@ -53,7 +61,10 @@ void testObsDiagnostics() {
   const GeoVaLs gval(gconf, ospace, hop.requiredVars());
 
   // initialize bias correction
-  const ObsBias ybias(ospace, conf);
+  eckit::LocalConfiguration biasconf = conf.getSubConfiguration("obs bias");
+  ObsBiasParameters biasparams;
+  biasparams.validateAndDeserialize(biasconf);
+  const ObsBias ybias(ospace, biasparams);
 
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);
@@ -62,7 +73,7 @@ void testObsDiagnostics() {
   eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
   oops::Variables diagvars(diagconf, "variables");
   EXPECT(diagvars.size() > 0);
-  std::unique_ptr<Locations> locs(hop.locations(bgn, end));
+  std::unique_ptr<Locations> locs(hop.locations());
   ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
 
   // call H(x) to compute diagnostics

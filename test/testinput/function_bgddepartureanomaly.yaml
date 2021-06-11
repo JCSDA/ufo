@@ -1,0 +1,22 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs space:
+    name: amsr2
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
+    simulated variables: [brightness_temperature]
+    channels: 7-9,11-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
+  obs function:
+    name: BgdDepartureAnomaly@ObsFunction
+    options:
+      channel_low_freq: 11
+      channel_high_freq: 13
+      test_hofx: MetOfficeHofX
+      ObsBias: ObsBias
+    variables: [mwicloud]
+    tolerance: 1.0e-6
+

@@ -13,49 +13,46 @@ namespace ufo {
   makerProfileCheckBackgroundWindSpeed_("BackgroundWindSpeed");
 
   ProfileCheckBackgroundWindSpeed::ProfileCheckBackgroundWindSpeed
-  (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundWindSpeed::runCheck()
+  void ProfileCheckBackgroundWindSpeed::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for wind velocity" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &uObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_eastward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &uObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_eastward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_eastward_wind);
     const std::vector <float> &uBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_eastward_wind);
     const std::vector <float> &uBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
+      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_eastward_wind);
     std::vector <float> &uPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_eastward_wind);
     std::vector <float> &uPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_eastward_wind);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     const std::vector <float> &vObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_northward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
     const std::vector <float> &vObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_northward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_northward_wind);
     const std::vector <float> &vBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_northward_wind);
     const std::vector <float> &vBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_northward_wind);
+      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_northward_wind);
     std::vector <float> &vPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
     std::vector <float> &vPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_northward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     if (!oops::allVectorsSameNonZeroSize(uObs, uObsErr, uBkg, uBkgErr,
                                          uPGE, uFlags,
@@ -73,10 +70,10 @@ namespace ufo {
     }
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, options_.BkCheck_PdBad_uv.value());
+    std::vector <float> PdBad(numProfileLevels, options_.BkCheck_PdBad_uv.value());
 
     // Modify observation PGE if certain flags have been set.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)
         uPGE[jlev] = 0.5 + 0.5 * uPGE[jlev];
       if (timeFlags[jlev])

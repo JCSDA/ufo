@@ -16,6 +16,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -38,8 +39,8 @@ class LatLonBoxParameters : public oops::Parameters {
 };
 
 /// \brief Options controlling the operation of the MetOfficeBuddyCheck filter.
-class MetOfficeBuddyCheckParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(MetOfficeBuddyCheckParameters, Parameters)
+class MetOfficeBuddyCheckParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(MetOfficeBuddyCheckParameters, FilterParametersBase)
 
  public:
   /// \name Parameters controlling buddy pair identification
@@ -48,7 +49,7 @@ class MetOfficeBuddyCheckParameters : public oops::Parameters {
   /// Maximum distance between two observations that may be classified as buddies, in km.
   oops::Parameter<float> searchRadius{"search_radius", 100, this};
 
-  /// Variable storing integer-valued station IDs.
+  /// Variable storing string-valued or integer-valued station IDs.
   ///
   /// If not set and observations were grouped into records when the observation space was
   /// constructed, each record is assumed to consist of observations taken by a separate
@@ -56,7 +57,7 @@ class MetOfficeBuddyCheckParameters : public oops::Parameters {
   /// assumed to have been taken by a single station.
   ///
   /// Note: the variable used to group observations into records can be set with the
-  /// \c obs space.obsdatain.obsgrouping.group_variable YAML option.
+  /// \c obs space.obsdatain.obsgrouping.groupvariable YAML option.
   oops::OptionalParameter<Variable> stationIdVariable{"station_id_variable", this};
 
   /// Number of zonal bands to split the Earth's surface into when building a search data structure.

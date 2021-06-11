@@ -14,8 +14,12 @@
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
   class Configuration;
@@ -28,16 +32,65 @@ namespace ioda {
 
 namespace ufo {
 
-/// ObsBoundsCheck: generic quality control based on observation data only
+/// Parameters controlling the operation of the ObsBoundsCheck filter.
+class ObsBoundsCheckParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsBoundsCheckParameters, FilterParametersBase)
 
-// Check that observations are within some bounds over some domain
+ public:
+  /// Minimum allowed value of the tested variables.
+  oops::OptionalParameter<float> minvalue{"minvalue", this};
+
+  /// Maximum allowed value of the tested variables.
+  oops::OptionalParameter<float> maxvalue{"maxvalue", this};
+
+  /// Variables to be compared against the bounds specified in the `minvalue` and `maxvalue`
+  /// options.
+  ///
+  /// There are three valid possibilities:
+  ///
+  /// * If this option is not set, the filter will flag each filter variable at each location
+  ///   where the measured value of that variable lies outside the specified bounds.
+  ///
+  /// * If this option is set to a single-element list containing only one single-channel variable
+  ///   or the `flag all filter variables if any test variable is out of bounds` option is set to
+  ///   `true`, the filter will flag each filter variable at each location where any test variable
+  ///   lies outside the specified bounds.
+  ///
+  /// * If this option is set to a list with as many elements as there are filter variables and
+  ///   the `flag all filter variables if any test variable is out of bounds` option is set to
+  ///   `false`, the filter will flag each filter variable at each location
+  ///   where the corresponding test variable lies outside the specified bounds.
+  oops::OptionalParameter<std::vector<Variable>> testVariables{"test variables", this};
+
+  /// Set this option to `true` to flag all filter variables at each location where any test
+  /// variable lies outside the specified bounds.
+  ///
+  /// This option is ignored if the `test variables` option is not set.
+  oops::Parameter<bool> flagAllFilterVarsIfAnyTestVarOutOfBounds{
+    "flag all filter variables if any test variable is out of bounds", false, this};
+
+  /// By default, the filter flags filter variables at locations where the corresponding test
+  /// variable is set to the missing value indicator. Set this option to `false` to stop it from
+  /// doing so (hence assuming "optimistically" that the test variable was in fact in bounds).
+  oops::Parameter<bool> treatMissingAsOutOfBounds{"treat missing as out of bounds", true, this};
+};
+
+/// \brief Flag observations that lie outside specified bounds.
+///
+/// This is a generic quality control filter based on observation data only.
+///
+/// See ObsBoundsCheckParameters for the documentation of the parameters controlling this filter.
 
 class ObsBoundsCheck : public FilterBase,
                        private util::ObjectCounter<ObsBoundsCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef ObsBoundsCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsBoundsCheck";}
 
-  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  ObsBoundsCheck(ioda::ObsSpace &, const Parameters_ &,
                  std::shared_ptr<ioda::ObsDataVector<int> >,
                  std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsBoundsCheck();
@@ -47,6 +100,7 @@ class ObsBoundsCheck : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::bounds;}
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo

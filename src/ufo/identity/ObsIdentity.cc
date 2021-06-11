@@ -8,6 +8,7 @@
 #include "ufo/identity/ObsIdentity.h"
 
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsVector.h"
 
@@ -16,6 +17,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -27,7 +29,12 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_()
 {
-  ufo_identity_setup_f90(keyOperObsIdentity_, config, odb.obsvariables(), varin_);
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+
+  ufo_identity_setup_f90(keyOperObsIdentity_, config,
+                         operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
+                         varin_);
 
   oops::Log::trace() << "ObsIdentity created." << std::endl;
 }

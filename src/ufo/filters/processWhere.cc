@@ -8,15 +8,17 @@
 #include "ufo/filters/processWhere.h"
 
 #include <bitset>
+#include <regex>
 #include <set>
 #include <string>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "eckit/types/FloatCompare.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/PartialDateTime.h"
+#include "oops/util/wildcard.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
@@ -24,23 +26,21 @@ namespace ufo {
 
 
 // -----------------------------------------------------------------------------
-ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
-
+ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> & params) {
   ufo::Variables vars;
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-    eckit::LocalConfiguration varconf(masks[jm], "variable");
-    vars += ufo::Variable(varconf);
+  for (const WhereParameters & currentParams : params) {
+    vars += currentParams.variable;
   }
   return vars;
 }
 
+
 // -----------------------------------------------------------------------------
-void processWhereMinMax(const std::vector<float> & data,
-                        const float & vmin, const float & vmax,
+template<typename T>
+void processWhereMinMax(const std::vector<T> & data,
+                        const T & vmin, const T & vmax,
                         std::vector<bool> & mask) {
-  const float not_set_value = util::missingValue(not_set_value);
+  const T not_set_value = util::missingValue(not_set_value);
   const size_t n = data.size();
 
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -54,16 +54,14 @@ void processWhereMinMax(const std::vector<float> & data,
 
 // -----------------------------------------------------------------------------
 void processWhereMinMax(const std::vector<util::DateTime> & data,
-                        const std::string & vmin, const std::string & vmax,
+                        const util::PartialDateTime & vmin, const util::PartialDateTime & vmax,
                         std::vector<bool> & mask) {
-  const std::string not_set_value = "0000-00-00T00:00:00Z";
+  const util::PartialDateTime not_set_value {};
 
   if (vmin != not_set_value || vmax != not_set_value) {
-    util::PartialDateTime pdt_vmin(vmin), pdt_vmax(vmax);
-
     for (size_t jj = 0; jj < data.size(); ++jj) {
-      if (vmin != not_set_value && pdt_vmin > data[jj]) mask[jj] = false;
-      if (vmax != not_set_value && pdt_vmax < data[jj]) mask[jj] = false;
+      if (vmin != not_set_value && vmin > data[jj]) mask[jj] = false;
+      if (vmax != not_set_value && vmax < data[jj]) mask[jj] = false;
     }
   }
 }
@@ -101,6 +99,31 @@ void processWhereIsIn(const std::vector<T> & data,
 }
 
 // -----------------------------------------------------------------------------
+void processWhereIsClose(const std::vector<float> & data,
+                         const float tolerance, const bool relative,
+                         const std::vector<float> & whitelist,
+                         std::vector<bool> & mask) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    bool inlist = false;
+    for (auto testvalue : whitelist) {
+      if (relative) {
+        float relativetolerance = testvalue * tolerance;
+        if (eckit::types::is_approximately_equal(data[jj], testvalue, relativetolerance)) {
+          inlist = true;
+          break;
+        }
+      } else {
+        if (eckit::types::is_approximately_equal(data[jj], testvalue, tolerance)) {
+          inlist = true;
+          break;
+        }
+      }
+    }  // testvalue
+    if (!inlist) mask[jj] = false;
+  }  // jj
+}
+
+// -----------------------------------------------------------------------------
 template <class T>
 void processWhereIsNotIn(const std::vector<T> & data,
                          const std::set<T> & blacklist,
@@ -121,24 +144,63 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
 }
 
 // -----------------------------------------------------------------------------
-void applyMinMaxFloat(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
-                      ObsFilterData const & filterdata, Variable const & varname) {
-  const float not_set_value = util::missingValue(not_set_value);
-  const float vmin = mask.getFloat("minvalue", not_set_value);
-  const float vmax = mask.getFloat("maxvalue", not_set_value);
+void processWhereIsNotClose(const std::vector<float> & data,
+                            const float tolerance, const bool relative,
+                            const std::vector<float> & blacklist,
+                            std::vector<bool> & mask) {
+  const float missing = util::missingValue(missing);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    for (auto testvalue : blacklist) {
+      if (relative) {
+        float relativetolerance = testvalue * tolerance;
+        if (data[jj] == missing ||
+            eckit::types::is_approximately_equal(data[jj], testvalue, relativetolerance)) {
+          mask[jj] = false;
+          break;
+        }
+      } else {
+        if (data[jj] == missing ||
+            eckit::types::is_approximately_equal(data[jj], testvalue, tolerance)) {
+          mask[jj] = false;
+          break;
+        }
+      }
+    }  // testvalue
+  }  // jj
+}
+
+// -----------------------------------------------------------------------------
+template <typename T>
+void applyMinMax(std::vector<bool> & where, WhereParameters const & parameters,
+                 ObsFilterData const & filterdata, Variable const & varname) {
+  const T not_set_value = util::missingValue(not_set_value);
+
+  // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
+  T vmin = not_set_value;
+  if (parameters.minvalue.value() != boost::none)
+    vmin = parameters.minvalue.value()->as<T>();
+  // Set vmax to the value of the 'maxvalue' option if it exists; if not, leave vmax unchanged.
+  T vmax = not_set_value;
+  if (parameters.maxvalue.value() != boost::none)
+    vmax = parameters.maxvalue.value()->as<T>();
+
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {
-    std::vector<float> data;
+    std::vector<T> data;
     filterdata.get(varname, data);
     processWhereMinMax(data, vmin, vmax, where);
   }
 }
 
-void applyMinMaxDatetime(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
-                         ObsFilterData const & filterdata, Variable const & varname) {
-  const std::string not_set_value("0000-00-00T00:00:00Z");
-  const std::string vmin = mask.getString("minvalue", not_set_value);
-  const std::string vmax = mask.getString("maxvalue", not_set_value);
+// -----------------------------------------------------------------------------
+template <>
+void applyMinMax<util::DateTime>(std::vector<bool> & where, WhereParameters const & parameters,
+                                 ObsFilterData const & filterdata, Variable const & varname) {
+  util::PartialDateTime vmin {}, vmax {}, not_set_value {};
+  if (parameters.minvalue.value() != boost::none)
+    vmin = parameters.minvalue.value()->as<util::PartialDateTime>();
+  if (parameters.maxvalue.value() != boost::none)
+    vmax = parameters.maxvalue.value()->as<util::PartialDateTime>();
 
   // Apply mask min/max
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -149,83 +211,193 @@ void applyMinMaxDatetime(std::vector<bool> & where, eckit::LocalConfiguration co
 }
 
 // -----------------------------------------------------------------------------
-void processWhereBitSet(const std::vector<int> & data,
-                        const std::set<int> & flags,
-                        std::vector<bool> & mask) {
-  std::bitset<32> flags_bs;
-  for (const int &elem : flags) {
-    flags_bs[elem] = 1;
+/// \brief Process an `any_bit_set_of` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` in
+/// which all bits with indices `bitIndices` are zero. Bits are numbered from 0 starting from the
+/// least significant bit.
+///
+/// The vectors `data` and `where` must be of the same length.
+///
+/// Example: Suppose `data` is set to [1, 3, 4, 8] and bitIndices to [0, 2]. Then this function will
+/// set only the last element of `where` to false, since 8 is the only integer from `data` in whose
+/// binary representation both bits 0 and 2 are zero.
+void processWhereAnyBitSetOf(const std::vector<int> & data,
+                             const std::set<int> & bitIndices,
+                             std::vector<bool> & where) {
+  std::bitset<32> mask_bs;
+  for (const int &bitIndex : bitIndices) {
+    mask_bs[bitIndex] = 1;
   }
+  const int mask = mask_bs.to_ulong();
+
   for (size_t jj = 0; jj < data.size(); ++jj) {
-    if ((data[jj] & flags_bs.to_ulong()) != 0) mask[jj] = false;
+    if ((data[jj] & mask) == 0) {
+      // None of the specified bits is set
+      where[jj] = false;
+    }
   }
 }
 
 // -----------------------------------------------------------------------------
-void isInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+/// \brief Process an `any_bit_unset_of` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` in
+/// which all bits with indices `bitIndices` are non-zero. Bits are numbered from 0 starting from
+/// the least significant bit.
+///
+/// The vectors `data` and `where` must be of the same length.
+///
+/// Example: Suppose `data` is set to [1, 3, 4, 5] and bitIndices to [0, 2]. Then this function will
+/// set only the last element of `where` to false, since 5 is the only integer from `data` in whose
+/// binary representation both bits 0 and 2 are non-zero.
+void processWhereAnyBitUnsetOf(const std::vector<int> & data,
+                               const std::set<int> & bitIndices,
+                               std::vector<bool> & where) {
+  std::bitset<32> mask_bs;
+  for (const int &bitIndex : bitIndices) {
+    mask_bs[bitIndex] = 1;
+  }
+  const int mask = mask_bs.to_ulong();
+
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if ((data[jj] & mask) == mask) {
+      // None of the specified bits is unset
+      where[jj] = false;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+/// \brief Process a `matches_regex` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` that
+/// do not match the regular expression `pattern`. The vectors `data` and `where` must be of the
+/// same length.
+void processWhereMatchesRegex(const std::vector<std::string> & data,
+                              const std::string & pattern,
+                              std::vector<bool> & where) {
+  std::regex regex(pattern);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !std::regex_match(data[jj], regex))
+      where[jj] = false;
+  }
+}
+
+/// \brief Process a `matches_regex` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` whose
+/// string representations do not match the regular expression `pattern`. The vectors `data` and
+/// `where` must be of the same length.
+void processWhereMatchesRegex(const std::vector<int> & data,
+                              const std::string & pattern,
+                              std::vector<bool> & where) {
+  std::regex regex(pattern);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !std::regex_match(std::to_string(data[jj]), regex))
+      where[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+/// Returns true if `string` matches any of the patterns from the list `patterns`.
+///
+/// The patterns may contain wildcards `*` (matching any sequence of characters) and `?` (matching
+/// a single character).
+bool stringMatchesAnyWildcardPattern(const std::string &string,
+                                     const std::vector<std::string> & patterns) {
+  return std::any_of(patterns.begin(),
+                     patterns.end(),
+                     [&string] (const std::string &pattern)
+                     { return util::matchesWildcardPattern(string, pattern); });
+}
+
+/// \brief Function used to process a `matches_wildcard` or `matches_any_wildcard` keyword in a
+/// `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` that
+/// do not match any of the patterns from the list `patterns`. The patterns may contain wildcards
+/// `*` (matching any sequence of characters) and `?` (matching a single character). The vectors
+/// `data` and `where` must be of the same length.
+void processWhereMatchesAnyWildcardPattern(const std::vector<std::string> & data,
+                                           const std::vector<std::string> & patterns,
+                                           std::vector<bool> & where) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !stringMatchesAnyWildcardPattern(data[jj], patterns))
+      where[jj] = false;
+  }
+}
+
+/// \overload Same as the function above, but taking a vector of integers rather than strings.
+/// The integers are converted to strings before pattern matching.
+void processWhereMatchesAnyWildcardPattern(const std::vector<int> & data,
+                                           const std::vector<std::string> & patterns,
+                                           std::vector<bool> & where) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !stringMatchesAnyWildcardPattern(std::to_string(data[jj]), patterns))
+      where[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+void isInString(std::vector<bool> & where, std::vector<std::string> const & allowedValues,
                 ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<std::string> data;
-  std::vector<std::string> whitelistvec = mask.getStringVector("is_in");
-  std::set<std::string> whitelist(whitelistvec.begin(), whitelistvec.end());
+  std::set<std::string> whitelist(allowedValues.begin(), allowedValues.end());
   filterdata.get(varname, data);
   processWhereIsIn(data, whitelist, where);
 }
 
 // -----------------------------------------------------------------------------
-void isInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isInInteger(std::vector<bool> & where, std::set<int> const & allowedValues,
                  ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<int> data;
-  std::set<int> whitelist = oops::parseIntSet(mask.getString("is_in"));
   filterdata.get(varname, data);
-  processWhereIsIn(data, whitelist, where);
+  processWhereIsIn(data, allowedValues, where);
 }
 
 // -----------------------------------------------------------------------------
-void isNotInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isNotInString(std::vector<bool> & where, std::vector<std::string> const & forbiddenValues,
                    ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<std::string> data;
-  std::vector<std::string> blacklistvec = mask.getStringVector("is_not_in");
-  std::set<std::string> blacklist(blacklistvec.begin(), blacklistvec.end());
+  std::set<std::string> blacklist(forbiddenValues.begin(), forbiddenValues.end());
   filterdata.get(varname, data);
   processWhereIsNotIn(data, blacklist, where);
 }
 
 // -----------------------------------------------------------------------------
-void isNotInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+void isNotInInteger(std::vector<bool> & where, std::set<int> const & forbiddenValues,
                     ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<int> data;
   filterdata.get(varname, data);
-  std::set<int> blacklist = oops::parseIntSet(mask.getString("is_not_in"));
-  processWhereIsNotIn(data, blacklist, where);
+  processWhereIsNotIn(data, forbiddenValues, where);
 }
 
 // -----------------------------------------------------------------------------
-std::vector<bool> processWhere(const eckit::Configuration & config,
+std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
                                const ObsFilterData & filterdata) {
   const size_t nlocs = filterdata.nlocs();
 
 // Everywhere by default if no mask
   std::vector<bool> where(nlocs, true);
 
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
-
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-    eckit::LocalConfiguration varconf(masks[jm], "variable");
-    Variable var(varconf);
+  for (const WhereParameters &currentParams : params) {
+    const Variable &var = currentParams.variable;
     for (size_t jvar = 0; jvar < var.size(); ++jvar) {
       if (var.group() != "VarMetaData") {
         const Variable varname = var[jvar];
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
         if (dtype == ioda::ObsDtype::DateTime) {
-          applyMinMaxDatetime(where, masks[jm], filterdata, varname);
+          applyMinMax<util::DateTime>(where, currentParams, filterdata, varname);
+        } else if (dtype == ioda::ObsDtype::Integer) {
+          applyMinMax<int>(where, currentParams, filterdata, varname);
         } else {
-          applyMinMaxFloat(where, masks[jm], filterdata, varname);
+          applyMinMax<float>(where, currentParams, filterdata, varname);
         }
 
 //      Apply mask is_defined
-        if (masks[jm].has("is_defined")) {
+        if (currentParams.isDefined.value()) {
           if (filterdata.has(varname)) {
             std::vector<float> data;
             filterdata.get(varname, data);
@@ -236,18 +408,20 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         }
 
 //      Apply mask is_not_defined
-        if (masks[jm].has("is_not_defined")) {
+        if (currentParams.isNotDefined.value()) {
           std::vector<float> data;
           filterdata.get(varname, data);
           processWhereIsNotDefined(data, where);
         }
 
 //      Apply mask is_in
-        if (masks[jm].has("is_in")) {
+        if (currentParams.isIn.value() != boost::none) {
           if (dtype == ioda::ObsDtype::String) {
-            isInString(where, masks[jm], filterdata, varname);
+            isInString(where, currentParams.isIn.value()->as<std::vector<std::string>>(),
+                       filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isInInteger(where, masks[jm], filterdata, varname);
+            isInInteger(where, currentParams.isIn.value()->as<std::set<int>>(),
+                        filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_in'",
@@ -255,12 +429,39 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
           }
         }
 
+//      Apply mask is_close
+        if (currentParams.isClose.value() != boost::none) {
+          if (dtype == ioda::ObsDtype::Float) {
+            std::vector<float> data;
+            filterdata.get(varname, data);
+            if (currentParams.relativetolerance.value() == boost::none &&
+                currentParams.absolutetolerance.value() != boost::none) {
+              processWhereIsClose(data, currentParams.absolutetolerance.value().get(),
+                                  false, currentParams.isClose.value().get(), where);
+            } else if (currentParams.relativetolerance.value() != boost::none &&
+                       currentParams.absolutetolerance.value() == boost::none) {
+              processWhereIsClose(data, currentParams.relativetolerance.value().get(),
+                                  true, currentParams.isClose.value().get(), where);
+            } else {
+              throw eckit::UserError(
+                "For 'is_close' one (and only one) tolerance is needed.",
+                Here());
+            }
+          } else {
+            throw eckit::UserError(
+              "Only float variables may be used for processWhere 'is_close'",
+              Here());
+          }
+        }
+
 //      Apply mask is_not_in
-        if (masks[jm].has("is_not_in")) {
+        if (currentParams.isNotIn.value() != boost::none) {
           if (dtype == ioda::ObsDtype::String) {
-            isNotInString(where, masks[jm], filterdata, varname);
+            isNotInString(where, currentParams.isNotIn.value()->as<std::vector<std::string>>(),
+                          filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isNotInInteger(where, masks[jm], filterdata, varname);
+            isNotInInteger(where, currentParams.isNotIn.value()->as<std::set<int>>(),
+                           filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
@@ -268,16 +469,116 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
           }
         }
 
+//      Apply mask is_not_close
+        if (currentParams.isNotClose.value() != boost::none) {
+          if (dtype == ioda::ObsDtype::Float) {
+            std::vector<float> data;
+            filterdata.get(varname, data);
+            if (currentParams.relativetolerance.value() == boost::none &&
+                currentParams.absolutetolerance.value() != boost::none) {
+              processWhereIsNotClose(data, currentParams.absolutetolerance.value().get(),
+                                     false, currentParams.isNotClose.value().get(), where);
+            } else if (currentParams.relativetolerance.value() != boost::none &&
+                       currentParams.absolutetolerance.value() == boost::none) {
+              processWhereIsNotClose(data, currentParams.relativetolerance.value().get(),
+                                     true, currentParams.isNotClose.value().get(), where);
+            } else {
+              throw eckit::UserError(
+                "For 'is_close' one (and only one) tolerance is needed.",
+                Here());
+            }
+          } else {
+            throw eckit::UserError(
+              "Only float variables may be used for processWhere 'is_not_close'",
+              Here());
+          }
+        }
+
 //      Apply mask any_bit_set_of
-        if (masks[jm].has("any_bit_set_of")) {
+        if (currentParams.anyBitSetOf.value() != boost::none) {
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
-            std::set<int> flags = oops::parseIntSet(masks[jm].getString("any_bit_set_of"));
+            const std::set<int> &bitIndices = *currentParams.anyBitSetOf.value();
             filterdata.get(varname, data);
-            processWhereBitSet(data, flags, where);
+            processWhereAnyBitSetOf(data, bitIndices, where);
           } else {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_set_of'",
+              Here());
+          }
+        }
+
+//      Apply mask any_bit_unset_of
+        if (currentParams.anyBitUnsetOf.value() != boost::none) {
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            const std::set<int> &bitIndices = *currentParams.anyBitUnsetOf.value();
+            filterdata.get(varname, data);
+            processWhereAnyBitUnsetOf(data, bitIndices, where);
+          } else {
+            throw eckit::UserError(
+              "Only integer variables may be used for processWhere 'any_bit_unset_of'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_regex
+        if (currentParams.matchesRegex.value() != boost::none) {
+          const std::string pattern = *currentParams.matchesRegex.value();
+          // Select observations for which the variable 'varname' matches the regular expression
+          // 'pattern'.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesRegex(data, pattern, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesRegex(data, pattern, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere 'matches_regex'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_wildcard
+        if (currentParams.matchesWildcard.value() != boost::none) {
+          const std::string &pattern = *currentParams.matchesWildcard.value();
+          // Select observations for which the variable 'varname' matches the pattern
+          // 'pattern', which may contain the * and ? wildcards.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere 'matches_wildcard'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_any_wildcard
+        if (currentParams.matchesAnyWildcard.value() != boost::none) {
+          const std::vector<std::string> &patterns = *currentParams.matchesAnyWildcard.value();
+          // Select observations for which the variable 'varname' matches any of the patterns
+          // 'patterns'; these may contain the * and ? wildcards.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere "
+              "'matches_any_wildcard'",
               Here());
           }
         }

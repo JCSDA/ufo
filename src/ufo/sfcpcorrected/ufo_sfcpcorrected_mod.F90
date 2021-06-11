@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2020 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -13,6 +13,7 @@ module ufo_sfcpcorrected_mod
  use iso_c_binding
  use kinds
  use ufo_constants_mod, only : grav, rd, Lclr, t2tv
+ use gnssro_mod_transform, only : geop2geometric
 
  implicit none
  private
@@ -29,24 +30,43 @@ module ufo_sfcpcorrected_mod
    procedure :: simobs => ufo_sfcpcorrected_simobs
  end type ufo_sfcpcorrected
 
- character(len=MAXVARLEN), dimension(5), parameter :: geovars_default = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
+ character(len=MAXVARLEN), dimension(5) :: geovars_list = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
 
 contains
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_sfcpcorrected_setup(self, f_conf)
 use fckit_configuration_module, only: fckit_configuration
+use fckit_log_module,  only : fckit_log
 implicit none
 class(ufo_sfcpcorrected), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: f_conf
-character(len=:), allocatable         :: str
+character(len=:), allocatable         :: str_psfc_scheme, str_var_sfc_geomz, str_var_geomz
+character(max_string)             :: debug_msg
 
-call self%geovars%push_back(geovars_default)
+!> In the case where a user wants to specify the geoVaLs variable name of model
+!> height of vertical levels and/or the surface height.  Example: MPAS is height
+!> but FV-3 uses geopotential_height.
+
+if (f_conf%has("geovar_geomz")) then
+   call f_conf%get_or_die("geovar_geomz", str_var_geomz)
+   write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: overriding default var_geomz with ", trim(str_var_geomz)
+   call fckit_log%debug(debug_msg)
+   geovars_list(2) = trim(str_var_geomz)
+end if
+if (f_conf%has("geovar_sfc_geomz")) then
+   call f_conf%get_or_die("geovar_sfc_geomz", str_var_sfc_geomz)
+   write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: overriding default var_sfc_geomz with ", trim(str_var_sfc_geomz)
+   call fckit_log%debug(debug_msg)
+   geovars_list(3) = trim(str_var_sfc_geomz)
+end if
+
+call self%geovars%push_back(geovars_list)
 
 self%da_psfc_scheme = "UKMO"
 if (f_conf%has("da_psfc_scheme")) then
-   call f_conf%get_or_die("da_psfc_scheme",str)
-   self%da_psfc_scheme = str
+   call f_conf%get_or_die("da_psfc_scheme",str_psfc_scheme)
+   self%da_psfc_scheme = str_psfc_scheme
 end if
 
 end subroutine ufo_sfcpcorrected_setup
@@ -67,7 +87,7 @@ type(c_ptr), value, intent(in)    :: obss
 ! Local variables
 real(c_double)                    :: missing
 real(kind_real)                   :: H2000 = 2000.0
-integer                           :: nobs, iobs, ivar
+integer                           :: nobs, iobs, ivar, k, kbot, idx_geop
 real(kind_real),    allocatable   :: cor_psfc(:)
 type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
 character(len=*), parameter       :: myname_="ufo_sfcpcorrected_simobs"
@@ -75,8 +95,9 @@ character(max_string)             :: err_msg
 real(kind_real)                   :: wf
 integer                           :: wi
 logical                           :: variable_present
-real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc
+real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_lat
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
+real(kind_real)                   :: model_znew
 
 missing = missing_value(missing)
 nobs    = obsspace_get_nlocs(obss)
@@ -89,6 +110,7 @@ endif
 
 ! cor_psfc: observed surface pressure at model surface height, corresponding to P_o2m in da_intpsfc_prs* subroutines
 allocate(cor_psfc(nobs))
+cor_psfc = missing
 
 ! get obs variables
 allocate(obs_height(nobs))
@@ -96,26 +118,101 @@ allocate(obs_psfc(nobs))
 call obsspace_get_db(obss, "MetaData",  "station_elevation",obs_height)
 call obsspace_get_db(obss, "ObsValue",  "surface_pressure", obs_psfc)
 
-! get model variables
-call ufo_geovals_get_var(geovals, var_ps, model_ps)
-call ufo_geovals_get_var(geovals, var_geomz, model_geomz)
-call ufo_geovals_get_var(geovals, var_sfc_geomz, model_sfc_geomz)
-call ufo_geovals_get_var(geovals, var_tv, model_tv)
-call ufo_geovals_get_var(geovals, var_prs, model_p)
+! get model variables; geovars_list = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
+write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                    &
+             ' retrieving GeoVaLs with these names: '//trim(geovars_list(1))//  &
+             ', '//trim(geovars_list(2))//', '//trim(geovars_list(3))//         &
+             ', '//trim(geovars_list(4))//', '//trim(geovars_list(5))
+call fckit_log%debug(err_msg)
+call ufo_geovals_get_var(geovals, trim(geovars_list(1)), model_ps)
+call ufo_geovals_get_var(geovals, trim(geovars_list(2)), model_geomz)
+call ufo_geovals_get_var(geovals, trim(geovars_list(3)), model_sfc_geomz)
+call ufo_geovals_get_var(geovals, trim(geovars_list(4)), model_tv)
+call ufo_geovals_get_var(geovals, trim(geovars_list(5)), model_p)
 
-if (model_geomz%vals(1,1) .gt. model_geomz%vals(model_geomz%nval,1) ) then
-   write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                   &
-                        '  Model vertical height profile is from top to bottom'
-   call fckit_log%info(err_msg)
-end if
+! discover if the model vertical profiles are ordered top-bottom or not
+kbot = 1
+do iobs = 1, nlocs
+  if (obs_psfc(iobs).ne.missing) then
+    if (model_geomz%vals(1,iobs) .gt. model_geomz%vals(model_geomz%nval,iobs)) then
+      write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                   &
+                          '  Model vertical height profile is from top to bottom'
+      call fckit_log%debug(err_msg)
+      kbot = model_geomz%nval
+    endif
+    exit
+  endif
+enddo
 
 allocate(model_zs(nobs))
 allocate(model_level1(nobs))
 allocate(model_psfc(nobs))
 
+! If needed, we can convert geopotential heights to geometric altitude
+! for the full model vertical column using gnssro_mod_transform. We need
+! to get the latitude of observation to do this.
+idx_geop = -1
+idx_geop = index(trim(geovars_list(2)),'geopotential')
+if (idx_geop.gt.0) then
+   write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//      &
+                        '  converting '//trim(geovars_list(2))//     &
+                        ' variable to z-geometric'
+   call fckit_log%debug(err_msg)
+   if (.not. allocated(obs_lat)) then
+      variable_present = obsspace_has(obss, "MetaData", "latitude")
+      if (variable_present) then
+         call fckit_log%debug('     allocating obs_lat array')
+         allocate(obs_lat(nobs))
+         call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
+      else
+         call abor1_ftn('Variable latitude@MetaData does not exist, aborting')
+      endif
+   endif
+   do iobs = 1, nlocs
+      if (obs_psfc(iobs).ne.missing) then
+         do k = 1, model_geomz%nval
+            call geop2geometric(latitude=obs_lat(iobs),              &
+                           geopotentialH=model_geomz%vals(k,iobs),   &
+                           geometricZ=model_znew)
+            model_geomz%vals(k,iobs) = model_znew
+         enddo
+      endif
+   enddo
+endif
+
+! Now do the same if needed for surface geopotential height.
+idx_geop = -1
+idx_geop = index(trim(geovars_list(3)),'geopotential')
+if (idx_geop.gt.0) then
+   write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//      &
+                        '  converting '//trim(geovars_list(3))//     &
+                        ' variable to z-sfc-geometric'
+   call fckit_log%debug(err_msg)
+   if (.not. allocated(obs_lat)) then
+      variable_present = obsspace_has(obss, "MetaData", "latitude")
+      if (variable_present) then
+         call fckit_log%debug('     allocating obs_lat array')
+         allocate(obs_lat(nobs))
+         call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
+      else
+         call abor1_ftn('Variable latitude@MetaData does not exist, aborting')
+      endif
+   endif
+   do iobs = 1, nlocs
+      if (obs_psfc(iobs).ne.missing) then
+         call geop2geometric(latitude=obs_lat(iobs),            &
+                   geopotentialH=model_sfc_geomz%vals(1,iobs),  &
+                   geometricZ=model_znew)
+         model_sfc_geomz%vals(1,iobs) = model_znew
+      endif
+   enddo
+endif
+
+if (allocated(obs_lat)) deallocate(obs_lat)
+
 model_zs = model_sfc_geomz%vals(1,:)
-model_level1 = model_geomz%vals(model_geomz%nval,:)   !reverse
 model_psfc = model_ps%vals(1,:)
+model_level1 = model_geomz%vals(kbot,:)
 
 ! do terrain height correction, two optional schemes
 select case (trim(self%da_psfc_scheme))
@@ -135,7 +232,7 @@ case ("WRFDA")
 
    ! get extra model values
    allocate(model_tvs(nobs))
-   model_tvs = model_tv%vals(model_tv%nval,:) + Lclr * ( model_level1 - model_zs )  !Lclr = 0.0065 K/m
+   model_tvs = model_tv%vals(kbot,:) + Lclr * ( model_level1 - model_zs )  !Lclr = 0.0065 K/m
 
    ! correction
    call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t, obs_q)
@@ -163,7 +260,7 @@ case ("UKMO")
 
 case default
    write(err_msg,*) "ufo_sfcpcorrected_mod.F90: da_psfc_scheme must be WRFDA or UKMO"
-   call fckit_log%info(err_msg)
+   call fckit_log%debug(err_msg)
    call abor1_ftn(err_msg)
 end select
 

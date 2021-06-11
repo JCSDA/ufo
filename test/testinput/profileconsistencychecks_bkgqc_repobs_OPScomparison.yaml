@@ -10,11 +10,18 @@ Sondes:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: ["air_temperature", "relative_humidity", "eastward_wind", "northward_wind", "geopotential_height"]
   obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_obsdiagnostics_repobs.nc4
+    variables:
+    - name: air_temperature_background_error@ObsDiag
+    - name: relative_humidity_background_error@ObsDiag
+    - name: eastward_wind_background_error@ObsDiag
+    - name: northward_wind_background_error@ObsDiag
+    - name: geopotential_height_background_error@ObsDiag
   ProfileConsistencyChecks:
     Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: true

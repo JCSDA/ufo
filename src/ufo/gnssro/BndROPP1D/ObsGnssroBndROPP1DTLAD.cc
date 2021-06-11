@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsGnssroBndROPP1DTLAD> makerGnssroBndROPP1DTL_("G
 
 ObsGnssroBndROPP1DTLAD::ObsGnssroBndROPP1DTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGnssroBndROPP1D_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperGnssroBndROPP1D_(0), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "obs options");
 
@@ -51,20 +51,20 @@ ObsGnssroBndROPP1DTLAD::~ObsGnssroBndROPP1DTLAD() {
 
 void ObsGnssroBndROPP1DTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                            ObsDiagnostics &) {
-  ufo_gnssro_bndropp1d_tlad_settraj_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), odb_);
+  ufo_gnssro_bndropp1d_tlad_settraj_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndROPP1DTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndropp1d_simobs_tl_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), odb_,
+  ufo_gnssro_bndropp1d_simobs_tl_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndROPP1DTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndropp1d_simobs_ad_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), odb_,
+  ufo_gnssro_bndropp1d_simobs_ad_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 

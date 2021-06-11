@@ -27,17 +27,30 @@ FilterActionFactory::FilterActionFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-FilterActionBase * FilterActionFactory::create(const eckit::Configuration & conf) {
+std::unique_ptr<FilterActionBase> FilterActionFactory::create(
+    const FilterActionParametersBase & parameters) {
   oops::Log::trace() << "FilterActionBase::create starting" << std::endl;
-  const std::string name = conf.getString("name", "reject");
+  const std::string &name = parameters.name.value().value();
   typename std::map<std::string, FilterActionFactory*>::iterator jloc = getMakers().find(name);
   if (jloc == getMakers().end()) {
     oops::Log::error() << name << " does not exist in ufo::FilterActionFactory." << std::endl;
     ABORT("Element does not exist in ufo::FilterActionFactory.");
   }
-  FilterActionBase * ptr = jloc->second->make(conf);
+  std::unique_ptr<FilterActionBase> action = jloc->second->make(parameters);
   oops::Log::trace() << "FilterActionBase::create done" << std::endl;
-  return ptr;
+  return action;
+}
+
+// -----------------------------------------------------------------------------
+
+std::unique_ptr<FilterActionParametersBase> FilterActionFactory::createParameters(
+    const std::string &name) {
+  typename std::map<std::string, FilterActionFactory*>::iterator it =
+      getMakers().find(name);
+  if (it == getMakers().end()) {
+    throw std::runtime_error(name + " does not exist in FilterActionFactory");
+  }
+  return it->second->makeParameters();
 }
 
 // -----------------------------------------------------------------------------

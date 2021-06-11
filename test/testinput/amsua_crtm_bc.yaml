@@ -7,6 +7,7 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
       Clouds: [Water, Ice]
@@ -18,7 +19,7 @@ observations:
   obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
 #   obsdataout:
 #     obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_bc_out.nc4
     simulated variables: [brightness_temperature]
@@ -26,55 +27,42 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
-    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
-    sensor: *Sensor_ID
-    jobs: *channels
-    covariance:
-      minimal required obs number: 20
-      variance range: [1.0e-6, 10.]
-      step size: 1.0e-4
-      largest analysis variance: 10000.0 
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
-        inflation:
-          ratio: 1.1
-          ratio for small dataset: 2.0
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: cosine_of_latitude_times_orbit_node
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cosine_of_latitude_times_orbit_node
         options:
           preconditioner: 0.01
-    - predictor:
-        name: sine_of_latitude
-    - predictor:
-        name: lapse_rate
+      - name: sine_of_latitude
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *amsua19tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
-    tolerance: 1.e-5
+      - name: scan_angle
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
   vector ref: GsiHofXBc
   tolerance: 1.e-7
   linear obs operator test:

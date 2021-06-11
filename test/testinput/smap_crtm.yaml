@@ -8,6 +8,7 @@ observations:
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
     Salinity: on
+    SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
       Clouds: [Water, Ice]
@@ -20,7 +21,7 @@ observations:
   obs space:
     name: radiometer_smap
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/smap_obs_2018041500_m.nc4
     obsdataout:
       obsfile: Data/smap_obs_2018041500_m_out.nc4
     simulated variables: [brightness_temperature]

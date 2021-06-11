@@ -11,30 +11,39 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
 namespace ufo {
-  class ProfileCheckValidator;
   class ProfileDataHandler;
-  class ProfileIndices;
 }
 
 namespace ufo {
+
+  /// Information on each subgroup of checks.
+  struct CheckSubgroup {
+    /// \p runOnEntireSample specifies whether the checks in this subgroup run on all
+    /// profiles at once.
+    bool runOnEntireSample;
+    /// \p checkNames contains the names of the checks in this subgroup.
+    std::vector<std::string> checkNames;
+  };
 
   /// \brief Profile QC checker
   ///
   /// Runs the various QC checks on individual profiles and modifies flags accordingly.
   class ProfileChecker {
    public:
-    ProfileChecker(const ProfileConsistencyCheckParameters &options,
-                   const ProfileIndices &profileIndices,
-                   ProfileDataHandler &profileDataHandler,
-                   ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileChecker(const ProfileConsistencyCheckParameters &options);
+
+    /// Type for container of check subgroups.
+    typedef std::vector <CheckSubgroup> CheckSubgroupList;
 
     /// Run all checks requested
-    void runChecks();
+    void runChecks(ProfileDataHandler &profileDataHandler,
+                   const CheckSubgroup &subGroupChecks);
 
     /// Get basic check result
     bool getBasicCheckResult() {return basicCheckResult_;}
@@ -42,24 +51,39 @@ namespace ufo {
     /// Set basic check result
     void setBasicCheckResult(bool result) {basicCheckResult_ = result;}
 
+    /// Get container of check subgroups
+    CheckSubgroupList getCheckSubgroups() {return checkSubgroups_;}
+
+    /// Get vector of GeoVaL names for all checks.
+    oops::Variables getGeoVaLNames() const {return GeoVaLNames_;}
+
+    /// Get vector of validation GeoVaL names for all checks.
+    oops::Variables getValidationGeoVaLNames() const {return validationGeoVaLNames_;}
+
+    /// Get vector of obs diagnostic names for all checks.
+    oops::Variables getObsDiagNames() const {return obsDiagNames_;}
+
    private:
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
-
-    /// Indices of profile's observations in the entire sample
-    const ProfileIndices &profileIndices_;
-
-    /// Profile data
-    ProfileDataHandler &profileDataHandler_;
-
-    /// Profile check validator
-    ProfileCheckValidator &profileCheckValidator_;
 
     /// Checks to perform
     std::vector <std::string> checks_;
 
     /// Basic check result
     bool basicCheckResult_ = true;
+
+    /// Subgroups of checks with the same mode of operation.
+    CheckSubgroupList checkSubgroups_;
+
+    /// Names of all required GeoVaLs.
+    oops::Variables GeoVaLNames_;
+
+    /// Names of all validation GeoVaLs.
+    oops::Variables validationGeoVaLNames_;
+
+    /// Names of all required obs diagnostics.
+    oops::Variables obsDiagNames_;
   };
 }  // namespace ufo
 

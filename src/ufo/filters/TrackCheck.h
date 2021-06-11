@@ -17,6 +17,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TrackCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 
 namespace eckit {
@@ -30,7 +31,7 @@ class ObsSpace;
 
 namespace ufo {
 
-class TrackCheckParameters;
+class ObsAccessor;
 class PiecewiseLinearInterpolation;
 class RecursiveSplitter;
 
@@ -73,15 +74,20 @@ class TrackCheck : public FilterBase,
     std::vector<float> pressures;
   };
 
-  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes() const;
+  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes(
+      const ObsAccessor &obsAccessor) const;
+
  public:
+  typedef TrackCheckParameters Parameters_;
+
   static const std::string classname() { return "ufo::TrackCheck"; }
 
-  TrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  TrackCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> > flags,
              std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   ~TrackCheck() override;
+
  private:
   /// \brief Attributes of an observation belonging to a track.
   class TrackObservation {
@@ -143,6 +149,7 @@ class TrackCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::track;}
 
+  ObsAccessor createObsAccessor() const;
 
   /// Returns an interpolator mapping pressures (in Pa) to maximum accepted speeds (in km/s).
   PiecewiseLinearInterpolation makeMaxSpeedByPressureInterpolation() const;
@@ -177,7 +184,7 @@ class TrackCheck : public FilterBase,
       std::vector<float> &workspace) const;
 
  private:
-  std::unique_ptr<TrackCheckParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo

@@ -7,6 +7,7 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
     obs options:
       Sensor_ID: amsua_n19
       EndianType: little_endian
@@ -14,7 +15,7 @@ observations:
   obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     obsdataout:
       obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
     simulated variables: [brightness_temperature]

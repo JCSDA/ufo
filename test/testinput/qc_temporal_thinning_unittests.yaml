@@ -18,7 +18,6 @@ Min_spacing below observation spacing:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT9S
   expected_thinned_obs_indices: []
 
@@ -42,7 +41,6 @@ Min spacing equal to observation spacing:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT10S
   expected_thinned_obs_indices: []
 
@@ -66,11 +64,10 @@ Min spacing above observation spacing:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT11S
   expected_thinned_obs_indices: [1, 3, 5]
 
-Categories:
+Int-valued categories:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -91,10 +88,35 @@ Categories:
       obs errors: [1.0]
   category: [0, 0, 0, 1, 1, 1, 1]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     category_variable:
       name: category@MetaData
+  expected_thinned_obs_indices: [1, 4, 6]
+
+String-valued categories:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 0, 0, 0, 0 ]
+        lons: [ 0, 0, 0, 0, 0, 0, 0 ]
+        datetimes:
+          - 2010-01-01T00:04:00Z
+          - 2010-01-01T00:04:10Z
+          - 2010-01-01T00:04:20Z
+          - 2010-01-01T00:04:30Z
+          - 2010-01-01T00:04:40Z
+          - 2010-01-01T00:04:50Z
+          - 2010-01-01T00:05:00Z
+      obs errors: [1.0]
+  string_category: [a, a, a, b, b, b, b]
+  TemporalThinning:
+    min_spacing: PT15S
+    category_variable:
+      name: string_category@MetaData
   expected_thinned_obs_indices: [1, 4, 6]
 
 Categories, observations sorted in descending order:
@@ -118,7 +140,6 @@ Categories, observations sorted in descending order:
       obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     category_variable:
       name: category@MetaData
@@ -145,7 +166,6 @@ Categories, where clause:
       obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     category_variable:
       name: category@MetaData
@@ -199,7 +219,6 @@ Tolerance and priorities, first observation in each group to be retained:
              0, 0, 0,   0, 0, 0,
              0, 0, 0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
@@ -253,7 +272,6 @@ Tolerance and priorities, second observation in each group to be retained:
              0, 1, 1,   0, 1, 1,
              0, 1, 1]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
@@ -307,7 +325,6 @@ Tolerance and priorities, third observation in each group to be retained:
              0, 0, 1,   0, 0, 1,
              0, 0, 1]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
@@ -357,7 +374,6 @@ Tolerance but no priorities:
           - 2010-01-01T00:05:02Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT05S
   expected_thinned_obs_indices: [ 1,  2,   3,  4,  5,
@@ -385,7 +401,6 @@ Seed time inside observation time range (should pick preceding observation):
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:34Z
   expected_thinned_obs_indices: [0, 2, 4, 6]
@@ -410,7 +425,6 @@ Seed time inside observation time range (should pick following observation):
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:36Z
   expected_thinned_obs_indices: [1, 3, 5]
@@ -435,7 +449,6 @@ Seed time midway between two observations (should pick following observation):
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:25Z
   expected_thinned_obs_indices: [0, 2, 4, 6]
@@ -460,7 +473,6 @@ Seed time at earliest observation:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:00Z
   expected_thinned_obs_indices: [1, 3, 5]
@@ -485,7 +497,6 @@ Seed time before earliest observation:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:03:00Z
   expected_thinned_obs_indices: [1, 3, 5]
@@ -510,7 +521,6 @@ Seed time at latest observation:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:06:00Z
   expected_thinned_obs_indices: [1, 3, 5]
@@ -535,7 +545,6 @@ Seed time after latest observation:
           - 2010-01-01T00:05:00Z
       obs errors: [1.0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     seed_time: 2010-01-01T00:06:00Z
   expected_thinned_obs_indices: [1, 3, 5]
@@ -584,7 +593,6 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
              0, 0, 1,   0, 0, 1,
              0, 0, 1]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT02S
     priority_variable:
@@ -639,7 +647,6 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
              1, 0, 0,   1, 0, 0,
              1, 0, 0]
   TemporalThinning:
-    variables: [air_temperature]
     min_spacing: PT15S
     tolerance:   PT02S
     priority_variable:

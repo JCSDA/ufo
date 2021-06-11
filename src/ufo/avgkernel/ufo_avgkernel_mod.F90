@@ -9,6 +9,7 @@ module ufo_avgkernel_mod
 
  use oops_variables_mod
  use ufo_vars_mod
+ use missing_values_mod
  use kinds
  use iso_c_binding
 
@@ -45,6 +46,7 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   integer :: nlevs_yaml
   integer :: ivar, nvars
   character(len=max_string) :: err_msg
+  character(len=:), allocatable :: str_array(:)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("obs options",f_confOpts)
@@ -74,12 +76,18 @@ subroutine ufo_avgkernel_setup(self, f_conf)
 
   ! get name of geoval/tracer to use from the model
   nvars = self%obsvars%nvars()
-  call f_confOpts%get_or_die("tracer variables", self%tracervars)
+  call f_confOpts%get_or_die("tracer variables", str_array)
+  self%tracervars = str_array
 
   ! determine if this is a total column or troposphere calculation
-  ! support stratosphere, etc. later?
   if (.not. f_confOpts%get("tropospheric column", self%troposphere)) self%troposphere = .false.
   if (.not. f_confOpts%get("total column", self%totalcolumn)) self%totalcolumn = .false.
+
+  ! both of these cannot be true
+  if (self%troposphere .and. self%totalcolumn) then
+    write(err_msg, *) "ufo_avgkernel_setup error: both tropospheric and total column set to TRUE, only one can be TRUE"
+    call abor1_ftn(err_msg)
+  end if
 
   ! do we need a conversion factor, say between ppmv and unity?
   if (.not. f_confOpts%get("model units coeff", self%convert_factor_model)) self%convert_factor_model = one
@@ -115,7 +123,7 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   use kinds
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, &
                              ufo_geovals_reorderzdir, ufo_geovals_copy
-  use ufo_constants_mod, only: zero, half
+  use ufo_constants_mod, only: half
   use satcolumn_mod, only: simulate_column_ob
   use iso_c_binding
   use obsspace_mod
@@ -136,6 +144,9 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   integer, allocatable, dimension(:) :: troplev_obs
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
+  real(c_double) :: missing
+
+  missing = missing_value(missing)
 
   ! get geovals of atmospheric pressure
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
@@ -183,16 +194,22 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     geovar = self%tracervars(ivar)
     call ufo_geovals_get_var(geovals, geovar, tracer)
     do iobs = 1, nlocs
-      if (avgkernel_obs(1,iobs) > -1.0e9_kind_real) then ! take care of missing obs
+      if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
         if (self%troposphere) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
           hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
+        else if (self%totalcolumn) then
+          call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
+                                  prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
+                                  phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
+                                  hofx_tmp)
+          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         end if
       else
-        hofx(ivar,iobs) = zero ! default if we are unable to compute averaging kernel
+        hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel
       end if
     end do
   end do

@@ -14,9 +14,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 #include "ufo/profile/ProfileStandardLevels.h"
 
 namespace ufo {
@@ -29,16 +27,13 @@ namespace ufo {
   class ProfileCheckHydrostatic : public ProfileCheckBase,
     private ProfileStandardLevels {
    public:
-    ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options,
-                            const ProfileIndices &profileIndices,
-                            ProfileDataHandler &profileDataHandler,
-                            ProfileCheckValidator &profileCheckValidator);
+      explicit ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override;
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// Hydrostatic error descriptions

@@ -13,14 +13,8 @@
 #include "oops/util/Logger.h"
 
 namespace ufo {
-  ProfileCheckBase::ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
-                                     const ProfileIndices &profileIndices,
-                                     ProfileDataHandler &profileDataHandler,
-                                     ProfileCheckValidator &profileCheckValidator)
-    : options_(options),
-      profileIndices_(profileIndices),
-      profileDataHandler_(profileDataHandler),
-      profileCheckValidator_(profileCheckValidator)
+  ProfileCheckBase::ProfileCheckBase(const ProfileConsistencyCheckParameters &options)
+    : options_(options)
   {}
 
   ProfileCheckFactory::ProfileCheckFactory(const std::string & name)
@@ -32,10 +26,7 @@ namespace ufo {
 
   std::unique_ptr<ProfileCheckBase>
   ProfileCheckFactory::create(const std::string& name,
-                              const ProfileConsistencyCheckParameters &options,
-                              const ProfileIndices &profileIndices,
-                              ProfileDataHandler &profileDataHandler,
-                              ProfileCheckValidator &profileCheckValidator)
+                              const ProfileConsistencyCheckParameters &options)
   {
     oops::Log::trace() << "ProfileCheckBase::create starting" << std::endl;
     typename std::map<std::string, ProfileCheckFactory*>::iterator jloc =
@@ -46,10 +37,7 @@ namespace ufo {
       throw eckit::BadParameter(name + " does not exist in ufo::ProfileCheckFactory. "
                                 "Possible values:" + makerNameList, Here());
     }
-    std::unique_ptr<ProfileCheckBase> ptr = jloc->second->make(options,
-                                                               profileIndices,
-                                                               profileDataHandler,
-                                                               profileCheckValidator);
+    std::unique_ptr<ProfileCheckBase> ptr = jloc->second->make(options);
     oops::Log::trace() << "ProfileCheckBase::create done" << std::endl;
     return ptr;
   }

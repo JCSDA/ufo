@@ -15,8 +15,11 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
+#include "ufo/ObsBiasParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -36,10 +39,12 @@ class ObsBiasCovariance : public util::Printable,
                           private boost::noncopyable,
                           private util::ObjectCounter<ObsBiasCovariance> {
  public:
+  typedef ObsBiasParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 // Constructor, destructor
-  ObsBiasCovariance(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasCovariance(ioda::ObsSpace & odb, const Parameters_ & params);
   ~ObsBiasCovariance() {}
 
 // Linear algebra operators
@@ -49,14 +54,13 @@ class ObsBiasCovariance : public util::Printable,
   void randomize(ObsBiasIncrement &) const;
 
 // Utilities
-  const eckit::Configuration & config() const {return conf_;}
-  void read(const eckit::Configuration &);
+  void read(const ObsBiasCovariancePriorParameters &);
   void write(const eckit::Configuration &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
 
  private:
   void print(std::ostream &) const {}
-  const eckit::LocalConfiguration conf_;
+
   ioda::ObsSpace & odb_;
 
 // Hessian contribution from Jo bias correction terms
@@ -75,22 +79,24 @@ class ObsBiasCovariance : public util::Printable,
   std::vector<double> analysis_variances_;
 
 // Error variances
-  std::vector<double> variances_;
+  Eigen::VectorXd variances_;
 
-// Default smallest variance value
-  double smallest_variance_ = 1.0e-6;
+// Smallest variance value
+  double smallest_variance_ = ObsBiasCovarianceParameters::defaultSmallestVariance();
 
-// Default largest variance value
-  double largest_variance_ = 10.0;
+// Largest variance value
+  double largest_variance_ = ObsBiasCovarianceParameters::defaultLargestVariance();
 
-// Default largest analysis error variance
-  double largest_analysis_variance_ = 10000.0;
+// Largest analysis error variance
+  double largest_analysis_variance_ = ObsBiasCovarianceParameters::defaultLargestAnalysisVariance();
 
-// Default stepsize
-  double step_size_ = 1.e-4;
+// Step size
+  double step_size_ = ObsBiasCovarianceParameters::defaultStepSize();
 
   std::vector<std::string> prednames_;
-  std::vector<int> jobs_;
+
+  /// variables for which bias correction coefficients will be updated
+  oops::Variables vars_;
 };
 
 // -----------------------------------------------------------------------------

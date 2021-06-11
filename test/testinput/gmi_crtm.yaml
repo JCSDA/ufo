@@ -7,6 +7,7 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
       Clouds: [Water]
@@ -17,7 +18,7 @@ observations:
   obs space:
     name: gmi_gpm
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-13
   geovals:

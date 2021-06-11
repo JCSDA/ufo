@@ -1,6 +1,5 @@
 /*
- * (C) Copyright 2019 Met Office UK
- *
+ * (C) 2021 Crown Copyright Met Office. All rights reserved.
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
@@ -10,6 +9,7 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
@@ -18,12 +18,42 @@ class Configuration;
 
 namespace ufo {
 
+  enum class SurfaceObservationSubtype {
+    LNDSYN, SHPSYN, BUOY, MOBSYN, OPENROAD, TEMP, BATHY, TESAC, BUOYPROF, LNDSYB, SHPSYB
+  };
+  struct SurfaceObservationSubtypeParameterTraitsHelper {
+    typedef SurfaceObservationSubtype EnumType;
+    static constexpr char enumTypeName[] = "SurfaceObservationSubtype";
+    static constexpr util::NamedEnumerator<SurfaceObservationSubtype> namedValues[] = {
+      { SurfaceObservationSubtype::LNDSYN, "LNDSYN" },
+      { SurfaceObservationSubtype::SHPSYN, "SHPSYN" },
+      { SurfaceObservationSubtype::BUOY, "BUOY" },
+      { SurfaceObservationSubtype::MOBSYN, "MOBSYN" },
+      { SurfaceObservationSubtype::OPENROAD, "OPENROAD" },
+      { SurfaceObservationSubtype::TEMP, "TEMP" },
+      { SurfaceObservationSubtype::BATHY, "BATHY" },
+      { SurfaceObservationSubtype::TESAC, "TESAC" },
+      { SurfaceObservationSubtype::BUOYPROF, "BUOYPROF" },
+      { SurfaceObservationSubtype::LNDSYB, "LNDSYB" },
+      { SurfaceObservationSubtype::SHPSYB, "SHPSYB" }
+    };
+  };
+}  // namespace ufo
+
+namespace oops {
+
+template<>
+struct ParameterTraits<ufo::SurfaceObservationSubtype> :
+    public EnumParameterTraits<ufo::SurfaceObservationSubtypeParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+namespace ufo {
+
 /// \brief Options controlling the operation of the track check filter.
-class TrackCheckUtilsParameters : public oops::Parameters {
-  // TODO(wsmigaj/aweinbren): Refactor TrackCheckUtils::groupObservationsByStation to avoid creating
-  // a TrackCheckUtilsParameters object and then replace OOPS_CONCRETE_PARAMETERS with
-  // OOPS_ABSTRACT_PARAMETERS.
-  OOPS_CONCRETE_PARAMETERS(TrackCheckUtilsParameters, Parameters)
+class TrackCheckUtilsParameters : public FilterParametersBase {
+  OOPS_ABSTRACT_PARAMETERS(TrackCheckUtilsParameters, FilterParametersBase)
 
  public:
   /// Variable storing integer-valued or string-valued station IDs.
@@ -35,7 +65,7 @@ class TrackCheckUtilsParameters : public oops::Parameters {
   /// assumed to have been taken by a single station.
   ///
   /// Note: the variable used to group observations into records can be set with the
-  /// \c obs space.obsdatain.obsgrouping.group_variable YAML option.
+  /// \c obs space.obsdatain.obsgrouping.groupvariable YAML option.
   oops::OptionalParameter<Variable> stationIdVariable{
     "station_id_variable", this};
 };

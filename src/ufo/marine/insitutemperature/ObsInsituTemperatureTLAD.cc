@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
 
 ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
                                                    const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_water_potential_temperature",
                                     "sea_water_salinity",
@@ -48,7 +48,7 @@ ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
 
 void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                              ObsDiagnostics &) {
-  ufo_insitutemperature_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_insitutemperature_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: trajectory set" << std::endl;
 }
 
@@ -56,7 +56,7 @@ void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsB
 
 void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
                                              ioda::ObsVector & ovec) const {
-  ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: TL observation operator run" << std::endl;
 }
@@ -65,7 +65,7 @@ void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
 
 void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals,
                                              const ioda::ObsVector & ovec) const {
-  ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+  ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: adjoint observation operator run" << std::endl;
 }

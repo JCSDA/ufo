@@ -21,15 +21,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr),
-    ref_(config_.getString("reference")), val_(config_.getString("value"))
+  : FilterBase(obsdb, parameters, flags, obserr),
+    parameters_(parameters)
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
-  allvars_ += ref_;
-  allvars_ += val_;
+  allvars_ += parameters_.ref;
+  allvars_ += parameters_.val;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,8 +49,8 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
   const size_t nlocs = obsdb_.nlocs();
 
 // min/max value setup
-  float vmin = config_.getFloat("minvalue", missing);
-  float vmax = config_.getFloat("maxvalue", missing);
+  float vmin = parameters_.minvalue.value().value_or(missing);
+  float vmax = parameters_.maxvalue.value().value_or(missing);
 
 // check for threshold and if exists, set vmin and vmax appropriately
   const float thresh = config_.getFloat("threshold", missing);
@@ -61,8 +61,8 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
 
 // Get reference values and values to compare (as floats)
   std::vector<float> ref, val;
-  data_.get(ref_, ref);
-  data_.get(val_, val);
+  data_.get(parameters_.ref, ref);
+  data_.get(parameters_.val, val);
   ASSERT(ref.size() == val.size());
 
 // Loop over all obs

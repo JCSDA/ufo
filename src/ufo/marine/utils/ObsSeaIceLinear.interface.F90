@@ -117,7 +117,9 @@ if (.not.(allocated(geoval%vals))) then
      write(err_msg,*)' unknown number of categories'
      call abor1_ftn(err_msg)
    endif
+   geoval%nval = self%ncat
    allocate(geoval%vals(self%ncat,size(c_hofx,1)))
+   geoval%vals = 0.0
 end if
 end subroutine ufo_seaicelinear_alloc_ad_c
 

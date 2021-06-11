@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsADTTLAD> makerADTTL_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vv));
@@ -44,21 +44,21 @@ ObsADTTLAD::~ObsADTTLAD() {
 
 void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                ObsDiagnostics &) {
-  ufo_adt_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  ufo_adt_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsADTTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_adt_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_adt_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(), ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsADTTLAD: tangent linear observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_adt_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_adt_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(), ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsADTTLAD: adjoint observation operator run" << std::endl;
 }
 

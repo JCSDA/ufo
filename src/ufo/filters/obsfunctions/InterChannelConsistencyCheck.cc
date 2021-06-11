@@ -89,14 +89,18 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
   }
 
   // Inter-channel consistency check
+  bool passive_bc = true;
+  bool channel_passive = false;
   size_t ncheck = 6;
   if (inst == "atms") ncheck = 7;
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     for (int ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 0;
     int kval = 0;
     for (int ichan = 1; ichan < ncheck; ++ichan) {
+      channel_passive = use_flag[ichan] == -1 || use_flag[ichan] == 0;
       int channel = ichan + 1;
-      if (varinv[ichan][iloc] <= 0.0 && use_flag[ichan] >= 1) {
+      if (varinv[ichan][iloc] <= 0.0 &&
+         (use_flag[ichan] >= 1 || (passive_bc && channel_passive))) {
         kval = std::max(channel-1, kval);
         if ((inst == "amsua" || inst == "atms") && channel <= 3) kval = 0;
       }

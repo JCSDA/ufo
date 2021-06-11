@@ -5,6 +5,7 @@ observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
+    SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
     obs options:
@@ -14,7 +15,7 @@ observations:
   obs space:
     name: hirs4_metop-a
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/hirs4_metop-a_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/hirs4_metop-a_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:

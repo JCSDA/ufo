@@ -7,7 +7,7 @@ Duplicates, constraints on buddy counts, legacy pair collector:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
   Met Office Buddy Check, modern:
     use_legacy_buddy_collector: false
     num_zonal_bands: 12

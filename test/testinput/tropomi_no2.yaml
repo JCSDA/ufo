@@ -4,7 +4,7 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
     simulated variables: [nitrogen_dioxide_in_tropospheric_column]
   obs operator:
     name: AvgKernel
@@ -29,7 +29,47 @@ observations:
       total column: false
       model units coeff: 1e-6 # ppmv to 1/1
       hofx units coeff: 1.6605392e-20 # molec/cm2 to mol/m2
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-14
   geovals:
     filename: Data/ufo/testinput_tier_1/tropomi_no2_geoval_2020090318_m.nc4
-  rms ref: 2.2154632172314298e-05
+  rms ref: 2.1272229395313009e-05
+  tolerance: 1.0e-7
+- obs space:
+    name: NO2
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+    simulated variables: [nitrogen_dioxide_in_total_column]
+  obs operator:
+    name: AvgKernel
+    obs options:
+      nlayers_kernel: 34
+      ak: [0, 22.83594, 424.4141, 1387.547, 3057.266, 5564.383,
+           8163.375, 11901.34, 14898.45, 17471.84, 19290.23,
+           20361.82, 20337.86, 19859.39, 19031.29, 18308.43,
+           17008.79, 15508.26, 13881.33, 12766.87, 11116.66,
+           9562.683, 8608.525, 7311.869, 6156.074, 4490.817,
+           3381.744, 2265.432, 1423.77, 823.9678, 427.5925,
+           191.3386, 69.52058, 18.60893, 0]
+      bk: [1, 0.991984, 0.969513, 0.931881, 0.873929, 0.790717,
+           0.704669, 0.576692, 0.466003, 0.358254, 0.263242,
+           0.16891, 0.111505, 0.077958, 0.051773, 0.038026,
+           0.022355, 0.011806, 0.005378, 0.002857, 0.00089,
+           0.000199, 5.9e-05, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0 ]
+      AvgKernelVar: averaging_kernel_level
+      tracer variables: [no2]
+      tropospheric column: false
+      total column: true
+      model units coeff: 1e-6 # ppmv to 1/1
+      hofx units coeff: 1.6605392e-20 # molec/cm2 to mol/m2
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-14
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tropomi_no2_geoval_2020090318_m.nc4
+  rms ref: 1.4128255400842815e-05
   tolerance: 1.0e-7

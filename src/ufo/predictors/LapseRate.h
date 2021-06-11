@@ -9,14 +9,15 @@
 #define UFO_PREDICTORS_LAPSERATE_H_
 
 #include <map>
-#include <vector>
-
-#include "eckit/config/LocalConfiguration.h"
 
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
+}
+
+namespace oops {
+  class Variables;
 }
 
 namespace ioda {
@@ -29,8 +30,7 @@ namespace ufo {
 
 class LapseRate : public PredictorBase {
  public:
-  LapseRate(const eckit::Configuration &, const std::vector<int> &);
-  ~LapseRate() {}
+  LapseRate(const eckit::Configuration &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

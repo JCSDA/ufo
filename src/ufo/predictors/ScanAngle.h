@@ -7,13 +7,15 @@
 
 #ifndef UFO_PREDICTORS_SCANANGLE_H_
 #define UFO_PREDICTORS_SCANANGLE_H_
-
-#include <vector>
-
+#include <string>
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
+}
+
+namespace oops {
+  class Variables;
 }
 
 namespace ioda {
@@ -26,8 +28,7 @@ namespace ufo {
 
 class ScanAngle : public PredictorBase {
  public:
-  ScanAngle(const eckit::Configuration &, const std::vector<int> &);
-  ~ScanAngle() {}
+  ScanAngle(const eckit::Configuration &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -36,6 +37,7 @@ class ScanAngle : public PredictorBase {
 
  private:
   int order_;
+  std::string var_name_;
 };
 
 // -----------------------------------------------------------------------------

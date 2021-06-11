@@ -9,8 +9,6 @@ module ufo_gnssro_bndropp2d_mod_c
   
   use fckit_configuration_module, only: fckit_configuration 
   use ufo_gnssro_bndropp2d_mod
-  use ufo_locs_mod
-  use ufo_locs_mod_c
   use ufo_gnssro_2d_locs_mod
 
   implicit none
@@ -81,26 +79,19 @@ call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 end subroutine ufo_gnssro_bndropp2d_simobs_c
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_2d_locs_init_c(c_key_self, c_key_locs, c_obsspace, c_t1, c_t2) bind(c,name='ufo_gnssro_2d_locs_init_f90')
-use datetime_mod
+subroutine ufo_gnssro_2d_locs_init_c(c_key_self, c_obsspace, c_nlocs, c_lons, c_lats) &
+    bind(c,name='ufo_gnssro_2d_locs_init_f90')
 implicit none
-integer(c_int),     intent(in)     :: c_key_self  ! operator key
-integer(c_int),     intent(inout)  :: c_key_locs  ! location key
+integer(c_int),     intent(in)     :: c_key_self
 type(c_ptr), value, intent(in)     :: c_obsspace
-type(c_ptr), value, intent(in)     :: c_t1, c_t2
+integer(c_int),     intent(in)     :: c_nlocs
+real(c_float),      intent(inout)  :: c_lons(c_nlocs)
+real(c_float),      intent(inout)  :: c_lats(c_nlocs)
 
-type(ufo_locs),              pointer :: locs
 type(ufo_gnssro_BndROPP2D),  pointer :: self
 
-integer, parameter            :: max_string = 800
-type(datetime)                :: t1, t2
-
-call c_f_datetime(c_t1, t1)
-call c_f_datetime(c_t2, t2)
-
-call ufo_locs_registry%get(c_key_locs, locs)
 call ufo_gnssro_BndROPP2D_registry%get(c_key_self, self)
-call ufo_gnssro_2d_locs_init(self,locs, c_obsspace, t1, t2)
+call ufo_gnssro_2d_locs_init(self, c_obsspace, c_nlocs, c_lons, c_lats)
 
 end subroutine ufo_gnssro_2d_locs_init_c
 

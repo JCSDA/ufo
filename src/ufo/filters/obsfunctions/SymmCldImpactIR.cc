@@ -77,8 +77,9 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
         // TODO(JJG): change CRTM clear-sky behavior
         if (clr[iloc] > -1.0f && clr[iloc] < 1.0f) clr[iloc] = bak[iloc];
 
-        Cmod = abs(clr[iloc] - bak[iloc]);
-        Cobs = abs(clr[iloc] - obs[iloc] + bias[iloc]);
+        // HofX contains bias correction; subtracting it here
+        Cmod = std::abs(clr[iloc] - bak[iloc] + bias[iloc]);
+        Cobs = std::abs(clr[iloc] - obs[iloc] + bias[iloc]);
         SCI[ich][iloc] = 0.5f * (Cmod + Cobs);
       } else {
         SCI[ich][iloc] = missing;

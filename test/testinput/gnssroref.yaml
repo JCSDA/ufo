@@ -8,7 +8,7 @@ observations:
   obs space:
    name: GnssroRef
    obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+    obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
    simulated variables: [refractivity]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4

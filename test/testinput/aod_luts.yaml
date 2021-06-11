@@ -13,7 +13,7 @@ observations:
   obs space:
     name: Aod
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/aod_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
     simulated variables: [aerosol_optical_depth]
     channels: 4
   geovals:

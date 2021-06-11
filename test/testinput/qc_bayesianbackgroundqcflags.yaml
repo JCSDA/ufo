@@ -1,0 +1,71 @@
+window begin: 2019-06-14T21:00:00Z
+window end: 2019-06-15T02:59:59Z
+
+observations:
+- obs space:
+    name: Bayesian background QC flags
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
+    simulated variables: [air_temperature, eastward_wind, northward_wind, geopotential_height]
+  obs filters:
+  - filter: Bayesian Background QC Flags
+    filter variables:
+    - name: air_temperature
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+  passedBenchmark: 1830
+  compareVariables:
+    - reference:
+        name: OPS_air_temperature@QCFlags
+      test:
+        name: air_temperature@QCFlags
+    - reference:
+        name: OPS_eastward_wind@QCFlags
+      test:
+        name: eastward_wind@QCFlags
+    - reference:
+        name: OPS_northward_wind@QCFlags
+      test:
+        name: northward_wind@QCFlags
+    - reference:
+        name: OPS_geopotential_height@QCFlags
+      test:
+        name: geopotential_height@QCFlags
+- obs space:
+    name: Missing QC flags
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Bayesian Background QC Flags
+    filter variables:
+    - name: air_temperature
+  expectExceptionWithMessage: air_temperature@QCFlags not present
+  passedBenchmark: 0
+- obs space:
+    name: Missing PGE
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
+    simulated variables: [eastward_wind]
+  obs filters:
+  - filter: Bayesian Background QC Flags
+    filter variables:
+    - name: eastward_wind
+  expectExceptionWithMessage: At least one of eastward_wind@GrossErrorProbability or eastward_wind@GrossErrorProbabilityBuddyCheck must be present
+- obs space:
+    name: Bayesian background QC flags with where clause
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Bayesian Background QC Flags
+    filter variables:
+    - name: air_temperature
+    # Applies the filter to all but the first profile in the sample.
+    # As a result an extra 69 observations pass.
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 0.0
+  passedBenchmark: 93

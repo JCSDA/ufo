@@ -1,0 +1,89 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    GeoVal_type: MetO
+    Absorbers: &rttov_absobers [Water_vapour, CLW]
+    linear obs operator:
+      Absorbers: [Water_vapour]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs filters:
+### Bennartz scattering test [over land] ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-7, 16-22
+    where:
+    - variable:
+        name: land_sea@MetaData
+      is_in: 0  # land=0, sea=1, ice=2
+    test variables:
+    - name: BennartzScatIndex@ObsFunction
+      options:
+        channel_89ghz: 16
+        channel_150ghz: 17
+        bennartz_coeff_1: 0.158
+        bennartz_coeff_2: 0.0163
+        apply_bias: ObsBias
+    maxvalue: -1.0
+    action:
+      name: reject
+### Surface-to-space transmittance check ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: &humidity_chans 18-22
+    test variables:
+    - name: toa_total_transmittance@ObsDiag
+      channels: *humidity_chans
+    maxvalue: 0.7         # (example) apply to each channel
+    action:
+      name: reject        # obs rejected per channel if transmittance exceeded
+### Cost function cloud check ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 18-20
+    where:
+    - variable:
+        name: land_sea@MetaData
+      is_in: 0  # land=0, sea=1, ice=2
+    test variables:
+    - name: CloudCostFunction@ObsFunction
+      options:
+        cost channels list: 18, 20, 22
+        RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+        BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+        background fields:
+        - air_temperature
+        - specific_humidity
+        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+        - mass_content_of_cloud_ice_in_atmosphere_layer
+        - surface_temperature
+        - specific_humidity_at_two_meters_above_surface
+        - skin_temperature
+        - air_pressure_at_two_meters_above_surface
+        qtotal: true
+        qtotal split rain: true
+        reverse Jacobian order: true
+        HofX group: HofX  # default, awaits bias correction
+    maxvalue: 69.8        # example value
+    action:
+      name: reject
+  passedBenchmark: 2164   # number passing QC after all filters

@@ -6,27 +6,53 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      dataextractor/DataExtractor.h
+      dataextractor/DataExtractor.cc
+      dataextractor/DataExtractorBackend.h
+      dataextractor/DataExtractorCSVBackend.h
+      dataextractor/DataExtractorCSVBackend.cc
+      dataextractor/DataExtractorInput.h
+      dataextractor/DataExtractorNetCDFBackend.h
+      dataextractor/DataExtractorNetCDFBackend.cc
       DistanceCalculator.h
       EquispacedBinSelector.h
       GeodesicDistanceCalculator.h
+      IodaGroupIndices.cc
+      IodaGroupIndices.h
       MaxNormDistanceCalculator.h
+      metoffice/MetOfficeBMatrixStatic.cc
+      metoffice/MetOfficeBMatrixStatic.h
+      metoffice/MetOfficeBMatrixStatic.interface.h
+      metoffice/MetOfficeBMatrixStatic.interface.F90
       metoffice/MetOfficeQCFlags.h
+      metoffice/MetOfficeRMatrixRadiance.cc
+      metoffice/MetOfficeRMatrixRadiance.h
+      metoffice/MetOfficeRMatrixRadiance.interface.h
+      metoffice/MetOfficeRMatrixRadiance.interface.F90
       metoffice/MetOfficeObservationIDs.h
+      metoffice/ufo_metoffice_bmatrixstatic_mod.f90
+      metoffice/ufo_metoffice_rmatrixradiance_mod.f90
+      OperatorUtils.cc
+      OperatorUtils.h
+      parameters/ParameterTraitsVariable.cc
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
-      ParallelObsDistribution.cc
-      ParallelObsDistribution.h
+      PrimitiveVariables.cc
+      PrimitiveVariables.h
       ProbabilityOfGrossError.cc
       ProbabilityOfGrossError.h
       ProbabilityOfGrossErrorParameters.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
+      RefractivityCalculator.F90
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
       ufo_utils_mod.F90
+      ufo_utils.interface.F90
+      ufo_utils.interface.h
       VertInterp.interface.F90
       VertInterp.interface.h
       vert_interp.F90

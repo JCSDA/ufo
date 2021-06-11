@@ -11,8 +11,11 @@ use ufo_vars_mod
 
   type, public :: ufo_atmvertinterp
      type(oops_variables), public :: geovars 
-     type(oops_variables), public :: obsvars 
+     type(oops_variables), public :: obsvars ! Variables to be simulated
+     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
+                                                      ! simulated variables in the ObsSpace
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
+     character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
    contains
      procedure :: setup  => atmvertinterp_setup_
@@ -45,13 +48,27 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   if( grid_conf%has("vertical coordinate") ) then
       call grid_conf%get_or_die("vertical coordinate",coord_name)
       self%v_coord = coord_name
-      if( trim(self%v_coord) .eq. var_prs ) self%use_ln = .true.
+      if( (trim(self%v_coord) .eq. var_prs) .or. &
+          (trim(self%v_coord) .eq. var_prsi) ) then 
+        self%use_ln = .true.
+      endif
   else  ! default
       self%v_coord = var_prs
       self%use_ln  = .true.
   endif
-  call self%geovars%push_back(self%v_coord)
 
+  !> Determine observation vertical coordinate.
+  !  Use the model vertical coordinate unless the option
+  !  'observation vertical coordinate' is specified.
+  if ( grid_conf%has("observation vertical coordinate") ) then
+     call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+     self%o_v_coord = coord_name
+  else
+     self%o_v_coord = self%v_coord
+  endif
+
+  call self%geovars%push_back(self%v_coord)
+ 
 end subroutine atmvertinterp_setup_
 
 ! ------------------------------------------------------------------------------
@@ -68,7 +85,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, ivar
+  integer :: iobs, ivar, iobsvar
   real(kind_real), dimension(:), allocatable :: obsvcoord
   type(ufo_geoval), pointer :: vcoordprofile, profile
   real(kind_real), allocatable :: wf(:)
@@ -83,7 +100,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   ! Get the observation vertical coordinates
   allocate(obsvcoord(nlocs))
-  call obsspace_get_db(obss, "MetaData", self%v_coord, obsvcoord)
+  call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
 
   ! Allocate arrays for interpolation weights
   allocate(wi(nlocs))
@@ -102,9 +119,12 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
   enddo
 
-  do ivar = 1, nvars
+  do iobsvar = 1, size(self%obsvarindices)
+    ! Get the index of the row of hofx to fill
+    ivar = self%obsvarindices(iobsvar)
+
     ! Get the name of input variable in geovals
-    geovar = self%geovars%variable(ivar)
+    geovar = self%geovars%variable(iobsvar)
 
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)

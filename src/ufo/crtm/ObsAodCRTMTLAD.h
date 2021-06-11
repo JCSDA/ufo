@@ -56,7 +56,6 @@ class ObsAodCRTMTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOperAodCRTM_;
-  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
 

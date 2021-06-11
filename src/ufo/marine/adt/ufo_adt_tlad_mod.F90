@@ -188,8 +188,11 @@ call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
 call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
 offset_hofx = offset_hofx/cnt_glb
 
-if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nlocs))
-geoval_adt%vals = 0.0
+if (.not. allocated(geoval_adt%vals)) then
+   allocate(geoval_adt%vals(1,nlocs))
+   geoval_adt%nval = 1
+   geoval_adt%vals = 0.0
+end if
 do iobs = 1, nlocs
    if (hofx(iobs)/=self%r_miss_val) then
       geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset_hofx

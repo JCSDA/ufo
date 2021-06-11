@@ -21,7 +21,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
 
@@ -64,9 +63,9 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> impactparameter(obsdb_, "impact_parameter", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> earthradius(obsdb_, "earth_radius_of_curvature",
-                                         "MetaData");
-  ioda::ObsDataVector<float> temperature(obsdb_, "temperature",
-                                         "MetaData");  // background temperature at obs location
+                                    "MetaData");
+  ioda::ObsDataVector<float> temperature(obsdb_, "virtual_temperature",
+                                    "MetaData");  // background virtual temperature at obs location
 
   Variables varhofx(filtervars, "HofX");
 

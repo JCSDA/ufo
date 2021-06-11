@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
@@ -20,19 +20,29 @@ class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
+class ROobserrInflationParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ROobserrInflationParameters, FilterActionParametersBase);
+
+  // No extra parameters needed
+};
+
+// -----------------------------------------------------------------------------
+
 class ROobserrInflation : public FilterActionBase {
  public:
-  explicit ROobserrInflation(const eckit::Configuration &);
+  /// The type of parameters accepted by the constructor of this action.
+  /// This typedef is used by the FilterActionFactory.
+  typedef ROobserrInflationParameters Parameters_;
+
+  explicit ROobserrInflation(const Parameters_ &);
   ~ROobserrInflation() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
+             const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
  private:
   Variables allvars_;
-  const std::string strfactor_;
-  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------

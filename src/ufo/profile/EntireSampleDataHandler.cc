@@ -19,7 +19,7 @@ namespace ufo {
 
   void EntireSampleDataHandler::writeQuantitiesToObsdb()
   {
-    // Write out all variables in the QCFlags and Corrections groups.
+    // Write out all variables in particular groups.
     for (const auto& it_data : entireSampleData_) {
       std::string fullname = it_data.first;
       std::string varname;
@@ -28,7 +28,11 @@ namespace ufo {
 
       if (groupname == "QCFlags") {
         putDataVector(fullname, get<int>(fullname));
-      } else if (groupname == "Corrections") {
+      } else if (groupname == "Corrections" ||
+                 groupname == "DerivedValue") {
+        // todo(ctgh): Add ModelLevelsDerivedValue, ModelRhoLevelsDerivedValue,
+        // ModelLevelsFlags and ModelRhoLevelsFlags to this list when
+        // it is possible to save variables with different nlocs.
         putDataVector(fullname, get<float>(fullname));
       }
     }
@@ -37,5 +41,29 @@ namespace ufo {
     const std::vector <int> &NumAnyErrors =
       get<int>(ufo::VariableNames::counter_NumAnyErrors);
     putDataVector(ufo::VariableNames::counter_NumAnyErrors, NumAnyErrors);
+  }
+
+  int EntireSampleDataHandler::defaultValue(const std::vector <int> &vec,
+                                            const std::string &groupname)
+  {
+    if (groupname == "Counters")
+      return 0;
+    else
+      return missingValueInt;
+  }
+
+  float EntireSampleDataHandler::defaultValue(const std::vector <float> &vec,
+                                              const std::string &groupname)
+  {
+    if (groupname == "Corrections")
+      return 0.0f;
+    else
+      return missingValueFloat;
+  }
+
+  std::string EntireSampleDataHandler::defaultValue(const std::vector <std::string> &vec,
+                                                    const std::string &groupname)
+  {
+    return missingValueString;
   }
 }  // namespace ufo

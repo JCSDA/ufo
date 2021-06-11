@@ -1,0 +1,12 @@
+obs space:
+  name: ompstc8_npp
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/ompstc8_npp.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).ompstc8_npp.{{window_begin}}.nc4
+  simulated variables: [integrated_layer_ozone_in_air]
+obs operator:
+  name: AtmVertInterpLay
+  geovals: [mole_fraction_of_ozone_in_air]
+  coefficients: [0.007886131] # convert from ppmv to DU
+  nlevels: [1]

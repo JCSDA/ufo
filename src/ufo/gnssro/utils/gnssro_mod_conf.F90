@@ -22,6 +22,7 @@ type gnssro_conf
   real(kind_real)    :: top_2d
   real(kind_real)    :: dtheta
   character(len=20)  :: vertlayer
+  character(len=20)  :: output_diags
 end type gnssro_conf
 
 !--------- ropp2d location default parameters-----------------
@@ -62,7 +63,11 @@ if (f_conf%has("super_ref_qc"))  then
 endif
 roconf%sr_steps = 2
 if (f_conf%has("sr_steps")) call f_conf%get_or_die("sr_steps",roconf%sr_steps)
-
+roconf%output_diags="false"
+if (f_conf%has("output_diags"))  then
+  call f_conf%get_or_die("output_diags",str)
+  roconf%output_diags=trim(str) 
+endif
 end subroutine gnssro_conf_setup
 
 

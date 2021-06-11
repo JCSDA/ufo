@@ -14,6 +14,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -24,8 +25,8 @@ namespace eckit {
 namespace ufo {
 
 /// \brief Options controlling the operation of the TemporalThinning filter.
-class TemporalThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(TemporalThinningParameters, Parameters)
+class TemporalThinningParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(TemporalThinningParameters, FilterParametersBase)
 
  public:
   /// Minimum spacing between two successive retained observations.
@@ -46,8 +47,15 @@ class TemporalThinningParameters : public oops::Parameters {
   /// observations in reverse chronological order.
   oops::OptionalParameter<util::DateTime> seedTime{"seed_time", this};
 
-  /// Variable storing integer-valued IDs associated with observations. Observations belonging
-  /// to different categories are thinned separately.
+  /// A string- or integer-valued variable. Observations with different values of that variable will
+  /// be thinned separately.
+  ///
+  /// If not set and observations were grouped into records when the observation space was
+  /// constructed, observations from each record will be thinned separately. If not set and
+  /// observations were not grouped into records, all observations will be thinned together.
+  ///
+  /// Note: the variable used to group observations into records can be set with the
+  /// \c obs space.obsdatain.obsgrouping.group variable YAML option.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   /// Variable storing observation priorities. Used together with \c tolerance; see the

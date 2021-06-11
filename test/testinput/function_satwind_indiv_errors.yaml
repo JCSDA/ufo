@@ -1,0 +1,56 @@
+window begin: 2020-10-01T03:00:00Z
+window end: 2020-10-01T09:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure_levels
+  obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+    obsdataout:
+      obsfile: Data/satwind_obs_1d_2020100106_noinv_errors.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z_noinv.nc4
+  obs filters:
+  - filter: Bounds Check
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          default pressure error: 10000
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: eastward_wind
+          vertical coordinate: air_pressure_levels
+  - filter: Bounds Check
+    defer to post: true
+    filter variables:
+    - name: northward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          default pressure error: 10000
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: northward_wind
+          vertical coordinate: air_pressure_levels
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: eastward_wind@TestReference
+      test:
+        name: eastward_wind@EffectiveError
+      absTol: 1.0e-5
+    - reference:
+        name: northward_wind@TestReference
+      test:
+        name: northward_wind@EffectiveError
+      absTol: 1.0e-5

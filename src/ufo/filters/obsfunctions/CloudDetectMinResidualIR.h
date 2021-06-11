@@ -48,9 +48,6 @@ class CloudDetectMinResidualIRParameters : public oops::Parameters {
   /// Name of the HofX group used to replace the default group (default is HofX)
   oops::Parameter<std::string> testHofX{"test_hofx", "HofX", this};
 
-  /// Name of the bias correction group used to replace the default group (default is ObsBias)
-  oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
-
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
 };

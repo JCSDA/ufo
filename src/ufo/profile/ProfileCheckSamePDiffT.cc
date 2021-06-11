@@ -12,35 +12,32 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckSamePDiffT> makerProfileCheckSamePDiffT_("SamePDiffT");
 
-  ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options,
-                                                 const ProfileIndices &profileIndices,
-                                                 ProfileDataHandler &profileDataHandler,
-                                                 ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+  ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckSamePDiffT::runCheck()
+  void ProfileCheckSamePDiffT::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Test for same pressure and different temperature" << std::endl;
     int jlevprev = -1;
     int NumErrors = 0;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     const std::vector <float> &pressures =
-      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-      profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+      profileDataHandler.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumSamePErrObs =
-      profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
+      profileDataHandler.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
     const std::vector <float> &tObsCorrection =
-      profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -54,7 +51,7 @@ namespace ufo {
     std::vector <float> tObsFinal;
     correctVector(tObs, tObsCorrection, tObsFinal);
 
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (tObs[jlev] == missingValueFloat) continue;
 
       if (jlevprev == -1) {

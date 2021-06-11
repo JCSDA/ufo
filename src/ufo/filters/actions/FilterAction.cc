@@ -18,8 +18,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-FilterAction::FilterAction(const eckit::Configuration & conf)
-  : action_(FilterActionFactory::create(conf))
+FilterAction::FilterAction(const FilterActionParametersBase & parameters)
+  : action_(FilterActionFactory::create(parameters))
 {}
 
 // -----------------------------------------------------------------------------
@@ -29,9 +29,9 @@ FilterAction::~FilterAction() {}
 // -----------------------------------------------------------------------------
 
 void FilterAction::apply(const Variables & vars, const std::vector<std::vector<bool>> & mask,
-                         const ObsFilterData & data,
-                         ioda::ObsDataVector<int> & flag, ioda::ObsDataVector<float> & err) const {
-  action_->apply(vars, mask, data, flag, err);
+                         const ObsFilterData & data, int filterQCflag,
+                         ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & err) const {
+  action_->apply(vars, mask, data, filterQCflag, flags, err);
 }
 
 // -----------------------------------------------------------------------------

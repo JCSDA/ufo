@@ -5,12 +5,18 @@ observations:
 - obs operator: 
     name: GroundgnssMetOffice
     obs options:
+      min_temp_grad: 1.0e-6
   obs space: 
     name: Groundgnss
     obsdatain: 
-      obsfile: Data/ioda/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+      obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
     simulated variables: [ZTD] 
   geovals: 
     filename: Data/ufo/testinput_tier_1/groundgnss_geovals_20191230T0600Z.nc4
   norm ref: HofX
   tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14

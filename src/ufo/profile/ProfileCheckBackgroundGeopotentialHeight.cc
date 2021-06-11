@@ -13,43 +13,40 @@ namespace ufo {
   makerProfileCheckBackgroundGeopotentialHeight_("BackgroundGeopotentialHeight");
 
   ProfileCheckBackgroundGeopotentialHeight::ProfileCheckBackgroundGeopotentialHeight
-  (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundGeopotentialHeight::runCheck()
+  void ProfileCheckBackgroundGeopotentialHeight::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for geopotential height" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Zstation =
-      profileDataHandler_.get<float>(ufo::VariableNames::Zstation);
+      profileDataHandler.get<float>(ufo::VariableNames::Zstation);
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &zObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <float> &zObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <float> &zBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_geopotential_height);
+      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_geopotential_height);
     std::vector <float> &zPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
     std::vector <float> &zPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_geopotential_height);
     std::vector <int> &zFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     const std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <float> &zObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
     const std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     if (!oops::allVectorsSameNonZeroSize(Zstation, pressures,
                                          zObs, zObsErr, zBkg,
@@ -70,14 +67,14 @@ namespace ufo {
     correctVector(zObs, zObsCorrection, zObsFinal);
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, 0);
+    std::vector <float> PdBad(numProfileLevels, 0);
     // The z background error may not have been set before this point.
     if (zBkgErr.empty())
-      zBkgErr.assign(numLevelsToCheck, missingValueFloat);
+      zBkgErr.assign(numProfileLevels, missingValueFloat);
     // Background error estimates are taken from ECMWF Research Manual 1
     // (ECMWF Data Assimilation Scientific Documentation, 3/92, 3rd edition), table 2.1.
     // They are then multiplied by 1.2.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (zObsFinal[jlev] != missingValueFloat) {
         // Permanently reject any levels at/below surface
         if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag ||
@@ -100,7 +97,7 @@ namespace ufo {
     }
 
     // Modify observation PGE if certain flags have been set.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::HydrostaticFlag)

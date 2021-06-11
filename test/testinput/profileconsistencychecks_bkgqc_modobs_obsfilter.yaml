@@ -11,7 +11,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_modobs.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]
@@ -31,6 +31,13 @@ observations:
     ModelLevels: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 140
-  benchmarkFlag: 15
-  flaggedBenchmark: 212
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_obsdiagnostics_modobs.nc4
+    variables:
+    - name: air_temperature_background_error@ObsDiag
+    - name: relative_humidity_background_error@ObsDiag
+    - name: eastward_wind_background_error@ObsDiag
+    - name: northward_wind_background_error@ObsDiag
+    - name: geopotential_height_background_error@ObsDiag
+  passedBenchmark: 328
+  benchmarkFlag: 24
+  flaggedBenchmark: 24

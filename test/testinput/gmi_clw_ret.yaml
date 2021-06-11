@@ -1,0 +1,56 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2018041500_m.nc4
+  obs filters:
+  #  Ckeck CLW retrievals from observations 
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-13
+    test variables:
+    - name: CLWRetMW@ObsFunction
+      options:
+        clwret_ch37v: 6
+        clwret_ch37h: 7
+        clwret_types: [ObsValue]
+    maxvalue: 999.0
+    action:
+      name: reject
+# passedBenchmark: 156
+  #  Ckeck CLW retrievals from Hofx
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-13
+    test variables:
+    - name: CLWRetMW@ObsFunction
+      options:
+        clwret_ch37v: 6
+        clwret_ch37h: 7
+        clwret_types: [HofX]
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 156

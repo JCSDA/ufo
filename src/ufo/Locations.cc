@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2020 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,33 +7,28 @@
 
 #include "ufo/Locations.h"
 
-#include <memory>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "ioda/ObsSpace.h"
+
 #include "oops/mpi/mpi.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
-#include "oops/util/Random.h"
-
-#include "ufo/Locations.interface.h"
 
 namespace ufo {
 
 // -------------------------------------------------------------------------------------------------
 
-Locations::Locations(const eckit::mpi::Comm & comm) : comm_(comm) {
-  int nobs = 0;
-  ufo_locs_setup_f90(keyLoc_, nobs);
-}
-
-// -------------------------------------------------------------------------------------------------
-
-Locations::Locations(const ioda::ObsSpace & odb,
-                     const util::DateTime & t1, const util::DateTime & t2) : comm_(odb.comm()) {
-  ufo_locs_init_f90(keyLoc_, odb, t1, t2);
+Locations::Locations(const std::vector<float> & lons, const std::vector<float> & lats,
+                     const std::vector<util::DateTime> & times,
+                     const std::shared_ptr<const ioda::Distribution> dist)
+  : dist_(dist), lons_(lons), lats_(lats), times_(times) {
+  ASSERT(lons_.size() == lats_.size());
+  ASSERT(lats_.size() == times_.size());
+  oops::Log::trace() << "ufo::Locations::Locations done" << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -57,69 +52,52 @@ Locations::Locations(const ioda::ObsSpace & odb,
  */
 
 Locations::Locations(const eckit::Configuration & conf,
-                     const eckit::mpi::Comm & comm) : comm_(comm) {
+                     const eckit::mpi::Comm & comm) {
   const eckit::LocalConfiguration obsconf(conf, "obs space");
   const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
   const util::DateTime end = util::DateTime(conf.getString("window end"));
 
   ioda::ObsSpace obspace(obsconf, comm, bgn, end, oops::mpi::myself());
-  const int nlocs = obspace.nlocs();
+  const size_t nlocs = obspace.nlocs();
+  dist_ = obspace.distribution();
 
-  std::vector<double> lats(nlocs);
-  std::vector<double> lons(nlocs);
-  obspace.get_db("MetaData", "latitude", lats);
-  obspace.get_db("MetaData", "longitude", lons);
+  lats_.resize(nlocs);
+  lons_.resize(nlocs);
+  times_.resize(nlocs);
 
-  ufo_locs_create_f90(keyLoc_, nlocs, obspace, &lats[0], &lons[0]);
-}
-
-// -------------------------------------------------------------------------------------------------
-
-Locations::Locations(const Locations & other) : comm_(other.comm_) {
-  ufo_locs_copy_f90(keyLoc_, other.toFortran());
+  obspace.get_db("MetaData", "latitude", lats_);
+  obspace.get_db("MetaData", "longitude", lons_);
+  obspace.get_db("MetaData", "datetime", times_);
 }
 
 // -------------------------------------------------------------------------------------------------
 Locations & Locations::operator+=(const Locations & other) {
-  F90locs otherKeyLoc_ = other.toFortran();
-  ufo_locs_concatenate_f90(keyLoc_, otherKeyLoc_);
+  lons_.insert(lons_.end(), other.lons_.begin(), other.lons_.end());
+  lats_.insert(lats_.end(), other.lats_.begin(), other.lats_.end());
+  times_.insert(times_.end(), other.times_.begin(), other.times_.end());
   return *this;
 }
 
 // -------------------------------------------------------------------------------------------------
-
-Locations::~Locations() {
-  ufo_locs_delete_f90(keyLoc_);
+std::vector<bool> Locations::isInTimeWindow(const util::DateTime & t1,
+                                            const util::DateTime & t2) const {
+  std::vector<bool> isIn(times_.size(), false);
+  for (size_t ii = 0; ii < times_.size(); ++ii) {
+    if (t1 < times_[ii] && times_[ii] <= t2) isIn[ii] = true;
+  }
+  return isIn;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-int Locations::nobs() const {
-  int nobs;
-  ufo_locs_nobs_f90(keyLoc_, nobs);
-  return nobs;
+size_t Locations::size() const {
+  return lats_.size();
 }
 
 // -------------------------------------------------------------------------------------------------
 
 void Locations::print(std::ostream & os) const {
-  int nobs, indx, max_indx, i(0);
-  ufo_locs_nobs_f90(keyLoc_, nobs);
-  ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
-  os << "Locations: " << nobs << " locations: "
-                      << max_indx << " maximum indx:";
-
-  // Write lat and lon to debug stream
-  double lat, lon;
-
-  for (int i=0; i < nobs; ++i) {
-    ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
-    ufo_locs_coords_f90(keyLoc_, i, lat, lon);
-
-    oops::Log::debug() << "obs " << i << ": " << "gv index = " << indx
-                       << std::setprecision(2) << std::fixed
-                       << " lat = " << lat << ", lon = " << lon << std::endl;
-  }
+  os << "Lat/lon/time locations: " << size() << " locations on this task " << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------

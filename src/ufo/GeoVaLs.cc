@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2019 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,11 +7,16 @@
 
 #include "ufo/GeoVaLs.h"
 
+#include <cassert>
 #include <iomanip>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
+
+#include "ioda/distribution/Accumulator.h"
+#include "ioda/distribution/Distribution.h"
+#include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -24,8 +29,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /*! \brief Default constructor - does not allocate fields
 */
-GeoVaLs::GeoVaLs(const eckit::mpi::Comm & comm)
-  : keyGVL_(-1), comm_(comm)
+GeoVaLs::GeoVaLs(const std::shared_ptr<const ioda::Distribution> dist,
+                 const oops::Variables & vars)
+  : keyGVL_(-1), vars_(vars), dist_(dist)
 {
   oops::Log::trace() << "GeoVaLs default constructor starting" << std::endl;
   ufo_geovals_default_constr_f90(keyGVL_);
@@ -44,10 +50,10 @@ GeoVaLs::GeoVaLs(const eckit::mpi::Comm & comm)
  *
  */
 GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), comm_(locs.getComm())
+  : keyGVL_(-1), vars_(vars), dist_(locs.distribution())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, locs.nobs(), vars_);
+  ufo_geovals_setup_f90(keyGVL_, locs.size(), vars_);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 
@@ -60,7 +66,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
 GeoVaLs::GeoVaLs(const eckit::Configuration & config,
                  const ioda::ObsSpace & obspace,
                  const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), comm_(obspace.comm())
+  : keyGVL_(-1), vars_(vars), dist_(obspace.distribution())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 0, vars_);
@@ -75,7 +81,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
 * create a new GeoVaLs with just one location
 */
 GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
-  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+  : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 1, vars_);
@@ -87,7 +93,7 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
 /*! \brief Copy constructor */
 
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
-  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+  : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 0, vars_);
@@ -100,6 +106,15 @@ GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor starting" << std::endl;
   ufo_geovals_delete_f90(keyGVL_);
   oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Allocate GeoVaLs for \p vars variables to have \p nlevels levels (number of
+ *  locations is defined in the constructor) */
+void GeoVaLs::allocate(const int & nlevels, const oops::Variables & vars)
+{
+  oops::Log::trace() << "GeoVaLs::allocate starting" << std::endl;
+  ufo_geovals_allocate_f90(keyGVL_, nlevels, vars);
+  oops::Log::trace() << "GeoVaLs::allocate done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Zero out the GeoVaLs */
@@ -198,10 +213,31 @@ GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
 /*! \brief Scalar product of two GeoVaLs */
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
-  double zz;
-  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_);
+  const size_t nlocs = this->nlocs();
+  assert(nlocs == other.nlocs());
+  assert(vars_ == other.vars_);
+  auto accumulator = dist_->createAccumulator<double>();
+  std::vector<double> this_values(nlocs), other_values(nlocs);
+  double missing = util::missingValue(missing);
+  // loop over all variables in geovals
+  for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+    const size_t nlevs = this->nlevs(vars_[jvar]);
+    assert(nlevs == other.nlevs(vars_[jvar]));
+    // loop over all levels for this variable
+    for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+      this->get(this_values, vars_[jvar], jlev+1);
+      other.get(other_values, vars_[jvar], jlev+1);
+      // loop over all locations
+      for (size_t jloc = 0; jloc < nlocs; ++jloc) {
+        if ((this_values[jloc] != missing) && (other_values[jloc] != missing)) {
+          accumulator->addTerm(jloc, this_values[jloc]*other_values[jloc]);
+        }
+      }
+    }
+  }
+  const double dotprod = accumulator->computeResult();
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
-  return zz;
+  return dotprod;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Split two GeoVaLs */
@@ -267,10 +303,11 @@ size_t GeoVaLs::nlevs(const std::string & var) const {
 /*! \brief Return all values for a specific 2D variable */
 void GeoVaLs::get(std::vector<float> & vals, const std::string & var) const {
   oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
-  size_t nlocs;
-  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
-  ASSERT(vals.size() == nlocs);
-  ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), nlocs, vals[0]);
+  /// Call method to get double values (Fortran data structure stores data in double)
+  /// and convert to floats
+  std::vector<double> doublevals(vals.size());
+  this->get(doublevals, var);
+  vals.assign(doublevals.begin(), doublevals.end());
   oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -294,14 +331,126 @@ void GeoVaLs::get(std::vector<double> & vals, const std::string & var, const int
   oops::Log::trace() << "GeoVaLs::get done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Put values for a specific variable and level */
+/*! \brief Return all values for a specific 2D variable */
+void GeoVaLs::get(std::vector<double> & vals, const std::string & var) const {
+  oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), nlocs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific 2D variable */
+void GeoVaLs::get(std::vector<int> & vals, const std::string & var) const {
+  oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
+  /// Call method to get double values (Fortran data structure stores data in double)
+  /// and convert to ints
+  std::vector<double> doublevals(vals.size());
+  this->get(doublevals, var);
+  vals.assign(doublevals.begin(), doublevals.end());
+  oops::Log::trace() << "GeoVaLs::get 2D done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and location */
+void GeoVaLs::getAtLocation(std::vector<double> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  ufo_geovals_get_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and location and convert to float */
+void GeoVaLs::getAtLocation(std::vector<float> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
+  std::vector <double> doublevals(vals.size());
+  this->getAtLocation(doublevals, var, loc);
+  vals.assign(doublevals.begin(), doublevals.end());
+  oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and location and convert to int */
+void GeoVaLs::getAtLocation(std::vector<int> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::getAtLocation starting" << std::endl;
+  std::vector <double> doublevals(vals.size());
+  this->getAtLocation(doublevals, var, loc);
+  vals.assign(doublevals.begin(), doublevals.end());
+  oops::Log::trace() << "GeoVaLs::getAtLocation done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put double values for a specific variable and level */
 void GeoVaLs::put(const std::vector<double> & vals, const std::string & var, const int lev) const {
   oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
   size_t nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
   ASSERT(vals.size() == nlocs);
   ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
-  oops::Log::trace() << "GeoVaLs::get done" << std::endl;
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put float values for a specific variable and level */
+void GeoVaLs::put(const std::vector<float> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put int values for a specific variable and level */
+void GeoVaLs::put(const std::vector<int> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::put done" << std::endl;
+}
+/*! \brief Put double values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<double> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
+}
+/*! \brief Put float values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<float> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
+}
+/*! \brief Put int values for a specific variable and location */
+void GeoVaLs::putAtLocation(const std::vector<int> & vals,
+                            const std::string & var,
+                            const int loc) const {
+  oops::Log::trace() << "GeoVaLs::putAtLocation starting" << std::endl;
+  const size_t nlevs = this->nlevs(var);
+  ASSERT(vals.size() == nlevs);
+  ASSERT(loc >= 0 && loc < this->nlocs());
+  std::vector<double> doublevals(vals.begin(), vals.end());
+  ufo_geovals_put_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, doublevals[0]);
+  oops::Log::trace() << "GeoVaLs::putAtLocation done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Read GeoVaLs from the file */
@@ -315,8 +464,17 @@ void GeoVaLs::read(const eckit::Configuration & config,
 /*! \brief Write GeoVaLs to the file */
 void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
-  ufo_geovals_write_file_f90(keyGVL_, config, comm_);
+  ufo_geovals_write_file_f90(keyGVL_, config, dist_->rank());
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Return the number of geovals */
+size_t GeoVaLs::nlocs() const {
+  oops::Log::trace() << "GeoVaLs::nlocs starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  oops::Log::trace() << "GeoVaLs::nlocs done" << std::endl;
+  return nlocs;
 }
 // -----------------------------------------------------------------------------
 }  // namespace ufo

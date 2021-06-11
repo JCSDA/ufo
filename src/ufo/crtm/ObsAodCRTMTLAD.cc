@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("AodCRTM");
 
 ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperAodCRTM_(0), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
@@ -52,20 +52,20 @@ ObsAodCRTMTLAD::~ObsAodCRTMTLAD() {
 
 void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                    ObsDiagnostics &) {
-  ufo_aodcrtm_tlad_settraj_f90(keyOperAodCRTM_, geovals.toFortran(), odb_);
+  ufo_aodcrtm_tlad_settraj_f90(keyOperAodCRTM_, geovals.toFortran(), obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+  ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+  ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 

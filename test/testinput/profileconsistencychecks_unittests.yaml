@@ -25,7 +25,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -43,7 +43,7 @@ observations:
       is_in: 0
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Standard sonde profile (test_id = 0), no sorting ===#
 #Should be identical to the case with sorting because the indices are already in the correct order
@@ -52,7 +52,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -68,7 +68,7 @@ observations:
       is_in: 0
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Standard sonde profile (test_id = 0), no checks defined ===#
 #Basic checks should be added automatically
@@ -77,7 +77,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -95,7 +95,7 @@ observations:
       is_in: 0
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
 #This profile is rejected by the basic checks so none of its observations pass
@@ -104,7 +104,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -122,7 +122,7 @@ observations:
       is_in: 1
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
 #The sonde with a pressure too large (test_id = 1) is selected by the where clause but it fails the basic checks
@@ -133,7 +133,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -151,7 +151,7 @@ observations:
       is_in: 1
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with negative pressure reading (test_id = 2) ===#
 #This profile is rejected by the basic checks so none of its observations pass
@@ -160,7 +160,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -178,7 +178,7 @@ observations:
       is_in: 2
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== No data (invalid test_id) ===#
 #No observations are expected to be processed by the filter so the number expected is the
@@ -188,7 +188,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -206,7 +206,7 @@ observations:
       is_in: 999
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with pressures out of order (test_id = 3), sorting by pressure ===#
 #After sorting this profile should be the same as the original sonde (test_id = 0), so expect the same observations to pass
@@ -215,7 +215,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -233,7 +233,7 @@ observations:
       is_in: 3
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
 #The lack of sorting will mean this sonde fails the basic checks
@@ -242,7 +242,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -258,7 +258,7 @@ observations:
       is_in: 3
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with all pressures missing (test_id = 4) ===#
 #Expect this sonde to fail the basic checks
@@ -267,7 +267,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -283,7 +283,7 @@ observations:
       is_in: 4
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with all temperatures missing (test_id = 5) ===#
 #Basic checks still passed since they only depend on pressure
@@ -294,7 +294,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -310,7 +310,7 @@ observations:
       is_in: 5
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with all temperatures missing (test_id = 5), all checks ===#
 #Basic checks still passed since they only depend on pressure
@@ -320,8 +320,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_geovals.nc4
   obs filters:
   - filter: Profile Consistency Checks
     filter variables:
@@ -336,5 +338,5 @@ observations:
       is_in: 5
   HofX: HofX
   obs diagnostics:
-  benchmarkFlag: 15
+  benchmarkFlag: 24
   flaggedBenchmark: 0

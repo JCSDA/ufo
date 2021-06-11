@@ -11,7 +11,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity]
@@ -27,6 +27,6 @@ observations:
     BChecks_Skip: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 9586
-  benchmarkFlag: 15
-  flaggedBenchmark: 136
+  passedBenchmark: 9654
+  benchmarkFlag: 24
+  flaggedBenchmark: 68

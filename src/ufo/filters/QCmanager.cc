@@ -7,11 +7,14 @@
 
 #include "ufo/filters/QCmanager.h"
 
+#include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -90,91 +93,69 @@ QCmanager::~QCmanager() {
 // -----------------------------------------------------------------------------
 
 void QCmanager::print(std::ostream & os) const {
-  for (size_t jj = 0; jj < observed_.size(); ++jj) {
-    size_t iobs = obsdb_.nlocs();
-    size_t ipass = 0;
-    size_t imiss = 0;
-    size_t ipreq = 0;
-    size_t ibnds = 0;
-    size_t iwhit = 0;
-    size_t iblck = 0;
-    size_t iherr = 0;
-    size_t ifgss = 0;
-    size_t ignss = 0;
-    size_t ithin = 0;
-    size_t idydx = 0;
-    size_t iclw  = 0;
-    size_t iprof = 0;
-    size_t idiffref = 0;
-    size_t iseaice  = 0;
-    size_t itrack   = 0;
-    size_t ibuddy   = 0;
+  const std::vector<std::pair<int, const char*>> cases{
+    // Special cases reported using dedicated code
+    {QCflags::pass, nullptr},
+    {76, nullptr},  // } The numbers of observations with these two flags
+    {77, nullptr},  // } will be added up and reported together
 
-    for (size_t jobs = 0; jobs < iobs; ++jobs) {
-      if ((*flags_)[jj][jobs] == QCflags::pass)    ++ipass;
-      if ((*flags_)[jj][jobs] == QCflags::missing) ++imiss;
-      if ((*flags_)[jj][jobs] == QCflags::preQC)   ++ipreq;
-      if ((*flags_)[jj][jobs] == QCflags::bounds)  ++ibnds;
-      if ((*flags_)[jj][jobs] == QCflags::domain)  ++iwhit;
-      if ((*flags_)[jj][jobs] == QCflags::black)   ++iblck;
-      if ((*flags_)[jj][jobs] == QCflags::Hfailed) ++iherr;
-      if ((*flags_)[jj][jobs] == QCflags::fguess)  ++ifgss;
-      if ((*flags_)[jj][jobs] == QCflags::thinned) ++ithin;
-      if ((*flags_)[jj][jobs] == QCflags::clw)     ++iclw;
-      if ((*flags_)[jj][jobs] == QCflags::profile) ++iprof;
-      if ((*flags_)[jj][jobs] == QCflags::diffref) ++idiffref;
-      if ((*flags_)[jj][jobs] == QCflags::seaice)  ++iseaice;
-      if ((*flags_)[jj][jobs] == 76 || (*flags_)[jj][jobs] == 77)  ++ignss;
-      if ((*flags_)[jj][jobs] == QCflags::track)  ++itrack;
-      if ((*flags_)[jj][jobs] == QCflags::buddy)  ++ibuddy;
-      if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
-    }
+    // "Normal" cases reported in a uniform way
+    {QCflags::missing,       "missing values"},
+    {QCflags::preQC,         "rejected by pre QC"},
+    {QCflags::bounds,        "out of bounds"},
+    {QCflags::domain,        "out of domain of use"},
+    {QCflags::black,         "black-listed"},
+    {QCflags::Hfailed,       "H(x) failed"},
+    {QCflags::thinned,       "removed by thinning"},
+    {QCflags::derivative,    "dy/dx out of valid range"},
+    {QCflags::clw,           "removed by cloud liquid water check"},
+    {QCflags::profile,       "removed by profile consistency check"},
+    {QCflags::fguess,        "rejected by first-guess check"},
+    {QCflags::diffref,       "rejected by difference check"},
+    {QCflags::seaice,        "removed by sea ice check"},
+    {QCflags::track,         "removed by track check"},
+    {QCflags::buddy,         "removed by buddy check"},
+    {QCflags::onedvar,       "removed by 1D Var check"},
+    {QCflags::bayesianQC,    "removed by Bayesian background check"},
+    {QCflags::modelobthresh, "removed by ModelOb threshold"}
+  };
+  const size_t numSpecialCases = 3;
 
-    if (obsdb_.isDistributed()) {
-      obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ipass, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(imiss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ipreq, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ibnds, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iwhit, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iprof, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
+  const size_t nlocs = obsdb_.nlocs();
+  const size_t gnlocs = obsdb_.globalNumLocs();
+
+  for (size_t jvar = 0; jvar < observed_.size(); ++jvar) {
+    std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> accumulator =
+        obsdb_.distribution()->createAccumulator<size_t>(cases.size());
+
+    for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+      const int actualFlag = (*flags_)[jvar][jobs];
+      for (size_t jcase = 0; jcase < cases.size(); ++jcase)
+        if (actualFlag == cases[jcase].first)
+          accumulator->addTerm(jobs, jcase, 1);
     }
+    const std::vector<std::size_t> counts = accumulator->computeResult();
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
-      if (imiss > 0) os << info << imiss << " missing values." << std::endl;
-      if (ipreq > 0) os << info << ipreq << " rejected by pre QC." << std::endl;
-      if (ibnds > 0) os << info << ibnds << " out of bounds." << std::endl;
-      if (iwhit > 0) os << info << iwhit << " out of domain of use." << std::endl;
-      if (iblck > 0) os << info << iblck << " black-listed." << std::endl;
-      if (iherr > 0) os << info << iherr << " H(x) failed." << std::endl;
-      if (ithin > 0) os << info << ithin << " removed by thinning." << std::endl;
-      if (idydx > 0) os << info << idydx << " dy/dx out of valid range." << std::endl;
-      if (iclw  > 0) os << info << iclw  << " removed by cloud liquid water check." << std::endl;
-      if (iprof > 0) os << info << iprof  << " removed by profile consistency check." << std::endl;
-      if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
-      if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
-      if (idiffref > 0) os << info << idiffref << " rejected by difference check." << std::endl;
-      if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
-      if (itrack   > 0) os << info << itrack  << " removed by track check." << std::endl;
-      if (ibuddy   > 0) os << info << ibuddy  << " removed by buddy check." << std::endl;
+      const std::string info = "QC " + flags_->obstype() + " " + observed_[jvar] + ": ";
 
-      os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
+      // Normal cases
+      for (size_t i = numSpecialCases; i < counts.size(); ++i)
+        if (counts[i] > 0)
+          os << info << counts[i] << " " << cases[i].second << "." << std::endl;
+
+      // Special cases: the GNSSRO check...
+      const size_t nGNSSRO = counts[1] + counts[2];
+      if (nGNSSRO > 0)
+        os << info << nGNSSRO << " rejected by GNSSRO reality check." << std::endl;
+
+      // ... the number of passed observations and the total number of observations.
+      const size_t npass = counts[0];
+      os << info << npass << " passed out of " << gnlocs << " observations." << std::endl;
     }
 
-    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + iprof + ifgss + \
-           ignss + idiffref + iseaice + itrack + ibuddy + idydx == iobs);
+    const size_t numRecognizedFlags = std::accumulate(counts.begin(), counts.end(), 0);
+    ASSERT(numRecognizedFlags == gnlocs);
   }
 }
 

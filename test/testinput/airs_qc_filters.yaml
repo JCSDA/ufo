@@ -5,6 +5,7 @@ observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
+    SurfaceWindGeoVars: uv
     obs options:
       Sensor_ID: &Sensor_ID airs_aqua
       EndianType: little_endian
@@ -12,8 +13,8 @@ observations:
   obs space:
     name: airs_aqua
     obsdatain:
-#      obsfile: Data/ioda/testinput_tier_1/airs_aqua_obs_2018041500_m_qc.nc4
-      obsfile: Data/ioda/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
+#      obsfile: Data/ufo/testinput_tier_1/airs_aqua_obs_2018041500_m_qc.nc4
+      obsfile: Data/ufo/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
 #    obsdataout:
 #      obsfile: Data/airs_aqua_obs_2018041500_m_qc_out.nc4
 #      obsfile: Data/airs_aqua_obs_2018041500_m_unittest_out.nc4
@@ -45,37 +46,28 @@ observations:
 #    filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_qc.nc4
     filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_unittest.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
-    sensor: *Sensor_ID
-    jobs: *all_channels
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: lapse_rate
+    input file: Data/ufo/testinput_tier_1/satbias_airs_aqua.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &airs_aqua-atlap Data/ufo/testinput_tier_1/airs_aqua_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *airs_aqua-atlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
 #  Wavenumber Check
   - filter: BlackList

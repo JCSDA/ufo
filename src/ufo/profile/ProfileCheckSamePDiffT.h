@@ -11,9 +11,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
@@ -24,16 +22,10 @@ namespace ufo {
   /// \brief Profile QC: same P/different T check
   class ProfileCheckSamePDiffT : public ProfileCheckBase {
    public:
-    ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options,
-                           const ProfileIndices &profileIndices,
-                           ProfileDataHandler &profileDataHandler,
-                           ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
-
-    /// Fill variables in validator
-    void fillValidator() override {}
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

@@ -7,6 +7,7 @@ observations:
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
     obs options:
       Sensor_ID: &Sensor_ID atms_npp
       EndianType: little_endian
@@ -14,46 +15,36 @@ observations:
   obs space:
     name: atms_npp
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+      obsfile: Data/ufo/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
 #   obsdataout:
-#     obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc_out.nc4
+#     obsfile: Data/ufo/testinput_tier_1/atms_npp_obs_2018041500_m_qc_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
-    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
-    sensor: *Sensor_ID
-    jobs: *all_channels
-    predictors:
-    - predictor:
-        name: constant
-    - predictor:
-        name: lapse_rate
+    input file: Data/ufo/testinput_tier_1/satbias_atms_npp.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
         options:
           order: 2
           tlapse: &atms_npp_tlap Data/ufo/testinput_tier_1/atms_npp_tlapmean.txt
-    - predictor:
-        name: lapse_rate
+      - name: lapse_rate
         options:
           tlapse: *atms_npp_tlap
-    - predictor:
-        name: emissivity
-    - predictor:
-        name: scan_angle
+      - name: emissivity
+      - name: scan_angle
         options:
           order: 4
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 3
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
         options:
           order: 2
-    - predictor:
-        name: scan_angle
+      - name: scan_angle
   obs filters:
   - filter: BlackList
     filter variables:

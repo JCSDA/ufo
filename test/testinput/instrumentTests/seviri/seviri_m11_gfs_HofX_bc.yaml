@@ -1,0 +1,45 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: &Sensor_ID seviri_m11
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: seviri_m11
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 4-11
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_seviri_m11.2020110106.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
+        options:
+          order: 2
+          tlapse: &seviri_m11_tlap Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_tlapmean.txt
+      - name: lapse_rate
+        options:
+          tlapse: *seviri_m11_tlap
+      - name: emissivity
+# The scan angle here actually is used as for scan positions in the input ioda file to replicate gsi
+      - name: scan_angle
+        options:
+          order: 4
+      - name: scan_angle
+        options:
+          order: 3
+      - name: scan_angle
+        options:
+          order: 2
+      - name: scan_angle
+  vector ref: GsiHofXBc
+  tolerance: 1.e-6

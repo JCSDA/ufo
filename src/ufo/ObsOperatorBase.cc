@@ -7,6 +7,8 @@
 
 #include "ufo/ObsOperatorBase.h"
 
+#include <vector>
+
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
@@ -17,9 +19,20 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsOperatorBase::locations(const util::DateTime & t1,
-                                       const util::DateTime & t2) const {
-  return std::unique_ptr<Locations>(new Locations(odb_, t1, t2));
+std::unique_ptr<Locations> ObsOperatorBase::locations() const {
+  std::vector<float> lons(odb_.nlocs());
+  std::vector<float> lats(odb_.nlocs());
+  std::vector<util::DateTime> times(odb_.nlocs());
+  odb_.get_db("MetaData", "latitude", lats);
+  odb_.get_db("MetaData", "longitude", lons);
+  odb_.get_db("MetaData", "datetime", times);
+  return std::unique_ptr<Locations>(new Locations(lons, lats, times, odb_.distribution()));
+}
+
+// -----------------------------------------------------------------------------
+
+oops::Variables ObsOperatorBase::simulatedVars() const {
+  return odb_.obsvariables();
 }
 
 // -----------------------------------------------------------------------------

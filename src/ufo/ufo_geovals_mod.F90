@@ -6,7 +6,6 @@
 !
 module ufo_geovals_mod
 
-use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_vars_mod
 use kinds
@@ -20,9 +19,10 @@ private
 integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval
-public :: ufo_geovals_get_var, ufo_geovals_put_var
+public :: ufo_geovals_get_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
-public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
+public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
+public :: ufo_geovals_allocate
 public :: ufo_geovals_profmult
 public :: ufo_geovals_reorderzdir
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
@@ -84,7 +84,6 @@ type(oops_variables), intent(in) :: vars
 integer, intent(in) :: nlocs
 
 integer :: ivar
-type(fckit_configuration) :: f_vars
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -102,6 +101,49 @@ enddo
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
+!> Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
+!> If the GeoVaLs for this variable were allocated before with different size,
+!> aborts.
+subroutine ufo_geovals_allocate(self, vars, nlevels)
+use oops_variables_mod
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(oops_variables), intent(in) :: vars
+integer, intent(in) :: nlevels
+
+integer :: ivar, ivar_gvals
+character(max_string) :: err_msg
+
+do ivar = 1, vars%nvars()
+  ! find index of variable to be allocated
+  ivar_gvals = ufo_vars_getindex(self%variables, vars%variable(ivar))
+  ! abort if we are trying to allocate geovals for nonexistent variable
+  if (ivar_gvals < 0) then
+    write(err_msg,*) "ufo_geovals_allocate: ", trim(vars%variable(ivar)), " doesn't exist in geovals"
+    call abor1_ftn(err_msg)
+  endif
+  ! abort if we are trying to allocate geovals again, and with a different size
+  if (allocated(self%geovals(ivar_gvals)%vals) .and. (self%geovals(ivar_gvals)%nval /= nlevels)) then
+    write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",          &
+                     trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(ivar_gvals)%nval, &
+                     " levels; now trying to allocate as ", nlevels, " levels."
+    call abor1_ftn(err_msg)
+  ! only allocate if not already allocated
+  elseif (.not. allocated(self%geovals(ivar_gvals)%vals)) then
+    self%geovals(ivar_gvals)%nval  = nlevels
+    allocate(self%geovals(ivar_gvals)%vals(nlevels, self%nlocs))
+  endif
+enddo
+
+! check if all variables are now allocated, and set self%linit accordingly
+self%linit = .true.
+do ivar = 1, self%nvar
+  if (.not. allocated(self%geovals(ivar)%vals)) self%linit = .false.
+enddo
+
+end subroutine ufo_geovals_allocate
+
+! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_delete(self)
 implicit none
@@ -114,7 +156,7 @@ if (allocated(self%geovals)) then
     if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
   enddo
   deallocate(self%geovals)
- endif
+endif
 if (allocated(self%variables)) deallocate(self%variables)
 self%nvar = 0
 self%nlocs = 0
@@ -154,21 +196,6 @@ else
 endif
 
 end subroutine ufo_geovals_get_var
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_put_var(self, varname, geoval,k)
-type(ufo_geovals),intent(inout) :: self
-character(len=*),    intent(in) :: varname
-type(ufo_geoval),    intent(in) :: geoval
-integer,             intent(in) :: k
-
-integer :: ivar
-
-ivar = ufo_vars_getindex(self%variables, varname)
-self%geovals(ivar)%vals(k,:)=geoval%vals(k,:)
-
-end subroutine ufo_geovals_put_var
 
 ! ------------------------------------------------------------------------------
 
@@ -348,9 +375,7 @@ endif
 
 ! Get vertical coordinate variable
 call ufo_geovals_get_var(self, varname, geoval)
-if (associated(geoval)) then
-  print *, 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), geoval%nval, geoval%nlocs
-else
+if (.not. associated(geoval)) then
   write(err_msg, *) 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), ' doesnt exist'
 endif
 
@@ -358,11 +383,9 @@ endif
 if ((zdir == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
     (zdir == "top2bottom" .and. geoval%vals(1,1) > geoval%vals(geoval%nval,1))) then
    do_flip = .true.
-   print *, 'ufo_geovals_reorderzdir: do_flip ', do_flip
 else if (zdir /= "bottom2top" .or. zdir /= "top2bottom") then
   write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined'
 else
-   print *, 'no need to reorder variables in vertical direction (zdir) do_flip ', do_flip
    return
 endif
 
@@ -596,21 +619,23 @@ end subroutine ufo_geovals_copy_one
 !!
 
 subroutine ufo_geovals_analytic_init(self, locs, ic)
-use ufo_locs_mod, only : ufo_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
+use ufo_locations_mod
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(ufo_locs), intent(in)       :: locs
+type(ufo_locations), intent(in)  :: locs
 character(*), intent(in)         :: ic
 
 real(kind_real) :: pi = acos(-1.0_kind_real)
 real(kind_real) :: deg_to_rad,rlat, rlon
 real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
 real(kind_real) :: q1, q2, q3, q4
-integer :: ivar, iloc, ival
+real(kind_real), allocatable, dimension(:) :: lons, lats
+integer :: nlocs, ivar, iloc, ival
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
@@ -618,19 +643,25 @@ endif
 
 ! The last variable should be the ln pressure coordinate.  That's
 ! where we get the height information for the analytic init
-if (trim(self%variables(self%nvar)) /= trim(var_prs)) then
+if (self%variables(self%nvar) /= var_prs .and. &
+    self%variables(self%nvar) /= var_prsi) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
 endif
 
 deg_to_rad = pi/180.0_kind_real
+
+nlocs = locs%nlocs()
+allocate(lons(nlocs), lats(nlocs))
+call locs%get_lons(lons)
+call locs%get_lats(lats)
 
 do ivar = 1, self%nvar-1
 
    do iloc = 1, self%geovals(ivar)%nlocs
 
       ! convert lat and lon to radians
-      rlat = deg_to_rad * locs%lat(iloc)
-      rlon = deg_to_rad*modulo(locs%lon(iloc)+180.0_kind_real,360.0_kind_real) - pi
+      rlat = deg_to_rad * lats(iloc)
+      rlon = deg_to_rad*modulo(lons(iloc)+180.0_kind_real,360.0_kind_real) - pi
 
       do ival = 1, self%geovals(ivar)%nval
 
@@ -640,6 +671,10 @@ do ivar = 1, self%nvar-1
          p0 = self%geovals(self%nvar)%vals(ival,iloc)
 
          init_option: select case (trim(ic))
+
+         case ("invent_state")
+
+           t0 = cos(deg_to_rad * lons(iloc) ) * cos(rlat)
 
          case ("dcmip-test-1-1")
 
@@ -667,8 +702,8 @@ do ivar = 1, self%nvar-1
 
          end select init_option
 
-         ! currently only temperture is implemented
-         if (trim(self%variables(ivar)) == trim(var_tv)) then
+         ! currently only temperature is implemented
+         if (cmp_strings(self%variables(ivar), var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
             self%geovals(ivar)%vals(ival,iloc) = t0
@@ -677,6 +712,8 @@ do ivar = 1, self%nvar-1
       enddo
    enddo
 enddo
+
+deallocate(lons, lats)
 
 end subroutine ufo_geovals_analytic_init
 
@@ -748,44 +785,6 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod(self, other, gprod, f_comm)
-implicit none
-real(kind_real), intent(inout) :: gprod
-type(ufo_geovals), intent(in) :: self, other
-integer :: ivar, iobs, ival, nval
-real(kind_real) :: prod
-
-type(fckit_mpi_comm), intent(in) :: f_comm
-
-if (.not. self%linit) then
-  call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
-endif
-
-if (.not. other%linit) then
-  call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
-endif
-
-! just something to put in (dot product of the 1st var and 1st element in the profile
-prod=0.0
-do ivar = 1, self%nvar
-  nval = self%geovals(ivar)%nval
-  do ival = 1, nval
-     do iobs = 1, self%nlocs
-      if ((self%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value) .and. &
-          (other%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value)) then
-        prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
-                      other%geovals(ivar)%vals(ival,iobs)
-      endif
-    enddo
-  enddo
-enddo
-
-!Get global dot product
-call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
-
-end subroutine ufo_geovals_dotprod
-
-!-------------------------------------------------------------------------------
 subroutine ufo_geovals_reset_sec_arg(self, other, nlocs)
 implicit none
 type(ufo_geovals), intent(in) :: self

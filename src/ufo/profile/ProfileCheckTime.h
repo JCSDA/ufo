@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
 
@@ -33,16 +32,10 @@ namespace ufo {
   /// Also, if requested, reject data taken a short period after the sonde launch.
   class ProfileCheckTime : public ProfileCheckBase {
    public:
-    ProfileCheckTime(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
-                     ProfileDataHandler &profileDataHandler,
-                     ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckTime(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
-
-    /// Fill variables in validator
-    void fillValidator() override {}
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

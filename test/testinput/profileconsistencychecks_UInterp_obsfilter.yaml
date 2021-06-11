@@ -11,7 +11,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_uinterp.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [eastward_wind, northward_wind]
@@ -26,6 +26,6 @@ observations:
     PrintStationID: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 5456
-  benchmarkFlag: 15
-  flaggedBenchmark: 186
+  passedBenchmark: 5549
+  benchmarkFlag: 24
+  flaggedBenchmark: 93

@@ -37,11 +37,11 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(21), parameter :: varin_default = &
+ character(len=maxvarlen), dimension(19), parameter :: varin_default = &
                             (/var_ts, var_prs, var_prsi,                                  &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
-                              var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
+                              var_sfc_vegfrac, var_sfc_lai,                               &
                               var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
                               var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
 
@@ -50,6 +50,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_setup(self, f_confOper, channels)
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 class(ufo_radiancecrtm),   intent(inout) :: self
@@ -77,7 +78,8 @@ logical :: request_cldfrac
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ ! 2 for sfc_wind_geovars parsing
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds + 2
  request_cldfrac = &
    self%conf%n_Clouds > 0 .and. &
    self%conf%Cloud_Fraction < 0.0
@@ -85,7 +87,7 @@ logical :: request_cldfrac
    nvars_in = nvars_in + 1
  end if
  ! if sss is in obs options + sss
- if (TRIM(self%conf%salinity_option) == "on") then
+ if (cmp_strings(self%conf%salinity_option, "on")) then
    nvars_in = nvars_in + 1
  end if
 
@@ -107,8 +109,19 @@ logical :: request_cldfrac
    self%varin(ind) = var_cldfrac
    ind = ind + 1
  end if
- if (TRIM(self%conf%salinity_option) == "on") then
+ if (cmp_strings(self%conf%salinity_option, "on")) then
    self%varin(ind) = var_sfc_sss
+   ind = ind + 1
+ end if
+ if (trim(self%conf%sfc_wind_geovars) == 'vector') then
+   self%varin(ind) = var_sfc_wspeed
+   ind = ind + 1
+   self%varin(ind) = var_sfc_wdir
+   ind = ind + 1
+ else if (trim(self%conf%sfc_wind_geovars) == 'uv') then
+   self%varin(ind) = var_sfc_u
+   ind = ind + 1
+   self%varin(ind) = var_sfc_v
    ind = ind + 1
  end if
 
@@ -133,6 +146,7 @@ end subroutine ufo_radiancecrtm_delete
 
 subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
 use fckit_mpi_module,   only: fckit_mpi_comm
+use ufo_utils_mod,      only: cmp_strings
 
 implicit none
 
@@ -175,6 +189,13 @@ type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
 type(CRTM_Surface_type),    allocatable :: sfc_K(:,:)
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 type(CRTM_Options_type),    allocatable :: Options(:)
+
+!for gmi
+type(CRTM_Geometry_type),   allocatable :: geo_hf(:)
+type(CRTM_Atmosphere_type), allocatable :: atm_Ka(:,:)
+type(CRTM_Surface_type),    allocatable :: sfc_Ka(:,:)
+type(CRTM_RTSolution_type), allocatable :: rts_Ka(:,:)
+type(CRTM_RTSolution_type), allocatable :: rtsa(:,:)
 
 ! Used to parse hofxdiags
 character(len=MAXVARLEN) :: varstr
@@ -277,8 +298,12 @@ logical :: jacobian_needed
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
    call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
-   call Load_Geom_Data(obss,geo)
-
+   if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+     allocate( geo_hf( n_Profiles ))
+     call Load_Geom_Data(obss,geo,geo_hf)
+   else
+     call Load_Geom_Data(obss,geo)
+   endif
    ! Call THE CRTM inspection
    ! ------------------------
    if (self%conf%inspect > 0) then
@@ -389,6 +414,49 @@ logical :: jacobian_needed
                                 Options       )  ! Input
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+         allocate( atm_Ka( n_Channels, n_Profiles ),               &
+                   sfc_Ka( n_Channels, n_Profiles ),   &
+                   rts_Ka( n_Channels, n_Profiles ),   &
+                   rtsa( n_Channels, n_Profiles ),     &
+                   STAT = alloc_stat )
+         message = 'Error allocating K structure arrays rtsa, atm_Ka ......'
+         call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
+         !! save resutls for gmi channels 1-9.
+         atm_Ka = atm_K
+         sfc_Ka = sfc_K
+         rts_Ka = rts_K
+         rtsa   = rts
+         !! call CRTM_K_Matrix again for geo_hf which has view angle for gmi channels 10-13.
+         call CRTM_Atmosphere_Zero( atm_K )
+         call CRTM_Surface_Zero( sfc_K )
+         rts_K%Radiance               = ZERO
+         rts_K%Brightness_Temperature = ONE
+         ! Call the K-matrix model
+         ! -----------------------
+         err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
+                                   sfc         , &  ! FORWARD  Input
+                                   rts_K       , &  ! K-MATRIX Input
+                                   geo_hf        , &  ! Input
+                                   chinfo(n:n) , &  ! Input
+                                   atm_K       , &  ! K-MATRIX Output
+                                   sfc_K       , &  ! K-MATRIX Output
+                                   rts         , &  ! FORWARD  Output
+                                   Options       )  ! Input
+         message = 'Error calling CRTM (setTraj, geo_hf) K-Matrix Model for ' &
+                   //TRIM(self%conf%SENSOR_ID(n))
+         call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+         !! replace data for gmi channels 1-9 by early results calculated with geo.
+         do l = 1, size(self%channels)
+            if ( self%channels(l) <= 9 ) then  
+               atm_K(l,:) = atm_Ka(l,:)
+               sfc_K(l,:) = sfc_Ka(l,:)
+               rts_K(l,:) = rts_Ka(l,:)
+               rts(l,:)   = rtsa(l,:)
+            endif
+         enddo
+         deallocate(atm_Ka,sfc_Ka,rts_Ka,rtsa)
+      endif ! cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
@@ -400,6 +468,31 @@ logical :: jacobian_needed
                                Options       )  ! Input
       message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+         allocate( rtsa( n_Channels, n_Profiles ),     &
+                   STAT = alloc_stat )
+         message = 'Error allocating K structure arrays rtsa.'
+         call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
+         !! save resutls for gmi channels 1-9.
+         rtsa = rts
+         !! call crtm again for gmi channels 10-13 with geo_hf.
+         ! -----------------------
+         err_stat = CRTM_Forward( atm         , &  ! Input
+                                  sfc         , &  ! Input
+                                  geo_hf        , &  ! Input
+                                  chinfo(n:n) , &  ! Input
+                                  rts         , &  ! Output
+                                  Options       )  ! Input
+         message = 'Error calling CRTM Forward Model for gmi_gpm channels 10-13'
+         call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
+         !! replace data for gmi channels 1-9 by results calculated with geo.
+         do l = 1, size(self%channels)
+            if ( self%channels(l) <= 9 ) then  
+               rts(l,:)   = rtsa(l,:)
+            endif
+         enddo
+         deallocate(rtsa)
+      endif ! cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')
    end if ! jacobian_needed
 
    !call CRTM_RTSolution_Inspect(rts)
@@ -448,7 +541,7 @@ logical :: jacobian_needed
       !============================================
       ! Diagnostics used for QC and bias correction
       !============================================
-      if (trim(xstr_diags(jvar)) == "") then
+      if (cmp_strings(xstr_diags(jvar), "")) then
          ! forward h(x) diags
          select case(ystr_diags(jvar))
             ! variable: optical_thickness_of_atmosphere_layer_CH
@@ -685,6 +778,7 @@ logical :: jacobian_needed
    ! Deallocate all arrays
    ! ---------------------
    deallocate(geo, atm, sfc, rts, Options, Skip_Profiles, STAT = alloc_stat)
+   if(allocated(geo_hf)) deallocate(geo_hf)
    message = 'Error deallocating structure arrays'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 

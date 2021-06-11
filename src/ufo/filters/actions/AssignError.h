@@ -11,8 +11,11 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/filters/Variables.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -20,19 +23,36 @@ class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
+class AssignErrorParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(AssignErrorParameters, FilterActionParametersBase);
+
+ public:
+  oops::OptionalParameter<float> errorParameter{"error parameter", this};
+  oops::OptionalParameter<Variable> errorFunction{"error function", this};
+
+  /// This function is overridden to check that either `error parameter` or `error function`
+  /// is specified, but not both.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+};
+
+// -----------------------------------------------------------------------------
+
 class AssignError : public FilterActionBase {
  public:
-  explicit AssignError(const eckit::Configuration &);
+  /// The type of parameters accepted by the constructor of this action.
+  /// This typedef is used by the FilterActionFactory.
+  typedef AssignErrorParameters Parameters_;
+
+  explicit AssignError(const Parameters_ &);
   ~AssignError() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
+             const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
  private:
   Variables allvars_;
-  const std::string strerror_;
-  const eckit::LocalConfiguration conf_;
+  const Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

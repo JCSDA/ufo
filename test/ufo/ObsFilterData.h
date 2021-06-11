@@ -67,8 +67,9 @@ void testObsFilterData() {
     EXPECT(data.nlocs() == ospace.nlocs());
 
 ///  Check that has(), get() and dtype() works on ObsSpace:
+    const eckit::LocalConfiguration dataconf(confs[jconf], "test data");
     varconfs.clear();
-    obsconf.get("float variables", varconfs);
+    dataconf.get("float variables", varconfs);
     ufo::Variables obsvars(varconfs);
     for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
       EXPECT(data.has(obsvars.variable(jvar)));
@@ -83,7 +84,7 @@ void testObsFilterData() {
     }
 ///  Check that has(), get() and dtype() work on integer variables in ObsSpace:
     varconfs.clear();
-    obsconf.get("integer variables", varconfs);
+    dataconf.get("integer variables", varconfs);
     ufo::Variables intvars(varconfs);
     for (size_t jvar = 0; jvar < intvars.nvars(); ++jvar) {
       EXPECT(data.has(intvars.variable(jvar)));
@@ -99,7 +100,7 @@ void testObsFilterData() {
 
     ///  Check that get() works on string variables in ObsSpace:
     varconfs.clear();
-    obsconf.get("string variables", varconfs);
+    dataconf.get("string variables", varconfs);
     ufo::Variables strvars(varconfs);
     for (size_t jvar = 0; jvar < strvars.nvars(); ++jvar) {
       std::vector<std::string> vec;
@@ -111,7 +112,7 @@ void testObsFilterData() {
 
     ///  Check that get() works on datetime variables in ObsSpace:
     varconfs.clear();
-    obsconf.get("datetime variables", varconfs);
+    dataconf.get("datetime variables", varconfs);
     ufo::Variables dtvars(varconfs);
     for (size_t jvar = 0; jvar < dtvars.nvars(); ++jvar) {
       std::vector<util::DateTime> vec;

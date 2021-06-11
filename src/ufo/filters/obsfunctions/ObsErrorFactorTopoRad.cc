@@ -47,7 +47,7 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   std::string inst, sat;
   splitInstSat(sensor, inst, sat);
   ASSERT(inst == "amsua" || inst == "atms" ||
-         inst == "iasi" || inst == "cris-fsr" || inst == "airs");
+         inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3");
 
   if (inst == "amsua" || inst == "atms") {
     // Get test groups from options
@@ -91,7 +91,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   in.get(Variable("surface_geopotential_height@GeoVaLs"), zsges);
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
-  if (inst == "iasi" || inst == "cris-fsr" || inst == "airs") {
+  if (inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
@@ -146,7 +146,8 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     }
   } else {
     oops::Log::error() << "ObsErrorFactorTopoRad: Invalid instrument (sensor) specified: " << inst
-                       << "  The valid instruments are: iasi, cris-fsr, airs, amsua and atms"
+                       << "  The valid instruments are: iasi, cris-fsr, airs, avhrr3, "
+                       << "  amsua and atms"
                        << std::endl;
   }
 }

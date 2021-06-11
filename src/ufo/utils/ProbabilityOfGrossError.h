@@ -18,8 +18,9 @@
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
 
 namespace ufo {
-  /// \brief Bayesian update of probability of gross error (PGE) for
-  /// scalar (1D) or vector (2D) observables.
+  /// \brief Bayesian update of probability of gross error (PGE)
+  /// \details Update PGE across locations according to (obsVal-bkgVal), obsErr, and bkgErr,
+  /// and update flags to say BG check performed, and whether obs rejected or not.
   /// This routine can process both single observations and observations on profile levels.
   /// In the vector case, the variance is assumed to be isotropic
   /// and obsErr and bkgErr give the error in a single vector component.
@@ -37,6 +38,7 @@ namespace ufo {
   /// \param[in] ErrVarMax: (Optional) Maximum error variance.
   /// \param[in] obsVal2: (Optional) Second component of 2D observation values.
   /// \param[in] bkgVal2: (Optional) Second component of 2D background values.
+
   void BayesianPGEUpdate(const ProbabilityOfGrossErrorParameters &options,
                          const std::vector<float> &obsVal,
                          const std::vector<float> &obsErr,

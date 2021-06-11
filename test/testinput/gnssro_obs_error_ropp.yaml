@@ -1,0 +1,43 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+   name: GnssroBndROPP1D
+   obs options:
+  obs space:
+   name: ROPP1D
+   obsdatain:
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+   simulated variables: [bending_angle]
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+    variable: bending_angle
+  passedBenchmark: 744
+- obs operator:
+   name: GnssroBndROPP2D
+   obs options:
+    n_horiz: 3
+    res: 40.0
+    top_2d: 50.0
+  obs space:
+   name: ROPP2D
+   obsdatain:
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+   simulated variables: [bending_angle]
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4
+   loc_multiplier: 3
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+    n_horiz: 3
+    variable: bending_angle
+  passedBenchmark: 18

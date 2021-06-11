@@ -8,6 +8,21 @@ set ( profile_files
       DataHandlerParameters.h
       EntireSampleDataHandler.cc
       EntireSampleDataHandler.h
+      ModelHeightCalculator.cc
+      ModelHeightCalculator.h
+      ModelParameters.h
+      ObsProfileAverage.cc
+      ObsProfileAverage.h
+      ObsProfileAverageParameters.h
+      ProfileAveragePressure.cc
+      ProfileAveragePressure.h
+      ProfileAverageRelativeHumidity.cc
+      ProfileAverageRelativeHumidity.h
+      ProfileAverageTemperature.cc
+      ProfileAverageTemperature.h
+      ProfileAverageWindSpeed.cc
+      ProfileAverageWindSpeed.h
+      ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h
       ProfileCheckBackgroundGeopotentialHeight.cc
@@ -38,16 +53,31 @@ set ( profile_files
       ProfileCheckTime.h
       ProfileCheckUInterp.cc
       ProfileCheckUInterp.h
+      ProfileCheckUInterpAlternative.cc
+      ProfileCheckUInterpAlternative.h
       ProfileCheckUnstableLayer.cc
       ProfileCheckUnstableLayer.h
       ProfileCheckValidator.cc
       ProfileCheckValidator.h
       ProfileDataHandler.cc
       ProfileDataHandler.h
+      ProfileDataHolder.cc
+      ProfileDataHolder.h
       ProfileIndices.cc
       ProfileIndices.h
+      ProfilePressure.cc
+      ProfilePressure.h
+      ProfileSondeFlags.cc
+      ProfileSondeFlags.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      ProfileVerticalAveraging.cc
+      ProfileVerticalAveraging.h
+      ProfileVerticalInterpolation.cc
+      ProfileVerticalInterpolation.h
+      ProfileWindProfilerFlags.cc
+      ProfileWindProfilerFlags.h
+      VariableNames.cc
       VariableNames.h
 )
 

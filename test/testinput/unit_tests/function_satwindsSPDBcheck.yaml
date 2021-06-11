@@ -1,0 +1,25 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: satwindsSPDBtest
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: SatWindsSPDBCheck@ObsFunction
+      options:
+        error_min: 1.4
+        error_max: 20.0
+        test_hofx: GsiHofX
+    maxvalue: 1.75
+  passedBenchmark: 144
+#  In the test data set of 100 possible values, 1 ob is 2100UTC exactly since time test is (2100-0300].
+#  There are 74 valid (non-missing) observed winds (times 2 wind components making 148 possible).
+#  There are 2 locations where the calculated threshold test is greater than max so 148-4=144.

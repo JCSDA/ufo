@@ -13,9 +13,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 #include "ufo/utils/ProbabilityOfGrossError.h"
 
@@ -37,16 +35,16 @@ namespace ufo {
   /// (except those with PGE > 0.999) will be used in vertical averaging.
   class ProfileCheckBackgroundWindSpeed : public ProfileCheckBase {
    public:
-    ProfileCheckBackgroundWindSpeed(const ProfileConsistencyCheckParameters &options,
-                                    const ProfileIndices &profileIndices,
-                                    ProfileDataHandler &profileDataHandler,
-                                    ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckBackgroundWindSpeed(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
-    void fillValidator() override {}
+    /// List of names of required obs diagnostics.
+    oops::Variables getObsDiagNames() override {
+      return oops::Variables({ufo::VariableNames::bkgerr_eastward_wind,
+            ufo::VariableNames::bkgerr_northward_wind});
+    }
   };
 }  // namespace ufo
 

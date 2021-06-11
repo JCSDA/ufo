@@ -1,0 +1,75 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+obs space:
+  name: test data
+  obsdatain:
+    obsfile: Data/ufo/testinput_tier_1/ahi_himawari8_obs_2019042306_s.nc4
+  simulated variables: [brightness_temperature]
+cases:
+  Empty list:
+    variables: []
+    expected values: []
+    expected names: []
+    expected groups: []
+  Mix of single-channel and multi-channel variables:
+    variables:
+    - name: latitude@MetaData
+    - name: brightness_temperature@ObsValue
+      channels: 10-12
+    - name: longitude@MetaData
+    expected values:
+    - [40.90339]
+    - [252.4]
+    - [285.5]
+    - [255.1]
+    - [126.4771]
+    expected names:
+    - latitude
+    - brightness_temperature_10
+    - brightness_temperature_11
+    - brightness_temperature_12
+    - longitude
+    expected groups:
+    - MetaData
+    - ObsValue
+    - ObsValue
+    - ObsValue
+    - MetaData
+  Mix of ObsSpace variables and ObsFunctions:
+    variables:
+    - name: brightness_temperature@ObsValue
+      channels: 8-9
+    - name: latitude@MetaData
+    # outputs 100 in the first output channel, 200 in the second and 300 in the third
+    - name: ObsErrorModelRamp@ObsFunction
+      channels: 10-12
+      options:
+        channels: 10-12
+        xvar:
+          name: latitude@MetaData
+        x0: [0, 0, 0]
+        x1: [1000, 1000, 1000]
+        err0: [100, 200, 300]
+        err1: [100, 200, 300]
+    expected values:
+    - [234.1]
+    - [244.5]
+    - [40.90339]
+    - [100]
+    - [200]
+    - [300]
+    expected names:
+    - brightness_temperature_8
+    - brightness_temperature_9
+    - latitude
+    - ObsErrorModelRamp_10
+    - ObsErrorModelRamp_11
+    - ObsErrorModelRamp_12
+    expected groups:
+    - ObsValue
+    - ObsValue
+    - MetaData
+    - ObsFunction
+    - ObsFunction
+    - ObsFunction

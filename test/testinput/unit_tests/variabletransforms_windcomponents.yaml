@@ -1,0 +1,27 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Satwind
+    #  Ioda file we want to apply the filter to
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_2018041500.nc4
+    obsdataout:
+      obsfile: Data/windcomponents_2018041500_output.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: ["WindComponents"]
+  passedBenchmark: 148
+  compareVariables:                #  test output matches precalculated values
+    - reference:
+        name: eastward_wind@TestReference
+      test:
+        name: eastward_wind@DerivedValue
+      absTol: 5.0e-5
+    - reference:
+        name: northward_wind@TestReference
+      test:
+        name: northward_wind@DerivedValue
+      absTol: 5.0e-5

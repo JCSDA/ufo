@@ -4,28 +4,31 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( filters_files
-      TrackCheckUtils.cc
-      TrackCheckUtils.h
-      TrackCheckUtilsParameters.h
-      TrackCheck.cc
-      TrackCheck.h
-      TrackCheckParameters.h
-      TrackCheckShip.cc
-      TrackCheckShip.h
-      TrackCheckShipDiagnostics.h
-      TrackCheckShipParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
+      BayesianBackgroundQCFlags.cc
+      BayesianBackgroundQCFlags.h
+      BayesianBackgroundCheck.cc
+      BayesianBackgroundCheck.h
       BlackList.cc
       BlackList.h
       DifferenceCheck.cc
       DifferenceCheck.h
       FilterBase.cc
       FilterBase.h
+      FilterParametersBase.h
+      GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
+      HistoryCheck.cc
+      HistoryCheck.h
+      HistoryCheckParameters.h
+      ImpactHeightCheck.cc
+      ImpactHeightCheck.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
+      ObsProcessorBase.cc
+      ObsProcessorBase.h
       MetOfficeBuddyCheck.cc
       MetOfficeBuddyCheck.h
       MetOfficeBuddyCheckParameters.h
@@ -38,6 +41,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      ModelObThreshold.cc
+      ModelObThreshold.h
       MWCLWCheck.cc
       MWCLWCheck.h
       ObsDiagnosticsWriter.cc
@@ -55,18 +60,51 @@ set ( filters_files
       QCflags.h
       QCmanager.cc
       QCmanager.h
+      PerformAction.cc
+      PerformAction.h
+      ProfileBackgroundCheck.cc
+      ProfileBackgroundCheck.h
       ProfileConsistencyChecks.cc
       ProfileConsistencyChecks.h
       ProfileConsistencyCheckParameters.h
+      ProfileFewObsCheck.cc
+      ProfileFewObsCheck.h
+      SatName.h
+      SatName.cc
+      StuckCheck.cc
+      StuckCheck.h
+      StuckCheckParameters.h
+      obsfunctions/DrawObsErrorFromFile.cc
+      obsfunctions/DrawObsErrorFromFile.h
+      obsfunctions/DrawValueFromFile.cc
+      obsfunctions/DrawValueFromFile.h
       Thinning.cc
       Thinning.h
       TemporalThinning.cc
       TemporalThinning.h
       TemporalThinningParameters.h
+      TrackCheck.cc
+      TrackCheck.h
+      TrackCheckParameters.h
+      TrackCheckShip.cc
+      TrackCheckShip.h
+      TrackCheckShipDiagnostics.h
+      TrackCheckShipParameters.h
+      TrackCheckUtils.cc
+      TrackCheckUtils.h
+      TrackCheckUtilsParameters.cc
+      TrackCheckUtilsParameters.h
       Variable.cc
       Variable.h
+      VariableTransforms.cc
+      VariableTransforms.h
+      VariableTransformsParameters.h
       Variables.cc
       Variables.h
+      VariableAssignment.cc
+      VariableAssignment.h
+      AcceptList.cc
+      AcceptList.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.cc
@@ -77,8 +115,12 @@ set ( filters_files
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
+      ObsAccessor.cc
+      ObsAccessor.h
       actions/AssignError.cc
       actions/AssignError.h
+      actions/AcceptObs.cc
+      actions/AcceptObs.h
       actions/FilterAction.cc
       actions/FilterAction.h
       actions/FilterActionBase.cc
@@ -87,14 +129,22 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/BennartzScatIndex.cc
+      obsfunctions/BennartzScatIndex.h
       obsfunctions/ChannelUseflagCheckRad.cc
       obsfunctions/ChannelUseflagCheckRad.h
       obsfunctions/CLWMatchIndexMW.cc
       obsfunctions/CLWMatchIndexMW.h
       obsfunctions/CLWRetMW.cc
       obsfunctions/CLWRetMW.h
+      obsfunctions/TotalColumnVaporGuess.cc
+      obsfunctions/TotalColumnVaporGuess.h
+      obsfunctions/CLWRetMW_SSMIS.cc
+      obsfunctions/CLWRetMW_SSMIS.h
       obsfunctions/CLWRetSymmetricMW.cc
       obsfunctions/CLWRetSymmetricMW.h
+      obsfunctions/Conditional.cc
+      obsfunctions/Conditional.h
       obsfunctions/SIRetMW.cc
       obsfunctions/SIRetMW.h
       obsfunctions/SIRetSymmetricMW.cc
@@ -103,8 +153,14 @@ set ( filters_files
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
       obsfunctions/HydrometeorCheckATMS.h
+      obsfunctions/ImpactHeight.cc
+      obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/BgdDepartureAnomaly.cc
+      obsfunctions/BgdDepartureAnomaly.h
+      obsfunctions/ObsErrorModelStepwiseLinear.cc
+      obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsErrorModelQuad.cc
@@ -113,6 +169,10 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/CloudCostFunction.cc
+      obsfunctions/CloudCostFunction.h
+      obsfunctions/CloudDetectMinResidualAVHRR.cc
+      obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
       obsfunctions/ObsErrorBoundIR.cc
@@ -125,23 +185,56 @@ set ( filters_files
       obsfunctions/ObsErrorFactorSurfJacobianRad.h
       obsfunctions/ObsErrorFactorLatRad.cc
       obsfunctions/ObsErrorFactorLatRad.h
+      obsfunctions/ObsErrorFactorQuotient.cc
+      obsfunctions/ObsErrorFactorQuotient.h
       obsfunctions/ObsErrorFactorTopoRad.cc
       obsfunctions/ObsErrorFactorTopoRad.h
       obsfunctions/ObsErrorFactorTransmitTopRad.cc
       obsfunctions/ObsErrorFactorTransmitTopRad.h
       obsfunctions/ObsErrorFactorWavenumIR.cc
       obsfunctions/ObsErrorFactorWavenumIR.h
+      obsfunctions/ObsErrorFactorSfcPressure.cc
+      obsfunctions/ObsErrorFactorSfcPressure.h
+      obsfunctions/ObsErrorFactorConventional.cc
+      obsfunctions/ObsErrorFactorConventional.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
+      obsfunctions/ObsFunctionLinearCombination.cc
+      obsfunctions/ObsFunctionLinearCombination.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SatwindIndivErrors.cc
+      obsfunctions/SatwindIndivErrors.h
+      obsfunctions/SatWindsLNVDCheck.cc
+      obsfunctions/SatWindsLNVDCheck.h
+      obsfunctions/SatWindsSPDBCheck.cc
+      obsfunctions/SatWindsSPDBCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      obsfunctions/SunGlintAngle.cc
+      obsfunctions/SunGlintAngle.h
+      obsfunctions/TropopauseEstimate.cc
+      obsfunctions/TropopauseEstimate.h
+      obsfunctions/WindDirAngleDiff.cc
+      obsfunctions/WindDirAngleDiff.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.cc
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.F90
+      obsfunctions/LAMDomainCheck/esg_grid_mod.F90
 )
+
+if( ${rttov_FOUND} )
+  add_subdirectory( rttovonedvarcheck )
+  list( APPEND filters_files ${rttovonedvarcheck_src_files} )
+endif( ${rttov_FOUND} )
+
+add_subdirectory( gnssroonedvarcheck )
+list( APPEND filters_files ${gnssroonedvarcheck_src_files} )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
 

@@ -5,9 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ioda/ObsVector.h"
-
 #include "ufo/LinearObsOperator.h"
+
+#include <vector>
+
+#include "ioda/ObsVector.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
@@ -19,22 +21,37 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os), biaspreds_()
-{}
-
-// -----------------------------------------------------------------------------
-
-LinearObsOperator::~LinearObsOperator() {}
+  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
+{
+  // We use += rather than = to make sure the Variables objects contain no duplicate entries
+  // and the variables are sorted alphabetically.
+  oops::Variables operatorVars;
+  operatorVars += oper_->simulatedVars();
+  oops::Variables obsSpaceVars;
+  obsSpaceVars += os.obsvariables();
+  if (!(operatorVars == obsSpaceVars))
+    throw eckit::UserError("The list of variables simulated by the obs operator differs from "
+                           "the list of simulated variables in the obs space",
+                           Here());
+}
 
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
   oops::Variables vars;
   vars += bias.requiredHdiagnostics();
-  ObsDiagnostics ydiags(odb_, Locations(odb_, odb_.windowStart(), odb_.windowEnd()), vars);
+  std::vector<float> lons(odb_.nlocs());
+  std::vector<float> lats(odb_.nlocs());
+  std::vector<util::DateTime> times(odb_.nlocs());
+  odb_.get_db("MetaData", "latitude", lats);
+  odb_.get_db("MetaData", "longitude", lons);
+  odb_.get_db("MetaData", "datetime", times);
+  ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
-  biaspreds_.clear();
-  biaspreds_ = bias.computePredictors(gvals, ydiags);
+  if (bias) {
+    biasoper_.reset(new LinearObsBiasOperator(odb_));
+    biasoper_->setTrajectory(gvals, bias, ydiags);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -44,7 +61,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
-    bias.computeObsBiasTL(gvals, biaspreds_, ybiasinc);
+    biasoper_->computeObsBiasTL(gvals, bias, ybiasinc);
     yy += ybiasinc;
   }
 }
@@ -56,7 +73,7 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
-    bias.computeObsBiasAD(gvals, biaspreds_, ybiasinc);
+    biasoper_->computeObsBiasAD(gvals, bias, ybiasinc);
   }
 }
 

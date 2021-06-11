@@ -13,31 +13,28 @@ namespace ufo {
   makerProfileCheckPermanentReject_("PermanentReject");
 
   ProfileCheckPermanentReject::ProfileCheckPermanentReject
-  (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckPermanentReject::runCheck()
+  void ProfileCheckPermanentReject::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Permanent rejection check" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_relative_humidity);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     std::vector <int> &zFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     std::vector <int> &ReportFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_observation_report);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (ReportFlags.empty()) {
       oops::Log::debug() << "ReportFlags vector is empty. "
@@ -46,24 +43,24 @@ namespace ufo {
     }
 
     // Set PermRejectFlag on individual elements if whole report has PermReject.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport) {
-        for (auto flags : {&tFlags, &rhFlags, &uFlags, &vFlags, &zFlags})
-          if (!flags->empty()) (*flags)[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
+        SetQCFlag(ufo::MetOfficeQCFlags::Elem::PermRejectFlag, jlev,
+                  tFlags, rhFlags, uFlags, vFlags, zFlags);
       }
     }
 
     // Set FinalRejectFlag on individual elements if a variety of criteria
     // are met on model-level data.
     if (ModelLevels) {
-      for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
         if ((ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::TrackRejectReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::SurplusReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::OutOfAreaReport)) {
           ReportFlags[jlev] |= ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport;
-          for (auto flags : {&tFlags, &rhFlags, &uFlags, &vFlags, &zFlags})
-            if (!flags->empty()) (*flags)[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+          SetQCFlag(ufo::MetOfficeQCFlags::Elem::FinalRejectFlag, jlev,
+                    tFlags, rhFlags, uFlags, vFlags, zFlags);
         }
       }
     }

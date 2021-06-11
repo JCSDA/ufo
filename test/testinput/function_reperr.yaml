@@ -1,0 +1,22 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: ADT
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/synthetic-adt-2018041500.nc
+    obsdataout:
+      obsfile: Data/synthetic-adt-2018041500_function_output.nc
+    simulated variables: [obs_absolute_dynamic_topography]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/synthetic-adt-2018041500-geovals.nc
+  obs function:
+    name: LinearCombination@ObsFunction
+    options:
+      variables: [representation_error@GeoVaLs,
+                  obs_absolute_dynamic_topography@ObsError]
+      coefs: [0.1,
+              1.0]
+    variables: [ObsError]
+    tolerance: 1.0e-8

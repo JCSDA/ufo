@@ -20,10 +20,8 @@
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
-  ProfileCheckValidator::ProfileCheckValidator(const ProfileConsistencyCheckParameters &options,
-                                               ProfileDataHandler &profileDataHandler)
-    : options_(options),
-      profileDataHandler_(profileDataHandler)
+  ProfileCheckValidator::ProfileCheckValidator(const ProfileConsistencyCheckParameters &options)
+    : options_(options)
   {
     // Set offsets due to C++ and Fortran array index starting values
     comparison_offsets_[ufo::VariableNames::StdLev] = 1;
@@ -86,7 +84,7 @@ namespace ufo {
         valuesToCompare_float_.insert({
             ufo::VariableNames::DC,
             ufo::VariableNames::ETol});
-      } else if (check == "UInterp") {
+      } else if (check == "UInterp" || check == "UInterpAlternative") {
         valuesToCompare_int_.insert({
             ufo::VariableNames::counter_NumSamePErrObs,
             ufo::VariableNames::counter_NumInterpErrObs,
@@ -145,8 +143,42 @@ namespace ufo {
             ufo::VariableNames::pgebd_air_temperature,
             ufo::VariableNames::pgebd_relative_humidity,
             ufo::VariableNames::pgebd_eastward_wind,
-            ufo::VariableNames::pgebd_northward_wind,
-            ufo::VariableNames::pgebd_geopotential_height});
+            ufo::VariableNames::pgebd_northward_wind});
+      } else if (check == "Pressure") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_observation_report});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::obs_air_pressure});
+      } else if (check == "AveragePressure") {
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::LogP_derived,
+            ufo::VariableNames::bigPgaps_derived,
+            ufo::VariableNames::modellevels_logP_derived,
+            ufo::VariableNames::modellevels_ExnerP_derived,
+            ufo::VariableNames::modellevels_logP_rho_derived,
+            ufo::VariableNames::modellevels_ExnerP_rho_derived});
+      } else if (check == "AverageTemperature") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::modellevels_average_air_temperature_qcflags,
+            ufo::VariableNames::counter_NumGapsT});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::modellevels_air_temperature_derived,
+            ufo::VariableNames::modellevels_average_air_temperature_derived});
+      } else if (check == "AverageWindSpeed") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::modellevels_average_eastward_wind_qcflags,
+            ufo::VariableNames::modellevels_average_northward_wind_qcflags,
+            ufo::VariableNames::counter_NumGapsU,
+            ufo::VariableNames::counter_NumGapsUWP});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::modellevels_average_eastward_wind_derived,
+            ufo::VariableNames::modellevels_average_northward_wind_derived});
+      } else if (check == "AverageRelativeHumidity") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::modellevels_average_relative_humidity_qcflags,
+            ufo::VariableNames::counter_NumGapsRH});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::modellevels_average_relative_humidity_derived});
       }
     }
   }
@@ -197,7 +229,8 @@ namespace ufo {
     }
   }
 
-  void ProfileCheckValidator::validate()
+  void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler,
+                                       size_t commSize)
   {
     oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
 
@@ -222,9 +255,9 @@ namespace ufo {
 
       // Obtain values for comparison
       const std::vector <int> &values_thiscode =
-        profileDataHandler_.get<int>(valueToCompare_int);
+        profileDataHandler.get<int>(valueToCompare_int);
       const std::vector <int> &values_OPS =
-        profileDataHandler_.get<int>(varname_OPS);
+        profileDataHandler.get<int>(varname_OPS);
 
       // Account for potential offset between values in this code and OPS
       int offset = 0;
@@ -242,9 +275,19 @@ namespace ufo {
       // Only the first element of each counter is compared;
       // in all other cases tne entire vectors are compared.
       if (groupname == "Counters") {
-        if (!oops::anyVectorEmpty(values_OPS, values_thiscode))
-          compareOutput(valueToCompare_int, values_OPS[0], values_thiscode[0],
-                        offset, tol, nMismatches_);
+        // The counter comparison is only performed if there is one processor.
+        // With some refactoring it would be possible to use eckit::allGatherv
+        // to sum the results over multiple processors but, at present,
+        // if two processors have a different number of profiles then the allGatherv
+        // routine on the processor with more profiles will hang indefinitely.
+        if (commSize == 1) {
+          if (!oops::anyVectorEmpty(values_OPS, values_thiscode))
+            compareOutput(valueToCompare_int, values_OPS[0], values_thiscode[0],
+                          offset, tol, nMismatches_);
+        } else {
+            oops::Log::debug() << "The counter comparison was not performed "
+                               << "because multiple processors are in use." << std::endl;
+        }
       } else {
         compareOutput(valueToCompare_int, values_OPS, values_thiscode,
                       offset, tol, nMismatches_);
@@ -258,9 +301,9 @@ namespace ufo {
     // Compare float values obtained in this code and OPS
     for (const auto& valueToCompare_float : valuesToCompare_float_) {
       const std::vector <float> &values_thiscode =
-        profileDataHandler_.get<float>(valueToCompare_float);
+        profileDataHandler.get<float>(valueToCompare_float);
       const std::vector <float> &values_OPS =
-        profileDataHandler_.get<float>("OPS_" + valueToCompare_float);
+        profileDataHandler.get<float>("OPS_" + valueToCompare_float);
       compareOutput(valueToCompare_float, values_OPS, values_thiscode,
                     0, tol, nMismatches_);
     }

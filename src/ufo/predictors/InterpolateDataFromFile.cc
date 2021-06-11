@@ -1,0 +1,106 @@
+/*
+ * (C) Crown copyright 2021, Met Office
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+#include "ufo/predictors/InterpolateDataFromFile.h"
+
+#include <set>
+#include <string>
+#include <vector>
+
+#include <boost/make_unique.hpp>
+
+#include "eckit/exception/Exceptions.h"
+#include "ioda/ObsSpace.h"
+#include "oops/util/AssociativeContainers.h"
+#include "ufo/filters/ObsFilterData.h"
+
+namespace ufo {
+
+namespace {
+
+/// \brief Store all components of `input` in `output`.
+void save(const ioda::ObsDataVector<float> &input, ioda::ObsVector &output) {
+  const float fmiss = util::missingValue(fmiss);
+  const double dmiss = util::missingValue(dmiss);
+  const size_t numLocs = input.nlocs();
+  const size_t numInputVars = input.nvars();
+  const size_t numOutputVars = output.nvars();
+  for (size_t inputVarIndex = 0; inputVarIndex < numInputVars; ++inputVarIndex) {
+    const ioda::ObsDataRow<float> &inputVarValues = input[inputVarIndex];
+    const size_t outputVarIndex = output.varnames().find(input.varnames()[inputVarIndex]);
+    for (size_t locIndex = 0; locIndex < numLocs; ++locIndex) {
+      const float value = inputVarValues[locIndex];
+      output[locIndex * numOutputVars + outputVarIndex] =
+          (value == fmiss) ? dmiss : static_cast<double>(value);
+    }
+  }
+}
+
+std::set<std::string> getVariableNamesWithoutChannels(const oops::Variables &vars) {
+  if (vars.channels().empty()) {
+    return std::set<std::string>(vars.variables().begin(), vars.variables().end());
+  } else {
+    // We assume there's only a single multi-channel variable
+    ASSERT(vars.channels().size() == vars.variables().size());
+    std::string channellessVariable = vars.variables().front();
+    channellessVariable.resize(channellessVariable.find_last_of('_'));
+    return std::set<std::string>{channellessVariable};
+  }
+}
+
+}  // namespace
+
+static PredictorMaker<InterpolateDataFromFile> maker("interpolate_data_from_file");
+
+InterpolateDataFromFile::InterpolateDataFromFile(const eckit::Configuration & conf,
+                                                 const oops::Variables & vars)
+  : PredictorBase(conf, vars) {
+  InterpolateDataFromFileParameters params;
+  eckit::LocalConfiguration optionsConf(conf, "options");
+  params.validateAndDeserialize(optionsConf);
+
+  const std::set<std::string> channellessVariables = getVariableNamesWithoutChannels(vars_);
+
+  for (const VariableCorrectionParameters & varParams : params.correctedVariables.value()) {
+    if (!oops::contains(channellessVariables, varParams.name))
+      throw eckit::UserError("'" + varParams.name.value() +
+                             "' is not in the list of bias-corrected variables", Here());
+    eckit::LocalConfiguration varConfig = varParams.details.toConfiguration();
+    varConfig.set("group", "ObsBias");
+    obsFunctions_[varParams.name] = boost::make_unique<DrawValueFromFile>(varConfig);
+  }
+
+  for (const auto &varAndObsFunction : obsFunctions_) {
+    const DrawValueFromFile &obsFunction = *varAndObsFunction.second;
+    const ufo::Variables &requiredVariables = obsFunction.requiredVariables();
+    geovars_ += requiredVariables.allFromGroup("GeoVaLs").toOopsVariables();
+    hdiags_ += requiredVariables.allFromGroup("ObsDiag").toOopsVariables();
+  }
+}
+
+void InterpolateDataFromFile::compute(const ioda::ObsSpace & /*odb*/,
+                                      const GeoVaLs & geovals,
+                                      const ObsDiagnostics & obsdiags,
+                                      ioda::ObsVector & out) const {
+  ObsFilterData obsFilterData(out.space());
+  obsFilterData.associate(geovals);
+  obsFilterData.associate(obsdiags);
+
+  out.zero();
+
+  for (const auto &varAndObsFunction : obsFunctions_) {
+    const std::string &varName = varAndObsFunction.first;
+    const DrawValueFromFile &obsFunction = *varAndObsFunction.second;
+
+    oops::Variables currentVars({varName}, vars_.channels());
+    ioda::ObsDataVector<float> obsFunctionResult(out.space(), currentVars);
+    obsFunction.compute(obsFilterData, obsFunctionResult);
+    save(obsFunctionResult, out);
+  }
+}
+
+}  // namespace ufo

@@ -3,7 +3,7 @@ window end: 2018-04-15T03:00:00Z
 obs space:
   name: airs_aqua
   obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
+    obsfile: Data/ufo/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
   simulated variables: [brightness_temperature]
   channels: &all_channels
             1, 6, 7, 10, 11, 15, 16, 17, 20, 21, 22, 24,
@@ -31,6 +31,7 @@ obs space:
 obs operator:
   name: CRTM
   Absorbers: [H2O,O3,CO2]
+  SurfaceWindGeoVars: uv
   obs options:
     Sensor_ID: airs_aqua
     EndianType: little_endian

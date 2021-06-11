@@ -32,19 +32,24 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_identity_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_identity_tlad_setup_f90')
+subroutine ufo_identity_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, c_nobsvars, &
+                                     c_geovars) bind(c,name='ufo_identity_tlad_setup_f90')
 use oops_variables_mod
 implicit none
-integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), value, intent(in) :: c_conf
-type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
-type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
+integer(c_int), intent(inout)     :: c_key_self
+type(c_ptr), value, intent(in)    :: c_conf
+type(c_ptr), intent(in), value    :: c_obsvars                    ! variables to be simulated...
+integer(c_int), intent(in), value :: c_nobsvars
+integer(c_int), intent(in)        :: c_obsvarindices(c_nobsvars)  ! ... and their global indices
+type(c_ptr), value, intent(in)    :: c_geovars                    ! variables requested from the model
 
 type(ufo_identity_tlad), pointer :: self
 
 call ufo_identity_tlad_registry%setup(c_key_self, self)
 
 self%obsvars = oops_variables(c_obsvars)
+allocate(self%obsvarindices(self%obsvars%nvars()))
+self%obsvarindices(:) = c_obsvarindices(:) + 1  ! Convert from C to Fortran indexing
 self%geovars = oops_variables(c_geovars)
 
 call self%setup()
@@ -84,14 +89,14 @@ end subroutine ufo_identity_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_identity_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_identity_simobs_tl_f90')
+subroutine ufo_identity_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_identity_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_identity_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -99,27 +104,27 @@ type(ufo_geovals),       pointer :: geovals
 call ufo_identity_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals, geovals)
 
-call self%simobs_tl(geovals, c_hofx, c_obsspace)
+call self%simobs_tl(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_identity_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_identity_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_identity_simobs_ad_f90')
+subroutine ufo_identity_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_identity_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(in) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_identity_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
 
 call ufo_identity_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals, geovals)
-call self%simobs_ad(geovals, c_hofx, c_obsspace)
+call self%simobs_ad(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_identity_simobs_ad_c
 

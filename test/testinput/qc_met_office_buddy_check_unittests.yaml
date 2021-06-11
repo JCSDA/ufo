@@ -19,21 +19,22 @@ Pair of observations:
     air_temperature@ObsError:              [   1,   2]
     air_temperature@GrossErrorProbability: [0.05, 0.1]
     air_temperature@HofX:                  [ 289, 293]
-    air_temperature@HofXError:             [   2,   1]
 
     eastward_wind@ObsValue:                [  20,   21]
     eastward_wind@ObsError:                [ 0.5,  1.0]
     eastward_wind@GrossErrorProbability:   [0.07, 0.12]
     eastward_wind@HofX:                    [  19,   23]
-    eastward_wind@HofXError:               [   1,  0.5]
 
     northward_wind@ObsValue:               [ -30,  -31]
     northward_wind@ObsError:               [ 0.5,  1.0]
     northward_wind@GrossErrorProbability:  [0.07, 0.12]
     northward_wind@HofX:                   [ -29,  -33]
-    northward_wind@HofXError:              [   1,  0.5]
   IntVariables:
     station_id@MetaData:                   [   1,   2]
+  obs diagnostics:
+    air_temperature_background_error:      [   2,    1]
+    eastward_wind_background_error:        [   1,  0.5]
+    northward_wind_background_error:       [   1,  0.5]
   Met Office Buddy Check:
     filter variables:
     - name: eastward_wind
@@ -43,7 +44,6 @@ Pair of observations:
     - name: air_temperature
     horizontal_correlation_scale: {"90": 150, "30": 150, "20": 200,
                                    "-20": 200, "-30": 250, "-90": 250}
-    vertical_correlation_scale: 10
     temporal_correlation_scale: PT1H
     num_zonal_bands: 12
     search_radius: 500 # km

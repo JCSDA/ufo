@@ -22,12 +22,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+Thinning::Thinning(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                    std::shared_ptr<ioda::ObsDataVector<int> > flags,
                    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
+  oops::Log::debug() << "Thinning: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -41,23 +41,22 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
                            std::vector<std::vector<bool>> & flagged) const {
   // get local and global number of locations
   const size_t nlocs = obsdb_.nlocs();
-  const size_t gnlocs = obsdb_.gnlocs();
+  const size_t gnlocs = obsdb_.globalNumLocs();
 
   // get global indices of the local locations
   const std::vector<std::size_t> & gindex = obsdb_.index();
 
-  const float thinning = config_.getFloat("amount");
+  const float amount = parameters_.amount;
 
   // create random numbers for each observation based on some seed
-  unsigned int random_seed = config_.getInt("random seed", std::time(0));
-  int mymember = config_.getInt("member", 0);
-  random_seed += mymember;
+  unsigned int random_seed = parameters_.randomSeed.value().value_or(std::time(0));
+  random_seed += parameters_.member;
 
   util::UniformDistribution<float> rand(gnlocs, 0.0, 1.0, random_seed);
 
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-      if ( apply[jobs] && rand[gindex[jobs]] < thinning ) flagged[jv][jobs] = true;
+      if ( apply[jobs] && rand[gindex[jobs]] < amount ) flagged[jv][jobs] = true;
     }
   }
 }
@@ -65,7 +64,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void Thinning::print(std::ostream & os) const {
-  os << "Thinning: config = " << config_ << std::endl;
+  os << "Thinning: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

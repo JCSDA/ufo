@@ -25,34 +25,47 @@
 #include "oops/util/missingValues.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
-#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
+#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
-namespace ufo {
-  class ProfileConsistencyCheckParameters;
-  class ProfileCheckValidator;
-  class ProfileDataHandler;
-  class ProfileIndices;
-}
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/VariableNames.h"
+
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
 
   /// \brief Profile QC checker base class
   class ProfileCheckBase {
    public:
-    ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
-                     ProfileDataHandler &profileDataHandler,
-                     ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckBase(const ProfileConsistencyCheckParameters &options);
+
     virtual ~ProfileCheckBase() {}
 
     /// Run check
-    virtual void runCheck() = 0;
+    virtual void runCheck(ProfileDataHandler &profileDataHandler) = 0;
 
-    /// Fill variables in validator
-    virtual void fillValidator() = 0;
+    /// Fill variables in validator using a ProfileDataHandler.
+    /// This function will only be called for subclasses of ProfileCheckBase
+    /// whose runOnEntireSample() implementation returns false.
+    /// If runOnEntireSample() returns true, the subclass needs
+    /// to handle the storage of validation data on its own.
+    /// For an example see the ProfileAveragePressure class.
+    virtual void fillValidationData(ProfileDataHandler &profileDataHandler) {}
 
     /// Get result of check (default fail)
     virtual bool getResult() {return false;}
+
+    /// Run this check on the entire sample?
+    virtual bool runOnEntireSample() {return false;}
+
+    /// List of names of required GeoVaLs.
+    virtual oops::Variables getGeoVaLNames() {return oops::Variables();}
+
+    /// List of names of GeoVaLs used in check validation.
+    virtual oops::Variables getValidationGeoVaLNames() {return oops::Variables();}
+
+    /// List of names of required obs diagnostics.
+    virtual oops::Variables getObsDiagNames() {return oops::Variables();}
 
    protected:  // functions
     /// Apply correction to vector of values
@@ -66,18 +79,35 @@ namespace ufo {
         std::transform(v1.begin(), v1.end(), v2.begin(), vout.begin(), std::plus<T>());
       }
 
+    /// Set a QC flag on one profile level.
+    /// This is the base case for one vector.
+    template <typename T>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec)
+      {
+        if (vec.size() > jlev) vec[jlev] |= flag;
+      }
+
+    /// Set a QC flag on one profile level.
+    /// This is the recursive case that accepts an arbitrary number of vectors
+    /// using a variadic template.
+    template <typename T, typename... Args>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec1,
+                     Args&... vecs)
+    {
+      if (vec1.size() > jlev) vec1[jlev] |= flag;
+      SetQCFlag(flag, jlev, vecs...);
+    }
+
    protected:  // variables
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
 
-    /// Indices of profile's observations in the entire sample
-    const ProfileIndices &profileIndices_;
-
-    /// Profile data handler
-    ProfileDataHandler &profileDataHandler_;
-
-    /// Profile check validator
-    ProfileCheckValidator &profileCheckValidator_;
+    /// Missing value (int)
+    const int missingValueInt = util::missingValue(1);
 
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);
@@ -88,18 +118,12 @@ namespace ufo {
   {
    public:
     static std::unique_ptr<ProfileCheckBase> create(const std::string&,
-                                                    const ProfileConsistencyCheckParameters&,
-                                                    const ProfileIndices&,
-                                                    ProfileDataHandler&,
-                                                    ProfileCheckValidator&);
+                                                    const ProfileConsistencyCheckParameters&);
     virtual ~ProfileCheckFactory() = default;
    protected:
     explicit ProfileCheckFactory(const std::string &);
    private:
-    virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&,
-                                                   const ProfileIndices&,
-                                                   ProfileDataHandler&,
-                                                   ProfileCheckValidator&) = 0;
+    virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&) = 0;
 
     static std::map <std::string, ProfileCheckFactory*> & getMakers()
       {
@@ -112,15 +136,9 @@ namespace ufo {
     class ProfileCheckMaker : public ProfileCheckFactory
     {
       virtual std::unique_ptr<ProfileCheckBase>
-        make(const ProfileConsistencyCheckParameters &options,
-             const ProfileIndices &profileIndices,
-             ProfileDataHandler &profileDataHandler,
-             ProfileCheckValidator &profileCheckValidator)
+        make(const ProfileConsistencyCheckParameters &options)
       {
-        return std::unique_ptr<ProfileCheckBase>(new T(options,
-                                                       profileIndices,
-                                                       profileDataHandler,
-                                                       profileCheckValidator));
+        return std::unique_ptr<ProfileCheckBase>(new T(options));
       }
      public:
       explicit ProfileCheckMaker(const std::string & name)

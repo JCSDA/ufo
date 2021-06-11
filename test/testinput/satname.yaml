@@ -1,0 +1,145 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2050-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+       obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+    obsdataout:
+      obsfile:  Data/satwind_obs__1d_2020100106_noinv_out.nc4
+    simulated variables: [eastward_wind]
+  obs filters:
+  - filter: satname
+    filter variables:
+    - name: eastward_wind
+    SatName assignments:
+    - min WMO Satellite id: 1  
+      max WMO Satellite id: 999
+      Satellite_comp:
+      - satobchannel: 1
+        min frequency: 7.5e+13
+        max frequency: 8.2e+13
+        wind channel: ir38
+      - satobchannel: 1
+        min frequency: 2.6e+13
+        max frequency: 2.9e+13
+        wind channel: ir108
+      - satobchannel: 1
+        min frequency: 1.7e+14
+        max frequency: 2.0e+14
+        wind channel: ir16
+      - satobchannel: 1
+        min frequency: 3.6e+14
+        max frequency: 4.8e+14
+        wind channel: irvis
+      - satobchannel: 3 
+        min frequency: 4.3e+13
+        max frequency: 4.7e+13
+        wind channel: wv67
+      - satobchannel: 5
+        min frequency: 4.3e+13
+        max frequency: 4.7e+13
+        wind channel: cswv67
+      - satobchannel: 3
+        min frequency: 4.71e+13
+        max frequency: 4.9e+13
+        wind channel: wv62
+      - satobchannel: 5
+        min frequency: 4.71e+13
+        max frequency: 4.9e+13
+        wind channel: cswv62
+      - satobchannel: 3
+        min frequency: 3.9e+13
+        max frequency: 4.2e+13
+        wind channel: wv73
+      - satobchannel: 5
+        min frequency: 3.9e+13
+        max frequency: 4.2e+13
+        wind channel: cswv73
+      - satobchannel: 2
+        min frequency: 3.8e+14
+        max frequency: 4.2e+14
+        wind channel: hrvis 
+      - satobchannel: 2
+        min frequency: 4.5e+14
+        max frequency: 4.8e+14
+        wind channel: vis06 
+      - satobchannel: 2
+        min frequency: 3.4e+14
+        max frequency: 3.8e+14
+        wind channel: vis08 
+      Satellite_id:
+      - Sat ID: 3 
+        Sat name: MetopB
+      - Sat ID: 4 
+        Sat name: MetopA
+      - Sat ID: 5 
+        Sat name: MetopC
+      - Sat ID: 54
+        Sat name: Meteosat7 
+      - Sat ID: 55
+        Sat name: Meteosat8 
+      - Sat ID: 56
+        Sat name: Meteosat9 
+      - Sat ID: 57
+        Sat name: Meteosat10
+      - Sat ID: 70
+        Sat name: Meteosat11
+      - Sat ID: 173
+        Sat name: Himawari8
+      - Sat ID: 174
+        Sat name: Himawari9
+      - Sat ID: 205
+        Sat name: NOAA14
+      - Sat ID: 206
+        Sat name: NOAA15
+      - Sat ID: 207
+        Sat name: NOAA16
+      - Sat ID: 208
+        Sat name: NOAA17
+      - Sat ID: 209
+        Sat name: NOAA18
+      - Sat ID: 223
+        Sat name: NOAA19
+      - Sat ID: 224
+        Sat name: SoumiNPP
+      - Sat ID: 225
+        Sat name: NOAA20
+      - Sat ID: 270
+        Sat name: GOES16
+      - Sat ID: 271
+        Sat name: GOES17
+      - Sat ID: 272
+        Sat name: GOES18
+      - Sat ID: 273
+        Sat name: GOES19
+      - Sat ID: 410
+        Sat name: kalpana1
+      - Sat ID: 470
+        Sat name: INSAT3A
+      - Sat ID: 471
+        Sat name: INSAT3D
+      - Sat ID: 472
+        Sat name: INSAT3E
+      - Sat ID: 473
+        Sat name: INSAT3DR
+      - Sat ID: 474
+        Sat name: INSAT3DS
+      - Sat ID: 517
+        Sat name: FY2G
+      - Sat ID: 518
+        Sat name: FY2H   
+      - Sat ID: 530
+        Sat name: FY4A
+      - Sat ID: 531
+        Sat name: FY4B   
+      - Sat ID: 783
+        Sat name: Terra
+      - Sat ID: 784
+        Sat name: Aqua   
+      - Sat ID: 852
+        Sat name: MixedMetop
+      - Sat ID: 854
+        Sat name: LeoGeo 
+  passedBenchmark: 91051

@@ -8,7 +8,7 @@ observations:
   obs space:
    name: GnssroBndNBAM
    obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
+    obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
    simulated variables: [bending_angle]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4

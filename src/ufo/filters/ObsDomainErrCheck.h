@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 
@@ -28,21 +29,26 @@ namespace ioda {
 
 namespace ufo {
 
-/// Domain check: AMSU-A scattering check and obserr inflation
-//  that obs are within domain
+/// Parameters controlling the operation of the ObsDomainErrCheck filter.
+class ObsDomainErrCheckParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsDomainErrCheckParameters, FilterParametersBase)
 
-// Domain is defined by metadata criteria regardless of obs value.
-// If obs value is required, use ObsBoundsCheck.
+ public:
+  oops::RequiredParameter<float> infltparameter{"infltparameter", this};
+};
 
-// The same effect can be achieved with opposite criteria through BlackList,
-// the choice is a matter of convenience or which seems more natural.
+/// AMSU-A scattering check and obserr inflation
 
 class ObsDomainErrCheck : public FilterBase,
                           private util::ObjectCounter<ObsDomainErrCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef ObsDomainErrCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsDomainErrCheck";}
 
-  ObsDomainErrCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  ObsDomainErrCheck(ioda::ObsSpace &, const Parameters_ &,
                     std::shared_ptr<ioda::ObsDataVector<int> >,
                     std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainErrCheck();
@@ -53,7 +59,7 @@ class ObsDomainErrCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::domain;}
 
-  float parameter_;
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo

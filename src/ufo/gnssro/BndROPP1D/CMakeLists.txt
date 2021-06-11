@@ -2,7 +2,7 @@
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-if( ${ROPP-UFO_FOUND} )
+if( ${ropp-ufo_FOUND} )
 set (  bndropp1d_src_files
        ObsGnssroBndROPP1D.h
        ObsGnssroBndROPP1D.cc
@@ -17,7 +17,7 @@ set (  bndropp1d_src_files
        ufo_gnssro_ropp1d_utils_mod.F90
 PARENT_SCOPE
 )
-else( ${ROPP-UFO_FOUND} )
+else( ${ropp-ufo_FOUND} )
 set (  bndropp1d_src_files
        ObsGnssroBndROPP1D.h
        ObsGnssroBndROPP1D.cc
@@ -31,4 +31,4 @@ set (  bndropp1d_src_files
        ufo_gnssro_bndropp1d_tlad_mod_stub.F90
 PARENT_SCOPE
 )
-endif( ${ROPP-UFO_FOUND} )
+endif( ${ropp-ufo_FOUND} )

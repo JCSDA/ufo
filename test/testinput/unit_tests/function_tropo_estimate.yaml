@@ -1,0 +1,27 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: tropopause_estimate
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/tropo_obs_2018041500.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+# In real usage, a satwind obs that is more than 50 hPa above tropopause is rejected, but for
+# testing purposes shown here, the difference check is only 5 hPa to reject 12 obs from sample.
+# The options shown here do not work yet in Difference Check because it implements differently
+# than Bounds Check and cannot yet accept options sub-config.  This is UFO number 492.
+  - filter: Difference Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    reference: TropopauseEstimate@ObsFunction
+#     options:
+#       - tropo_equator: 13000         # 130 hPa
+#       - tropo_pole: 37000            # 370 hPa
+    value: air_pressure@MetaData
+    minvalue: -500                   # 5 hPa above tropopause level, negative p-diff
+  passedBenchmark: 132

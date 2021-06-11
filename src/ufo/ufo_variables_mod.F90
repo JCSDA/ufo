@@ -14,7 +14,7 @@ public :: ufo_vars_read, ufo_vars_getindex
 integer, parameter, public :: n_aerosols_gocart_default=14,&
      &n_aerosols_gocart_merra_2=15,n_aerosols_other=1
 
-integer, parameter, public :: MAXVARLEN=60
+integer, parameter, public :: MAXVARLEN=100
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
 character(len=MAXVARLEN), public, parameter :: var_t    = "temperature"
@@ -27,6 +27,7 @@ character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
 character(len=MAXVARLEN), public, parameter :: var_delp = "air_pressure_thickness"
 character(len=MAXVARLEN), public, parameter :: var_ps   = "surface_pressure"
 character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
+character(len=MAXVARLEN), public, parameter :: var_zm   = "geometric_height"
 character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
 character(len=MAXVARLEN), public, parameter :: var_sfc_z= "surface_geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_oz   = "mole_fraction_of_ozone_in_air"
@@ -60,6 +61,10 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_sdepth  = "surface_snow_t
 character(len=MAXVARLEN), public, parameter :: var_sfc_vegfrac = "vegetation_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "surface_wind_speed"
 character(len=MAXVARLEN), public, parameter :: var_sfc_wdir    = "surface_wind_from_direction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_u10     = "uwind_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_v10     = "vwind_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_u       = "surface_eastward_wind"
+character(len=MAXVARLEN), public, parameter :: var_sfc_v       = "surface_northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "leaf_area_index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "volume_fraction_of_condensed_water_in_soil"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "soil_temperature"
@@ -77,62 +82,23 @@ character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickn
 character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
 character(len=MAXVARLEN), public, parameter :: var_tb          = "brightness_temperature"
 character(len=MAXVARLEN), public, parameter :: var_tb_clr      = "brightness_temperature_assuming_clear_sky"
+character(len=MAXVARLEN), public, parameter :: var_total_transmit= "toa_total_transmittance"
 character(len=MAXVARLEN), public, parameter :: var_lvl_transmit= "transmittances_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_lvl_weightfunc= "weightingfunction_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_pmaxlev_weightfunc= "pressure_level_at_peak_of_weightingfunction"
 character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surface_temperature_within_field_of_view"
+character(len=MAXVARLEN), public, parameter :: var_sea_fric_vel    = "friction_velocity_over_water"
+character(len=MAXVARLEN), public, parameter :: var_obk_length      = "obukhov_length"
 
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
-!@mzp strings have to be same MAXVARLEN length for array constructor
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
 character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
-
-
-character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
-     &var_aerosols_gocart_default = [&
-     &"sulf                                                    ",&
-     &"bc1                                                     ",&
-     &"bc2                                                     ",&
-     &"oc1                                                     ",&
-     &"oc2                                                     ",&
-     &"dust1                                                   ",&
-     &"dust2                                                   ",&
-     &"dust3                                                   ",&
-     &"dust4                                                   ",&
-     &"dust5                                                   ",&
-     &"seas1                                                   ",&
-     &"seas2                                                   ",&
-     &"seas3                                                   ",&
-     &"seas4                                                   "]
-!@mzp var_aerosols_gocart_merra_2 =[&
-!    &var_aerosols_gocart_default,&
-!    &"p25                                                     "]
-! won't compile
-character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
-     &var_aerosols_gocart_merra_2 = [&
-     &"sulf                                                    ",&
-     &"bc1                                                     ",&
-     &"bc2                                                     ",&
-     &"oc1                                                     ",&
-     &"oc2                                                     ",&
-     &"dust1                                                   ",&
-     &"dust2                                                   ",&
-     &"dust3                                                   ",&
-     &"dust4                                                   ",&
-     &"dust5                                                   ",&
-     &"seas1                                                   ",&
-     &"seas2                                                   ",&
-     &"seas3                                                   ",&
-     &"seas4                                                   ",&
-     &"seas5                                                   "]
-
-character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
-     &var_aerosols_other = [&
-     &"other                                                   "]
+character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
+character(len=MAXVARLEN), public, parameter :: var_sfc_seaicefrac = "seaice_fraction"
 
 character(len=MAXVARLEN), public :: var_seaicefrac      = "sea_ice_category_area_fraction"
 character(len=MAXVARLEN), public :: var_seaicethick     = "sea_ice_category_thickness"
@@ -152,7 +118,6 @@ character(len=MAXVARLEN), public :: var_sw_rad          = "net_downwelling_short
 character(len=MAXVARLEN), public :: var_latent_heat     = "upward_latent_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_sens_heat       = "upward_sensible_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_lw_rad          = "net_downwelling_longwave_radiation"
-character(len=MAXVARLEN), public :: var_sea_fric_vel    = "friction_velocity_over_water"
 
 character(len=MAXVARLEN), public, parameter :: var_du001 = "mass_fraction_of_dust001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_du002 = "mass_fraction_of_dust002_in_air"
@@ -168,11 +133,32 @@ character(len=MAXVARLEN), public, parameter :: var_bcphobic = "mass_fraction_of_
 character(len=MAXVARLEN), public, parameter :: var_bcphilic = "mass_fraction_of_hydrophilic_black_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphobic = "mass_fraction_of_hydrophobic_organic_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphilic = "mass_fraction_of_hydrophilic_organic_carbon_in_air"
-character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_aerosols_in_air"
+character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_nitrate001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ext1 = "volume_extinction_in_air_due_to_aerosol_particles_lambda1"
+character(len=MAXVARLEN), public, parameter :: var_ext2 = "volume_extinction_in_air_due_to_aerosol_particles_lambda2"
+character(len=MAXVARLEN), public, parameter :: var_ext3 = "volume_extinction_in_air_due_to_aerosol_particles_lambda3"
+character(len=MAXVARLEN), public, parameter :: var_airdens = "moist_air_density"
 
+character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
+     &var_aerosols_gocart_default = [&
+     &var_sulfate,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004]
+
+character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
+     &var_aerosols_gocart_merra_2 = [&
+     &var_sulfate,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005]
+
+character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
+     &var_aerosols_other = [&
+     &"other                                                   "]
 
 ! ------------------------------------------------------------------------------
 contains
@@ -201,6 +187,7 @@ end subroutine ufo_vars_read
 ! ------------------------------------------------------------------------------
 
 integer function ufo_vars_getindex(vars, varname)
+use ufo_utils_mod, only: cmp_strings
 implicit none
 character(len=*), intent(in) :: vars(:)
 character(len=*), intent(in) :: varname
@@ -210,7 +197,7 @@ integer :: ivar
 ufo_vars_getindex = -1
 
 do ivar = 1, size(vars)
-  if (trim(vars(ivar)) == trim(varname)) then
+  if (cmp_strings(vars(ivar), varname)) then
     ufo_vars_getindex = ivar
     exit
   endif

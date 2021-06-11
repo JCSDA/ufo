@@ -7,8 +7,15 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -20,7 +27,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -36,26 +42,34 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of the sort_by_pressure option
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -68,7 +82,6 @@ observations:
     sort_by_pressure: true
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -84,26 +97,34 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck2
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck2
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of the 'where' clause handler
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -119,7 +140,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -135,25 +155,33 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2958
   compareVariables:
     - reference:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck3
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck3
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of station ID assignment directly from a string-valued variable
             # (rather than record numbers)
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: Identity
+    # operator used to evaluate background errors
+    - name: BackgroundErrorIdentity
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -165,7 +193,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -183,16 +210,17 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  HofX: HofX
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5

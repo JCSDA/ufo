@@ -8,13 +8,16 @@
 #include "ufo/atmvertinterp/ObsAtmVertInterp.h"
 
 #include <ostream>
+#include <vector>
 
 #include "oops/util/Logger.h"
 
 #include "ioda/ObsVector.h"
 
+#include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -27,7 +30,12 @@ ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperAtmVertInterp_(0),
     odb_(odb), varin_()
 {
-  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, config, odb.obsvariables(), varin_);
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+
+  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, config,
+                              operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
+                              varin_);
 
   oops::Log::trace() << "ObsAtmVertInterp created." << std::endl;
 }

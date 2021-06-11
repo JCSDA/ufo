@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,43 +8,31 @@
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
 
-#include <Eigen/Core>
-
-#include <memory>
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
-
 #include "oops/util/Printable.h"
 
+#include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;
-  class ObsVector;
-}
-
-namespace ioda {
-  class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
   class ObsBias;
 
-// -----------------------------------------------------------------------------
-
+/// Contains increments to bias correction coefficients
 class ObsBiasIncrement : public util::Printable {
  public:
-// Constructor, destructor
-  ObsBiasIncrement(const ioda::ObsSpace &, const eckit::Configuration &);
-  ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
-  ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
-  ~ObsBiasIncrement() {}
+  typedef ObsBiasParameters Parameters_;
 
-// Linear algebra operators
+  ObsBiasIncrement(const ioda::ObsSpace & odb,
+                   const Parameters_ & params);
+  ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
+
+  // Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
   void zero();
   ObsBiasIncrement & operator=(const ObsBiasIncrement &);
@@ -54,41 +42,50 @@ class ObsBiasIncrement : public util::Printable {
   void axpy(const double, const ObsBiasIncrement &);
   double dot_product_with(const ObsBiasIncrement &) const;
 
-// I/O and diagnostics
+  // I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
 
-  double & operator[](const unsigned int ii) {return biascoeffsinc_[ii];}
-  const double & operator[](const unsigned int ii) const {return biascoeffsinc_[ii];}
+  /// Return bias coefficient increments
+  const Eigen::VectorXd & data() const {return biascoeffsinc_;}
+  Eigen::VectorXd & data() {return biascoeffsinc_;}
 
-// Linear obs bias model
-  void computeObsBiasTL(const GeoVaLs &,
-                        const std::vector<ioda::ObsVector> &,
-                        ioda::ObsVector &) const;
+  // We could store coefficients in a different order. Then it would
+  // be easier to extract part of the existing vector.
+  /// Return bias coefficient increments for predictor with index \p jpred
+  std::vector<double> coefficients(size_t jpred) const {
+    std::vector<double> coeffs(vars_.size());
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      coeffs[jvar] = biascoeffsinc_(jvar*prednames_.size() + jpred);
+    }
+    return coeffs;
+  }
+  /// Increment bias coeffiecient increments for predictor with index \p jpred
+  /// with \p coeffs
+  void updateCoeff(size_t jpred, const std::vector<double> &coeffs) {
+    for (size_t jj = 0; jj < vars_.size(); ++jj) {
+      biascoeffsinc_[jj*prednames_.size() + jpred] += coeffs[jj];
+    }
+  }
 
-  void computeObsBiasAD(GeoVaLs &,
-                        const std::vector<ioda::ObsVector> &,
-                        const ioda::ObsVector &);
-
-// Serialize and deserialize
+  // Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
-  void serialize(std::vector<double> &) const {}
-  void deserialize(const std::vector<double> &, std::size_t &) {}
+  void serialize(std::vector<double> &) const;
+  void deserialize(const std::vector<double> &, std::size_t &);
 
-// Operator
+  // Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
  private:
   void print(std::ostream &) const;
 
-  const ioda::ObsSpace & odb_;
-  const eckit::LocalConfiguration conf_;
-
-  std::vector<double> biascoeffsinc_;
-  std::vector<std::shared_ptr<PredictorBase>> predbases_;
+  /// Bias coefficient increments
+  Eigen::VectorXd biascoeffsinc_;
   std::vector<std::string> prednames_;
-  std::vector<int> jobs_;
+
+  /// Variables that need to be bias-corrected
+  oops::Variables vars_;
 };
 
 // -----------------------------------------------------------------------------

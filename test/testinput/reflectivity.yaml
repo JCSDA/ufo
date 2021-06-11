@@ -3,12 +3,13 @@ window end: 2019-05-22T22:05:00Z
 
 observations:
 - obs operator:
-    name: RadarReflectivity
-    VertCoord: geopotential_height
+    name: VertInterp
+    vertical coordinate: geopotential_height
+    observation vertical coordinate: height
   obs space:
     name: Radar
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/radar_dbz_obs_2019052222.nc4
+      obsfile: Data/ufo/testinput_tier_1/radar_dbz_obs_2019052222.nc4
     simulated variables: [equivalent_reflectivity_factor]
   geovals:
     filename: Data/ufo/testinput_tier_1/radar_dbz_geoval_2019052222.nc4

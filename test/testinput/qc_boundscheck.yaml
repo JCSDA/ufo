@@ -26,6 +26,29 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
+  - filter: Bounds Check        # test min/max value with all variables and a where statement
+    where:
+    - variable:
+        name: var1@MetaData
+      maxvalue: 8
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 15
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
   - filter: Bounds Check        # test min/max value with subset of variables
     filter variables:
     - name: variable2
@@ -173,3 +196,73 @@ observations:
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
   passedBenchmark: 24
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # reject all filter variables if any test variable is out of bounds
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    - name: var2@MetaData
+    flag all filter variables if any test variable is out of bounds: true
+    minvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 22 # variable2 and variable3 should be rejected at locations 0, 1, 8 and 9
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds (but not if it's missing)
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var5@MetaData
+    treat missing as out of bounds: false
+    maxvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+  passedBenchmark: 26 # variable2 and variable3 should be rejected at locations 6 and 8
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var5@MetaData
+    treat missing as out of bounds: true
+    maxvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+  passedBenchmark: 18 # variable2 and variable3 should be rejected at locations 1, 3, 5, 6, 7 and 8
+- obs space:
+    name: Where using datetimes
+    simulated variables: [brightness_temperature]
+    channels: 20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4
+  obs filters:
+    - filter: BlackList
+      where:
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 2018-04-14T21:00:00Z
+        maxvalue: 2018-04-14T22:00:00Z
+  failedBenchmark: 17

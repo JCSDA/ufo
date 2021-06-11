@@ -24,9 +24,19 @@
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
 
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
+
 namespace ufo {
 namespace test {
 
+class TestParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(TestParameters, Parameters);
+ public:
+  oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
+  oops::RequiredParameter<int> sizeWhereTrue{"size where true", this};
+};
 
 // -----------------------------------------------------------------------------
 
@@ -40,18 +50,20 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
   ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
   ObsFilterData data(ospace);
 
-  const int nlocs = obsconf.getInt("nlocs");
+  const int nlocs = conf.getInt("nlocs");
   EXPECT(data.nlocs() == nlocs);
 
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("ProcessWhere", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
     eckit::LocalConfiguration config = confs[jconf];
+    TestParameters params;
+    params.validateAndDeserialize(config);
     if (is_in_usererror) {
-      EXPECT_THROWS(processWhere(config, data));
+      EXPECT_THROWS(processWhere(params.where, data));
     } else {
-      std::vector<bool> result = processWhere(config, data);
-      const int size_ref = config.getInt("size where true");
+      std::vector<bool> result = processWhere(params.where, data);
+      const int size_ref = params.sizeWhereTrue;
       const int size = std::count(result.begin(), result.end(), true);
       oops::Log::info() << "reference: " << size_ref << ", compare with " << size << std::endl;
       EXPECT(size == size_ref);

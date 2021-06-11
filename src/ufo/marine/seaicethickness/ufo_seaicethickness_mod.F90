@@ -61,6 +61,7 @@ end subroutine ufo_seaicethickness_delete
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_seaicethickness_simobs(self, geovals, hofx, obss)
+use ufo_utils_mod, only: cmp_strings
 implicit none
 class(ufo_seaicethickness), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals
@@ -80,15 +81,15 @@ type(c_ptr), value, intent(in)    :: obss
        call abor1_ftn(err_msg)
     endif 
 
-    if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
+    if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
        rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-       rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+       rho_wsw = (-self%rho_snow)/self%rho_water  
     endif
 
     ! check if sea ice fraction variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
     ! check if snow thickness variable is in geovals and get it
-    if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") &
+    if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) &
        call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
     ! check if sea ice thickness variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicethick, icethick)

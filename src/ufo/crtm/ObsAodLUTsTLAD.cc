@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsAodLUTsTLAD> makerAodTL_("AodLUTs");
 
 ObsAodLUTsTLAD::ObsAodLUTsTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAodLUTs_(0), odb_(odb), varin_()
+  : LinearObsOperatorBase(odb), keyOperAodLUTs_(0), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
@@ -52,20 +52,20 @@ ObsAodLUTsTLAD::~ObsAodLUTsTLAD() {
 
 void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                    ObsDiagnostics &) {
-  ufo_aodluts_tlad_settraj_f90(keyOperAodLUTs_, geovals.toFortran(), odb_);
+  ufo_aodluts_tlad_settraj_f90(keyOperAodLUTs_, geovals.toFortran(), obsspace());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodLUTsTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_aodluts_simobs_tl_f90(keyOperAodLUTs_, geovals.toFortran(), odb_,
+  ufo_aodluts_simobs_tl_f90(keyOperAodLUTs_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodLUTsTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_aodluts_simobs_ad_f90(keyOperAodLUTs_, geovals.toFortran(), odb_,
+  ufo_aodluts_simobs_ad_f90(keyOperAodLUTs_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 

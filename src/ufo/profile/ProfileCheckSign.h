@@ -11,9 +11,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
@@ -24,16 +22,14 @@ namespace ufo {
   /// \brief Profile QC: sign check
   class ProfileCheckSign : public ProfileCheckBase {
    public:
-    ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
-                     ProfileDataHandler &profileDataHandler,
-                     ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckSign(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator
-    void fillValidator() override {}
+    /// List of names of required GeoVaLs.
+    oops::Variables getGeoVaLNames() override {
+      return oops::Variables({ufo::VariableNames::geovals_pressure});}
   };
 }  // namespace ufo
 

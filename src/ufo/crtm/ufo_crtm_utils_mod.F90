@@ -13,9 +13,10 @@ use kinds
 
 use crtm_module
 
-use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use ufo_vars_mod
 use obsspace_mod
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 private
@@ -79,6 +80,7 @@ type crtm_conf
  integer :: inspect
  character(len=MAXVARLEN) :: aerosol_option
  character(len=255) :: salinity_option
+  character(len=MAXVARLEN) :: sfc_wind_geovars
 end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
@@ -103,7 +105,7 @@ END INTERFACE qsmith
          [ var_mixr, var_co2, var_oz ]
 
  ! copy of ABSORBER_ID_NAME defined in CRTM_Atmosphere_Define
- character(len=*), parameter :: &
+ character(len=MAXVARLEN), parameter :: &
       CRTM_Absorbers(N_VALID_ABSORBER_IDS) = &
          ABSORBER_ID_NAME(1:N_VALID_ABSORBER_IDS)
  integer, parameter :: &
@@ -131,7 +133,7 @@ END INTERFACE qsmith
             , [N_VALID_CLOUD_CATEGORIES,2] )
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
- character(len=*), parameter :: &
+ character(len=MAXVARLEN), parameter :: &
       CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
          CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
  integer, parameter :: &
@@ -147,11 +149,14 @@ END INTERFACE qsmith
 
  character(len=MAXVARLEN), parameter :: &
       UFO_Surfaces(4) = &
-         [ var_sfc_wtmp, var_sfc_wspeed,var_sfc_wdir, var_sfc_sss]
+         [ var_sfc_wtmp, var_sfc_wspeed, var_sfc_wdir, var_sfc_sss]
 
  character(len=MAXVARLEN), parameter :: & 
       CRTM_Surfaces(4) = &
          [  character(len=MAXVARLEN):: 'Water_Temperature', 'Wind_Speed', 'Wind_Direction', 'Salinity' ]
+
+ character(len=MAXVARLEN), parameter :: &
+      ValidSurfaceWindGeoVars(2) = [character(len=MAXVARLEN) :: 'vector', 'uv']
 
 contains
 
@@ -314,6 +319,18 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
    conf%Surfaces(jspec) = UFO_Surfaces(ivar)
 
  end do
+
+ ! select between two surface wind geovals options
+ ! valid options: vector [default], uv
+ if (f_confOper%get('SurfaceWindGeoVars', str)) then
+   conf%sfc_wind_geovars = str
+ else
+   conf%sfc_wind_geovars = 'vector'
+ endif
+ if (ufo_vars_getindex(ValidSurfaceWindGeoVars, conf%sfc_wind_geovars) < 1) then
+   write(message,*) 'crtm_conf_setup error: invalid SurfaceWindGeoVars ',trim(str)
+   call abor1_ftn(message)
+ end if
 
  ! Sea_Surface_Salinity
  !---------
@@ -494,7 +511,6 @@ end subroutine ufo_crtm_skip_profiles
 ! ------------------------------------------------------------------------------
 
 SUBROUTINE Load_Atm_Data(n_Profiles, n_Layers, geovals, atm, conf)
-
 implicit none
 
 integer, intent(in) :: n_Profiles, n_Layers
@@ -534,9 +550,9 @@ character(max_string) :: err_msg
 
   do jspec = 1, conf%n_Absorbers
     ! O3 Absorber has special treatment for Aerosols
-    if ( trim(conf%Absorbers(jspec)) == trim(var_oz) .AND. &
+    if (cmp_strings(conf%Absorbers(jspec), var_oz) .AND. &
       ufo_vars_getindex(geovals%variables, var_oz) < 0 .AND. &
-      TRIM(conf%aerosol_option) /= "" ) then
+      (.NOT. cmp_strings(conf%aerosol_option,""))) then
       do k1 = 1, n_Profiles
         atm(k1)%Absorber(1:n_Layers, jspec) = ozone_default_value
       end do
@@ -568,16 +584,23 @@ character(max_string) :: err_msg
   end do
 
   ! When n_Clouds>0, Cloud_Fraction must either be provided as geoval or in conf
+  ! If Cloud_Fraction is provided in conf,then use the Cloud_Fraction in conf
+  ! If Cloud_Fraction is not provided in conf , then use the Cloud_Fraction in geoval 
+  ! and make sure the cloud fraction interpolated from background is in the valid range [0.0,1.0]
   if (conf%n_Clouds > 0) then
-    if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
-      CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
-      do k1 = 1, n_Profiles
-        atm(k1)%Cloud_Fraction(:) = geoval%vals(:, k1)
-      end do
-    else
+    if ( conf%Cloud_Fraction >= 0.0  ) then 
       do k1 = 1, n_Profiles
         atm(k1)%Cloud_Fraction(:) = conf%Cloud_Fraction
       end do
+    else
+      if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
+        CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
+        do k1 = 1, n_Profiles
+          where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
+          where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
+          atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)  
+        end do
+      end if
     end if
   end if
 
@@ -597,7 +620,7 @@ type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
 type(crtm_conf),             intent(in)    :: conf
 
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval, u, v
 integer :: k1, n1
 integer :: iLand
 
@@ -641,17 +664,38 @@ real(kind_real), allocatable :: ObsTb(:,:)
   end do
   deallocate(ObsTb)
 
-  !Wind_Speed
-  call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Wind_Speed = geoval%vals(1, k1)
-  end do
+  if (ufo_vars_getindex(geovals%variables, var_sfc_wspeed) > 0 .and. &
+      ufo_vars_getindex(geovals%variables, var_sfc_wdir) > 0) then
+    ! Directly use model-provided wind speed and direction
+    !Wind_Speed
+    call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Speed = geoval%vals(1, k1)
+    end do
 
-  !Wind_Direction
-  call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Wind_Direction = geoval%vals(1, k1)
-  end do
+    !Wind_Direction
+    call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Direction = geoval%vals(1, k1)
+    end do
+  else if (ufo_vars_getindex(geovals%variables, var_sfc_u) > 0 .and. &
+      ufo_vars_getindex(geovals%variables, var_sfc_v) > 0) then
+    ! Convert 2d wind components to speed and direction
+    call ufo_geovals_get_var(geovals, var_sfc_u, u)
+    call ufo_geovals_get_var(geovals, var_sfc_v, v)
+
+    !Wind_Speed
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Speed = sqrt(u%vals(1, k1)**2 + v%vals(1, k1)**2)
+    end do
+
+    !Wind_Direction
+    do k1 = 1, n_Profiles
+      sfc(k1)%Wind_Direction = uv_to_wdir(u%vals(1, k1), v%vals(1, k1))
+    end do
+  else
+    call abor1_ftn('Load_Sfc_Data error: missing surface wind geovals')
+  end if
 
   !Water_Coverage
   call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
@@ -755,25 +799,38 @@ real(kind_real), allocatable :: ObsTb(:,:)
   end do
   
   !Sea_Surface_Salinity
-  if (TRIM(conf%salinity_option) == "on") THEN
+  if (cmp_strings(conf%salinity_option, "on")) THEN
     call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
     do k1 = 1, n_Profiles
       sfc(k1)%Salinity = geoval%vals(1, k1)
     end do
   end if
 
+  ! Update Ice_Coverage and Land_Coverage for
+  ! Soil_Type or Vegetation_Type corresponding to Glacial land ice
+  do k1 = 1, n_Profiles
+    if (sfc(k1)%Land_Coverage > ZERO .and. &
+       (sfc(k1)%Soil_Type == 9 .or. sfc(k1)%Vegetation_Type == 13)) then
+      sfc(k1)%Ice_Coverage = min(sfc(k1)%Ice_Coverage + sfc(k1)%Land_Coverage, ONE)
+      sfc(k1)%Land_Coverage = ZERO
+    end if
+  end do
+
 end subroutine Load_Sfc_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Geom_Data(obss,geo)
+subroutine Load_Geom_Data(obss,geo,geo_hf)
 
 implicit none
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
+type(CRTM_Geometry_type), intent(inout), optional :: geo_hf(:)
 real(kind_real), allocatable :: TmpVar(:)
 integer :: nlocs
+character(kind=c_char,len=101) :: obsname
 
+ call obsspace_obsname(obss, obsname)
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
@@ -810,6 +867,33 @@ integer :: nlocs
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
     geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
+!read geophysical values for gmi high frequency channels 10-13.
+ if (cmp_strings(trim(obsname),'GMI-GPM') .or. cmp_strings(trim(obsname),'gmi_gpm')) then
+    if ( present(geo_hf) ) then
+       geo_hf = geo
+       if (obsspace_has(obss, "MetaData", "sensor_zenith_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle1", TmpVar)
+          geo_hf(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
+       endif
+       if (obsspace_has(obss, "MetaData", "solar_zenith_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "solar_zenith_angle1", TmpVar)
+          geo_hf(:)%Source_Zenith_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "sensor_azimuth_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle1", TmpVar)
+          geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "solar_azimuth_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle1", TmpVar)
+          geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
+       endif
+       if (obsspace_has(obss, "MetaData", "sensor_view_angle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensor_view_angle1", TmpVar)
+          geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
+       endif
+    endif
+ endif
+ 
  deallocate(TmpVar)
 
 end subroutine Load_Geom_Data
@@ -830,6 +914,51 @@ end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
+!> \brief Determines the wind direction from U and V components
+!!
+!! \details **uv_to_wdir** Calculates the wind direction, as measured clockwise
+!! from north, similar to an azimuth angle.  Takes the eastward and northward
+!! wind component magnitudes, respectively, as arguments.
+!! Due to the azimuthal convention used here, the inverse equations are:
+!! u = w * cos(wdir * deg2rad)
+!! v = w * sin(wdir * deg2rad)
+!! where w is the wind speed
+function uv_to_wdir(u, v) result(wdir)
+
+use ufo_constants_mod, only: zero, one, two, pi, rad2deg
+
+implicit none
+
+real (kind=kind_real), intent(in) :: u !< eastward_wind
+real (kind=kind_real), intent(in) :: v !< northward_wind
+real (kind=kind_real) :: wdir
+real (kind=kind_real) :: windratio, windangle
+integer :: iquadrant
+real(kind=kind_real),parameter:: windscale = 999999.0_kind_real
+real(kind=kind_real),parameter:: windlimit = 0.0001_kind_real
+real(kind=kind_real),parameter:: quadcof(4,2) = &
+  reshape((/zero,  one,  one,  two, &
+            one,  -one,  one, -one/), (/4,2/))
+
+  if (u >= zero .and. v >= zero) iquadrant = 1
+  if (u >= zero .and. v <  zero) iquadrant = 2
+  if (u <  zero .and. v >= zero) iquadrant = 4
+  if (u <  zero .and. v <  zero) iquadrant = 3
+
+  if (abs(v) >= windlimit) then
+    windratio = u / v
+  else
+    windratio = zero
+    if (abs(u) > windlimit) then
+      windratio = windscale * u
+    endif
+  endif
+  windangle = atan(abs(windratio))   ! wind azimuth is in radians
+  wdir = ( quadcof(iquadrant, 1) * pi + windangle * quadcof(iquadrant, 2) ) * rad2deg
+
+end function uv_to_wdir
+
+! -----------------------------------------------------------------------------
 
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      &aerosol_option,atm)
@@ -851,19 +980,19 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
     INTEGER :: ivar
 
-    IF (TRIM(aerosol_option) == "aerosols_gocart_default") THEN
+    IF (cmp_strings(aerosol_option, "aerosols_gocart_default")) THEN
        varname=var_rh
        CALL ufo_geovals_get_var(geovals, varname, geoval)
        rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_default
-    ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_merra_2") THEN
+    ELSEIF (cmp_strings(aerosol_option, "aerosols_gocart_merra_2")) THEN
        varname=var_rh
        CALL ufo_geovals_get_var(geovals, varname, geoval)
        rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_merra_2
-    ELSEIF (TRIM(aerosol_option) == "aerosols_other") THEN
+    ELSEIF (cmp_strings(aerosol_option, "aerosols_other")) THEN
        CALL assign_other
     ELSE
        message = 'this aerosol not implemented - check later'
@@ -882,7 +1011,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
 
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
+      REAL(kind_real), DIMENSION(n_layers) :: layer_factors
       
       INTEGER :: i,k,m
 
@@ -890,7 +1019,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       DO m=1,n_profiles
 
-         CALL calculate_aero_layer_factor(atm(m),ugkg_kgm2)
+         CALL calculate_aero_layer_factor(atm(m),layer_factors)
  
          DO i=1,n_aerosols_gocart_default
 
@@ -898,10 +1027,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue_layer)
+                 &MAX(geoval%vals(:,m)*layer_factors,aerosol_concentration_minvalue_layer)
 
-            SELECT CASE ( TRIM(varname))
-            CASE ('sulf')
+            SELECT CASE (TRIM(varname))
+            CASE (var_sulfate)
                atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -909,11 +1038,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('bc1')
+            CASE (var_bcphobic)
                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-            CASE ('bc2')
+            CASE (var_bcphilic)
                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -921,11 +1050,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('oc1')
+            CASE (var_ocphobic)
                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-            CASE ('oc2')
+            CASE (var_ocphilic)
                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -933,44 +1062,44 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('dust1')
+            CASE (var_du001)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
-            CASE ('dust2')
+            CASE (var_du002)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
-            CASE ('dust3')
+            CASE (var_du003)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
-            CASE ('dust4')
+            CASE (var_du004)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
-            CASE ('dust5')
+            CASE (var_du005)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
 
-            CASE ('seas1')
+            CASE (var_ss001)
                atm(m)%aerosol(i)%type  = seas_types(1)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas2')
+            CASE (var_ss002)
                atm(m)%aerosol(i)%type  = seas_types(2)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas3')
+            CASE (var_ss003)
                atm(m)%aerosol(i)%type  = seas_types(3)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas4')
+            CASE (var_ss004)
                atm(m)%aerosol(i)%type  = seas_types(4)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -1027,41 +1156,37 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
    END SUBROUTINE assign_aerosol_names
 
-   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,ugkg_kgm2)
+   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
+     REAL(kind_real), INTENT(out) :: layer_factors(:)
 
      INTEGER :: k
 
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-     DO k=1,SIZE(ugkg_kgm2)
-!correct for mixing ratio factor ugkg_kgm2 
+     DO k=1,SIZE(layer_factors)
+!correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-        ugkg_kgm2(k)=1.0e-9_kind_real*(atm%Level_Pressure(k)-&
+        layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
              &atm%Level_Pressure(k-1))*100_kind_real/grav/&
              &(1_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
      ENDDO
 
    END SUBROUTINE calculate_aero_layer_factor_atm_profile
 
-   SUBROUTINE calculate_aero_layer_factor_atm(atm,ugkg_kgm2)
+   SUBROUTINE calculate_aero_layer_factor_atm(atm,layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm(:)
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:,:)
+     REAL(kind_real), INTENT(out) :: layer_factors(:,:)
 
      INTEGER :: k,m
 
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-     DO k=1,SIZE(ugkg_kgm2,1)
-        DO m=1,SIZE(ugkg_kgm2,2)
-!correct for mixing ratio factor ugkg_kgm2 
+     DO k=1,SIZE(layer_factors,1)
+        DO m=1,SIZE(layer_factors,2)
+!correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-           ugkg_kgm2(k,m)=1.0e-9_kind_real*(atm(m)%Level_Pressure(k)-&
+           layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
                 &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
                 &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
         ENDDO
@@ -1139,7 +1264,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER i
      getindex=-1
      DO i=1,SIZE(names)
-        IF(TRIM(usrname)==TRIM(names(i))) THEN
+        IF(cmp_strings(usrname, names(i))) THEN
            getindex=i
            EXIT
         ENDIF

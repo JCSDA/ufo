@@ -8,7 +8,7 @@ observations:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -19,7 +19,7 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 4-8
   obs filters:

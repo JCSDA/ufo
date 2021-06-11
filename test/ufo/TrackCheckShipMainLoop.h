@@ -31,8 +31,6 @@ namespace ufo {
 namespace test {
 
 void testFirstRejectionSimultaneousIncluded(const eckit::LocalConfiguration &conf) {
-  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
-
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
 
@@ -49,7 +47,10 @@ void testFirstRejectionSimultaneousIncluded(const eckit::LocalConfiguration &con
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
+  ufo::TrackCheckShipParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::TrackCheckShip filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
   const ufo::TrackCheckShipDiagnostics diagnostics = *filter.diagnostics();
 

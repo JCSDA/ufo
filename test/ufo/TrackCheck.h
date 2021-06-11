@@ -53,8 +53,10 @@ void testTrackCheck(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "Track Check");
-  ufo::TrackCheck filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "Track Check");
+  ufo::TrackCheckParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::TrackCheck filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedRejectedObsIndices =

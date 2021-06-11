@@ -43,10 +43,14 @@ class ObsErrorModelRampParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<float>> x0{"x0", this};
   /// x-coordinate of the upper ramp inflection point
   oops::RequiredParameter<std::vector<float>> x1{"x1", this};
+  /// (optinal) an extra upper ramp.
+  oops::OptionalParameter<std::vector<float>> x2{"x2", this};
   /// y-coordinate of the lower ramp inflection point
   oops::RequiredParameter<std::vector<float>> err0{"err0", this};
   /// y-coordinate of the upper ramp inflection point
   oops::RequiredParameter<std::vector<float>> err1{"err1", this};
+  /// (optional) an extra error value.
+  oops::OptionalParameter<std::vector<float>> err2{"err2", this};
   /// whether to save xvar values to the ObsSpace
   oops::Parameter<bool> save{"save", false, this};
 };
@@ -73,10 +77,27 @@ class ObsErrorModelRampParameters : public oops::Parameters {
 ///         '       '
 ///        x0      x1
 /// ~~~~
+/// In case there are x2 and err2 values:
+///
+/// err2 |-   -   -  -  -  -  -  *---
+///      |                   , ' .
+///      |               , '     .
+///      |           , '         .
+/// err1 |-   -   - *---         .
+///      |        ,'.            .
+///      |      ,'  .            .
+///      |    ,'    .            .
+/// err0 |--*'      .            .
+///      |  .       .            .
+///      '--+-------+---------------
+///         '       '            '
+///        x0      x1           x2
+/// ~~~~
 ///
 /// Notes:
-/// - for a decaying ramp, set err1 < err0
-/// - for a step function, set x0 == x1
+/// - for a decaying ramp, set err1 < err0 and/or err2 < err1.
+/// - for a step function starting at either the first or second inflection point, set x0 == x1
+///   or x2 == x1, respectively.
 ///
 /// ### example configurations for a FilterBase derived class: ###
 ///

@@ -1,0 +1,59 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+# Use the default actions of the RejectList and AcceptList filters
+- obs space:
+    name: Standard
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  HofX: HofX
+  obs filters:
+  # reject observations with var1 >= 6
+  - filter: RejectList
+    # the default action for RejectList is "reject"
+    where:
+      - variable:
+          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 6
+  # now "accept back" all rejected observations of variable2 with var1 >= 3 and var1 <= 7
+  - filter: AcceptList
+    # the default action for AcceptList is "accept"
+    filter variables: [variable2]
+    where:
+      - variable:
+          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 3
+        maxvalue: 7
+  # all observations of variable1 with var1 <= 5 and of variable2 with var1 <= 7 should be accepted
+  passedBenchmark: 12
+# Check it is possible to flip the actions of the RejectList and AcceptList filters
+- obs space:
+    name: Flipped
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  HofX: HofX
+  obs filters:
+  # reject observations with var1 >= 6
+  - filter: AcceptList
+    action:
+      name: reject
+    where:
+      - variable:
+          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 6
+  # now "accept back" all rejected observations of variable2 with var1 >= 3 and var1 <= 7
+  - filter: RejectList
+    action:
+      name: accept
+    filter variables: [variable2]
+    where:
+      - variable:
+          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 3
+        maxvalue: 7
+  # all observations of variable1 with var1 <= 5 and of variable2 with var1 <= 7 should be accepted
+  passedBenchmark: 12
+

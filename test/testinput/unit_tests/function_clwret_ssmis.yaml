@@ -1,0 +1,25 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs space:
+    name: ssmis_f17
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-24 
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_geoval_2020110112_m.nc4
+  obs function:
+    name: CLWRetMW_SSMIS@ObsFunction 
+    options:
+        ch19h: 12 
+        ch19v: 13 
+        ch22v: 14 
+        ch37h: 15 
+        ch37v: 16 
+        ch91v: 17 
+        ch91h: 18 
+        varGroup: ObsValue
+    variables: [clw]
+    tolerance: 1.0e-6

@@ -14,6 +14,10 @@
 
 #include "ufo/ObsBiasCovariance.h"
 
+#include "ioda/distribution/Accumulator.h"
+#include "ioda/Engines/Factory.h"
+#include "ioda/Layout.h"
+#include "ioda/ObsGroup.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -24,95 +28,84 @@
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/predictors/PredictorBase.h"
+#include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : conf_(conf), odb_(odb), prednames_(0), jobs_(0), variances_(0), preconditioner_(0),
+ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
+                                     const Parameters_ & params)
+  : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(),
+    preconditioner_(0),
     ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
-  // Get the jobs(channels)
-  if (conf_.has("obs bias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
-    jobs_.assign(jobs.begin(), jobs.end());
-  }
-
   // Predictor factory
-  if (conf_.has("obs bias.predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("obs bias.predictors", confs);
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
-      prednames_.push_back(pred->name());
-    }
+  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
+    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(conf, vars_));
+    prednames_.push_back(pred->name());
   }
 
-  if (prednames_.size()*jobs_.size() > 0) {
+  if (prednames_.size()*vars_.size() > 0) {
+    if (params.covariance.value() == boost::none)
+      throw eckit::UserError("obs bias.covariance section missing from the YAML file");
+    const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
+
     // Get the minimal required filtered obs number
-    minimal_required_obs_number_ =
-      conf_.getUnsigned("obs bias.covariance.minimal required obs number");
+    minimal_required_obs_number_ = biasCovParams.minimalRequiredObsNumber;
 
     // Override the variance range if provided
-    if (conf_.has("obs bias.covariance.variance range")) {
-      const std::vector<double>
-        range = conf_.getDoubleVector("obs bias.covariance.variance range");
+    {
+      const std::vector<double> &range = biasCovParams.varianceRange.value();
       ASSERT(range.size() == 2);
       smallest_variance_ = range[0];
       largest_variance_ = range[1];
     }
 
-    // Override the preconditioning step size  if provided
-    if (conf_.has("obs bias.covariance.step size")) {
-      step_size_ = conf_.getDouble("obs bias.covariance.step size");
-    }
+    // Override the preconditioning step size if provided
+    step_size_ = biasCovParams.stepSize;
 
     // Override the largest analysis variance if provided
-    if (conf_.has("obs bias.covariance.largest analysis variance")) {
-      largest_analysis_variance_ =
-        conf_.getDouble("obs bias.covariance.largest analysis variance");
-    }
+    largest_analysis_variance_ = biasCovParams.largestAnalysisVariance;
 
     // Initialize the variances to upper limit
-    variances_.resize(prednames_.size() * jobs_.size());
-    std::fill(variances_.begin(), variances_.end(), largest_variance_);
+    variances_ = Eigen::VectorXd::Constant(prednames_.size()*vars_.size(), largest_variance_);
 
     // Initialize the hessian contribution to zero
-    ht_rinv_h_.resize(prednames_.size() * jobs_.size());
+    ht_rinv_h_.resize(prednames_.size() * vars_.size());
     std::fill(ht_rinv_h_.begin(), ht_rinv_h_.end(), 0.0);
 
     // Initialize the preconditioner to default step size
-    preconditioner_.resize(prednames_.size() * jobs_.size());
+    preconditioner_.resize(prednames_.size() * vars_.size());
     std::fill(preconditioner_.begin(), preconditioner_.end(), step_size_);
 
     // Initialize obs_num_ to ZERO
-    obs_num_.resize(jobs_.size());
+    obs_num_.resize(vars_.size());
     std::fill(obs_num_.begin(), obs_num_.end(), 0);
 
     // Initialize analysis error variances to the upper limit
-    analysis_variances_.resize(prednames_.size() * jobs_.size());
+    analysis_variances_.resize(prednames_.size() * vars_.size());
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
 
     // Initializes from given prior
-    if (conf_.has("obs bias.covariance.prior")) {
+    if (biasCovParams.prior.value() != boost::none) {
+      const ObsBiasCovariancePriorParameters &priorParams = *biasCovParams.prior.value();
+
       // Get default inflation ratio
-      const double inflation_ratio =
-        conf.getDouble("obs bias.covariance.prior.inflation.ratio");
+      const double inflation_ratio = priorParams.inflation.value().ratio;
 
       // Check the large inflation ratio when obs number < minimal_required_obs_number
-      const double large_inflation_ratio =
-        conf.getDouble("obs bias.covariance.prior.inflation.ratio for small dataset");
+      const double large_inflation_ratio = priorParams.inflation.value().ratioForSmallDataset;
 
       // read in Variances prior (analysis_variances_) and number of obs. (obs_num_)
       // from previous cycle
-      this->read(conf_);
+      this->read(priorParams);
 
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance
       std::size_t ii;
-      for (std::size_t j = 0; j < jobs_.size(); ++j) {
+      for (std::size_t j = 0; j < vars_.size(); ++j) {
         const double inflation = (obs_num_[j] <= minimal_required_obs_number_) ?
                                  large_inflation_ratio : inflation_ratio;
         for (std::size_t p = 0; p < prednames_.size(); ++p) {
@@ -133,72 +126,48 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::read(const eckit::Configuration & conf) {
+void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
   oops::Log::trace() << "ObsBiasCovariance::read from file " << std::endl;
 
-  // Default predictor names from GSI
-  const std::vector<std::string> gsi_predictors = {"constant",
-                                                   "zenith_angle",
-                                                   "cloud_liquid_water",
-                                                   "lapse_rate_order_2",
-                                                   "lapse_rate",
-                                                   "cosine_of_latitude_times_orbit_node",
-                                                   "sine_of_latitude",
-                                                   "emissivity",
-                                                   "scan_angle_order_4",
-                                                   "scan_angle_order_3",
-                                                   "scan_angle_order_2",
-                                                   "scan_angle"
-                                                   };
+  if (params.inputFile.value() != boost::none) {
+    // Open an hdf5 file, read only
+    ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
+    ioda::Engines::BackendCreationParameters backendParams;
+    backendParams.fileName = *params.inputFile.value();
+    backendParams.action   = ioda::Engines::BackendFileActions::Open;
+    backendParams.openMode = ioda::Engines::BackendOpenModes::Read_Only;
 
-  const std::string sensor = conf.getString("obs bias.sensor");
+    // Create the backend and attach it to an ObsGroup
+    // Use the None DataLyoutPolicy for now to accommodate the current file format
+    ioda::Group backend = constructBackend(backendName, backendParams);
+    ioda::ObsGroup obsgroup = ioda::ObsGroup(backend,
+                   ioda::detail::DataLayoutPolicy::generate(
+                         ioda::detail::DataLayoutPolicy::Policies::None));
 
-  if (conf.has("obs bias.covariance.prior.datain")) {
-    const std::string filename = conf.getString("obs bias.covariance.prior.datain");
-    std::ifstream infile(filename);
+    // Read coefficients error variances into the Eigen array
+    ioda::Variable bcerrvar = obsgroup.vars["bias_coeff_errors"];
+    Eigen::ArrayXXf allbcerrors;
+    bcerrvar.readWithEigenRegular(allbcerrors);
 
-    if (infile.is_open())
-    {
-      int ich;            //  sequential number
-      std::string nusis;  //  sensor/instrument/satellite
-      int nuchan;         //  channel number
-      float number;       //  QCed obs number from previous cycle
+    // Read nobs into Eigen array
+    ioda::Variable nobsvar = obsgroup.vars["number_obs_assimilated"];
+    Eigen::ArrayXf nobsassim;
+    nobsvar.readWithEigenRegular(nobsassim);
 
-      float par;
-      while (infile >> ich)
-      {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> number;
-        if (nusis == sensor) {
-          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
-          if (ijob != jobs_.end()) {
-            int j = std::distance(jobs_.begin(), ijob);
-            obs_num_[j] = static_cast<int>(number);
+    // Find indices of predictors and variables/channels that we need in the data read from the file
+    const std::vector<int> pred_idx = getRequiredVariableIndices(obsgroup, "predictors",
+                                              prednames_.begin(), prednames_.end());
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
 
-            for (auto & item : gsi_predictors) {
-              infile >> par;
-              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
-              if (ipred != prednames_.end()) {
-                int p = std::distance(prednames_.begin(), ipred);
-                analysis_variances_.at(j*prednames_.size() + p) = static_cast<double>(par);
-              }
-            }
-          } else {
-            for (auto & item : gsi_predictors)
-              infile >> par;
-          }
-        } else {
-          for (auto & item : gsi_predictors)
-            infile >> par;
-        }
+    // Filter predictors and channels that we need
+    // FIXME: may be possible by indexing allbcerrors(pred_idx, chan_idx) when Eigen 3.4
+    // is available
+    for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
+      obs_num_[jvar] = nobsassim(var_idx[jvar]);
+      for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+        analysis_variances_[jvar*pred_idx.size()+jpred] =
+             allbcerrors(pred_idx[jpred], var_idx[jvar]);
       }
-      infile.close();
-      oops::Log::trace() << "ObsBiasCovariance::read from prior file: "
-                         << filename << " Done " << std::endl;
-    } else {
-      oops::Log::error() << "Unable to open file : " << filename << std::endl;
-      ABORT("Unable to open bias correction coeffs variance prior file ");
     }
   }
 
@@ -221,32 +190,32 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     // Retrieve the QC flags and do statistics from second outer loop
     const int jouter = innerConf.getInt("iteration");
     if (jouter >= 1) {
-      // Reset the number of filtered Obs.
-      std::fill(obs_num_.begin(), obs_num_.end(), 0);
+      std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
+          odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
 
-      // Retrieve the QC flags of previous outer loop and get the number of effective obs.
+      // Retrieve the QC flags of previous outer loop and recalculate the number of effective obs.
       const std::string group_name = "EffectiveQC" + std::to_string(jouter-1);
       const std::vector<std::string> vars = odb_.obsvariables().variables();
       std::vector<int> qc_flags(odb_.nlocs(), 999);
-      for (std::size_t j = 0; j < vars.size(); ++j) {
-        if (odb_.has(group_name , vars[j])) {
-          odb_.get_db(group_name, vars[j],  qc_flags);
-          obs_num_[j] = std::count(qc_flags.begin(), qc_flags.end(), 0);
+      for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
+        if (odb_.has(group_name, vars[jvar])) {
+          odb_.get_db(group_name, vars[jvar], qc_flags);
+          for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
+            if (qc_flags[jloc] == 0)
+              obs_num_accumulator->addTerm(jloc, jvar, 1);
         } else {
-          throw eckit::UserError("Unable to find QC flags : " + vars[j] + "@" + group_name);
+          throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + group_name);
         }
       }
 
-      // Sum across the processros
-      if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(obs_num_.begin(), obs_num_.end(),
-                                     eckit::mpi::sum());
+      // Sum across the processors
+      obs_num_ = obs_num_accumulator->computeResult();
 
       const float missing = util::missingValue(missing);
 
       // compute the hessian contribution from Jo bias terms channel by channel
       // retrieve the effective error (after QC) for this channel
-      ioda::ObsVector r_inv(odb_, "EffectiveError", true);
+      ioda::ObsVector r_inv(odb_, "EffectiveError");
 
       // compute \mathrm{R}^{-1}
       std::size_t nvars = r_inv.nvars();
@@ -260,16 +229,13 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         }
       }
 
-      // Sum the total number of effective obs. across tasks
-      if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(obs_num_.begin(), obs_num_.end(), eckit::mpi::sum());
-
       // compute \mathrm{H}_\beta^\intercal \mathrm{R}^{-1} \mathrm{H}_\beta
       // -----------------------------------------
-      std::fill(ht_rinv_h_.begin(), ht_rinv_h_.end(), 0.0);
+      std::unique_ptr<ioda::Accumulator<std::vector<double>>> ht_rinv_h_accumulator =
+          odb_.distribution()->createAccumulator<double>(ht_rinv_h_.size());
       for (std::size_t p = 0; p < prednames_.size(); ++p) {
         // retrieve the predictors
-        const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor", true);
+        const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
 
         // for each variable
         ASSERT(r_inv.nlocs() == predx.nlocs());
@@ -277,18 +243,18 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         // only keep the diagnoal
         for (size_t vv = 0; vv < nvars; ++vv) {
           for (size_t ii = 0; ii < predx.nlocs(); ++ii)
-            ht_rinv_h_[vv*prednames_.size() + p] +=
-              pow(predx[ii*nvars + vv], 2) * r_inv[ii*nvars + vv];
+            ht_rinv_h_accumulator->addTerm(ii,
+                                           vv*prednames_.size() + p,
+                                           pow(predx[ii*nvars + vv], 2) * r_inv[ii*nvars + vv]);
         }
       }
 
       // Sum the hessian contributions across the tasks
-      if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(ht_rinv_h_.begin(), ht_rinv_h_.end(), eckit::mpi::sum());
+      ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
     }
 
     // reset variances for bias predictor coeff. based on current data count
-    for (std::size_t j = 0; j < jobs_.size(); ++j) {
+    for (std::size_t j = 0; j < obs_num_.size(); ++j) {
       if (obs_num_[j] <= minimal_required_obs_number_) {
         for (std::size_t p = 0; p < prednames_.size(); ++p)
           variances_[j*prednames_.size() + p] = smallest_variance_;
@@ -296,10 +262,9 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     }
 
     // set a coeff. factor for variances of control variables
-    std::size_t index;
-    for (std::size_t j = 0; j < jobs_.size(); ++j) {
+    for (std::size_t j = 0; j < vars_.size(); ++j) {
       for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        index = j*prednames_.size() + p;
+        const std::size_t index = j*prednames_.size() + p;
         preconditioner_[index] = step_size_;
         // L = \mathrm{A}^{-1}
         if (obs_num_[j] > 0)
@@ -323,9 +288,7 @@ void ObsBiasCovariance::multiply(const ObsBiasIncrement & dx1,
                                  ObsBiasIncrement & dx2) const {
   oops::Log::trace() << "ObsBiasCovariance::multiply starts" << std::endl;
 
-  for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-    dx2[jj] = dx1[jj] * variances_[jj];
-  }
+  dx2.data().array() = dx1.data().array() * variances_.array();
 
   oops::Log::trace() << "ObsBiasCovariance::multiply is done" << std::endl;
 }
@@ -336,9 +299,7 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & dx1,
                                         ObsBiasIncrement & dx2) const {
   oops::Log::trace() << "ObsBiasCovariance::inverseMultiply starts" << std::endl;
 
-  for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-    dx2[jj] = dx1[jj] / variances_[jj];
-  }
+  dx2.data().array() = dx1.data().array() / variances_.array();
 
   oops::Log::trace() << "ObsBiasCovariance::inverseMultiply is done" << std::endl;
 }
@@ -350,7 +311,7 @@ void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   if (dx) {
     static util::NormalDistribution<double> dist(variances_.size());
     for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-      dx[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
     }
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;

@@ -8,12 +8,14 @@
 #ifndef UFO_PREDICTORS_EMISSIVITY_H_
 #define UFO_PREDICTORS_EMISSIVITY_H_
 
-#include <vector>
-
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
+}
+
+namespace oops {
+  class Variables;
 }
 
 namespace ioda {
@@ -26,8 +28,7 @@ namespace ufo {
 
 class Emissivity : public PredictorBase {
  public:
-  Emissivity(const eckit::Configuration &, const std::vector<int> &);
-  ~Emissivity() {}
+  Emissivity(const eckit::Configuration &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

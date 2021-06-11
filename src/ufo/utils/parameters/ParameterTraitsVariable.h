@@ -9,12 +9,8 @@
 #define UFO_UTILS_PARAMETERS_PARAMETERTRAITSVARIABLE_H_
 
 #include <string>
-#include <vector>
 
-#include "eckit/exception/Exceptions.h"
-#include "oops/util/CompositePath.h"
 #include "oops/util/parameters/ParameterTraits.h"
-#include "oops/util/stringFunctions.h"
 #include "ufo/filters/Variable.h"
 
 /// \file ParameterTraitsVariable.h
@@ -23,46 +19,39 @@
 
 namespace oops {
 
+/// Parameters representing variables can be set in YAML files in two ways:
+///
+/// * by setting a key to the variable name (a string), e.g.
+///
+///       selected variable: air_temperature@ObsValue
+///
+/// * by setting a key to a dictionary containing a key "name" set to the variable name
+///   and optionally extra keys called "channels" and "options", e.g.
+///
+///       selected variable:
+///         name: brightness_temperature@ObsValue
+///         channels: 1,5,7-10,13
+///
+///   or
+///
+///       selected variable:
+///         name: SCATRetMW@ObsFunction
+///         options:
+///           scatret_ch238: 1
+///           scatret_ch314: 2
+///           scatret_ch890: 15
+///           scatret_types: [ObsValue]
 template <>
 struct ParameterTraits<ufo::Variable> {
   static boost::optional<ufo::Variable> get(util::CompositePath &path,
                                             const eckit::Configuration &config,
-                                            const std::string& name) {
-    if (config.has(name)) {
-      eckit::LocalConfiguration varConf(config, name);
-      if (!varConf.has("name")) {
-        // TODO(wsmigaj): shouldn't ufo::Variable itself throw an exception if
-        // the 'name' property is not specified?
-        throw eckit::BadParameter(path.path() + ": No variable name specified", Here());
-      }
-      return ufo::Variable(varConf);
-    } else {
-      return boost::none;
-    }
-  }
+                                            const std::string& name);
 
   static void set(eckit::LocalConfiguration &config,
                   const std::string &name,
-                  const ufo::Variable &value) {
-    eckit::LocalConfiguration subConfig;
-    subConfig.set("name", value.variable() + "@" + value.group());
-    const std::vector<int> &channels = value.channels();
-    if (!channels.empty()) {
-      const std::string channelsAsString = util::stringfunctions::join(
-            ",", channels.begin(), channels.end(), [](int n) { return std::to_string(n); });
-      subConfig.set("channels", channelsAsString);
-    }
-    if (!value.options().keys().empty())
-      subConfig.set("options", value.options());
-    config.set(name, subConfig);
-  }
+                  const ufo::Variable &value);
 
-  static ObjectJsonSchema jsonSchema(const std::string &name) {
-    ObjectJsonSchema nestedSchema({{"name", {{"type", "\"string\""}}},
-                                   {"options", {{"type", "\"object\""}}},
-                                   {"channels", {{"type", "[\"string\", \"integer\"]"}}}});
-    return ObjectJsonSchema({{name, nestedSchema.toPropertyJsonSchema()}});
-  }
+  static ObjectJsonSchema jsonSchema(const std::string &name);
 };
 
 }  // namespace oops

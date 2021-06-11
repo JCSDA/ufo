@@ -19,6 +19,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TemporalThinningParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -35,8 +36,8 @@ namespace util {
 
 namespace ufo {
 
+class ObsAccessor;
 class RecursiveSplitter;
-class TemporalThinningParameters;
 
 /// \brief Thin observations so that the retained ones are sufficiently separated in time.
 ///
@@ -44,9 +45,11 @@ class TemporalThinningParameters;
 class TemporalThinning : public FilterBase,
                          private util::ObjectCounter<TemporalThinning> {
  public:
+  typedef TemporalThinningParameters Parameters_;
+
   static const std::string classname() {return "ufo::TemporalThinning";}
 
-  TemporalThinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  TemporalThinning(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                    std::shared_ptr<ioda::ObsDataVector<int> > flags,
                    std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -58,20 +61,16 @@ class TemporalThinning : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override { return QCflags::thinned; }
 
-  std::vector<bool> identifyThinnedObservations(const std::vector<bool> &apply) const;
+  ObsAccessor createObsAccessor() const;
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+  std::vector<bool> identifyThinnedObservations(const std::vector<bool> &apply,
+                                                const ObsAccessor &obsAccessor) const;
 
-  std::unique_ptr<ioda::ObsDataVector<int>> getObservationPriorities() const;
-
-  void groupObservationsByCategory(const std::vector<size_t> &validObsIds,
-                                   RecursiveSplitter &splitter) const;
-
-  void flagThinnedObservations(const std::vector<bool> &isThinned,
-                               std::vector<std::vector<bool>> &flagged) const;
+  boost::optional<std::vector<int>> getObservationPriorities(
+      const ObsAccessor &obsAccessor) const;
 
  private:
-  std::unique_ptr<TemporalThinningParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo
