@@ -31,6 +31,7 @@
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
+#include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
@@ -123,6 +124,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            performActionMaker("Perform Action");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::BayesianBackgroundQCFlags> >
            BayesianBackgroundQCFlagsMaker("Bayesian Background QC Flags");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ProbabilityGrossErrorWholeReport> >
+           ProbabilityGrossErrorWholeReportMaker("Bayesian Whole Report");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ImpactHeightCheck> >
            ImpactHeightCheckMaker("GNSSRO Impact Height Check");
 

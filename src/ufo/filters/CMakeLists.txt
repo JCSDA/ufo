@@ -57,6 +57,8 @@ set ( filters_files
       ObsFilterData.h
       PreQC.cc
       PreQC.h
+      ProbabilityGrossErrorWholeReport.cc
+      ProbabilityGrossErrorWholeReport.h
       QCflags.h
       QCmanager.cc
       QCmanager.h
