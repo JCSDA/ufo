@@ -37,6 +37,7 @@
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/SatName.h"
+#include "ufo/filters/SatwindInversionCorrection.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
@@ -128,6 +129,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            ProbabilityGrossErrorWholeReportMaker("Bayesian Whole Report");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ImpactHeightCheck> >
            ImpactHeightCheckMaker("GNSSRO Impact Height Check");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::SatwindInversionCorrection> >
+             SatwindInversionCorrectionMaker("Satwind Inversion Correction");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

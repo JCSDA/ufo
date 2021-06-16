@@ -209,6 +209,7 @@ list( APPEND ufo_test_input
   testinput/satname.yaml
   testinput/sattcwv.yaml
   testinput/satwind.yaml
+  testinput/satwind_inversion_correction.yaml
   testinput/satwind_metoffice.yaml
   testinput/sbuv2_n19.yaml
   testinput/sbuv2_n19_flipz.yaml
@@ -1597,6 +1598,13 @@ ecbuild_add_test( TARGET  test_ufo_satname
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_satwind_inversion_correction
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/satwind_inversion_correction.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_boundscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

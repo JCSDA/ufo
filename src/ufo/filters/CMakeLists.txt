@@ -73,6 +73,8 @@ set ( filters_files
       ProfileFewObsCheck.h
       SatName.h
       SatName.cc
+      SatwindInversionCorrection.cc
+      SatwindInversionCorrection.h
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
