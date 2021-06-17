@@ -50,6 +50,7 @@ set ( utils_files
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      SurfaceReportConstants.h
       ufo_utils_mod.F90
       ufo_utils.interface.F90
       ufo_utils.interface.h

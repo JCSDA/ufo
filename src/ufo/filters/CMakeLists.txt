@@ -149,6 +149,8 @@ set ( filters_files
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/Conditional.cc
       obsfunctions/Conditional.h
+      obsfunctions/SetSurfaceType.cc
+      obsfunctions/SetSurfaceType.h
       obsfunctions/SIRetMW.cc
       obsfunctions/SIRetMW.h
       obsfunctions/SIRetSymmetricMW.cc

@@ -68,10 +68,10 @@ module ufo_radiancerttov_utils_mod
 
   !var_ps
 
-  character(len=maxvarlen), dimension(10), target :: varin_default_satrad = &
+  character(len=maxvarlen), dimension(9), target :: varin_default_satrad = &
     (/var_prs, var_ts, var_q, var_sfc_t2m, & 
     var_u, var_v, var_sfc_p2m, var_sfc_q2m, &
-    var_sfc_tskin, var_surf_type_rttov /)
+    var_sfc_tskin /)
 
   character(len=maxvarlen), pointer, public :: varin_default(:)
 
@@ -769,11 +769,12 @@ contains
     profiles => self % profiles
 !DAR: This will be extended for RTTOV_SCATT
 !profiles_scatt = > self % profiles_scatt
-    if(present(ob_info)) then
+
+    if (present(ob_info)) then
       nlocs_total = 1
     else
       nlocs_total = obsspace_get_nlocs(obss)
-    end if
+    endif
 
     nprofiles = min(size(profiles), geovals%nlocs)
 
@@ -960,72 +961,16 @@ contains
       deallocate(windsp)
     endif
 
-! Get surface type from geoval if it exists else diagnose surface type from water fraction.
-! If RTTOV surface type exists then it is expected that the related variables will also be available
-! e.g. water type, Tskin
-! DARFIX : This will be moved out to a separate subroutine in the next release to support all instruments
-!          particularly where we have additional surface metadata for certain instruments
+    if (.not. allocated(tmpvar)) allocate(TmpVar(nlocs_total))
 
-    varname = var_surf_type_rttov ! RTTOV surface type: 0 (land), 1 (water), 2 (sea-ice)
-    if (ufo_vars_getindex(geovals%variables, varname) > 0) then
-      call ufo_geovals_get_var(geovals, varname, geoval)
-      profiles(1:nprofiles)%skin%surftype = int(geoval%vals(1,1:nprofiles), kind=jpim)
+!Hard code watertype to ocean. Only used to determine BRDF in visible calculations
+    profiles(1:nprofiles) % skin % watertype = 1             ! always assume ocean
 
-      !varname = var_water_type_rttov ! RTTOV water type: 0 (fresh), 1 (sea)
-      !call ufo_geovals_get_var(geovals, varname, geoval)
-      !profiles(1:nprofiles)%skin%watertype = int(geoval%vals(1,1:nprofiles),kind=jpim)
-      profiles(1:nprofiles) % skin % watertype = 1             ! always assume ocean
-
-      varname = var_sfc_tskin !Skin (surface) temperature (K)
-      call ufo_geovals_get_var(geovals, varname, geoval)
-      profiles(1:nprofiles)%skin%t = geoval%vals(1,1:nprofiles)
+!Get Skin (surface) temperature (K)
+    varname = var_sfc_tskin 
+    call ufo_geovals_get_var(geovals, varname, geoval)
+    profiles(1:nprofiles)%skin%t = geoval%vals(1,1:nprofiles)
      
-    else
-
-      ! Try to diagnose RTTOV surface from water fraction
-      !DARFIX: this is not consistent with CRTM in any way. Need to find out how they select surface type.
-
-      varname = var_sfc_wfrac
-      if (ufo_vars_getindex(geovals%variables, varname) > 0) then
-        call ufo_geovals_get_var(geovals, varname, geoval)
-
-        do iprof = 1, nprofiles
-          !Land point or sea point
-          wfrac = geoval%vals(1,iprof)
-          if (wfrac > half) then
-            profiles(iprof)%skin%surftype   = surftype_sea
-            call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
-            profiles(iprof)%skin%t   = geoval%vals(1, iprof)
-          else
-            !maybe it's predominantly land or ice
-            !   !determine land, snow and ice fractions and temperatures to determine average temperature
-            profiles(iprof)%skin%surftype   = surftype_land ! land
-
-            call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval) 
-            lfrac   = geoval%vals(1, iprof)
-
-            call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval) 
-            sfrac   = geoval%vals(1, iprof)
-
-            call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval) 
-            ifrac   = geoval%vals(1, iprof)
-            
-            call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
-            ltmp   = geoval%vals(1, iprof)
-            
-            call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
-            stmp   = geoval%vals(1, iprof)
-            
-            call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
-            itmp   = geoval%vals(1, iprof)
-            
-            !Skin temperature is a combination of (i)ce temp, (l)and temp and (s)now temp
-            profiles(iprof)%skin%t   = (lfrac * ltmp + sfrac * stmp + ifrac * itmp) / (lfrac + sfrac + ifrac)
-          endif
-        end do
-      endif
-    endif
-
     !MCC: wind fetch fixed for now too
     profiles(1:nprofiles) % s2m % wfetc = 100000.0_kind_real ! wind fetch (m) taken
                                                              ! from users guide
@@ -1160,7 +1105,7 @@ contains
 
     end if
 
-! Set geometry for RTTOV calculation
+! Set geometry for RTTOV calculation, either from the supplied ob info (1dvar) or the obsspace db
 
     if(present(ob_info)) then
 
@@ -1172,7 +1117,6 @@ contains
         profiles(1) % cfraction = ob_info % cloudfrac
       end if
 
-      nlocs_total = 1
       nprofiles = 1
       nlevels = size(profiles(1) % p)
 
@@ -1181,9 +1125,9 @@ contains
       profiles(1) % sunzenangle = ob_info % solar_zenith_angle
       profiles(1) % sunazangle  = ob_info % solar_azimuth_angle
 
-    else
+      profiles(1)%skin%surftype = ob_info % surface_type
 
-      allocate(TmpVar(nlocs_total))
+    else
 
 !Set RT profile elevation (ob has priority, otherwise model height from geoval)
       if (obsspace_has(obss, "MetaData", "elevation")) then
@@ -1195,8 +1139,8 @@ contains
       else if (obsspace_has(obss, "MetaData", "model_orography")) then
         call obsspace_get_db(obss, "MetaData", "model_orography", TmpVar)
         profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
-      else if (ufo_vars_getindex(geovals%variables, 'surface_altitude') > 0) then
-        call ufo_geovals_get_var(geovals, 'surface_altitude', geoval)
+      else if (ufo_vars_getindex(geovals%variables, "surface_altitude") > 0) then
+        call ufo_geovals_get_var(geovals, "surface_altitude", geoval)
         profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
       else
         write(message,'(A)') 'MetaData elevation not in database: check implicit filtering'
@@ -1223,8 +1167,6 @@ contains
           'MetaData longitude not in database: check implicit filtering'
         call fckit_log%info(message)
       end if
-
-!Set RTTOV viewing geometry
 
       ! sensor zenith - RTTOV convention 0-max (coef dependent). Nadir = 0 deg
       ! mandatory so assume it's present
@@ -1263,6 +1205,15 @@ contains
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunazangle = zero
       end if
+
+      ! RTTOV surface type
+      variable_present = obsspace_has(obss, "MetaData", var_surf_type_rttov)
+      if (variable_present) then
+        call obsspace_get_db(obss, "MetaData", var_surf_type_rttov, profiles(1:nlocs_total)%skin%surftype)
+      else
+        call ufo_geovals_get_var(geovals, var_surf_type_rttov, geoval)
+        profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
+      endif
 
       deallocate(TmpVar)
     
@@ -1313,7 +1264,6 @@ contains
     character(10) :: prof_str
 
     include 'rttov_print_profile.interface'
-    write(*,*) 'profile ', iprof
     if (any(conf % inspect == iprof)) then
       write(prof_str,'(i0)') iprof
       self % profiles(iprof) % id = prof_str

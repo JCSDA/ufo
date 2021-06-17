@@ -5,7 +5,7 @@ observations:
 - obs operator:
     name: RTTOV
     GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour, CLW]
+    Absorbers: &rttov_absorbers [Water_vapour, CLW]
     linear obs operator:
       Absorbers: [Water_vapour]
     obs options: &rttov_options
