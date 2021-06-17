@@ -149,13 +149,13 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   // Get pressure [Pa] (nlevs, nlocs)
   std::vector<std::vector<float>> cx_p(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(vcoord+"@GeoVaLs"), ilev + 1, cx_p[ilev]);
+    in.get(Variable(vcoord+"@GeoVaLs"), ilev, cx_p[ilev]);
   }
 
   // Get wind component (nlevs, nlocs)
   std::vector<std::vector<float>> cx_windcomponent(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(profile+"@GeoVaLs"), ilev + 1, cx_windcomponent[ilev]);
+    in.get(Variable(profile+"@GeoVaLs"), ilev, cx_windcomponent[ilev]);
   }
 
   // Loop through locations

@@ -86,7 +86,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
       const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
       if (ydiags.has(varname)) {
         ydiags.allocate(1, oops::Variables({varname}));
-        ydiags.save(biasTerm, varname, 1);
+        ydiags.save(biasTerm, varname, 0);
       } else {
         oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
         ABORT("ObsBiasOperatorTerm variable is not reserved in ydiags");

@@ -95,7 +95,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
-             nlevs, tao_sfc);
+             nlevs - 1, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         out[ich][iloc] = 1.0;
         if (zsges[iloc] > 2000.0) {

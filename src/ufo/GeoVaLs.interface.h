@@ -39,7 +39,7 @@ extern "C" {
   void ufo_geovals_allocate_f90(F90goms &, const size_t &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
-  void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, int &);
+  void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, const int &);
   void ufo_geovals_zero_f90(const F90goms &);
   void ufo_geovals_reorderzdir_f90(const F90goms &, const int &, const char *,
                                    const int &, const char *);

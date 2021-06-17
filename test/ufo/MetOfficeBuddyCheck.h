@@ -77,7 +77,7 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   obsDiags.allocate(1, diagVars);
   for (const std::string &name : diagConf.keys()) {
     const std::vector<double> diag = diagConf.getDoubleVector(name);
-    obsDiags.save(diag, name, 1);
+    obsDiags.save(diag, name, 0);
   }
 
   filter.postFilter(hofx, obsDiags);

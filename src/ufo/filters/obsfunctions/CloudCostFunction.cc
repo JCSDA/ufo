@@ -82,8 +82,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   // Determine if pressure is ascending or descending (B-matrix assumption)
   size_t np = in.nlevs(Variable("air_pressure@GeoVaLs"));
   std::vector<float> gv_pres_1(nlocs), gv_pres_N(nlocs);
-  in.get(Variable("air_pressure@GeoVaLs"), 1, gv_pres_1);
-  in.get(Variable("air_pressure@GeoVaLs"), np, gv_pres_N);
+  in.get(Variable("air_pressure@GeoVaLs"), 0, gv_pres_1);
+  in.get(Variable("air_pressure@GeoVaLs"), np - 1, gv_pres_N);
   const float missing = util::missingValue(missing);
   ASSERT(gv_pres_1[0] != missing);
   ASSERT(gv_pres_N[0] != missing);
@@ -102,8 +102,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     size_t nlevs = in.nlevs(Variable(jac_name, channels_)[0]);
     std::vector<float> jac_store(nlocs);
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level_gv = (p_ascending ? ilev+1 : nlevs-ilev);
-      int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv+1 : level_gv);
+      const int level_gv = (p_ascending ? ilev : nlevs-ilev-1);
+      const int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv-1 : level_gv);
       if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
         in.get(Variable("air_pressure@GeoVaLs"), level_gv, gv_pres);
         in.get(Variable("air_temperature@GeoVaLs"), level_gv, gv_temp);

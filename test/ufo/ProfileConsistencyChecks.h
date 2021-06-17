@@ -259,7 +259,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
       // Calculate level heights for GeoVaLs.
       std::vector <float> orogGeoVaLs(obsspace.nlocs(), 0.0);
-      geovals->getAtLevel(orogGeoVaLs, ufo::VariableNames::geovals_orog, 1);
+      geovals->getAtLevel(orogGeoVaLs, ufo::VariableNames::geovals_orog, 0);
       std::vector <float> zRhoGeoVaLs;
       std::vector <float> zThetaGeoVaLs;
       ufo::CalculateModelHeight(options.DHParameters.ModParameters,
@@ -275,7 +275,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       std::vector <float> pressureGeoVaLs(obsspace.nlocs(), 0.0);
       const size_t gvnlevs = geovals->nlevs(ufo::VariableNames::geovals_pressure);
       std::vector <float> pressureGeoVaLs_column;
-      for (int jlev = 1; jlev < gvnlevs + 1; ++jlev) {
+      for (int jlev = 0; jlev < gvnlevs; ++jlev) {
         geovals->getAtLevel(pressureGeoVaLs, ufo::VariableNames::geovals_pressure, jlev);
         pressureGeoVaLs_column.push_back(pressureGeoVaLs[0]);
       }

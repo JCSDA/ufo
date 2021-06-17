@@ -86,8 +86,7 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
 {
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor starting" << std::endl;
   ufo_geovals_setup_f90(keyGVL_, 1, vars_);
-  int fort_index = index + 1;  // Fortran numbers from 1
-  ufo_geovals_copy_one_f90(keyGVL_, other.keyGVL_, fort_index);
+  ufo_geovals_copy_one_f90(keyGVL_, other.keyGVL_, index);
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -226,8 +225,8 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
     assert(nlevs == other.nlevs(vars_[jvar]));
     // loop over all levels for this variable
     for (size_t jlev = 0; jlev < nlevs; ++jlev) {
-      this->getAtLevel(this_values, vars_[jvar], jlev+1);
-      other.getAtLevel(other_values, vars_[jvar], jlev+1);
+      this->getAtLevel(this_values, vars_[jvar], jlev);
+      other.getAtLevel(other_values, vars_[jvar], jlev);
       // loop over all locations
       for (size_t jloc = 0; jloc < nlocs; ++jloc) {
         if ((this_values[jloc] != missing) && (other_values[jloc] != missing)) {

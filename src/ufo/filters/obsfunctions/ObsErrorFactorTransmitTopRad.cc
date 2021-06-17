@@ -57,7 +57,7 @@ void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
   // Inflate obs error as a function of model top-to-spaec transmittance
   std::vector<float> tao_top(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
-    in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich], 1, tao_top);
+    in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich], 0, tao_top);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       out[ich][iloc] = sqrt(1.0 / tao_top[iloc]);
     }

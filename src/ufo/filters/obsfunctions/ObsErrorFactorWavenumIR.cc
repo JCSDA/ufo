@@ -82,7 +82,7 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0;
     if (wavenumber[ich] > 2000.0 && wavenumber[ich] <= 2400.0) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
-             nlevs, tao_sfc);
+             nlevs - 1, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (water_frac[iloc] > 0.f && solza[iloc] <= 89.f) {
           float factor = std::fmax(0.f, cos(Constants::deg2rad * solza[iloc]));

@@ -99,7 +99,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
        dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level = nlevs - ilev;
+      const int level = nlevs - ilev - 1;
       in.get(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
                        channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
@@ -110,7 +110,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
        dbtdq(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level = nlevs - ilev;
+      const int level = nlevs - ilev - 1;
       in.get(Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag",
                        channels_)[ichan], level, dbtdq[ichan][ilev]);
     }

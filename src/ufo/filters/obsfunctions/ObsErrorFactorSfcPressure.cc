@@ -108,13 +108,13 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   // Get GeoVals of air pressure [Pa] and temperature in vertical column.
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = nlevs - ilev;
+    const size_t level = nlevs - ilev - 1;
     data.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
   }
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
   const std::string geovar_temp = options_->geovar_temp.value();
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = nlevs - ilev;
+    const size_t level = nlevs - ilev - 1;
     data.get(Variable(geovar_temp + "@GeoVaLs"), level, tair[ilev]);
   }
 

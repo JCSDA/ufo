@@ -116,7 +116,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.1 Retrieve pressure in hPa
       std::vector<std::vector<double>> tmpvar3d;    // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "air_pressure", i+1);  // get one level P
+         geovals.getAtLevel(tmpvar2d, "air_pressure", i);  // get one level P
          tmpvar3d.push_back(tmpvar2d);  // push one level P into 3D P
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -132,7 +132,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.2 Retrieve temperature in K
       std::vector<std::vector<double>> tmpvar3d_T;  // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "air_temperature", i+1);  // get one level T
+         geovals.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
          tmpvar3d_T.push_back(tmpvar2d);   // push one level T into 3D T
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -146,7 +146,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.3 Retrieve specific humidity in kg/kg
       std::vector<std::vector<double>> tmpvar3d_Q;  // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "specific_humidity", i+1);
+         geovals.getAtLevel(tmpvar2d, "specific_humidity", i);
          tmpvar3d_Q.push_back(tmpvar2d);
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {

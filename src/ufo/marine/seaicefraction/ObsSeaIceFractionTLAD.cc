@@ -57,7 +57,7 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & 
   int nlevs = gv.nlevs("sea_ice_category_area_fraction");
 
   std::vector<double> aicen(nlocs);
-  for ( std::size_t k = 1; k < nlevs+1; ++k ) {
+  for ( std::size_t k = 0; k < nlevs; ++k ) {
     gv.getAtLevel(aicen, "sea_ice_category_area_fraction", k);
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       ovec[i] += aicen[i];
@@ -75,7 +75,7 @@ void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & 
   int nlevs = gv.nlevs("sea_ice_category_area_fraction");
   float miss = 0.0;
   std::vector<double> aicen(nlocs);
-  for ( std::size_t k = 1; k < nlevs+1; ++k ) {
+  for ( std::size_t k = 0; k < nlevs; ++k ) {
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       if (ovec[i] != util::missingValue(ovec[i]))
         { aicen[i] = ovec[i]; }

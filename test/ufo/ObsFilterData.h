@@ -170,9 +170,9 @@ void testObsFilterData() {
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        data.get(geovars.variable(jvar), nlevs, vec);
+        data.get(geovars.variable(jvar), nlevs - 1, vec);
         std::vector<float> ref(ospace.nlocs());
-        gval.getAtLevel(ref, geovars.variable(jvar).variable(), nlevs);
+        gval.getAtLevel(ref, geovars.variable(jvar).variable(), nlevs - 1);
         EXPECT(vec == ref);
       }
     }
@@ -199,9 +199,9 @@ void testObsFilterData() {
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        data.get(diagvars.variable(jvar), nlevs, vec);
+        data.get(diagvars.variable(jvar), nlevs - 1, vec);
         std::vector<float> ref(ospace.nlocs());
-        obsdiags.get(ref, diagvars.variable(jvar).variable(), nlevs);
+        obsdiags.get(ref, diagvars.variable(jvar).variable(), nlevs - 1);
         EXPECT(vec == ref);
       }
     }

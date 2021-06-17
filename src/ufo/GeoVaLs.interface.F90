@@ -103,13 +103,17 @@ end subroutine ufo_geovals_copy_c
 ! ------------------------------------------------------------------------------
 !> Copy one GeoVaLs location into another object
 
-subroutine ufo_geovals_copy_one_c(c_key_self, c_key_other, ind) bind(c,name='ufo_geovals_copy_one_f90')
+subroutine ufo_geovals_copy_one_c(c_key_self, c_key_other, c_ind) bind(c,name='ufo_geovals_copy_one_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
-integer(c_int), intent(in) :: ind
+integer(c_int), intent(in) :: c_ind
 type(ufo_geovals), pointer :: self
 type(ufo_geovals), pointer :: other
+integer :: ind
+
+! Convert location index from the C++ to the Fortran convention.
+ind = c_ind + 1
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
@@ -466,14 +470,14 @@ end subroutine ufo_geovals_get2d_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
+subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, c_lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: lev
+integer(c_int), intent(in) :: c_lev
 integer(c_int), intent(in) :: nlocs
 real(c_float), intent(inout) :: values(nlocs)
 
@@ -481,6 +485,10 @@ character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
+integer(c_int) :: lev
+
+! Convert level index from the C++ to the Fortran convention.
+lev = c_lev + 1
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
@@ -544,7 +552,7 @@ end subroutine ufo_geovals_get_loc_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_getdouble_c(c_key_self, lvar, c_var, lev, nlocs, values)&
+subroutine ufo_geovals_getdouble_c(c_key_self, lvar, c_var, c_lev, nlocs, values)&
   bind(c, name='ufo_geovals_getdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
@@ -552,13 +560,17 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: lev
+integer(c_int), intent(in) :: c_lev
 integer(c_int), intent(in) :: nlocs
 real(c_double), intent(inout) :: values(nlocs)
 
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
+integer(c_int) :: lev
+
+! Convert level index from the C++ to the Fortran convention.
+lev = c_lev + 1
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
@@ -569,19 +581,23 @@ end subroutine ufo_geovals_getdouble_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_putdouble_f90')
+subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, c_lev, nlocs, values) bind(c, name='ufo_geovals_putdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: lev
+integer(c_int), intent(in) :: c_lev
 integer(c_int), intent(in) :: nlocs
 real(c_double), intent(in) :: values(nlocs)
 
 type(ufo_geoval), pointer  :: geoval
 character(len=MAXVARLEN)   :: varname
 type(ufo_geovals), pointer :: self
+integer(c_int) :: lev
+
+! Convert level index from the C++ to the Fortran convention.
+lev = c_lev + 1
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)

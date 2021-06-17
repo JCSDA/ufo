@@ -91,8 +91,8 @@ void testObsDiagnostics() {
     for (size_t ilev = 0; ilev < nlevs; ilev++) {
       std::vector<float> ref(nlocs);
       std::vector<float> computed(nlocs);
-      diags.get(computed, diagvars[ivar], ilev+1);
-      diagref.get(ref, diagvars[ivar], ilev+1);
+      diags.get(computed, diagvars[ivar], ilev);
+      diagref.get(ref, diagvars[ivar], ilev);
 
       float rms = 0.0;
       for (size_t iloc = 0; iloc < nlocs; iloc++) {

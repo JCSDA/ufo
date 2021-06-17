@@ -101,7 +101,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
     hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(vars_.channels()[jvar]);
     tmpvar.clear();
     for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
-      ydiags.get(pred, hdiags, js+1);
+      ydiags.get(pred, hdiags, js);
       tmpvar.push_back(pred);
     }
     ptau5.push_back(tmpvar);
@@ -111,7 +111,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   std::vector<std::vector<float>> tvp;
   std::size_t nlevs = geovals.nlevs("air_temperature");
   for (std::size_t js = 0; js < nlevs; ++js) {
-    geovals.getAtLevel(pred, "air_temperature", js+1);
+    geovals.getAtLevel(pred, "air_temperature", js);
     tvp.push_back(pred);
   }
   nlevs = geovals.nlevs("air_pressure");
