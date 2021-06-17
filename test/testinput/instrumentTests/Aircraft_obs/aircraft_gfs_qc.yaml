@@ -1,25 +1,27 @@
-window begin: 2020-11-01T09:00:00Z
-window end: 2020-11-01T15:00:00Z
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
 
 observations:
 - obs space:
     name: aircraft_QC_wind
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
-#     obsgrouping:
-#       group variables: ["tail_number"]  # Does not exist yet in IODA obs file.
-#       sort variable: "air_pressure"
-#       sort order: "descending"
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020121500_m.nc
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    obsdataout: 
+      obsfile: Data/aircraft_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   obs filters:
 #--------------------------------------------------------------------------------------------------------------------
 # WINDS
 #--------------------------------------------------------------------------------------------------------------------
 #
 # Begin by assigning all ObsError to a constant value. These will get overwritten (as needed) for specific types.
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: eastward_wind
     - name: northward_wind
@@ -28,7 +30,7 @@ observations:
       error parameter: 2.0             # 2.0 m/s
 #
 # Assign intial ObsError specific to AIREP/ACARS
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: eastward_wind
     - name: northward_wind
@@ -41,7 +43,7 @@ observations:
       is_in: 230
 #
 # Assign intial ObsError specific to AMDAR
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: eastward_wind
     - name: northward_wind
@@ -54,7 +56,7 @@ observations:
       is_in: 231
 #
 # Assign intial ObsError specific to MDCRS
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: eastward_wind
     - name: northward_wind
@@ -137,7 +139,7 @@ observations:
       name: reject
 #
 # When multiple obs exist within a single vertical model level, inflate ObsError
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: eastward_wind
     action:
@@ -149,7 +151,7 @@ observations:
           inflate variables: [eastward_wind]
     defer to post: true
 #
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: northward_wind
     action:
@@ -204,21 +206,21 @@ observations:
           name: northward_wind@ObsError
     defer to post: true
 #
-  passedBenchmark: 480
+  passedBenchmark: 4852
 #--------------------------------------------------------------------------------------------------------------------
 # TEMPERATURE
 #--------------------------------------------------------------------------------------------------------------------
 - obs space:
     name: aircraft_QC_temp
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020121500_m.nc
     simulated variables: [air_temperature]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   obs filters:
 #
 # Begin by assigning all ObsError to a constant value. These will get overwritten for specific types.
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: air_temperature
     action:
@@ -301,7 +303,7 @@ observations:
       name: reject
 #
 # When multiple obs exist within a single vertical model level, inflate ObsError
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: air_temperature
     action:
@@ -340,17 +342,17 @@ observations:
           name: air_temperature@ObsError
     defer to post: true
 #
-  passedBenchmark: 188
+  passedBenchmark: 2401
 #--------------------------------------------------------------------------------------------------------------------
 # MOISTURE
 #--------------------------------------------------------------------------------------------------------------------
 - obs space:
     name: aircraft_QC_moisture
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020121500_m.nc
     simulated variables: [specific_humidity]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   obs filters:
 #
 # Assign the initial observation error, based on height/pressure ONLY MDCRS
@@ -392,7 +394,7 @@ observations:
       name: reject
 #
 # When multiple obs exist within a single vertical model level, inflate ObsError
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: specific_humidity
     action:
@@ -420,4 +422,4 @@ observations:
           name: specific_humidity@ObsError
     defer to post: true
 #
-  passedBenchmark: 48
+  passedBenchmark: 141

@@ -7,12 +7,12 @@ observations:
 - obs space:
     name: SurfaceComposite
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2020121500_s.nc
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020121500_s.nc
     obsdataout:
       obsfile: Data/sfc_obs_2020121500_out.nc
     simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
   geovals:
-    filename: Data/ufo/testinput_tier_1/sfc_geoval_2020121500_s.nc
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020121500_s.nc
   obs operator:
     name: Composite
     components:
@@ -31,5 +31,5 @@ observations:
   # The reference value is calculated as
   #     sqrt( (rms(air_temperature)^2 + rms(specific_humidity)^2 + rms(eastward_wind)^2
   #            rms(northward_wind)^2 + rms(surface_pressure)^2) / 5)
-  rms ref: 43876.78924
-  tolerance: 1.0e-05
+  rms ref: 42928.48419
+  tolerance: 1.0e-06

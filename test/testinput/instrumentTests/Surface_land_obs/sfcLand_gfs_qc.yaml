@@ -1,16 +1,16 @@
-window begin: 2020-11-01T09:00:00Z
-window end: 2020-11-01T15:00:00Z
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
 
 observations:
 - obs space:
     name: surface_pressure_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020121500_m.nc
     obsdataout:
-      obsfile: Data/sfc_obs_2020120112_out.nc
+      obsfile: Data/sfc_obs_2020121500_m_out.nc
     simulated variables: [surface_pressure, air_temperature]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020121500_m.nc
   obs filters:
 # Observation Range Sanity Check
   - filter: Bounds Check
@@ -21,19 +21,19 @@ observations:
     action:
       name: reject 
 # Reject all obs with PreQC mark already set above 3
-  - filter: PreQC
-    maxvalue: 3
-    action:
-      name: reject
+# - filter: PreQC
+#   maxvalue: 3
+#   action:
+#     name: reject
 # Assign obsError.
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: surface_pressure
     action:
       name: assign error
       error parameter: 120             # 120 Pa (1.2mb)
 #
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: surface_pressure
     action:
@@ -50,7 +50,7 @@ observations:
         name: surface_pressure@ObsType
       is_in: 181          # Type is SYNOP
 #
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: surface_pressure
     action:
@@ -68,7 +68,7 @@ observations:
       is_in: 187          # Type is METAR
 #
 # Inflate ObsError as it is done with GSI
-  - filter: BlackList
+  - filter: Perform Action
     filter variables:
     - name: surface_pressure
     action:
@@ -120,4 +120,4 @@ observations:
         name: surface_pressure@ObsType
       is_in: 187          # Type is METAR
 #
-  passedBenchmark: 53
+  passedBenchmark: 3013
