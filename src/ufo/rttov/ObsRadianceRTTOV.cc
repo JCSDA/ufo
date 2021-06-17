@@ -19,7 +19,6 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {

@@ -47,7 +47,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   odb_.get_db("MetaData", "longitude", lons);
   odb_.get_db("MetaData", "datetime", times);
   ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
-  oper_->setTrajectory(gvals, bias, ydiags);
+  oper_->setTrajectory(gvals, ydiags);
   if (bias) {
     biasoper_.reset(new LinearObsBiasOperator(odb_));
     biasoper_->setTrajectory(gvals, bias, ydiags);

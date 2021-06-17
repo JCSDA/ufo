@@ -18,7 +18,6 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
@@ -51,8 +50,7 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                        ObsDiagnostics & ydiags) {
+void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
   ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
                                     ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::setTrajectory done" << std::endl;

@@ -25,7 +25,6 @@ class ObsVector;
 
 namespace ufo {
 class GeoVaLs;
-class ObsBias;
 class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
@@ -39,7 +38,7 @@ class LinearObsOperatorBase : public util::Printable,
   virtual ~LinearObsOperatorBase() {}
 
 /// Obs Operator
-  virtual void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) = 0;
+  virtual void setTrajectory(const GeoVaLs &, ObsDiagnostics &) = 0;
   virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const = 0;
   virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const = 0;
 

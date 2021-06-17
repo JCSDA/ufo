@@ -48,8 +48,7 @@ ObsGnssroRefTLAD::~ObsGnssroRefTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                     ObsDiagnostics &) {
+void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), obsspace());
 }
 

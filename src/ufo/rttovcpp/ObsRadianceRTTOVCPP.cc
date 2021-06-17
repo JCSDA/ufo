@@ -16,7 +16,6 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/rttovcpp/ObsRadianceRTTOVCPP.h"
 #include "ufo/rttovcpp/rttovcpp_interface.h"

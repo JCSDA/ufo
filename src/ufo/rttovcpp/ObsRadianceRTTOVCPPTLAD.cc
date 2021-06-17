@@ -18,7 +18,6 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/rttovcpp/ObsRadianceRTTOVCPPTLAD.h"
 #include "ufo/rttovcpp/rttovcpp_interface.h"
@@ -63,8 +62,7 @@ ObsRadianceRTTOVCPPTLAD::~ObsRadianceRTTOVCPPTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                            ObsDiagnostics &) {
+void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 //
   ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, CoefFileName, channels_,
                           nlevels, skip_profile);

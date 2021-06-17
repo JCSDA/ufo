@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -46,8 +45,7 @@ ObsSeaIceFractionTLAD::~ObsSeaIceFractionTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                          ObsDiagnostics &) {
+void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_seaicelinear_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsSeaIceFractionTLAD: trajectory set" << std::endl;
 }

@@ -14,7 +14,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -42,8 +41,7 @@ ObsAodExtTLAD::~ObsAodExtTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodExtTLAD::setTrajectory(const GeoVaLs & geovals,
-                                      const ObsBias & bias, ObsDiagnostics &) {
+void ObsAodExtTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   oops::Log::trace() << "ObsAodExtTLAD:trajectory entering" <<std::endl;
   ufo_aodext_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsAodExtTLAD: set trajectory exiting" << std::endl;

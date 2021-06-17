@@ -50,8 +50,7 @@ SatTCWVTLAD::~SatTCWVTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                           ObsDiagnostics &) {
+void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_sattcwv_tlad_settraj_f90(keyOperSatTCWV_, geovals.toFortran(),
                                obsspace());
 }

@@ -16,7 +16,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -45,7 +44,7 @@ ObsRadarRadialVelocityTLAD::~ObsRadarRadialVelocityTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals,
-                    const ObsBias & bias, ObsDiagnostics &) {
+                                               ObsDiagnostics &) {
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::setTrajectory entering" << std::endl;
 
   ufo_radarradialvelocity_tlad_settraj_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),

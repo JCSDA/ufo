@@ -18,7 +18,6 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -50,8 +49,7 @@ ObsAodLUTsTLAD::~ObsAodLUTsTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                   ObsDiagnostics &) {
+void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_aodluts_tlad_settraj_f90(keyOperAodLUTs_, geovals.toFortran(), obsspace());
 }
 

@@ -18,7 +18,6 @@
 
 #include "ufo/compositeoper/ObsCompositeParameters.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -52,12 +51,11 @@ ObsCompositeTLAD::~ObsCompositeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                    ObsDiagnostics & ydiags) {
+void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory entered" << std::endl;
 
   for (const std::unique_ptr<LinearObsOperatorBase> &component : components_)
-    component->setTrajectory(geovals, bias, ydiags);
+    component->setTrajectory(geovals, ydiags);
 
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory exit " <<  std::endl;
 }

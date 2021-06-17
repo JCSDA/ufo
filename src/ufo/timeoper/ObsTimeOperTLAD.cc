@@ -20,8 +20,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 #include "ufo/timeoper/ObsTimeOperUtil.h"
 
 namespace ufo {
@@ -49,7 +47,6 @@ ObsTimeOperTLAD::~ObsTimeOperTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
-                                    const ObsBias & bias,
                                     ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsTimeOperTLAD::setTrajectory entering" << std::endl;
 
@@ -73,7 +70,7 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory final geovals gv1 "
                      << gv1 << std::endl;
 
-  actualoperator_->setTrajectory(gv1, bias, ydiags);
+  actualoperator_->setTrajectory(gv1, ydiags);
 
   oops::Log::debug() << gv1;
 
