@@ -66,6 +66,7 @@ observations:
     UseColdSurfaceCheck: *UseColdSurfaceCheck1 # setting the same as obs operator
     FullDiagnostics: true
     JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0  # turned off
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
@@ -135,6 +136,7 @@ observations:
     UseColdSurfaceCheck: *UseColdSurfaceCheck2 # setting the same as obs operator
     FullDiagnostics: true
     JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7

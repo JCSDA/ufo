@@ -132,6 +132,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
+  real(kind_real), allocatable       :: max_error(:)    ! max_error = error(stdev) * factor
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
@@ -306,6 +307,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
             obs % QCflags(jvar,jobs) = self % onedvarflag
           end if
         end do
+      end if
+
+      ! Check the BTs are within a factor of the error
+      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == 0)) then
+        allocate(max_error(size(ob % channels_used)))
+        call r_submatrix % multiply_factor_by_stdev(self % RetrievedErrorFactor, max_error)
+        if (any(abs(ob % final_bt_diff(:)) > max_error(:))) then
+          do jvar = 1, self % nchans
+            if( obs % QCflags(jvar,jobs) == 0 ) then
+              obs % QCflags(jvar,jobs) = self % onedvarflag
+            end if
+          end do
+        end if
+        deallocate(max_error)
       end if
 
       ! Tidy up memory specific to a single observation

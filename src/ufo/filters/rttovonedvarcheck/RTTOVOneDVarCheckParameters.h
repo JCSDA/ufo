@@ -93,6 +93,11 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Final observation to run through 1d-var, subsetting for testing
   oops::Parameter<int> FinishOb{"FinishOb", 0, this};
 
+  /// Check all the retrieved brightness temperatures are within a factor * error of the
+  /// observed and bias corrected BTs.  If this value is less than 0.0 this check is
+  /// not performed
+  oops::Parameter<double> RetrievedErrorFactor{"RetrievedErrorFactor", 4.0, this};
+
   /// Convergence factor used when the absolute difference in the profile is used
   /// to determine convergence.
   oops::Parameter<double> ConvergenceFactor{"ConvergenceFactor", 0.4, this};

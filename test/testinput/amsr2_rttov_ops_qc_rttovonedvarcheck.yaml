@@ -62,6 +62,7 @@ observations:
     UseRHwaterForQC: *UseRHwaterForQC # setting the same as obs operator
     UseColdSurfaceCheck: *UseColdSurfaceCheck # setting the same as obs operator
     JConvergenceOption: 1
+    RetrievedErrorFactor: 5.0
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
@@ -79,4 +80,4 @@ observations:
         name: LWP@OneDVar
       maxvalue: 1.0e-1
     defer to post: true
-  passedBenchmark: 450      # number of passed obs
+  passedBenchmark: 444      # number of passed obs

@@ -344,13 +344,15 @@ end do Iterations
 ! Pass convergence flag out
 onedvar_success = converged
 
+! Recalculate final cost - to make sure output when profile has not converged
+call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+ob % final_cost = Jout(1)
+ob % niter = iter
+ob % final_bt_diff = Ydiff
+
 ! Pass output profile, final BTs and final cost out
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
-
-  ! Recalculate final cost - to make sure output when using profile convergence
-  call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
-  ob % final_cost = Jout(1)
 
   ! If lwp output required then recalculate
   if (self % Store1DVarLWP) then
@@ -365,8 +367,8 @@ if (converged) then
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))
   call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_all, &
-                                       profile_index, GuessProfile(:), &
-                                       hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
+                                          profile_index, GuessProfile(:), &
+                                          hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
   deallocate(out_H_matrix)
