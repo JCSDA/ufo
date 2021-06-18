@@ -32,7 +32,6 @@ namespace ufo {
 * obs filters:
 * - filter: Variables Transform
 *   Transform: ["RelativeHumidity"]
-*   Method: UKMO            # Using UKMO method and UKMO default formulation
 *   Formulation: Sonntag    # Using Sonntag formulation
 * \endcode
 *
@@ -41,14 +40,16 @@ namespace ufo {
 class Cal_RelativeHumidity : public TransformBase {
  public:
   Cal_RelativeHumidity(const VariableTransformsParameters &options,
-                                   ioda::ObsSpace &os,
-                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                       ioda::ObsSpace &os,
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::vector<bool> &apply);
   // Run variable conversion
   void runTransform() override;
 
  private:
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT();
+  void methodUKMO();
 };
 
 
@@ -74,8 +75,9 @@ class Cal_RelativeHumidity : public TransformBase {
 class Cal_SpecificHumidity : public TransformBase {
  public:
   Cal_SpecificHumidity(const VariableTransformsParameters &options,
-                                ioda::ObsSpace &os,
-                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                       ioda::ObsSpace &os,
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::vector<bool> &apply);
   // Run check
   void runTransform() override;
 

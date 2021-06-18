@@ -13,6 +13,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/variabletransforms/Formulas.h"
+#include "ufo/variabletransforms/LookupTable.h"
 
 namespace ufo {
 
@@ -63,6 +64,39 @@ float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
       }
       break;
     }
+    case formulas::MethodFormulation::LandoltBornstein: {
+      /* Returns a saturation mixing ratio given a temperature and pressure
+         using saturation vapour pressures caluclated using the Goff-Gratch
+         formulae, adopted by the WMO as taken from Landolt-Bornstein, 1987
+         Numerical Data and Functional relationships in Science and
+         Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
+         properties of Air, P35.
+      */
+      if (temp_K != missingValueFloat) {
+        float adj_Temp;
+        float lookup_a;
+        int lookup_i;
+
+        const float Low_temp_thd = 183.15;   // Lowest temperature for which look-up table is valid
+        const float High_temp_thd = 338.15;  // Highest temperature for which look-up table is valid
+        const float Delta_Temp = 0.1;        // Temperature increment of look-up table
+
+        //  Use the lookup table to find saturated vapour pressure.
+        adj_Temp = std::max(Low_temp_thd, temp_K);
+        adj_Temp = std::min(High_temp_thd, adj_Temp);
+
+        lookup_a = (adj_Temp - Low_temp_thd + Delta_Temp) / Delta_Temp;
+        lookup_i = static_cast<int>(lookup_a);
+        lookup_a = lookup_a - lookup_i;
+        e_sub_s = (1.0 - lookup_a) *
+                  lookuptable::LandoltBornstein_lookuptable[lookup_i] +
+                  lookup_a *
+                  lookuptable::LandoltBornstein_lookuptable[lookup_i + 1];
+      } else {
+        e_sub_s = 0.0f;
+      }
+      break;
+    }
     case formulas::MethodFormulation::Walko: {
           // Polynomial fit of Goff-Gratch (1946) formulation. (Walko, 1991)
           float x = std::max(-80.0f, temp_K-t0c);
@@ -95,7 +129,8 @@ float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
 }
 
 /* -------------------------------------------------------------------------------------*/
-float SatVaporPres_correction(float e_sub_s, float temp_K, MethodFormulation formulation) {
+float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
+                              MethodFormulation formulation) {
   const float t0c = static_cast<float>(ufo::Constants::t0c);
 
   switch (formulation) {
@@ -103,15 +138,16 @@ float SatVaporPres_correction(float e_sub_s, float temp_K, MethodFormulation for
     case formulas::MethodFormulation::NOAA:
     case formulas::MethodFormulation::UKMO:
     case formulas::MethodFormulation::Sonntag: {
-      /* e_sub_s above is the saturation vapour pressure of pure water vapour
-         FsubW (~ 1.005 at 1000 hPa) is the enhancement factor needed for moist
-          air (eg eqns 20, 22 of Sonntag, but for consistency with QSAT the formula
-          below is from eqn A4.6 of Adrian Gill's book)
+      /* e_sub_s is the saturation vapour pressure of pure water vapour.FsubW (~ 1.005
+         at 1000 hPa) is the enhancement factor needed for moist air.
+         If P is set to -1: then eg eqns 20, 22 of Sonntag is used
+         If P > 0 then eqn A4.6 of Adrian Gill's book is used to guarantee consistency with the
+         saturated specific humidity.
       */
       float FsubW;  // Enhancement factor
-      FsubW = 1.0f - 1.0E-8f *
-          (4.5f + 6.0E-4f * (temp_K - t0c) *(temp_K - t0c));
+      FsubW = 1.0f + 1.0E-8f * pressure * (4.5f + 6.0E-4f * (temp_K - t0c) *(temp_K - t0c));
       e_sub_s = e_sub_s * FsubW;
+
       break;
     }
     default: {
@@ -135,6 +171,8 @@ float Qsat_From_Psat(float Psat, float P, MethodFormulation formulation) {
     default: {
       // Calculation using the Sonntag (1994) formula. (With fix at low
       // pressure)
+      //  Note that at very low pressures we apply a fix, to prevent a
+      //     singularity (Qsat tends to 1.0 kg/kg).
       QSat = (Constants::epsilon * Psat) /
              (std::max(P, Psat) - (1.0f - Constants::epsilon) * Psat);
       break;

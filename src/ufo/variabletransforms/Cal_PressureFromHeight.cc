@@ -19,8 +19,9 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
     const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::vector<bool> &apply)
+    : TransformBase(options, os, flags, apply) {}
 
 /************************************************************************************/
 
@@ -164,7 +165,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
       // Update Tprev if Rh is valid
       if (relativeHumidity[rSort[ilocs]] != missingValueFloat) {
         Pvap = formulas::SatVaporPres_fromTemp(Tprev, formulation());
-        Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, formulation());
+        Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, -1.0, formulation());
         Tprev = formulas::VirtualTemp_From_Rh_Psat_P_T(
             relativeHumiditySurface[rSort[ilocs]], Pvap, Pprev, Tprev, formulation());
       }
@@ -176,6 +177,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
                                       formulation());
         Pvap = formulas::SatVaporPres_correction(Pvap,
                                                  dewPointTemperatureSurface[rSort[ilocs]],
+                                                 -1.0,
                                                  formulation());
         Tprev = formulas::VirtualTemp_From_Psat_P_T(Pvap, Pprev, Tprev, formulation());
       }
@@ -183,6 +185,9 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
 
     // 4.2 Loop over the length of the profile
     for (ilocs = 0; ilocs < rSort.size(); ++ilocs) {
+      // if the data have been excluded by the where statement
+      if (!apply_[rSort[ilocs]]) continue;
+
       // Take current level values
       Zcurrent = geopotentialHeight[rSort[ilocs]];
       Tcurrent = airTemperature[rSort[ilocs]];
@@ -198,17 +203,18 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
         // Update Tcurrent if Rh is valid
         if (relativeHumidity[rSort[ilocs]] != missingValueFloat) {
           Pvap = formulas::SatVaporPres_fromTemp(Tprev, formulation());
-          Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, formulation());
+          Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, -1.0, formulation());
           Tcurrent = formulas::VirtualTemp_From_Rh_Psat_P_T(
               relativeHumidity[rSort[ilocs]], Pvap, Pprev, Tcurrent, formulation());
         }
       } else {
         // Update Tcurrent if dew point positive
         if (dewPointTemperature[rSort[ilocs]] != missingValueFloat) {
-          Pvap =
-              formulas::SatVaporPres_fromTemp(dewPointTemperature[rSort[ilocs]], formulation());
+          Pvap = formulas::SatVaporPres_fromTemp(dewPointTemperature[rSort[ilocs]],
+                                                 formulation());
           Pvap = formulas::SatVaporPres_correction(Pvap,
                                                    dewPointTemperature[rSort[ilocs]],
+                                                   -1.0,
                                                    formulation());
           Tcurrent = formulas::VirtualTemp_From_Psat_P_T(Pvap, Pprev, Tcurrent, formulation());
         }
@@ -241,8 +247,9 @@ static TransformMaker<Cal_PressureFromHeightForICAO>
 
 Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
     const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::vector<bool> &apply)
+    : TransformBase(options, os, flags, apply) {}
 
 /************************************************************************************/
 
@@ -305,6 +312,9 @@ void Cal_PressureFromHeightForICAO::methodUKMO() {
 
     // 3.1 Loop over each record
     for (ilocs = 0; ilocs < rSort.size(); ++ilocs) {
+      // if the data have been excluded by the where statement
+      if (!apply_[rSort[ilocs]]) continue;
+
       // Cycle if airPressure is valid
       if (airPressure[rSort[ilocs]] != missingValueFloat) continue;
 

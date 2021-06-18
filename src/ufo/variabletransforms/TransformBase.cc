@@ -14,12 +14,14 @@ namespace ufo {
 
 TransformBase::TransformBase(const VariableTransformsParameters& options,
                              ioda::ObsSpace& os,
-                             const std::shared_ptr<ioda::ObsDataVector<int>>& flags)
-    : options_(options), obsdb_(os) , flags_(*flags) {
+                             const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
+                             const std::vector<bool> &apply)
+    : options_(options), obsdb_(os) , flags_(*flags), apply_(apply) {
   method_ = formulas::resolveMethods(options.Method.value());
   formulation_  = formulas::resolveFormulations(options.Formulation.value(),
                                                 options.Method.value());
   UseValidDataOnly_ = options.UseValidDataOnly.value();
+  AllowSuperSaturation_ = options.AllowSuperSaturation.value();
   obsName_ = os.obsname();
 }
 
@@ -70,7 +72,8 @@ TransformFactory::TransformFactory(const std::string& name) {
 
 std::unique_ptr<TransformBase> TransformFactory::create(
     const std::string& name, const VariableTransformsParameters& options,
-    ioda::ObsSpace& os, const std::shared_ptr<ioda::ObsDataVector<int>>& flags) {
+    ioda::ObsSpace& os, const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
+    const std::vector<bool>& apply) {
 
   oops::Log::trace() << "          --> TransformFactory::create" << std::endl;
   oops::Log::trace() << "              --> name: " << name << std::endl;
@@ -94,7 +97,7 @@ std::unique_ptr<TransformBase> TransformFactory::create(
                               Here());
   }
 
-  std::unique_ptr<TransformBase> ptr = jloc->second->make(options, os, flags);
+  std::unique_ptr<TransformBase> ptr = jloc->second->make(options, os, flags, apply);
   oops::Log::trace() << "TransformBase::create done" << std::endl;
 
   return ptr;

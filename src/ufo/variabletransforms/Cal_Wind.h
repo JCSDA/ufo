@@ -31,8 +31,9 @@ namespace ufo {
 class Cal_WindSpeedAndDirection : public TransformBase {
  public:
   Cal_WindSpeedAndDirection(const VariableTransformsParameters &options,
-                                   ioda::ObsSpace &os,
-                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                            ioda::ObsSpace &os,
+                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                            const std::vector<bool> &apply);
   // Run variable conversion
   void runTransform() override;
 };
@@ -49,8 +50,9 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 class Cal_WindComponents : public TransformBase {
  public:
   Cal_WindComponents(const VariableTransformsParameters &options,
-                                ioda::ObsSpace &os,
-                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                     ioda::ObsSpace &os,
+                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                     const std::vector<bool> &apply);
   // Run check
   void runTransform() override;
 };

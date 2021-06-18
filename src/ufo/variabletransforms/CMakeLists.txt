@@ -10,6 +10,7 @@ set ( variabletransforms_files
       Cal_Humidity.cc
       Cal_Wind.h
       Cal_Wind.cc
+      LookupTable.h
       TransformBase.cc
       TransformBase.h
       Formulas.cc

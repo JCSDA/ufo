@@ -20,8 +20,9 @@ static TransformMaker<Cal_WindSpeedAndDirection>
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
     const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::vector<bool> &apply)
+    : TransformBase(options, os, flags, apply) {}
 
 /************************************************************************************/
 
@@ -53,6 +54,9 @@ void Cal_WindSpeedAndDirection::runTransform() {
 
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    // if the data have been excluded by the where statement
+    if (!apply_[jobs]) continue;
+
     // Calculate wind vector
     if (u[jobs] != missingValueFloat && v[jobs] != missingValueFloat) {
        windFromDirection[jobs] = formulas::GetWindDirection(u[jobs], v[jobs]);
@@ -72,8 +76,9 @@ static TransformMaker<Cal_WindComponents>
 
 Cal_WindComponents::Cal_WindComponents(
     const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::vector<bool> &apply)
+    : TransformBase(options, os, flags, apply) {}
 
 /************************************************************************************/
 
@@ -105,6 +110,9 @@ void Cal_WindComponents::runTransform() {
 
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    // if the data have been excluded by the where statement
+    if (!apply_[jobs]) continue;
+
     // Calculate wind vector
     if (windFromDirection[jobs] != missingValueFloat &&
           windSpeed[jobs] != missingValueFloat && windSpeed[jobs] >= 0) {

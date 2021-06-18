@@ -31,6 +31,7 @@ enum MethodFormulation {
   // Formulations: Specific authors
   Murphy,
   Sonntag,
+  LandoltBornstein,
   Walko,
   Rogers
 };
@@ -88,10 +89,12 @@ float SatVaporPres_fromTemp(const float temp_K,
 * \param e_sub_s
 *     saturation vapour pressure
 * \param temp_K
-*     Temperature [k]
+*     temperature [k]
+* \param pressure
+*     air pressure [Pa]
 * \return saturated vapour pressure
 */
-float SatVaporPres_correction(float e_sub_s, float temp_K,
+float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
                         const MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
 // -------------------------------------------------------------------------------------
 /*!

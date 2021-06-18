@@ -59,7 +59,7 @@ void VariableTransforms::applyFilter(
   for (const auto& cal_ : options_->Transform.value()) {
     std::cout << "         estimate: " << cal_ << std::endl;
     std::unique_ptr<TransformBase> Transform =
-        TransformFactory::create(cal_, *options_, obsdb_, flags_);
+        TransformFactory::create(cal_, *options_, obsdb_, flags_, apply);
 
     Transform->runTransform();
   }

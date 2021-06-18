@@ -69,6 +69,11 @@ class VariableTransformsParameters : public oops::Parameters {
   /// By default \e UseValidDataOnly is set to \e true.
   /// See ReadTheDoc for more details
   oops::Parameter<bool> UseValidDataOnly{"UseValidDataOnly", true, this};
+
+  /// Should we allow super-saturated relative humidity? [Optional]:
+  /// By default \e AllowSuperSaturation is set to \e false.
+  /// See ReadTheDoc for more details
+  oops::Parameter<bool> AllowSuperSaturation{"AllowSuperSaturation", false, this};
 };
 }  // namespace ufo
 

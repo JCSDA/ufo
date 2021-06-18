@@ -280,6 +280,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
   testinput/unit_tests/function_wdirdiff.yaml
   testinput/unit_tests/variabletransforms_rhumidity.yaml
+  testinput/unit_tests/variabletransforms_rhumidity_part2.yaml
   testinput/unit_tests/variabletransforms_shumidity.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeightICAO.yaml
@@ -2441,6 +2442,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative_part2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_rhumidity_part2.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityspecific
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/variabletransforms_shumidity.yaml"
