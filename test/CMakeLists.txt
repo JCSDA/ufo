@@ -325,15 +325,17 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   # If REPO branch is being built set GIT_BRANCH_FUNC to REPO's current branch.
   # If a tagged version of REPO is being built set GIT_TAG_FUNC to REPO's current tag.
   find_branch_name(REPO_DIR_NAME ${repo})
+
+  if ( ${repo} STREQUAL "crtm" )
+    set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
+  endif()
+
   if( DEFINED GIT_BRANCH_FUNC )
     set( REPO_GIT_BRANCH ${GIT_BRANCH_FUNC} )
   elseif( DEFINED GIT_TAG_FUNC )
     set( REPO_GIT_BRANCH ${GIT_TAG_FUNC} )
   endif()
 
-  if ( ${repo} STREQUAL "crtm" )
-    set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
-  endif()
 
   # When env veriable LOCAL_PATH_JEDI_TESTFILES is set, simply link test files
   # to build directory. get_${repo}_test_data checks the existence of test file directory.
