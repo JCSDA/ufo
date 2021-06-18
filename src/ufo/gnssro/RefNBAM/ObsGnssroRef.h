@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_GNSSRO_REF_OBSGNSSROREF_H_
-#define UFO_GNSSRO_REF_OBSGNSSROREF_H_
+#ifndef UFO_GNSSRO_REFNBAM_OBSGNSSROREF_H_
+#define UFO_GNSSRO_REFNBAM_OBSGNSSROREF_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/gnssro/Ref/ObsGnssroRef.interface.h"
+#include "ufo/gnssro/RefNBAM/ObsGnssroRef.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -61,4 +61,4 @@ class ObsGnssroRef : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_GNSSRO_REF_OBSGNSSROREF_H_
+#endif  // UFO_GNSSRO_REFNBAM_OBSGNSSROREF_H_

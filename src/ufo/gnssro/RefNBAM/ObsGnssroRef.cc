@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/gnssro/Ref/ObsGnssroRef.h"
+#include "ufo/gnssro/RefNBAM/ObsGnssroRef.h"
 
 #include <ostream>
 #include <string>

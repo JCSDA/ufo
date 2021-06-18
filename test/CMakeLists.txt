@@ -105,6 +105,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobendmetoffice_obserror.yaml
   testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobendmetoffice_qc.yaml
+  testinput/gnssrorefmetoffice.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp1d_qc.yaml
   testinput/gnssrobndropp2d.yaml
@@ -1313,6 +1314,13 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRefMetOffice_pseudo
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrorefmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 if( ${ropp-ufo_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_REF_OBSGNSSROREFTLAD_H_
-#define UFO_GNSSRO_REF_OBSGNSSROREFTLAD_H_
+#ifndef UFO_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
+#define UFO_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/gnssro/Ref/ObsGnssroRefTLAD.interface.h"
+#include "ufo/gnssro/RefNBAM/ObsGnssroRefTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -61,4 +61,4 @@ class ObsGnssroRefTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GNSSRO_REF_OBSGNSSROREFTLAD_H_
+#endif  // UFO_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
