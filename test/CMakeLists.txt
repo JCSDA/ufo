@@ -149,6 +149,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_iasi_jacobian.yaml
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obserror_assign_unittests.yaml
+  testinput/obserrordiagonal.yaml
   testinput/obsfilterdata.yaml
   testinput/omi_aura.yaml
   testinput/omi_aura_flipz.yaml
@@ -518,6 +519,14 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc ufo/Locations.h ufo/locations_test.F90
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obserrordiagonal
+                  SOURCES mains/TestObsErrorCovariance.cc
+                  ARGS    "testinput/obserrordiagonal.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  MPI     4
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
