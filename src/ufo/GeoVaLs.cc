@@ -28,8 +28,10 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-/*! \brief Default constructor - does not allocate fields
-*/
+/*! \brief Deprecated default constructor - does not allocate fields.
+ *
+ * \details Please do not use this constructor in new code.
+ */
 GeoVaLs::GeoVaLs(std::shared_ptr<const ioda::Distribution> dist,
                  const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars), dist_(std::move(dist))
@@ -39,22 +41,39 @@ GeoVaLs::GeoVaLs(std::shared_ptr<const ioda::Distribution> dist,
   oops::Log::trace() << "GeoVaLs default constructor end" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
-/*! \brief Constructor given Locations and Variables
+/*! \brief Deprecated constructor given Locations and Variables
  *
- * \details This ufo::GeoVaLs constructor is typically used to initialize
- * GeoVaLs for the full time window (ufo::Locations hold all locations within
- * data assimilation window) and all variables (oops::Variables hold all
- * variables specified by the ObsOperator as input varialbes. Note that
- * nothing is allocated in the constructor currently, and getValues is
- * responsible for allocation
- *
+ * \details Please do not use in any new code. This constructor is currently
+ * only used for ObsDiagnostics and will be removed soon. Use the
+ * GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &)
+ * constructor instead.
+ * This ufo::GeoVaLs constructor is used to initialize GeoVaLs for specified
+ * ufo::Locations and oops::Variables hold all. Note that nothing is allocated
+ * when this constructor is called.
  */
 GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars), dist_(locs.distribution())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, locs.size(), vars_);
+  ufo_geovals_partial_setup_f90(keyGVL_, locs.size(), vars_);
+  oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+/*! \brief Allocating constructor for specified Locations \p locs, Variables \p vars
+ * and number of levels \p nlevs
+ *
+ * \details This ufo::GeoVaLs constructor is used in all oops H(x) and DA
+ * applications.
+ * Sizes of GeoVaLs for i-th variable at a single location are defined by i-th value
+ * of \p nlevs.
+ */
+GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars,
+                 const std::vector<size_t> & nlevs)
+  : keyGVL_(-1), vars_(vars), dist_(locs.distribution())
+{
+  oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
+  ufo_geovals_setup_f90(keyGVL_, locs.size(), vars_, nlevs.size(), nlevs[0]);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 
@@ -70,7 +89,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
   : keyGVL_(-1), vars_(vars), dist_(obspace.distribution())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, 0, vars_);
+  ufo_geovals_partial_setup_f90(keyGVL_, 0, vars_);
   // only read if there are variables specified
   if (vars_.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, config, obspace, vars_);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
@@ -85,7 +104,6 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
   : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, 1, vars_);
   ufo_geovals_copy_one_f90(keyGVL_, other.keyGVL_, index);
   oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor key = " << keyGVL_ << std::endl;
 }
@@ -96,7 +114,6 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other)
   : keyGVL_(-1), vars_(other.vars_), dist_(other.dist_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, 0, vars_);
   ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
   oops::Log::trace() << "GeoVaLs copy constructor key = " << keyGVL_ << std::endl;
 }
@@ -108,8 +125,6 @@ GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Allocate GeoVaLs for \p vars variables to have \p nlevels levels (number of
- *  locations is defined in the constructor) */
 void GeoVaLs::allocate(const int & nlevels, const oops::Variables & vars)
 {
   oops::Log::trace() << "GeoVaLs::allocate starting" << std::endl;

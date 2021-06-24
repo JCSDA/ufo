@@ -217,16 +217,6 @@ if (ncat < 1) then
   write(err_msg,*) myname_, ' unknown number of categories'
   call abor1_ftn(err_msg)
 endif
-if (.not. allocated(icefrac_d%vals)) then
-  icefrac_d%nval = ncat
-  allocate(icefrac_d%vals(ncat,size(hofx,1)))
-  icefrac_d%vals = 0.0
-endif
-if (.not. allocated(icethick_d%vals)) then
-  icethick_d%nval = ncat
-  allocate(icethick_d%vals(ncat, size(hofx,1)))
-  icethick_d%vals = 0.0
-endif
 
 ! backward sea ice thickness obs operator
 

@@ -16,7 +16,6 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/utils/ObsSeaIceLinear.interface.h"
 
 // Forward declarations
 namespace eckit {
@@ -50,12 +49,8 @@ class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOper_;
   std::unique_ptr<const oops::Variables> varin_;
 };
 

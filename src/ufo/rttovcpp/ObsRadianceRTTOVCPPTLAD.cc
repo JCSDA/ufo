@@ -123,11 +123,6 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
   std::size_t nprofiles = dy.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();
 
-  if ( dx.nlevs("air_temperature") == 0 ) {   // if dx is not allocated
-     dx.allocate(nlevels, varin_);
-     dx.zero();
-  }
-
   std::vector<double>  tmpvar2d(nprofiles, 0.0);  // one single level field
   std::vector<std::vector<double>> dT;  // [nlevels][nprofiles]
   std::vector<std::vector<double>> dQ;  // [nlevels][nprofiles]

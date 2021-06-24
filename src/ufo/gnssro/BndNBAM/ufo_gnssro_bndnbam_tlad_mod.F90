@@ -596,27 +596,6 @@ if (self%nlocs > 0 ) then
     call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
   end if
 
-! allocate if not yet allocated	
-  if (.not. allocated(t_ad%vals)) then
-      t_ad%nlocs = self%nlocs
-      t_ad%nval = self%nlev
-      allocate(t_ad%vals(t_ad%nval,t_ad%nlocs))
-      t_ad%vals = 0.0_kind_real
-  endif
-  if (.not. allocated(prs_ad%vals)) then
-      prs_ad%nlocs = self%nlocs
-      prs_ad%nval = self%nlev1
-      allocate(prs_ad%vals(prs_ad%nval,prs_ad%nlocs))
-      prs_ad%vals = 0.0_kind_real
-  endif
-  if (.not. allocated(q_ad%vals)) then
-      q_ad%nlocs = self%nlocs
-      q_ad%nval = self%nlev
-      allocate(q_ad%vals(q_ad%nval,q_ad%nlocs))
-      q_ad%vals = 0.0_kind_real
-  endif
-  if (.not. geovals%linit ) geovals%linit=.true.
-
   nlocs = self%nlocs
   nlev  = self%nlev
   nlev1 = self%nlev1

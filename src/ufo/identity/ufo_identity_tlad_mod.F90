@@ -132,12 +132,6 @@ subroutine identity_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
 
-    if (.not.(allocated(point%vals))) then
-      point%nval=1
-      allocate(point%vals(1,size(hofx,2)))
-      point%vals = 0.0
-    end if
-
     ! backward obs operator
     do iobs = 1, nlocs
       if (hofx(ivar, iobs) /= missing) then

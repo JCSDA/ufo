@@ -202,30 +202,6 @@ subroutine ufo_gnssro_ref_simobs_ad(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_ts,t_d)
   call ufo_geovals_get_var(geovals, var_q, q_d)
 
-! allocate if not yet allocated
-  if (.not. allocated(t_d%vals)) then
-      t_d%nlocs = self%nlocs
-      t_d%nval = self%nval
-      allocate(t_d%vals(t_d%nval,t_d%nlocs))
-      t_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. allocated(prs_d%vals)) then
-      prs_d%nlocs = self%nlocs
-      prs_d%nval = self%nval
-      allocate(prs_d%vals(prs_d%nval,prs_d%nlocs))
-      prs_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. allocated(q_d%vals)) then
-      q_d%nlocs = self%nlocs
-      q_d%nval = self%nval
-      allocate(q_d%vals(q_d%nval,q_d%nlocs))
-      q_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. geovals%linit ) geovals%linit=.true.
-
   missing = missing_value(missing)
 
   do iobs = 1, geovals%nlocs

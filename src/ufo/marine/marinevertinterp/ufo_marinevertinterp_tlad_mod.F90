@@ -224,13 +224,6 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     nlev = self%nval
     nlocs = self%nlocs
 
-    if (.not. allocated(dvar%vals)) then
-      allocate(dvar%vals(nlev, size(hofx,1)))
-      dvar%nval = nlev
-      dvar%vals = 0.0
-    end if
-
-
     ! backward vertical interp
     do iobs = 1, size(hofx,1)
        if (hofx(iobs) /= missing) then

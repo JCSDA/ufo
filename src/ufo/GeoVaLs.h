@@ -42,6 +42,10 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
   GeoVaLs(const Locations &, const oops::Variables &);
+
+  GeoVaLs(const Locations & locs, const oops::Variables & vars,
+          const std::vector<size_t> & nlevs);
+
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
   GeoVaLs(const GeoVaLs &, const int &);
@@ -59,12 +63,17 @@ class GeoVaLs : public util::Printable,
   void split(GeoVaLs &, GeoVaLs &) const;
   void merge(const GeoVaLs &, const GeoVaLs &);
 
-  /// \brief Allocate GeoVaLs for \p vars variables with \p nlev number of levels
-  /// \details Fails if at least one of the \p vars doesn't exist in GeoVaLs.
-  ///          Only allocates variables that haven't been allocated before.
-  ///          Fails if one of \p vars is already allocated with number of levels
-  ///          different than \p nlev; doesn't reallocate variables that are already
-  ///          allocated with \p nlev.
+  /// \brief Deprecated method. Allocates GeoVaLs for \p vars variables with
+  /// \p nlev number of levels
+  /// \details Please do not use in any new code. This method is currently
+  /// only used for ObsDiagnostics and will be removed soon. Rely on
+  /// GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &)
+  /// to allocate GeoVaLs correctly.
+  /// Fails if at least one of the \p vars doesn't exist in GeoVaLs.
+  /// Only allocates variables that haven't been allocated before.
+  /// Fails if one of \p vars is already allocated with number of levels
+  /// different than \p nlev; doesn't reallocate variables that are already
+  /// allocated with \p nlev.
   void allocate(const int & nlev, const oops::Variables & vars);
 
   void zero();

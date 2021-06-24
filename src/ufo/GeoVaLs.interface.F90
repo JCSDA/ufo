@@ -45,8 +45,28 @@ call ufo_geovals_default_constr(self)
 
 end subroutine ufo_geovals_default_constr_c
 
+subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars, c_nvars, c_sizes) bind(c,name='ufo_geovals_setup_f90')
+use oops_variables_mod
+implicit none
+integer(c_int), intent(inout)  :: c_key_self
+integer(c_int), intent(in)     :: c_nlocs, c_nvars
+type(c_ptr), value, intent(in) :: c_vars
+integer(c_size_t), intent(in)     :: c_sizes(c_nvars)
+
+type(ufo_geovals), pointer :: self
+type(oops_variables) :: vars
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+vars = oops_variables(c_vars)
+call ufo_geovals_setup(self, vars, c_nlocs, c_nvars, c_sizes)
+
+end subroutine ufo_geovals_setup_c
+
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
-subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
+subroutine ufo_geovals_partial_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_partial_setup_f90')
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
@@ -61,9 +81,9 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 vars = oops_variables(c_vars)
-call ufo_geovals_setup(self, vars, c_nlocs)
+call ufo_geovals_partial_setup(self, vars, c_nlocs)
 
-end subroutine ufo_geovals_setup_c
+end subroutine ufo_geovals_partial_setup_c
 
 !> Allocate GeoVaLs
 subroutine ufo_geovals_allocate_c(c_key_self, c_nlevels, c_vars) bind(c,name='ufo_geovals_allocate_f90')
@@ -88,11 +108,13 @@ end subroutine ufo_geovals_allocate_c
 
 subroutine ufo_geovals_copy_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_copy_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_other
-type(ufo_geovals), pointer :: self
-type(ufo_geovals), pointer :: other
+integer(c_int), intent(in)    :: c_key_self
+integer(c_int), intent(inout) :: c_key_other
+type(ufo_geovals), pointer    :: self
+type(ufo_geovals), pointer    :: other
 
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_other)
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 
@@ -105,16 +127,18 @@ end subroutine ufo_geovals_copy_c
 
 subroutine ufo_geovals_copy_one_c(c_key_self, c_key_other, c_ind) bind(c,name='ufo_geovals_copy_one_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_other
-integer(c_int), intent(in) :: c_ind
-type(ufo_geovals), pointer :: self
-type(ufo_geovals), pointer :: other
+integer(c_int), intent(inout) :: c_key_self
+integer(c_int), intent(in)    :: c_key_other
+integer(c_int), intent(in)    :: c_ind
+type(ufo_geovals), pointer    :: self
+type(ufo_geovals), pointer    :: other
 integer :: ind
 
 ! Convert location index from the C++ to the Fortran convention.
 ind = c_ind + 1
 
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 

@@ -11,14 +11,12 @@ add_subdirectory( coolskin )
 add_subdirectory( seaicefraction )
 add_subdirectory( seaicethickness )
 add_subdirectory( chleuzintegr )
-add_subdirectory( utils )
 if( ${gsw_FOUND} )
   add_subdirectory( insitutemperature )
   add_subdirectory( marinevertinterp )
   add_subdirectory( obsop )
 endif( ${gsw_FOUND} )
 
-PREPEND( _p_utils_files               "marine/utils"               ${utils_files} )
 PREPEND( _p_adt_files                 "marine/adt"                 ${adt_files} )
 PREPEND( _p_coolskin_files            "marine/coolskin"            ${coolskin_files} )
 PREPEND( _p_seaicefraction_files      "marine/seaicefraction"      ${seaicefraction_files} )
@@ -31,7 +29,6 @@ if( ${gsw_FOUND} )
 endif( ${gsw_FOUND} )
 
 set ( marine_src_files
-    ${_p_utils_files}
     ${_p_adt_files}
     ${_p_coolskin_files}
     ${_p_marinevertinterp_files}

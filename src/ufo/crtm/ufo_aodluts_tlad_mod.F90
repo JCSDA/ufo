@@ -312,12 +312,6 @@ CONTAINS
     DO jaero=self%n_aerosols,1,-1
 
        CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
-       IF (.NOT. ALLOCATED(var_p%vals)) THEN
-          var_p%nlocs = self%n_profiles
-          var_p%nval = self%n_layers
-          ALLOCATE(var_p%vals(var_p%nval,var_p%nlocs))
-          var_p%vals = 0.0_kind_real
-       ENDIF
 
        qm_ad(jaero,:,:) = qm_ad(jaero,:,:) * self%layer_factors
        var_p%vals=qm_ad(jaero,:,:)

@@ -351,6 +351,47 @@ void testGeoVaLsAllocatePutGet() {
   }
 }
 
+/// \brief Tests GeoVaLs(const Locations &, const Variables &, const std::vector<size_t> &)
+/// constructor. Tests that levels get correctly allocated, and that the GeoVaLs are zeroed
+/// out.
+void testGeoVaLsConstructor() {
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+  const eckit::LocalConfiguration testconf(conf, "geovals get test");
+
+  const std::string var1 = "variable1";
+  const std::string var2 = "variable2";
+  const oops::Variables testvars({var1, var2});
+
+  /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
+  const Locations locs(testconf, oops::mpi::world());
+  const std::vector<size_t> testnlevs({10, 1});
+  GeoVaLs gval(locs, testvars, testnlevs);
+  oops::Log::test() << "Created and allocated GeoVaLs: " << var1 << "; nlevs(var1) = " <<
+                       gval.nlevs(var1) << ", " << var2 << "; nlevs(var2) = " <<
+                       gval.nlevs(var2) << std::endl;
+  EXPECT_EQUAL(gval.nlevs(var1), 10);
+  EXPECT_EQUAL(gval.nlevs(var2), 1);
+
+  const std::vector<double> refvalues(gval.nlocs(), 0.0);
+  const std::vector<float>  refvalues_float(gval.nlocs(), 0.0);
+  const std::vector<int>    refvalues_int(gval.nlocs(), 0);
+
+  /// check that get method returns zeroes (initial values in GeoVaLs)
+  std::vector<double> testvalues(gval.nlocs(), 1.0);
+  gval.get(testvalues, var2);
+  oops::Log::test() << "Get result:        " << testvalues << std::endl;
+  EXPECT_EQUAL(testvalues, refvalues);
+  std::vector<float> testvalues_float(gval.nlocs(), 1.0);
+  gval.get(testvalues_float, var2);
+  oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
+  EXPECT_EQUAL(testvalues_float, refvalues_float);
+  std::vector<int> testvalues_int(gval.nlocs(), 1);
+  gval.get(testvalues_int, var2);
+  oops::Log::test() << "Get(int) result:   " << testvalues_int << std::endl;
+  EXPECT_EQUAL(testvalues_int, refvalues_int);
+}
+
+
 // -----------------------------------------------------------------------------
 
 class GeoVaLs : public oops::Test {
@@ -367,6 +408,8 @@ class GeoVaLs : public oops::Test {
       { testGeoVaLs(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsAllocatePutGet")
       { testGeoVaLsAllocatePutGet(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsConstructor")
+      { testGeoVaLsConstructor(); });
   }
 
   void clear() const override {}

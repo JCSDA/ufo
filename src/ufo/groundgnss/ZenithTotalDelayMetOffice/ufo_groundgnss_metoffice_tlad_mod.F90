@@ -317,22 +317,6 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure
 
-! Allocate the output for the air pressure
-  if (.not. allocated(prs_d%vals)) then
-      prs_d % nlocs = self % nlocs
-      prs_d % nval = self % nlevp
-      allocate(prs_d%vals(prs_d%nval, prs_d%nlocs))
-      prs_d % vals = 0.0_kind_real
-  endif
-
-! Allocate the output for the specific humidity
-  if (.not. allocated(q_d%vals)) then
-      q_d % nlocs = self % nlocs
-      q_d % nval = self % nlevq
-      allocate(q_d%vals(q_d%nval, q_d%nlocs))
-      q_d % vals = 0.0_kind_real
-  endif
-
   missing = missing_value(missing)
   allocate(x_d(1:prs_d%nval + q_d%nval))
   allocate(pressure_d(1:prs_d%nval))

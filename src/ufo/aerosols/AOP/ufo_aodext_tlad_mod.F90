@@ -384,15 +384,9 @@ real(c_double) :: missing
  !Get pointer to ext profiles in geovals and put adjoint of extinction profiles into geovals
  do nch = self%nprofiles, 1, -1
      
-     geovar = self%geovars%variable(nch)    
-     call ufo_geovals_get_var(geovals, geovar, ext_profile)
-     if(.not. allocated(ext_profile%vals)) then
-        ext_profile%nlocs = nlocs
-        ext_profile%nval  = self%nlayers
-        allocate(ext_profile%vals(ext_profile%nval, ext_profile%nlocs))
-        ext_profile%vals(:,:) = zero
-     endif
-  ext_profile%vals(:,:) = ext_ad(:,:,nch) 
+   geovar = self%geovars%variable(nch)
+   call ufo_geovals_get_var(geovals, geovar, ext_profile)
+   ext_profile%vals(:,:) = ext_ad(:,:,nch)
                          
  enddo
  deallocate(angstrom_ad, angstrom, aod_bkg_ad, aod_bkg, ext_ad)  

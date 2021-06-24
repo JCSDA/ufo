@@ -502,14 +502,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
     ! -----------
     call ufo_geovals_get_var(geovals, var_ts, geoval_d) ! var_ts = air_temperature
 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
-      geoval_d % vals = zero
-    end if
-
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
       do jchan = 1, size(self%channels)
@@ -526,14 +518,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     do jspec = 1, self%conf%ngas
       call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
-
-      ! allocate if not yet allocated
-      if (.not. allocated(geoval_d % vals)) then
-        geoval_d % nlocs = self % nprofiles
-        geoval_d % nval = self % nlevels
-        allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
-        geoval_d % vals = zero
-      end if
 
       do ichan = 1, self % nchan_total, size(self%channels)
         prof = self % RTprof_K % chanprof(ichan) % prof
@@ -570,14 +554,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval_d) 
 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
-
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
       do jchan = 1, size(self%channels)
@@ -590,13 +566,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     !q2m
     call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval_d) 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
@@ -613,18 +582,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
     call ufo_geovals_get_var(geovals, var_u, geoval_d)
     call ufo_geovals_get_var(geovals, var_v, geoval_d2)
 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      geoval_d2 % nlocs = self % nprofiles
-      geoval_d2 % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs), &
-        geoval_d2 % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-      geoval_d2 % vals = zero
-    end if
-
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
       do jchan = 1, size(self%channels)
@@ -640,14 +597,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     !Tskin
     call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval_d)
-
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof

@@ -288,14 +288,6 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
     geovar = self%tracervars(ivar)
     call ufo_geovals_get_var(geovals_in, geovar, tracer)
 
-    ! Allocate geovals profile if not yet allocated
-    if (.not. allocated(tracer%vals)) then
-       tracer%nlocs = self%nlocs
-       tracer%nval  = self%nval
-       allocate(tracer%vals(tracer%nval, tracer%nlocs))
-       tracer%vals(:,:) = 0.0_kind_real
-    endif
-
     do iobs = 1, nlocs
       if (hofx(ivar,iobs) /= missing) then ! take care of missing obs
         if (self%troposphere) then

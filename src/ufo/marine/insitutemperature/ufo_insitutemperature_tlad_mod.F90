@@ -291,23 +291,6 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     nlev = self%nval
     nlocs = self%nlocs
 
-    if (.not. allocated(dtemp%vals)) then
-       allocate(dtemp%vals(nlev, size(hofx,1)))
-       dtemp%nval = nlev
-       dtemp%vals = 0.0
-    end if
-    if (.not. allocated(dsalt%vals)) then
-      allocate(dsalt%vals(nlev, size(hofx,1)))
-      dsalt%nval = nlev
-      dsalt%vals = 0.0
-    end if
-    if (.not. allocated(dlayerthick%vals)) then
-       allocate(dlayerthick%vals(nlev, size(hofx,1)))
-       dlayerthick%nval = nlev
-       dlayerthick%vals = 0.0
-       ! Layer thickness is not a control variable: it stays zeroed out!
-    end if
-
     ! backward sea temperature profile obs operator
     do iobs = 1, size(hofx,1)
 

@@ -190,16 +190,6 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
     ! Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
     call ufo_geovals_get_var(geovals, geovar, profile)
-    ! Allocate geovals profile if not yet allocated
-    if (.not. allocated(profile%vals)) then
-       profile%nlocs = self%nlocs
-       profile%nval  = self%nval
-       allocate(profile%vals(profile%nval, profile%nlocs))
-       profile%vals(:,:) = 0.0_kind_real
-    endif
-    if (.not. geovals%linit ) geovals%linit=.true.
-
-
     nsig = self%nval-1
     do iobs = 1, nlocs
        call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
