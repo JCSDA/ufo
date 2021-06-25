@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/categoricaloper/ObsCategoricalData.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -91,7 +92,7 @@ class ObsCategorical : public ObsOperatorBase,
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  const oops::Variables & requiredVars() const override { return requiredVars_; }
+  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
 
  private:
   void print(std::ostream &) const override;
@@ -100,20 +101,8 @@ class ObsCategorical : public ObsOperatorBase,
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
 
-  /// Observation operators which are run by the Categorical operator.
-  std::map<std::string, std::unique_ptr<ObsOperatorBase>> components_;
-
-  /// Required variables.
-  oops::Variables requiredVars_;
-
-  /// Value of the categorical variable in the ObsSpace.
-  std::vector <std::string> categoricalVariable_;
-
-  /// Name of the fallback observation operator.
-  std::string fallbackOperatorName_;
-
-  /// Names of the categorised observation operators.
-  std::map<std::string, std::string> categorisedOperatorNames_;
+  /// Data handler for the Categorical operator and TL/AD code.
+  ObsCategoricalData<ObsOperatorBase, ObsOperatorFactory> data_;
 };
 
 // -----------------------------------------------------------------------------
