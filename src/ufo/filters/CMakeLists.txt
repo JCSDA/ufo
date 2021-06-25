@@ -181,6 +181,8 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
+      obsfunctions/ModelHeightAdjustedAirTemperature.cc
+      obsfunctions/ModelHeightAdjustedAirTemperature.h
       obsfunctions/ObsErrorBoundIR.cc
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
