@@ -8,12 +8,6 @@ set ( identity_files
     ObsIdentity.cc
     ObsIdentityTLAD.h
     ObsIdentityTLAD.cc
-    ObsIdentity.interface.F90
-    ObsIdentity.interface.h
-    ObsIdentityTLAD.interface.F90
-    ObsIdentityTLAD.interface.h
-    ufo_identity_mod.F90
-    ufo_identity_tlad_mod.F90
 )
 
 PREPEND( _p_identity_files       "identity"       ${identity_files} )

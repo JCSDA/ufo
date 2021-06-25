@@ -129,6 +129,7 @@ list( APPEND ufo_test_input
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
+  testinput/identity.yaml
   testinput/interpolate_data_from_file_predictor.yaml
   testinput/legendre_predictor.yaml
   testinput/locations.yaml
@@ -1575,6 +1576,20 @@ ecbuild_add_test( TARGET  test_ufo_opr_profile_average
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test UFO ObsFilters (generic)
 

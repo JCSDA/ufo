@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2021 UK Met Office
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -10,10 +10,11 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/identity/ObsIdentity.interface.h"
+
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -30,33 +31,49 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-// -----------------------------------------------------------------------------
-/// Generic identity observation operator class
+/// \brief Identity observation operator.
+///
+/// This observation operator transfers model values directly to the H(x) vector, after horizontal
+/// interpolation has been performed, with no further processing.
+/// For GeoVaLs with more than one vertical level, only the first entry in the GeoVaL is processed
+/// in this way.
+///
+/// An example yaml configuration is:
+///
+///     obs operator:
+///      name: Identity
+///
+/// This operator also accepts an optional `variables` parameter, which controls which ObsSpace
+/// variables will be simulated. This option should only be set if this operator is used as a
+/// component of the Composite operator. If `variables` is not set, the operator will simulate
+/// all ObsSpace variables. Please see the documentation of the Composite operator for further
+/// details.
 class ObsIdentity : public ObsOperatorBase,
-                          private util::ObjectCounter<ObsIdentity> {
+  private util::ObjectCounter<ObsIdentity> {
  public:
   static const std::string classname() {return "ufo::ObsIdentity";}
 
   ObsIdentity(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsIdentity();
+  ~ObsIdentity() override;
 
-// Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-// Other
-  const oops::Variables & requiredVars() const override {return varin_;}
+  const oops::Variables & requiredVars() const override { return requiredVars_; }
 
   oops::Variables simulatedVars() const override { return operatorVars_; }
 
-  int & toFortran() {return keyOperObsIdentity_;}
-  const int & toFortran() const {return keyOperObsIdentity_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperObsIdentity_;
-  const ioda::ObsSpace& odb_;
-  oops::Variables varin_;
+
+ private:
+  /// Required variables.
+  oops::Variables requiredVars_;
+
+  /// Operator variables.
   oops::Variables operatorVars_;
+
+  /// Indices of operator variables.
+  std::vector<int> operatorVarIndices_;
 };
 
 // -----------------------------------------------------------------------------
