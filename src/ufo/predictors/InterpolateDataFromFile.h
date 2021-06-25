@@ -13,7 +13,10 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
+
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 #include "ufo/predictors/PredictorBase.h"
 
@@ -30,10 +33,9 @@ class VariableCorrectionParameters : public oops::Parameters {
   DrawValueFromFileParametersWithoutGroup details{this};
 };
 
-/// \brief Parameters recognized in the `options` section of the Configuration passed to
-/// the InterpolateDataFromFile constructor.
-class InterpolateDataFromFileParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(InterpolateDataFromFileParameters, Parameters)
+/// Configuration parameters of the `interpolate_data_from_file` predictor.
+class InterpolateDataFromFileParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(InterpolateDataFromFileParameters, PredictorParametersBase);
 
  public:
   oops::Parameter<std::vector<VariableCorrectionParameters>> correctedVariables{
@@ -71,7 +73,11 @@ class InterpolateDataFromFileParameters : public oops::Parameters {
 /// DrawValueFromFile and DataExtractor.
 class InterpolateDataFromFile : public PredictorBase {
  public:
-  InterpolateDataFromFile(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef InterpolateDataFromFileParameters Parameters_;
+
+  InterpolateDataFromFile(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &, const GeoVaLs &,
                const ObsDiagnostics &, ioda::ObsVector &) const override;

@@ -93,22 +93,17 @@ observations:
       predictors:
       - name: constant
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &iasi_metop-atlap Data/ufo/testinput_tier_1/iasi_metop-a_tlapmean.txt
+        order: 2
+        tlapse: &iasi_metop-atlap Data/ufo/testinput_tier_1/iasi_metop-a_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *iasi_metop-atlap
+        tlapse: *iasi_metop-atlap
       - name: emissivity
       - name: scan_angle
-        options:
-          order: 4
+        order: 4
       - name: scan_angle
-        options:
-          order: 3
+        order: 3
       - name: scan_angle
-        options:
-          order: 2
+        order: 2
       - name: scan_angle
   obs filters:
 #  Wavenumber Check

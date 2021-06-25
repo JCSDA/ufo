@@ -15,51 +15,39 @@ observations:
     variational bc:
       predictors:
       - name: orbital_angle
-        options:
-          order: 1
-          component: "cos"
+        order: 1
+        component: "cos"
       - name: orbital_angle 
-        options:
-          order: 1
-          component: "sin"
+        order: 1
+        component: "sin"
       - name: orbital_angle
-        options:
-          order: 2
-          component: "cos"
+        order: 2
+        component: "cos"
       - name: orbital_angle
-        options:
-          order: 2
-          component: "sin"
+        order: 2
+        component: "sin"
       - name: orbital_angle
-        options:
-          order: 3
-          component: "cos"
+        order: 3
+        component: "cos"
       - name: orbital_angle 
-        options:
-          order: 3
-          component: "sin"
+        order: 3
+        component: "sin"
       - name: orbital_angle
-        options:
-          order: 4
-          component: "cos"
+        order: 4
+        component: "cos"
       - name: orbital_angle
-        options:
-          order: 4
-          component: "sin"
+        order: 4
+        component: "sin"
       - name: orbital_angle
-        options:
-          order: 5
-          component: "cos"
+        order: 5
+        component: "cos"
       - name: orbital_angle 
-        options:
-          order: 5
-          component: "sin"
+        order: 5
+        component: "sin"
       - name: orbital_angle
-        options:
-          order: 6
-          component: "cos"
+        order: 6
+        component: "cos"
       - name: orbital_angle
-        options:
-          order: 6
-          component: "sin"
+        order: 6
+        component: "sin"
   tolerance: 1.e-5

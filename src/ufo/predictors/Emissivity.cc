@@ -25,8 +25,8 @@ static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivity");
 
 // -----------------------------------------------------------------------------
 
-Emissivity::Emissivity(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
+Emissivity::Emissivity(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars) {
   // required variables
   geovars_ += oops::Variables({"water_area_fraction"});
   if (vars.size() > 0) {

@@ -10,10 +10,6 @@
 
 #include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace oops {
   class Variables;
 }
@@ -28,16 +24,16 @@ namespace ufo {
 
 class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
  public:
-  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef EmptyPredictorParameters Parameters_;
+
+  CosineOfLatitudeTimesOrbitNode(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
                ioda::ObsVector &) const override;
-
- private:
-  // default preconditioner for bias terms
-  double precond_ = 0.01;
 };
 
 // -----------------------------------------------------------------------------

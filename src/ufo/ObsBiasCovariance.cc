@@ -42,8 +42,10 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
-  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
-    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(conf, vars_));
+  for (const PredictorParametersWrapper &wrapper :
+       params.variationalBC.value().predictors.value()) {
+    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(wrapper.predictorParameters,
+                                                                 vars_));
     prednames_.push_back(pred->name());
   }
 

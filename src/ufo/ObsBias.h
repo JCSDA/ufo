@@ -95,7 +95,7 @@ class ObsBias : public util::Printable,
   /// index in the flattened biascoeffs_ for predictor \p jpred and variable \p jvar
   size_t index(size_t jpred, size_t jvar) const {return jvar*numVariablePredictors_ + jpred;}
 
-  void initPredictor(const eckit::Configuration &predictorConf);
+  void initPredictor(const PredictorParametersWrapper &params);
 
   /// bias correction coefficients (npredictors x nprimitivevariables)
   Eigen::VectorXd biascoeffs_;

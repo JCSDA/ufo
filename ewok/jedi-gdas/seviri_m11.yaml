@@ -19,28 +19,22 @@ obs bias:
     predictors:
     - name: constant
     - name: lapse_rate
-      options:
-        order: 2
-        tlapse: &seviri_m11_tlapse $(experiment_dir)/{{current_cycle}}/seviri_m11.{{background_time}}.tlapse.txt
+      order: 2
+      tlapse: &seviri_m11_tlapse $(experiment_dir)/{{current_cycle}}/seviri_m11.{{background_time}}.tlapse.txt
     - name: lapse_rate
-      options:
-        tlapse: *seviri_m11_tlapse
+      tlapse: *seviri_m11_tlapse
     - name: emissivity
     - name: scan_angle
-      options:
-        var_name: scan_position
-        order: 4
+      var_name: scan_position
+      order: 4
     - name: scan_angle
-      options:
-        var_name: scan_position
-        order: 3
+      var_name: scan_position
+      order: 3
     - name: scan_angle
-      options:
-        var_name: scan_position
-        order: 2
+      var_name: scan_position
+      order: 2
     - name: scan_angle
-      options:
-        var_name: scan_position
+      var_name: scan_position
 obs filters:
 #  Observation Range Sanity Check
 - filter: Bounds Check

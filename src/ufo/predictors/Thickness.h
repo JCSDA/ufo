@@ -13,20 +13,17 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/predictors/PredictorBase.h"
 
-
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
 }
 
 namespace ufo {
 
-/// Parameters controlling the thickness predictor.
-class ThicknessParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ThicknessParameters, Parameters)
+// -----------------------------------------------------------------------------
+
+/// Configuration parameters of the thickness predictor.
+class ThicknessParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ThicknessParameters, PredictorParametersBase);
 
  public:
   /// Pressure value (Pa) at the top of the required thickness layer
@@ -54,7 +51,11 @@ class ThicknessParameters : public oops::Parameters {
 
 class Thickness : public PredictorBase {
  public:
-  Thickness(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef ThicknessParameters Parameters_;
+
+  Thickness(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -62,7 +63,7 @@ class Thickness : public PredictorBase {
                ioda::ObsVector &) const override;
 
  private:
-  ThicknessParameters parameters_;
+  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

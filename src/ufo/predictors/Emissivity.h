@@ -28,7 +28,11 @@ namespace ufo {
 
 class Emissivity : public PredictorBase {
  public:
-  Emissivity(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef EmptyPredictorParameters Parameters_;
+
+  Emissivity(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

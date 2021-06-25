@@ -17,16 +17,14 @@ static PredictorMaker<Legendre> makerFuncLegendre_("Legendre");
 
 // -----------------------------------------------------------------------------
 
-Legendre::Legendre(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars), order_(1), nscan_(-99) {
-  // get the order if it is provided in options
-  if (conf.has("options.order")) {
-    conf.get("options.order", order_);
-
+Legendre::Legendre(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars),
+    order_(parameters.order.value().value_or(1)),
+    nscan_(parameters.numScanPositions) {
+  if (parameters.order.value() != boost::none) {
     // override the predictor name to distinguish between Legendre predictors of different orders
     name() = name() + "_" + std::to_string(order_);
   }
-  conf.get("number of scan positions", nscan_);
 }
 
 // -----------------------------------------------------------------------------

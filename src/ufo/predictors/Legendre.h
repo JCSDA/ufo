@@ -9,17 +9,36 @@
 #define UFO_PREDICTORS_LEGENDRE_H_
 
 #include <vector>
-#include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
+
+#include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;
 }
 
 namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+/// Configuration parameters of the Legendre predictor.
+class LegendreParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(LegendreParameters, PredictorParametersBase);
+
+ public:
+  /// Number of scan positions.
+  oops::RequiredParameter<int> numScanPositions{"number of scan positions", this};
+
+  /// Order of the Legendre polynomial. By default, 1.
+  ///
+  /// \note If this option is set, a suffix containing its value (even if it's equal to 1) will be
+  /// appended to the predictor name.
+  oops::OptionalParameter<int> order{"order", this};
+};
 
 // -----------------------------------------------------------------------------
 /**
@@ -35,7 +54,11 @@ namespace ufo {
 
 class Legendre : public PredictorBase {
  public:
-  Legendre(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef LegendreParameters Parameters_;
+
+  Legendre(const Parameters_ &, const oops::Variables &);
   ~Legendre() {}
 
   void compute(const ioda::ObsSpace &,

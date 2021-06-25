@@ -61,22 +61,17 @@ observations:
       predictors:
       - name: constant
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &cris-fsr_npp-atlap Data/ufo/testinput_tier_1/cris-fsr_npp_tlapmean.txt
+        order: 2
+        tlapse: &cris-fsr_npp-atlap Data/ufo/testinput_tier_1/cris-fsr_npp_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *cris-fsr_npp-atlap
+        tlapse: *cris-fsr_npp-atlap
       - name: emissivity
       - name: scan_angle
-        options:
-          order: 4
+        order: 4
       - name: scan_angle
-        options:
-          order: 3
+        order: 3
       - name: scan_angle
-        options:
-          order: 2
+        order: 2
       - name: scan_angle
   obs filters:
 #  Wavenumber Check

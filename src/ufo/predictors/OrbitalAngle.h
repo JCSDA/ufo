@@ -7,19 +7,60 @@
 
 #ifndef UFO_PREDICTORS_ORBITALANGLE_H_
 #define UFO_PREDICTORS_ORBITALANGLE_H_
+
 #include <string>
 #include <vector>
-#include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/ParameterTraits.h"
+#include "oops/util/parameters/RequiredParameter.h"
+
+#include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;
 }
 
 namespace ufo {
+
+enum class FourierTermType {
+  SIN, COS
+};
+
+struct FourierTermTypeParameterTraitsHelper {
+  typedef FourierTermType EnumType;
+  static constexpr char enumTypeName[] = "FourierTermType";
+  static constexpr util::NamedEnumerator<FourierTermType> namedValues[] = {
+    { FourierTermType::SIN, "sin" },
+    { FourierTermType::COS, "cos" }
+  };
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::FourierTermType> :
+    public EnumParameterTraits<ufo::FourierTermTypeParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+/// Configuration parameters of the OrbitalAngle predictor.
+class OrbitalAngleParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(OrbitalAngleParameters, PredictorParametersBase);
+
+ public:
+  /// Order of the Fourier term.
+  oops::RequiredParameter<int> order{"order", this};
+  /// Type of the Fourier term (either `sin` or `cos`).
+  oops::RequiredParameter<FourierTermType> component{"component", this};
+};
 
 // -----------------------------------------------------------------------------
 /**
@@ -33,7 +74,11 @@ namespace ufo {
 
 class OrbitalAngle : public PredictorBase {
  public:
-  OrbitalAngle(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef OrbitalAngleParameters Parameters_;
+
+  OrbitalAngle(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -42,7 +87,7 @@ class OrbitalAngle : public PredictorBase {
 
  private:
   int order_;
-  std::string component_;  // has two valid values: "cos"  and "sin"
+  FourierTermType component_;
 };
 
 // -----------------------------------------------------------------------------

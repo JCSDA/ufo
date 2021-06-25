@@ -56,16 +56,12 @@ std::set<std::string> getVariableNamesWithoutChannels(const oops::Variables &var
 
 static PredictorMaker<InterpolateDataFromFile> maker("interpolate_data_from_file");
 
-InterpolateDataFromFile::InterpolateDataFromFile(const eckit::Configuration & conf,
+InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
                                                  const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
-  InterpolateDataFromFileParameters params;
-  eckit::LocalConfiguration optionsConf(conf, "options");
-  params.validateAndDeserialize(optionsConf);
-
+  : PredictorBase(parameters, vars) {
   const std::set<std::string> channellessVariables = getVariableNamesWithoutChannels(vars_);
 
-  for (const VariableCorrectionParameters & varParams : params.correctedVariables.value()) {
+  for (const VariableCorrectionParameters & varParams : parameters.correctedVariables.value()) {
     if (!oops::contains(channellessVariables, varParams.name))
       throw eckit::UserError("'" + varParams.name.value() +
                              "' is not in the list of bias-corrected variables", Here());

@@ -14,11 +14,10 @@ observations:
     variational bc:
       predictors:
       - name: thickness
-        options:
-          layer top: 300000
-          layer base: 850000
-          mean: 7.6
-          standard deviation: 0.4
+        layer top: 300000
+        layer base: 850000
+        mean: 7.6
+        standard deviation: 0.4
   expectExceptionWithMessage: layer top is greater than largest model pressure level
 
 - obs space:
@@ -33,21 +32,18 @@ observations:
     variational bc:
       predictors:
       - name: thickness
-        options:
-          layer top: 30000
-          layer base: 85000
-          mean: 7.6
-          standard deviation: 0.4
+        layer top: 30000
+        layer base: 85000
+        mean: 7.6
+        standard deviation: 0.4
       - name: thickness
-        options:
-          layer top: 5000
-          layer base: 20000
-          mean: 8.6
-          standard deviation: 0.4 
+        layer top: 5000
+        layer base: 20000
+        mean: 8.6
+        standard deviation: 0.4 
       - name: thickness
-        options:
-          layer top: 85000
-          layer base: 100000
-          mean: 1.2
-          standard deviation: 0.4
+        layer top: 85000
+        layer base: 100000
+        mean: 1.2
+        standard deviation: 0.4
   tolerance: 5.0e-5

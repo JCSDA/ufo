@@ -51,22 +51,17 @@ observations:
       predictors:
       - name: constant
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &airs_aqua-atlap Data/ufo/testinput_tier_1/airs_aqua_tlapmean.txt
+        order: 2
+        tlapse: &airs_aqua-atlap Data/ufo/testinput_tier_1/airs_aqua_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *airs_aqua-atlap
+        tlapse: *airs_aqua-atlap
       - name: emissivity
       - name: scan_angle
-        options:
-          order: 4
+        order: 4
       - name: scan_angle
-        options:
-          order: 3
+        order: 3
       - name: scan_angle
-        options:
-          order: 2
+        order: 2
       - name: scan_angle
   obs filters:
 #  Wavenumber Check

@@ -15,15 +15,30 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/parameters/RequiredPolymorphicParameter.h"
+
+#include "ufo/predictors/PredictorBase.h"
 
 namespace ufo {
+
+/// \brief Contains a polymorphic parameter holding an instance of a subclass of
+/// PredictorParametersBase.
+class PredictorParametersWrapper : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(PredictorParametersWrapper, Parameters)
+ public:
+  /// After deserialization, holds an instance of a subclass of PredictorParametersBase configuring
+  /// a predictor. The type of the subclass is determined by the value of the "name" key in the
+  /// Configuration object from which this object is deserialized.
+  oops::RequiredPolymorphicParameter<PredictorParametersBase, PredictorFactory>
+    predictorParameters{"name", this};
+};
 
 class StaticOrVariationalBCParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(StaticOrVariationalBCParameters, Parameters)
 
  public:
   /// Each element of this list is used to configure a separate predictor.
-  oops::Parameter<std::vector<eckit::LocalConfiguration>> predictors{"predictors", {}, this};
+  oops::Parameter<std::vector<PredictorParametersWrapper>> predictors{"predictors", {}, this};
 };
 
 class ObsBiasCovariancePriorInflationParameters : public oops::Parameters {

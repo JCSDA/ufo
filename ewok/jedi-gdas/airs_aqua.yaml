@@ -40,22 +40,17 @@ obs bias:
     predictors:
     - name: constant
     - name: lapse_rate
-      options:
-        order: 2
-        tlapse: &airs_aqua_tlapse $(experiment_dir)/{{current_cycle}}/airs_aqua.{{background_time}}.tlapse.txt
+      order: 2
+      tlapse: &airs_aqua_tlapse $(experiment_dir)/{{current_cycle}}/airs_aqua.{{background_time}}.tlapse.txt
     - name: lapse_rate
-      options:
-        tlapse: *airs_aqua_tlapse
+      tlapse: *airs_aqua_tlapse
     - name: emissivity
     - name: scan_angle
-      options:
-        order: 4
+      order: 4
     - name: scan_angle
-      options:
-        order: 3
+      order: 3
     - name: scan_angle
-      options:
-        order: 2
+      order: 2
     - name: scan_angle
 obs filters:
 #  Wavenumber Check

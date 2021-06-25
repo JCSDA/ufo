@@ -34,12 +34,14 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
-  for (const eckit::LocalConfiguration &conf : params.staticBC.value().predictors.value()) {
-    initPredictor(conf);
+  for (const PredictorParametersWrapper &wrapper :
+       params.staticBC.value().predictors.value()) {
+    initPredictor(wrapper);
     ++numStaticPredictors_;
   }
-  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
-    initPredictor(conf);
+  for (const PredictorParametersWrapper &wrapper :
+       params.variationalBC.value().predictors.value()) {
+    initPredictor(wrapper);
     ++numVariablePredictors_;
   }
 
@@ -215,8 +217,8 @@ void ObsBias::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::initPredictor(const eckit::Configuration &predictorConf) {
-  std::shared_ptr<PredictorBase> pred(PredictorFactory::create(predictorConf, vars_));
+void ObsBias::initPredictor(const PredictorParametersWrapper &params) {
+  std::shared_ptr<PredictorBase> pred(PredictorFactory::create(params.predictorParameters, vars_));
   predictors_.push_back(pred);
   prednames_.push_back(pred->name());
   geovars_ += pred->requiredGeovars();

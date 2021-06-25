@@ -45,22 +45,17 @@ observations:
       predictors:
       - name: constant
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &airs_aqua_tlap Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_tlapmean.txt
+        order: 2
+        tlapse: &airs_aqua_tlap Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *airs_aqua_tlap
+        tlapse: *airs_aqua_tlap
       - name: emissivity
       - name: scan_angle
-        options:
-          order: 4
+        order: 4
       - name: scan_angle
-        options:
-          order: 3
+        order: 3
       - name: scan_angle
-        options:
-          order: 2
+        order: 2
       - name: scan_angle
   vector ref: GsiHofXBc
   tolerance: 1.e-7
