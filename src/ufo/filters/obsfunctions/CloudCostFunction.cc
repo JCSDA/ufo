@@ -117,7 +117,20 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           // Ensure specific humidity is within limits
           gv_qgas[iloc] = std::max(gv_qgas[iloc], options_.min_q.value());
           gv_qgas[iloc] = std::min(gv_qgas[iloc], qsaturated[iloc]);
-          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc] + gv_ciw[iloc];
+          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc];  // ice is neglected for partitioning
+        }
+        int qsplit_partition_mode = 1;  // partition total water into vapour, liquid and ice
+        std::vector<float> qsplit_gas(nlocs), qsplit_clw(nlocs), qsplit_ciw(nlocs);
+        ufo_ops_satrad_qsplit_f90(qsplit_partition_mode, static_cast<int>(nlocs), gv_pres.data(),
+                                  gv_temp.data(), humidity_total.data(), qsplit_gas.data(),
+                                  qsplit_clw.data(), qsplit_ciw.data(), split_rain);
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          // For scattering use sum of geovals for qtotal, otherwise use partitioned quantities
+          if (options_.scattering_switch.value()) {
+            humidity_total[iloc] += gv_ciw[iloc];
+          } else {
+            humidity_total[iloc] = qsplit_gas[iloc] + qsplit_clw[iloc] + qsplit_ciw[iloc];
+          }
         }
       }
 
@@ -131,8 +144,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           in.get(Variable("brightness_temperature_jacobian_"+ciw_name+"@ObsDiag", channels_)[ichan],
                  level_jac, jac_ciw);
           std::vector<float> dq_dqtotal(nlocs), dql_dqtotal(nlocs), dqi_dqtotal(nlocs);
-          int qsplit_mode = 2;  // compute derivatives
-          ufo_ops_satrad_qsplit_f90(qsplit_mode, static_cast<int>(nlocs), gv_pres.data(),
+          int qsplit_derivative_mode = 2;  // compute derivatives
+          ufo_ops_satrad_qsplit_f90(qsplit_derivative_mode, static_cast<int>(nlocs), gv_pres.data(),
                                     gv_temp.data(), humidity_total.data(), dq_dqtotal.data(),
                                     dql_dqtotal.data(), dqi_dqtotal.data(), split_rain);
           // Jacobian dy/dx for observation y, humdity x in units kg/kg

@@ -57,4 +57,4 @@ observations:
       name: cloud_cost@TestReference
     test:
       name: cloud_cost@MetaData
-    absTol: 1.0e-4
+    absTol: 1.0e-5
