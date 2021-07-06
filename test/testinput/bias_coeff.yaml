@@ -7,9 +7,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-15
+    channels: 1-15
   obs bias:  # test reading coefficients for 2 predictors; coeffs are zero for all channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test1.nc4
     variational bc:
       predictors:
       - name: cosine_of_latitude_times_orbit_node
@@ -23,9 +24,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-15
+    channels: 1-15
   obs bias:  # test reading coefficients for 1 predictor (all channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test2.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -38,9 +40,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 7-9, 12
+    channels: 7-9, 12
   obs bias:  # test reading coefficients for 1 predictor (subset of channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test3.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -53,9 +56,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 7-9, 12
+    channels: 7-9, 12
   obs bias:  # test reading coefficients for 2 predictors and subset of channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test4.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -69,9 +73,30 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-15
+    channels: 7-9, 12
+  obs bias:  # test reading coefficients for 1 predictor and subset of channels
+             # and static (==1) coefficients for another predictor
+    input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test5.nc4
+    variational bc:
+      predictors:
+      - name: emissivity
+    static bc:
+      predictors:
+      - name: constant
+  obs bias test:
+    norm: 0.99229224635
+    relative tolerance: 1.e-7
+
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
   obs bias:  # test reading all channels and most predictors
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    output file: Data/satbias_amsua_n19_test6.nc4
     variational bc:
       predictors:
       - name: constant

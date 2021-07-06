@@ -84,6 +84,9 @@ class ObsBias : public util::Printable,
   /// Return the list of bias-corrected variables.
   const oops::Variables & correctedVars() const {return vars_;}
 
+  /// Set all variable predictors coefficients to zero (used in the test)
+  void zero();
+
   // Operator
   operator bool() const {
     return (numStaticPredictors_ > 0 || numVariablePredictors_ > 0) && vars_.size() > 0;

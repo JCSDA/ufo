@@ -3113,6 +3113,13 @@ ecbuild_add_test( TARGET  test_ufo_bias_coeffs
                   DEPENDS test_ObsBias.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
+ecbuild_add_test( TARGET  test_ufo_bias_coeffs_readwrite
+                  SOURCES mains/TestUfoObsBias.cc
+                  ARGS    "testinput/bias_coeff.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
 ecbuild_add_test( TARGET  test_ufo_bias_coeff_increment
                   SOURCES mains/TestObsBiasIncrement.cc
                   ARGS    "testinput/bias_coeff_cov.yaml"

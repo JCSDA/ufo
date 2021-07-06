@@ -95,6 +95,9 @@ class ObsBiasParameters : public oops::Parameters {
   /// Path to a NetCDF file containing initial values of the coefficients of predictors used
   /// in VarBC.
   oops::OptionalParameter<std::string> inputFile{"input file", this};
+  /// Path to a NetCDF file containing final values of the coefficients of predictors used
+  /// in VarBC.
+  oops::OptionalParameter<std::string> outputFile{"output file", this};
   /// Options controlling the covariance matrix.
   oops::OptionalParameter<ObsBiasCovarianceParameters> covariance{"covariance", this};
 };
