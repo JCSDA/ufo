@@ -434,15 +434,17 @@ endfunction()
 # add tests to download ufo & crtm data
 
 ADD_DOWNLOAD_TEST( "ufo" ${ufo_test_data} UFO_UFO_TESTFILES_PATH )
-ADD_DOWNLOAD_TEST( "crtm" ${crtm_test_data} UFO_CRTM_TESTFILES_PATH )
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${UFO_UFO_TESTFILES_PATH}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
 
-execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                ${UFO_CRTM_TESTFILES_PATH}
-                ${CMAKE_CURRENT_BINARY_DIR}/Data/crtm)
+if( crtm_FOUND )
+  ADD_DOWNLOAD_TEST( "crtm" ${crtm_test_data} UFO_CRTM_TESTFILES_PATH )
+  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                   ${UFO_CRTM_TESTFILES_PATH}
+                   ${CMAKE_CURRENT_BINARY_DIR}/Data/crtm)
+endif( crtm_FOUND )
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
