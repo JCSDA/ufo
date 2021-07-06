@@ -210,8 +210,10 @@ void ObsBias::write(const Parameters_ & params) const {
 
     saveBiasCoeffsWithChannels(group, predictors, vars_.channels(), coeffs);
   } else {
-    throw eckit::UserError("obs bias.output file section missing from the configuration",
-                           Here());
+    if (numVariablePredictors_ > 0) {
+      oops::Log::warning() << "obs bias.output file is NOT available, bias coefficients "
+                           << "will not be saved." << std::endl;
+    }
   }
 }
 
