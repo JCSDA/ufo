@@ -22,6 +22,7 @@
 #include "ufo/filters/HistoryCheck.h"
 #include "ufo/filters/ImpactHeightCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
+#include "ufo/filters/ModelBestFitPressure.h"
 #include "ufo/filters/ModelObThreshold.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
@@ -80,6 +81,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            differenceCheckMaker("Difference Check");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::HistoryCheck> >
            historyCheckMaker("History Check");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ModelBestFitPressure> >
+           ModelBestFitPressureMaker("Model Best Fit Pressure");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ModelObThreshold> >
            ModelObThresholdMaker("ModelOb Threshold");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ROobserror> >

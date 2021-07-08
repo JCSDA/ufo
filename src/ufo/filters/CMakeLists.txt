@@ -43,6 +43,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      ModelBestFitPressure.cc
+      ModelBestFitPressure.h
       ModelObThreshold.cc
       ModelObThreshold.h
       MWCLWCheck.cc

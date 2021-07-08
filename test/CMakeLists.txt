@@ -186,6 +186,7 @@ list( APPEND ufo_test_input
   testinput/qc_met_office_buddy_check.yaml
   testinput/qc_met_office_buddy_check_unittests.yaml
   testinput/qc_met_office_buddy_pair_finder.yaml
+  testinput/qc_modelbestfitpressure.yaml
   testinput/qc_modelobthreshold.yaml
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_performaction.yaml
@@ -1798,12 +1799,19 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc_halo
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_qc_modelbestfitpressure
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_modelbestfitpressure.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_modelobthreshold
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_modelobthreshold.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_stuckcheck
                   MPI     4

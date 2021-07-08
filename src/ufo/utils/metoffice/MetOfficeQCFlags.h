@@ -36,7 +36,6 @@ namespace MetOfficeQCFlags {
     // Satellite wind data
     MissingDataReport     = 1 << 14,  ///< Missing data
     SatwindAltReport      = 1 << 15,  ///< Satwind alternative p/uv
-    SatwindGoodConstraint = 1 << 16,  ///< Best-fit pressure is not well constrained
     // Other miscellaneous flags
     Thin4DFlag            = 1 << 17,  ///< Duplicate found
     StationListThinFlag   = 1 << 18   ///< Rejected based on station list
@@ -100,7 +99,8 @@ namespace MetOfficeQCFlags {
     SatwindConfFlag       = 1 << 12,  ///< Satwind product confidence
     SatwindInversionFlag  = 1 << 13,  ///< Inversion height corrected
     SatwindDryLayerFlag   = 1 << 14,  ///< Model dry layer QC
-    SatwindWrongLayerFlag = 1 << 15   ///< Wrong moist layer QC
+    SatwindWrongLayerFlag = 1 << 15,   ///< Wrong moist layer QC
+    SatwindPoorConstraint = 1 << 16,  ///< Best-fit pressure is not well constrained
   };
 
   // Flags for scatterometers
