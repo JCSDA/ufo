@@ -17,6 +17,8 @@ set ( filters_files
       FilterBase.cc
       FilterBase.h
       FilterParametersBase.h
+      FinalCheck.cc
+      FinalCheck.h
       GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h

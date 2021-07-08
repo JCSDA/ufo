@@ -118,14 +118,14 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// \code{.yaml}
 ///     - filter: Variable Assignment
 ///       assignments:
-///       - name: interpolated_value@DerivedValue
+///       - name: interpolated_value@DerivedObsValue
 ///         function:
 ///           name: DrawValueFromFile@ObsFunction
 ///           channels: 1-3
 ///           options:
 ///             file: <filepath>
 ///             channels: 1-3
-///             group: DerivedValue
+///             group: DerivedObsValue
 ///             interpolation:
 ///             - name: satellite_id@MetaData
 ///               method: exact

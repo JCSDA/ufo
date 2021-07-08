@@ -16,6 +16,7 @@
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
+#include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
 #include "ufo/filters/HistoryCheck.h"
@@ -57,6 +58,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
   oops::instantiateObsFilterFactory<OBS>();
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::QCmanager> >
            qcManagerMaker("QCmanager");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::FinalCheck> >
+           finalCheckMaker("Final Check");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::PreQC> >
            preQCMaker("PreQC");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ObsDomainCheck> >

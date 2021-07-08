@@ -178,6 +178,7 @@ list( APPEND ufo_test_input
   testinput/qc_derivative_dpdt.yaml
   testinput/qc_derivative_dxdt.yaml
   testinput/qc_differencecheck.yaml
+  testinput/qc_finalcheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
   testinput/qc_grosserrorwholereport.yaml
@@ -1718,6 +1719,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_derivative_ascent
 ecbuild_add_test( TARGET  test_ufo_qc_derivative_speed
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_derivative_dxdt.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_finalcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_finalcheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

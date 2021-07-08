@@ -35,6 +35,7 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsBiasParameters.h"
@@ -173,6 +174,23 @@ class ObsFiltersParameters : public oops::Parameters {
   /// observations from individual observation spaces.
   oops::Parameter<std::vector<ObsTypeParameters>> observations{"observations", {}, this};
 };
+
+// -----------------------------------------------------------------------------
+
+//!
+//! \brief Run the FinalCheck filter.
+//!
+//! This needs to be done manually if post-filters aren't run because the HofX vector
+//! is not available.
+//!
+void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
+                   oops::ObsDataVector<ufo::ObsTraits, int> &qcflags,
+                   oops::ObsVector<ufo::ObsTraits> &obserr) {
+  FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
+                        qcflags.obsdatavectorptr(),
+                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsvector()));
+  finalCheck.doFilter();
+}
 
 // -----------------------------------------------------------------------------
 
@@ -445,10 +463,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
+///   apply the FinalCheck filter (which should always be run after all other filters).
+    runFinalCheck(obspace, *qcflags, obserr);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
+///   apply the FinalCheck filter (which should always be run after all other filters).
+    runFinalCheck(obspace, *qcflags, obserr);
   }
 
   qcflags->save("EffectiveQC");

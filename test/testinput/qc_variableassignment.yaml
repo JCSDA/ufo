@@ -265,6 +265,72 @@ observations:
     reference:
       name: assigned_int_variable_4@TestReference
 
+- obs space:
+    <<: *ObsSpace
+    name: Copy a variable to another (pre-existing) float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: float_variable_1@MetaData
+      source variable:
+        name: assigned_float_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a variable to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      type: float
+      source variable:
+        name: assigned_float_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_float_variable_4@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a variable to another (pre-existing) int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: int_variable_1@MetaData
+      source variable:
+        name: assigned_int_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a variable to new int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      type: int
+      source variable:
+        name: assigned_int_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_int_variable_4@TestReference
+
 ## Test Conditional ObsFunction "add on" - Example 1
 ## Float variable assignment including multiple where in a case
 - obs space:
@@ -561,11 +627,9 @@ observations:
           err1: [5]
   expectExceptionWithMessage: ObsFunction values cannot be assigned to non-numeric variables
 
-- obs space: &ObsSpace
+- obs space:
+    <<: *ObsSpace
     name: Try to assign values to an existing variable from the ObsValue group
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -573,11 +637,9 @@ observations:
       value: 75.5
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
 
-- obs space: &ObsSpace
+- obs space:
+    <<: *ObsSpace
     name: Try to assign values to a new variable from the ObsValue group
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -586,11 +648,9 @@ observations:
       type: float
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
 
-- obs space: &ObsSpace
+- obs space:
+    <<: *ObsSpace
     name: Try to assign values to a new variable without specifying its type
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:

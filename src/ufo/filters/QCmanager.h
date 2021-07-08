@@ -26,6 +26,11 @@ namespace ufo {
 class GeoVaLs;
 class ObsDiagnostics;
 
+/// \brief Always the first filter to be run.
+///
+/// The constructor sets the QC flag to `missing` at all locations with missing obs values of QC
+/// flags. The postFilter() function sets the QC flag to `Hfailed` if it was previously set to
+/// `pass`, but the obs operator failed to produce a valid value.
 class QCmanager : public util::Printable {
  public:
   QCmanager(ioda::ObsSpace &, const eckit::Configuration &,
@@ -44,12 +49,9 @@ class QCmanager : public util::Printable {
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
-  const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
   const oops::Variables nodiags_;
   std::shared_ptr<ioda::ObsDataVector<int>> flags_;
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
-  const oops::Variables & observed_;
 };
 
 }  // namespace ufo

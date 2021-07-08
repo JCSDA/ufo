@@ -1,0 +1,119 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+
+# The following two tests verify the Variable Assignment filter makes expected updates to QC flags
+# when derived obs values change from missing to non-missing and vice versa
+
+- obs space:
+    name: Assign missing values to some observations
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  # Blacklist locations 2 and 3
+  - filter: BlackList
+    where:
+    - variable:
+        name: latitude@MetaData  # [1, 2, ..., 10]
+      minvalue: 3
+      maxvalue: 4
+  # This filter will put missing values in the first 3 elements of variable1@DerivedObsValue.
+  # It should also set the QC flag to "missing" at locations 0 and 1 (location 2 has already been
+  # rejected by the BlackList, so its QC flag should not change)
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: latitude@MetaData  # [1, 2, ..., 10]
+      minvalue: 4  # Select only the last 7 locations
+    assignments:
+    - name: variable1@DerivedObsValue
+      type: float
+      value: 1
+  benchmarkFlag: 10  # missing
+  flaggedObservationsBenchmark: [0, 1]
+  failedObservationsBenchmark: [0, 1, 2, 3]
+
+- obs space:
+    name: Remove missing values from some observations
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    # The first two elements of ObsValue and the last two of ObsError are missing
+    simulated variables: [surface_pressure]
+  obs filters:
+  # Blacklist location 2
+  - filter: BlackList
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: 0
+      maxvalue: 0
+  # Leave only the first element of surface_pressure@DerivedObsValue set to a missing value
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: -2  # Select all locations except the first
+    assignments:
+    - name: surface_pressure@DerivedObsValue
+      type: float
+      value: 100000
+  benchmarkFlag: 10  # missing
+  flaggedObservationsBenchmark: [0, 3, 4]  # loc 0 has a missing ob, locs 3 and 4 -- a missing error
+  failedObservationsBenchmark: [0, 2, 3, 4]  # in addition, loc 2 was blacklisted
+
+# The following tests check if derived simulated variables are handled appropriately
+
+- obs space:
+    name: Derived simulated variable not assigned
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+    derived simulated variables: [eastward_wind]
+  expectExceptionWithMessage: All filters have been run, but the derived simulated variable eastward_wind can't be found either in the ObsValue or the DerivedObsValue group
+
+- obs space:
+    name: Derived simulated variable assigned values, but not error estimates
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+    derived simulated variables: [eastward_wind]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: eastward_wind@DerivedObsValue
+      type: float
+      value: 10
+  passedBenchmark: 5 # air_temperature
+  failedBenchmark: 5 # eastward_wind -- its error estimates are missing
+
+- obs space:
+    name: Derived simulated variable assigned both values and error estimates
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+    derived simulated variables: [eastward_wind]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: eastward_wind@DerivedObsValue
+      type: float
+      value: 10
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  passedBenchmark: 10
+
+- obs space:
+    name: Derived simulated variable already exists
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: []
+    # Already exists. But the first two elements of ObsValue and the last two of ObsError are missing
+    derived simulated variables: [surface_pressure]
+  obs filters:
+  # Add a dummy filter to force the QCmanager and Final Check to be run.
+  - filter: Domain Check
+  failedObservationsBenchmark: [0, 1, 3, 4]

@@ -10,41 +10,51 @@
 
 #include <memory>
 #include <ostream>
+#include <string>
+#include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
-#include "oops/util/Printable.h"
+#include "oops/util/ObjectCounter.h"
+#include "ufo/filters/FilterBase.h"
+#include "ufo/filters/QCflags.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-class GeoVaLs;
-class ObsDiagnostics;
 
-class PreQC : public util::Printable {
+class PreQCParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(PreQCParameters, FilterParametersBase)
+
  public:
-  PreQC(ioda::ObsSpace &, const eckit::Configuration &,
+  /// The ObsSpace group holding PreQC flags. By default, 'PreQC'.
+  oops::Parameter<std::string> inputQC{"inputQC", "PreQC", this};
+  /// Minimum PreQC flag denoting "pass". By default, zero.
+  oops::Parameter<int> minvalue{"minvalue", 0, this};
+  /// Maximum PreQC flag denoting "pass". By default, zero.
+  oops::Parameter<int> maxvalue{"maxvalue", 0, this};
+};
+
+class PreQC : public FilterBase, private util::ObjectCounter<PreQC> {
+ public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef PreQCParameters Parameters_;
+
+  static const std::string classname() {return "ufo::PreQC";}
+
+  PreQC(ioda::ObsSpace &, const Parameters_ &,
         std::shared_ptr<ioda::ObsDataVector<int> >,
         std::shared_ptr<ioda::ObsDataVector<float> >);
-  ~PreQC() {}
-
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
-
-  const oops::Variables & requiredVars() const {return nogeovals_;}
-  const oops::Variables & requiredHdiagnostics() const {return nodiagvars_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, const Variables &,
+                   std::vector<std::vector<bool>> &) const override;
+  int qcFlag() const override {return QCflags::preQC;}
 
-  const oops::Variables nogeovals_;
-  const oops::Variables nodiagvars_;
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo
