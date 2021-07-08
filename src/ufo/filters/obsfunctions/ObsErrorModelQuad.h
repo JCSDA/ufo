@@ -113,7 +113,7 @@ class ObsErrorModelQuadParameters : public oops::Parameters {
 ///             err1: [17.0, 20.5, 21.1]
 ///            {save: true}
 ///
-class ObsErrorModelQuad : public ObsFunctionBase {
+class ObsErrorModelQuad : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorModelQuad";}
 

@@ -97,7 +97,7 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
 ///        sort variable: "air_pressure"
 ///        sort order: "descending"
 ///
-class ObsErrorFactorConventional : public ObsFunctionBase {
+class ObsErrorFactorConventional : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorFactorConventional";}
 

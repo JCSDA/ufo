@@ -30,18 +30,17 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /*! \brief ObsFilterData provides access to all data related to an ObsFilter
  *
- * \details ObsFilterData can always provide access to all data from ObsSpace
- * and optionally to data from H(x) ObsVector, GeoVaLs and ObsDiagnostics.
- * The latter three can be associated with ObsFilterData by using associate()
+ * \details ObsFilterData can always provide access to all data from ObsSpace, values computed on
+ * the fly by ObsFunctions, and optionally to data from the H(x) ObsVector, GeoVaLs and
+ * ObsDiagnostics. The latter three can be associated with ObsFilterData by using associate()
  * method.
- *
  */
 class ObsFilterData : public util::Printable,
                       private util::ObjectCounter<ObsFilterData> {
  public:
   static const std::string classname() {return "ufo::ObsFilterData";}
 
-  //! Constructs ObsFilterData and associates ObsSpace with it
+  //! Constructs ObsFilterData and associates an ObsSpace with it.
   explicit ObsFilterData(ioda::ObsSpace &);
   ~ObsFilterData();
 
@@ -56,29 +55,66 @@ class ObsFilterData : public util::Printable,
   //! Associates ObsDataVector with this ObsFilterData (int)
   void associate(const ioda::ObsDataVector<int> &, const std::string &);
 
-  //! Gets requested data from ObsFilterData
-  void get(const Variable &, std::vector<float> &) const;
-  //! Gets requested data at requested level from ObsFilterData
-  void get(const Variable &, const int, std::vector<float> &) const;
-  //! Gets requested data from ObsFilterData
-  void get(const Variable &, std::vector<std::string> &) const;
-  //! Gets requested data from ObsFilterData
-  void get(const Variable &, std::vector<int> &) const;
-  //! Gets requested data from ObsFilterData
-  void get(const Variable &, std::vector<util::DateTime> &) const;
-  //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
-  void get(const Variable &, ioda::ObsDataVector<float> &) const;
-  //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
-  void get(const Variable &, ioda::ObsDataVector<int> &) const;
-  //! Checks if requested data exists in ObsFilterData
-  bool has(const Variable &) const;
+  //! \brief Fills a `std::vector` with values of the specified variable.
+  //!
+  //! \param varname
+  //!   The requested variable.
+  //! \param[out] values
+  //!   Vector to be filled with values of the requested variable.
+  //!
+  //! An exception is thrown if the requested variable does not exist or is not of the correct type.
+  void get(const Variable &varname, std::vector<float> &values) const;
+  //! \overload
+  void get(const Variable &varname, std::vector<int> &values) const;
+  //! \overload
+  void get(const Variable &varname, std::vector<std::string> &values) const;
+  //! \overload
+  void get(const Variable &varname, std::vector<util::DateTime> &values) const;
+
+  //! \brief Fills a `std::vector` with values of the specified variable at a single level.
+  //!
+  //! \param varname
+  //!   The requested variable, which must belong to one of the following groups: GeoVaLs, ObsDiag
+  //!   and ObsBiasTerm.
+  //! \param level
+  //!   Requested level.
+  //! \param[out]
+  //!   Vector to be filled with values of the requested variable.
+  //!
+  //! An exception is thrown if the requested variable does not exist or if it is not in one of
+  //! the groups listed above.
+  void get(const Variable & varname, const int level,
+           std::vector<float> & values) const;
+
+  //! brief Fills a `ioda::ObsDataVector` with values of the specified variable.
+  //!
+  //! \param varname
+  //!   The requested variable.
+  //! \param[out] values
+  //!   An `ObsDataVector` to be filled with values of the requested variable. Must be
+  //!   pre-populated, i.e. contain a row corresponding to each requested channel of that variable.
+  //!
+  //! An exception is thrown if the requested variable does not exist or is not of the correct type.
+  void get(const Variable &varname, ioda::ObsDataVector<float> &values) const;
+  //! \overload
+  void get(const Variable &varname, ioda::ObsDataVector<int> &values) const;
+  //! \overload
+  void get(const Variable &varname, ioda::ObsDataVector<std::string> &values) const;
+  //! \overload
+  void get(const Variable &varname, ioda::ObsDataVector<util::DateTime> &values) const;
+
+  //! Returns true if variable `varname` is known to ObsFilterData, false otherwise.
+  bool has(const Variable &varname) const;
 
   //! Determines dtype of the provided variable
   ioda::ObsDtype dtype(const Variable &) const;
 
-  //! Returns number of locations
+  //! \brief Returns the number of locations in the associated ObsSpace.
   size_t nlocs() const;
-  //! Returns number of levels for specified variable if 3D GeoVaLs or ObsDiags
+  //! \brief Returns the number of levels in the specified variable.
+  //!
+  //! This is useful primarily for variables belonging to the GeoVaLs, ObsDiag and ObsBiasTerm
+  //! groups. For all other variables this function returns 1.
   size_t nlevs(const Variable &) const;
   //! Returns reference to ObsSpace associated with ObsFilterData
   ioda::ObsSpace & obsspace() const {return obsdb_;}
@@ -91,6 +127,12 @@ class ObsFilterData : public util::Printable,
   bool hasVector(const std::string &, const std::string &) const;
   bool hasDataVector(const std::string &, const std::string &) const;
   bool hasDataVectorInt(const std::string &, const std::string &) const;
+
+  template <typename T>
+  void getVector(const Variable &varname, std::vector<T> &values) const;
+  /// Called by the overloads of get() taking an ioda::ObsDataVector of strings or datetimes.
+  template <typename T>
+  void getNonNumeric(const Variable &varname, ioda::ObsDataVector<T> &values) const;
 
   ioda::ObsSpace & obsdb_;                 //!< ObsSpace associated with this object
   const GeoVaLs mutable * gvals_;          //!< pointer to GeoVaLs associated with this object

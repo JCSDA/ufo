@@ -13,9 +13,15 @@
 namespace ufo
 {
 
+template <typename ExtractedValue>
 struct DataExtractorInput;
 
 /// \brief Provides data to the DataExtractor.
+///
+/// \tparam ExtractedValue
+///   Type of values extracted by the DataExtractor. Must be `float`, `int` or `std::string`.
+///
+template <typename ExtractedValue>
 class DataExtractorBackend {
  public:
   virtual ~DataExtractorBackend() = default;
@@ -29,7 +35,7 @@ class DataExtractorBackend {
   ///
   /// \returns An object encapsulating the payload variable, all coordinates indexing it
   /// and the mapping between dimensions of the payload array and coordinates.
-  virtual DataExtractorInput loadData(const std::string &payloadGroup) const = 0;
+  virtual DataExtractorInput<ExtractedValue> loadData(const std::string &payloadGroup) const = 0;
 };
 
 }  // namespace ufo

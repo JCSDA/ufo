@@ -60,7 +60,7 @@ class CloudDetectMinResidualIRParameters : public oops::Parameters {
 /// 1 = channel is affected by clouds (cloudy channel)
 /// 2 = channel is not affected by clouds but too sensitive to surface condition
 ///
-class CloudDetectMinResidualIR : public ObsFunctionBase {
+class CloudDetectMinResidualIR : public ObsFunctionBase<float> {
  public:
   explicit CloudDetectMinResidualIR(const eckit::LocalConfiguration &);
   ~CloudDetectMinResidualIR();

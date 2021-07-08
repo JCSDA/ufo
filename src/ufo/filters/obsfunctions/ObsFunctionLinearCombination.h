@@ -54,7 +54,7 @@ class LinearCombinationParameters : public oops::Parameters {
 ///
 
 
-class LinearCombination : public ObsFunctionBase {
+class LinearCombination : public ObsFunctionBase<float> {
  public:
   explicit LinearCombination(const eckit::LocalConfiguration &);
   ~LinearCombination();

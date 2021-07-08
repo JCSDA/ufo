@@ -68,7 +68,7 @@ class TropopauseEstimateParameters : public oops::Parameters {
 ///       value: air_pressure@MetaData
 ///       minvalue: -5000                  # 50 hPa above tropopause level, negative p-diff
 ///
-class TropopauseEstimate : public ObsFunctionBase {
+class TropopauseEstimate : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "TropopauseEstimate";}
 

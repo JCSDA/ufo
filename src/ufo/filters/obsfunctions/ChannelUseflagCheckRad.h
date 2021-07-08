@@ -38,7 +38,7 @@ class ChannelUseflagCheckRadParameters : public oops::Parameters {
 ///
 /// \brief Channel useflag check: remove channel if useflag is less than one
 ///
-class ChannelUseflagCheckRad : public ObsFunctionBase {
+class ChannelUseflagCheckRad : public ObsFunctionBase<float> {
  public:
   explicit ChannelUseflagCheckRad(const eckit::LocalConfiguration &);
   ~ChannelUseflagCheckRad();

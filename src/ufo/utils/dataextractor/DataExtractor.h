@@ -8,24 +8,15 @@
 #ifndef UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
 #define UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
 
-#include <algorithm>           // sort
-#include <functional>          // greater
-#include <limits>              // std::numeric_limits
-#include <list>                // list
 #include <memory>              // unique_ptr
-#include <sstream>             // stringstream
 #include <string>
 #include <unordered_map>
-#include <utility>             // pair
 #include <vector>
 
-#include "boost/variant.hpp"
-#include "Eigen/Dense"         // Eigen Arrays and Matrices
+#include <boost/multi_array.hpp>
+#include <boost/variant.hpp>
 
-#include "eckit/exception/Exceptions.h"
-#include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
-#include "ufo/filters/Variables.h"
+#include "ufo/utils/dataextractor/ConstrainedRange.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ioda {
@@ -36,7 +27,9 @@ struct Named_Variable;
 
 namespace ufo {
 
+template <typename ExtractedValue>
 class DataExtractorBackend;
+
 
 /// \brief Method used by the DataExtractor to map the value of an ObsSpace variable to
 /// a range of slices of the interpolated array along the dimension indexed by that variable.
@@ -70,12 +63,16 @@ enum class InterpMethod {
   /// \brief Perform a piecewise linear interpolation along the dimension indexed by the ObsSpace
   /// variable.
   ///
-  /// This method can only be used for the last indexing variable.
+  /// This method can only be used for the last indexing variable. It is supported only when the
+  /// DataExtractor produces values of type `float`, but not `int` or `std::string`.
   LINEAR
 };
 
 
 /// \brief This class makes it possible to extract and interpolate data loaded from a file.
+///
+/// \tparam ExtractedValue
+///   Type of the values to extract. Must be `float`, `int` or `std::string`.
 ///
 /// Currently the following file formats are supported: NetCDF and CSV. See
 /// DataExtractorNetCDFBackend and DataExtractorCSVBackend for more information about these
@@ -111,6 +108,7 @@ enum class InterpMethod {
 ///
 ///   Both 1 and 2 are equidistant, but we take the first found equidistant neighbour (1), then
 ///   return all indices matching this neighbour (indices 0 and 1 in this case).
+template <typename ExtractedValue>
 class DataExtractor
 {
  public:
@@ -151,310 +149,31 @@ class DataExtractor
   /// method).  The extract then utilises the observation value ('obVal') to perform this
   /// extraction.
   /// \param[in] obVal is the observation value used for the extract operation.
-  template<typename T>
-  void extract(const T &obVal) {
-    if (nextCoordToExtractBy_ == coordsToExtractBy_.cend()) {
-      throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
-                             Here());
-    }
-
-    // Fetch coordinate values
-    const std::vector<T> &coordValues = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
-    // Perform the extraction using the selected method
-    switch (nextCoordToExtractBy_->method) {
-      case InterpMethod::EXACT:
-        exactMatch(nextCoordToExtractBy_->name, coordValues,
-                   nextCoordToExtractBy_->payloadDim, obVal);
-        break;
-      case InterpMethod::LINEAR:
-        result_ = getResult(nextCoordToExtractBy_->name, coordValues,
-                            nextCoordToExtractBy_->payloadDim, obVal);
-        resultSet_ = true;
-        break;
-      case InterpMethod::NEAREST:
-        nearestMatch(nextCoordToExtractBy_->name, coordValues,
-                     nextCoordToExtractBy_->payloadDim, obVal);
-        break;
-      case InterpMethod::LEAST_UPPER_BOUND:
-        leastUpperBoundMatch(nextCoordToExtractBy_->name, coordValues,
-                             nextCoordToExtractBy_->payloadDim, obVal);
-        break;
-      case InterpMethod::GREATEST_LOWER_BOUND:
-        greatestLowerBoundMatch(nextCoordToExtractBy_->name, coordValues,
-                                nextCoordToExtractBy_->payloadDim, obVal);
-        break;
-      default:
-        throw eckit::UserError("Only 'linear', 'nearest', 'exact', 'least upper bound' and "
-                               "'greatest lower bound' interpolation methods supported.",
-                               Here());
-    }
-    ++nextCoordToExtractBy_;
-  }
+  void extract(float obVal);
+  void extract(int obVal);
+  void extract(const std::string &obVal);
 
   /// \brief Fetch the final interpolated value.
   /// \details This will only be succesful if previous calls to extract() have produced a single
   /// value to return.
-  float getResult();
+  ExtractedValue getResult();
 
  private:
-  /// \brief Fetch the final interpolated value at the 'location' `obVal`.
+  /// \brief Common implementation of the overloaded public function extract().
+  template <typename T>
+  void extractImpl(const T &obVal);
+
+  /// \brief Perform extraction using piecewise linear interpolation, if it's compatible with the
+  /// ExtractedValue type in use; otherwise throw an exception.
+  template <typename T>
+  void maybeExtractByLinearInterpolation(const T &obVal);
+
+  /// \brief Fetch the result produced by previous calls to extract(), none of which may have
+  /// used linear interpolation.
   ///
-  /// \details It is assumed that previous calls to extract() have extracted a single 1D slice of
-  /// the interpolated array parallel to the axis `varName`. This function returns the value
-  /// produced by piecewise linear interpolation of this slice at the point `obVal`.
-  ///
-  /// \param[in] varName is the name of the coordinate along which to interpolate.
-  /// \param[in] varValues is the vector of values of that coordinate.
-  /// \param[in] dimIndex is the dimension of the payload array indexed by the coordinate.
-  /// \param[in] obVal is the interpolation location.
-  template<typename T>
-  float getResult(const std::string &varName, const std::vector<T> &varValues,
-                  int dimIndex, const T &obVal) {
-    // Sanity check constraint
-    int sizeDim0 = constrainedRanges_[0].end - constrainedRanges_[0].begin;
-    int sizeDim1 = constrainedRanges_[1].end - constrainedRanges_[1].begin;
-    if ((dimIndex == 1 && !(sizeDim1 > 1 && sizeDim0 == 1)) ||
-        (dimIndex == 0 && !(sizeDim0 > 1 && sizeDim1 == 1))) {
-      throw eckit::Exception("Linear interpolation failed - data must be 1D.", Here());
-    }
-
-    // Constrain our index range in the relevant dimension.
-    const Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
-
-    if ((obVal > varValues[range.end - 1]) || (obVal < varValues[range.begin])) {
-      throw eckit::Exception("Linear interpolation failed, value is beyond grid extent."
-                             "No extrapolation supported.",
-                             Here());
-    }
-    // Find first index of varValues >= obVal
-    int nnIndex = std::lower_bound(varValues.begin() + range.begin,
-                                     varValues.begin() + range.end,
-                                     obVal) - varValues.begin();
-
-    // Determine upper or lower indices from this
-    if (varValues[nnIndex] == obVal) {
-      // No interpolation required (is equal)
-      float res;
-      if (dimIndex == 1) {
-        res = static_cast<float>(interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex));
-      } else {
-        res = static_cast<float>(interpolatedArray2D_(nnIndex, constrainedRanges_[1].begin));
-      }
-      return res;
-    }
-    // Linearly interpolate between these two indices.
-    auto zUpper = *(interpolatedArray2D_.data());
-    auto zLower = *(interpolatedArray2D_.data());
-    if (dimIndex == 1) {
-      zUpper = interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex);
-      zLower = interpolatedArray2D_(constrainedRanges_[0].begin, nnIndex-1);
-    } else {
-      zUpper = interpolatedArray2D_(nnIndex, constrainedRanges_[1].begin);
-      zLower = interpolatedArray2D_(nnIndex-1, constrainedRanges_[1].begin);
-    }
-    float res = ((static_cast<float>(obVal - varValues[nnIndex-1]) /
-                  static_cast<float>(varValues[nnIndex] - varValues[nnIndex-1])) *
-                 (zUpper - zLower)) + zLower;
-    return res;
-  }
-
-  float getResult(const std::string &varName, const std::vector<std::string> &varValues,
-                  int dimIndex, const std::string &obVal) {
-    throw eckit::UserError("VarName: " + varName +
-                           " - linear interpolation not compatible with string type.", Here());
-  }
-
-  /// \brief Update our extract constraint based on a nearest match against the specified
-  /// coordinate indexing a dimension of the payload array.
-  /// \details
-  ///
-  /// Method:
-  /// - Find **first** discovered nearest value in our loop.
-  /// - Determine which indices match this nearest value.
-  ///   (more than one index could have this one value).
-  ///
-  ///   [1, 1, 2, 3, 4, 5]
-  ///
-  /// Nearest neighbour extraction of “1”, has more than one neighbour.
-  /// That is, more than one index with the same value have the same distance:
-  ///
-  ///   [1, 1]  i.e. range=(0, 2)
-  ///
-  /// - Note that an alternative implementation could consider equidistant
-  ///   values, though it was decided this was not desirable behaviour:
-  ///
-  ///   [1, 1, 2, 3, 4, 5]
-  ///
-  /// Nearest neighbour extraction of “1.5” could be then considered to have 3
-  /// equidistant neighbours (1, 1, 2).  That is, two different values with the
-  /// same distance.
-  ///
-  /// [1, 1, 2] i.e. range=(0, 3)
-  ///
-  /// \param[in] varName is the name of the coordinate to match against.
-  /// \param[in] varValues is the vector of values of that coordinate.
-  /// \param[in] dimIndex is the dimension of the payload array indexed by the coordinate.
-  /// \param[in] obVal is the value to match.
-  template<typename T>
-  void nearestMatch(const std::string &varName, const std::vector<T> &varValues,
-                    int dimIndex, const T &obVal) {
-    // Constrain our index range in the relevant dimension.
-    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
-
-    // Find first index of varValues >= obVal
-    int nnIndex = std::lower_bound(varValues.begin() + range.begin,
-                                   varValues.begin() + range.end,
-                                   obVal) - varValues.begin();
-    if (nnIndex >= range.end) {
-      nnIndex = range.end - 1;
-    }
-
-    // Now fetch the nearest neighbour index (lower index prioritised for different values with
-    // same distance)
-    T dist = std::abs(varValues[nnIndex] - obVal);
-    if ((varValues[nnIndex] > obVal) && (nnIndex > range.begin) &&
-        (std::abs(varValues[nnIndex - 1] - obVal) <= dist))
-      nnIndex--;
-
-    // Now find **same value** equidistant neighbours
-    auto bounds = std::equal_range(varValues.begin() + range.begin,
-                                   varValues.begin() + range.end,
-                                   varValues[nnIndex]);
-    range = {static_cast<int>(bounds.first - varValues.begin()),
-             static_cast<int>(bounds.second - varValues.begin())};
-    oops::Log::debug() << "Nearest match; name: " << varName << " range: " <<
-      range.begin << "," << range.end << std::endl;
-  }
-
-  void nearestMatch(const std::string &varName, const std::vector<std::string> &varValues,
-                    int dimIndex, const std::string &obVal) {
-    throw eckit::UserError("Nearest match not compatible with string type.", Here());
-  }
-
-  /// \brief Update our extract constraint based on an exact match against the specified coordinate
-  /// indexing a dimension of the payload array.
-  ///
-  /// \param[in] varName is the name of the coordinate to match against.
-  /// \param[in] varValues is the vector of values of that coordinate.
-  /// \param[in] dimIndex is the dimension of the payload array indexed by the coordinate.
-  /// \param[in] obVal is the value to match.
-  template<typename T>
-  void exactMatch(const std::string &varName, const std::vector<T> &varValues,
-                  int dimIndex, const T &obVal) {
-    // Constrain our index range in the relevant dimension.
-    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
-
-    // Find the first and last matching index
-    auto bounds = std::equal_range(varValues.begin() + range.begin,
-                                   varValues.begin() + range.end,
-                                   obVal);
-    if (bounds.first == bounds.second) {
-      // No matching coordinate found. If the coordinate contains a 'missing value' entry,
-      // use it as a fallback. (If it doesn't, the 'bounds' range will stay empty, so an error will
-      // be reported).
-      bounds = std::equal_range(varValues.begin() + range.begin,
-                                varValues.begin() + range.end,
-                                util::missingValue(obVal));
-    }
-
-    range = {static_cast<int>(bounds.first - varValues.begin()),
-             static_cast<int>(bounds.second - varValues.begin())};
-
-    if (range.begin == range.end) {
-      std::stringstream msg;
-      msg << "No match found for exact match extraction of value '" << obVal
-          << "' of the variable '" << varName << "'";
-      throw eckit::Exception(msg.str(), Here());
-    }
-    oops::Log::debug() << "Exact match; name: " << varName << " range: " <<
-      range.begin << "," << range.end << std::endl;
-  }
-
-  /// \brief Update our extract constraint based on a least-upper-bound match against the specified
-  /// coordinate indexing a dimension of the payload array.
-  ///
-  /// \param[in] varName is the name of the coordinate to match against.
-  /// \param[in] varValues is the vector of values of that coordinate.
-  /// \param[in] dimIndex is the dimension of the payload array indexed by the coordinate.
-  /// \param[in] obVal is the value to match.
-  template<typename T>
-  void leastUpperBoundMatch(const std::string &varName, const std::vector<T> &varValues,
-                            int dimIndex, const T &obVal) {
-    // Constrain our index range in the relevant dimension.
-    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
-
-    // Find index of the first varValues >= obVal
-    typedef typename std::vector<T>::const_iterator It;
-    const It rangeBegin(varValues.begin() + range.begin);
-    const It rangeEnd(varValues.begin() + range.end);
-
-    const It leastUpperBoundIt = std::lower_bound(rangeBegin, rangeEnd, obVal);
-    if (leastUpperBoundIt == rangeEnd) {
-      std::stringstream msg;
-      msg << "No match found for 'least upper bound' extraction of value '" << obVal
-          << "' of the variable '" << varName << "'";
-      throw eckit::Exception(msg.str(), Here());
-    }
-
-    // Find the range of items with the same value of this coordinate
-    const auto bounds = std::equal_range(rangeBegin, rangeEnd, *leastUpperBoundIt);
-    range = {static_cast<int>(bounds.first - varValues.begin()),
-             static_cast<int>(bounds.second - varValues.begin())};
-    oops::Log::debug() << "Least upper bound match; name: " << varName << " range: "
-                       << range.begin << "," << range.end << std::endl;
-  }
-
-  void leastUpperBoundMatch(const std::string &varName, const std::vector<std::string> &varValues,
-                            int dimIndex, const std::string &obVal) {
-    throw eckit::UserError("The 'least upper bound' method cannot be used for string variables.",
-                           Here());
-  }
-
-  /// \brief Update our extract constraint based on a greatest-lower-bound match against the
-  /// specified coordinate indexing a dimension of the payload array.
-  ///
-  /// \param[in] varName is the name of the coordinate to match against.
-  /// \param[in] varValues is the vector of values of that coordinate.
-  /// \param[in] dimIndex is the dimension of the payload array indexed by the coordinate.
-  /// \param[in] obVal is the value to match, against the NetCDF coordinate of name 'varName'.
-  template<typename T>
-  void greatestLowerBoundMatch(const std::string &varName, const std::vector<T> &varValues,
-                               int dimIndex, const T &obVal) {
-    // Constrain our index range in the relevant dimension.
-    Range &range = constrainedRanges_[static_cast<size_t>(dimIndex)];
-
-    // Find index of the last varValues <= obVal
-
-    typedef typename std::vector<T>::const_reverse_iterator ReverseIt;
-    typedef std::greater<T> Compare;
-    const ReverseIt reverseRangeBegin(varValues.begin() + range.end);
-    const ReverseIt reverseRangeEnd(varValues.begin() + range.begin);
-
-    const ReverseIt greatestLowerBoundIt =
-        std::lower_bound(reverseRangeBegin, reverseRangeEnd, obVal, Compare());
-    if (greatestLowerBoundIt == reverseRangeEnd) {
-      std::stringstream msg;
-      msg << "No match found for 'greatest lower bound' extraction of value '" << obVal
-          << "' of the variable '" << varName << "'";
-      throw eckit::Exception(msg.str(), Here());
-    }
-
-    // Find the range of items with the same value of this coordinate
-    const auto bounds = std::equal_range(varValues.begin() + range.begin,
-                                         varValues.begin() + range.end,
-                                         *greatestLowerBoundIt);
-    range = {static_cast<int>(bounds.first - varValues.begin()),
-             static_cast<int>(bounds.second - varValues.begin())};
-    oops::Log::debug() << "Greatest lower bound match; name: " << varName << " range: "
-                       << range.begin << "," << range.end << std::endl;
-  }
-
-  void greatestLowerBoundMatch(const std::string &varName,
-                               const std::vector<std::string> &varValues,
-                               int dimIndex, const std::string &obVal) {
-    throw eckit::UserError("The 'greatest lower bound' method cannot be used for string variables.",
-                           Here());
-  }
+  /// An exception is thrown if these calls haven't produced a unique match of the extraction
+  /// criteria.
+  ExtractedValue getUniqueMatch() const;
 
   /// \brief Reset the extraction range for this object.
   /// \details Each time an exactMatch, nearestMatch, leastUpperBoundMatch or
@@ -462,30 +181,19 @@ class DataExtractor
   /// the extraction range is further constrained to match our updated match conditions.  After
   /// the final 'extract' is made (i.e. an interpolated value is derived) it is desirable to reset
   /// the extraction range by calling this method.
-  /// \internal This is called by the getObsErrorValue member functions just before returning the
+  /// \internal This is called by the getResult member function just before returning the
   /// interpolated value.
   void resetExtract();
-
-  /// \brief Fetch the coordinate data of specified name.
-  /// \details We cache this data so as not to require performing multiple loads from disk.
-  template <typename T>
-  T& get(const std::string &key) {
-    try {
-      return boost::get<T> (coordsVals_[key]);
-    } catch (boost::bad_get) {
-      throw eckit::BadParameter("Unable to find coordinate with this type", Here());
-    }
-  }
 
   /// \brief Load all data from the input file.
   void load(const std::string &filepath, const std::string &interpolatedArrayGroup);
 
   /// \brief Create a backend able to read file \p filepath.
-  static std::unique_ptr<DataExtractorBackend> createBackendFor(const std::string &filepath);
+  static std::unique_ptr<DataExtractorBackend<ExtractedValue>> createBackendFor(
+      const std::string &filepath);
 
   // Object represent the extraction range in both dimensions.
-  struct Range {int begin, end;};
-  std::array<Range, 2> constrainedRanges_;
+  std::array<ConstrainedRange, 2> constrainedRanges_;
 
   // Container holding coordinate arrays (of all supported types) loaded from the input file.
   typedef boost::variant<std::vector<int>,
@@ -493,8 +201,10 @@ class DataExtractor
                          std::vector<std::string>> CoordinateValues;
   std::unordered_map<std::string, CoordinateValues> coordsVals_;
   // The array to be interpolated (the payload array).
-  Eigen::ArrayXXf interpolatedArray2D_;
+  boost::multi_array<ExtractedValue, 2> interpolatedArray2D_;
+  // Linear interpolation result. Only used when ExtractedValue = float. interpolation.
   float result_;
+  // Set to true if result_ is a valid value.
   bool resultSet_;
   // Container for re-ordering our data
   std::vector<ufo::RecursiveSplitter> splitter_;
@@ -518,7 +228,7 @@ class DataExtractor
 
   /// Coordinates to use in successive calls to extract().
   std::vector<Coordinate> coordsToExtractBy_;
-  std::vector<Coordinate>::const_iterator nextCoordToExtractBy_;
+  typename std::vector<Coordinate>::const_iterator nextCoordToExtractBy_;
 };
 
 }  // namespace ufo

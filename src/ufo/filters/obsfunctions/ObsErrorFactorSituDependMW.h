@@ -67,7 +67,7 @@ class ObsErrorFactorSituDependMWParameters : public oops::Parameters {
 /// retrieved cloud liquid water from background and observation, scattering index,
 /// surface wind speed, and cloud information match index over the ocean
 ///
-class ObsErrorFactorSituDependMW : public ObsFunctionBase {
+class ObsErrorFactorSituDependMW : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorFactorSituDependMW(const eckit::LocalConfiguration &);
   ~ObsErrorFactorSituDependMW();

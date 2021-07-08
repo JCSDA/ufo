@@ -36,7 +36,7 @@ class ModelHeightAdjustedAirTemperatureParameters : public oops::Parameters {
 /// applied to the temperature is calculated using a standard lapse rate
 /// (Constants::Lclr).
 
-class ModelHeightAdjustedAirTemperature : public ObsFunctionBase {
+class ModelHeightAdjustedAirTemperature : public ObsFunctionBase<float> {
  public:
     explicit ModelHeightAdjustedAirTemperature(const eckit::LocalConfiguration &
                                                = eckit::LocalConfiguration());

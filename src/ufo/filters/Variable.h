@@ -38,6 +38,10 @@ class Variable: public util::Printable {
   const std::string & group() const;
   const std::vector<int> & channels() const;
 
+  /// Return the full variable name including the group name (but no channel number), e.g.
+  /// `air_pressure@MetaData`.
+  std::string fullName() const;
+
   oops::Variables toOopsVariables() const;
 
   const eckit::LocalConfiguration & options() const {return options_;}

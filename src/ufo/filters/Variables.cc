@@ -130,8 +130,20 @@ Variables Variables::allFromGroup(const std::string & group) const {
   for (size_t ivar = 0; ivar < vars_.size(); ++ivar) {
     if (vars_[ivar].group() == group) {
       vars += vars_[ivar];
-    } else if (vars_[ivar].group() == "ObsFunction") {
-      ObsFunction obsfunc(vars_[ivar]);
+    } else if (vars_[ivar].group() == ObsFunctionTraits<float>::groupName) {
+      ObsFunction<float> obsfunc(vars_[ivar]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      vars += funcvars.allFromGroup(group);
+    } else if (vars_[ivar].group() == ObsFunctionTraits<int>::groupName) {
+      ObsFunction<int> obsfunc(vars_[ivar]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      vars += funcvars.allFromGroup(group);
+    } else if (vars_[ivar].group() == ObsFunctionTraits<std::string>::groupName) {
+      ObsFunction<std::string> obsfunc(vars_[ivar]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      vars += funcvars.allFromGroup(group);
+    } else if (vars_[ivar].group() == ObsFunctionTraits<util::DateTime>::groupName) {
+      ObsFunction<util::DateTime> obsfunc(vars_[ivar]);
       ufo::Variables funcvars = obsfunc.requiredVariables();
       vars += funcvars.allFromGroup(group);
     }
@@ -156,9 +168,23 @@ oops::Variables Variables::toOopsVariables() const {
 bool Variables::hasGroup(const std::string & group) const {
   bool found = false;
   for (size_t jj = 0; jj < vars_.size(); ++jj) {
-    if (vars_[jj].group() == group) found = true;
-    if (vars_[jj].group() == "ObsFunction") {
-      ObsFunction obsfunc(vars_[jj]);
+    if (vars_[jj].group() == group)
+      found = true;
+
+    if (vars_[jj].group() == ObsFunctionTraits<float>::groupName) {
+      ObsFunction<float> obsfunc(vars_[jj]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      found = found || funcvars.hasGroup(group);
+    } else if (vars_[jj].group() == ObsFunctionTraits<int>::groupName) {
+      ObsFunction<int> obsfunc(vars_[jj]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      found = found || funcvars.hasGroup(group);
+    } else if (vars_[jj].group() == ObsFunctionTraits<std::string>::groupName) {
+      ObsFunction<std::string> obsfunc(vars_[jj]);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      found = found || funcvars.hasGroup(group);
+    } else if (vars_[jj].group() == ObsFunctionTraits<util::DateTime>::groupName) {
+      ObsFunction<util::DateTime> obsfunc(vars_[jj]);
       ufo::Variables funcvars = obsfunc.requiredVariables();
       found = found || funcvars.hasGroup(group);
     }

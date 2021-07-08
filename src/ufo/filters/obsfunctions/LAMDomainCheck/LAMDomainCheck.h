@@ -49,7 +49,7 @@ class LAMDomainCheckParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-class LAMDomainCheck : public ObsFunctionBase {
+class LAMDomainCheck : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "LAMDomainCheck";}
 

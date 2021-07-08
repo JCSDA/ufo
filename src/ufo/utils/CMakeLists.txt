@@ -6,6 +6,7 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      dataextractor/ConstrainedRange.h
       dataextractor/DataExtractor.h
       dataextractor/DataExtractor.cc
       dataextractor/DataExtractorBackend.h

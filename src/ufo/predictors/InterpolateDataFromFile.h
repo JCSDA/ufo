@@ -90,7 +90,7 @@ class InterpolateDataFromFile : public PredictorBase {
   // (http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#2397), later resolved by
   // amending the C++11 standard as described in N4387
   // (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4387.html).
-  std::map<std::string, std::unique_ptr<DrawValueFromFile>> obsFunctions_;
+  std::map<std::string, std::unique_ptr<DrawValueFromFile<float>>> obsFunctions_;
 };
 
 }  // namespace ufo

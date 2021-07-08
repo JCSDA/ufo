@@ -7,6 +7,8 @@
 
 #include "ufo/filters/VariableAssignment.h"
 
+#include <algorithm>
+#include <limits>
 #include <set>
 #include <string>
 #include <utility>
@@ -21,6 +23,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/StringUtils.h"
@@ -70,25 +73,36 @@ void assignVariable(const ufo::Variable &variable,
 
 /// Evaluate the ObsFunction \p function and assign the vectors it produced to successive vectors
 /// in \p values (only at locations selected by the `where` statement).
-template <typename VariableType>
+template <typename FunctionValueType, typename VariableType>
 void assignFunction(const ufo::Variable &function,
                     const ufo::Variable &variable,
                     const std::vector<bool> &apply,
                     const ObsFilterData &data,
                     ioda::ObsDataVector<VariableType> &values) {
-  ioda::ObsDataVector<float> newValues(data.obsspace(), variable.toOopsVariables());
+  ioda::ObsDataVector<FunctionValueType> newValues(data.obsspace(), variable.toOopsVariables());
   data.get(function, newValues);
 
-  const VariableType missing = util::missingValue(VariableType());
-  const float missingfloat = util::missingValue(float());
+  const VariableType missingVariableValue = util::missingValue(VariableType());
+  const FunctionValueType missingFunctionValue = util::missingValue(FunctionValueType());
+  const FunctionValueType maxFunctionValue = std::numeric_limits<FunctionValueType>::max();
   for (size_t ival = 0; ival < values.nvars(); ++ival) {
     std::vector<VariableType> &currentValues = values[ival];
-    const ioda::ObsDataRow<float> &currentNewValues = newValues[ival];
+    const ioda::ObsDataRow<FunctionValueType> &currentNewValues = newValues[ival];
     for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
-      if (apply[iloc] && currentNewValues[iloc] != missingfloat)
-        currentValues[iloc] = static_cast<VariableType>(currentNewValues[iloc]);
-      if (apply[iloc] && currentNewValues[iloc] == missingfloat)
-        currentValues[iloc] = missing;
+      if (apply[iloc]) {
+        if (currentNewValues[iloc] != missingFunctionValue)
+          // The call to min() below is a hack preventing clang from generating optimized code
+          // that speculatively converts currentNewValues[iloc] to VariableType regardless of
+          // whether it's equal to missingFunctionValue or not. This causes a floating exception
+          // and thus breaks the test suite. After migration to a more recent version of clang
+          // we may be able to remove the call to min() and use the -ffp-exception-behavior=maytrap
+          // flag instead to instruct the compiler to avoid transformations that may raise
+          // floating-point exceptions that would not have been raised by the original code.
+          currentValues[iloc] =
+              static_cast<VariableType>(std::min(currentNewValues[iloc], maxFunctionValue));
+        else
+          currentValues[iloc] = missingVariableValue;
+      }
     }
   }
 }
@@ -106,13 +120,20 @@ void assignNumericValues(const AssignmentParameters &params,
     assignVariable(*params.sourceVariable.value(), apply, data, values);
   } else {
     ASSERT(params.function.value() != boost::none);
-    assignFunction(*params.function.value(), variable, apply, data, values);
+    if (params.function.value()->group() == ObsFunctionTraits<float>::groupName)
+      assignFunction<float>(*params.function.value(), variable, apply, data, values);
+    else if (params.function.value()->group() == ObsFunctionTraits<int>::groupName)
+      assignFunction<int>(*params.function.value(), variable, apply, data, values);
+    else
+      throw eckit::BadParameter(params.function.value()->fullName() +
+                                " is not a function producing numeric values", Here());
   }
 }
 
 /// Assign values to a non-numeric variable (of type string or DateTime).
 template <typename VariableType>
 void assignNonnumericValues(const AssignmentParameters &params,
+                            const ufo::Variable &variable,
                             const std::vector<bool> &apply,
                             const ObsFilterData &data,
                             ioda::ObsDataVector<VariableType> &values) {
@@ -120,8 +141,7 @@ void assignNonnumericValues(const AssignmentParameters &params,
     assignValue(*params.value_.value(), apply, values);
     // TODO(wsmigaj): Handle sourceVariable once PR #1280 is merged in.
   } else {
-    ASSERT(params.function.value() != boost::none);
-    throw eckit::BadValue("ObsFunction values cannot be assigned to non-numeric variables", Here());
+    assignFunction<VariableType>(*params.function.value(), variable, apply, data, values);
   }
 }
 
@@ -213,7 +233,7 @@ void assignToNonnumericVariable(const ufo::Variable &variable,
                                 const ObsFilterData &data,
                                 ioda::ObsSpace &obsdb) {
   ioda::ObsDataVector<VariableType> values = getCurrentValues<VariableType>(variable, obsdb);
-  assignNonnumericValues(params, apply, data, values);
+  assignNonnumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
 }
 

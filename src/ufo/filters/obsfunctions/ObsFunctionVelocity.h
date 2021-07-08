@@ -18,7 +18,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class ObsFunctionVelocity : public ObsFunctionBase {
+class ObsFunctionVelocity : public ObsFunctionBase<float> {
  public:
   explicit ObsFunctionVelocity(const eckit::LocalConfiguration);
   ~ObsFunctionVelocity();

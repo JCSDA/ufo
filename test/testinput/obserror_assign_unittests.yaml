@@ -341,7 +341,7 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
           interpolation:
           - name: StringVar@MetaData
             method: nearest
-  expectExceptionWithMessage: Nearest match not compatible with string type
+  expectExceptionWithMessage: The 'nearest' method cannot be used for string variables
 Assign observation error from NetCDF variance; attempt at using 'linear' for strings:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -369,7 +369,7 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
           interpolation:
           - name: StringVar@MetaData
             method: linear
-  expectExceptionWithMessage: linear interpolation not compatible with string type
+  expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as StringVar@MetaData
 Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -576,6 +576,93 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
           - name: StringVar@MetaData
             method: greatest lower bound
   expectExceptionWithMessage: The 'greatest lower bound' method cannot be used for string variables
+Assign observation error from NetCDF file; no variable with the @ErrorVariance suffix:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2, 3 ]
+        lons: [ 178, 179, 180, 181, 182, 183 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 599, 599, 100, 600, 600, 600]
+  station_id: [0, 1, 2, 0, 1, 2]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_misspelled_variance.nc
+          interpolation:
+          - name: air_pressure@MetaData
+            method: greatest lower bound
+          - name: station_id@MetaData
+            method: exact
+  expectExceptionWithMessage: "No payload variable found: no variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
+Assign observation error from NetCDF file; multiple variables with the @ErrorVariance suffix:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2, 3 ]
+        lons: [ 178, 179, 180, 181, 182, 183 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [ 599, 599, 100, 600, 600, 600]
+  station_id: [0, 1, 2, 0, 1, 2]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_multiple_variances.nc
+          interpolation:
+          - name: air_pressure@MetaData
+            method: greatest lower bound
+          - name: station_id@MetaData
+            method: exact
+  expectExceptionWithMessage: "Multiple payload candidates found: more than one variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
+Assign observation error from NetCDF file; 2D array of full covariance matrices:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  channel_number:    [ 2, 0, 4, 7, 5 ]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_4d.nc
+          interpolation:
+          - name: channel_number@MetaData
+            method: exact
+  expectExceptionWithMessage: Expecting 3D or 2D array for error covariance
 Assign observation error from NetCDF variance; multi-channel variable support:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -979,6 +1066,33 @@ Assign observation error from CSV file; no data lines:
           - name: StringVar@MetaData
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
+Assign observation error from CSV file; empty data line:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 1 ]
+        lons: [ 1 ]
+        datetimes: [ '2010-01-01T00:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [1]
+  StringVar: [abc]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_empty_data_line.csv
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+  expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; incorrect number of data types:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -1060,6 +1174,33 @@ Assign observation error from CSV file; unsupported data type:
           - name: StringVar@MetaData
             method: exact
   expectExceptionWithMessage: Unsupported data type 'color'
+Assign observation error from CSV file; criteria insufficient to identify a single matching row:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0 ]
+        lons: [ 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z' ]
+      obs errors: [1.0]
+  air_pressure: [100000]
+  StringVar: [south]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude.csv
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+  expectExceptionWithMessage: Previous calls to extract() have failed to identify a single value to return
 Assign observation error from CSV file; data types float, int and string; missing values:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z

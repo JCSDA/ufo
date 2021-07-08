@@ -52,7 +52,7 @@ class SatwindIndivErrorsParameters : public oops::Parameters {
 ///  dependent on an input height (pressure) error estimate and the wind shear.
 ///
 
-class SatwindIndivErrors : public ObsFunctionBase {
+class SatwindIndivErrors : public ObsFunctionBase<float> {
  public:
   explicit SatwindIndivErrors(const eckit::LocalConfiguration &);
   ~SatwindIndivErrors();

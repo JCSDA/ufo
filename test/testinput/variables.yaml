@@ -4,16 +4,52 @@ test variables:
     channels: 1, 4-5
     reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
     reference group: ObsValue
+    reference full name: brightness_temperature@ObsValue
   - name: latitude@MetaData
     reference names: [latitude]
     reference group: MetaData
+    reference full name: latitude@MetaData
   - name: optical_thickness_of_atmosphere_layer@ObsDiag
     channels: 23-25
     reference names: [optical_thickness_of_atmosphere_layer_23, optical_thickness_of_atmosphere_layer_24, optical_thickness_of_atmosphere_layer_25]
     reference group: ObsDiag
+    reference full name: optical_thickness_of_atmosphere_layer@ObsDiag
 oops variables:
   - variables: ['var1', 'var2', 'var3']
     reference names: ['var1', 'var2', 'var3']
   - variables: ['var']
     channels: 3-5,8
     reference names: ['var_3', 'var_4', 'var_5', 'var_8']
+# Options passed to Conditional@ObsFunction. The test uses them to verify that when a Variables
+# object contains a variable from the ObsFunction group, the results produced by its has() and
+# allFromGroup() functions include variables needed by the ObsFunction itself (e.g.
+# eastward_wind@ObsValue in the example below).
+float conditional:
+  cases:
+  - where:
+    - variable:
+        name: eastward_wind@ObsValue
+      minvalue: 10
+    value: 1.5
+# Same for Conditional@IntObsFunction, and so on.
+int conditional:
+  cases:
+  - where:
+    - variable:
+        name: eastward_wind@ObsValue
+      minvalue: 10
+    value: 1
+string conditional:
+  cases:
+  - where:
+    - variable:
+        name: eastward_wind@ObsValue
+      minvalue: 10
+    value: XYZ
+datetime conditional:
+  cases:
+  - where:
+    - variable:
+        name: eastward_wind@ObsValue
+      minvalue: 10
+    value: 2000-01-01T00:00:00Z

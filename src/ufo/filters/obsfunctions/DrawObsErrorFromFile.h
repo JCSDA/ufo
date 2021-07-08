@@ -45,17 +45,15 @@ namespace ufo {
 ///
 /// Note that channel number extraction is implicit, using the channels selected and performed as
 /// an exact match before any user defined interpolation takes place.
-class DrawObsErrorFromFile : public ObsFunctionBase {
+class DrawObsErrorFromFile : public ObsFunctionBase<float> {
  public:
-  static const std::string classname() {return "DrawObsErrorFromFile";}
-
   explicit DrawObsErrorFromFile(const eckit::LocalConfiguration &);
 
   void compute(const ObsFilterData &, ioda::ObsDataVector<float> &) const;
   const ufo::Variables & requiredVariables() const;
 
  private:
-  DrawValueFromFile drawValueFromFile_;
+  DrawValueFromFile<float> drawValueFromFile_;
 };
 
 }  // namespace ufo

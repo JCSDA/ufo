@@ -91,7 +91,7 @@ class ObsErrorModelStepwiseLinearParameters : public oops::Parameters {
 ///             xvals: [110000, 85000, 50000, 25000, 10000, 1]   #Pressure (Pa)
 ///             errors: [1.1, 1.3, 1.8, 2.4, 4.0, 4.5]
 ///
-class ObsErrorModelStepwiseLinear : public ObsFunctionBase {
+class ObsErrorModelStepwiseLinear : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorModelStepwiseLinear";}
 

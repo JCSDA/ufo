@@ -77,7 +77,7 @@ class HydrometeorCheckATMSParameters : public oops::Parameters {
 ///    0 = channel is not affected by thick clouds and precipitation
 ///    1 = channel is affected by thick clouds and precipitataion
 ///
-class HydrometeorCheckATMS : public ObsFunctionBase {
+class HydrometeorCheckATMS : public ObsFunctionBase<float> {
  public:
   explicit HydrometeorCheckATMS(const eckit::LocalConfiguration &);
   ~HydrometeorCheckATMS();

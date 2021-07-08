@@ -276,6 +276,8 @@ list( APPEND ufo_test_input
   testinput/unit_tests/composite_GsiSfcModel_SfcPCorrected.yaml
   testinput/unit_tests/composite_vertInterp_SfcPCorrected.yaml
   testinput/unit_tests/function_clwret_ssmis.yaml
+  testinput/unit_tests/function_conditional.yaml
+  testinput/unit_tests/function_drawvaluefromfile.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
   testinput/unit_tests/function_lam_domaincheck_circle.yaml
@@ -2618,6 +2620,20 @@ ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval
 ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval_atms
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_clwret_obsval_atms.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_conditional
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_conditional.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_drawvaluefromfile
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_drawvaluefromfile.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)

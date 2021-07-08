@@ -10,8 +10,8 @@
 #include <utility>  // for move
 #include <vector>
 
+#include <boost/multi_array.hpp>
 #include <boost/variant.hpp>
-#include "Eigen/Core"
 
 #include "eckit/exception/Exceptions.h"
 #include "eckit/parser/CSVParser.h"
@@ -74,27 +74,46 @@ class AppendValueVisitor : public boost::static_visitor<void> {
   const eckit::Value &value_;
 };
 
-/// Visitor that converts a (numeric) std::vector to an Eigen column vector.
-class ConvertToEigenArrayVisitor : public boost::static_visitor<void> {
+template <typename Source, typename Destination>
+void convertVectorToColumnArray(const std::vector<Source> &source,
+                                    boost::multi_array<Destination, 2> &destination) {
+  const Source missingSource = util::missingValue(Source());
+  const Destination missingDestination = util::missingValue(Destination());
+  destination.resize(boost::extents[source.size()][1]);
+  for (size_t i = 0; i < source.size(); ++i)
+    if (source[i] != missingSource)
+      destination[i][0] = static_cast<Destination>(source[i]);
+    else
+      destination[i][0] = missingDestination;
+}
+
+/// Visitor that converts an std::vector to a boost::multi_array with one column.
+template <typename ExtractedValue>
+class ConvertToBoostMultiArrayVisitor : public boost::static_visitor<void> {
  public:
-  explicit ConvertToEigenArrayVisitor(Eigen::ArrayXXf &output) :
+  explicit ConvertToBoostMultiArrayVisitor(boost::multi_array<ExtractedValue, 2> &output) :
     output_(output)
   {}
 
-  template <typename T>
+  template <typename T,
+            typename std::enable_if<std::is_convertible<T, ExtractedValue>::value, bool>::type
+            = true>
   void operator()(const std::vector<T> &values) {
-    output_.resize(values.size(), 1);
+    output_.resize(boost::extents[values.size()][1]);
     for (size_t i = 0; i < values.size(); ++i)
-      output_(i, 0) = values[i];
+      output_[i][0] = values[i];
   }
 
-  void operator()(const std::vector<std::string> &) {
+  template <typename T,
+            typename std::enable_if<!std::is_convertible<T, ExtractedValue>::value, bool>::type
+            = true>
+  void operator()(const std::vector<T> &) {
     // Should never be called
     throw eckit::NotImplemented(Here());
   }
 
  private:
-  Eigen::ArrayXXf &output_;
+  boost::multi_array<ExtractedValue, 2> &output_;
 };
 
 /// \brief Find the index of the column whose name ends with `@` followed by `payloadGroup`
@@ -128,15 +147,40 @@ std::vector<T> createColumn(size_t numValues) {
   return values;
 }
 
+/// \brief Throw an exception if contents of columns of type `type` can't be converted to values
+/// of type `ExtractedValue`.
+template <typename ExtractedValue>
+void checkPayloadColumnType(const std::string &type);
+
+template <>
+void checkPayloadColumnType<float>(const std::string &type) {
+  if (type != "float" && type != "int")
+    throw eckit::UserError("The payload column must contain numeric data", Here());
+}
+
+template <>
+void checkPayloadColumnType<int>(const std::string &type) {
+  if (type != "float" && type != "int")
+    throw eckit::UserError("The payload column must contain numeric data", Here());
+}
+
+template <>
+void checkPayloadColumnType<std::string>(const std::string &type) {
+  if (type != "string" && type != "datetime")
+    throw eckit::UserError("The payload column must contain strings or datetimes", Here());
+}
+
 }  // namespace
 
-DataExtractorCSVBackend::DataExtractorCSVBackend(const std::string &filepath)
+template <typename ExtractedValue>
+DataExtractorCSVBackend<ExtractedValue>::DataExtractorCSVBackend(const std::string &filepath)
   : filepath_(filepath)
 {}
 
-DataExtractorInput DataExtractorCSVBackend::loadData(
+template <typename ExtractedValue>
+DataExtractorInput<ExtractedValue> DataExtractorCSVBackend<ExtractedValue>::loadData(
     const std::string &interpolatedArrayGroup) const {
-  DataExtractorInput result;
+  DataExtractorInput<ExtractedValue> result;
 
   const eckit::Value contents = eckit::CSVParser::decodeFile(filepath_, false /* hasHeader? */);
   const size_t numRows = contents.size();
@@ -169,12 +213,12 @@ DataExtractorInput DataExtractorCSVBackend::loadData(
     throw eckit::UserError("The number of columns in line 2 differs from that in line 1", Here());
 
   // Allocate vectors for values to be loaded from subsequent lines
-  std::vector<DataExtractorInput::Coordinate> columns(numColumns);
+  std::vector<DataExtractorInputBase::Coordinate> columns(numColumns);
   for (size_t column = 0; column < numColumns; ++column) {
     const std::string type = typeHeader[column];
+    if (column == payloadColumnIndex)
+      checkPayloadColumnType<ExtractedValue>(type);
     if (type == "string" || type == "datetime") {
-      if (column == payloadColumnIndex)
-        throw eckit::UserError("The payload column must contain numeric data", Here());
       columns[column] = createColumn<std::string>(numValues);
     } else if (type == "int" || type == "integer") {
       columns[column] = createColumn<int>(numValues);
@@ -202,7 +246,7 @@ DataExtractorInput DataExtractorCSVBackend::loadData(
   result.dim2CoordMapping.resize(1);
   for (size_t column = 0; column < numColumns; ++column) {
     if (column == payloadColumnIndex) {
-      ConvertToEigenArrayVisitor visitor(result.payloadArray);
+      ConvertToBoostMultiArrayVisitor<ExtractedValue> visitor(result.payloadArray);
       boost::apply_visitor(visitor, columns[column]);
     } else {
       result.coordsVals[columnNames[column]] = std::move(columns[column]);
@@ -211,10 +255,15 @@ DataExtractorInput DataExtractorCSVBackend::loadData(
     }
   }
 
-  if (result.payloadArray.rows() == 0)
+  if (result.payloadArray.shape()[0] == 0)
     throw eckit::UserError("No data could be loaded from the file '" + filepath_ + "'", Here());
 
   return result;
 }
+
+// Explicit instantiations
+template class DataExtractorCSVBackend<float>;
+template class DataExtractorCSVBackend<int>;
+template class DataExtractorCSVBackend<std::string>;
 
 }  // namespace ufo

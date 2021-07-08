@@ -77,7 +77,7 @@ class SCATRetMWParameters : public oops::Parameters {
 /// Application of AMSU for obtaining hydrological parameters
 /// Microw. Radiomet. Remote Sens. Eatch's Surf. Atmosphere, pp. 339-351
 ///
-class SCATRetMW : public ObsFunctionBase {
+class SCATRetMW : public ObsFunctionBase<float> {
  public:
   explicit SCATRetMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

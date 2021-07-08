@@ -39,7 +39,7 @@ class ObsErrorFactorTransmitTopRadParameters : public oops::Parameters {
 /// tao = model top-to-space transmittance
 /// EIF = SQRT ( 1.0 / tao )
 ///
-class ObsErrorFactorTransmitTopRad : public ObsFunctionBase {
+class ObsErrorFactorTransmitTopRad : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorFactorTransmitTopRad(const eckit::LocalConfiguration &);
   ~ObsErrorFactorTransmitTopRad();

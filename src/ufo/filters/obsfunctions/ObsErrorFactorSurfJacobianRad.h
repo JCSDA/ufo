@@ -58,7 +58,7 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
 /// Errinv = inverse of effective observation error variance
 /// EIF    = SQRT [ 1 / ( 1 / (1 + Errinv * Beta) ]
 ///
-class ObsErrorFactorSurfJacobianRad : public ObsFunctionBase {
+class ObsErrorFactorSurfJacobianRad : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorFactorSurfJacobianRad(const eckit::LocalConfiguration &);
   ~ObsErrorFactorSurfJacobianRad();

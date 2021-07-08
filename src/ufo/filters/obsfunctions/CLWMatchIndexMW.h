@@ -52,7 +52,7 @@ class CLWMatchIndexMWParameters : public oops::Parameters {
 /// 1: both background and observation cont contain clouds
 /// 0: either background has cloud or observation has cloud detected
 ///
-class CLWMatchIndexMW : public ObsFunctionBase {
+class CLWMatchIndexMW : public ObsFunctionBase<float> {
  public:
   explicit CLWMatchIndexMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

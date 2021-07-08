@@ -23,6 +23,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
+/// \brief A function of observation data.
+///
+/// \tparam FunctionValue
+///   Type of the values produced by the function. Must be `float`, `int`, `std::string`
+///   or `util::DateTime`.
+template <typename FunctionValue>
 class ObsFunction : private boost::noncopyable {
  public:
 /// constructor takes function name (for factory) on input
@@ -31,11 +37,12 @@ class ObsFunction : private boost::noncopyable {
 
 /// compute(metadata, obs values, output)
   void compute(const ObsFilterData &,
-               ioda::ObsDataVector<float> &) const;
+               ioda::ObsDataVector<FunctionValue> &) const;
 /// required variables
   const ufo::Variables & requiredVariables() const;
+
  private:
-  std::unique_ptr<ObsFunctionBase> obsfct_;
+  std::unique_ptr<ObsFunctionBase<FunctionValue>> obsfct_;
 };
 
 // -----------------------------------------------------------------------------

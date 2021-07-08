@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "eckit/utils/StringTools.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -78,8 +79,14 @@ bool ObsFilterData::has(const Variable & varname) const {
   const std::string grp = varname.group();
   if (grp == "GeoVaLs") {
     return (gvals_ && gvals_->has(var));
-  } else if (grp == "ObsFunction") {
-    return ObsFunctionFactory::functionExists(var);
+  } else if (grp == ObsFunctionTraits<float>::groupName) {
+    return ObsFunctionFactory<float>::functionExists(var);
+  } else if (grp == ObsFunctionTraits<int>::groupName) {
+    return ObsFunctionFactory<int>::functionExists(var);
+  } else if (grp == ObsFunctionTraits<std::string>::groupName) {
+    return ObsFunctionFactory<std::string>::functionExists(var);
+  } else if (grp == ObsFunctionTraits<util::DateTime>::groupName) {
+    return ObsFunctionFactory<util::DateTime>::functionExists(var);
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     return (diags_ && diags_->has(var));
   } else {
@@ -122,12 +129,31 @@ bool ObsFilterData::hasDataVectorInt(const std::string & grp, const std::string 
 }
 
 // -----------------------------------------------------------------------------
-/*! Gets requested data from ObsFilterData
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (undefined on input)
- *  \warning if data are unavailable, assertions would fail and method abort
- */
+// Overloads of get() taking a std::vector.
+
+// -----------------------------------------------------------------------------
 void ObsFilterData::get(const Variable & varname, std::vector<float> & values) const {
+  getVector(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, std::vector<int> & values) const {
+  getVector(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, std::vector<std::string> & values) const {
+  getVector(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & values) const {
+  getVector(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+template <typename T>
+void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
 
@@ -135,105 +161,16 @@ void ObsFilterData::get(const Variable & varname, std::vector<float> & values) c
     values.resize(obsdb_.nvars());
     obsdb_.get_db(grp, var, values);
   } else {
-    ioda::ObsDataVector<float> vec(obsdb_, varname.toOopsVariables(), grp, false);
+    ioda::ObsDataVector<T> vec(obsdb_, varname.toOopsVariables(), grp, false);
     this->get(varname, vec);
-    values.resize(obsdb_.nlocs());
-    for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
-      values[jj] = vec[var][jj];
-    }
+    values = vec[var];
   }
 }
 
+// -----------------------------------------------------------------------------
+// Overload of get() taking an std::vector and a level index.
 
 // -----------------------------------------------------------------------------
-/*! Gets requested data from ObsFilterData
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (undefined on input)
- *  \warning if data are unavailable, assertions would fail and method abort
- */
-void ObsFilterData::get(const Variable & varname, std::vector<std::string> & values) const {
-  const std::string var = varname.variable();
-  const std::string grp = varname.group();
-
-  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
-    grp == "ObsBiasTerm" || grp == "ObsFunction") {
-      oops::Log::error() << "ObsFilterData::get std::string and int values only "
-                         << "supported for ObsSpace"
-                         << std::endl;
-    ABORT("ObsFilterData::get std::string, int and util::DateTime values only supported for "
-          "ObsSpace");
-  } else {
-    values.resize(obsdb_.nlocs());
-    obsdb_.get_db(grp, var, values);
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-/*! Gets requested data from ObsFilterData
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (undefined on input)
- *  \warning if data are unavailable, assertions would fail and method abort
- */
-void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & values) const {
-  const std::string var = varname.variable();
-  const std::string grp = varname.group();
-
-  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
-    grp == "ObsBiasTerm" || grp == "ObsFunction") {
-      oops::Log::error() << "ObsFilterData::get std::string and int values only "
-                         << "supported for ObsSpace"
-                         << std::endl;
-    ABORT("ObsFilterData::get std::string, int and util::DateTime values only supported for "
-          "ObsSpace");
-  } else {
-    values.resize(obsdb_.nlocs());
-    obsdb_.get_db(grp, var, values);
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-/*! Gets requested integer data from ObsFilterData
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (undefined on input)
- *  \warning if data are unavailable, assertions would fail and method abort
- *           only ObsSpace int data are supported currently
- */
-void ObsFilterData::get(const Variable & varname, std::vector<int> & values) const {
-  const std::string var = varname.variable();
-  const std::string grp = varname.group();
-
-  if (grp == "VarMetaData") {
-    values.resize(obsdb_.nvars());
-    obsdb_.get_db(grp, var, values);
-  } else {
-    if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
-        grp == "ObsBiasTerm" || grp == "ObsFunction") {
-      oops::Log::error() << "ObsFilterData::get std::string and int values only "
-                         << "supported for ObsSpace"
-                         << std::endl;
-      ABORT("ObsFilterData::get std::string and int values only supported for ObsSpace");
-    } else {
-      ioda::ObsDataVector<int> vec(obsdb_, varname.toOopsVariables(), grp, false);
-      this->get(varname, vec);
-      values.resize(obsdb_.nlocs());
-      for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
-        values[jj] = vec[var][jj];
-      }
-    }
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-/*! Gets requested data at requested level from ObsFilterData
- *  \param[in] varname is a name of a variable requested
- *         group must be either GeoVaLs or ObsDiag
- *  \param[in] level is a level variable is requested at
- *  \param[out] values on output is data from varname (undefined on input)
- *  \warning if data are unavailable, assertions would fail and method abort
- */
 void ObsFilterData::get(const Variable & varname, const int level,
                         std::vector<float> & values) const {
   const std::string var = varname.variable();
@@ -253,12 +190,9 @@ void ObsFilterData::get(const Variable & varname, const int level,
 }
 
 // -----------------------------------------------------------------------------
-/*! Gets requested data from ObsFilterData into ObsDataVector
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (should be allocated on input)
- *  \warning only works for ObsFunction;
- *           if data are unavailable, assertions would fail and method abort
- */
+// Overloads of get() taking an ioda::ObsDataVector.
+
+// -----------------------------------------------------------------------------
 void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & values) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
@@ -269,8 +203,8 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
     gvals_->get(vec, var);
     values[var] = vec;
   /// For Function call compute
-  } else if (grp == "ObsFunction") {
-    ObsFunction obsfunc(varname);
+  } else if (grp == ObsFunctionTraits<float>::groupName) {
+    ObsFunction<float> obsfunc(varname);
     obsfunc.compute(*this, values);
   ///  For HofX get from ObsVector H(x) (should be available)
   } else if (this->hasVector(grp, var)) {
@@ -294,33 +228,78 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
     std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator
                           jv = dvecsf_.find(grp);
     values = *jv->second;
+  /// Produce a clear error message for incompatible ObsFunction types
+  } else if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
+    throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
+                              " is not a function producing values of type " +
+                              ObsFunctionTraits<float>::valueTypeName, Here());
   } else {
     values.read(grp);
   }
 }
 
 // -----------------------------------------------------------------------------
-/*! Gets requested data from ObsFilterData into ObsDataVector
- *  \param[in] varname is a name of a variable requested
- *  \param[out] values on output is data from varname (should be allocated on input)
- *  \return data associated with varname, in ioda::ObsDataVector<int>
-*/
 void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & values) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
-  if (this->hasDataVectorInt(grp, var)) {
+  /// For Function call compute
+  if (grp == ObsFunctionTraits<int>::groupName) {
+    ObsFunction<int> obsfunc(varname);
+    obsfunc.compute(*this, values);
+  /// For ObsDataVector
+  } else if (this->hasDataVectorInt(grp, var)) {
     std::map<std::string, const ioda::ObsDataVector<int> *>::const_iterator jv = dvecsi_.find(grp);
     values = *jv->second;
+  /// Produce a clear error message for incompatible ObsFunction types
+  } else if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
+    throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
+                              " is not a function producing values of type " +
+                              ObsFunctionTraits<int>::valueTypeName, Here());
+  /// Produce a clear error message for other incompatible groups
+  } else if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
+                              " are of type float", Here());
   } else {
     values.read(grp);
   }
 }
 
 // -----------------------------------------------------------------------------
-/*! Returns number of levels in 3D geovals and obsdiags or
- *  one if not 3D geovals or obsdiag
- *
- */
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<std::string> & values) const {
+  getNonNumeric(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname,
+                        ioda::ObsDataVector<util::DateTime> & values) const {
+  getNonNumeric(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+template <typename T>
+void ObsFilterData::getNonNumeric(const Variable & varname, ioda::ObsDataVector<T> & values) const {
+  const std::string &grp = varname.group();
+  /// For Function call compute
+  if (grp == ObsFunctionTraits<T>::groupName) {
+    ObsFunction<T> obsfunc(varname);
+    obsfunc.compute(*this, values);
+  } else if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
+    throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
+                              " is not a function producing values of type " +
+                              ObsFunctionTraits<T>::valueTypeName, Here());
+  /// Produce a clear error message for other incompatible groups
+  } else if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
+                              " are of type float", Here());
+  } else {
+    values.read(grp);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// End of overloads of get().
+
+// -----------------------------------------------------------------------------
 size_t ObsFilterData::nlevs(const Variable & varname) const {
   const std::string var = varname.variable();
   const std::string grp = varname.group();

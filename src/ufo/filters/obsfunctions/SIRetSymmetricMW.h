@@ -31,7 +31,7 @@ typedef SIRetMWParameters SIRetSymmetricMWParameters;
 /// \brief Calculate symmetric (mean) cloud amount from the cloud amount retrieved
 /// from the observed and simulated measurements
 ///
-class SIRetSymmetricMW : public ObsFunctionBase {
+class SIRetSymmetricMW : public ObsFunctionBase<float> {
  public:
   explicit SIRetSymmetricMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

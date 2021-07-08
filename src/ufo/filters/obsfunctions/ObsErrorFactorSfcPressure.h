@@ -69,7 +69,7 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///             error_max: 300         # 3 mb
 ///             geovar_sfc_geomz: surface_geopotential_height     # default is surface_altitude
 ///
-class ObsErrorFactorSfcPressure : public ObsFunctionBase {
+class ObsErrorFactorSfcPressure : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorFactorSfcPressure";}
 

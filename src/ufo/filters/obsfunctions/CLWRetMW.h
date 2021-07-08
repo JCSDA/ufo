@@ -85,7 +85,7 @@ class CLWRetMWParameters : public oops::Parameters {
 /// the NOAA 15 advanced microwave sounding unit
 /// Journal of Geophysical Research (Vol. 106, No. D3, Pages 2943-2953)
 ///
-class CLWRetMW : public ObsFunctionBase {
+class CLWRetMW : public ObsFunctionBase<float> {
  public:
   explicit CLWRetMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

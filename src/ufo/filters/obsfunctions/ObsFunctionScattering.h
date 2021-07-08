@@ -16,7 +16,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class ObsFunctionScattering : public ObsFunctionBase {
+class ObsFunctionScattering : public ObsFunctionBase<float> {
  public:
   explicit ObsFunctionScattering(const eckit::LocalConfiguration conf
                                        = eckit::LocalConfiguration());

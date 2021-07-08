@@ -24,7 +24,7 @@ namespace ufo {
 ///
 /// \brief Calculate column water vapor mass in guess at observation locations.
 ///
-class TotalColumnVaporGuess : public ObsFunctionBase {
+class TotalColumnVaporGuess : public ObsFunctionBase<float> {
  public:
   explicit TotalColumnVaporGuess(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

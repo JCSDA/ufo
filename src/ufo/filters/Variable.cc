@@ -125,6 +125,17 @@ const std::vector<int> & Variable::channels() const {
 
 // -----------------------------------------------------------------------------
 
+std::string Variable::fullName() const {
+  std::string result;
+  result.reserve(varname_.size() + 1 + grpname_.size());
+  result = varname_;
+  result += '@';
+  result += grpname_;
+  return result;
+}
+
+// -----------------------------------------------------------------------------
+
 oops::Variables Variable::toOopsVariables() const {
   oops::Variables vars;
   for (size_t jj = 0; jj < this->size(); ++jj) {

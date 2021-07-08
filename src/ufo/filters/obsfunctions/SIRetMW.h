@@ -69,7 +69,7 @@ class SIRetMWParameters : public oops::Parameters {
 /// Geer, A. J., Fabrizio, B., Bormann, N., & English, S. (2014). All-sky assimilation of
 /// microwave humidity sounders. European Centre for Medium-Range Weather Forecasts.
 ///
-class SIRetMW : public ObsFunctionBase {
+class SIRetMW : public ObsFunctionBase<float> {
  public:
   explicit SIRetMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

@@ -115,39 +115,36 @@ observations:
     reference:
       name: assigned_string_variable_2@TestReference
 
-# We can't test datetime variables yet because there's no way to store reference data in the
-# ObsSpace: the loader recognizes only a single variable of type DateTime: datetime@MetaData.
-#
-#- obs space:
-#    <<: *ObsSpace
-#    name: Assign a fixed value to a pre-existing datetime variable
-#  obs filters:
-#  - filter: Variable Assignment
-#    where: *Where
-#    assignments:
-#    - name: datetime@MetaData
-#      value: 2000-01-02T03:04:05Z
-#  compareVariables:
-#  - test:
-#      name: datetime@MetaData
-#    reference:
-#      name: assigned_datetime_variable_1@TestReference
-#
-#- obs space:
-#    <<: *ObsSpace
-#    name: Assign a fixed value to a new datetime variable
-#  obs filters:
-#  - filter: Variable Assignment
-#    where: *Where
-#    assignments:
-#    - name: new_variable@MetaData
-#      value: 2000-01-02T03:04:05Z
-#      type: string
-#  compareVariables:
-#  - test:
-#      name: new_variable@MetaData
-#    reference:
-#      name: assigned_datetime_variable_2@TestReference
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: datetime@MetaData
+      value: 2000-01-02T03:04:05Z
+  compareVariables:
+  - test:
+      name: datetime@MetaData
+    reference:
+      name: assigned_datetime_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a new datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      value: 2000-01-02T03:04:05Z
+      type: datetime
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_datetime_variable_2@TestReference
 
 - obs space:
     <<: *ObsSpace
@@ -625,7 +622,29 @@ observations:
           x1: [10]
           err0: [0.25]
           err1: [5]
-  expectExceptionWithMessage: ObsFunction values cannot be assigned to non-numeric variables
+  expectExceptionWithMessage: ObsErrorModelRamp@ObsFunction is not a function producing values of type std::string
+
+- obs space: &ObsSpace
+    name: Try to assign values produced by a string-valued ObsFunction to a floating-point variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: float_variable_1@MetaData
+      function:
+        name: Conditional@StringObsFunction
+        options:
+          cases:
+          - where:
+            - variable:
+                # [1, 2, 3, 4, 5]
+                name: int_variable_1@MetaData
+              is_in: 2-4
+            value: XYZ
+  expectExceptionWithMessage: Conditional@StringObsFunction is not a function producing numeric values
 
 - obs space:
     <<: *ObsSpace

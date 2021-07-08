@@ -79,7 +79,7 @@ class SetSurfaceTypeParameters : public oops::Parameters {
 ///
 /// \brief Set observation operator surface type based on model and observation data
 ///
-class SetSurfaceType : public ObsFunctionBase {
+class SetSurfaceType : public ObsFunctionBase<float> {
  public:
   explicit SetSurfaceType(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

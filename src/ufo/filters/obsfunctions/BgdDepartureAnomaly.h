@@ -69,7 +69,7 @@ class BgdDepartureAnomalyParameters : public oops::Parameters {
 /// is used to diagnose cloudy scenes.
 ///
 
-class BgdDepartureAnomaly : public ObsFunctionBase {
+class BgdDepartureAnomaly : public ObsFunctionBase<float> {
  public:
   explicit BgdDepartureAnomaly(const eckit::LocalConfiguration & = eckit::LocalConfiguration());
   void compute(const ObsFilterData &, ioda::ObsDataVector<float> &) const;

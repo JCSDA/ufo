@@ -19,7 +19,6 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/PrimitiveVariables.h"
 #include "ufo/utils/StringUtils.h"
