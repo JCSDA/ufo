@@ -1,12 +1,8 @@
 window begin: 2019-06-14T20:30:00Z
 window end: 2019-06-15T03:30:00Z
 
-# rms ref is zero because only the auxiliary levels are tested
-# todo(ctgh): in a future PR, the simulated variables will be treated correctly.
-# When this occurs, use 'vector ref' with the correct reference values.
-
 observations:
-# Standard case.
+# Standard case: eastward_wind.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -15,7 +11,7 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [eastward_wind]
     extension:
       average profiles onto model levels: 71
   obs operator:
@@ -28,29 +24,10 @@ observations:
     coef TL: 0.1
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
-  rms ref: 0
+  vector ref: MetOfficeHofX
   tolerance: 1.0e-06
-# Group variables configuration is empty, throwing an exception.
-- obs space:
-    name: Radiosonde
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
-    simulated variables: [air_temperature]
-    extension:
-      average profiles onto model levels: 71
-  expect constructor to throw exception with message: Group variables configuration is empty
-  obs operator:
-    name: ProfileAverage
-    compareWithOPS: true
-  geovals:
-    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
-  linear obs operator test:
-    coef TL: 0.1
-    tolerance TL: 1.0e-11
-    tolerance AD: 1.0e-13
-  rms ref: 0
-  tolerance: 1.0e-06
-# Extended ObsSpace is not used, throwing an exception.
+
+# Standard case: eastward_wind and northward_wind.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -59,7 +36,99 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [eastward_wind, northward_wind]
+    extension:
+      average profiles onto model levels: 71
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+    numIntersectionIterations: 3
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# The group variable is not used, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+    simulated variables: [eastward_wind]
+    extension:
+      average profiles onto model levels: 71
+  expect constructor to throw exception with message: Group variables configuration is empty
+  obs operator:
+    name: ProfileAverage
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# The sort variable is not air_pressure, throwing an exception
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+    extension:
+      average profiles onto model levels: 71
+  expect constructor to throw exception with message: Sort variable must be air_pressure
+  obs operator:
+    name: ProfileAverage
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# The sort order is not descending, throwing an exception
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "ascending"
+    simulated variables: [eastward_wind]
+    extension:
+      average profiles onto model levels: 71
+  expect constructor to throw exception with message: Profiles must be sorted in descending order
+  obs operator:
+    name: ProfileAverage
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# The extended ObsSpace is not used, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
   obs operator:
     name: ProfileAverage
     compareWithOPS: true
@@ -70,5 +139,57 @@ observations:
     coef TL: 0.1
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
-  rms ref: 0
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# Use deliberately wrong reference values of slant_path_location, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_locs_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+    extension:
+      average profiles onto model levels: 71
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+    numIntersectionIterations: 3
+  expect simulateObs to throw exception with message: "Mismatch for slant_path_location, location = 0 (this code, OPS): 2659, 0"
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06
+
+# Use deliberately wrong reference values of slant_pressure, throwing an exception.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_pressure_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+    extension:
+      average profiles onto model levels: 71
+  obs operator:
+    name: ProfileAverage
+    compareWithOPS: true
+    numIntersectionIterations: 3
+  expect simulateObs to throw exception with message: "Mismatch for slant_pressure, location = 0 (this code, OPS): 100958, 0"
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
   tolerance: 1.0e-06

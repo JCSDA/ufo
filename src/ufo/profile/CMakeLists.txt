@@ -14,6 +14,8 @@ set ( profile_files
       ObsProfileAverage.cc
       ObsProfileAverage.h
       ObsProfileAverageParameters.h
+      ObsProfileAverageData.cc
+      ObsProfileAverageData.h
       ProfileAveragePressure.cc
       ProfileAveragePressure.h
       ProfileAverageRelativeHumidity.cc

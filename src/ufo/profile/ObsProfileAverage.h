@@ -18,6 +18,7 @@
 
 #include "ufo/ObsOperatorBase.h"
 
+#include "ufo/profile/ObsProfileAverageData.h"
 #include "ufo/profile/ObsProfileAverageParameters.h"
 
 /// Forward declarations
@@ -85,31 +86,17 @@ class ObsProfileAverage : public ObsOperatorBase,
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  const oops::Variables & requiredVars() const override { return requiredVars_; }
+  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
 
  private:
-  /// Set up auxiliary reference variables that are used for comparison with OPS.
-  void setUpAuxiliaryReferenceVariables();
-
-  /// Compare auxiliary reference variables with those obtained in OPS.
-  void compareAuxiliaryVariables(const std::vector<std::size_t> &locsExtended,
-                                 const std::vector<std::size_t> &slant_path_location,
-                                 const std::vector<float> &slant_pressure) const;
-
   void print(std::ostream &) const override;
 
  private:
+  /// ObsSpace.
   const ioda::ObsSpace& odb_;
-  oops::Variables requiredVars_;
 
-  /// Options for this observation operator.
-  ObsProfileAverageParameters options_;
-
-  /// Reference values of slant path locations.
-  std::vector<int> slant_path_location_ref_;
-
-  /// Reference values of slant path pressures.
-  std::vector<float> slant_pressure_ref_;
+  /// Data handler for the ProfileAverage operator and TL/AD code.
+  ObsProfileAverageData data_;
 };
 
 // -----------------------------------------------------------------------------
