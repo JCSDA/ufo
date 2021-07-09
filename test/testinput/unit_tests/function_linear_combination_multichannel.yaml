@@ -1,0 +1,81 @@
+window begin: 2017-12-31T21:00:00Z
+window end: 2018-01-01T03:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: Calculate a bias corrected obs value for all channels
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/linear_combination_multichannel_unittest.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-3
+  obs function: &ObsFunction
+    name: LinearCombination@ObsFunction
+    options:
+      variables:
+      - name: brightness_temperature@ObsValue
+        channels: *all_channels
+      - name: brightness_temperature@ObsBias
+        channels: *all_channels
+      coefs: [ 1.0, -1.0]
+    variables: [bias_corr_obs_value]
+    channels: *all_channels
+    tolerance: 1.0e-8
+
+- obs space:
+    <<: *ObsSpace
+    name: Calculate a bias corrected obs value for a selection of channels
+  obs function:
+    name: LinearCombination@ObsFunction
+    options:
+      variables:
+      - name: brightness_temperature@ObsValue
+        channels: &select_chans 1,3
+      - name: brightness_temperature@ObsBias
+        channels: *select_chans
+      coefs: [ 1.0, -1.0]
+    variables: [bias_corr_obs_value]
+    channels: *select_chans
+    tolerance: 1.0e-8
+
+- obs space:
+    <<: *ObsSpace
+    name: Calculate a bias corrected obs value for a single channel
+  obs function:
+    name: LinearCombination@ObsFunction
+    options:
+      variables:
+      - name: brightness_temperature@ObsValue
+        channels: &single_chan 2
+      - name: brightness_temperature@ObsBias
+        channels: *single_chan
+      coefs: [ 1.0, -1.0]
+    variables: [bias_corr_obs_value]
+    channels: *single_chan
+    tolerance: 1.0e-8
+
+- obs space:
+    <<: *ObsSpace
+    name: LinearCombination of terms, some of which are also ObsFunctions
+  # Computes 0.5 * (2.0 * brightness_temperature@ObsValue) - 0.25 * (4.0 * brightness_temperature@ObsBias)
+  obs function: &ObsFunction
+    name: LinearCombination@ObsFunction
+    options:
+      variables:
+      - name: LinearCombination@ObsFunction
+        channels: *all_channels
+        options:
+          variables:
+          - name: brightness_temperature@ObsValue
+            channels: *all_channels
+          coefs: [2.0]
+      - name: LinearCombination@ObsFunction
+        channels: *all_channels
+        options:
+          variables:
+          - name: brightness_temperature@ObsBias
+            channels: *all_channels
+          coefs: [4.0]
+      coefs: [0.5, -0.25]
+    variables: [bias_corr_obs_value]
+    channels: *all_channels
+    tolerance: 1.0e-8
