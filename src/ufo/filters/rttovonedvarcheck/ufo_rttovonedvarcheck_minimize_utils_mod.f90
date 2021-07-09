@@ -167,13 +167,13 @@ end if
 !  prof_x(profindex % cloudfrac) = ob % cloudfrac
 !end if
 
-! Windspeed - var_u = "eastward_wind"
-!           - var_v = "northward_wind"
+! Windspeed - var_sfc_u10 = "uwind_at_10m"
+!           - var_sfc_v10 = "vwind_at_10m"
 !           - windsp = sqrt (u*u + v*v)
 if (profindex % windspeed > 0) then
-  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
-  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_v10), geoval)
   v = geoval % vals(1, 1)
   prof_x(profindex % windspeed) = sqrt(u ** 2 + v ** 2)
 end if
@@ -392,9 +392,9 @@ end if
 
 ! windspeed
 if (profindex % windspeed > 0) then
-  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
-  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_v10), geoval)
   v = geoval % vals(1, 1)
   windsp = sqrt (u ** 2 + v ** 2)
 
@@ -411,14 +411,14 @@ if (profindex % windspeed > 0) then
   ! Write back updated u component
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_u) == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_u10) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = u
 
   ! Write back updated v component
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_v) == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_v10) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = v
 end if
@@ -1265,11 +1265,11 @@ do i = 1, size(varlist)
            trim(varname) == trim(var_sfc_q2m) .or. &
            trim(varname) == trim(var_sfc_p2m) .or. &
            trim(varname) == trim(var_sfc_tskin) .or. &
-           trim(varname) == trim(var_u) .or. &
-           trim(varname) == trim(var_v)) then
+           trim(varname) == trim(var_sfc_u10) .or. &
+           trim(varname) == trim(var_sfc_v10)) then
     ret_nlevs(i) = 1
   else
-    write(message, *) trim(varlist(i)), "not setup for retrieval yet: aborting"
+    write(message, *) trim(varlist(i)), " not setup for retrieval yet: aborting"
     call abor1_ftn(message)
   end if
 end do

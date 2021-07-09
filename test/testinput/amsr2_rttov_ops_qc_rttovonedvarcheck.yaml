@@ -14,7 +14,7 @@ observations:
       SatRad_compatibility: true
       RTTOV_GasUnitConv: true
       UseRHwaterForQC: &UseRHwaterForQC true # default
-      UseColdSurfaceCheck: &UseColdSurfaceCheck true # default
+      UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default
       Sensor_ID: &sensor_id gcom-w_1_amsr2
       CoefficientPath: Data/
   obs space:
@@ -52,8 +52,8 @@ observations:
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
     - air_pressure_at_two_meters_above_surface # 6
-    - eastward_wind # 11 - required for windspeed retrieval
-    - northward_wind # 11 - required for windspeed retrieval
+    - uwind_at_10m # 11 - required for windspeed retrieval
+    - vwind_at_10m # 11 - required for windspeed retrieval
     nlevels: 70
     qtotal: true
     UseQtSplitRain: true

@@ -70,7 +70,7 @@ module ufo_radiancerttov_utils_mod
 
   character(len=maxvarlen), dimension(9), target :: varin_default_satrad = &
     (/var_prs, var_ts, var_q, var_sfc_t2m, & 
-    var_u, var_v, var_sfc_p2m, var_sfc_q2m, &
+    var_sfc_u10, var_sfc_v10, var_sfc_p2m, var_sfc_q2m, &
     var_sfc_tskin /)
 
   character(len=maxvarlen), pointer, public :: varin_default(:)
@@ -142,6 +142,7 @@ module ufo_radiancerttov_utils_mod
     procedure :: alloc_k         => ufo_rttov_alloc_k
     procedure :: alloc_profs     => ufo_rttov_alloc_profiles
     procedure :: alloc_profs_K   => ufo_rttov_alloc_profiles_K
+    procedure :: zero_K          => ufo_rttov_zero_K
     procedure :: init_emissivity => ufo_rttov_init_emissivity 
     procedure :: setup           => ufo_rttov_setup_rtprof
     procedure :: check           => ufo_rttov_check_rtprof
@@ -169,7 +170,7 @@ module ufo_radiancerttov_utils_mod
 
     logical                               :: SatRad_compatibility = .true.
     logical                               :: UseRHwaterForQC = .true. ! only used with SatRad compatibility
-    logical                               :: UseColdSurfaceCheck = .true. ! only used with SatRad compatibility
+    logical                               :: UseColdSurfaceCheck = .false. ! to replicate pre-PS45 results
     logical                               :: SplitQtotal = .false. ! true for SatRad compatibility with MW
     logical                               :: UseQtsplitRain = .false.
     logical                               :: RTTOV_profile_checkinput = .false.
@@ -770,7 +771,7 @@ contains
 !DAR: This will be extended for RTTOV_SCATT
 !profiles_scatt = > self % profiles_scatt
 
-    if (present(ob_info)) then
+    if(present(ob_info)) then
       nlocs_total = 1
     else
       nlocs_total = obsspace_get_nlocs(obss)
@@ -935,14 +936,14 @@ contains
       enddo
     endif
 
-    varname = var_u ! Eastward-wind in m/s 
+    varname = var_sfc_u10 ! Eastward-wind in m/s 
     if (ufo_vars_getindex(geovals%variables, varname) > 0) then
       call ufo_geovals_get_var(geovals, varname, geoval)
 
       profiles(1:nprofiles)%s2m%u = geoval%vals(1,1:nprofiles)
       !assume if eastward then northward too
 
-      varname = var_v ! Northward-wind in m/s 
+      varname = var_sfc_v10 ! Northward-wind in m/s 
       call ufo_geovals_get_var(geovals, varname, geoval)
 
       profiles(1:nprofiles)%s2m%v = geoval%vals(1,1:nprofiles)
@@ -964,7 +965,7 @@ contains
     if (.not. allocated(tmpvar)) allocate(TmpVar(nlocs_total))
 
 !Hard code watertype to ocean. Only used to determine BRDF in visible calculations
-    profiles(1:nprofiles) % skin % watertype = 1             ! always assume ocean
+    profiles(1:nprofiles) % skin % watertype = watertype_ocean_water  ! always assume ocean
 
 !Get Skin (surface) temperature (K)
     varname = var_sfc_tskin 
@@ -1168,6 +1169,8 @@ contains
         call fckit_log%info(message)
       end if
 
+!Set RTTOV viewing geometry
+
       ! sensor zenith - RTTOV convention 0-max (coef dependent). Nadir = 0 deg
       ! mandatory so assume it's present
       call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
@@ -1226,26 +1229,27 @@ contains
 
   end subroutine ufo_rttov_setup_rtprof
 
-  subroutine ufo_rttov_check_rtprof(self, conf, iprof, i_inst)
+  subroutine ufo_rttov_check_rtprof(self, conf, iprof, i_inst, errorstatus)
     implicit none
     
     class(ufo_rttov_io), target,  intent(inout) :: self
     type(rttov_conf),             intent(in)    :: conf
     integer,                      intent(in)    :: iprof
     integer,                      intent(in)    :: i_inst
+    integer,                      intent(out)   :: errorstatus
 
     character(10) :: prof_str
 
     include 'rttov_print_profile.interface'
     include 'rttov_user_profile_checkinput.interface'
 
-    call rttov_user_profile_checkinput(rttov_errorstatus, &
+    call rttov_user_profile_checkinput(errorstatus, &
       conf % rttov_opts, &
       conf % rttov_coef_array(i_inst), &
       self % profiles(iprof))
 
     ! print erroneous profile to stderr
-    if(rttov_errorstatus /= errorstatus_success) then
+    if(errorstatus /= errorstatus_success .and. debug) then
       write(prof_str,'(i0)') iprof
       self % profiles(iprof) % id = prof_str
       call rttov_print_profile(self % profiles(iprof), lu = stderr)
@@ -1264,11 +1268,10 @@ contains
     character(10) :: prof_str
 
     include 'rttov_print_profile.interface'
-    if (any(conf % inspect == iprof)) then
-      write(prof_str,'(i0)') iprof
-      self % profiles(iprof) % id = prof_str
-      call rttov_print_profile(self % profiles(iprof), lu = stdout)
-    endif
+    write(*,*) 'profile ', iprof
+    write(prof_str,'(i0)') iprof
+    self % profiles(iprof) % id = prof_str
+    call rttov_print_profile(self % profiles(iprof), lu = stdout)
 
   end subroutine ufo_rttov_print_rtprof
 
@@ -1484,6 +1487,22 @@ contains
 
   end subroutine ufo_rttov_alloc_profiles_k
 
+  subroutine ufo_rttov_zero_k(self)
+    implicit none
+
+    class(ufo_rttov_io), target, intent(inout) :: self
+
+    include 'rttov_init_prof.interface'
+
+    call rttov_init_prof(self % profiles_k)
+    self % emissivity_k(:) % emis_in = 0.0
+    self % emissivity_k(:) % emis_out = 0.0
+    self % emissivity(:) % emis_out = 0.0
+    self % radiance_k % bt(:) = 1.0
+    self % radiance_k % total(:) = 1.0
+
+  end subroutine ufo_rttov_zero_k
+
   subroutine ufo_rttov_init_emissivity(self, conf, prof_start)
     class(ufo_rttov_io), intent(inout) :: self
     type(rttov_conf),    intent(in)    :: conf
@@ -1620,7 +1639,7 @@ contains
     self % rttov_opts % rt_mw % fastem_version           = 6       !< FASTEM version (0-6); 0 => TESSEM2
     self % rttov_opts % rt_mw % supply_foam_fraction     = .false. !< Supply a foam fraction to FASTEM
     self % rttov_opts % rt_mw % clw_data                 = .false. !< Switch to enable input of cloud liquid water profile
-    self % rttov_opts % rt_mw % clw_scheme               = 1       !< MW CLW scheme: 1 => Liebe, 2 => Rosenkranz, 3 => TKC
+    self % rttov_opts % rt_mw % clw_scheme               = mw_clw_scheme_liebe !< MW CLW scheme: 1 => Liebe, 2 => Rosenkranz, 3 => TKC
     self % rttov_opts % rt_mw % clw_calc_on_coef_lev     = .true.  !< Apply MW CLW calculations on coef/user levels (true/false resp.)
     self % rttov_opts % rt_mw % clw_cloud_top            = 322     !< Lower pressure limit for MW CLW calculations (hPa)
     self % rttov_opts % rt_mw % apply_band_correction    = .true.  !< Apply band-correction for Planck radiance and BT calculations
@@ -1654,7 +1673,7 @@ contains
         self % rttov_opts % rt_mw % clw_data                 = .true.  ! Set to true for allocation purposes
       
         self % rttov_opts % interpolation % addinterp        = .true.  ! Allow interpolation of input profile
-        self % rttov_opts % interpolation % interp_mode      = 4       ! Set interpolation method (4 for all insts at PS44)
+        self % rttov_opts % interpolation % interp_mode      = interp_rochon_wfn ! Set interpolation method (4 for all insts at PS44)
       endif
     
       !RTTOV options that are different from RTTOV defaults at and before PS44
@@ -1681,7 +1700,7 @@ contains
       if (PS_Number == 45) then
         self % rttov_opts % rt_all % addrefrac               = .true. ! This is an RTTOV 13 default
         
-        self % rttov_opts % rt_mw % clw_scheme               = 2      ! This is an RTTOV 13 default
+        self % rttov_opts % rt_mw % clw_scheme               = mw_clw_scheme_rosenkranz ! This is an RTTOV 13 default
         
         self % rttov_opts % interpolation % reg_limit_extrap = .true. ! This is an RTTOV 13 default
       endif
@@ -1689,17 +1708,19 @@ contains
 
   end subroutine set_defaults_rttov
 
-  subroutine populate_hofxdiags(RTProf, chanprof, conf, hofxdiags)
+  subroutine populate_hofxdiags(RTProf, chanprof, conf, prof_start, hofxdiags)
     use ufo_constants_mod, only : g_to_kg
 
     type(ufo_rttov_io),   intent(in)    :: RTProf
     type(rttov_chanprof), intent(in)    :: chanprof(:)
     type(rttov_conf),     intent(in)    :: conf
+    integer,              intent(in)    :: prof_start
     type(ufo_geovals),    intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
-    integer                      :: jvar, chan, prof, ichan
-    integer                      :: nlayers, nchanprof, nlevels, nprofiles
-    real(kind_real), allocatable :: od_level(:), wfunc(:)
+    integer                             :: jvar, chan, prof, ichan, rttov_prof
+    integer                             :: nchanprof, nlevels, nprofiles
+    real(kind_real), allocatable        :: od_level(:), wfunc(:)
+    logical, save                       :: firsttime = .true.
 
     include 'rttov_calc_weighting_fn.interface'
 
@@ -1710,7 +1731,7 @@ contains
 
     nchanprof = size(chanprof)
     nlevels = size(RTProf % profiles(1) % p)
-    nprofiles = maxval(chanprof(:)%prof) !SIZE(RTProf % profiles)
+    nprofiles = nlocs_total
 
     do jvar = 1, hofxdiags%nvar
       if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
@@ -1728,16 +1749,18 @@ contains
           ! variable: weightingfunction_of_atmosphere_layer_CH
         case (var_opt_depth, var_lvl_transmit,var_lvl_weightfunc)
 
-          nlayers = nlevels - 1
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
-             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
-          hofxdiags%geovals(jvar)%vals = missing
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+            hofxdiags%geovals(jvar)%vals = missing
+          endif
+
           ! get channel/profile
           do ichan = 1, nchanprof
             chan = chanprof(ichan)%chan
-            prof = chanprof(ichan)%prof
-
+            rttov_prof = chanprof(ichan)%prof
+            prof = prof_start + chanprof(ichan)%prof - 1
+            
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
               if(cmp_strings(ystr_diags(jvar), var_opt_depth)) then
@@ -1748,11 +1771,10 @@ contains
                                                        RTProf % transmission%tau_levels(2:,chan)
               else if (cmp_strings(ystr_diags(jvar), var_lvl_weightfunc)) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
-                call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
+                call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(rttov_prof)%p, od_level(:), &
                   hofxdiags%geovals(jvar)%vals(:,prof))
 
               endif
-              !endif
             endif
           enddo
 
@@ -1760,16 +1782,19 @@ contains
           ! variable: brightness_temperature_assuming_clear_sky_CH
           ! variable: pressure_level_at_peak_of_weightingfunction_CH
           ! variable: toa_total_transmittance_CH
-        case (var_radiance, var_tb_clr, var_tb, var_pmaxlev_weightfunc, var_total_transmit)
+          ! variable: surface_emissivity_CH
+        case (var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit)
           ! always returned
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
-             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
-          hofxdiags%geovals(jvar)%vals = missing
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+            hofxdiags%geovals(jvar)%vals = missing
+          endif
 
           do ichan = 1, nchanprof
             chan = chanprof(ichan)%chan
-            prof = chanprof(ichan)%prof
+            rttov_prof = chanprof(ichan)%prof
+            prof = prof_start + chanprof(ichan)%prof - 1
 
             if(chan == ch_diags(jvar)) then
               if(cmp_strings(ystr_diags(jvar), var_radiance)) then
@@ -1779,11 +1804,13 @@ contains
               else if(cmp_strings(ystr_diags(jvar), var_tb)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % radiance % bt(ichan)
               else if(cmp_strings(ystr_diags(jvar), var_pmaxlev_weightfunc)) then
-                call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
+                call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(rttov_prof)%p, od_level(:), &
                   Wfunc(:))
                 hofxdiags%geovals(jvar)%vals(1,prof) = maxloc(Wfunc(:), DIM=1) ! scalar not array(1)
               else if(cmp_strings(ystr_diags(jvar), var_total_transmit)) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % transmission % tau_total(ichan)
+              else if(cmp_strings(ystr_diags(jvar), var_sfc_emiss)) then
+                hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % emissivity(ichan) % emis_out
               end if
             endif
           end do
@@ -1791,13 +1818,17 @@ contains
         case default
           ! not a supported obsdiag but we allocate and initialise here anyway for use later on
           hofxdiags%geovals(jvar)%nval = 1
-          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
-          hofxdiags%geovals(jvar)%vals = missing
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+            hofxdiags%geovals(jvar)%vals = missing
+          endif
 
-          write(message,*) 'ufo_radiancerttov_simobs: //&
-            & ObsDiagnostic is unsupported but allocating anyway, ', &
-            & hofxdiags%variables(jvar), shape(hofxdiags%geovals(jvar)%vals)
-          call fckit_log%info(message)
+          if(firsttime) then 
+            write(message,*) 'ufo_radiancerttov_simobs: //&
+              & ObsDiagnostic is unsupported but allocating anyway, ', &
+              & hofxdiags%variables(jvar), shape(hofxdiags%geovals(jvar)%vals)
+            call fckit_log%info(message)
+          endif
 
         end select
 
@@ -1807,15 +1838,16 @@ contains
 
         case (var_ts,var_mixr,var_q,var_clw,var_cli)
 
-          nlayers = nlevels - 1
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
-          hofxdiags%geovals(jvar)%vals = missing
+            hofxdiags%geovals(jvar)%vals = missing
+          endif
 
           do ichan = 1, nchanprof
             chan = chanprof(ichan)%chan
-            prof = chanprof(ichan)%prof
+            rttov_prof = chanprof(ichan)%prof
+            prof = prof_start + chanprof(ichan)%prof - 1
 
             if(chan == ch_diags(jvar)) then
               if(xstr_diags(jvar) == var_ts) then
@@ -1836,15 +1868,17 @@ contains
             endif
           enddo
 
-        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_sfc_p2m, var_u, var_v)
+        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_sfc_p2m, var_sfc_u10, var_sfc_v10)
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
-          hofxdiags%geovals(jvar)%vals = missing
+            hofxdiags%geovals(jvar)%vals = missing
+          endif
 
           do ichan = 1, nchanprof
             chan = chanprof(ichan)%chan
-            prof = chanprof(ichan)%prof
+            rttov_prof = chanprof(ichan)%prof
+            prof = prof_start + chanprof(ichan)%prof - 1
 
             if(chan == ch_diags(jvar)) then
               if(xstr_diags(jvar) == var_sfc_tskin) then
@@ -1859,10 +1893,10 @@ contains
               else if (xstr_diags(jvar) == var_sfc_q2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % q * conf%scale_fac(gas_id_watervapour)
-              else if (xstr_diags(jvar) == var_u) then
+              else if (xstr_diags(jvar) == var_sfc_u10) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % u
-              else if (xstr_diags(jvar) == var_v) then
+              else if (xstr_diags(jvar) == var_sfc_v10) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % v
               else if (xstr_diags(jvar) == var_sfc_emiss) then
@@ -1873,22 +1907,26 @@ contains
           end do
 
         case default
-          write(message,*) 'ufo_radiancerttov_simobs: //&
-            & Jacobian ObsDiagnostic is unsupported, ', &
-            & hofxdiags%variables(jvar)
-          call fckit_log%info(message)
+          if (firsttime) then
+            write(message,*) 'ufo_radiancerttov_simobs: //&
+              & Jacobian ObsDiagnostic is unsupported, ', &
+              & hofxdiags%variables(jvar)
+            call fckit_log%info(message)
+          endif  
         end select
       else
-        write(message,*) 'ufo_radiancerttov_simobs: //&
-          & ObsDiagnostic is not recognised, ', &
-          & hofxdiags%variables(jvar)
-        call fckit_log%info(message)
+        if (firsttime) then
+          write(message,*) 'ufo_radiancerttov_simobs: //&
+            & ObsDiagnostic is not recognised, ', &
+            & hofxdiags%variables(jvar)
+          call fckit_log%info(message)
+        endif
       end if
 
     enddo
 
     deallocate(od_level,wfunc)
-
+    firsttime = .false.
   end subroutine populate_hofxdiags
 
   subroutine parse_hofxdiags(hofxdiags, jacobian_needed)
@@ -1899,7 +1937,7 @@ contains
     character(10), parameter  :: jacobianstr = "_jacobian_"
 
     integer                   :: str_pos(4)
-    character(len=maxvarlen) :: varstr
+    character(len=maxvarlen)  :: varstr
     integer                   :: jvar
     character(len=max_string) :: err_msg
 

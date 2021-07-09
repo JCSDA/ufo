@@ -287,22 +287,22 @@ if (profindex % pstar > 0) then
   end do
 end if
 
-! 2.4) Windspeed - var_u = "eastward_wind"
-!                - var_v = "northward_wind"
+! 2.4) Windspeed - var_sfc_u10 = "uwind_at_10m"
+!                - var_sfc_v10 = "vwind_at_10m"
 !                - windsp = sqrt (u*u + v*v)
 
 if (profindex % windspeed > 0) then
-  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
-  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_v10), geoval)
   v = geoval % vals(1, 1)
   windsp = sqrt (u ** 2 + v ** 2)
 
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_u),"_",channels(i)
+    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_u10),"_",channels(i)
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
     dBT_du = geoval % vals(1,1)
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_v),"_",channels(i)
+    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_v10),"_",channels(i)
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
     dBT_dv = geoval % vals(1,1)
     if (windsp > zero) then
