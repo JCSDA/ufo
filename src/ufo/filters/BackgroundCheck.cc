@@ -92,8 +92,8 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass &&
-            (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
+          ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
@@ -129,8 +129,8 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
         bc_factor = getScalarOrFilterData(*parameters_.BiasCorrectionFactor.value(), data_);
 
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass &&
-            (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
+          ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
           if (parameters_.BiasCorrectionFactor.value()) {
             ASSERT(obsbias[jv][jobs] != util::missingValue(obsbias[jv][jobs]));
