@@ -1,0 +1,42 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
+  obs bias:
+    variational bc:
+      predictors:
+# Predictors for 224 S-NPP
+      - name: satellite_selector
+        satellite id: 224
+        owned predictor:
+          name: constant
+      - name: satellite_selector
+        satellite id: 224
+        owned predictor:
+          name: thickness
+          layer top: 30000
+          layer base: 85000
+          mean: 7.6
+          standard deviation: 0.4
+# Predictors for 225 NOAA-20
+      - name: satellite_selector
+        satellite id: 225
+        owned predictor:
+          name: constant
+      - name: satellite_selector
+        satellite id: 225
+        owned predictor:
+          name: thickness
+          layer top: 30000
+          layer base: 85000
+          mean: 7.6
+          standard deviation: 0.4
+  tolerance: 5.0e-5

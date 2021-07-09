@@ -22,6 +22,8 @@ set ( predictor_files
   Legendre.cc
   OrbitalAngle.h
   OrbitalAngle.cc
+  SatelliteSelector.h
+  SatelliteSelector.cc
   ScanAngle.h
   ScanAngle.cc
   SineOfLatitude.h

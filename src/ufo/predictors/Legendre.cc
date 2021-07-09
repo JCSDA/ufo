@@ -23,7 +23,7 @@ Legendre::Legendre(const Parameters_ & parameters, const oops::Variables & vars)
     nscan_(parameters.numScanPositions) {
   if (parameters.order.value() != boost::none) {
     // override the predictor name to distinguish between Legendre predictors of different orders
-    name() = name() + "_" + std::to_string(order_);
+    name() = name() + "_order_" + std::to_string(order_);
   }
 }
 

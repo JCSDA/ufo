@@ -17,7 +17,7 @@ observations:
       - name: orbital_angle
         order: 1
         component: "cos"
-      - name: orbital_angle 
+      - name: orbital_angle
         order: 1
         component: "sin"
       - name: orbital_angle
@@ -29,7 +29,7 @@ observations:
       - name: orbital_angle
         order: 3
         component: "cos"
-      - name: orbital_angle 
+      - name: orbital_angle
         order: 3
         component: "sin"
       - name: orbital_angle
@@ -41,7 +41,7 @@ observations:
       - name: orbital_angle
         order: 5
         component: "cos"
-      - name: orbital_angle 
+      - name: orbital_angle
         order: 5
         component: "sin"
       - name: orbital_angle

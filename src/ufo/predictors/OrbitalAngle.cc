@@ -28,7 +28,7 @@ OrbitalAngle::OrbitalAngle(const Parameters_ & parameters, const oops::Variables
     component_(parameters.component) {
   // override the predictor name to distinguish between Orbital angle predictors of
   // different orders as well as the two components, sine and cosine.
-  name() = name() + "_" + std::to_string(order_)+ "_" +
+  name() = name() + "_order_" + std::to_string(order_)+ "_" +
       (component_ == FourierTermType::SIN ? "sin" : "cos");
 }
 
