@@ -36,10 +36,6 @@ ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
 
 // -----------------------------------------------------------------------------
 
-ModelHeightAdjustedAirTemperature::~ModelHeightAdjustedAirTemperature() {}
-
-// -----------------------------------------------------------------------------
-
 void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();

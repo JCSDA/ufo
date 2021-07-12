@@ -40,8 +40,6 @@ class ModelHeightAdjustedAirTemperature : public ObsFunctionBase<float> {
  public:
     explicit ModelHeightAdjustedAirTemperature(const eckit::LocalConfiguration &
                                                = eckit::LocalConfiguration());
-    ~ModelHeightAdjustedAirTemperature();
-
     void compute(const ObsFilterData &,
                        ioda::ObsDataVector<float> &) const;
     const ufo::Variables & requiredVariables() const;
