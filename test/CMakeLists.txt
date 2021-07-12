@@ -283,8 +283,9 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
   testinput/unit_tests/function_lam_domaincheck_circle.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustWindVector.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustTemperature.yaml
   testinput/unit_tests/function_linear_combination_multichannel.yaml
-  testinput/unit_tests/function_ModelSurfaceHeightAdjust.yaml
   testinput/unit_tests/function_obserrorfactorquotient.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
@@ -2824,10 +2825,16 @@ ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-
-ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_windvector
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
-                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjust.yaml"
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustWindVector.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_temperature
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustTemperature.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
