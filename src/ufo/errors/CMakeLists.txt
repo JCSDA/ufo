@@ -4,6 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( errors_files
+    ObsErrorCrossVarCov.cc
+    ObsErrorCrossVarCov.h
     ObsErrorDiagonal.cc
     ObsErrorDiagonal.h
 )
