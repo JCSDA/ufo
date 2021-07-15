@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2020 Met Office
+ * (C) British Crown Copyright 2021 Met Office
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -29,13 +29,17 @@ ObsGnssroRefMetOffice::ObsGnssroRefMetOffice(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperGnssroRefMetOffice_(0), odb_(odb), varin_()
 {
+  parameters_.validateAndDeserialize(config);
+  ObsGnssroRefMetOfficeOptions obsOptions = parameters_.obsOptions.value();
+
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-  const eckit::Configuration *configc = &obsOptions;
-  ufo_gnssro_refmetoffice_setup_f90(keyOperGnssroRefMetOffice_, &configc);
+  ufo_gnssro_refmetoffice_setup_f90(keyOperGnssroRefMetOffice_,
+                                    obsOptions.vertInterpOPS,
+                                    obsOptions.pseudoLevels,
+                                    obsOptions.minTempGrad);
 
   oops::Log::trace() << "ObsGnssroRefMetOffice created." << std::endl;
 }
@@ -58,7 +62,7 @@ void ObsGnssroRefMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & o
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefMetOffice::print(std::ostream & os) const {
-  os << "ObsGnssroRefMetOffice::print not implemented";
+  os << "ObsGnssroRefMetOffice: config = " <<  parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

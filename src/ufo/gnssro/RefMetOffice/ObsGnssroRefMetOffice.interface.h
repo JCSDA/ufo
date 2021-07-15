@@ -1,5 +1,5 @@
 /*
- * (C) British Crown Copyright 2020 Met Office
+ * (C) British Crown Copyright 2021 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -23,7 +23,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Gnssro refractivity observation operators - (Met Office 1D)
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_refmetoffice_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_refmetoffice_setup_f90(F90hop &, const bool &, const bool &, const float &);
   void ufo_gnssro_refmetoffice_delete_f90(F90hop &);
   void ufo_gnssro_refmetoffice_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                           const int &, double &, const F90goms &);

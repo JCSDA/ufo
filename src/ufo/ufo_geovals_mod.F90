@@ -403,7 +403,9 @@ type(ufo_geovals) :: selfclone
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 integer:: iobs, ivar, ival, kval
-logical :: do_flip = .false.     !< .true. if all the ufo_geoval arrays inside geovals
+logical :: do_flip                   !< .true. if all the ufo_geoval arrays inside geovals
+
+do_flip = .false.
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_reorderzdir: geovals not allocated")

@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------------
-! (C) British Crown Copyright 2020 Met Office
+! (C) British Crown Copyright 2021 Met Office
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -45,26 +45,44 @@ end type ufo_gnssro_RefMetOffice
 
 contains
 
-! ------------------------------------------------------------------------------
-! Get the optional settings for the forward model, and save them in the object
-! so that they can be used in the code.
-! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_refmetoffice_setup(self, f_conf)
+!-------------------------------------------------------------------------------
+!> \brief Set up the Met Office GNSS-RO refractivity operator
+!!
+!! \details **ufo_gnssro_refmetoffice_setup**
+!! * Get the optional settings for the forward model, and save them in the
+!!   object so that they can be used in the code.
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 20 March 2021
+!!
+!-------------------------------------------------------------------------------
+subroutine ufo_gnssro_refmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
 
-use fckit_configuration_module, only: fckit_configuration
 implicit none
-class(ufo_gnssro_RefMetOffice), intent(inout) :: self
-type(fckit_configuration), intent(in)   :: f_conf
 
-call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+class(ufo_gnssro_refmetoffice), intent(inout) :: self
+logical(c_bool), intent(in)  :: vert_interp_ops
+logical(c_bool), intent(in)  :: pseudo_ops
+real(c_float), intent(in)  :: min_temp_grad
+
+self % vert_interp_ops = vert_interp_ops
+self % pseudo_ops = pseudo_ops
+self % min_temp_grad = min_temp_grad
 
 end subroutine ufo_gnssro_refmetoffice_setup
 
-! ------------------------------------------------------------------------------
-! 1-dimensional GNSS-RO forward operator for the Met Office system
-! ------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!> \brief Calculate the model forecast of the observations
+!!
+!! \details **ufo_gnssro_refmetoffice_simobs**
+!! * 1-dimensional GNSS-RO forward operator for the Met Office system
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 20 March 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diags)
 
   implicit none
@@ -124,10 +142,10 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
   call ufo_geovals_reorderzdir(geovals, var_prsi, "bottom2top")
 
-  write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with'
+  write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with:'
   call fckit_log%info(message)
   write(message, *) 'vert_interp_ops =', self % vert_interp_ops, &
-    'pseudo_ops =', self % pseudo_ops
+    'pseudo_ops =', self % pseudo_ops, 'min_temp_grad =', self % min_temp_grad
   call fckit_log%info(message)
 
 ! get variables from geovals
@@ -216,9 +234,19 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   call fckit_log%info(err_msg)
 
 end subroutine ufo_gnssro_refmetoffice_simobs
-! ------------------------------------------------------------------------------
 
-
+!-------------------------------------------------------------------------------
+!> \brief Interface routine for the GNSS-RO refractivity forward operator
+!!
+!! \details **RefMetOffice_ForwardModel**
+!! * Calculate the refractivity on model or pseudo levels
+!! * Vertically interpolate the model refractivity to the observation locations
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 20 March 2021
+!!
+!-------------------------------------------------------------------------------
 SUBROUTINE RefMetOffice_ForwardModel(nlevp, &
                                      nlevq, &
                                      za, &

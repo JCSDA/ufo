@@ -1,12 +1,12 @@
 /*
  * (C) British Crown Copyright 2021 Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICE_H_
-#define UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICE_H_
+#ifndef UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICETLAD_H_
+#define UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICETLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -14,10 +14,11 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/gnssro/RefMetOffice/ObsGnssroRefMetOffice.interface.h"
-#include "ufo/ObsOperatorBase.h"
+#include "ufo/gnssro/RefMetOffice/ObsGnssroRefMetOfficeTLAD.interface.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "ObsGnssroRefMetOfficeParameters.h"
 
+// Forward declarations
 namespace eckit {
   class Configuration;
 }
@@ -32,20 +33,22 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// GnssroRefMetOffice observation operator
+/// GnssroRefMetOffice observation operator - TL/AD
 // -----------------------------------------------------------------------------
-class ObsGnssroRefMetOffice : public ObsOperatorBase,
-                        private util::ObjectCounter<ObsGnssroRefMetOffice> {
+class ObsGnssroRefMetOfficeTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsGnssroRefMetOfficeTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroRefMetOffice";}
+  static const std::string classname() {return "ufo::ObsGnssroRefMetOfficeTLAD";}
 
-  ObsGnssroRefMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroRefMetOffice();
+  ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGnssroRefMetOfficeTLAD();
 
-// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  // Obs Operators
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
-// Other
+  // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
   int & toFortran() {return keyOperGnssroRefMetOffice_;}
@@ -54,7 +57,6 @@ class ObsGnssroRefMetOffice : public ObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOperGnssroRefMetOffice_;
-  const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
   ObsGnssroRefMetOfficeParameters parameters_;
 };
@@ -62,5 +64,4 @@ class ObsGnssroRefMetOffice : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-
-#endif  // UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICE_H_
+#endif  // UFO_GNSSRO_REFMETOFFICE_OBSGNSSROREFMETOFFICETLAD_H_
