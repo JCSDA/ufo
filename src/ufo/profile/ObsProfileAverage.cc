@@ -70,7 +70,7 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
       data_.getSlantPathLocations(locsOriginal, locsExtended, gv);
 
     // Fill H(x) vector for each variable.
-    for (size_t jvar = 0; jvar < ovec.nvars(); ++jvar) {
+    for (int jvar : data_.operatorVarIndices()) {
       const auto& variable = ovec.varnames().variables()[jvar];
       // Number of levels for this variable.
       const std::size_t nlevs_var = gv.nlevs(variable);

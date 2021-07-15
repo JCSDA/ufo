@@ -9,6 +9,7 @@
 #define UFO_PROFILE_OBSPROFILEAVERAGEDATA_H_
 
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "ioda/ObsSpace.h"
@@ -32,6 +33,12 @@ namespace ufo {
 
     /// Return required variables for the operator.
     const oops::Variables & requiredVars() const;
+
+    /// Return simulated variables for the operator.
+    const oops::Variables & simulatedVars() const;
+
+    /// Return operator variable indices for the operator.
+    const std::vector<int> & operatorVarIndices() const;
 
     /// Get slant path locations. This determines, for each model level, the location that
     /// corresponds to the intersection of the observed profile with that level.
@@ -61,8 +68,17 @@ namespace ufo {
     /// Options for this observation operator.
     ObsProfileAverageParameters options_;
 
+    /// Name of model vertical coordinate.
+    std::string modelVerticalCoord_;
+
     /// Required variables.
     oops::Variables requiredVars_;
+
+    /// Operator variables.
+    oops::Variables operatorVars_;
+
+    /// Indices of operator variables.
+    std::vector<int> operatorVarIndices_;
 
     /// Reference values of slant path locations.
     std::vector<int> slant_path_location_ref_;

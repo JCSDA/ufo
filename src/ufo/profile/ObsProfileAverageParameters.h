@@ -16,7 +16,8 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/profile/DataHandlerParameters.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -28,13 +29,19 @@ class ObsProfileAverageParameters : public oops::Parameters {
   /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
   oops::OptionalParameter<std::string> name{"name", this};
 
+  /// List of variables to be used by this operator.
+  oops::Parameter<std::vector<ufo::Variable>> variables{"variables", {}, this};
+
+  /// Name of model vertical coordinate.
+  oops::RequiredParameter<std::string> modelVerticalCoordinate{"vertical coordinate", this};
+
   /// Number of iterations that are used to find the intersection between
   /// the observed profile and each model level.
   oops::Parameter<int> numIntersectionIterations
-    {"numIntersectionIterations", 3, this, {oops::minConstraint(1)}};
+    {"number of intersection iterations", 3, this, {oops::minConstraint(1)}};
 
   /// Perform comparisons of auxiliary variables with OPS?
-  oops::Parameter<bool> compareWithOPS{"compareWithOPS", false, this};
+  oops::Parameter<bool> compareWithOPS{"compare with OPS", false, this};
 };
 
 }  // namespace ufo

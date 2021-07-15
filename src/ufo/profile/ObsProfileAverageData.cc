@@ -9,6 +9,7 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/profile/ObsProfileAverageData.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -37,15 +38,17 @@ namespace ufo {
     if (!odb_.has("MetaData", "air_pressure"))
       throw eckit::UserError("air_pressure@MetaData not present", Here());
 
-    // Add air_pressure_levels to the list of variables used in this operator.
-    // This GeoVaL is used to determine the slant path locations.
-    requiredVars_ += oops::Variables({"air_pressure_levels"});
-
-    // Add any simulated variables to the list of variables used in this operator.
-    requiredVars_ += odb_.obsvariables();
-
     // Set up configuration options.
     options_.validateAndDeserialize(config);
+
+    // Add model air pressure to the list of variables used in this operator.
+    // This GeoVaL is used to determine the slant path locations.
+    modelVerticalCoord_ = options_.modelVerticalCoordinate;
+    requiredVars_ += oops::Variables({modelVerticalCoord_});
+
+    // Add any simulated variables to the list of variables used in this operator.
+    getOperatorVariables(config, odb_.obsvariables(), operatorVars_, operatorVarIndices_);
+    requiredVars_ += operatorVars_;
 
     // If required, set up vectors for OPS comparison.
     if (options_.compareWithOPS.value())
@@ -54,6 +57,14 @@ namespace ufo {
 
   const oops::Variables & ObsProfileAverageData::requiredVars() const {
     return requiredVars_;
+  }
+
+  const oops::Variables & ObsProfileAverageData::simulatedVars() const {
+    return operatorVars_;
+  }
+
+  const std::vector<int> & ObsProfileAverageData::operatorVarIndices() const {
+    return operatorVarIndices_;
   }
 
   std::vector<std::size_t> ObsProfileAverageData::getSlantPathLocations
@@ -68,8 +79,8 @@ namespace ufo {
     odb_.get_db("MetaData", "air_pressure", pressure_obs);
 
     // Set up GeoVaLs and H(x) vectors.
-    // Number of levels for air_pressure_levels.
-    const std::size_t nlevs_p = gv.nlevs("air_pressure_levels");
+    // Number of levels for model pressure.
+    const std::size_t nlevs_p = gv.nlevs(modelVerticalCoord_);
     // Vector storing location for each level along the slant path.
     // Initially the first location in the profile is used everywhere.
     std::vector<std::size_t> slant_path_location(nlevs_p, locsOriginal.front());
@@ -90,7 +101,7 @@ namespace ufo {
     for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
       for (int iter = 0; iter <= itermax; ++iter) {
         // Get the GeoVaL that corresponds to the current slanted profile location.
-        gv.getAtLocation(pressure_gv, "air_pressure_levels", jlocslant);
+        gv.getAtLocation(pressure_gv, modelVerticalCoord_, jlocslant);
         // Define an iteration-specific location that is initialised to the
         // current slanted profile location.
         std::size_t jlociter = jlocslant;
@@ -155,21 +166,21 @@ namespace ufo {
       slant_pressure_ref_profile.push_back(slant_pressure_ref_[loc]);
     }
     std::stringstream errmsg;
-    for (std::size_t jloccomp = 0; jloccomp < locsExtended.size(); ++jloccomp) {
-      if (slant_path_location[jloccomp] != slant_path_location_ref_profile[jloccomp]) {
-        errmsg << "Mismatch for slant_path_location, location = " << jloccomp
+    for (std::size_t mlev = 0; mlev < locsExtended.size(); ++mlev) {
+      if (slant_path_location[mlev] != slant_path_location_ref_profile[mlev]) {
+        errmsg << "Mismatch for slant_path_location, level = " << mlev
                << " (this code, OPS): "
-               << slant_path_location[jloccomp] << ", "
-               << slant_path_location_ref_profile[jloccomp];
+               << slant_path_location[mlev] << ", "
+               << slant_path_location_ref_profile[mlev];
         throw eckit::BadValue(errmsg.str(), Here());
       }
-      if (!oops::is_close_relative(slant_pressure[jloccomp],
-                                   slant_pressure_ref_profile[jloccomp],
+      if (!oops::is_close_relative(slant_pressure[mlev],
+                                   slant_pressure_ref_profile[mlev],
                                    1e-5f)) {
-        errmsg << "Mismatch for slant_pressure, location = " << jloccomp
+        errmsg << "Mismatch for slant_pressure, level = " << mlev
                << " (this code, OPS): "
-               << slant_pressure[jloccomp] << ", "
-               << slant_pressure_ref_profile[jloccomp];
+               << slant_pressure[mlev] << ", "
+               << slant_pressure_ref_profile[mlev];
         throw eckit::BadValue(errmsg.str(), Here());
       }
     }
