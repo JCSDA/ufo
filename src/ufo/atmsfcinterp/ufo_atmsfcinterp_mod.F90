@@ -111,6 +111,10 @@ subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
   real(kind_real), parameter :: ka = 2.4e-5_kind_real
   character(1024) :: debug_msg
 
+  ! Quickly exit if nlocs is less than one, which happens on many CPUs and
+  ! no observations sent to one of them.
+  if (nlocs .lt. 1) return
+
   ! Notes:
   ! (1) Set desired vertical coordinate direction (top2bottom or bottom2top) based
   !     on vertical coodinate variable and reload geovals according to the set
