@@ -198,7 +198,7 @@ contains
         trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
       call fckit_log%debug(message)
 
-      call self % RTprof % alloc_profs_K(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
+      call self % RTprof % alloc_profs_k(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
       call self % RTprof % alloc_k(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
     endif
 
@@ -276,7 +276,6 @@ contains
           write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst, &
                                        ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
           call fckit_log%info(message)
-          cycle
         end if
 
       else
@@ -295,7 +294,6 @@ contains
           write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, i_inst, &
                                        ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
           call fckit_log%info(message)
-          cycle
         end if
       endif ! jacobian_needed
 
@@ -316,17 +314,20 @@ contains
 
       ! deallocate local chanprof so it can be re-allocated with a different number of channels if reqd.
       deallocate(chanprof)
-      if (jacobian_needed) call self % RTprof % zero_K()
+      if (jacobian_needed) call self % RTprof % zero_k()
 
     end do RTTOV_loop
 
     ! Deallocate structures for rttov_direct
     if(jacobian_needed) then
       call self % RTprof % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
-      call self % RTprof % alloc_profs_K(errorstatus, self % conf, -1, -1, asw=0)
+      call self % RTprof % alloc_profs_k(errorstatus, self % conf, size(self % RTprof % profiles_k), -1, asw=0)
+      ! deallocation of profiles_k isn't done by default in alloc_profs_k because it can contain the trajectory 
+      ! which is currently used for the TL/AD but the 1dvar doesn't use it so it can be safely done here
+      deallocate (self % RTprof % profiles_k)
     endif
     call self % RTprof % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
-    call self % RTprof % alloc_profs(errorstatus, self % conf, -1, -1, asw=0)
+    call self % RTprof % alloc_profs(errorstatus, self % conf, size(self % RTprof % profiles), -1, asw=0)
 
     deallocate(self % RTprof % chanprof)
     

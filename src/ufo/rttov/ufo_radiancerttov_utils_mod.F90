@@ -123,26 +123,26 @@ module ufo_radiancerttov_utils_mod
   integer :: iprof
 
   type, public :: ufo_rttov_io
-    logical, pointer               :: calcemis(:)     ! Flag to indicate calculation of emissivity within RTTOV
 
-    type(rttov_emissivity), pointer :: emissivity(:)   ! Input/output surface emissivity
-    type(rttov_profile), pointer    :: profiles(:)     ! Input profiles
-    type(rttov_profile), pointer    :: profiles_k(:)   ! Input profiles
-    type(rttov_chanprof), pointer   :: chanprof(:)     ! Input profiles
-    type(rttov_transmission)        :: transmission    ! Output transmittances
-    type(rttov_radiance)            :: radiance        ! Output radiances
+    logical, pointer                 :: calcemis(:)     ! Flag to indicate calculation of emissivity within RTTOV
+    type(rttov_emissivity), pointer  :: emissivity(:)   ! Input/output surface emissivity
+    type(rttov_profile), allocatable :: profiles(:)     ! Input profiles
+    type(rttov_profile), allocatable :: profiles_k(:)   ! Output jacobian profiles
+    type(rttov_chanprof), pointer    :: chanprof(:)
+    type(rttov_transmission)         :: transmission    ! Output transmittances
+    type(rttov_radiance)             :: radiance        ! Output radiances
 
-    type(rttov_emissivity), pointer :: emissivity_k(:) !Input/output surface emissivity
-    type(rttov_transmission)        :: transmission_k  ! Output transmittances
-    type(rttov_radiance)            :: radiance_k      ! Output radiances
+    type(rttov_emissivity), pointer  :: emissivity_k(:) ! Input/output surface emissivity
+    type(rttov_transmission)         :: transmission_k  ! Output transmittances
+    type(rttov_radiance)             :: radiance_k      ! Output radiances
 
   contains
 
     procedure :: alloc_direct    => ufo_rttov_alloc_direct
     procedure :: alloc_k         => ufo_rttov_alloc_k
     procedure :: alloc_profs     => ufo_rttov_alloc_profiles
-    procedure :: alloc_profs_K   => ufo_rttov_alloc_profiles_K
-    procedure :: zero_K          => ufo_rttov_zero_K
+    procedure :: alloc_profs_k   => ufo_rttov_alloc_profiles_k
+    procedure :: zero_k          => ufo_rttov_zero_k
     procedure :: init_emissivity => ufo_rttov_init_emissivity 
     procedure :: setup           => ufo_rttov_setup_rtprof
     procedure :: check           => ufo_rttov_check_rtprof
@@ -331,7 +331,7 @@ contains
     endif
 
     if( .not. conf % rttov_is_setup) then
-      call conf % setup(f_confOpts, asw=1)
+      call conf % setup(f_confOpts)
     end if
 
     !DARFIX THIS ONLY WORKS FOR ONE INSTRUMENT
@@ -393,6 +393,16 @@ contains
 
     implicit none
     type(rttov_conf), intent(inout) :: conf
+    
+    integer                         :: i
+
+    include 'rttov_dealloc_coefs.interface'
+
+    do i = 1, size(conf % rttov_coef_array)
+      call rttov_dealloc_coefs(rttov_errorstatus, conf % rttov_coef_array(i))
+    enddo
+    deallocate(conf % rttov_coef_array)
+    conf%rttov_is_setup =.false.
 
     deallocate(conf%SENSOR_ID)
     deallocate(conf%Absorbers)
@@ -661,10 +671,9 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine setup_rttov(self, f_confOpts, asw)
+  subroutine setup_rttov(self, f_confOpts)
     class(rttov_conf), intent(inout) :: self
     type(fckit_configuration), intent(in) :: f_confOpts ! RTcontrol
-    integer, intent(in) :: asw !allocate switch
 
     character(len=255) :: coef_filename
     character(len=4) :: coef_ext
@@ -674,8 +683,7 @@ contains
 
     coef_ext = '.dat'
     if (.not. self%rttov_is_setup ) then
-    if(asw == 1) then
-
+      
       ! --------------------------------------------------------------------------
       ! 1. Setup rttov options
       ! --------------------------------------------------------------------------
@@ -696,20 +704,16 @@ contains
                               file_coef = coef_filename)     !in
 
         if (rttov_errorstatus /= errorstatus_success) then
-            write(message,*) 'fatal error reading coefficients'
-            call abor1_ftn(message)
+          write(message,*) 'fatal error reading coefficients'
+          call abor1_ftn(message)
         else
-            write(message,*) 'successfully read' // coef_filename
-            call fckit_log%info(message)
+          write(message,*) 'successfully read' // coef_filename
+          call fckit_log%info(message)
         end if
 
       end do
 
       self % rttov_is_setup =.true.
-    else !asw == 0
-      deallocate(self % rttov_coef_array)
-      self%rttov_is_setup =.false.
-    end if
     endif
   end subroutine setup_rttov
 
@@ -962,7 +966,7 @@ contains
       deallocate(windsp)
     endif
 
-    if (.not. allocated(tmpvar)) allocate(TmpVar(nlocs_total))
+    allocate(TmpVar(nlocs_total))
 
 !Hard code watertype to ocean. Only used to determine BRDF in visible calculations
     profiles(1:nprofiles) % skin % watertype = watertype_ocean_water  ! always assume ocean
@@ -1217,10 +1221,10 @@ contains
         call ufo_geovals_get_var(geovals, var_surf_type_rttov, geoval)
         profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
       endif
-
-      deallocate(TmpVar)
     
     end if
+
+    deallocate(TmpVar)
 
 !    deallocate(profiles)
 !    nullify(profiles)
@@ -1467,7 +1471,6 @@ contains
       allocate (self % profiles_k(nprofiles))
     endif
 
-    ! Allocate structures for rttov_direct
     call rttov_alloc_prof(          &
       errorstatus,                    &
       nprofiles,                      &
@@ -1560,7 +1563,6 @@ contains
         endif
       enddo
     endif
-
 
   end subroutine ufo_rttov_init_emissivity
 
