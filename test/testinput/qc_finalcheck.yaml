@@ -117,3 +117,33 @@ observations:
   # Add a dummy filter to force the QCmanager and Final Check to be run.
   - filter: Domain Check
   failedObservationsBenchmark: [0, 1, 3, 4]
+
+# The following tests checks if a non-derived simulated variable not accompanied by an ObsError
+# array in the input file is handled appropriately
+
+- obs space:
+    name: Simulated variable without initial ObsErrors; errors not assigned by any filter
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    # The input file contains no relative_humidity@ObsError variable
+    simulated variables: [relative_humidity, air_temperature]
+  obs filters:
+  # Add a dummy filter to force the QCmanager and Final Check to be run.
+  - filter: Domain Check
+  passedBenchmark: 5 # air_temperature
+  failedBenchmark: 5 # relative_humidity -- its error estimates are missing
+
+- obs space:
+    name: Simulated variable without initial ObsErrors; errors assigned by a filter
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    # The input file contains no relative_humidity@ObsError variable
+    simulated variables: [relative_humidity, air_temperature]
+  obs filters:
+  - filter: Perform Action
+    filter variables: [relative_humidity]
+    action:
+      name: assign error
+      error parameter: 0.1
+  passedBenchmark: 10
+  failedBenchmark: 0
