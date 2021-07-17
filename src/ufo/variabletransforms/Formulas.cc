@@ -313,6 +313,13 @@ float GetWind_V(float windSpeed, float windFromDirection) {
   return v;
 }
 
+/* -------------------------------------------------------------------------------------*/
+
+int RenumberScanPosition(int scanpos) {
+  // Renumber from 2,5,8,... to 1,2,3,...
+  int newpos = (scanpos + 1)/3;
+  return newpos;
+}
 
 }  // namespace formulas
 }  // namespace ufo

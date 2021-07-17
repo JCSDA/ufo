@@ -25,43 +25,6 @@ TransformBase::TransformBase(const VariableTransformsParameters& options,
   obsName_ = os.obsname();
 }
 
-void TransformBase::filterObservation(const std::string &variableName,
-                                       std::vector<float> &obsVector) const {
-  if (flags_.has(variableName)) {
-    const float missing = missingValueFloat;
-    const std::vector<int> *varFlags = &flags_[variableName];
-
-    std::transform(obsVector.begin(), obsVector.end(),  // Input range 1
-                   varFlags->begin(),  // First element of input range vector 2 (must be same size)
-                   obsVector.begin(),  // First element of output range (must be same size)
-                   [missing](float obsvalue, int flag)
-                   { return flag == QCflags::missing || flag == QCflags::bounds
-                     ? missing : obsvalue; });
-  }
-}
-
-void TransformBase::getObservation(const std::string &originalTag, const std::string &varName,
-                                   std::vector<float> &obsVector, bool require) const {
-  const size_t nlocs = obsdb_.nlocs();
-
-  if (obsdb_.has("DerivedValue", varName)) {
-    obsVector = std::vector<float>(nlocs);
-    obsdb_.get_db("DerivedValue", varName, obsVector);
-    // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
-    if (UseValidDataOnly()) filterObservation(varName, obsVector);
-  } else if (obsdb_.has(originalTag, varName)) {
-    obsVector = std::vector<float>(nlocs);
-    obsdb_.get_db(originalTag, varName, obsVector);
-    // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
-    if (UseValidDataOnly()) filterObservation(varName, obsVector);
-  }
-
-  if (require && obsVector.empty()) {
-    throw eckit::BadValue("The parameter `" + varName + "@" + originalTag +
-                          "` does not exist in the ObsSpace ", Here());
-  }
-}
-
 TransformFactory::TransformFactory(const std::string& name) {
   if (getMakers().find(name) != getMakers().end())
     throw eckit::BadParameter(

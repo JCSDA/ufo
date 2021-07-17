@@ -232,6 +232,17 @@ float GetWind_U(float windSpeed, float windFromDirection);
 */
 float GetWind_V(float windSpeed, float windFromDirection);
 
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Get renumbered scan position 1,2,3,... for satellite instrument
+* which has been spatially resampled and for which scan position is 2,5,8,...
+*
+* \param scanpos
+*     satellite instrument scan position
+* \return newpos
+*/
+int RenumberScanPosition(int scanpos);
+
 }  // namespace formulas
 }  // namespace ufo
 

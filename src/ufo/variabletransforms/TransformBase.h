@@ -58,7 +58,6 @@ class TransformBase {
   virtual void runTransform() = 0;
 
  private:
-  void filterObservation(const std::string &variable, std::vector<float> &obsVector) const;
   /// Method used for the calculation
   formulas::MethodFormulation method_;
   formulas::MethodFormulation formulation_;
@@ -66,10 +65,25 @@ class TransformBase {
   bool AllowSuperSaturation_;
   /// The observation name
   std::string obsName_;
+  /// templated function for float, int data types
+  template <typename T>
+  void filterObservation(const std::string &variableName,
+                         std::vector<T> &obsVector) const {
+    if (flags_.has(variableName)) {
+      constexpr T one = T(1.0);
+      const T missing = util::missingValue(one);
+      const std::vector<int> *varFlags = &flags_[variableName];
+
+      std::transform(obsVector.begin(), obsVector.end(),  // Input range 1
+                     varFlags->begin(),  // 1st element of input range vector 2 (must be same size)
+                     obsVector.begin(),  // 1st element of output range (must be same size)
+                     [missing](T obsvalue, int flag)
+                     { return flag == QCflags::missing || flag == QCflags::bounds
+                       ? missing : obsvalue; });
+    }
+  }
 
  protected:  // variables
-  void getObservation(const std::string &originalTag, const std::string &varName,
-                      std::vector<float> &obsVector, bool require = false) const;
   /// subclasses to access Method and formualtion used for the calculation
   formulas::MethodFormulation method() const { return method_; }
   formulas::MethodFormulation formulation() const { return formulation_; }
@@ -84,10 +98,35 @@ class TransformBase {
   ioda::ObsSpace &obsdb_;
   const ioda::ObsDataVector<int> &flags_;
   const std::vector<bool> &apply_;
+  /// Missing value (int)
+  const int missingValueInt = util::missingValue(1);
   /// Missing value (float)
   const float missingValueFloat = util::missingValue(1.0f);
   /// output tag for derived parameters
   const std::string outputTag = "DerivedValue";
+  /// templated function for float, int data types
+  template <typename T>
+  void getObservation(const std::string &originalTag, const std::string &varName,
+                      std::vector<T> &obsVector, bool require = false) const {
+    const size_t nlocs = obsdb_.nlocs();
+
+    if (obsdb_.has("DerivedValue", varName)) {
+      obsVector = std::vector<T>(nlocs);
+      obsdb_.get_db("DerivedValue", varName, obsVector);
+      // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
+      if (UseValidDataOnly()) filterObservation(varName, obsVector);
+    } else if (obsdb_.has(originalTag, varName)) {
+      obsVector = std::vector<T>(nlocs);
+      obsdb_.get_db(originalTag, varName, obsVector);
+      // Set obsValue to missingValueFloat if flag is equal to QCflags::missing or QCflags::bounds
+      if (UseValidDataOnly()) filterObservation(varName, obsVector);
+    }
+
+    if (require && obsVector.empty()) {
+      throw eckit::BadValue("The parameter `" + varName + "@" + originalTag +
+                          "` does not exist in the ObsSpace ", Here());
+    }
+  }
 };
 
 /// \brief Transform factory
