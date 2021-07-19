@@ -29,8 +29,8 @@ module ufo_avgkernel_tlad_mod
    character(kind=c_char,len=:), allocatable :: obskernelvar, tracervars(:)
    logical :: troposphere, totalcolumn
    real(kind_real) :: convert_factor_model, convert_factor_hofx
-   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsl_obs
-   real(kind_real), allocatable, dimension(:,:) :: prsl, temp, phii
+   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsl_obs, prsi_obs
+   real(kind_real), allocatable, dimension(:,:) :: prsl, prsi, temp, phii
    real(kind_real), allocatable, dimension(:) :: airmass_tot, airmass_trop
    integer, allocatable, dimension(:) :: troplev_obs
    logical :: flip_it
@@ -136,7 +136,6 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
   integer :: ivar, iobs, ilev
   character(len=MAXVARLEN) :: varstring
   character(len=4) :: levstr
-  real(kind_real), allocatable, dimension(:,:) :: prsi_obs
   type(ufo_geovals) :: geovals
   type(ufo_geoval), pointer :: prsl, temp, phii, p_temp
 
@@ -165,8 +164,10 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
   allocate(self%prsl(self%nval, self%nlocs))
   allocate(self%temp(self%nval, self%nlocs))
   allocate(self%phii(self%nval+1, self%nlocs))
+  allocate(self%prsi(self%nval+1, self%nlocs))
   do iobs = 1, self%nlocs
     self%prsl(:,iobs) = prsl%vals(:,iobs)
+    self%prsi(:,iobs) = prsi%vals(:,iobs)
     self%temp(:,iobs) = temp%vals(:,iobs)
     self%phii(:,iobs) = phii%vals(:,iobs)
   end do
@@ -184,14 +185,14 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
 
   ! compute prsl_obs/prsi_obs from ak/bk/psfc
   allocate(self%prsl_obs(self%nlayers_kernel, self%nlocs))
-  allocate(prsi_obs(self%nlayers_kernel+1, self%nlocs))
+  allocate(self%prsi_obs(self%nlayers_kernel+1, self%nlocs))
   ! prsi_obs calculation
   do ilev = 1, self%nlayers_kernel+1
-    prsi_obs(ilev,:) = self%ak_kernel(ilev) + self%bk_kernel(ilev) * psfc%vals(1,:)
+    self%prsi_obs(ilev,:) = self%ak_kernel(ilev) + self%bk_kernel(ilev) * psfc%vals(1,:)
   end do
   ! using simple averaging for now for prsl, can use more complex way later
   do ilev = 1, self%nlayers_kernel
-    self%prsl_obs(ilev,:) = (prsi_obs(ilev,:) + prsi_obs(ilev+1,:)) * half
+    self%prsl_obs(ilev,:) = (self%prsi_obs(ilev,:) + self%prsi_obs(ilev+1,:)) * half
   end do
 
   if (self%troposphere) then
@@ -202,9 +203,6 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
     call obsspace_get_db(obss, "MetaData", "air_mass_factor_troposphere", self%airmass_trop)
     call obsspace_get_db(obss, "MetaData", "air_mass_factor_total", self%airmass_tot)
   end if
-
-  ! cleanup things we do not need now
-  deallocate(prsi_obs)
 
 end subroutine avgkernel_tlad_settraj_
 
@@ -240,12 +238,14 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
         if(self%flip_it) tracer%vals(1:tracer%nval,iobs) = tracer%vals(tracer%nval:1:-1,iobs)
         if (self%troposphere) then
           call simulate_column_ob_tl(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
           hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         else if (self%totalcolumn) then
           call simulate_column_ob_tl(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp)
@@ -293,6 +293,7 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
         if (self%troposphere) then
           hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
           call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs), &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
@@ -300,6 +301,7 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
         else if (self%totalcolumn) then
           hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
           call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs), hofx_tmp)
           tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
@@ -325,7 +327,9 @@ subroutine avgkernel_tlad_cleanup_(self)
   if (allocated(self%tracervars)) deallocate(self%tracervars)
   if (allocated(self%avgkernel_obs)) deallocate(self%avgkernel_obs)
   if (allocated(self%prsl_obs)) deallocate(self%prsl_obs)
+  if (allocated(self%prsi_obs)) deallocate(self%prsi_obs)
   if (allocated(self%prsl)) deallocate(self%prsl)
+  if (allocated(self%prsi)) deallocate(self%prsi)
   if (allocated(self%temp)) deallocate(self%temp)
   if (allocated(self%phii)) deallocate(self%phii)
   if (allocated(self%airmass_tot)) deallocate(self%airmass_tot)
