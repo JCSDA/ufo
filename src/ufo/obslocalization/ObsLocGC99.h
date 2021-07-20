@@ -13,7 +13,6 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -32,11 +31,10 @@ class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
  public:
   ObsLocGC99(const eckit::Configuration &, const ioda::ObsSpace &);
 
-  /// compute localization and save localization values in \p obsvector and
-  /// localization flags (1: outside of localization; 0: inside localization area)
-  /// in \p outside
-  void computeLocalization(const GeometryIterator_ &, ioda::ObsDataVector<int> & outside,
-                           ioda::ObsVector & obsvector) const override;
+  /// compute localization and save localization values in \p locfactor
+  /// (missing values indicate that observation is outside of localization)
+  void computeLocalization(const GeometryIterator_ &,
+                           ioda::ObsVector & locfactor) const override;
 
  private:
   void print(std::ostream &) const override;
@@ -56,12 +54,11 @@ ObsLocGC99<MODEL>::ObsLocGC99(const eckit::Configuration & config,
 
 template<typename MODEL>
 void ObsLocGC99<MODEL>::computeLocalization(const GeometryIterator_ & i,
-                                            ioda::ObsDataVector<int> & outside,
                                             ioda::ObsVector & locvector) const {
   oops::Log::trace() << "ObsLocGC99::computeLocalization" << std::endl;
 
   // do distance search and compute box-car locvector
-  ObsLocalization<MODEL>::computeLocalization(i, outside, locvector);
+  ObsLocalization<MODEL>::computeLocalization(i, locvector);
 
   // return refs to internals of ObsLocalization
   const std::vector<int> & localobs = ObsLocalization<MODEL>::localobs();
