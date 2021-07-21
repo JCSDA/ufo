@@ -947,6 +947,14 @@ if( ${rttov_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_variabletransforms_scanposition
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/unit_tests/variabletransforms_scanposition.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
 endif( ${rttov_FOUND} )
 
 
@@ -2533,13 +2541,6 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative_part2
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
-
-ecbuild_add_test( TARGET  test_ufo_variabletransforms_scanposition
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/unit_tests/variabletransforms_scanposition.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsFilters.x
-                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityspecific
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
