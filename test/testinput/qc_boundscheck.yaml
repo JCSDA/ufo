@@ -16,9 +16,9 @@ observations:
     minvalue: 14.0
     maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
-#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
   passedBenchmark: 13
 - obs space:
     name: test data
@@ -29,9 +29,9 @@ observations:
   - filter: Bounds Check        # test min/max value with all variables and a where statement
     where:
     - variable:
-        name: var1@MetaData
+        name: MetaData/var1
       maxvalue: 8
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     filter variables:
     - name: variable1
     - name: variable2
@@ -39,9 +39,9 @@ observations:
     minvalue: 14.0
     maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
-#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
   passedBenchmark: 15
 - obs space:
     name: test data
@@ -57,8 +57,8 @@ observations:
     maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
   passedBenchmark: 17
 - obs space:
     name: test data
@@ -74,8 +74,8 @@ observations:
     maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
 # Note: variable2 is not specified in filtered variables, all obs for variable2 will pass
-#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
-#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
   passedBenchmark: 20
 - obs space:
     name: test data
@@ -89,15 +89,15 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
-    - name: var2@MetaData
-    - name: var3@MetaData
+    - name: MetaData/var1
+    - name: MetaData/var2
+    - name: MetaData/var3
     minvalue: 14.0
     maxvalue: 19.0
-# Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
-#  var3@MetaData =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+# Filter variable1, variable2, variable3 based on MetaData/var1, MetaData/var2, MetaData/var3 values
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var3 =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
   passedBenchmark: 0
 - obs space:
     name: test data
@@ -111,15 +111,15 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
-    - name: var2@MetaData
-    - name: var3@MetaData
+    - name: MetaData/var1
+    - name: MetaData/var2
+    - name: MetaData/var3
     minvalue: 1
     maxvalue: 3
-# Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
-#  var3@MetaData =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+# Filter variable1, variable2, variable3 based on MetaData/var1, MetaData/var2, MetaData/var3 values
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var3 =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
   passedBenchmark: 11
 - obs space:
     name: test data
@@ -132,12 +132,12 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
-    - name: var2@MetaData
-# Filter variable2, variable3 based on var1@MetaData, var2@MetaData values
+    - name: MetaData/var1
+    - name: MetaData/var2
+# Filter variable2, variable3 based on MetaData/var1, MetaData/var2 values
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
     minvalue: 14.0
     maxvalue: 19.0
   passedBenchmark: 10
@@ -152,14 +152,14 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
-    - name: var2@MetaData
+    - name: MetaData/var1
+    - name: MetaData/var2
     minvalue: 1
     maxvalue: 3
-# Filter variable2, variable3 based on var1@MetaData, var2@MetaData values
+# Filter variable2, variable3 based on MetaData/var1, MetaData/var2 values
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
   passedBenchmark: 16
 - obs space:
     name: test data
@@ -172,12 +172,12 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
+    - name: MetaData/var1
     minvalue: 4
-# Filter variable2 AND variable3 based only on single test var: var1@MetaData values
+# Filter variable2 AND variable3 based only on single test var: MetaData/var1 values
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
   passedBenchmark: 24
 - obs space:
     name: test data
@@ -190,11 +190,11 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: variable1@ObsValue
+    - name: ObsValue/variable1
     maxvalue: 16
-# Filter variable2 AND variable3 based only on single test var of variable1 (@ObsValue)
+# Filter variable2 AND variable3 based only on single test var of (ObsValue/) variable1
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
   passedBenchmark: 24
 - obs space:
     name: test data
@@ -207,14 +207,14 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var1@MetaData
-    - name: var2@MetaData
+    - name: MetaData/var1
+    - name: MetaData/var2
     flag all filter variables if any test variable is out of bounds: true
     minvalue: 3
-# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
   passedBenchmark: 22 # variable2 and variable3 should be rejected at locations 0, 1, 8 and 9
 - obs space:
     name: test data
@@ -227,12 +227,12 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var5@MetaData
+    - name: MetaData/var5
     treat missing as out of bounds: false
     maxvalue: 3
-# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+#  MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
   passedBenchmark: 26 # variable2 and variable3 should be rejected at locations 6 and 8
 - obs space:
     name: test data
@@ -245,12 +245,12 @@ observations:
     - name: variable2
     - name: variable3
     test variables:
-    - name: var5@MetaData
+    - name: MetaData/var5
     treat missing as out of bounds: true
     maxvalue: 3
-# Filter variable2 AND variable3 based the values of var1 and var2@MetaData
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
-#  var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+#  MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
   passedBenchmark: 18 # variable2 and variable3 should be rejected at locations 1, 3, 5, 6, 7 and 8
 - obs space:
     name: Where using datetimes
@@ -262,7 +262,7 @@ observations:
     - filter: BlackList
       where:
       - variable:
-          name:  datetime@MetaData
+          name:  MetaData/datetime
         minvalue: 2018-04-14T21:00:00Z
         maxvalue: 2018-04-14T22:00:00Z
   failedBenchmark: 17

@@ -15,15 +15,34 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-
+// For now support both ioda v1 an ioda v2 syntax for specifying the combined
+// variable and group name:
+//     ioda v1: variable@group
+//     ioda v2: group/variable
+//
+// We will eventually be obsoleting the ioda v1 syntax. For ioda v1 syntax, only
+// allow for one "@" separator. For ioda v2 syntax, since it allows for nested groups,
+// allow for multiple "/" separators, and the variable name is after the last "/".
+//
 void splitVarGroup(const std::string & vargrp, std::string & var, std::string & grp) {
   const size_t at = vargrp.find("@");
-  var = vargrp.substr(0, at);
-  grp = "";
+  const size_t slash = vargrp.find_last_of("/");
+
   if (at != std::string::npos) {
+    // ioda v1 syntax
+    var = vargrp.substr(0, at);
     grp = vargrp.substr(at + 1, std::string::npos);
     const size_t no_at = grp.find("@");
     ASSERT(no_at == std::string::npos);
+  } else if (slash != std::string::npos) {
+    // ioda v2 syntax
+    grp = vargrp.substr(0, slash);
+    var = vargrp.substr(slash + 1, std::string::npos);
+  } else {
+    // vargrp has no "@" nor "/" then assume that vargrp is a variable
+    // name (with no group specified).
+    var = vargrp;
+    grp = "";
   }
 }
 
