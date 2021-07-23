@@ -135,9 +135,11 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     } else {
       rdelz = ob_elevation[iloc]-model_elevation[iloc];
 
-    // If more than a km between model and real elevation, set error factor very high.
-      if (std::abs(rdelz) > 1000.0f) {
-       obserr[iv][iloc] = 49.9f;
+      // If more than a km between model and real elevation, set error factor linearly higher.
+      if (std::abs(rdelz) > 5000.0f) {
+       obserr[iv][iloc] = 50.0f;
+      } else if (std::abs(rdelz) > 1000.0f) {
+       obserr[iv][iloc] = 3.0f + 47.0f*(std::abs(rdelz)-1000.0f)/4000.0f;
       } else {
         pgesorig = model_pres_sfc[iloc]*0.001;             // Converting Pascals to cb
         psges = log(pgesorig);
