@@ -191,6 +191,8 @@ set ( filters_files
       obsfunctions/ModelHeightAdjustedAirTemperature.h
       obsfunctions/ModelHeightAdjustedRelativeHumidity.cc
       obsfunctions/ModelHeightAdjustedRelativeHumidity.h
+      obsfunctions/ModelHeightAdjustedMarineWind.cc
+      obsfunctions/ModelHeightAdjustedMarineWind.h
       obsfunctions/ObsErrorBoundIR.cc
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
