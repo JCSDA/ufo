@@ -22,7 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -35,7 +35,8 @@ namespace ufo {
   /// (except those with PGE > 0.999) will be used in vertical averaging.
   class ProfileCheckBackgroundTemperature : public ProfileCheckBase {
    public:
-    explicit ProfileCheckBackgroundTemperature(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckBackgroundTemperature
+      (const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

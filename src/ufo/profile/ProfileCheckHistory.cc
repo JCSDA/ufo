@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckHistory_("History");
 
   ProfileCheckHistory::ProfileCheckHistory
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

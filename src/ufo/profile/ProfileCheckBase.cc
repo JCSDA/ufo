@@ -13,7 +13,7 @@
 #include "oops/util/Logger.h"
 
 namespace ufo {
-  ProfileCheckBase::ProfileCheckBase(const ProfileConsistencyCheckParameters &options)
+  ProfileCheckBase::ProfileCheckBase(const ConventionalProfileProcessingParameters &options)
     : options_(options)
   {}
 
@@ -26,7 +26,7 @@ namespace ufo {
 
   std::unique_ptr<ProfileCheckBase>
   ProfileCheckFactory::create(const std::string& name,
-                              const ProfileConsistencyCheckParameters &options)
+                              const ConventionalProfileProcessingParameters &options)
   {
     oops::Log::trace() << "ProfileCheckBase::create starting" << std::endl;
     typename std::map<std::string, ProfileCheckFactory*>::iterator jloc =

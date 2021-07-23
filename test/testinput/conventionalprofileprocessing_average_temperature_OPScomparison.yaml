@@ -1,0 +1,27 @@
+#
+#=== Profile average temperature: comparison with OPS values ===#
+#
+
+Sondes:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs_extended.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulated variables: [air_temperature]
+    extension:
+      average profiles onto model levels: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
+  obs diagnostics:
+  Conventional Profile Processing:
+    Checks: ["Basic", "AveragePressure", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+

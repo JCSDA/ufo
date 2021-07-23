@@ -22,7 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -36,7 +36,7 @@ namespace ufo {
   class ProfileCheckBackgroundGeopotentialHeight : public ProfileCheckBase {
    public:
     explicit ProfileCheckBackgroundGeopotentialHeight
-      (const ProfileConsistencyCheckParameters &options);
+      (const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

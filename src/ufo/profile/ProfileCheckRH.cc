@@ -13,7 +13,7 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckRH> makerProfileCheckRH_("RH");
 
   ProfileCheckRH::ProfileCheckRH
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

@@ -24,7 +24,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -40,7 +40,7 @@ namespace ufo {
   ///      11             800.0         missing      50.0 knots, 270 degs
   class ProfileSondeFlags : public ProfileCheckBase {
    public:
-    explicit ProfileSondeFlags(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileSondeFlags(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

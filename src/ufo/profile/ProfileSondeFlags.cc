@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileSondeFlags_("SondeFlags");
 
   ProfileSondeFlags::ProfileSondeFlags
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

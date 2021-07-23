@@ -13,7 +13,7 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckUInterp> makerProfileCheckUInterp_("UInterp");
 
   ProfileCheckUInterp::ProfileCheckUInterp
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options),
     ProfileStandardLevels(options)
   {}

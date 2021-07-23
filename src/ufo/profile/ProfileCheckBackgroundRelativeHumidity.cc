@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckBackgroundRelativeHumidity_("BackgroundRelativeHumidity");
 
   ProfileCheckBackgroundRelativeHumidity::ProfileCheckBackgroundRelativeHumidity
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

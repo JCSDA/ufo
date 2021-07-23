@@ -8,7 +8,8 @@
 #include "ufo/profile/ProfileStandardLevels.h"
 
 namespace ufo {
-  ProfileStandardLevels::ProfileStandardLevels(const ProfileConsistencyCheckParameters &options)
+  ProfileStandardLevels::ProfileStandardLevels
+  (const ConventionalProfileProcessingParameters &options)
     : optionsSL_(options)
   {
     StandardLevels_ = optionsSL_.StandardLevels.value();

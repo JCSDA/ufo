@@ -13,7 +13,7 @@ namespace ufo {
   makerProfilePressure_("Pressure");
 
   ProfilePressure::ProfilePressure
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

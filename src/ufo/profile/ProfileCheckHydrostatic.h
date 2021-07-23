@@ -18,7 +18,7 @@
 #include "ufo/profile/ProfileStandardLevels.h"
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -27,7 +27,7 @@ namespace ufo {
   class ProfileCheckHydrostatic : public ProfileCheckBase,
     private ProfileStandardLevels {
    public:
-      explicit ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options);
+      explicit ProfileCheckHydrostatic(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

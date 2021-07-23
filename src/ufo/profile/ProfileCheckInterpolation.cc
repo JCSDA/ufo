@@ -14,7 +14,7 @@ namespace ufo {
   makerProfileCheckInterpolation_("Interpolation");
 
   ProfileCheckInterpolation::ProfileCheckInterpolation
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options),
     ProfileStandardLevels(options)
   {}

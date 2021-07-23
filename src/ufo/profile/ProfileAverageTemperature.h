@@ -21,7 +21,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -43,7 +43,7 @@ namespace ufo {
   /// the averaged observation value.
   class ProfileAverageTemperature : public ProfileCheckBase {
    public:
-    explicit ProfileAverageTemperature(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAverageTemperature(const ConventionalProfileProcessingParameters &options);
 
     /// Average temperature observations onto model levels and store the results.
     /// \throws eckit::BadValue if vectors produced by the AveragePressure routine

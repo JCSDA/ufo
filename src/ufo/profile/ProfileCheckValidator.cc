@@ -20,7 +20,8 @@
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
-  ProfileCheckValidator::ProfileCheckValidator(const ProfileConsistencyCheckParameters &options)
+  ProfileCheckValidator::ProfileCheckValidator
+  (const ConventionalProfileProcessingParameters &options)
     : options_(options)
   {
     // Set offsets due to C++ and Fortran array index starting values

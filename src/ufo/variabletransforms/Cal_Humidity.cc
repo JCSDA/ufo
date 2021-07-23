@@ -5,7 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/variabletransforms/Cal_Humidity.h"
 

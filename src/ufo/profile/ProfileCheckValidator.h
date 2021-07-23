@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/filters/ConventionalProfileProcessingParameters.h"
 
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
@@ -26,7 +26,7 @@ namespace ufo {
   /// the equivalent values produced in the OPS code.
   class ProfileCheckValidator {
    public:
-    explicit ProfileCheckValidator(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckValidator(const ConventionalProfileProcessingParameters &options);
 
     /// Validate check results against OPS values.
     void validate(ProfileDataHandler &profileDataHandler,
@@ -61,7 +61,7 @@ namespace ufo {
 
    private:  // variables
     /// Configurable parameters.
-    const ProfileConsistencyCheckParameters &options_;
+    const ConventionalProfileProcessingParameters &options_;
 
     /// Counters that are accumulated across profiles.
     std::map <std::string, int> cumulativeCounters_;

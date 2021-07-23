@@ -23,7 +23,7 @@ namespace ufo {
   makerProfileAverageWindSpeed_("AverageWindSpeed");
 
   ProfileAverageWindSpeed::ProfileAverageWindSpeed
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

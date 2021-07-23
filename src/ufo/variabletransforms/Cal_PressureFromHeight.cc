@@ -6,7 +6,6 @@
  */
 
 #include "ufo/variabletransforms/Cal_PressureFromHeight.h"
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {

@@ -16,7 +16,7 @@ namespace ufo {
   makerProfileCheckTime_("Time");
 
   ProfileCheckTime::ProfileCheckTime
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

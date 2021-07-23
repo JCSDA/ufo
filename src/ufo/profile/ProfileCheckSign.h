@@ -14,7 +14,7 @@
 #include "ufo/profile/ProfileDataHandler.h"
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -22,7 +22,7 @@ namespace ufo {
   /// \brief Profile QC: sign check
   class ProfileCheckSign : public ProfileCheckBase {
    public:
-    explicit ProfileCheckSign(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckSign(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

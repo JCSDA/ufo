@@ -19,7 +19,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
   class ProfileDataHandler;
   class ProfileDataHolder;
 }
@@ -30,7 +30,7 @@ namespace ufo {
   /// The transformed pressures are used in subsequent profile averaging routines.
   class ProfileAveragePressure : public ProfileCheckBase {
    public:
-    explicit ProfileAveragePressure(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAveragePressure(const ConventionalProfileProcessingParameters &options);
 
     /// Run check on all profiles.
     void runCheck(ProfileDataHandler &profileDataHandler) override;

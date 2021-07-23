@@ -27,7 +27,7 @@
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
-  ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options)
+  ProfileChecker::ProfileChecker(const ConventionalProfileProcessingParameters &options)
     : options_(options),
       checks_(options.Checks.value())
   {

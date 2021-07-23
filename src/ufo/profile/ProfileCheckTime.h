@@ -23,7 +23,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -32,7 +32,7 @@ namespace ufo {
   /// Also, if requested, reject data taken a short period after the sonde launch.
   class ProfileCheckTime : public ProfileCheckBase {
    public:
-    explicit ProfileCheckTime(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckTime(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

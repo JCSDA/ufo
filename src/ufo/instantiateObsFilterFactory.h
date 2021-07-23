@@ -15,6 +15,7 @@
 #include "ufo/filters/BayesianBackgroundCheck.h"
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
+#include "ufo/filters/ConventionalProfileProcessing.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
@@ -35,7 +36,6 @@
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
-#include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/SatName.h"
@@ -95,8 +95,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            MWCLWCheckMaker("MWCLW Check");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ObsDomainErrCheck> >
            domainErrCheckMaker("DomainErr Check");
-  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ProfileConsistencyChecks> >
-           profileConsistencyChecksMaker("Profile Consistency Checks");
+  static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::ConventionalProfileProcessing> >
+           conventionalProfileProcessingMaker("Conventional Profile Processing");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::BackgroundCheckRONBAM> >
            backgroundCheckRONBAMMaker("Background Check RONBAM");
   static oops::FilterMaker<OBS, oops::ObsFilter<OBS, ufo::TemporalThinning> >

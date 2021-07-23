@@ -13,7 +13,7 @@ namespace ufo {
   static ProfileCheckMaker<ProfileWindProfilerFlags> makerProfileWindProfilerFlags_("WinProFlags");
 
   ProfileWindProfilerFlags::ProfileWindProfilerFlags
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

@@ -12,7 +12,8 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckSamePDiffT> makerProfileCheckSamePDiffT_("SamePDiffT");
 
-  ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options)
+  ProfileCheckSamePDiffT::ProfileCheckSamePDiffT
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

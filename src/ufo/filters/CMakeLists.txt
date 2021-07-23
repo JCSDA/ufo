@@ -12,6 +12,9 @@ set ( filters_files
       BayesianBackgroundCheck.h
       BlackList.cc
       BlackList.h
+      ConventionalProfileProcessing.cc
+      ConventionalProfileProcessing.h
+      ConventionalProfileProcessingParameters.h
       DifferenceCheck.cc
       DifferenceCheck.h
       FilterBase.cc
@@ -70,9 +73,6 @@ set ( filters_files
       PerformAction.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
-      ProfileConsistencyChecks.cc
-      ProfileConsistencyChecks.h
-      ProfileConsistencyCheckParameters.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
       SatName.h

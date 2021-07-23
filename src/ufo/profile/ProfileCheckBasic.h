@@ -18,7 +18,7 @@ namespace ufo {
   /// \brief Profile QC: basic checks on pressure
   class ProfileCheckBasic : public ProfileCheckBase {
    public:
-    explicit ProfileCheckBasic(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckBasic(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

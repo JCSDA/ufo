@@ -1,0 +1,35 @@
+#
+#=== Unit test with one profile for the profile QC ===#
+#
+
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 24
+  flaggedBenchmark: 69

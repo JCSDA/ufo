@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckBackgroundGeopotentialHeight_("BackgroundGeopotentialHeight");
 
   ProfileCheckBackgroundGeopotentialHeight::ProfileCheckBackgroundGeopotentialHeight
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

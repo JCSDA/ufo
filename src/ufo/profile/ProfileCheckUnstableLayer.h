@@ -16,7 +16,7 @@
 #include "ufo/profile/ProfileDataHandler.h"
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -24,7 +24,7 @@ namespace ufo {
   /// \brief Profile QC: unstable layer check
   class ProfileCheckUnstableLayer : public ProfileCheckBase {
    public:
-    explicit ProfileCheckUnstableLayer(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckUnstableLayer(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

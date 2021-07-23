@@ -23,7 +23,7 @@ namespace ufo {
   makerProfileAverageRelativeHumidity_("AverageRelativeHumidity");
 
   ProfileAverageRelativeHumidity::ProfileAverageRelativeHumidity
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

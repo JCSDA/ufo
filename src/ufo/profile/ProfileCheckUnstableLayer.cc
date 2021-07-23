@@ -14,7 +14,7 @@ namespace ufo {
   makerProfileCheckUnstableLayer_("UnstableLayer");
 
   ProfileCheckUnstableLayer::ProfileCheckUnstableLayer
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

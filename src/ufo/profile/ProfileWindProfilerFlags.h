@@ -22,7 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -31,7 +31,7 @@ namespace ufo {
   /// Rejects levels of wind-profiler observations for which reported QC flags indicate bad obs.
   class ProfileWindProfilerFlags : public ProfileCheckBase {
    public:
-    explicit ProfileWindProfilerFlags(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileWindProfilerFlags(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

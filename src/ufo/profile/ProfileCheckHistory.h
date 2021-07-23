@@ -23,7 +23,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -31,7 +31,7 @@ namespace ufo {
   /// \brief Profile QC: history check.
   class ProfileCheckHistory : public ProfileCheckBase {
    public:
-    explicit ProfileCheckHistory(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckHistory(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

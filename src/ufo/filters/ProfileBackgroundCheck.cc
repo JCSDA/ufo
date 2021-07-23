@@ -40,7 +40,7 @@ namespace ufo {
 /// taken from the threshold given for the first observation in the profile.
 ///
 /// This is related to BackgroundCheck, which checks each observation against a threshold.
-/// There is also a group of other profile checks (ProfileConsistencyChecks) which are
+/// There is also a group of other profile checks (ConventionalProfileProcessing) which are
 /// mostly aimed to processing radiosondes.
 
 ProfileBackgroundCheck::ProfileBackgroundCheck(
