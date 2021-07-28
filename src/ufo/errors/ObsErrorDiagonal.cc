@@ -16,8 +16,9 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsErrorDiagonal::ObsErrorDiagonal(const eckit::Configuration & conf, ioda::ObsSpace & obsgeom)
-  : stddev_(obsgeom, "ObsError"), inverseVariance_(obsgeom)
+ObsErrorDiagonal::ObsErrorDiagonal(const eckit::Configuration & conf, ioda::ObsSpace & obsgeom,
+                                   const eckit::mpi::Comm &timeComm)
+  : ObsErrorBase(timeComm), stddev_(obsgeom, "ObsError"), inverseVariance_(obsgeom)
 {
   options_.deserialize(conf);
   inverseVariance_ = stddev_;
@@ -65,14 +66,14 @@ void ObsErrorDiagonal::save(const std::string & name) const {
 
 // -----------------------------------------------------------------------------
 
-ioda::ObsVector ObsErrorDiagonal::obserrors() const {
-  return stddev_;
+std::unique_ptr<ioda::ObsVector> ObsErrorDiagonal::getObsErrors() const {
+  return std::make_unique<ioda::ObsVector>(stddev_);
 }
 
 // -----------------------------------------------------------------------------
 
-ioda::ObsVector ObsErrorDiagonal::inverseVariance() const {
-  return inverseVariance_;
+std::unique_ptr<ioda::ObsVector> ObsErrorDiagonal::getInverseVariance() const {
+  return std::make_unique<ioda::ObsVector>(inverseVariance_);
 }
 
 // -----------------------------------------------------------------------------

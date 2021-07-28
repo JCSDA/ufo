@@ -9,7 +9,7 @@
 #define UFO_INSTANTIATEOBSERRORFACTORY_H_
 
 #include "oops/generic/instantiateObsErrorFactory.h"
-#include "oops/interface/ObsErrorCovariance.h"
+#include "oops/interface/ObsErrorBase.h"
 
 #include "ufo/errors/ObsErrorCrossVarCov.h"
 #include "ufo/errors/ObsErrorDiagonal.h"
@@ -17,9 +17,9 @@
 namespace ufo {
 template<typename OBS> void instantiateObsErrorFactory() {
   oops::instantiateObsErrorFactory<OBS>();
-  static oops::ObsErrorMaker<OBS, oops::ObsErrorCovariance<OBS, ufo::ObsErrorDiagonal> >
+  static oops::interface::ObsErrorMaker<OBS, ufo::ObsErrorDiagonal>
               makerDiagUFO("diagonal ufo");
-  static oops::ObsErrorMaker<OBS, oops::ObsErrorCovariance<OBS, ufo::ObsErrorCrossVarCov> >
+  static oops::interface::ObsErrorMaker<OBS, ufo::ObsErrorCrossVarCov>
               makerCrossVarCov("cross variable covariances");
 }
 

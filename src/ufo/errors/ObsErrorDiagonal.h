@@ -8,19 +8,26 @@
 #ifndef UFO_ERRORS_OBSERRORDIAGONAL_H_
 #define UFO_ERRORS_OBSERRORDIAGONAL_H_
 
-#include <sstream>
+#include <memory>
 #include <string>
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/util/Logger.h"
+#include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/Printable.h"
 
+#include "ufo/ObsTraits.h"
+
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+}
 
 namespace ufo {
 
@@ -34,38 +41,39 @@ class ObsErrorDiagonalParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 /// \brief Diagonal observation error covariance matrix.
-class ObsErrorDiagonal : public util::Printable {
+class ObsErrorDiagonal : public oops::interface::ObsErrorBase<ObsTraits> {
  public:
   static const std::string classname() {return "ufo::ObsErrorDiagonal";}
 
-  ObsErrorDiagonal(const eckit::Configuration &, ioda::ObsSpace &);
+  ObsErrorDiagonal(const eckit::Configuration &, ioda::ObsSpace &,
+                   const eckit::mpi::Comm &timeComm);
 
 /// Update after obs errors potentially changed
-  void update(const ioda::ObsVector &);
+  void update(const ioda::ObsVector &) override;
 
 /// Multiply a Departure by \f$R\f$
-  void multiply(ioda::ObsVector &) const;
+  void multiply(ioda::ObsVector &) const override;
 
 /// Multiply a Departure by \f$R^{-1}\f$
-  void inverseMultiply(ioda::ObsVector &) const;
+  void inverseMultiply(ioda::ObsVector &) const override;
 
 /// Generate random perturbation
-  void randomize(ioda::ObsVector &) const;
+  void randomize(ioda::ObsVector &) const override;
 
 /// Save obs errors
-  void save(const std::string &) const;
+  void save(const std::string &) const override;
 
 /// Get mean error for Jo table
-  double getRMSE() const {return stddev_.rms();}
+  double getRMSE() const override {return stddev_.rms();}
 
 /// Get obs errors std deviation
-  ioda::ObsVector obserrors() const;
+  std::unique_ptr<ioda::ObsVector> getObsErrors() const override;
 
 /// Return inverseVariance
-  ioda::ObsVector inverseVariance() const;
+  std::unique_ptr<ioda::ObsVector> getInverseVariance() const override;
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   ioda::ObsVector stddev_;
   ioda::ObsVector inverseVariance_;
   ObsErrorDiagonalParameters options_;

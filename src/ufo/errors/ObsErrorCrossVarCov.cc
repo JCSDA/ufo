@@ -19,8 +19,10 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsErrorCrossVarCov::ObsErrorCrossVarCov(const eckit::Configuration & conf,
-                                         ioda::ObsSpace & obspace)
-  : stddev_(obspace, "ObsError"),
+                                         ioda::ObsSpace & obspace,
+                                         const eckit::mpi::Comm &timeComm)
+  : ObsErrorBase(timeComm),
+    stddev_(obspace, "ObsError"),
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars()))
 {
   ObsErrorCrossVarCovParameters options;
@@ -167,16 +169,16 @@ void ObsErrorCrossVarCov::save(const std::string & name) const {
 
 // -----------------------------------------------------------------------------
 
-ioda::ObsVector ObsErrorCrossVarCov::obserrors() const {
-  return stddev_;
+std::unique_ptr<ioda::ObsVector> ObsErrorCrossVarCov::getObsErrors() const {
+  return std::make_unique<ioda::ObsVector>(stddev_);
 }
 
 // -----------------------------------------------------------------------------
 
-ioda::ObsVector ObsErrorCrossVarCov::inverseVariance() const {
-  ioda::ObsVector inverseVariance = stddev_;
-  inverseVariance *= stddev_;
-  inverseVariance.invert();
+std::unique_ptr<ioda::ObsVector> ObsErrorCrossVarCov::getInverseVariance() const {
+  std::unique_ptr<ioda::ObsVector> inverseVariance = std::make_unique<ioda::ObsVector>(stddev_);
+  *inverseVariance *= stddev_;
+  inverseVariance->invert();
   return inverseVariance;
 }
 

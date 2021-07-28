@@ -10,14 +10,16 @@
 
 #include <Eigen/Core>
 
-#include <sstream>
+#include <memory>
 #include <string>
 
 #include "ioda/ObsVector.h"
 
+#include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
-#include "oops/util/Printable.h"
+
+#include "ufo/ObsTraits.h"
 
 namespace eckit {
   class Configuration;
@@ -46,40 +48,41 @@ class ObsErrorCrossVarCovParameters : public oops::Parameters {
 ///          Full observation error covariance matrix is R = D^{1/2} * C * D^{1/2}
 ///          where D^{1/2} is a diagonal matrix with stddev_ (ObsError group)
 ///          on the diagonal, and C is the correlation matrix.
-class ObsErrorCrossVarCov : public util::Printable {
+class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
  public:
   /// Initialize observation errors
-  ObsErrorCrossVarCov(const eckit::Configuration &, ioda::ObsSpace &);
+  ObsErrorCrossVarCov(const eckit::Configuration &, ioda::ObsSpace &,
+                      const eckit::mpi::Comm &timeComm);
 
   /// Update obs error standard deviations to be equal to \p stddev
-  void update(const ioda::ObsVector & stddev);
+  void update(const ioda::ObsVector & stddev) override;
 
   /// Multiply \p y by this observation error covariance
   /// Computed as R * dy = D^{1/2} * C * D^{1/2} * dy
   /// where D^{1/2} - diagonal matrix with stddev_ on the diagonal
   ///       C - correlations
-  void multiply(ioda::ObsVector & y) const;
+  void multiply(ioda::ObsVector & y) const override;
 
   /// Multiply \p y by inverse of this observation error covariance
   /// Computed as R^{-1} * dy = D^{-1/2} * C^{-1] * D^{-1/2} * dy
   /// where D^{1/2} - diagonal matrix with stddev_ on the diagonal
   ///       C - correlations
-  void inverseMultiply(ioda::ObsVector & y) const;
+  void inverseMultiply(ioda::ObsVector & y) const override;
 
   /// Generate \p y as a random perturbation
-  void randomize(ioda::ObsVector & y) const;
+  void randomize(ioda::ObsVector & y) const override;
 
   /// Save obs error standard deviations under \p name group name
-  void save(const std::string & name) const;
+  void save(const std::string & name) const override;
 
   /// Return RMS of obs error standard deviations
-  double getRMSE() const {return stddev_.rms();}
+  double getRMSE() const override {return stddev_.rms();}
 
   /// Return obs errors std deviation
-  ioda::ObsVector obserrors() const;
+  std::unique_ptr<ioda::ObsVector> getObsErrors() const override;
 
   /// Return inverse of obs error variance
-  ioda::ObsVector inverseVariance() const;
+  std::unique_ptr<ioda::ObsVector> getInverseVariance() const override;
 
  private:
   /// Print covariance details (for logging)
