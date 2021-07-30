@@ -20,7 +20,6 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"

@@ -12,7 +12,7 @@
 #include <ostream>
 #include <string>
 
-#include "oops/base/ObsFilterParametersBase.h"
+#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/ObsProcessorBase.h"
 

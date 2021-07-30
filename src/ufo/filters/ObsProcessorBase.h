@@ -12,10 +12,10 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
+#include "oops/interface/ObsFilterBase.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/ObsTraits.h"
 
 namespace eckit {
   class Configuration;
@@ -36,20 +36,20 @@ namespace ufo {
 /// Observation processors only need to implement the constructor and the doFilter method;
 /// the base class takes care of applying the processor at the pre, prior or post stage.
 
-class ObsProcessorBase : public util::Printable {
+class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
  public:
   ObsProcessorBase(ioda::ObsSpace &, bool deferToPost,
                    std::shared_ptr<ioda::ObsDataVector<int> >,
                    std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsProcessorBase();
 
-  void preProcess();
-  void priorFilter(const GeoVaLs &);
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
+  void preProcess() override;
+  void priorFilter(const GeoVaLs &) override;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) override;
 
-  oops::Variables requiredVars() const {
+  oops::Variables requiredVars() const override {
     return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
-  oops::Variables requiredHdiagnostics() const {
+  oops::Variables requiredHdiagnostics() const override {
     return allvars_.allFromGroup("ObsDiag").toOopsVariables();}
 
  protected:

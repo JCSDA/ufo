@@ -15,7 +15,9 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
+#include "oops/interface/ObsFilterBase.h"
 #include "oops/util/Printable.h"
+#include "ufo/ObsTraits.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -31,22 +33,22 @@ class ObsDiagnostics;
 /// The constructor sets the QC flag to `missing` at all locations with missing obs values of QC
 /// flags. The postFilter() function sets the QC flag to `Hfailed` if it was previously set to
 /// `pass`, but the obs operator failed to produce a valid value.
-class QCmanager : public util::Printable {
+class QCmanager : public oops::interface::ObsFilterBase<ObsTraits> {
  public:
   QCmanager(ioda::ObsSpace &, const eckit::Configuration &,
             std::shared_ptr<ioda::ObsDataVector<int> >,
             std::shared_ptr<ioda::ObsDataVector<float> >);
   ~QCmanager();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
+  void preProcess() override {}
+  void priorFilter(const GeoVaLs &) override {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) override;
 
-  const oops::Variables & requiredVars() const {return nogeovals_;}
-  const oops::Variables & requiredHdiagnostics() const {return nodiags_;}
+  oops::Variables requiredVars() const override {return nogeovals_;}
+  oops::Variables requiredHdiagnostics() const override {return nodiags_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
 
   ioda::ObsSpace & obsdb_;
   const oops::Variables nogeovals_;

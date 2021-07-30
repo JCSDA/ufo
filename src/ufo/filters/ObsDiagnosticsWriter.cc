@@ -13,7 +13,6 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
 namespace ufo {
