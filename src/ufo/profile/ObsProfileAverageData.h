@@ -8,6 +8,7 @@
 #ifndef UFO_PROFILE_OBSPROFILEAVERAGEDATA_H_
 #define UFO_PROFILE_OBSPROFILEAVERAGEDATA_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -40,11 +41,14 @@ namespace ufo {
     /// Return operator variable indices for the operator.
     const std::vector<int> & operatorVarIndices() const;
 
+    /// Cache the initial values of the GeoVaLs.
+    void cacheGeoVaLs(const GeoVaLs & gv) const;
+
     /// Get slant path locations. This determines, for each model level, the location that
     /// corresponds to the intersection of the observed profile with that level.
-    std::vector<std::size_t> getSlantPathLocations(const std::vector<std::size_t> & locsOriginal,
-                                                   const std::vector<std::size_t> & locsExtended,
-                                                   const GeoVaLs & gv) const;
+    std::vector<std::size_t> getSlantPathLocations
+      (const std::vector<std::size_t> & locsOriginal,
+       const std::vector<std::size_t> & locsExtended) const;
 
     /// Print operator configuration options.
     void print(std::ostream & os) const;
@@ -79,6 +83,9 @@ namespace ufo {
 
     /// Indices of operator variables.
     std::vector<int> operatorVarIndices_;
+
+    /// Cached GeoVaLs.
+    mutable std::unique_ptr<GeoVaLs> cachedGeoVaLs_;
 
     /// Reference values of slant path locations.
     std::vector<int> slant_path_location_ref_;

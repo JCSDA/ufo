@@ -67,10 +67,14 @@ namespace ufo {
     return operatorVarIndices_;
   }
 
+  void ObsProfileAverageData::cacheGeoVaLs(const GeoVaLs & gv) const {
+    // Only perform the caching once.
+    if (!cachedGeoVaLs_) cachedGeoVaLs_.reset(new GeoVaLs(gv));
+  }
+
   std::vector<std::size_t> ObsProfileAverageData::getSlantPathLocations
   (const std::vector<std::size_t> & locsOriginal,
-   const std::vector<std::size_t> & locsExtended,
-   const GeoVaLs & gv) const
+   const std::vector<std::size_t> & locsExtended) const
   {
     const float missing = util::missingValue(missing);
 
@@ -80,7 +84,7 @@ namespace ufo {
 
     // Set up GeoVaLs and H(x) vectors.
     // Number of levels for model pressure.
-    const std::size_t nlevs_p = gv.nlevs(modelVerticalCoord_);
+    const std::size_t nlevs_p = cachedGeoVaLs_->nlevs(modelVerticalCoord_);
     // Vector storing location for each level along the slant path.
     // Initially the first location in the profile is used everywhere.
     std::vector<std::size_t> slant_path_location(nlevs_p, locsOriginal.front());
@@ -101,7 +105,7 @@ namespace ufo {
     for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
       for (int iter = 0; iter <= itermax; ++iter) {
         // Get the GeoVaL that corresponds to the current slanted profile location.
-        gv.getAtLocation(pressure_gv, modelVerticalCoord_, jlocslant);
+        cachedGeoVaLs_->getAtLocation(pressure_gv, modelVerticalCoord_, jlocslant);
         // Define an iteration-specific location that is initialised to the
         // current slanted profile location.
         std::size_t jlociter = jlocslant;

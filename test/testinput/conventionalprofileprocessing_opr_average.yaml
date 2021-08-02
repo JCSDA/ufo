@@ -254,6 +254,7 @@ observations:
     number of intersection iterations: 3
     compare with OPS: true
   expect simulateObs to throw exception with message: "Mismatch for slant_path_location, level = 0 (this code, OPS): 2659, 0"
+  expect simulateObsTL to throw exception with message: "Mismatch for slant_path_location, level = 0 (this code, OPS): 2659, 0"
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
   linear obs operator test:
@@ -281,6 +282,7 @@ observations:
     number of intersection iterations: 3
     compare with OPS: true
   expect simulateObs to throw exception with message: "Mismatch for slant_pressure, level = 0 (this code, OPS): 100958, 0"
+  expect simulateObsTL to throw exception with message: "Mismatch for slant_pressure, level = 0 (this code, OPS): 100958, 0"
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
   linear obs operator test:
