@@ -163,8 +163,8 @@ size_t ObsAccessor::totalNumObservations() const {
 }
 
 RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
-    const std::vector<size_t> &validObsIds) const {
-  RecursiveSplitter splitter(validObsIds.size());
+    const std::vector<size_t> &validObsIds, bool opsCompatibilityMode) const {
+  RecursiveSplitter splitter(validObsIds.size(), opsCompatibilityMode);
   switch (groupBy_) {
   case GroupBy::NOTHING:
     // Nothing to do

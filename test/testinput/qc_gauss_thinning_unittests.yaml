@@ -463,3 +463,41 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
         name: latitude@MetaData
       maxvalue: 0
   expected_thinned_obs_indices: [1, 3, 6, 9, 12, 14]
+
+ops_compatibility_mode but round_horizontal_bin_count_to_nearest = false:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
+                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 100000, 100000, 100000, 100000]
+  GaussianThinning:
+    ops_compatibility_mode: true
+    round_horizontal_bin_count_to_nearest: false
+  on_deserialization_expect_exception_with_message: round_horizontal_bin_count_to_nearest must not be set to false when ops_compatibility_mode is set to true
+
+ops_compatibility_mode but distance_norm = geodesic:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
+                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 100000, 100000, 100000, 100000]
+  GaussianThinning:
+    ops_compatibility_mode: true
+    distance_norm: geodesic
+  on_deserialization_expect_exception_with_message: distance_norm must not be set to 'geodesic' when ops_compatibility_mode is set to true

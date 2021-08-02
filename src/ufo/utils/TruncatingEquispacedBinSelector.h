@@ -5,29 +5,30 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_UTILS_EQUISPACEDBINSELECTOR_H_
-#define UFO_UTILS_EQUISPACEDBINSELECTOR_H_
+#ifndef UFO_UTILS_TRUNCATINGEQUISPACEDBINSELECTOR_H_
+#define UFO_UTILS_TRUNCATINGEQUISPACEDBINSELECTOR_H_
 
 #include <algorithm>
 
 #include "eckit/exception/Exceptions.h"
+#include "ufo/utils/EquispacedBinSelectorBase.h"
 
 namespace ufo
 {
 
-/// \brief Represents a set of consecutive intervals (_bins_) of the same width.
+/// \brief Represents a finite set of consecutive intervals (_bins_) of the same width, each closed
+/// from the left and open from the right.
 ///
 /// Call the bin() function to find the bin containing a particular value.
-class EquispacedBinSelector
-{
+class TruncatingEquispacedBinSelector : public EquispacedBinSelectorBase {
  public:
   // If necessary, these could be made template parameters.
   typedef float ValueType;
   typedef int IndexType;
 
-  /// \brief Partition the interval [\p lowerBound, \p upperBound] into \p numBins
+  /// \brief Partition the interval [\p lowerBound, \p upperBound) into \p numBins
   /// bins of the same width.
-  EquispacedBinSelector(ValueType lowerBound, ValueType upperBound, IndexType numBins)
+  TruncatingEquispacedBinSelector(ValueType lowerBound, ValueType upperBound, IndexType numBins)
     : lowerBound_(lowerBound),
       binWidth_((upperBound - lowerBound) / numBins),
       inverseBinWidth_(1 / binWidth_),
@@ -37,32 +38,26 @@ class EquispacedBinSelector
     ASSERT_MSG(numBins > 0, "Number of bins must be positive");
   }
 
-  /// \brief Return the (0-based) index of the bin containing \p value, or the nearest bin
-  /// if \p value lies outside all bins.
-  IndexType bin(ValueType value) const {
+  IndexType bin(ValueType value) const override {
     IndexType binIndex = static_cast<IndexType>((value - lowerBound_) * inverseBinWidth_);
     binIndex = std::max(IndexType(0), binIndex);
     binIndex = std::min(numBins_ - 1, binIndex);
     return binIndex;
   }
 
-  /// \brief Return the number of bins.
-  IndexType numBins() const {
+  boost::optional<IndexType> numBins() const override {
     return numBins_;
   }
 
-  /// \brief Return the width of each bin.
-  ValueType binWidth() const {
+  ValueType binWidth() const override {
     return binWidth_;
   }
 
-  /// \brief Return the inverse of the width of each bin.
-  ValueType inverseBinWidth() const {
+  ValueType inverseBinWidth() const override {
     return inverseBinWidth_;
   }
 
-  /// \brief Return the value lying at the center of the bin with index \p bin.
-  ValueType binCenter(IndexType bin) const {
+  ValueType binCenter(IndexType bin) const override {
     return lowerBound_ + binWidth_ * (bin + ValueType(0.5));
   }
 
@@ -75,4 +70,4 @@ class EquispacedBinSelector
 
 }  // namespace ufo
 
-#endif  // UFO_UTILS_EQUISPACEDBINSELECTOR_H_
+#endif  // UFO_UTILS_TRUNCATINGEQUISPACEDBINSELECTOR_H_

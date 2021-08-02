@@ -181,6 +181,7 @@ list( APPEND ufo_test_input
   testinput/qc_differencecheck.yaml
   testinput/qc_finalcheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_gauss_thinning_ops.yaml
   testinput/qc_gauss_thinning_unittests.yaml
   testinput/qc_grosserrorwholereport.yaml
   testinput/qc_historycheck_unittests.yaml
@@ -1798,6 +1799,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_gauss_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning_ops
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_gauss_thinning_ops.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

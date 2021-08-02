@@ -155,8 +155,13 @@ class ObsAccessor {
   /// Construct a RecursiveSplitter object whose groups() method will return groups of observations
   /// that can be processed independently from each other (according to the criterion specified when
   /// the ObsAccessor was constructed).
+  ///
+  /// \param validObsIds
+  ///   Indices of valid observations.
+  /// \param opsCompatibilityMode
+  ///   Parameter to pass to the RecursiveSplitter's constructor.
   RecursiveSplitter splitObservationsIntoIndependentGroups(
-      const std::vector<size_t> &validObsIds) const;
+      const std::vector<size_t> &validObsIds, bool opsCompatibilityMode = false) const;
 
   /// \brief Update flags of observations held on the current MPI rank.
   ///

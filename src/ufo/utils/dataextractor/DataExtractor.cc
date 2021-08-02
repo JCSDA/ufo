@@ -42,10 +42,7 @@ class SortUpdateVisitor : public boost::static_visitor<void> {
   }
 
   void operator()(const std::vector<float> &coord) {
-    splitter.sortGroupsBy(
-      [&coord](int indexA, int indexB) {
-        return coord[static_cast<size_t>(indexA)] < coord[static_cast<size_t>(indexB)];
-      });
+    splitter.sortGroupsBy([&coord](int index) { return coord[static_cast<size_t>(index)]; });
   }
 
   ufo::RecursiveSplitter &splitter;

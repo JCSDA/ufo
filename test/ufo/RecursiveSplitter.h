@@ -227,10 +227,7 @@ CASE("ufo/RecursiveSplitter/Recurse") {
 
   // Final sorting of groups
   categories = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};  // effectively reverse ordering of final groups
-  splitter.sortGroupsBy(
-    [&categories](auto indexA, auto indexB) {
-      return categories[indexA] < categories[indexB];
-    });
+  splitter.sortGroupsBy([&categories](auto index) { return categories[index]; });
   expected = {{7}, {9, 8}, {6, 5}, {2}, {1, 0}, {4, 3}};
   orderedComparison(splitter, expected);
 }

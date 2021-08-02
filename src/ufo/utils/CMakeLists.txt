@@ -16,7 +16,7 @@ set ( utils_files
       dataextractor/DataExtractorNetCDFBackend.h
       dataextractor/DataExtractorNetCDFBackend.cc
       DistanceCalculator.h
-      EquispacedBinSelector.h
+      EquispacedBinSelectorBase.h
       GeodesicDistanceCalculator.h
       IodaGroupIndices.cc
       IodaGroupIndices.h
@@ -48,11 +48,13 @@ set ( utils_files
       RecursiveSplitter.cc
       RecursiveSplitter.h
       RefractivityCalculator.F90
+      RoundingEquispacedBinSelector.h
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
       SurfaceReportConstants.h
+      TruncatingEquispacedBinSelector.h
       ufo_utils_mod.F90
       ufo_utils.interface.F90
       ufo_utils.interface.h

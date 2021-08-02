@@ -351,8 +351,8 @@ std::vector<bool> TemporalThinning::identifyThinnedObservations(
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "datetime");
-  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
-                        { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
+  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
+                        { return times[validObsIds[obsIndex]]; });
 
   boost::optional<std::vector<int>> priorities = getObservationPriorities(obsAccessor);
 

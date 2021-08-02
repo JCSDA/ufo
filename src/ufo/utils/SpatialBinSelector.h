@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/EquispacedBinSelector.h"
+#include "ufo/utils/TruncatingEquispacedBinSelector.h"
 
 namespace ufo {
 
@@ -33,6 +33,9 @@ class SpatialBinSelector {
   static constexpr ValueType latitudeUpperBound_ = 90;
   static constexpr ValueType longitudeLowerBound_ = 0;
   static constexpr ValueType longitudeUpperBound_ = 360;
+  static constexpr ValueType opsCompatibilityModeLongitudeLowerBound_ = -360;
+  static constexpr ValueType opsCompatibilityModeLongitudeUpperBound_ =  720;
+  static constexpr int opsCompatibilityModeRelativeLongitudeRange_ = 3;
 
  public:
   /// \brief Partition a sphere into bins whose centers lie on a reduced Gaussian grid.
@@ -44,7 +47,16 @@ class SpatialBinSelector {
   ///     in the zonal direction is as close as possible to that in the meridional direction.
   ///   - If set to DOWN, the number of bins is chosen so that the bin width in the zonal direction
   ///     is as small as possible, but no smaller than in the meridional direction.
-  SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode);
+  /// \param metOfficeOpsCompatibilityMode
+  ///   If true, the compatibility mode with the Met Office OPS system will be activated.
+  ///   This will stop longitudeBin() from clamping longitudes to the interval [0, 360] deg.
+  ///
+  ///   Activation of this mode in new code is discouraged; even if input longitudes are e.g. in
+  ///   the range [-180, 180] deg, it is normally better to wrap them to the [0, 360] deg range
+  ///   before passing them to longitudeBin(). Otherwise there's a risk that points lying exactly
+  ///   at -180 or 180 deg will be put into a bin of their own.
+  SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode,
+                     bool metOfficeOpsCompatibilityMode = false);
 
   /// \brief Partition a sphere into bins whose centers lie on a regular Gaussian grid.
   ///
@@ -52,7 +64,8 @@ class SpatialBinSelector {
   ///   The number of zonal bands of bins into which the sphere is split.
   /// \param numLongitudeBins
   ///   The number of meridional bands of bins into which the sphere is split.
-  SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins);
+  SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins,
+                     bool metOfficeOpsCompatibilityMode = false);
 
   /// \brief Return the index of the zonal band of bins containing points with a given latitude
   /// (in degrees, assumed to lie in the interval [-90, 90]).
@@ -61,7 +74,10 @@ class SpatialBinSelector {
   }
 
   /// \brief Return the index of the bin within the zonal band of index \p latitudeBin
-  /// containing points with a given latitude (in degrees, assumed to lie in the interval [0, 360)).
+  /// containing points with a given longitude (in degrees).
+  ///
+  /// The longitude is assumed to lie in the interval [0, 360] unless the compatibility mode with
+  /// the Met Office OPS system is in effect.
   IndexType longitudeBin(IndexType latitudeBin, ValueType longitude) const {
     return longitudeBinSelectors_[latitudeBin].bin(longitude);
   }
@@ -106,8 +122,9 @@ class SpatialBinSelector {
   static IndexType roundNumBins(float idealNumBins, SpatialBinCountRoundingMode roundingMode);
 
  private:
-  EquispacedBinSelector latitudeBinSelector_;
-  std::vector<EquispacedBinSelector> longitudeBinSelectors_;
+  bool metOfficeOpsCompatibilityMode_;
+  TruncatingEquispacedBinSelector latitudeBinSelector_;
+  std::vector<TruncatingEquispacedBinSelector> longitudeBinSelectors_;
 };
 
 }  // namespace ufo

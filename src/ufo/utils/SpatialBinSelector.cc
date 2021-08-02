@@ -10,14 +10,16 @@
 #include <vector>
 
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/EquispacedBinSelector.h"
 #include "ufo/utils/SpatialBinSelector.h"
+#include "ufo/utils/TruncatingEquispacedBinSelector.h"
 
 namespace ufo {
 
 SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
-                                       SpatialBinCountRoundingMode roundingMode)
-  : latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins) {
+                                       SpatialBinCountRoundingMode roundingMode,
+                                       bool metOfficeOpsCompatibilityMode)
+  : metOfficeOpsCompatibilityMode_(metOfficeOpsCompatibilityMode),
+    latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins) {
   longitudeBinSelectors_.reserve(numLatitudeBins);
   for (IndexType latBin = 0; latBin < numLatitudeBins; ++latBin) {
     ValueType latBinCenter = latitudeBinCenter(latBin);
@@ -28,23 +30,40 @@ SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
         std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
     const IndexType numLonBins = roundNumBins(tentativeNumLongitudeBins, roundingMode);
 
-    longitudeBinSelectors_.emplace_back(
-          static_cast<ValueType>(longitudeLowerBound_),
-          static_cast<ValueType>(longitudeUpperBound_), numLonBins);
+    if (metOfficeOpsCompatibilityMode)
+      longitudeBinSelectors_.emplace_back(
+            static_cast<ValueType>(opsCompatibilityModeLongitudeLowerBound_),
+            static_cast<ValueType>(opsCompatibilityModeLongitudeUpperBound_),
+            opsCompatibilityModeRelativeLongitudeRange_ * numLonBins);
+    else
+      longitudeBinSelectors_.emplace_back(
+            static_cast<ValueType>(longitudeLowerBound_),
+            static_cast<ValueType>(longitudeUpperBound_), numLonBins);
   }
 }
 
-SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins)
-  : latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins),
+SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins,
+                                       bool metOfficeOpsCompatibilityMode)
+  : metOfficeOpsCompatibilityMode_(metOfficeOpsCompatibilityMode),
+    latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins),
     longitudeBinSelectors_(numLatitudeBins,
-                           EquispacedBinSelector(longitudeLowerBound_, longitudeUpperBound_,
-                                                 numLongitudeBins))
+                           metOfficeOpsCompatibilityMode ?
+                             TruncatingEquispacedBinSelector(
+                               opsCompatibilityModeLongitudeLowerBound_,
+                               opsCompatibilityModeLongitudeUpperBound_,
+                               opsCompatibilityModeRelativeLongitudeRange_ * numLongitudeBins) :
+                             TruncatingEquispacedBinSelector(
+                               longitudeLowerBound_,
+                               longitudeUpperBound_,
+                               numLongitudeBins))
 {}
 
 SpatialBinSelector::IndexType SpatialBinSelector::totalNumBins() const {
   size_t n = 0;
-  for (const EquispacedBinSelector & selector : longitudeBinSelectors_)
-    n += selector.numBins();
+  for (const TruncatingEquispacedBinSelector & selector : longitudeBinSelectors_)
+    n += *selector.numBins();
+  if (metOfficeOpsCompatibilityMode_)
+    n /= opsCompatibilityModeRelativeLongitudeRange_;
   return n;
 }
 

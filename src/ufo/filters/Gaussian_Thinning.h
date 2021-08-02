@@ -37,7 +37,7 @@ namespace util {
 namespace ufo {
 
 class DistanceCalculator;
-class EquispacedBinSelector;
+class EquispacedBinSelectorBase;
 class GaussianThinningParameters;
 class ObsAccessor;
 class RecursiveSplitter;
@@ -109,11 +109,14 @@ class Gaussian_Thinning : public FilterBase,
   static boost::optional<SpatialBinSelector> makeSpatialBinSelector(
       const GaussianThinningParameters &options);
 
-  static boost::optional<EquispacedBinSelector> makePressureBinSelector(
+  static std::unique_ptr<EquispacedBinSelectorBase> makePressureBinSelector(
       const GaussianThinningParameters &options);
 
-  static boost::optional<EquispacedBinSelector> makeTimeBinSelector(
-      const GaussianThinningParameters &options, util::DateTime &timeOffset);
+  static std::unique_ptr<EquispacedBinSelectorBase> makeTimeBinSelector(
+      const GaussianThinningParameters &options,
+      const util::DateTime &windowStart,
+      const util::DateTime &windowEnd,
+      util::DateTime &timeOffset);
 
   static std::unique_ptr<DistanceCalculator> makeDistanceCalculator(
       const GaussianThinningParameters &options);
