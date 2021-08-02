@@ -21,7 +21,7 @@ observations:
     Method: UKMO
   compareVariables:
   - test:
-      name: air_pressure@DerivedValue
+      name: air_pressure@DerivedObsValue
     reference:
       name: air_pressure_ICAO_reference@ObsValue
     relTol: 1.0e-5

@@ -15,7 +15,7 @@ observations:
     - reference:
         name: specific_humidity_NOAA@TestReference
       test:
-        name: specific_humidity@DerivedValue
+        name: specific_humidity@DerivedObsValue
       absTol: 1.0e-7
   passedBenchmark: 99
 
@@ -32,7 +32,7 @@ observations:
     - reference:
         name: specific_humidity_UKMO@TestReference
       test:
-        name: specific_humidity@DerivedValue
+        name: specific_humidity@DerivedObsValue
       absTol: 1.0e-7
   passedBenchmark: 99
 
@@ -50,7 +50,7 @@ observations:
     - reference:
         name: specific_humidity_UKMO@TestReference
       test:
-        name: specific_humidity@DerivedValue
+        name: specific_humidity@DerivedObsValue
       absTol: 1.0e-7
   passedBenchmark: 99
 
@@ -67,7 +67,7 @@ observations:
     - reference:
         name: specific_humidity_Walko@TestReference
       test:
-        name: specific_humidity@DerivedValue
+        name: specific_humidity@DerivedObsValue
       absTol: 1.0e-7
   passedBenchmark: 99
 
@@ -84,6 +84,6 @@ observations:
     - reference:
         name: specific_humidity_Murphy@TestReference
       test:
-        name: specific_humidity@DerivedValue
+        name: specific_humidity@DerivedObsValue
       absTol: 1.0e-7
   passedBenchmark: 99

@@ -15,7 +15,7 @@ observations:
     - reference:
         name: relative_humidity_NOAA@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
 
@@ -33,7 +33,7 @@ observations:
     - reference:
         name: relative_humidity_UKMO@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -51,7 +51,7 @@ observations:
     - reference:
         name: relative_humidity_Walko@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -69,6 +69,6 @@ observations:
     - reference:
         name: relative_humidity_Murphy@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99

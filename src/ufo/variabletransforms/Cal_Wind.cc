@@ -63,8 +63,8 @@ void Cal_WindSpeedAndDirection::runTransform() {
     }
   }
   // put new variable at existing locations
-  obsdb_.put_db(outputTag, "wind_speed", windSpeed);
-  obsdb_.put_db(outputTag, "wind_from_direction", windFromDirection);
+  putObservation("wind_speed", windSpeed);
+  putObservation("wind_from_direction", windFromDirection);
 }
 
 /************************************************************************************/
@@ -121,8 +121,8 @@ void Cal_WindComponents::runTransform() {
   }
 
   // put new variable at existing locations
-  obsdb_.put_db(outputTag, "eastward_wind", u);
-  obsdb_.put_db(outputTag,  "northward_wind", v);
+  putObservation("eastward_wind", u);
+  putObservation("northward_wind", v);
 }
 }  // namespace ufo
 

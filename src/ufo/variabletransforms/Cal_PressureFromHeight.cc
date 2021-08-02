@@ -233,8 +233,8 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
 
   if (hasBeenUpdated) {
     // if updated the airPressure
-    // assign the derived air pressure as DerivedValue
-    obsdb_.put_db(outputTag, "air_pressure", airPressure);
+    // assign the derived air pressure as DerivedObsValue
+    putObservation("air_pressure", airPressure);
   }
 }
 
@@ -326,8 +326,8 @@ void Cal_PressureFromHeightForICAO::methodUKMO() {
 
   if (hasBeenUpdated) {
     // if updated the airPressure
-    // assign the derived air pressure as DerivedValue
-    obsdb_.put_db(outputTag, "air_pressure", airPressure);
+    // assign the derived air pressure as DerivedObsValue
+    putObservation("air_pressure", airPressure);
   }
 }
 

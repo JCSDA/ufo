@@ -214,12 +214,12 @@ void Cal_RelativeHumidity::methodUKMO() {
     }
   }
 
-  // assign the derived relative humidity as DerivedValue
+  // assign the derived relative humidity as DerivedObsValue
   if (hasBeenUpdated) {
     if (surfaceData) {
-      obsdb_.put_db(outputTag, "relative_humidity_surface", relativeHumidity);
+      putObservation("relative_humidity_surface", relativeHumidity);
     } else {
-      obsdb_.put_db(outputTag, "relative_humidity", relativeHumidity);
+      putObservation("relative_humidity", relativeHumidity);
     }
   }
 }
@@ -282,7 +282,7 @@ void Cal_RelativeHumidity::methodDEFAULT() {
     }
   }
 
-  obsdb_.put_db("DerivedValue", "relative_humidity", relativeHumidity);
+  putObservation("relative_humidity", relativeHumidity);
 }
 
 /************************************************************************************/
@@ -368,7 +368,7 @@ void Cal_SpecificHumidity::methodDEFAULT() {
       specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
     }
   }
-  obsdb_.put_db("DerivedValue", "specific_humidity", specificHumidity);
+  putObservation("specific_humidity", specificHumidity);
 }
 
 

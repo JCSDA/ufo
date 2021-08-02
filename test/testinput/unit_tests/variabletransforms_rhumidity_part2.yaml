@@ -20,5 +20,5 @@ observations:
     - reference:
         name: relative_humidity_reference@ObsValue
       test:
-        name: relative_humidity_surface@DerivedValue
+        name: relative_humidity_surface@DerivedObsValue
       relTol: 1.0e-5
