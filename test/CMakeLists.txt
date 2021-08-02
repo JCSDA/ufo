@@ -293,6 +293,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
   testinput/unit_tests/function_wdirdiff.yaml
+  testinput/unit_tests/utils_metoffice_sort.yaml
   testinput/unit_tests/variabletransforms_rhumidity.yaml
   testinput/unit_tests/variabletransforms_rhumidity_part2.yaml
   testinput/unit_tests/variabletransforms_shumidity.yaml
@@ -3033,6 +3034,13 @@ ecbuild_add_test( TARGET  test_ufo_primitive_variables
 ecbuild_add_test( TARGET  test_ufo_metoffice_error_matrices
                   SOURCES mains/TestMetOfficeRadianceErrorMatrices.cc
                   ARGS    "testinput/metoffice_radiance_error_matrices.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test the sorting algorithm used for compatibility with the Met Office OPS system
+ecbuild_add_test( TARGET  test_ufo_metoffice_sort
+                  SOURCES mains/TestMetOfficeSort.cc
+                  ARGS    "testinput/unit_tests/utils_metoffice_sort.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

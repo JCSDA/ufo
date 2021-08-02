@@ -30,6 +30,7 @@ set ( utils_files
       metoffice/MetOfficeRMatrixRadiance.h
       metoffice/MetOfficeRMatrixRadiance.interface.h
       metoffice/MetOfficeRMatrixRadiance.interface.F90
+      metoffice/MetOfficeSort.h
       metoffice/MetOfficeObservationIDs.h
       metoffice/ufo_metoffice_bmatrixstatic_mod.f90
       metoffice/ufo_metoffice_rmatrixradiance_mod.f90
