@@ -26,8 +26,6 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cosine_of_latitude_times_orbit_node
-      - name: sine_of_latitude
       - name: lapse_rate
         order: 2
         tlapse: &amsua_metop-c_tlap Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-c_tlapmean.txt

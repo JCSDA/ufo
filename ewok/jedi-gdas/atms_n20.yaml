@@ -20,8 +20,6 @@ obs bias:
   variational bc:
     predictors:
     - name: constant
-    - name: cosine_of_latitude_times_orbit_node
-    - name: sine_of_latitude
     - name: lapse_rate
       order: 2
       tlapse: &atms_n20_tlapse $(experiment_dir)/{{current_cycle}}/atms_n20.{{background_time}}.tlapse.txt

@@ -22,8 +22,6 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cosine_of_latitude_times_orbit_node
-      - name: sine_of_latitude
       - name: lapse_rate
         order: 2
         tlapse: &mhs_n19_tlap Data/ufo/testinput_tier_1/instruments/radiance/mhs_n19_tlapmean.txt
