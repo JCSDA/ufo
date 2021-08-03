@@ -8,16 +8,24 @@
 #ifndef UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
 #define UFO_UTILS_DATAEXTRACTOR_DATAEXTRACTOR_H_
 
+#include <array>
+#include <limits>              // std::numeric_limits
 #include <memory>              // unique_ptr
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/multi_array.hpp>
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
+
+#include "eckit/exception/Exceptions.h"
+
+#include "oops/util/missingValues.h"
 
 #include "ufo/utils/dataextractor/ConstrainedRange.h"
 #include "ufo/utils/RecursiveSplitter.h"
+
 
 namespace ioda {
 class Variable;
@@ -26,6 +34,184 @@ struct Named_Variable;
 
 
 namespace ufo {
+
+
+/// \brief Perform bilinear interpolation along axis `dimIndex0` and `dimIndex1` at 'location'
+/// `obVal0` and `obVal1` corresponding to those axes.
+///
+/// \details This function returns the value produced by a bilinear interpolation at point
+/// `obVal0, obVal1`.  Where any of the neighbouring points used in the calculation are missing,
+/// return the nearest of the non-missing neighbouring points.  Where all 4 neighbours are missing
+/// or the coordinate value is out of bounds, return a missing value.
+/// This must be a final call in the sequence calls to extract.  This template handles all types
+/// except string (see below overloads).
+///
+/// \param[in] dimIndex0
+///   One of two axes of `interpolatedArray` along which to interpolate.  This axis corresponds to
+///   that which `varName0`, `varValues0` describes and to which `obVal0` is to be interpolated.
+/// \param[in] dimIndex1
+///   One of two axes of `interpolatedArray` along which to interpolate.  This axis corresponds to
+///   that which `varName1`, `varValues1` describes and to which `obVal1` is to be interpolated.
+/// \param[in] ranges
+///   Ranges of slices of `interpolatedArray` matching all constraints considered so far.
+/// \param[in] varName0
+///   Name of the coordinate along one axis of two over which to interpolate.
+/// \param[in] varName1
+///   Name of the coordinate along one axis of two over which to interpolate.
+/// \param[in] varValues0
+///   Vector of values of the `varName0` coordinate.
+/// \param[in] varValues1
+///   Vector of values of the `varName1` coordinate.
+/// \param[in] obVal0
+///   Interpolation location along the axis corresponding to `varName0`.
+/// \param[in] obVal1
+///   Interpolation location along the axis corresponding to `varName1`.
+/// \param[in] interpolatedArray
+///   Interpolated array.
+template <typename T, typename R>
+float bilinearInterpolation(const size_t dimIndex0,
+                            const std::string &varName0,
+                            const std::vector<T> &varValues0,
+                            const T &obVal0,
+                            const size_t dimIndex1,
+                            const std::string &varName1,
+                            const std::vector<R> &varValues1,
+                            const R &obVal1,
+                            const std::array<ConstrainedRange, 2> &ranges,
+                            const boost::multi_array<float, 2> &interpolatedArray) {
+  const float missing = util::missingValue(missing);
+
+  // Constrain our index range in the relevant dimension.
+  const ConstrainedRange &range0 = ranges[dimIndex0];
+  const ConstrainedRange &range1 = ranges[dimIndex1];
+
+  const int nnIndex0 = std::lower_bound(varValues0.begin() + range0.begin(),
+                                        varValues0.begin() + range0.end(), obVal0) -
+    varValues0.begin();
+  const int nnIndex1 = std::lower_bound(varValues1.begin() + range1.begin(),
+                                        varValues1.begin() + range1.end(), obVal1) -
+    varValues1.begin();
+
+  // Convenience function to extract specified index from the multi-array
+  auto getMultiArrayVal = [&] (int index0, int index1) {
+    if (dimIndex0 == 0) {
+      return interpolatedArray[index0][index1];
+    } else {
+      return interpolatedArray[index1][index0];
+    }
+  };
+
+  if ((varValues0[nnIndex0] == obVal0) && (varValues1[nnIndex1] == obVal1)) {
+    // No interpolation required.
+    return getMultiArrayVal(nnIndex0, nnIndex1);
+  }
+
+  // Setup points
+  // ------------
+  // Indices
+  const int ix1 = nnIndex0-1 >= 0 ? nnIndex0-1 : nnIndex0;
+  const int ix2 = ix1 + 1;
+  const int iy1 = nnIndex1-1 >= 0 ? nnIndex1-1 : nnIndex1;
+  const int iy2 = iy1 + 1;
+
+  // Coord locations
+  const T x1 = varValues0[ix1], x2 = varValues0[ix2];
+  const R y1 = varValues1[iy1], y2 = varValues1[iy2];
+
+  // Out of bounds check
+  if ((obVal0 > varValues0[range0.end()-1]) || (obVal0 < varValues0[range0.begin()]))
+    return missing;
+  if ((obVal1 > varValues1[range1.end()-1]) || (obVal1 < varValues1[range1.begin()]))
+    return missing;
+
+  // Z values at these locations
+  const float q11 = getMultiArrayVal(ix1, iy1), q12 = getMultiArrayVal(ix1, iy2),
+      q22 = getMultiArrayVal(ix2, iy2), q21 = getMultiArrayVal(ix2, iy1);
+
+  // Missing data handling
+  // - Pick nearest non-missing neighbour of the moore neighbourhood (no diagonals) if any of these
+  //   4 neighbours are missing.
+  // - Return missing if all 4 of the moore neighbourhood (no diagonals) are missing.
+  const int nmissing = (q11 == missing) + (q12 == missing) + (q22 == missing) + (q21 == missing);
+  if (nmissing > 0) {
+    if (nmissing == 4)
+      return missing;
+    const std::array<T, 4> xd = {x1, x1, x2, x2};
+    const std::array<R, 4> yd = {y1, y2, y2, y1};
+    const std::array<float, 4> qd = {q11, q12, q22, q21};
+
+    float minq, mindist = std::numeric_limits<float>::max();
+    for (size_t ind=0; ind < qd.size(); ind++) {
+      // Euclidean distance between two points.
+      const float currdist = std::hypot(obVal0-xd[ind], obVal1-yd[ind]);
+      if (currdist < mindist && qd[ind] != missing) {
+        mindist = currdist;
+        minq = qd[ind];
+      }
+    }
+    return minq;
+  }
+
+  // Interpolate at obVal0 and obVal1
+  const float denom = static_cast<float>((x2 - x1)*(y2 - y1));
+  float res = (((x2 - obVal0)*(y2 - obVal1))) * q11;
+  res +=      (((obVal0 - x1)*(y2 - obVal1))) * q21;
+  res +=      (((x2 - obVal0)*(obVal1 - y1))) * q12;
+  res +=      (((obVal0 - x1)*(obVal1 - y1))) * q22;
+  return res/denom;
+}
+
+
+/// \brief Bilinear interpolation template, templated coord1, string coord2.
+template <typename T>
+float bilinearInterpolation(const size_t dimIndex0,
+                            const std::string &varName0,
+                            const std::vector<T> &varValues0,
+                            const T &obVal0,
+                            const size_t dimIndex1,
+                            const std::string &varName1,
+                            const std::vector<std::string> &varValues1,
+                            const std::string &obVal1,
+                            const std::array<ConstrainedRange, 2> &ranges,
+                            const boost::multi_array<float, 2> &interpolatedArray) {
+  throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
+                         "by string variables such as " + varName1 + ".", Here());
+}
+
+
+/// \brief Bilinear interpolation template, string coord1, templated coord2.
+template <typename R>
+float bilinearInterpolation(const size_t dimIndex0,
+                            const std::string &varName0,
+                            const std::vector<std::string> &varValues0,
+                            const std::string &obVal0,
+                            const size_t dimIndex1,
+                            const std::string &varName1,
+                            const std::vector<R> &varValues1,
+                            const R &obVal1,
+                            const std::array<ConstrainedRange, 2> &ranges,
+                            const boost::multi_array<float, 2> &interpolatedArray) {
+  throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
+                         "by string variables such as " + varName0 + ".", Here());
+}
+
+
+// Bilinear interpolation template, string coord1, string coord2.
+inline float bilinearInterpolation(const size_t dimIndex0,
+                                   const std::string &varName0,
+                                   const std::vector<std::string> &varValues0,
+                                   const std::string &obVal0,
+                                   const size_t dimIndex1,
+                                   const std::string &varName1,
+                                   const std::vector<std::string> &varValues1,
+                                   const std::string &obVal1,
+                                   const std::array<ConstrainedRange, 2> &ranges,
+                                   const boost::multi_array<float, 2> &interpolatedArray) {
+  throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
+                         "by string variables such as " + varName0 + " or " +
+                         varName1 + ".", Here());
+}
+
 
 template <typename ExtractedValue>
 class DataExtractorBackend;
@@ -63,9 +249,17 @@ enum class InterpMethod {
   /// \brief Perform a piecewise linear interpolation along the dimension indexed by the ObsSpace
   /// variable.
   ///
-  /// This method can only be used for the last indexing variable. It is supported only when the
+  /// This method can only be used for the last indexing variable.  It is supported only when
   /// DataExtractor produces values of type `float`, but not `int` or `std::string`.
-  LINEAR
+  LINEAR,
+
+  /// \brief Perform a bilinear interpolation along two dimensions indexed by the ObsSpace
+  /// variables.
+  ///
+  /// This method can only be used for the final two indexing variables (see
+  /// `bilinearInterpolation`).  It is supported only when DataExtractor produces values of type
+  /// `float`, but not `int` or `std::string`.
+  BILINEAR
 };
 
 
@@ -83,8 +277,8 @@ enum class InterpMethod {
 /// possible to rapidly extract a value from the payload array corresponding to particular values
 /// of the coordinates, or to interpolate multiple values from this array. Coordinate matching can
 /// be exact or approximate (looking for the nearest match). It is also possible to perform a
-/// piecewise linear interpolation of the data along one coordinate axis. (Multidimensional linear
-/// interpolation is not supported.)
+/// piecewise linear interpolation of the data along one coordinate axis or bilinear interpolation
+/// along two axes.
 ///
 /// Here's how to use this class:
 ///
@@ -144,7 +338,7 @@ class DataExtractor
 
   /// \brief Perform extract, given an observation value for the coordinate associated with this
   /// extract iteration.
-  /// \details Calls the relevant extract methood (linear, nearest or exact), corresponding to the
+  /// \details Calls the relevant extract method (linear, nearest or exact), corresponding to the
   /// coordinate associated with this extract iteration (along with the associated interpolation
   /// method).  The extract then utilises the observation value ('obVal') to perform this
   /// extraction.
@@ -152,6 +346,31 @@ class DataExtractor
   void extract(float obVal);
   void extract(int obVal);
   void extract(const std::string &obVal);
+
+  /// \brief Perform extract, given the observation values associated with the current extract
+  /// iteration and the next.
+  /// \details Calls the relevant extract methood (linear), corresponding to the coordinate
+  /// associated with this extract iteration and the next (along with the associated interpolation
+  /// method).  This method actually functions as two iterations, passing the current iteration
+  /// coordinate and the next iteration coordinate.  These are passed to the underlying binary
+  /// operation (for example bilinear interpolation).
+  /// \param[in] obValDim0 is the observation value used for the extract operation corresponding
+  /// to the first coordinate utilised by the underlying method.
+  /// \param[in] obValDim1 is the observation value used for the extract operation corresponding
+  /// to the second coordinate utilised by the underlying method.
+  template <typename T, typename R>
+  void extract(T obValDim0, R obValDim1) {
+    if (nextCoordToExtractBy_ == coordsToExtractBy_.cend())
+      throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
+                             Here());
+
+    // Perform the extraction using the selected method
+    if (nextCoordToExtractBy_->method == InterpMethod::BILINEAR)
+      maybeExtractByBiLinearInterpolation(obValDim0, obValDim1);
+    else
+        throw eckit::UserError("Only bilinear method supports two variables as arguments.", Here());
+    ++nextCoordToExtractBy_;
+  }
 
   /// \brief Fetch the final interpolated value.
   /// \details This will only be succesful if previous calls to extract() have produced a single
@@ -167,6 +386,13 @@ class DataExtractor
   /// ExtractedValue type in use; otherwise throw an exception.
   template <typename T>
   void maybeExtractByLinearInterpolation(const T &obVal);
+
+  template <typename T, typename R>
+  void maybeExtractByBiLinearInterpolation(const T &obValDim0, const R &obValDim1) {
+    // Should never be called -- this error should be detected earlier (scheduleSort).
+    throw eckit::BadParameter("Bilinear interpolation can be used when extracting floating-point "
+                              "values, but not integers or strings.", Here());
+  }
 
   /// \brief Fetch the result produced by previous calls to extract(), none of which may have
   /// used linear interpolation.
@@ -230,6 +456,33 @@ class DataExtractor
   std::vector<Coordinate> coordsToExtractBy_;
   typename std::vector<Coordinate>::const_iterator nextCoordToExtractBy_;
 };
+
+
+// Specialization for ExtractedValue = float.
+template <>
+template <typename T, typename R>
+void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
+    const T &obValDim0, const R &obValDim1) {
+  auto &range = constrainedRanges_;
+
+  const size_t dimIndex0 = nextCoordToExtractBy_->payloadDim;
+  const std::string &varName0 = nextCoordToExtractBy_->name;
+  const std::vector<T> &varValues0 = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
+  ++nextCoordToExtractBy_;  // Consume variable
+
+  if (nextCoordToExtractBy_->method != InterpMethod::BILINEAR)
+    throw eckit::BadParameter("Second parameter provided to the Bilinear interpolator is not of "
+                              "method 'bilinear'.", Here());
+  const size_t dimIndex1 = nextCoordToExtractBy_->payloadDim;
+  const std::string &varName1 = nextCoordToExtractBy_->name;
+
+  const std::vector<R> &varValues1 = boost::get<std::vector<R>>(nextCoordToExtractBy_->values);
+  result_ = bilinearInterpolation(dimIndex0, varName0, varValues0, obValDim0,
+                                  dimIndex1, varName1, varValues1, obValDim1,
+                                  range, interpolatedArray2D_);
+  resultSet_ = true;
+}
+
 
 }  // namespace ufo
 

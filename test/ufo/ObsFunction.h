@@ -48,6 +48,7 @@ namespace test {
 // -----------------------------------------------------------------------------
 
 const char *expectComputeToThrow = "expect compute to throw exception with message";
+const char *expectConstructorToThrow = "expect constructor to throw exception with message";
 
 // -----------------------------------------------------------------------------
 
@@ -139,6 +140,12 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   Variable funcname(obsfuncconf);
 
 ///  Setup function
+  if (conf.has(expectConstructorToThrow)) {
+    // The constructor is expected to throw an exception containing the specified string.
+    const std::string expectedMessage = conf.getString(expectConstructorToThrow);
+    EXPECT_THROWS_MSG(ObsFunction<T>{funcname}, expectedMessage.c_str());
+    return;
+  }
   ObsFunction<T> obsfunc(funcname);
   ufo::Variables allfuncvars = obsfunc.requiredVariables();
 

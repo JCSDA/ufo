@@ -283,6 +283,24 @@ observations:
     variables: [assigned_string_variable_1]
   expect compute to throw exception with message: Linear interpolation can be used when extracting floating-point values, but not integers or strings
 
+- obs space: &ObsSpace
+    name: Attempt to use bilinear interpolation involving an int payload
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@IntObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced2.nc
+      group: IntResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: bilinear
+      - name: latitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin]
+  expect compute to throw exception with message: Bilinear interpolation can be used when extracting floating-point values, but not integers or strings
+
 
 # 4. Tests of DrawValueFromFile@StringObsFunction using a NetCDF input file
 
@@ -366,3 +384,114 @@ observations:
         method: linear
     variables: [assigned_string_variable_1]
   expect compute to throw exception with message: Linear interpolation can be used when extracting floating-point values, but not integers or strings
+
+- obs space: &ObsSpace
+    name: Attempt to use bilinear interpolation involving a string payload
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@StringObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced3.nc
+      group: StringResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: bilinear
+      - name: latitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin]
+  expect compute to throw exception with message: Bilinear interpolation can be used when extracting floating-point values, but not integers or strings
+
+# 5. Tests of DrawValueFromFile@ObsFunction (float) using a NetCDF input file
+
+- obs space: &ObsSpace
+    name: Attempt to use bilinear interpolation to extract a float variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
+      group: FloatResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: bilinear
+      - name: latitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: Attempt to use bilinear interpolation not as the final calls
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
+      group: FloatResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: bilinear
+      - name: latitude@MetaData
+        method: nearest
+    variables: [assigned_float_variable_bilin]
+  expect constructor to throw exception with message: Bilinear interpolation can only be supplied as the final two arguments
+
+- obs space: &ObsSpace
+    name: Attempt to use bilinear interpolation with only one variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
+      group: FloatResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin]
+  expect constructor to throw exception with message: Bilinear interpolation requires two variables
+
+- obs space: &ObsSpace
+    name: Attempt to use linear interpolation not as the final argument
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
+      group: FloatResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: linear
+      - name: latitude@MetaData
+        method: nearest
+    variables: [assigned_float_variable_bilin]
+  expect constructor to throw exception with message: Linear interpolation can only be supplied as the very last argument
+
+- obs space: &ObsSpace
+    name: Attempt to use linear interpolation more than one variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
+      group: FloatResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: linear
+      - name: latitude@MetaData
+        method: linear
+    variables: [assigned_float_variable_bilin]
+    tolerance: 1.0e-6
+  expect constructor to throw exception with message: Linear interpolation can only be supplied as the very last argument

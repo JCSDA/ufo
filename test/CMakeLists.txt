@@ -2229,6 +2229,15 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_dataextractor
+                  SOURCES mains/TestDataExtractor.cc
+                  # This test doesn't need a configuration file, but oops::Run::Run() requires
+                  # a path to a configuration file to be passed in the first command-line parameter.
+                  ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_stuckcheck_unittests
                   SOURCES mains/TestStuckCheck.cc
                   ARGS    "testinput/qc_stuckcheck_unittests.yaml"

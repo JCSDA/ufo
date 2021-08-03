@@ -14,13 +14,11 @@
 
 #include <boost/make_unique.hpp>
 
-#include "eckit/exception/Exceptions.h"
 #include "eckit/utils/StringTools.h"
 
 #include "ioda/Misc/StringFuncs.h"
 
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
 
 #include "ufo/utils/dataextractor/DataExtractor.h"
 #include "ufo/utils/dataextractor/DataExtractorCSVBackend.h"
@@ -515,9 +513,15 @@ void DataExtractor<ExtractedValue>::sort() {
 template <typename ExtractedValue>
 void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
                                                  const InterpMethod &method) {
-  if (method == InterpMethod::LINEAR && !std::is_floating_point<ExtractedValue>::value)
-    throw eckit::BadParameter("Linear interpolation can be used when extracting floating-point "
-                              "values, but not integers or strings.", Here());
+  if (!std::is_floating_point<ExtractedValue>::value) {
+      std::string msg = "interpolation can be used when extracting floating-point values, but not "
+                        "integers or strings.";
+      if (method == InterpMethod::LINEAR) {
+        throw eckit::BadParameter("Linear " + msg, Here());
+      } else if (method == InterpMethod::BILINEAR) {
+        throw eckit::BadParameter("Bilinear " + msg, Here());
+      }
+  }
 
   // Map any names of the form var@Group to Group/var
   const std::string canonicalVarName = ioda::convertV1PathToV2Path(varName);
@@ -554,10 +558,9 @@ void DataExtractor<ExtractedValue>::extract(const std::string &obVal) {
 template <typename ExtractedValue>
 template <typename T>
 void DataExtractor<ExtractedValue>::extractImpl(const T &obVal) {
-  if (nextCoordToExtractBy_ == coordsToExtractBy_.cend()) {
+  if (nextCoordToExtractBy_ == coordsToExtractBy_.cend())
     throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
                            Here());
-  }
 
   // Perform the extraction using the selected method
   if (nextCoordToExtractBy_->method == InterpMethod::LINEAR)
@@ -612,7 +615,7 @@ template <>
 float DataExtractor<float>::getResult() {
   // Fetch the result
   if (resultSet_) {
-    // This was derived from linear interpolation so return it.
+    // This was derived from linear/bilinear interpolation so return it.
     resetExtract();
     return result_;
   }

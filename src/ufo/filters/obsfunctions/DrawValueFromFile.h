@@ -41,7 +41,8 @@ struct InterpMethodParameterTraitsHelper {
     { InterpMethod::NEAREST, "nearest" },
     { InterpMethod::LEAST_UPPER_BOUND, "least upper bound" },
     { InterpMethod::GREATEST_LOWER_BOUND, "greatest lower bound" },
-    { InterpMethod::LINEAR, "linear" }
+    { InterpMethod::LINEAR, "linear" },
+    { InterpMethod::BILINEAR, "bilinear" }
   };
 };
 

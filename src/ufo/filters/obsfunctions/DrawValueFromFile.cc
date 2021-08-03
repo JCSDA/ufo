@@ -13,10 +13,10 @@ namespace ufo {
 namespace {
 
 // -----------------------------------------------------------------------------
-typedef std::list<std::pair<std::string, boost::variant<std::vector<int>,
-                                                        std::vector<float>,
-                                                        std::vector<std::string>>
-                           >> ObData;
+typedef std::vector<std::pair<std::string, boost::variant<std::vector<int>,
+                                                          std::vector<float>,
+                                                          std::vector<std::string>>
+                   >> ObData;
 
 
 // -----------------------------------------------------------------------------
@@ -67,15 +67,25 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
     std::vector<eckit::LocalConfiguration> interpSubConfs;
     const std::vector<InterpolationParameters> &interpolationParameters =
       options_.interpolation.value();
+    int nlin = 0;
     for (auto intParam = interpolationParameters.begin();
          intParam != interpolationParameters.end(); ++intParam) {
       const ufo::InterpMethod & method = intParam->method.value();
-      if ((method == InterpMethod::LINEAR) && (intParam + 1 != interpolationParameters.end())) {
+      if (method == InterpMethod::BILINEAR) {
+        nlin++;
+      } else if (nlin > 0) {
+        throw eckit::UserError("Bilinear interpolation can only be supplied as the final two "
+                               "arguments.", Here());
+      } else if ((method == InterpMethod::LINEAR) &&
+                 (intParam + 1 != interpolationParameters.end())) {
         throw eckit::UserError("Linear interpolation can only be supplied as the very last "
                                "argument.", Here());
       }
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[intParam->name.value()] = method;
+    }
+    if (nlin > 0 && nlin != 2) {
+      throw eckit::UserError("Bilinear interpolation requires two variables.", Here());
     }
     // Get channels from options
     if (options_.chlist.value() != boost::none) {
@@ -98,8 +108,12 @@ class ExtractVisitor : public boost::static_visitor<void> {
 
   template <typename T>
   void operator()(const std::vector<T> &obDat) {
-    auto obVal = obDat[iloc];
-    interpolator.extract(obVal);
+    interpolator.extract(obDat[iloc]);
+  }
+
+  template <typename T, typename R>
+  void operator()(const std::vector<T> &obDat1, const std::vector<R> &obDat2) {
+    interpolator.extract(obDat1[iloc], obDat2[iloc]);
   }
 
   DataExtractor<ExtractedValue> &interpolator;
@@ -150,10 +164,16 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
       if (options_.chlist.value() != boost::none)
         interpolator.extract(channels_[jvar]);
 
-      // Perform any extraction methods (exact, nearest and linear interp.)
-      for (auto &od : obData) {
-        ExtractVisitor<T> visitor(interpolator, iloc);
-        boost::apply_visitor(visitor, od.second);
+      // Perform any extraction methods.
+      ExtractVisitor<T> visitor(interpolator, iloc);
+      for (size_t ind=0; ind < obData.size(); ind++) {
+        const InterpMethod &interpolationMethod = interpMethod_.at(obData[ind].first);
+        if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
+          boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
+          break;
+        } else {
+          boost::apply_visitor(visitor, obData[ind].second);
+        }
       }
       out[jvar][iloc] = interpolator.getResult();
     }
