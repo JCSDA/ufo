@@ -379,14 +379,23 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   elseif( DEFINED GIT_TAG_FUNC)
     message( STATUS "Tagged version of ${repo} is used" )
     # set ARGS for get_${repo}_test_data
-    set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147_miesch/version/1.1.0/file )
+
+    # ECBUILD_DOWNLOAD_BASE_URL env var can be used to force test files and
+    # crtm coef to be downloaded from other databases such as S3 instead of DASH
+    # example ECBUILD_DOWNLOAD_BASE_URL=https://jedi-test-files.s3.amazonaws.com
+
+    if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL} )
+      set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL}/${repo}/${GIT_TAG_FUNC}" )
+    else()
+      set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147_miesch/version/1.1.0/file )
+    endif()
+
     set( DIRNAME ${GIT_TAG_FUNC} )
     set( checksum "0" )
     set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${DIRNAME}" )
 
     # Create test-data-release in source directory
     file( MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/test-data-release )
-
     # temporary solution for release 1.1.0
     if ( ${repo} STREQUAL "crtm" )
       list( APPEND REPO_DATA_DOWNLOADER_ARGS
@@ -402,9 +411,9 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
             ${test_files_dirname}
             ${checksum} )
     endif()
-
+    message( STATUS "ECBUILD_DOWNLOAD_BASE_URL is set, ${repo} test files will
+    be downloaded from ${ECBUILD_DOWNLOAD_BASE_URL}/test-data-release")
     set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
-    message( STATUS "Test data will be downloaded from: ${ECBUILD_DOWNLOAD_BASE_URL}" )
 
   # Any branch of REPO is being built.
   # repo-data repository is already cloned by bundle/CMakeLists.txt.
