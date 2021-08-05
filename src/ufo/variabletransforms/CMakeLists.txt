@@ -14,6 +14,8 @@ set ( variabletransforms_files
       Cal_RemapScanPosition.cc
       Cal_Wind.h
       Cal_Wind.cc
+      Cal_ProfileHorizontalDrift.h
+      Cal_ProfileHorizontalDrift.cc
       LookupTable.h
       TransformBase.cc
       TransformBase.h

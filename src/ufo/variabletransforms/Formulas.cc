@@ -375,5 +375,115 @@ int RenumberScanPosition(int scanpos) {
   return newpos;
 }
 
+/* -------------------------------------------------------------------------------------*/
+
+void horizontalDrift
+(const std::vector<size_t> & locs,
+ const std::vector<bool> & apply,
+ const std::vector<float> & lat_in,
+ const std::vector<float> & lon_in,
+ const std::vector<util::DateTime> & time_in,
+ const std::vector<float> & height,
+ const std::vector<float> & windspd,
+ const std::vector<float> & winddir,
+ std::vector<float> & lat_out,
+ std::vector<float> & lon_out,
+ std::vector<util::DateTime> & time_out,
+ MethodFormulation formulation) {
+  const float missingValueFloat = util::missingValue(1.0f);
+
+  switch (formulation) {
+  case formulas::MethodFormulation::NCAR:
+  case formulas::MethodFormulation::NOAA:
+  case formulas::MethodFormulation::UKMO:
+  default: {
+    // Location of the first entry in the profile.
+    const size_t loc0 = locs.front();
+
+    // Values of latitude, longitude and datetime at the first entry of the profile.
+    const double lat0 = lat_in[loc0];
+    const double lon0 = lon_in[loc0];
+    const util::DateTime time0 = time_in[loc0];
+
+    // The drift computation is not performed for very high latitude sites.
+    if (std::abs(lat0) >= 89.0) return;
+
+    // Fill vector of valid locations.
+    std::vector<size_t> locs_valid;
+    for (size_t jloc : locs) {
+      // If not selected by the where clause.
+      if (!apply[jloc]) continue;
+      // The location is classed as valid if the wind speed and height are not missing.
+      if (windspd[jloc] != missingValueFloat && height[jloc] != missingValueFloat)
+        locs_valid.push_back(jloc);
+    }
+
+    // If there are zero or one valid locations, exit the routine.
+    if (locs_valid.size() < 2) return;
+
+    // Average ascent speed (m/s).
+    const double ascent_speed = 5.16;
+
+    // Cumulative values of change in time.
+    // This value is converted to a util::Duration object rather than performing the
+    // same conversion to each individual change in time.
+    // This avoids a loss in precision given util::Duration is accurate to the nearest second.
+    double dt_cumul = 0.0;
+
+    for (size_t k = 0; k < locs_valid.size() - 1; ++k) {
+      // Locations of the current and next valid observations in the profile.
+      const size_t loc_current = locs_valid[k];
+      const size_t loc_next = locs_valid[k + 1];
+
+      // Compute changes in latitude, longitude and time between adjacent valid levels.
+      // Change in height.
+      const double dh = height[loc_next] - height[loc_current];
+      // Change in time.
+      const double dt = dh / ascent_speed;
+      // Average eastward and northward wind between the two levels.
+      // 180 degrees is subtracted from the wind direction in order to account for the different
+      // conventions used in the observations and in this calculation.
+      const double avgu = 0.5 *
+        (windspd[loc_current] * std::sin((winddir[loc_current] - 180.0) * Constants::deg2rad) +
+         windspd[loc_next] * std::sin((winddir[loc_next] - 180.0) * Constants::deg2rad));
+      const double avgv = 0.5 *
+        (windspd[loc_current] * std::cos((winddir[loc_current] - 180.0) * Constants::deg2rad) +
+         windspd[loc_next] * std::cos((winddir[loc_next] - 180.0) * Constants::deg2rad));
+      // Total height of the observation above the centre of the Earth.
+      const double totalheight = ufo::Constants::mean_earth_rad * 1000.0 + height[loc_current];
+      // Change in latitude.
+      const double dlat = ufo::Constants::rad2deg * avgv * dt / totalheight;
+      // Change in longitude.
+      const double dlon = ufo::Constants::rad2deg * avgu * dt /
+        (totalheight * std::cos(lat_out[loc_current] * ufo::Constants::Constants::deg2rad));
+
+      // Fill output values.
+      lat_out[loc_next] = lat_out[loc_current] + dlat;
+      lon_out[loc_next] = lon_out[loc_current] + dlon;
+      // Convert the cumulative change in time to a util::Duration.
+      dt_cumul += dt;
+      time_out[loc_next] = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+    }
+
+    // Copy latitude, longitude and time at each valid location to all invalid
+    // locations that lie between the current valid location and the next one above it.
+    double lat = lat0;
+    double lon = lon0;
+    util::DateTime time = time0;
+    for (size_t jloc : locs) {
+      if (std::find(locs_valid.begin(), locs_valid.end(), jloc) != locs_valid.end()) {
+        lat = lat_out[jloc];
+        lon = lon_out[jloc];
+        time = time_out[jloc];
+      } else {
+        lat_out[jloc] = lat;
+        lon_out[jloc] = lon;
+        time_out[jloc] = time;
+      }
+    }
+    break;
+  }
+  }
+}
 }  // namespace formulas
 }  // namespace ufo
