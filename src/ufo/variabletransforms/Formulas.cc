@@ -266,6 +266,60 @@ float Height_To_Pressure_ICAO_atmos(float height, MethodFormulation formulation)
   return Pressure;
 }
 
+/* -------------------------------------------------------------------------------------*/
+
+float Pressure_To_Height(float pressure, MethodFormulation method) {
+  const float missingValueFloat = util::missingValue(1.0f);
+  const float pressure_hPa = pressure * 0.01;
+  float height = missingValueFloat;
+
+  switch (method) {
+    case formulas::MethodFormulation::NCAR:
+      // The NCAR-RAL method: a fast approximation for pressures > 120 hPa.
+      // Above 120hPa (~15km) use the ICAO atmosphere.
+      if (pressure == missingValueFloat || pressure <= 0.0f) {
+        height = missingValueFloat;
+      } else if (pressure_hPa <= 120.0f &&
+                 pressure_hPa > Constants::icao_pressure_u) {
+        pressure = std::log(Constants::icao_pressure_l) - std::log(pressure_hPa);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::g_over_rd +
+          Constants::icao_height_l;
+      } else if (pressure_hPa <= Constants::icao_pressure_u) {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_u,
+                                  Constants::icao_lapse_rate_u / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::icao_lapse_rate_u +
+          Constants::icao_height_u;
+      } else {
+        height = 44307.692 * (1.0 - std::pow(pressure / 101325.0, 0.190));
+      }
+      break;
+
+    case formulas::MethodFormulation::NOAA:
+    case formulas::MethodFormulation::UKMO:
+    default: {
+      if (pressure == missingValueFloat || pressure <= 0.0f) {
+        height = missingValueFloat;
+      } else if (pressure_hPa > Constants::icao_pressure_l) {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_surface,
+                                  Constants::icao_lapse_rate_l / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_surface / Constants::icao_lapse_rate_l;
+      } else if (pressure_hPa <= Constants::icao_pressure_l &&
+                 pressure_hPa > Constants::icao_pressure_u) {
+        pressure = std::log(Constants::icao_pressure_l) - std::log(pressure_hPa);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::g_over_rd +
+          Constants::icao_height_l;
+      } else {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_u,
+                                  Constants::icao_lapse_rate_u / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::icao_lapse_rate_u +
+          Constants::icao_height_u;
+      }
+      break;
+    }
+  }
+  return height;
+}
+
 float GetWindDirection(float u, float v) {
   const float missing = util::missingValue(1.0f);
   float windDirection = missing;  // wind direction

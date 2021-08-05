@@ -71,20 +71,23 @@ struct Constants {
   // https://en.wikipedia.org/wiki/International_Standard_Atmosphere#ICAO_Standard_Atmosphere
   // with gpm = height in geopotential metres
   static constexpr double icao_lapse_rate_l = 6.5E-03;   // Lapse rate for levels up
-                                                         //      to 11,000 [gpm]
-                                                         //      (isothermal layer)
+                                                         //      to 11,000 gpm
+                                                         //      (lower boundary of the
+                                                         //      isothermal layer) [K/gpm]
   static constexpr double icao_lapse_rate_u = -1.0E-03;  // Lapse rate for levels above
-                                                         //      20,000 [gpm]
-  static constexpr double icao_height_l     = 11000.0;   // Height limit for assumed
-                                                         //      lower lapse rate [m]
+                                                         //      20,000 gpm
+                                                         //      (upper boundary of the
+                                                         //      isothermal layer) [K/gpm]
+  static constexpr double icao_height_l     = 11000.0;   // Height of bottom of isothermal
+                                                         //      layer [gpm]
   static constexpr double icao_height_u     = 20000.0;   // Height of top of isothermal
-                                                         //      layer [m]
+                                                         //      layer [gpm]
   static constexpr double icao_temp_surface = 288.15;    // Surface temperature [K]
   static constexpr double icao_temp_isothermal_layer = 216.65;  // Temperature of isothermal
                                                                 //      layer [K]
-  static constexpr double icao_pressure_surface = 1013.25;  // Assumed surface pressure
-  static constexpr double icao_pressure_l   = 226.32;    // Assumed pressure at 11,000 gpm
-  static constexpr double icao_pressure_u   = 54.7487;   // Assumed pressure at 20,000 gpm
+  static constexpr double icao_pressure_surface = 1013.25;  // Assumed surface pressure [hPa]
+  static constexpr double icao_pressure_l   = 226.32;    // Assumed pressure at 11,000 gpm [hPa]
+  static constexpr double icao_pressure_u   = 54.7487;   // Assumed pressure at 20,000 gpm [hPa]
 };
 
 //--------------------------------------------------------------------------------------------------

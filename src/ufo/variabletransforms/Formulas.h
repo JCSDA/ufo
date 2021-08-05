@@ -184,6 +184,23 @@ float Height_To_Pressure_ICAO_atmos(float Height,
 
 // -------------------------------------------------------------------------------------
 /*!
+* \brief Converts pressure to height.
+*
+* \b Formulation \b available:
+*      - NCAR: uses a fast approximation for pressures > 120 hPa and the ICAO atmosphere otherwise.
+*      - NOAA: as default
+*      - UKMO: as default
+*      - DEFAULT: uses the ICAO atmosphere for all pressures.
+*
+* \param pressure
+*     observation pressure in Pa
+* \return height in geopotential metres
+*/
+float Pressure_To_Height(float pressure,
+                         MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
+
+// -------------------------------------------------------------------------------------
+/*!
 * \brief Converts u and v wind component into wind direction.
 * Wind direction is defined such that a northerly wind is 0°, an easterly wind is 90°,
 * a southerly wind is 180°, and a westerly wind is 270°.
