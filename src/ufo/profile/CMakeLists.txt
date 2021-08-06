@@ -81,6 +81,8 @@ set ( profile_files
       ProfileVerticalInterpolation.h
       ProfileWindProfilerFlags.cc
       ProfileWindProfilerFlags.h
+      SlantPathLocations.cc
+      SlantPathLocations.h
       VariableNames.cc
       VariableNames.h
 )

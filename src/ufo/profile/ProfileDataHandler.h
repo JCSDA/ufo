@@ -203,6 +203,10 @@ namespace ufo {
     /// Get indices in entire sample corresponding to current profile.
     void getProfileIndicesInEntireSample(const std::string& groupname);
 
+    /// Get the name of the vertical coordinate that is used to determine the slant path
+    /// locations for the variable \p variableName.
+    std::string getAssociatedVerticalCoordinate(const std::string & variableName) const;
+
    private:  // members
     /// Container of each variable in the current profile.
     std::unordered_map <std::string, boost::variant
