@@ -167,7 +167,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
       // Perform any extraction methods.
       ExtractVisitor<T> visitor(interpolator, iloc);
       for (size_t ind=0; ind < obData.size(); ind++) {
-        const InterpMethod &interpolationMethod = interpMethod_.at(obData[ind].first);
+        ufo::InterpMethod interpolationMethod = interpMethod_.at(obData[ind].first);
         if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
           boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
           break;
