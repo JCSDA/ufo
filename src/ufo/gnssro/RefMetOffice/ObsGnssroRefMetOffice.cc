@@ -5,8 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/gnssro/RefMetOffice/ObsGnssroRefMetOffice.h"
-
 #include <ostream>
 #include <string>
 #include <vector>
@@ -17,6 +15,8 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/gnssro/RefMetOffice/ObsGnssroRefMetOffice.h"
+#include "ufo/gnssro/RefMetOffice/ObsGnssroRefMetOfficeParameters.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {

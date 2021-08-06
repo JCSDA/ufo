@@ -16,6 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOfficeTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ObsGnssroBendMetOfficeParameters.h"
 
 // Forward declarations
 namespace eckit {
@@ -56,6 +57,7 @@ class ObsGnssroBendMetOfficeTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperGnssroBendMetOffice_;
   std::unique_ptr<const oops::Variables> varin_;
+  ObsGnssroBendMetOfficeParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

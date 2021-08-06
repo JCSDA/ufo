@@ -30,8 +30,6 @@ SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
                                  GPSRO_pseudo_ops,       &
                                  GPSRO_vert_interp_ops,  &
                                  GPSRO_min_temp_grad,    &
-                                 GPSRO_Zmin,             &
-                                 GPSRO_Zmax,             &
                                  GPSRO_cost_funct_test,  &   ! Threshold value for the cost function convergence test
                                  GPSRO_y_test,           &   ! Threshold value for the yobs-ysol tes
                                  GPSRO_n_iteration_test, &   ! Maximum number of iterations
@@ -67,8 +65,6 @@ TYPE (SingleOb_type), INTENT(INOUT) :: Ob
 LOGICAL, INTENT(IN)                 :: GPSRO_pseudo_ops
 LOGICAL, INTENT(IN)                 :: GPSRO_vert_interp_ops
 REAL(kind_real), INTENT(IN)         :: GPSRO_min_temp_grad
-REAL(kind_real), INTENT(IN)         :: GPSRO_Zmin
-REAL(kind_real), INTENT(IN)         :: GPSRO_Zmax
 REAL(kind_real), INTENT(IN)         :: GPSRO_cost_funct_test
 REAL(kind_real), INTENT(IN)         :: GPSRO_y_test
 INTEGER, INTENT(IN)                 :: GPSRO_n_iteration_test

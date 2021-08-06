@@ -20,24 +20,43 @@
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"
 
-#include "eckit/config/Configuration.h"
-
 #include "oops/util/IntSetParser.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), config_(config)
+GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
+                                       const Parameters_ & parameters,
+                                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::debug() << "GNSSROOneDVarCheck contructor starting" << std::endl;
 
+  // convert from std::string to char pointer to pass to Fortran routine
+  // pass each variable as a char pointer + corresponding variable length
+  char * filename = new char[parameters_.bmatrix_filename.value().size()+1];
+  strcpy(filename, parameters_.bmatrix_filename.value().c_str());
+
   // Setup fortran object
-  const eckit::Configuration * conf = &config_;
-  ufo_gnssroonedvarcheck_create_f90(key_, obsdb, conf, GNSSROOneDVarCheck::qcFlag());
+  ufo_gnssroonedvarcheck_create_f90(key_,
+                                    obsdb,
+                                    parameters_.bmatrix_filename.value().size(),
+                                    filename,
+                                    parameters_.capsupersat.value(),
+                                    parameters_.cost_funct_test.value(),
+                                    parameters_.Delta_ct2.value(),
+                                    parameters_.Delta_factor.value(),
+                                    parameters_.min_temp_grad.value(),
+                                    parameters_.n_iteration_test.value(),
+                                    parameters_.OB_test.value(),
+                                    parameters_.pseudo_ops.value(),
+                                    parameters_.vert_interp_ops.value(),
+                                    parameters_.y_test.value(),
+                                    GNSSROOneDVarCheck::qcFlag());
+
+  delete[] filename;
 
   oops::Log::debug() << "GNSSROOneDVarCheck contructor complete. " << std::endl;
 }
@@ -69,7 +88,6 @@ void GNSSROOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   flags_->save("FortranQC");    // temporary measure as per ROobserror qc
 
   // Pass it all to fortran
-  const eckit::Configuration * conf = &config_;
   ufo_gnssroonedvarcheck_apply_f90(key_,
                                   gvals->toFortran(),
                                   apply_char.size(), apply_char[0]);

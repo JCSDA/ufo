@@ -5,8 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOffice.h"
-
 #include <ostream>
 #include <string>
 #include <vector>
@@ -17,6 +15,8 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOffice.h"
+#include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOfficeParameters.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
@@ -29,13 +29,17 @@ ObsGnssroBendMetOffice::ObsGnssroBendMetOffice(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperGnssroBendMetOffice_(0), odb_(odb), varin_()
 {
+  parameters_.validateAndDeserialize(config);
+  ObsGnssroBendMetOfficeOptions obsOptions = parameters_.obsOptions.value();
+
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-  const eckit::Configuration *configc = &obsOptions;
-  ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_, &configc);
+  ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_,
+                                     obsOptions.vertInterpOPS,
+                                     obsOptions.pseudoLevels,
+                                     obsOptions.minTempGrad);
 
   oops::Log::trace() << "ObsGnssroBendMetOffice created." << std::endl;
 }

@@ -43,8 +43,6 @@ type, public :: ufo_gnssroonedvarcheck
   integer                   :: n_iteration_test  !< Maximum number of iterations in the 1DVar
   real(kind_real)           :: OB_test           !< Threshold for the O-B throughout the profile
   real(kind_real)           :: y_test            !< Threshold on distance between observed and solution bending angles
-  real(kind_real)           :: Zmin              !< Minimum height at for assimilation of data
-  real(kind_real)           :: Zmax              !< Maximum height at for assimilation of data
   character(len=800)        :: bmatrix_filename  !< Location of the B-matrix file
   logical                   :: pseudo_ops        !< Whether to use pseudo levels in forward operator
   logical                   :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
@@ -62,34 +60,69 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_gnssroonedvarcheck_create(self, obsspace, f_conf, onedvarflag)
+subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
+                                         capsupersat, cost_funct_test, &
+                                         Delta_ct2, Delta_factor, min_temp_grad, &
+                                         n_iteration_test, OB_test, pseudo_ops, &
+                                         vert_interp_ops, y_test, onedvarflag)
 
   implicit none
-  type(ufo_gnssroonedvarcheck), intent(inout) :: self         !< gnssroonedvarcheck main object
-  type(c_ptr), value, intent(in)              :: obsspace     !< observation database pointer
-  type(fckit_configuration), intent(in)       :: f_conf       !< yaml file contents
-  integer(c_int), intent(in)                  :: onedvarflag  !< flag for qc manager
+  type(ufo_gnssroonedvarcheck), intent(inout) :: self              !< gnssroonedvarcheck main object
+  type(c_ptr), value, intent(in)              :: obsspace          !< observation database pointer
+  character(len=*), intent(in)                :: bmatrix_filename  !< Location of the B-matrix file
+  logical(c_bool), intent(in)                 :: capsupersat       !< Whether to remove super-saturation (wrt ice?)
+  real(c_float), intent(in)                   :: cost_funct_test   !< Threshold value for the cost function convergence test
+  real(c_float), intent(in)                   :: Delta_ct2         !< Threshold used in calculating convergence
+  real(c_float), intent(in)                   :: Delta_factor      !< Threshold used in calculating convergence
+  real(c_float), intent(in)                   :: min_temp_grad     !< The minimum vertical temperature gradient allowed
+  integer(c_int), intent(in)                  :: n_iteration_test  !< Maximum number of iterations in the 1DVar
+  real(c_float), intent(in)                   :: OB_test           !< Threshold for the O-B throughout the profile
+  logical(c_bool), intent(in)                 :: pseudo_ops        !< Whether to use pseudo levels in forward operator
+  logical(c_bool), intent(in)                 :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
+  real(c_float), intent(in)                   :: y_test            !< Threshold on distance between observed and solution bending angles
+  integer(c_int), intent(in)                  :: onedvarflag       !< flag for qc manager
 
-  character(len=:), allocatable :: temp_str1
+  character(len=800) :: message
 
   self % obsdb = obsspace
-  self % conf = f_conf
   self % onedvarflag = onedvarflag
 
-  call f_conf%get_or_die("capsupersat", self % capsupersat)
-  call f_conf%get_or_die("Zmin", self % Zmin)
-  call f_conf%get_or_die("Zmax", self % Zmax)
-  call f_conf%get_or_die("cost_funct_test", self % cost_funct_test)
-  call f_conf%get_or_die("y_test", self % y_test)
-  call f_conf%get_or_die("n_iteration_test", self % n_iteration_test)
-  call f_conf%get_or_die("Delta_ct2", self % Delta_ct2)
-  call f_conf%get_or_die("Delta_factor", self % Delta_factor)
-  call f_conf%get_or_die("OB_test", self % OB_test)
-  call f_conf%get_or_die("bmatrix_filename", temp_str1)
-  self % bmatrix_filename = temp_str1
-  call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-  call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-  call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+  self % bmatrix_filename = bmatrix_filename
+  self % capsupersat = capsupersat
+  self % cost_funct_test = cost_funct_test
+  self % Delta_ct2 = Delta_ct2
+  self % Delta_factor = Delta_factor
+  self % min_temp_grad = min_temp_grad
+  self % n_iteration_test = n_iteration_test
+  self % OB_test = OB_test
+  self % pseudo_ops = pseudo_ops
+  self % vert_interp_ops = vert_interp_ops
+  self % y_test = y_test
+
+  write(message, '(A)') 'GNSS-RO 1D-Var check: input parameters are:'
+  call fckit_log % debug(message)
+  write(message, '(2A)') 'bmatrix_filename = ', bmatrix_filename
+  call fckit_log % debug(message)
+  write(message, '(A,L1)') 'capsupersat = ', capsupersat
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'cost_funct_test = ', cost_funct_test
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'Delta_ct2 = ', Delta_ct2
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'Delta_factor = ', Delta_factor
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'min_temp_grad = ', min_temp_grad
+  call fckit_log % debug(message)
+  write(message, '(A,I7)') 'n_iteration_test = ', n_iteration_test
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'OB_test = ', OB_test
+  call fckit_log % debug(message)
+  write(message, '(A,L1)') 'pseudo_ops = ', pseudo_ops
+  call fckit_log % debug(message)
+  write(message, '(A,L1)') 'vert_interp_ops = ', vert_interp_ops
+  call fckit_log % debug(message)
+  write(message, '(A,F16.8)') 'y_test = ', y_test
+  call fckit_log % debug(message)
 
 end subroutine ufo_gnssroonedvarcheck_create
 
@@ -221,10 +254,6 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     call fckit_log % info(Message)
     WRITE (Message, '(A,I0)') 'Sat ID ', obsSatid(index_vals(start_point))
     call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'GPSRO_Zmin ', self % Zmin
-    call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'GPSRO_Zmax ', self % Zmax
-    call fckit_log % info(Message)
 
     ! Work out which observations belong to the current profile
     do current_point = start_point, nobs
@@ -273,8 +302,6 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
                               self % pseudo_ops,       &   ! Whether to use pseudo-levels in calculation
                               self % vert_interp_ops,  &   ! Whether to interpolate using ln(p) or exner
                               self % min_temp_grad,    &   ! Minimum vertical temperature gradient allowed
-                              self % Zmin,             &   ! Minimum vertical level to accept observations
-                              self % Zmax,             &   ! Maximum vertical level to accept observations
                               self % cost_funct_test,  &   ! Threshold value for the cost function convergence test
                               self % y_test,           &   ! Threshold value for the yobs-ysol tes
                               self % n_iteration_test, &   ! Maximum number of iterations

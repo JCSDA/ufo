@@ -42,16 +42,18 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, f_conf)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
 
-use fckit_configuration_module, only: fckit_configuration
 implicit none
-class(ufo_gnssro_BendMetOffice), intent(inout) :: self
-type(fckit_configuration), intent(in)   :: f_conf
 
-call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+class(ufo_gnssro_BendMetOffice), intent(inout) :: self
+logical(c_bool), intent(in) :: vert_interp_ops
+logical(c_bool), intent(in) :: pseudo_ops
+real(c_float), intent(in) :: min_temp_grad
+
+self % vert_interp_ops = vert_interp_ops
+self % pseudo_ops = pseudo_ops
+self % min_temp_grad = min_temp_grad
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 

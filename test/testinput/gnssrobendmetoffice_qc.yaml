@@ -75,8 +75,6 @@ observations:
     n_iteration_test: 20
     OB_test: 2.5
     y_test: 5
-    Zmin: 0
-    Zmax: 60000
     bmatrix_filename: ../resources/bmatrix/gnssro/gnssro_bmatrix.txt
     filter variables:
     - name: bending_angle
@@ -154,8 +152,6 @@ observations:
     n_iteration_test: 20
     OB_test: 2.5
     y_test: 5
-    Zmin: 0
-    Zmax: 60000
     bmatrix_filename: ../resources/bmatrix/gnssro/gnssro_bmatrix.txt
     filter variables:
     - name: bending_angle

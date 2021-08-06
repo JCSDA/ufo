@@ -16,6 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOffice.interface.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ObsGnssroBendMetOfficeParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -31,8 +32,8 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-
 /// GnssroBendMetOffice observation operator
+// -----------------------------------------------------------------------------
 class ObsGnssroBendMetOffice : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGnssroBendMetOffice> {
  public:
@@ -55,6 +56,7 @@ class ObsGnssroBendMetOffice : public ObsOperatorBase,
   F90hop keyOperGnssroBendMetOffice_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
+  ObsGnssroBendMetOfficeParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------
