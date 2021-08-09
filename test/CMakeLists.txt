@@ -190,6 +190,7 @@ list( APPEND ufo_test_input
   testinput/qc_met_office_buddy_pair_finder.yaml
   testinput/qc_modelbestfitpressure.yaml
   testinput/qc_modelobthreshold.yaml
+  testinput/qc_multichannel_thinning.yaml
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_performaction.yaml
   testinput/qc_poisson_disk_thinning.yaml
@@ -1824,6 +1825,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning_ops
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_met_office_buddy_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_multichannel_thinning
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_multichannel_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

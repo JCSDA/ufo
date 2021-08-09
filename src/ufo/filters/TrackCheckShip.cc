@@ -157,7 +157,8 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
 
-  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  const std::vector<size_t> validObsIds
+                                   = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);

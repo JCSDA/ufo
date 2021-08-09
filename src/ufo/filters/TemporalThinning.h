@@ -64,6 +64,7 @@ class TemporalThinning : public FilterBase,
   ObsAccessor createObsAccessor() const;
 
   std::vector<bool> identifyThinnedObservations(const std::vector<bool> &apply,
+                                                const Variables &filtervars,
                                                 const ObsAccessor &obsAccessor) const;
 
   boost::optional<std::vector<int>> getObservationPriorities(

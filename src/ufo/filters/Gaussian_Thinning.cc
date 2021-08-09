@@ -53,7 +53,8 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_,
+                                     filtervars, options_.thinIfAnyFilterVariablesAreValid.value());
 
   if (options_.opsCompatibilityMode) {
     // Sort observations by latitude

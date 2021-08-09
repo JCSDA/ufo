@@ -87,6 +87,7 @@ class PoissonDiskThinning : public FilterBase,
       const std::string &parameterName) const;
 
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
+                                             const Variables &filtervars,
                                              const ObsAccessor &obsAccessor) const;
 
   /// Initialise random number generators used for shuffling with the same seed on

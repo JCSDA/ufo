@@ -14,8 +14,10 @@
 
 #include <boost/optional.hpp>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/DateTime.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/filters/Variables.h"
 
 namespace ioda {
 class Distribution;
@@ -85,9 +87,17 @@ class ObsAccessor {
   ///   An ObsDataVector holding the QC flags (set by any filters run previously)
   ///   of observations held on the current MPI rank.
   ///
+  /// \param filtervars
+  ///   List of filter variables.
+  ///
+  /// \param validIfAnyFilterVariablePassedQC
+  ///   Boolean switch to treat an observation as valid if any filter variable has not been
+  ///   rejected. By default this is true; if false, the observation is only treated as valid
+  ///   if all filter variables have passed QC.
+  ///
   /// An observation location is treated as valid if (a) it has been selected by the \c where
-  /// clause and (b) its QC flag for the first filtered variable is set to \c pass (see note
-  /// below).
+  /// clause and (b) its QC flag(s) for (some/all) filtered variable(s) are set to \c pass
+  /// (see below).
   ///
   /// If each independent group of observations is stored entirely on a single MPI rank, the
   /// returned vector contains local IDs of valid observation locations held on the current rank
@@ -96,15 +106,15 @@ class ObsAccessor {
   /// nlocs(0) + nlocs(1) - 1 corresponding to locations held on rank 1 and so on, where nlocs(i)
   /// denotes the number of locations held on ith rank.
   ///
-  /// \note It is an open question what should be done if there's more than one filtered variable
-  /// and their QC flags differ. Should only observation locations where none of the filtered
-  /// variables have so far been rejected be treated as candidates for retaining? Or all locations
-  /// where at least one of these variables has not yet been rejected? For the moment we duck the
-  /// question and check only the QC flags of the first filtered variable, implicitly assuming that
-  /// if multiple variables are thinned together, they all have the same QC flags. It might be best
-  /// to make this user-configurable.
+  /// If there is more than one filtered variable, and their QC flags differ, there is a choice
+  /// as to whether to treat observation locations as valid (i) where none of the filtered variables
+  /// have so far been rejected, or (ii) where at least one of these variables has not yet been
+  /// rejected. The latter choice (ii) is the default, configurable via the switch
+  /// \c validIfAnyFilterVariablePassedQC.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
-                                             const ioda::ObsDataVector<int> &flags) const;
+                                             const ioda::ObsDataVector<int> &flags,
+                                             const Variables &filtervars,
+                                             bool validIfAnyFilterVariablePassedQC = true) const;
 
   /// \brief Return the IDs of both flagged and unflagged observation locations selected by the
   /// where clause.
@@ -193,6 +203,23 @@ class ObsAccessor {
 
   void groupObservationsByCategoryVariable(const std::vector<size_t> &validObsIds,
                                            RecursiveSplitter &splitter) const;
+
+  /// \brief Return true if filtered variable(s) have passed QC, otherwise false.
+  ///
+  /// \param flags
+  ///   A vector of type ObsDataRow holding the QC flags for the subset of simulated variables
+  ///   present in the list of filtered variables.
+  ///
+  /// \param ObsId
+  ///   Index of observation location.
+  ///
+  /// \param validIfAnyFilterVariablePassedQC
+  ///   Boolean variable to decide how to treat observation locations where QC flags of filtered
+  ///   variables differ.
+  ///   If true, consider that observation has passed QC if any filtered variable has passed QC.
+  ///   If false, consider that observation has passed QC only if all filtered variables passed QC.
+  bool isValid(const std::vector<ioda::ObsDataRow<int>> &flags, size_t ObsId,
+               bool validIfAnyFilterVariablePassedQC) const;
 
  private:
   const ioda::ObsSpace *obsdb_;

@@ -169,6 +169,13 @@ class GaussianThinningParameters : public FilterParametersBase {
   ///   enough.
   oops::Parameter<bool> opsCompatibilityMode{"ops_compatibility_mode", false, this};
 
+  /// Option to choose how to treat observations where there are multiple filter variables. If true,
+  /// treats an observation location as valid if any filter variables have not been rejected.
+  /// If false, observations are treated as valid only if all filter variables have passed QC.
+  /// This is an optional parameter, if omitted the default value is true.
+  oops::Parameter<bool>
+    thinIfAnyFilterVariablesAreValid{"thin_if_any_filter_variables_are_valid", true, this};
+
  private:
   static float defaultHorizontalMesh() {
     return static_cast<float>(2 * M_PI * Constants::mean_earth_rad / 360.0);
