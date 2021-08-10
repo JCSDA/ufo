@@ -38,10 +38,21 @@ class BackgroundCheckParameters : public FilterParametersBase {
 
  public:
   /// The filter will flag observations whose bias-corrected value differs from its model equivalent
-  /// by more than `threshold` times the current estimate of the observation error.
+  /// by more than `threshold` times the current estimate of the observation error. Or if the
+  /// option "threshold wrt background error" is true, the `threshold` is multiplied by the
+  /// background error rather than observation error. E.g.
+  ///
+  ///   filter variables:
+  ///   - name: sea_surface_height
+  ///   threshold wrt background error: true
+  ///   threshold: 3.0
   ///
   /// `threshold` can be a real number or the name of a variable.
   oops::OptionalParameter<std::string> threshold{"threshold", this};
+
+  /// A switch indicating whether threshold must be multiplied by background error rather than
+  /// observation error. If true, `threshold` must have a value.
+  oops::Parameter<bool> thresholdWrtBGerror{"threshold wrt background error", false, this};
 
   /// The filter will flag observations whose bias-corrected value differs from its model equivalent
   /// by more than `absolute threshold`
@@ -90,6 +101,9 @@ class BackgroundCheck : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::fguess;}
+  /// \brief Return the name of the variable containing the background error estimate of the
+  /// specified filter variable.
+  Variable backgrErrVariable(const Variable & filterVariable) const;
 
   Parameters_ parameters_;
 };

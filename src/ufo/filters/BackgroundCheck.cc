@@ -46,6 +46,12 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
       allvars_ += var;
   }
   allvars_ += Variables(filtervars_, test_hofx);
+  // Add BG error variable if threshold is required wrt BG error:
+  for (size_t jv = 0; jv < filtervars_.size(); ++jv) {
+    if (parameters_.thresholdWrtBGerror.value()) {
+      allvars_ += backgrErrVariable(filtervars_[jv]);
+    }
+  }
   ASSERT(parameters_.threshold.value() ||
          parameters_.absoluteThreshold.value() ||
          parameters_.functionAbsoluteThreshold.value());
@@ -53,6 +59,9 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
     ASSERT(!parameters_.threshold.value() &&
            !parameters_.absoluteThreshold.value());
     ASSERT(!parameters_.functionAbsoluteThreshold.value()->empty());
+  }
+  if (parameters_.thresholdWrtBGerror.value()) {
+    ASSERT(parameters_.threshold.value());
   }
 }
 
@@ -63,6 +72,14 @@ BackgroundCheck::~BackgroundCheck() {
 }
 
 // -----------------------------------------------------------------------------
+/// Return the name of the variable containing the background error estimate of the
+/// specified filter variable.
+
+Variable BackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
+  return Variable(filterVariable.variable() + "_background_error@ObsDiag");
+}
+
+// -----------------------------------------------------------------------------
 
 void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
@@ -70,7 +87,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
-  oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_;
+  oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> obsbias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
@@ -112,6 +129,12 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 //    H(x)
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
+//    H(x) error
+      std::vector<float> hofxerr;
+      bool thresholdWrtBGerror = parameters_.thresholdWrtBGerror.value();
+      if (thresholdWrtBGerror) {
+        data_.get(backgrErrVariable(filtervars[jv]), hofxerr);
+      }
 
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
@@ -137,9 +160,12 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
           }
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
+          const std::vector<float> &errorMultiplier = thresholdWrtBGerror ?
+                                                      hofxerr : (*obserr_)[iv];
 //        Threshold for current observation
           float zz = (thr[jobs] == std::numeric_limits<float>::max()) ? abs_thr[jobs] :
-            std::min(abs_thr[jobs], thr[jobs] * (*obserr_)[iv][jobs]);
+            std::min(abs_thr[jobs], thr[jobs] * errorMultiplier[jobs]);
+
           ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
 //        Check distance from background

@@ -141,3 +141,20 @@ observations:
 #  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
 #  variable3@ObsError =  2,  4,  2,  4,  2,  4,  2,  4,  2,  4
   passedBenchmark: 30
+- obs space:
+    name: Altimeter
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sataltimeter_sla_testdata.nc4
+    obsdataout:
+      obsfile: Data/altimeter_testout.nc4
+    simulated variables: [sea_surface_height]
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/background_errors_for_altimeter_test.nc4
+  obs filters:
+  - filter: Background Check  # BG check with threshold wrt BG error
+    filter variables:
+    - name: sea_surface_height
+    threshold wrt background error: true
+    threshold: 3.0
+  passedBenchmark: 12  # [0:7] accepted; [7:11] missing; [16:22] BG-rejected
