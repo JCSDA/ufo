@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -31,6 +32,23 @@
 namespace ufo {
 
 namespace {
+
+/// Convert a float \p x to an int by rounding. If \p is equal to \p missingIn, return \p
+/// missingOut. If the value to be returned is too large to be represented by an int, throw an
+/// exception.
+int safeCast(float x, float missingIn, int missingOut) {
+  if (x == missingIn)
+    return missingOut;
+  // Throws boost::math::rounding_error if x is outside the range representable by ints
+  return boost::math::iround(x);
+}
+
+/// Cast an int \p x to a float. If \p is equal to \p missingIn, return \p missingOut.
+float safeCast(int x, int missingIn, float missingOut) {
+  if (x == missingIn)
+    return missingOut;
+  return x;
+}
 
 /// Convert \p valueAsString to `VariableType` and for each vector in \p values assign that value
 /// at locations selected by the `where` statement.
@@ -51,24 +69,65 @@ void assignValue(const std::string &valueAsString,
   }
 }
 
-/// Retrieve the variable \p variable and assign its components (channels) to successive
-/// vectors in \p values (only at locations selected by the `where` statement).
+/// For each location selected by the `where` statement, copy the corresponding element of
+/// \p source to \p destination.
+///
+/// This two-parameter template is selected by the compiler when SourceVariableType is
+/// different from DestinationVariableType. It takes care of converting missing value indicators
+/// of type SourceVariableType to ones of type DestinationVariableType.
+template <typename SourceVariableType, typename DestinationVariableType>
+void assignObsDataVector(const std::vector<bool> &apply,
+                         const ioda::ObsDataVector<SourceVariableType> &source,
+                         ioda::ObsDataVector<DestinationVariableType> &destination) {
+  ASSERT(source.nvars() == destination.nvars());
+
+  const SourceVariableType missingSource = util::missingValue(SourceVariableType());
+  const DestinationVariableType missingDestination = util::missingValue(DestinationVariableType());
+
+  for (size_t ival = 0; ival < source.nvars(); ++ival) {
+    const ioda::ObsDataRow<SourceVariableType> &currentSource = source[ival];
+    ioda::ObsDataRow<DestinationVariableType> &currentDestination = destination[ival];
+    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
+      if (apply[iloc]) {
+        currentDestination[iloc] = safeCast(currentSource[iloc], missingSource, missingDestination);
+      }
+    }
+  }
+}
+
+/// For each location selected by the `where` statement, copy the corresponding element of
+/// \p source to \p destination.
+///
+/// This single-parameter template is selected by the compiler when \p source and \p destination
+/// are of the same type.
 template <typename VariableType>
+void assignObsDataVector(const std::vector<bool> &apply,
+                         const ioda::ObsDataVector<VariableType> &source,
+                         ioda::ObsDataVector<VariableType> &destination) {
+  ASSERT(source.nvars() == destination.nvars());
+
+  for (size_t ival = 0; ival < source.nvars(); ++ival) {
+    const ioda::ObsDataRow<VariableType> &currentSource = source[ival];
+    ioda::ObsDataRow<VariableType> &currentDestination = destination[ival];
+    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
+      if (apply[iloc]) {
+        currentDestination[iloc] = currentSource[iloc];
+      }
+    }
+  }
+}
+
+/// Retrieve the variable \p variable of type \c SourceVariableType and assign its components
+/// (channels) to successive vectors in \p values (only at locations selected by the `where`
+/// statement).
+template <typename SourceVariableType, typename DestinationVariableType>
 void assignVariable(const ufo::Variable &variable,
                     const std::vector<bool> &apply,
                     const ObsFilterData &data,
-                    ioda::ObsDataVector<VariableType> &values) {
-  ioda::ObsDataVector<VariableType> newValues(data.obsspace(), variable.toOopsVariables());
+                    ioda::ObsDataVector<DestinationVariableType> &values) {
+  ioda::ObsDataVector<SourceVariableType> newValues(data.obsspace(), variable.toOopsVariables());
   data.get(variable, newValues);
-
-  for (size_t ival = 0; ival < values.nvars(); ++ival) {
-    std::vector<VariableType> &currentValues = values[ival];
-    const ioda::ObsDataRow<VariableType> &currentNewValues = newValues[ival];
-    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
-      if (apply[iloc])
-        currentValues[iloc] = currentNewValues[iloc];
-    }
-  }
+  assignObsDataVector(apply, newValues, values);
 }
 
 /// Evaluate the ObsFunction \p function and assign the vectors it produced to successive vectors
@@ -81,30 +140,7 @@ void assignFunction(const ufo::Variable &function,
                     ioda::ObsDataVector<VariableType> &values) {
   ioda::ObsDataVector<FunctionValueType> newValues(data.obsspace(), variable.toOopsVariables());
   data.get(function, newValues);
-
-  const VariableType missingVariableValue = util::missingValue(VariableType());
-  const FunctionValueType missingFunctionValue = util::missingValue(FunctionValueType());
-  const FunctionValueType maxFunctionValue = std::numeric_limits<FunctionValueType>::max();
-  for (size_t ival = 0; ival < values.nvars(); ++ival) {
-    std::vector<VariableType> &currentValues = values[ival];
-    const ioda::ObsDataRow<FunctionValueType> &currentNewValues = newValues[ival];
-    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
-      if (apply[iloc]) {
-        if (currentNewValues[iloc] != missingFunctionValue)
-          // The call to min() below is a hack preventing clang from generating optimized code
-          // that speculatively converts currentNewValues[iloc] to VariableType regardless of
-          // whether it's equal to missingFunctionValue or not. This causes a floating exception
-          // and thus breaks the test suite. After migration to a more recent version of clang
-          // we may be able to remove the call to min() and use the -ffp-exception-behavior=maytrap
-          // flag instead to instruct the compiler to avoid transformations that may raise
-          // floating-point exceptions that would not have been raised by the original code.
-          currentValues[iloc] =
-              static_cast<VariableType>(std::min(currentNewValues[iloc], maxFunctionValue));
-        else
-          currentValues[iloc] = missingVariableValue;
-      }
-    }
-  }
+  assignObsDataVector(apply, newValues, values);
 }
 
 /// Assign values to a numeric variable (of type float or int).
@@ -117,7 +153,17 @@ void assignNumericValues(const AssignmentParameters &params,
   if (params.value_.value() != boost::none) {
     assignValue(*params.value_.value(), apply, values);
   } else if (params.sourceVariable.value() != boost::none) {
-    assignVariable(*params.sourceVariable.value(), apply, data, values);
+    switch (data.dtype(*params.sourceVariable.value())) {
+    case ioda::ObsDtype::Float:
+      assignVariable<float>(*params.sourceVariable.value(), apply, data, values);
+      break;
+    case ioda::ObsDtype::Integer:
+      assignVariable<int>(*params.sourceVariable.value(), apply, data, values);
+      break;
+    default:
+      throw eckit::BadParameter(params.sourceVariable.value()->fullName() +
+                                " is not a numeric variable", Here());
+    }
   } else {
     ASSERT(params.function.value() != boost::none);
     if (params.function.value()->group() == ObsFunctionTraits<float>::groupName)
@@ -139,8 +185,10 @@ void assignNonnumericValues(const AssignmentParameters &params,
                             ioda::ObsDataVector<VariableType> &values) {
   if (params.value_.value() != boost::none) {
     assignValue(*params.value_.value(), apply, values);
-    // TODO(wsmigaj): Handle sourceVariable once PR #1280 is merged in.
+  } else if (params.sourceVariable.value() != boost::none) {
+    assignVariable<VariableType>(*params.sourceVariable.value(), apply, data, values);
   } else {
+    ASSERT(params.function.value() != boost::none);
     assignFunction<VariableType>(*params.function.value(), variable, apply, data, values);
   }
 }
