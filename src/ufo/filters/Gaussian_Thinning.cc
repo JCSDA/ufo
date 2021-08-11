@@ -67,8 +67,8 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(
         validObsIds, options_.opsCompatibilityMode);
-  groupObservationsByPressure(validObsIds, *distanceCalculator, obsAccessor,
-                              splitter, distancesToBinCenter);
+  groupObservationsByVerticalCoordinate(validObsIds, *distanceCalculator, obsAccessor,
+                                        splitter, distancesToBinCenter);
   groupObservationsByTime(validObsIds, *distanceCalculator, obsAccessor,
                           splitter, distancesToBinCenter);
   groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsAccessor,
@@ -204,13 +204,13 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
 // -----------------------------------------------------------------------------
 
-void Gaussian_Thinning::groupObservationsByPressure(
+void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
     const std::vector<size_t> &validObsIds,
     const DistanceCalculator &distanceCalculator,
     const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
-  std::unique_ptr<EquispacedBinSelectorBase> binSelector = makePressureBinSelector(options_);
+  std::unique_ptr<EquispacedBinSelectorBase> binSelector = makeVerticalBinSelector(options_);
   if (!binSelector)
     return;
 
@@ -218,23 +218,24 @@ void Gaussian_Thinning::groupObservationsByPressure(
     oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
                        << *binSelector->numBins() << std::endl;
 
-  std::vector<float> pres = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+  std::vector<float> vcoord = obsAccessor.getFloatVariableFromObsSpace(
+        "MetaData", options_.verticalCoord);
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
   for (size_t obsId : validObsIds)
   {
-    bins.push_back(binSelector->bin(pres[obsId]));
+    bins.push_back(binSelector->bin(vcoord[obsId]));
   }
   splitter.groupBy(bins);
 
-  oops::Log::debug() << "Gaussian_Thinning: pressures     = " << pres << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: pressure bins = " << bins << std::endl;
+  oops::Log::debug() << "Gaussian_Thinning: vertical coords     = " << vcoord << std::endl;
+  oops::Log::debug() << "Gaussian_Thinning: vertical coord bins = " << bins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
     const float component = distanceCalculator.nonspatialDistanceComponent(
-          pres[obsId], binSelector->binCenter(bins[validObsIndex]),
+          vcoord[obsId], binSelector->binCenter(bins[validObsIndex]),
           binSelector->inverseBinWidth());
     distancesToBinCenter[validObsIndex] = distanceCalculator.combineDistanceComponents(
           distancesToBinCenter[validObsIndex], component);
@@ -243,7 +244,7 @@ void Gaussian_Thinning::groupObservationsByPressure(
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<EquispacedBinSelectorBase> Gaussian_Thinning::makePressureBinSelector(
+std::unique_ptr<EquispacedBinSelectorBase> Gaussian_Thinning::makeVerticalBinSelector(
     const GaussianThinningParameters &options) {
   if (options.verticalMesh <= 0)
     return nullptr;
@@ -256,7 +257,7 @@ std::unique_ptr<EquispacedBinSelectorBase> Gaussian_Thinning::makePressureBinSel
           1,
           static_cast<int>(std::ceil((options.verticalMax - options.verticalMin) /
                                      options.verticalMesh)));
-    // Adjust verticalMax upwards to make the range of pressures
+    // Adjust verticalMax upwards to make the range of vertical coordinates
     // evenly divisible into bins of width verticalMesh.
     const float adjustedVerticalMax = options.verticalMin + numVerticalBins * options.verticalMesh;
 

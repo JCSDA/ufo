@@ -85,15 +85,17 @@ class GaussianThinningParameters : public FilterParametersBase {
 
   // Vertical grid
 
-  /// Cell size (in Pa) in the vertical direction. Thinning in the vertical direction is disabled
+  /// Cell size in the vertical direction. Thinning in the vertical direction is disabled
   /// if this parameter is not specified or negative.
   oops::Parameter<float> verticalMesh{"vertical_mesh", -1.0f, this};
-  /// Lower bound of the pressure interval split into cells of size \c vertical_mesh.
+  /// Lower bound of the vertical coordinate interval split into cells of size \c vertical_mesh.
   oops::Parameter<float> verticalMin{"vertical_min", 100.0f, this};
-  /// Upper bound of the pressure interval split into cells of size \c vertical_mesh.
+  /// Upper bound of the vertical coordinate interval split into cells of size \c vertical_mesh.
   /// This parameter is rounded upwards to the nearest multiple of \c vertical_mesh starting from
   /// \c vertical_min.
   oops::Parameter<float> verticalMax{"vertical_max", 110000.0f, this};
+  /// Observation vertical coordinate.
+  oops::Parameter<std::string> verticalCoord{"vertical_coordinate", "air_pressure", this};
 
   // Temporal grid
 
@@ -134,7 +136,7 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// Allowed values:
   ///
   /// - \c geodesic: retain the observation closest to the cell centre in the horizontal direction
-  ///   (air pressure and time are ignored)
+  ///   (the vertical coordinate and time are ignored)
   /// - \c maximum: retain the observation lying furthest from the cell's bounding box in the
   ///   system of coordinates in which the cell is a unit cube (all dimensions along which thinning
   ///   is enabled are taken into account).
