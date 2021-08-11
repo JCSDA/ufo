@@ -40,16 +40,15 @@ namespace ufo {
 class Cal_RelativeHumidity : public TransformBase {
  public:
   Cal_RelativeHumidity(const VariableTransformsParameters &options,
-                       ioda::ObsSpace &os,
-                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                       const std::vector<bool> &apply);
+                       const ObsFilterData &data,
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 
  private:
   // list of specific implementation(s) - This is controlled by "method"
-  void methodDEFAULT();
-  void methodUKMO();
+  void methodDEFAULT(const std::vector<bool> &apply);
+  void methodUKMO(const std::vector<bool> &apply);
 };
 
 
@@ -75,15 +74,14 @@ class Cal_RelativeHumidity : public TransformBase {
 class Cal_SpecificHumidity : public TransformBase {
  public:
   Cal_SpecificHumidity(const VariableTransformsParameters &options,
-                       ioda::ObsSpace &os,
-                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                       const std::vector<bool> &apply);
+                       const ObsFilterData &data,
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 
  private:
   // list of specific implementation(s) - This is controlled by "method"
-  void methodDEFAULT();
+  void methodDEFAULT(const std::vector<bool> &apply);
 };
 }  // namespace ufo
 

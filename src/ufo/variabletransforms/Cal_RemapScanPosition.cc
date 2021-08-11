@@ -17,14 +17,14 @@ static TransformMaker<Cal_RemapScanPosition>
     makerCal_RemapScanPosition_("RemapScanPosition");
 
 Cal_RemapScanPosition::Cal_RemapScanPosition(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_RemapScanPosition::runTransform() {
+void Cal_RemapScanPosition::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Renumber satellite scan position"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -41,7 +41,7 @@ void Cal_RemapScanPosition::runTransform() {
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     // if the data have been excluded by the where statement
-    if (!apply_[jobs]) continue;
+    if (!apply[jobs]) continue;
 
     // Calculate wind vector
     if (original_scan_position[jobs] != missingValueInt) {
@@ -51,6 +51,5 @@ void Cal_RemapScanPosition::runTransform() {
   // Overwrite variable at existing locations
   obsdb_.put_db("MetaData", "scan_position", remapped_scan_position);
 }
-
 }  // namespace ufo
 

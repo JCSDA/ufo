@@ -16,14 +16,14 @@ static TransformMaker<Cal_HeightFromPressure>
     makerCal_HeightFromPressure_("HeightFromPressure");
 
 Cal_HeightFromPressure::Cal_HeightFromPressure(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_HeightFromPressure::runTransform() {
+void Cal_HeightFromPressure::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " Retrieve Height From Pressure" << std::endl;
 
   std::vector<float> geopotentialHeight;
@@ -75,7 +75,7 @@ void Cal_HeightFromPressure::runTransform() {
     // 3.1 Loop over each record
     for (ilocs = 0; ilocs < rSort.size(); ++ilocs) {
       // Cycle if the data have been excluded by the where statement
-      if (!apply_[rSort[ilocs]]) continue;
+      if (!apply[rSort[ilocs]]) continue;
 
       // Cycle if geopotential height is valid
       if (geopotentialHeight[rSort[ilocs]] != missingValueFloat) continue;

@@ -28,9 +28,12 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/filters/VariableTransformsParameters.h"
 #include "ufo/variabletransforms/Formulas.h"
+
 
 namespace ioda {
 template <typename DATATYPE>
@@ -41,6 +44,7 @@ class ObsVector;
 
 namespace ufo {
 class VariableTransformsParameters;
+class Variables;
 }
 
 namespace ufo {
@@ -49,13 +53,14 @@ namespace ufo {
 class TransformBase {
  public:
   TransformBase(const VariableTransformsParameters &options,
-                ioda::ObsSpace &os,
-                const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
-                const std::vector<bool>& apply);
+                const ObsFilterData& data,
+                const std::shared_ptr<ioda::ObsDataVector<int>>& flags);
   /// Destructor
   virtual ~TransformBase() {}
   /// Run variable conversion
-  virtual void runTransform() = 0;
+  virtual void runTransform(const std::vector<bool> &apply) = 0;
+  /// Return list of required geovals
+  virtual Variables requiredVariables() const { return Variables(); }
 
  private:
   /// templated function for float, int data types
@@ -138,10 +143,12 @@ class TransformBase {
   std::string obsName() const { return obsName_; }
   /// Configurable parameters
   const VariableTransformsParameters &options_;
+
+  /// Observation and geoval data
+  ObsFilterData data_;
   /// Observation space
-  ioda::ObsSpace &obsdb_;
+  ioda::ObsSpace &obsdb_ = data_.obsspace();
   ioda::ObsDataVector<int> &flags_;
-  const std::vector<bool> &apply_;
   /// Missing value (int)
   const int missingValueInt = util::missingValue(1);
   /// Missing value (float)
@@ -155,8 +162,8 @@ class TransformFactory {
  public:
   static std::unique_ptr<TransformBase> create(
       const std::string &, const VariableTransformsParameters &,
-      ioda::ObsSpace &, const std::shared_ptr<ioda::ObsDataVector<int>> &,
-      const std::vector<bool> &);
+      const ObsFilterData &,
+      const std::shared_ptr<ioda::ObsDataVector<int>> &);
   virtual ~TransformFactory() = default;
 
  protected:
@@ -164,9 +171,9 @@ class TransformFactory {
 
  private:
   virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &, ioda::ObsSpace &,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &,
-      const std::vector<bool> &) = 0;
+      const VariableTransformsParameters &,
+      const ObsFilterData &,
+      const std::shared_ptr<ioda::ObsDataVector<int>> &) = 0;
   static std::map<std::string, TransformFactory *> &getMakers() {
     static std::map<std::string, TransformFactory *> makers_;
     return makers_;
@@ -177,10 +184,10 @@ class TransformFactory {
 template <class T>
 class TransformMaker : public TransformFactory {
   virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &options, ioda::ObsSpace &os,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-      const std::vector<bool> &apply) {
-    return std::unique_ptr<TransformBase>(new T(options, os, flags, apply));
+      const VariableTransformsParameters &options,
+      const ObsFilterData& data,
+      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
+    return std::unique_ptr<TransformBase>(new T(options, data, flags));
   }
 
  public:

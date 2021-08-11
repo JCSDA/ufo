@@ -26,11 +26,10 @@ namespace ufo {
 class Cal_HeightFromPressure : public TransformBase {
  public:
   Cal_HeightFromPressure(const VariableTransformsParameters &options,
-                         ioda::ObsSpace &os,
-                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                         const std::vector<bool> &apply);
+                         const ObsFilterData &data,
+                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 };
 }  // namespace ufo
 

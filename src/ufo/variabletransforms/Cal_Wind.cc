@@ -8,6 +8,9 @@
 #include "ufo/variabletransforms/Cal_Wind.h"
 #include "ufo/utils/Constants.h"
 
+#include "ufo/filters/VariableTransformsParameters.h"
+
+
 namespace ufo {
 
 /************************************************************************************/
@@ -18,14 +21,14 @@ static TransformMaker<Cal_WindSpeedAndDirection>
     makerCal_WindSpeedAndDirection_("WindSpeedAndDirection");
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options, const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {
+}
 
 /************************************************************************************/
 
-void Cal_WindSpeedAndDirection::runTransform() {
+void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve wind speed and direction"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -54,7 +57,7 @@ void Cal_WindSpeedAndDirection::runTransform() {
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     // if the data have been excluded by the where statement
-    if (!apply_[jobs]) continue;
+    if (!apply[jobs]) continue;
 
     // Calculate wind vector
     if (u[jobs] != missingValueFloat && v[jobs] != missingValueFloat) {
@@ -74,14 +77,14 @@ static TransformMaker<Cal_WindComponents>
     makerCal_WindComponents_("WindComponents");
 
 Cal_WindComponents::Cal_WindComponents(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_WindComponents::runTransform() {
+void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve wind component"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -110,7 +113,7 @@ void Cal_WindComponents::runTransform() {
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     // if the data have been excluded by the where statement
-    if (!apply_[jobs]) continue;
+    if (!apply[jobs]) continue;
 
     // Calculate wind vector
     if (windFromDirection[jobs] != missingValueFloat &&

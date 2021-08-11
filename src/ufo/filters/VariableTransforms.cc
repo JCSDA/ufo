@@ -38,6 +38,14 @@ VariableTransforms::VariableTransforms(
   options_->deserialize(config);
   allvars_ += Variables(filtervars_);
 
+  // Add any required geovals to allvars_
+  for (const auto& cal_ : options_->Transform.value()) {
+    std::unique_ptr<TransformBase> Transform =
+        TransformFactory::create(cal_, *options_, data_, flags_);
+     Variables gvars = Transform->requiredVariables();
+     allvars_ += Variables(gvars);
+  }
+
   oops::Log::debug() << "VariableTransforms: config = " << config << std::endl;
 }
 
@@ -56,11 +64,10 @@ void VariableTransforms::applyFilter(
 
   // Run all calculations requested
   for (const auto& cal_ : options_->Transform.value()) {
-    std::cout << "         estimate: " << cal_ << std::endl;
+    oops::Log::debug() << "         estimate: " << cal_ << std::endl;
     std::unique_ptr<TransformBase> Transform =
-        TransformFactory::create(cal_, *options_, obsdb_, flags_, apply);
-
-    Transform->runTransform();
+        TransformFactory::create(cal_, *options_, data_, flags_);
+    Transform->runTransform(apply);
   }
 }
 

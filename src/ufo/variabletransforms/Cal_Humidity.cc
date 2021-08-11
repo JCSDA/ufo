@@ -17,14 +17,14 @@ static TransformMaker<Cal_RelativeHumidity>
     makerCal_RelativeHumidity_("RelativeHumidity");
 
 Cal_RelativeHumidity::Cal_RelativeHumidity(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {}
 
 /**************************************************************************************************/
 
-void Cal_RelativeHumidity::runTransform() {
+void Cal_RelativeHumidity::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve Relative humidity"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -34,13 +34,13 @@ void Cal_RelativeHumidity::runTransform() {
   // Get the right method
   switch (method()) {
     case formulas::MethodFormulation::UKMO: {
-      methodUKMO();
+      methodUKMO(apply);
       break;
     }
     case formulas::MethodFormulation::NCAR:
     case formulas::MethodFormulation::NOAA:
     default: {
-      methodDEFAULT();
+      methodDEFAULT(apply);
       break;
     }
   }
@@ -65,7 +65,7 @@ Method: -
    If the pressure, dew point or temperature take extreme
    values or are missing, the relative humidity is set to missing data.
 */
-void Cal_RelativeHumidity::methodUKMO() {
+void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
   const size_t nlocs_ = obsdb_.nlocs();
   // return if no data
   if (obsdb_.nlocs() == 0) {
@@ -166,7 +166,7 @@ void Cal_RelativeHumidity::methodUKMO() {
     // 3.1 Loop over each record
     for (size_t iloc : rSort) {
       // if the data have been excluded by the where statement
-      if (!apply_[iloc]) continue;
+      if (!apply[iloc]) continue;
 
       // store some variables
       pressure = airPressure[iloc];
@@ -226,7 +226,7 @@ void Cal_RelativeHumidity::methodUKMO() {
 
 /**************************************************************************************************/
 
-void Cal_RelativeHumidity::methodDEFAULT() {
+void Cal_RelativeHumidity::methodDEFAULT(const std::vector<bool> &apply) {
   const size_t nlocs = obsdb_.nlocs();
 
   float esat, qvs, qv, satVaporPres;
@@ -262,7 +262,7 @@ void Cal_RelativeHumidity::methodDEFAULT() {
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     // if the data have been excluded by the where statement
-    if (!apply_[jobs]) continue;
+    if (!apply[jobs]) continue;
 
     if (specificHumidity[jobs] != missingValueFloat &&
         airTemperature[jobs] != missingValueFloat && pressure[jobs] != missingValueFloat) {
@@ -292,14 +292,14 @@ static TransformMaker<Cal_SpecificHumidity>
     makerCal_SpecificHumidity_("SpecificHumidity");
 
 Cal_SpecificHumidity::Cal_SpecificHumidity(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::vector<bool> &apply)
-    : TransformBase(options, os, flags, apply) {}
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_SpecificHumidity::runTransform() {
+void Cal_SpecificHumidity::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " Retrieve Specific Humidity" << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
   oops::Log::trace() << "      --> formulation: " << formulation() << std::endl;
@@ -311,14 +311,14 @@ void Cal_SpecificHumidity::runTransform() {
     case formulas::MethodFormulation::NOAA:
     case formulas::MethodFormulation::UKMO:
     default: {
-      methodDEFAULT();
+      methodDEFAULT(apply);
       break;
     }
   }
 }
 /************************************************************************************/
 
-void Cal_SpecificHumidity::methodDEFAULT() {
+void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &apply) {
   const size_t nlocs = obsdb_.nlocs();
   float esat, qvs, qv, satVaporPres;
   std::vector<float> relativeHumidity;
@@ -370,8 +370,5 @@ void Cal_SpecificHumidity::methodDEFAULT() {
   }
   putObservation("specific_humidity", specificHumidity);
 }
-
-
-
 }  // namespace ufo
 

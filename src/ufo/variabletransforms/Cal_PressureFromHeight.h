@@ -30,15 +30,14 @@ namespace ufo {
 class Cal_PressureFromHeightForProfile : public TransformBase {
  public:
   Cal_PressureFromHeightForProfile(const VariableTransformsParameters &options,
-                                   ioda::ObsSpace &os,
-                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                                   const std::vector<bool> &apply);
+                                   const ObsFilterData &data,
+                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 
  private:
   // list of specific implementation(s) - This is controlled by "method"
-  void methodUKMO();
+  void methodUKMO(const std::vector<bool> &apply);
 };
 
 /*!
@@ -51,15 +50,14 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 class Cal_PressureFromHeightForICAO : public TransformBase {
  public:
   Cal_PressureFromHeightForICAO(const VariableTransformsParameters &options,
-                                ioda::ObsSpace &os,
-                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                                const std::vector<bool> &apply);
+                                const ObsFilterData &data,
+                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 
  private:
   // list of specific implementation(s) - This is controled by "method"
-  void methodUKMO();
+  void methodUKMO(const std::vector<bool> &apply);
 };
 }  // namespace ufo
 

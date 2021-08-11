@@ -34,11 +34,10 @@ namespace ufo {
 class Cal_RemapScanPosition : public TransformBase {
  public:
   Cal_RemapScanPosition(const VariableTransformsParameters &options,
-                        ioda::ObsSpace &os,
-                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                        const std::vector<bool> &apply);
+                        const ObsFilterData &data,
+                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
-  void runTransform() override;
+  void runTransform(const std::vector<bool> &apply) override;
 };
 }  // namespace ufo
 

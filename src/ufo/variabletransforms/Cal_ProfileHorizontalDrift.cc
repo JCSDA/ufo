@@ -19,14 +19,13 @@ makerCal_ProfileHorizontalDrift_("ProfileHorizontalDrift");
 
 Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
 (const VariableTransformsParameters &options,
- ioda::ObsSpace &os,
- const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
- const std::vector<bool> &apply)
-  : TransformBase(options, os, flags, apply) {}
+ const ObsFilterData &data,
+ const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
+  : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_ProfileHorizontalDrift::runTransform() {
+void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Compute horizontal drift lat/lon/time" << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
 
@@ -76,7 +75,7 @@ void Cal_ProfileHorizontalDrift::runTransform() {
   // Perform drift calculation for each profile in the sample.
   for (size_t jprof = 0; jprof < nprofs; ++jprof) {
     const std::vector<size_t> &locs = obsdb_.recidx_vector(recnums[jprof]);
-    formulas::horizontalDrift(locs, apply_,
+    formulas::horizontalDrift(locs, apply,
                               latitude_in, longitude_in, datetime_in,
                               height, wind_speed, wind_from_direction,
                               latitude_out, longitude_out, datetime_out);
@@ -87,6 +86,5 @@ void Cal_ProfileHorizontalDrift::runTransform() {
   obsdb_.put_db("DerivedMetaData", "longitude", longitude_out);
   obsdb_.put_db("DerivedMetaData", "datetime", datetime_out);
 }
-
 }  // namespace ufo
 
