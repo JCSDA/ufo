@@ -90,7 +90,10 @@ bool ObsFilterData::has(const Variable & varname) const {
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     return (diags_ && diags_->has(var));
   } else {
-    return this->hasVector(grp, var) || this->hasDataVector(grp, var) || obsdb_.has(grp, var);
+    return this->hasVector(grp, var) ||
+           this->hasDataVector(grp, var) ||
+           this->hasDataVectorInt(grp, var) ||
+           obsdb_.has(grp, var);
   }
   return false;
 }
@@ -227,7 +230,10 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
   } else if (this->hasDataVector(grp, var)) {
     std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator
                           jv = dvecsf_.find(grp);
-    values = *jv->second;
+    for (size_t ivar = 0; ivar < varname.size(); ++ivar) {
+      const std::string currvar = varname.variable(ivar);
+      values[currvar] = (*jv->second)[currvar];
+    }
   /// Produce a clear error message for incompatible ObsFunction types
   } else if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
     throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
@@ -249,7 +255,10 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & val
   /// For ObsDataVector
   } else if (this->hasDataVectorInt(grp, var)) {
     std::map<std::string, const ioda::ObsDataVector<int> *>::const_iterator jv = dvecsi_.find(grp);
-    values = *jv->second;
+    for (size_t ivar = 0; ivar < varname.size(); ++ivar) {
+      const std::string currvar = varname.variable(ivar);
+      values[currvar] = (*jv->second)[currvar];
+    }
   /// Produce a clear error message for incompatible ObsFunction types
   } else if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
     throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
@@ -352,6 +361,8 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
   ioda::ObsDtype res = ioda::ObsDtype::Float;
   if (obsdb_.has(grp, var)) {
     res = obsdb_.dtype(grp, var);
+  } else if (hasDataVectorInt(varname.group(), varname.variable())) {
+    res = ioda::ObsDtype::Integer;
   } else if (!this->has(varname)) {
     oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
                        << std::endl;

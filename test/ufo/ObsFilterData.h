@@ -28,6 +28,30 @@
 namespace ufo {
 namespace test {
 
+// -----------------------------------------------------------------------------
+
+template <typename T>
+void testHasDtypeAndGet(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
+                        const ufo::Variable &var,
+                        ioda::ObsDtype expectedDtype, const std::vector<T> &expectedValues) {
+  EXPECT(data.has(var));
+  EXPECT(data.dtype(var) == expectedDtype);
+
+  // Extract variable into an std::vector
+  {
+    std::vector<T> vec;
+    data.get(var, vec);
+    EXPECT(vec == expectedValues);
+  }
+
+  // Extract variable into an ObsDataVector
+  {
+    ioda::ObsDataVector<T> vec(ospace, var.variable());
+    data.get(var, vec);
+    EXPECT_EQUAL(vec.nvars(), 1);
+    EXPECT(vec[0] == expectedValues);
+  }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -62,6 +86,24 @@ void testObsFilterData() {
     const std::string hofxgroup = hofxconf.getString("group");
     ioda::ObsVector hofx(ospace, hofxgroup);
 
+///  Setup ObsErrors
+    const eckit::LocalConfiguration obserrorconf(confs[jconf], "ObsError");
+    varconfs.clear();
+    obserrorconf.get("variables", varconfs);
+    const Variables obserrorvars(varconfs);
+    ioda::ObsDataVector<float> obserrors(ospace, obserrorvars.toOopsVariables());
+    for (size_t i = 0; i < obserrors.nvars(); ++i)
+      std::fill(obserrors[i].begin(), obserrors[i].end(), 0.1f * i);
+
+///  Setup QCFlags
+    const eckit::LocalConfiguration qcflagsconf(confs[jconf], "QCFlags");
+    varconfs.clear();
+    qcflagsconf.get("variables", varconfs);
+    const Variables qcflagsvars(varconfs);
+    ioda::ObsDataVector<int> qcflags(ospace, qcflagsvars.toOopsVariables());
+    for (size_t i = 0; i < qcflags.nvars(); ++i)
+      std::fill(qcflags[i].begin(), qcflags[i].end(), i);
+
 ///  Setup ObsFilterData and test nlocs
     ObsFilterData data(ospace);
     EXPECT(data.nlocs() == ospace.nlocs());
@@ -72,54 +114,51 @@ void testObsFilterData() {
     dataconf.get("float variables", varconfs);
     ufo::Variables obsvars(varconfs);
     for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
-      EXPECT(data.has(obsvars.variable(jvar)));
+      const ufo::Variable &var = obsvars.variable(jvar);
 
-      EXPECT(data.dtype(obsvars.variable(jvar)) == ioda::ObsDtype::Float);
-
-      std::vector<float> vec;
-      data.get(obsvars.variable(jvar), vec);
       std::vector<float> ref(ospace.nlocs());
-      ospace.get_db(obsvars.variable(jvar).group(), obsvars.variable(jvar).variable(), ref);
-      EXPECT(vec == ref);
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref);
     }
+
 ///  Check that has(), get() and dtype() work on integer variables in ObsSpace:
     varconfs.clear();
     dataconf.get("integer variables", varconfs);
     ufo::Variables intvars(varconfs);
     for (size_t jvar = 0; jvar < intvars.nvars(); ++jvar) {
-      EXPECT(data.has(intvars.variable(jvar)));
+      const ufo::Variable &var = intvars.variable(jvar);
 
-      EXPECT(data.dtype(intvars.variable(jvar)) == ioda::ObsDtype::Integer);
-
-      std::vector<int> vec;
-      data.get(intvars.variable(jvar), vec);
       std::vector<int> ref(ospace.nlocs());
-      ospace.get_db(intvars.variable(jvar).group(), intvars.variable(jvar).variable(), ref);
-      EXPECT(vec == ref);
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Integer, ref);
     }
 
-    ///  Check that get() works on string variables in ObsSpace:
+///  Check that has(), get() and dtype() work on string variables in ObsSpace:
     varconfs.clear();
     dataconf.get("string variables", varconfs);
     ufo::Variables strvars(varconfs);
     for (size_t jvar = 0; jvar < strvars.nvars(); ++jvar) {
-      std::vector<std::string> vec;
-      data.get(strvars.variable(jvar), vec);
+      const ufo::Variable &var = strvars.variable(jvar);
+
       std::vector<std::string> ref(ospace.nlocs());
-      ospace.get_db(strvars.variable(jvar).group(), strvars.variable(jvar).variable(), ref);
-      EXPECT(vec == ref);
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::String, ref);
     }
 
-    ///  Check that get() works on datetime variables in ObsSpace:
+///  Check that has(), get() and dtype() work on datetime variables in ObsSpace:
     varconfs.clear();
     dataconf.get("datetime variables", varconfs);
     ufo::Variables dtvars(varconfs);
     for (size_t jvar = 0; jvar < dtvars.nvars(); ++jvar) {
-      std::vector<util::DateTime> vec;
-      data.get(dtvars.variable(jvar), vec);
+      const ufo::Variable &var = dtvars.variable(jvar);
+
       std::vector<util::DateTime> ref(ospace.nlocs());
-      ospace.get_db(dtvars.variable(jvar).group(), dtvars.variable(jvar).variable(), ref);
-      EXPECT(vec == ref);
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::DateTime, ref);
     }
 
 ///  Check that associate(), has(), get() and dtype() work on ObsVector:
@@ -135,17 +174,42 @@ void testObsFilterData() {
     data.associate(hofx, "HofX");
 ///  H(x) associated now
     for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
-      EXPECT(data.has(hofxvars.variable(jvar)));
+      const ufo::Variable &var = hofxvars.variable(jvar);
 
-      EXPECT(data.dtype(hofxvars.variable(jvar)) == ioda::ObsDtype::Float);
-
-      std::vector<float> vec;
-      data.get(hofxvars.variable(jvar), vec);
       std::vector<float> ref(hofx.nlocs());
       for (size_t jloc = 0; jloc < hofx.nlocs(); jloc++) {
         ref[jloc] = hofx[hofxvars.nvars() * jloc + jvar];
       }
-      EXPECT(vec == ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref);
+    }
+
+///  Check that associate(), has(), get() and dtype() work on ObsDataVector<float>:
+    for (size_t jvar = 0; jvar < obserrorvars.size(); ++jvar) {
+      EXPECT(!data.has(obserrorvars[jvar]));
+    }
+    data.associate(obserrors, "ObsErrorData");
+///  ObsErrorData associated now
+    for (size_t jvar = 0; jvar < obserrorvars.nvars(); ++jvar) {
+      const ufo::Variable &var = obserrorvars.variable(jvar);
+
+      const std::vector<float> &ref = obserrors[var.variable()];
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref);
+    }
+
+///  Check that associate(), has(), get() and dtype() work on ObsDataVector<int>:
+    for (size_t jvar = 0; jvar < qcflagsvars.size(); ++jvar) {
+      EXPECT(!data.has(qcflagsvars[jvar]));
+    }
+    data.associate(qcflags, "QCFlagsData");
+///  QCFlags associated now
+    for (size_t jvar = 0; jvar < qcflagsvars.nvars(); ++jvar) {
+      const ufo::Variable &var = qcflagsvars.variable(jvar);
+
+      const std::vector<int> &ref = qcflags[var.variable()];
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Integer, ref);
     }
 
 ///  Check that associate(), has() and get() work on GeoVaLs:
