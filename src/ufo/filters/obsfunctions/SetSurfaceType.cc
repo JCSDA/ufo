@@ -37,7 +37,7 @@ namespace ufo {
     invars_ += Variable("latitude@MetaData");
 
     if (options_.UseReportSurface.value()) {
-      invars_ += Variable("land_sea@MetaData");
+      invars_ += Variable(options_.SurfaceMetaDataName.value());
     }
 
     if (options_.UseReportElevation.value()) {
@@ -94,20 +94,23 @@ namespace ufo {
     }
 
     // if available and requested, set closest appropriate surface type using reported surface
-    if (options_.UseReportSurface.value() && in.has(Variable("land_sea@MetaData"))) {
-      std::vector<int> reported_land_sea(nlocs);
-      in.get(Variable("land_sea@MetaData"), reported_land_sea);
+    if (options_.UseReportSurface.value()) {
+      std::vector<int> reported_surftype(nlocs, surftype_invalid);
+
+      // load reported surf type takinginto account variable name from the yaml config file
+      in.get(Variable(options_.SurfaceMetaDataName.value()), reported_surftype);
 
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        if ( reported_land_sea[iloc] == AAPP_surftype::sea ||
-             reported_land_sea[iloc] == BUFR_surftype::posice ) {
+        if ( reported_surftype[iloc] == AAPP_surftype::sea ||
+             reported_surftype[iloc] == BUFR_surftype::ocean ||
+             reported_surftype[iloc] == BUFR_surftype::posice ) {
           surftype[iloc] = surftype_sea_;
-        } else if ( reported_land_sea[iloc] == BUFR_surftype::land ) {
+        } else if ( reported_surftype[iloc] == BUFR_surftype::land ) {
           surftype[iloc] = surftype_land_;
-        } else if ( reported_land_sea[iloc] == BUFR_surftype::ice ) {
+        } else if ( reported_surftype[iloc] == BUFR_surftype::ice ) {
           surftype[iloc] = surftype_seaice_;
-        } else if ( reported_land_sea[iloc] == BUFR_surftype::coast ||
-                    reported_land_sea[iloc] == BUFR_surftype::nrcoast) {
+        } else if ( reported_surftype[iloc] == BUFR_surftype::coast ||
+                    reported_surftype[iloc] == BUFR_surftype::nrcoast) {
           surftype[iloc] = land_sea[iloc];
         }
       }

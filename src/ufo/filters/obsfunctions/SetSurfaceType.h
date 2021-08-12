@@ -44,6 +44,12 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   ///          UseReportSurface: true
   oops::Parameter<bool> UseReportSurface{"UseReportSurface", false, this};
 
+  /// Change name of variable storing the reported surface type
+  /// Default is 'land_sea@MetaData'
+  /// Example: to set to SSMIS report type (which is surface_flag@MetaData) set
+  ///          SurfaceReport Name: surface_flag@MetaData
+  oops::Parameter<std::string> SurfaceMetaDataName{"SurfaceReport Name", "land_sea@MetaData", this};
+
   /// Use reported Surface Elevation (default false)
   /// Example: To use the AAPPreported elevation set
   ///          UseReportElevation: true
