@@ -34,17 +34,41 @@ namespace ioda {
 }
 
 namespace ufo {
+
+// Define some traits that enable ObsCategoricalData to work with both linear and nonlinear
+// operators.
+
+class LinearObsOperatorBase;
+class LinearObsOperatorFactory;
+class LinearObsOperatorParametersWrapper;
+
+class ObsOperatorBase;
+class ObsOperatorFactory;
+class ObsOperatorParametersWrapper;
+
+template <typename OPBASE>
+struct ObsOperatorTraits {};
+
+template <>
+struct ObsOperatorTraits<ObsOperatorBase> {
+  typedef ObsOperatorFactory Factory_;
+  typedef ObsOperatorParametersWrapper ParametersWrapper_;
+};
+
+template <>
+struct ObsOperatorTraits<LinearObsOperatorBase> {
+  typedef LinearObsOperatorFactory Factory_;
+  typedef LinearObsOperatorParametersWrapper ParametersWrapper_;
+};
+
 /// \brief Data handler for the Categorical observation operator and TL/AD code.
-template <typename OPBASE, typename OPFACTORY>
+template <typename OPBASE>
 class ObsCategoricalData  {
  public:
   /// Get all information related to the configuration of the Categorical operator and TL/AD code.
   void configure(const ioda::ObsSpace & odb,
-                 const eckit::Configuration & config)
+                 const ObsCategoricalParameters & parameters)
   {
-    ObsCategoricalParameters parameters;
-    parameters.validateAndDeserialize(config);
-
     // Get categorical variable from ObsSpace (and throw an exception if it is not present).
     // In the ObsSpace, the categorical variable can be either a vector of strings or
     // a vector of integers; if the latter, it is converted to a vector of strings here.
@@ -89,7 +113,12 @@ class ObsCategoricalData  {
     // Create list of component operators.
     for (const eckit::LocalConfiguration &operatorConfig :
            parameters.operatorConfigurations.value()) {
-      std::unique_ptr<OPBASE> op(OPFACTORY::create(odb, operatorConfig));
+      typedef typename ObsOperatorTraits<OPBASE>::Factory_ Factory_;
+      typedef typename ObsOperatorTraits<OPBASE>::ParametersWrapper_ ParametersWrapper_;
+
+      ParametersWrapper_ operatorParams;
+      operatorParams.validateAndDeserialize(operatorConfig);
+      std::unique_ptr<OPBASE> op(Factory_::create(odb, operatorParams.operatorParameters));
       requiredVars_ += op->requiredVars();
       components_.emplace(std::make_pair(operatorConfig.getString("name"), std::move(op)));
     }

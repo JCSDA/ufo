@@ -40,7 +40,9 @@ namespace ufo {
 class LinearObsOperator : public util::Printable,
                           private boost::noncopyable {
  public:
-  LinearObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
+  typedef LinearObsOperatorParametersWrapper Parameters_;
+
+  LinearObsOperator(ioda::ObsSpace &, const Parameters_ &);
 
 /// Obs Operator
   void setTrajectory(const GeoVaLs &, const ObsBias &);

@@ -14,6 +14,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 namespace ufo {
 
@@ -34,12 +35,10 @@ class ObsGnssroRefMetOfficeOptions : public oops::Parameters {
 };
 
 /// Configuration options recognized by the refractivity operator.
-class ObsGnssroRefMetOfficeParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsGnssroRefMetOfficeParameters, Parameters)
+class ObsGnssroRefMetOfficeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsGnssroRefMetOfficeParameters, ObsOperatorParametersBase)
 
  public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
   /// Obs Options - settings for the observation operator
   oops::Parameter<ObsGnssroRefMetOfficeOptions> obsOptions{"obs options",
     ObsGnssroRefMetOfficeOptions(), this};

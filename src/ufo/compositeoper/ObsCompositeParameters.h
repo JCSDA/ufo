@@ -12,18 +12,16 @@
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 namespace ufo {
 
 /// Configuration options recognized by the Composite operator.
-class ObsCompositeParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsCompositeParameters, Parameters)
+class ObsCompositeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsCompositeParameters, ObsOperatorParametersBase)
 
  public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
   /// A list of configuration options for each operator used to simulate a subset of variables.
   oops::RequiredParameter<std::vector<eckit::LocalConfiguration>> components{"components", this};
 };

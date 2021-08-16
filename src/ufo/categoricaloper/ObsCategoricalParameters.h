@@ -13,19 +13,16 @@
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 namespace ufo {
 
 /// Configuration options recognized by the Categorical operator.
-class ObsCategoricalParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsCategoricalParameters, Parameters)
+class ObsCategoricalParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsCategoricalParameters, ObsOperatorParametersBase)
 
  public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
-
   /// Categorical variable used to divide H(x) into sections.
   oops::RequiredParameter<std::string> categoricalVariable{"categorical variable", this};
 

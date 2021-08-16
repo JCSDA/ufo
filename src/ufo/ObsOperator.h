@@ -42,7 +42,9 @@ namespace ufo {
 class ObsOperator : public util::Printable,
                     private boost::noncopyable {
  public:
-  ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
+  typedef ObsOperatorParametersWrapper Parameters_;
+
+  ObsOperator(ioda::ObsSpace &, const Parameters_ &);
 
 /// Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;

@@ -16,13 +16,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/compositeoper/ObsCompositeParameters.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -58,9 +55,13 @@ namespace ufo {
 class ObsComposite : public ObsOperatorBase,
                      private util::ObjectCounter<ObsComposite> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsCompositeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsComposite";}
 
-  ObsComposite(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsComposite(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsComposite() override;
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;

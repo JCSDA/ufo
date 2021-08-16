@@ -48,17 +48,29 @@ ObsOperatorFactory::ObsOperatorFactory(const std::string & name) {
 // -----------------------------------------------------------------------------
 
 ObsOperatorBase * ObsOperatorFactory::create(const ioda::ObsSpace & odb,
-                                             const eckit::Configuration & conf) {
+                                             const ObsOperatorParametersBase & params) {
   oops::Log::trace() << "ObsOperatorBase::create starting" << std::endl;
-  const std::string id = conf.getString("name");
+  const std::string &id = params.name.value().value();
   typename std::map<std::string, ObsOperatorFactory*>::iterator jloc = getMakers().find(id);
   if (jloc == getMakers().end()) {
     oops::Log::error() << id << " does not exist in ufo::ObsOperatorFactory." << std::endl;
     ABORT("Element does not exist in ufo::ObsOperatorFactory.");
   }
-  ObsOperatorBase * ptr = jloc->second->make(odb, conf);
+  ObsOperatorBase * ptr = jloc->second->make(odb, params);
   oops::Log::trace() << "ObsOperatorBase::create done" << std::endl;
   return ptr;
+}
+
+// -----------------------------------------------------------------------------
+
+std::unique_ptr<ObsOperatorParametersBase>
+ObsOperatorFactory::createParameters(const std::string &name) {
+  typename std::map<std::string, ObsOperatorFactory*>::iterator it =
+      getMakers().find(name);
+  if (it == getMakers().end()) {
+    throw std::runtime_error(name + " does not exist in ufo::ObsOperatorFactory");
+  }
+  return it->second->makeParameters();
 }
 
 // -----------------------------------------------------------------------------

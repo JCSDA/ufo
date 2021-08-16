@@ -19,10 +19,6 @@
 #include "ObsGnssroRefMetOfficeParameters.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -38,9 +34,13 @@ namespace ufo {
 class ObsGnssroRefMetOfficeTLAD : public LinearObsOperatorBase,
                           private util::ObjectCounter<ObsGnssroRefMetOfficeTLAD> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the LinearObsOperatorFactory.
+  typedef ObsGnssroRefMetOfficeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroRefMetOfficeTLAD";}
 
-  ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroRefMetOfficeTLAD();
 
   // Obs Operators
@@ -58,7 +58,7 @@ class ObsGnssroRefMetOfficeTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperGnssroRefMetOffice_;
   std::unique_ptr<const oops::Variables> varin_;
-  ObsGnssroRefMetOfficeParameters parameters_;
+  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

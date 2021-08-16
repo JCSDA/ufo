@@ -20,8 +20,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
+LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
+  : oper_(LinearObsOperatorFactory::create(os, params.operatorParameters)), odb_(os)
 {
   // We use += rather than = to make sure the Variables objects contain no duplicate entries
   // and the variables are sorted alphabetically.

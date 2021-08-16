@@ -27,10 +27,10 @@ static LinearObsOperatorMaker<ObsGnssroRefMetOfficeTLAD>
 // -----------------------------------------------------------------------------
 
 ObsGnssroRefMetOfficeTLAD::ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
-  : LinearObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), varin_()
+                                                     const Parameters_ & parameters)
+  : LinearObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), varin_(),
+    parameters_(parameters)
 {
-  parameters_.validateAndDeserialize(config);
   ObsGnssroRefMetOfficeOptions obsOptions = parameters_.obsOptions.value();
 
   ufo_gnssro_refmetoffice_tlad_setup_f90(keyOperGnssroRefMetOffice_,

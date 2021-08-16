@@ -7,7 +7,8 @@
 
 #include "ufo/LinearObsOperatorBase.h"
 
-#include "eckit/config/Configuration.h"
+#include <memory>
+
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -33,24 +34,33 @@ LinearObsOperatorFactory::LinearObsOperatorFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-LinearObsOperatorBase * LinearObsOperatorFactory::create(const ioda::ObsSpace & odb,
-                                             const eckit::Configuration & conf) {
+LinearObsOperatorBase * LinearObsOperatorFactory::create(
+    const ioda::ObsSpace & odb, const ObsOperatorParametersBase & params) {
   oops::Log::trace() << "LinearObsOperatorBase::create starting" << std::endl;
 
-  std::string id;
-
-  id = conf.getString("name");
+  const std::string &id = params.name.value().value();
 
   typename std::map<std::string, LinearObsOperatorFactory*>::iterator jloc = getMakers().find(id);
   if (jloc == getMakers().end()) {
     oops::Log::error() << id << " does not exist in ufo::LinearObsOperatorFactory." << std::endl;
     ABORT("Element does not exist in ufo::LinearObsOperatorFactory.");
   }
-  LinearObsOperatorBase * ptr = jloc->second->make(odb, conf);
+  LinearObsOperatorBase * ptr = jloc->second->make(odb, params);
   oops::Log::trace() << "LinearObsOperatorBase::create done" << std::endl;
   return ptr;
 }
 
+// -----------------------------------------------------------------------------
+
+std::unique_ptr<ObsOperatorParametersBase>
+LinearObsOperatorFactory::createParameters(const std::string &name) {
+  typename std::map<std::string, LinearObsOperatorFactory*>::iterator it =
+      getMakers().find(name);
+  if (it == getMakers().end()) {
+    throw std::runtime_error(name + " does not exist in ufo::LinearObsOperatorFactory");
+  }
+  return it->second->makeParameters();
+}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo

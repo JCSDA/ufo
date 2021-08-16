@@ -26,12 +26,12 @@ static LinearObsOperatorMaker<ObsCategoricalTLAD> makerCategoricalTL_("Categoric
 // -----------------------------------------------------------------------------
 
 ObsCategoricalTLAD::ObsCategoricalTLAD(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
+                                       const Parameters_ & params)
   : LinearObsOperatorBase(odb), odb_(odb)
 {
   oops::Log::trace() << "ObsCategoricalTLAD constructor starting" << std::endl;
 
-  data_.configure(odb, config);
+  data_.configure(odb, params);
 
   oops::Log::trace() << "ObsCategoricalTLAD created." << std::endl;
 }

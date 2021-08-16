@@ -32,7 +32,9 @@ ObsTimeOperTLAD::ObsTimeOperTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
   : LinearObsOperatorBase(odb),
     actualoperator_(LinearObsOperatorFactory::create(
-                    odb, eckit::LocalConfiguration(config, "obs operator"))),
+                      odb,
+                      oops::validateAndDeserialize<LinearObsOperatorParametersWrapper>(
+                        eckit::LocalConfiguration(config, "obs operator")).operatorParameters)),
     timeWeights_(timeWeightCreate(odb, config))
 {
   oops::Log::trace() << "ObsTimeOperTLAD created" << std::endl;

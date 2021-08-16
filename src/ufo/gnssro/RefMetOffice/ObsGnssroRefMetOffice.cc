@@ -26,10 +26,10 @@ static ObsOperatorMaker<ObsGnssroRefMetOffice> makerGnssroRefMetOffice_("GnssroR
 // -----------------------------------------------------------------------------
 
 ObsGnssroRefMetOffice::ObsGnssroRefMetOffice(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroRefMetOffice_(0), odb_(odb), varin_()
+                                             const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), odb_(odb), varin_(),
+    parameters_(parameters)
 {
-  parameters_.validateAndDeserialize(config);
   ObsGnssroRefMetOfficeOptions obsOptions = parameters_.obsOptions.value();
 
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",

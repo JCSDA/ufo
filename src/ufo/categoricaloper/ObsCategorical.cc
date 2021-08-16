@@ -27,12 +27,12 @@ static ObsOperatorMaker<ObsCategorical> obsCategoricalMaker_("Categorical");
 // -----------------------------------------------------------------------------
 
 ObsCategorical::ObsCategorical(const ioda::ObsSpace & odb,
-                               const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), odb_(odb)
+                               const Parameters_ & params)
+  : ObsOperatorBase(odb), odb_(odb)
 {
   oops::Log::trace() << "ObsCategorical constructor starting" << std::endl;
 
-  data_.configure(odb, config);
+  data_.configure(odb, params);
 
   oops::Log::trace() << "ObsCategorical constructor finished" << std::endl;
 }

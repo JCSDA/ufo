@@ -21,10 +21,6 @@
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -39,9 +35,13 @@ namespace ufo {
 class ObsCategoricalTLAD : public LinearObsOperatorBase,
   private util::ObjectCounter<ObsCategoricalTLAD> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the LinearObsOperatorFactory.
+  typedef ObsCategoricalParameters Parameters_;
+
   static const std::string classname() { return "ufo::ObsCategoricalTLAD"; }
 
-  ObsCategoricalTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsCategoricalTLAD(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsCategoricalTLAD() override;
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -58,7 +58,7 @@ class ObsCategoricalTLAD : public LinearObsOperatorBase,
   const ioda::ObsSpace& odb_;
 
   /// Data handler for the Categorical operator and TL/AD code.
-  ObsCategoricalData<LinearObsOperatorBase, LinearObsOperatorFactory> data_;
+  ObsCategoricalData<LinearObsOperatorBase> data_;
 };
 
 // -----------------------------------------------------------------------------

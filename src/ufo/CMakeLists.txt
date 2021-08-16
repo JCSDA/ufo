@@ -37,6 +37,7 @@ list( APPEND ufo_src_files
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
+    ObsOperatorParametersBase.h
     ObsTraits.h
     locations_f.cc
     locations_f.h

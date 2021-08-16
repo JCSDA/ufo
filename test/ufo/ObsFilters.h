@@ -103,7 +103,7 @@ class ObsTypeParameters : public oops::Parameters {
   /// precalculated and stored in the IODA file used to initialize the ObsSpace. In that case the
   /// `obs operator` keyword should be omitted and instead the `HofX` option should be set to the
   /// name of the group of ObsSpace variables containing the precalculated model equivalents.
-  oops::OptionalParameter<eckit::LocalConfiguration> obsOperator{"obs operator", this};
+  oops::OptionalParameter<ObsOperatorParametersWrapper> obsOperator{"obs operator", this};
 
   /// Group of variables storing precalculated model equivalents of observations. See the
   /// description of the `obs operator` option for more information.

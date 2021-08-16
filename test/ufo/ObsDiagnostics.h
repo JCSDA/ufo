@@ -56,7 +56,9 @@ void testObsDiagnostics() {
   // initialize observation operator (set variables requested from the model,
   // variables simulated by the observation operator, other init)
   eckit::LocalConfiguration obsopconf(conf, "obs operator");
-  ObsOperator hop(ospace, obsopconf);
+  ObsOperatorParametersWrapper obsopparams;
+  obsopparams.validateAndDeserialize(obsopconf);
+  ObsOperator hop(ospace, obsopparams);
 
   // read geovals from the file
   eckit::LocalConfiguration gconf(conf, "geovals");
