@@ -96,7 +96,9 @@ void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &con
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsParams;
+  obsParams.validateAndDeserialize(obsSpaceConf);
+  ioda::ObsSpace obsSpace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   boost::optional<std::vector<float>> airPressures;
   if (obsSpace.has("MetaData", "air_pressure")) {

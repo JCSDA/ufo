@@ -48,7 +48,9 @@ void testObsDiagnostics() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsparams;
+  obsparams.validateAndDeserialize(obsconf);
+  ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,

@@ -9,6 +9,8 @@
 
 #include <utility>
 
+#include "ioda/ObsSpaceParameters.h"
+
 #include "oops/util/Duration.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
@@ -52,7 +54,7 @@ class HistoryCheckParameters : public TrackCheckUtilsParameters {
 
     /// Creates a new obs space with the wider window that is determined by the observation subtype.
     /// Needs: name (can be set with setValue), simulated variables, obsdatain.obsfile.
-    oops::RequiredParameter<eckit::LocalConfiguration> largerObsSpace {
+    oops::RequiredParameter<ioda::ObsTopLevelParameters> largerObsSpace {
       "obs space", this
     };
 

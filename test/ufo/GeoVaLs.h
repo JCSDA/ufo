@@ -44,7 +44,9 @@ void testGeoVaLs() {
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 /// Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
-    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsTopLevelParameters obsparams;
+    obsparams.validateAndDeserialize(obsconf);
+    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
 /// Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");

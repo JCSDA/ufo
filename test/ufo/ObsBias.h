@@ -40,8 +40,9 @@ void testObsBiasReadWrite() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
-    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::world(),
-                       bgn, end, oops::mpi::myself());
+    ioda::ObsTopLevelParameters obsparams;
+    obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
+    ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
     // setup ObsBias parameters
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");

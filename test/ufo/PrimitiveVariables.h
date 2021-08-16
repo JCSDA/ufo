@@ -66,7 +66,10 @@ class TestFixture : private boost::noncopyable {
     util::DateTime bgn(conf.getString("window begin"));
     util::DateTime end(conf.getString("window end"));
     const eckit::LocalConfiguration obsconf(conf, "obs space");
-    obsspace_.reset(new ioda::ObsSpace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself()));
+    ioda::ObsTopLevelParameters obsparams;
+    obsparams.validateAndDeserialize(obsconf);
+    obsspace_.reset(new ioda::ObsSpace(obsparams, oops::mpi::world(), bgn, end,
+                                       oops::mpi::myself()));
     data_.reset(new ObsFilterData(*obsspace_));
   }
 

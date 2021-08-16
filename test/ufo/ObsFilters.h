@@ -91,8 +91,7 @@ class ObsTypeParameters : public oops::Parameters {
 
  public:
   /// Options used to configure the observation space.
-  oops::Parameter<eckit::LocalConfiguration> obsSpace{
-    "obs space", eckit::LocalConfiguration(), this};
+  oops::Parameter<ioda::ObsTopLevelParameters> obsSpace{"obs space", {}, this};
 
   /// Options used to configure observation filters.
   oops::Parameter<std::vector<oops::ObsFilterParametersWrapper<ObsTraits>>> obsFilters{

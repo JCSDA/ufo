@@ -46,8 +46,9 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
   util::DateTime end(conf.getString("window end"));
 
   eckit::LocalConfiguration obsconf(conf, "obs space");
-
-  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsparams;
+  obsparams.validateAndDeserialize(obsconf);
+  ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
   ObsFilterData data(ospace);
 
   const int nlocs = conf.getInt("nlocs");
