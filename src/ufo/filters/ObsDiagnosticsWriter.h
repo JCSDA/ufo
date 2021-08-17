@@ -43,7 +43,8 @@ class ObsDiagnosticsWriter : public oops::interface::ObsFilterBase<ObsTraits> {
 
   void preProcess() override {}
   void priorFilter(const GeoVaLs &) override {}
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics & diags) override {
+  void postFilter(const ioda::ObsVector &, const ioda::ObsVector &,
+                  const ObsDiagnostics & diags) override {
     diags.write(config_);
   }
 

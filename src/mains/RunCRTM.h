@@ -70,9 +70,11 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
 
       ObsVector_ hofx(obsdb[jj]);
+      ObsVector_ bias(obsdb[jj]);
+      bias.zero();
       ObsDiags_ diag(obsdb[jj], hop.locations(), diagvars);
 
-      hop.simulateObs(gval, hofx, ybias, diag);
+      hop.simulateObs(gval, hofx, ybias, bias, diag);
 
       const double zz = hofx.rms();
       const double xx = conf[jj].getDouble("rms ref");

@@ -90,18 +90,17 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> obsbias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+
   std::string test_hofx = parameters_.test_hofx.value();
+  Variables varhofx(filtervars_, test_hofx);
 
 // Get function absolute threshold
-
   if (parameters_.functionAbsoluteThreshold.value()) {
 //  Get function absolute threshold info from configuration
     const Variable &rtvar = parameters_.functionAbsoluteThreshold.value()->front();
     ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsVariables());
     data_.get(rtvar, function_abs_threshold);
 
-    Variables varhofx(filtervars_, test_hofx);
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)
@@ -123,7 +122,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   } else {
-    Variables varhofx(filtervars_, test_hofx);
+    Variables varbias(filtervars_, "ObsBiasData");
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)
@@ -135,6 +134,9 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       if (thresholdWrtBGerror) {
         data_.get(backgrErrVariable(filtervars[jv]), hofxerr);
       }
+//    H(x) bias correction
+      std::vector<float> bias;
+      data_.get(varbias.variable(jv), bias);
 
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
@@ -155,8 +157,8 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
             (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
           if (parameters_.BiasCorrectionFactor.value()) {
-            ASSERT(obsbias[jv][jobs] != util::missingValue(obsbias[jv][jobs]));
-            bc_factor[jobs] = bc_factor[jobs]*obsbias[jv][jobs];
+            ASSERT(bias[jobs] != util::missingValue(bias[jobs]));
+            bc_factor[jobs] = bc_factor[jobs]*bias[jobs];
           }
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 

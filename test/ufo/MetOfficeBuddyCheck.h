@@ -69,8 +69,11 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   filter.preProcess();
 
   ioda::ObsVector hofx(obsSpace, "HofX");
-  ufo::Locations locations(conf, obsSpace.comm());
 
+  ioda::ObsVector bias(obsSpace);
+  bias.zero();
+
+  ufo::Locations locations(conf, obsSpace.comm());
   const eckit::LocalConfiguration diagConf = conf.getSubConfiguration("obs diagnostics");
   oops::Variables diagVars;
   for (const std::string &name : diagConf.keys())
@@ -82,7 +85,7 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsDiags.save(diag, name, 0);
   }
 
-  filter.postFilter(hofx, obsDiags);
+  filter.postFilter(hofx, bias, obsDiags);
 
   const eckit::LocalConfiguration pgeConf(conf, "ExpectedGrossErrorProbabilities");
   for (const std::string & varNameGroup : pgeConf.keys()) {

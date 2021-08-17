@@ -48,10 +48,11 @@ class HydrometeorCheckATMSParameters : public oops::Parameters {
   /// Name of the HofX group used to replace the default group (default is HofX)
   oops::Parameter<std::string> testHofX{"test_hofx", "HofX", this};
 
-  /// Name of the group for bias correction used to replace the default group (default is ObsBias)
+  /// Name of the group for bias correction used to replace the default group (default is
+  /// ObsBiasData)
   /// Example: use observation bias correction values from GSI
   ///          test_bias: GsiObsBias
-  oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
+  oops::Parameter<std::string> testBias{"test_bias", "ObsBiasData", this};
 
   /// Name of the group for bias correction terms used to replace the default group
   /// (default is ObsBiasTerm)

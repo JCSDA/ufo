@@ -73,6 +73,10 @@ void testObsDiagnostics() {
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);
 
+  // create obsvector to hold bias
+  ioda::ObsVector bias(ospace);
+  bias.zero();
+
   // create diagnostics to hold HofX diags
   eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
   oops::Variables diagvars(diagconf, "variables");
@@ -81,7 +85,7 @@ void testObsDiagnostics() {
   ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
 
   // call H(x) to compute diagnostics
-  hop.simulateObs(gval, hofx, ybias, diags);
+  hop.simulateObs(gval, hofx, ybias, bias, diags);
 
   // read tolerance and reference Diagnostics
   const double tol = conf.getDouble("tolerance");

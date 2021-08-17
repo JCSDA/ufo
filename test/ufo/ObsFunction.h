@@ -161,6 +161,11 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
     inputs.associate(*gval);
   }
 
+///  Setup zero ObsBias
+  ioda::ObsVector bias(ospace);
+  bias.zero();
+  inputs.associate(bias, "ObsBiasData");
+
 ///  Setup ObsDiags
   const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
   std::unique_ptr<ObsDiagnostics> diags;

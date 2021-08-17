@@ -94,7 +94,9 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*conf
 
 // -----------------------------------------------------------------------------
 
-void QCmanager::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) {
+void QCmanager::postFilter(const ioda::ObsVector & hofx,
+                           const ioda::ObsVector & /*bias*/,
+                           const ObsDiagnostics & /*diags*/) {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const double missing = util::missingValue(missing);

@@ -403,6 +403,11 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
   oops::Variables diagvars = filters.requiredHdiagnostics();
+
+/// initialize zero bias
+  ObsVector_ bias(obspace);
+  bias.zero();
+
   if (params.hofx.value() != boost::none) {
 ///   read GeoVaLs from file if required
     std::unique_ptr<const GeoVaLs_> gval;
@@ -430,7 +435,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
                         << std::endl;
     }
     const ObsDiags_ diags(obsdiagconf, obspace, diagvars);
-    filters.postFilter(hofx, diags);
+    filters.postFilter(hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
@@ -450,9 +455,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
-    hop.simulateObs(gval, hofx, ybias, diags);
+    hop.simulateObs(gval, hofx, ybias, bias, diags);
     hofx.save("hofx");
-    filters.postFilter(hofx, diags);
+    filters.postFilter(hofx, bias, diags);
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
     if (params.geovals.value() == boost::none)

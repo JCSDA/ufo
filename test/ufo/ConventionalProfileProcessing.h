@@ -19,6 +19,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/mpi/mpi.h"
@@ -70,6 +71,9 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
   ioda::ObsVector hofx(obsspace);
 
+  ioda::ObsVector bias(obsspace);
+  bias.zero();
+
   const eckit::LocalConfiguration obsdiagconf(conf, "obs diagnostics");
   std::vector<eckit::LocalConfiguration> varconfs;
   obsdiagconf.get("variables", varconfs);
@@ -117,9 +121,9 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   filter.preProcess();
   filter.priorFilter(*geovals);
   if (expectThrowDuringOperation)
-    EXPECT_THROWS(filter.postFilter(hofx, obsdiags));
+    EXPECT_THROWS(filter.postFilter(hofx, bias, obsdiags));
   else
-    filter.postFilter(hofx, obsdiags);
+    filter.postFilter(hofx, bias, obsdiags);
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are

@@ -45,15 +45,14 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
 // -----------------------------------------------------------------------------
 
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
-                              const ObsBias & bias, ObsDiagnostics & ydiags) const {
+                              const ObsBias & biascoeff, ioda::ObsVector & ybias,
+                              ObsDiagnostics & ydiags) const {
   oper_->simulateObs(gvals, yy, ydiags);
-  if (bias) {
-    ioda::ObsVector ybias(odb_);
+  if (biascoeff) {
     ObsBiasOperator biasoper(odb_);
-    biasoper.computeObsBias(gvals, ybias, bias, ydiags);
+    biasoper.computeObsBias(gvals, ybias, biascoeff, ydiags);
     // update H(x) with bias correction
     yy += ybias;
-    ybias.save("ObsBias");
   }
 }
 

@@ -47,7 +47,8 @@ class ObsOperator : public util::Printable,
   ObsOperator(ioda::ObsSpace &, const Parameters_ &);
 
 /// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ioda::ObsVector &,
+                   ObsDiagnostics &) const;
 
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;

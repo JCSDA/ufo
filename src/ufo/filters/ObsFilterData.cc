@@ -39,9 +39,9 @@ void ObsFilterData::associate(const GeoVaLs & gvals) {
 }
 
 // -----------------------------------------------------------------------------
-/*! Associates H(x) ObsVector with this ObsFilterData */
-void ObsFilterData::associate(const ioda::ObsVector & hofx, const std::string & name) {
-  ovecs_[name] = &hofx;
+/*! Associates H(x)-like ObsVector with this ObsFilterData */
+void ObsFilterData::associate(const ioda::ObsVector & data, const std::string & name) {
+  ovecs_[name] = &data;
 }
 
 // -----------------------------------------------------------------------------
