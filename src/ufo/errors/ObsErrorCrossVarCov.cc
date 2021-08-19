@@ -18,16 +18,13 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsErrorCrossVarCov::ObsErrorCrossVarCov(const eckit::Configuration & conf,
+ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                                          ioda::ObsSpace & obspace,
                                          const eckit::mpi::Comm &timeComm)
   : ObsErrorBase(timeComm),
     stddev_(obspace, "ObsError"),
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars()))
 {
-  ObsErrorCrossVarCovParameters options;
-  options.deserialize(conf);
-
   // Open and read error correlations from the hdf5 file
   ioda::Engines::BackendNames  backendName = ioda::Engines::BackendNames::Hdf5File;
   ioda::Engines::BackendCreationParameters backendParams;

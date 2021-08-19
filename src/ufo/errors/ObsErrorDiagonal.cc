@@ -16,11 +16,11 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsErrorDiagonal::ObsErrorDiagonal(const eckit::Configuration & conf, ioda::ObsSpace & obsgeom,
+ObsErrorDiagonal::ObsErrorDiagonal(const Parameters_ & options, ioda::ObsSpace & obsgeom,
                                    const eckit::mpi::Comm &timeComm)
-  : ObsErrorBase(timeComm), stddev_(obsgeom, "ObsError"), inverseVariance_(obsgeom)
+  : ObsErrorBase(timeComm),
+    stddev_(obsgeom, "ObsError"), inverseVariance_(obsgeom), options_(options)
 {
-  options_.deserialize(conf);
   inverseVariance_ = stddev_;
   inverseVariance_ *= stddev_;
   inverseVariance_.invert();

@@ -32,8 +32,8 @@ namespace ioda {
 namespace ufo {
 
 /// \brief Parameters for diagonal obs errors
-class ObsErrorDiagonalParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsErrorDiagonalParameters, Parameters)
+class ObsErrorDiagonalParameters : public oops::ObsErrorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorDiagonalParameters, ObsErrorParametersBase)
  public:
   /// perturbation amplitude multiplier
   oops::Parameter<double> pert{"random amplitude", 1.0, this};
@@ -43,9 +43,13 @@ class ObsErrorDiagonalParameters : public oops::Parameters {
 /// \brief Diagonal observation error covariance matrix.
 class ObsErrorDiagonal : public oops::interface::ObsErrorBase<ObsTraits> {
  public:
+  /// The type of parameters passed to the constructor.
+  /// This typedef is used by the ObsErrorFactory.
+  typedef ObsErrorDiagonalParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsErrorDiagonal";}
 
-  ObsErrorDiagonal(const eckit::Configuration &, ioda::ObsSpace &,
+  ObsErrorDiagonal(const Parameters_ &, ioda::ObsSpace &,
                    const eckit::mpi::Comm &timeComm);
 
 /// Update after obs errors potentially changed
@@ -76,7 +80,7 @@ class ObsErrorDiagonal : public oops::interface::ObsErrorBase<ObsTraits> {
   void print(std::ostream &) const override;
   ioda::ObsVector stddev_;
   ioda::ObsVector inverseVariance_;
-  ObsErrorDiagonalParameters options_;
+  Parameters_ options_;
 };
 
 // -----------------------------------------------------------------------------
