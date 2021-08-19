@@ -24,7 +24,7 @@ namespace ufo
 ///     This is the variable containing the values to be extracted (also known as the _payload_).
 ///     Its type needs to match the template parameter `ExtractedValue`, which must be
 ///     set to either `float`, `int` or `std::string`.
-///   - For most types of data, the above array should be 1D or 2D. As a special case,
+///   - For most types of data, the above array should be 1D, 2D or 3D. As a special case,
 ///     if this class is used to extract variances, the file may contain a full 2D covariance
 ///     matrix or a stack of such matrices stored as a 3D array, with variances located on the
 ///     diagonal of each matrix. In that case, the array should be equipped with a `full` attribute

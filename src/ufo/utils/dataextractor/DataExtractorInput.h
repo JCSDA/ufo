@@ -52,7 +52,7 @@ struct DataExtractorInputBase {
 template <typename ExtractedValue>
 struct DataExtractorInput : public DataExtractorInputBase {
   /// Array from which values will be extracted
-  boost::multi_array<ExtractedValue, 2> payloadArray;
+  boost::multi_array<ExtractedValue, 3> payloadArray;
 };
 
 }  // namespace ufo

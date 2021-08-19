@@ -227,11 +227,6 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
 
   // Load the array to be interpolated
   // --------------------------------
-  // NOTE:
-  // - We might want to eventually put together a more generalised approach (a collapse
-  //   method taking the dimension as argument)
-  // - We might also want to not assume that the array is ordered? - by using
-  //   coordinate info. though I'm not sure why it wouldn't be...
   if (isCovariant == "true") {
     // This is a full matrix or a stack of full matrices - pull out the diagonals
     // --------------------------------
@@ -246,10 +241,10 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
                                                             fullMatrices.num_elements()));
 
       // Extract their diagonals into the payload array
-      result.payloadArray.resize(boost::extents[dimdim.dimsCur[1]][dimdim.dimsCur[2]]);
+      result.payloadArray.resize(boost::extents[dimdim.dimsCur[1]][dimdim.dimsCur[2]][1]);
       for (int i = 0; i < dimdim.dimsCur[1]; i++) {
         for (int k = 0; k < dimdim.dimsCur[2]; k++) {
-          result.payloadArray[i][k] = fullMatrices[i][i][k];
+          result.payloadArray[i][k][0] = fullMatrices[i][i][k];
         }
       }
     } else if (dimdim.dimensionality == 2) {
@@ -260,9 +255,9 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
                                                             fullMatrix.num_elements()));
 
       // Extract its diagonal into the payload array
-      result.payloadArray.resize(boost::extents[dimdim.dimsCur[1]][1]);
+      result.payloadArray.resize(boost::extents[dimdim.dimsCur[1]][1][1]);
       for (int i = 0; i < dimdim.dimsCur[1]; i++) {
-        result.payloadArray[i][0] = fullMatrix[i][i];
+        result.payloadArray[i][0][0] = fullMatrix[i][i];
       }
     } else {
       throw eckit::Exception("Expecting 3D or 2D array for error covariance.", Here());
@@ -283,14 +278,17 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
         dim2CoordMapping[dim].emplace_back(coord.first);  // update our reverse lookup
       }
     }
+  } else if (dimdim.dimensionality == 3) {
+    result.payloadArray.resize(
+      boost::extents[dimdim.dimsCur[0]][dimdim.dimsCur[1]][dimdim.dimsCur[2]]);
+    interpolatedArrayCoord.read(gsl::span<ExtractedValue>(result.payloadArray.data(),
+                                                          result.payloadArray.num_elements()));
   } else if (dimdim.dimensionality == 2) {
-    // This is just the diagonals - read directly into our container
-    result.payloadArray.resize(boost::extents[dimdim.dimsCur[0]][dimdim.dimsCur[1]]);
+    result.payloadArray.resize(boost::extents[dimdim.dimsCur[0]][dimdim.dimsCur[1]][1]);
     interpolatedArrayCoord.read(gsl::span<ExtractedValue>(result.payloadArray.data(),
                                                           result.payloadArray.num_elements()));
   } else if (dimdim.dimensionality == 1) {
-    // This is just the diagonals - read directly into our container
-    result.payloadArray.resize(boost::extents[dimdim.dimsCur[0]][1]);
+    result.payloadArray.resize(boost::extents[dimdim.dimsCur[0]][1][1]);
     interpolatedArrayCoord.read(gsl::span<ExtractedValue>(result.payloadArray.data(),
                                                           result.payloadArray.num_elements()));
   } else {

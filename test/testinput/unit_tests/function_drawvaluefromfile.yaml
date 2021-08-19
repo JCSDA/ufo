@@ -301,6 +301,24 @@ observations:
     variables: [assigned_float_variable_bilin]
   expect compute to throw exception with message: Bilinear interpolation can be used when extracting floating-point values, but not integers or strings
 
+- obs space: &ObsSpace
+    name: Payload array with scalar coordinates.
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@IntObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced5.nc
+      group: IntResult2D
+      interpolation:
+      - name: longitude@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: nearest
+    variables: [assigned_int_variable_3]
+    tolerance: 1.0e-6
+
 
 # 4. Tests of DrawValueFromFile@StringObsFunction using a NetCDF input file
 
@@ -400,7 +418,7 @@ observations:
         method: bilinear
       - name: latitude@MetaData
         method: bilinear
-    variables: [assigned_float_variable_bilin]
+    variables: [assigned_float_variable_bilin_0]
   expect compute to throw exception with message: Bilinear interpolation can be used when extracting floating-point values, but not integers or strings
 
 # 5. Tests of DrawValueFromFile@ObsFunction (float) using a NetCDF input file
@@ -420,7 +438,7 @@ observations:
         method: bilinear
       - name: latitude@MetaData
         method: bilinear
-    variables: [assigned_float_variable_bilin]
+    variables: [assigned_float_variable_bilin_0]
     tolerance: 1.0e-6
 
 - obs space: &ObsSpace
@@ -438,7 +456,7 @@ observations:
         method: bilinear
       - name: latitude@MetaData
         method: nearest
-    variables: [assigned_float_variable_bilin]
+    variables: [assigned_float_variable_bilin_0]
   expect constructor to throw exception with message: Bilinear interpolation can only be supplied as the final two arguments
 
 - obs space: &ObsSpace
@@ -456,7 +474,7 @@ observations:
         method: nearest
       - name: latitude@MetaData
         method: bilinear
-    variables: [assigned_float_variable_bilin]
+    variables: [assigned_float_variable_bilin_0]
   expect constructor to throw exception with message: Bilinear interpolation requires two variables
 
 - obs space: &ObsSpace
@@ -474,7 +492,7 @@ observations:
         method: linear
       - name: latitude@MetaData
         method: nearest
-    variables: [assigned_float_variable_bilin]
+    variables: [assigned_float_variable_bilin_0]
   expect constructor to throw exception with message: Linear interpolation can only be supplied as the very last argument
 
 - obs space: &ObsSpace
@@ -492,6 +510,105 @@ observations:
         method: linear
       - name: latitude@MetaData
         method: linear
-    variables: [assigned_float_variable_bilin]
-    tolerance: 1.0e-6
+    variables: [assigned_float_variable_bilin_0]
   expect constructor to throw exception with message: Linear interpolation can only be supplied as the very last argument
+
+- obs space: &ObsSpace
+    name: 3D payload array with bilinear interpolation
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: longitude@MetaData
+        method: bilinear
+      - name: latitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin_0]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with bilinear interpolation alt. mapping
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: bilinear
+      - name: longitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin_0]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with linear interpolation
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: longitude@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: linear
+    variables: [assigned_float_variable_lin_0]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with linear interpolation coordinate mapped to the final dimension
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: nearest
+      - name: longitude@MetaData
+        method: nearest
+      - name: int_variable_1@MetaData
+        method: linear
+    variables: [assigned_float_variable_lin_1]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with bilinear interpolation coords mapped to the final two dimensions
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: nearest
+      - name: int_variable_1@MetaData
+        method: bilinear
+      - name: longitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_bilin_1]
+    tolerance: 1.0e-6

@@ -35,9 +35,142 @@ struct Named_Variable;
 
 namespace ufo {
 
+template <typename T>
+using DataExtractorPayload = boost::multi_array<T, 3>;
 
-/// \brief Perform bilinear interpolation along axis `dimIndex0` and `dimIndex1` at 'location'
-/// `obVal0` and `obVal1` corresponding to those axes.
+
+/// \brief Fetch a 1D sliced view of a boost multi_array object.
+///
+/// \details Given a set of constraints (ranges), return a 1D sliced view of the array.
+/// This will be along the dimension specified.  The constraints must constrain all but the
+/// dimension that the 1D varies.  Note that the 1D slice returned is not itself constrained or
+/// reordered.
+
+/// \param[in] array
+///   Some boost array for us to return its sliced view.
+/// \param[in] dimIndex
+///   Dimension index corresponding to this 1D slice.  Though this argument might be considered
+///   superfluous with also passing 'ranges', it does serve to ensure that the 1D slice returned
+///   corresponds to the dimension index you were expecting.
+/// \param[in] ranges
+///   Constraints for the array provided, used for extracting a 1D slice.
+///
+/// Example:
+/// \code
+///   // Define some 3D boost array
+///   boost::multi_array<float, 3> array (boost::extents[2][3][2]);
+///   for (int i=0; i<2; i++)
+///     for (int j=0; j<3; j++)
+///       for (int k=0; k<2; j++)
+///       array[i][j][k] = ...
+///
+///   // Let's fetch a 1D slice, constraining our first and last dimensions.
+///   std::array<ConstrainedRange, 3> ranges {ConstrainedRange(2), ConstrainedRange(3),
+///                                           ConstrainedRange(2)};
+///   ranges[0].constrain(0, 1);  // Let's pick the very first index...
+///   ranges[2].constrain(0, 1);  // Let's pick the very first index...
+///
+///   auto arraySliceView = get1DSlice(array, 1, ranges);
+/// \endcode
+template <typename T>
+const typename DataExtractorPayload<T>::template const_array_view<1>::type get1DSlice(
+    const DataExtractorPayload<T> &array, const size_t dimIndex,
+    const std::array<ConstrainedRange, 3> &ranges) {
+
+  // Sanity check constraints
+  for (size_t dim=0; dim < ranges.size(); dim++)
+    if ((dim != dimIndex) && (ranges[dim].size() > 1))
+      throw eckit::Exception(
+        "Unable to fetch a 1D array slice with the provided constraints.", Here());
+
+  typedef boost::multi_array_types::index_range range_t;
+  typedef typename DataExtractorPayload<T>::template const_array_view<1>::type view1D;
+  typename DataExtractorPayload<T>::index_gen indices;
+
+  if (dimIndex == 0) {
+    return array[indices[range_t()][ranges[1].begin()][ranges[2].begin()]];
+  } else if (dimIndex == 1) {
+    return array[indices[ranges[0].begin()][range_t()][ranges[2].begin()]];
+  } else if (dimIndex == 2) {
+    return array[indices[ranges[0].begin()][ranges[1].begin()][range_t()]];
+  } else {
+    // We shouldn't ever end up here (exception should be thrown earlier).
+    throw eckit::UserError("Invalid dimension index, expecting value mappings corresponding to 1 "
+                           "of 3 axes.", Here());
+  }
+}
+
+
+/// \brief Fetch a 2D sliced view of a boost multi_array object.
+///
+/// \details Given a set of constraints (ranges), return a 2D sliced view of the array.
+/// This will be along the two dimensions specified.  The constraints must constrain all
+/// but the two dimensions specified.  Note that the 2D slice returned is not itself constrained
+/// or reordered.
+///
+/// \param[in] array
+///   Some boost array for us to return its sliced view.
+/// \param[in] dimIndex0
+///   First of two 'array' dimension indices corresponding to our 2D slice.
+///   Though this argument might be considered superfluous with also passing 'ranges', it does
+///   serve to ensure that the 2D slice returned corresponds to the dimension index you were
+///   expecting.
+/// \param[in] dimIndex1
+///   Second of two 'array' dimension indices corresponding to our 2D slice.
+///   Though this argument might be considered superfluous with also passing 'ranges', it does
+///   serve to ensure that the 2D slice returned corresponds to the dimension index you were
+///   expecting.
+/// \param[in] ranges
+///   Constraints for the array provided, used for extracting a 2D slice.
+///
+/// Example:
+/// \code
+///   // Define some 3D boost array
+///   boost::multi_array<float, 3> array (boost::extents[2][3][2]);
+///   for (int i=0; i<2; i++)
+///     for (int j=0; j<3; j++)
+///       for (int k=0; k<2; j++)
+///       array[i][j][k] = ...
+///
+///   // Let's fetch a 2D slice, constraining our first dimension to a specific index.
+///   std::array<ConstrainedRange, 3> ranges {ConstrainedRange(2), ConstrainedRange(3),
+///                                           ConstrainedRange(2)};
+///   ranges[0].constrain(0, 1);  // Let's pick the very first index...
+///
+///   auto arraySliceView = get1DSlice(array, 1, 2, ranges);
+/// \endcode
+template <typename T>
+const typename DataExtractorPayload<T>::template const_array_view<2>::type get2DSlice(
+    const DataExtractorPayload<T> &array, const size_t dimIndex0, const size_t dimIndex1,
+    const std::array<ConstrainedRange, 3> &ranges) {
+
+  // Sanity check constraints
+  for (size_t dim=0; dim < ranges.size(); dim++)
+    if ((dim != dimIndex0) && (dim != dimIndex1) && (ranges[dim].size() > 1))
+      throw eckit::Exception(
+        "Unable to fetch a 2D array slice with the provided constraints.", Here());
+
+  typedef boost::multi_array_types::index_range range_t;
+  typedef typename DataExtractorPayload<T>::template const_array_view<2>::type view2D;
+  typename DataExtractorPayload<T>::index_gen indices;
+
+  size_t sumIndex = dimIndex0 + dimIndex1;
+  if (sumIndex == 1) {
+    return array[indices[range_t()][range_t()][ranges[2].begin()]];
+  } else if (sumIndex == 2) {
+    return array[indices[range_t()][ranges[1].begin()][range_t()]];
+  } else if (sumIndex == 3) {
+    return array[indices[ranges[0].begin()][range_t()][range_t()]];
+  } else {
+    // We shouldn't ever end up here (exception should be thrown earlier).
+    throw eckit::UserError("Invalid dimension index, expecting value mappings corresponding to two "
+                           "of 3 axes.", Here());
+  }
+}
+
+
+/// \brief Perform bilinear interpolation at 'location' at location `obVal0` and `obVal1`,
+/// corresponding to the first and second axes.
 ///
 /// \details This function returns the value produced by a bilinear interpolation at point
 /// `obVal0, obVal1`.  Where any of the neighbouring points used in the calculation are missing,
@@ -46,44 +179,40 @@ namespace ufo {
 /// This must be a final call in the sequence calls to extract.  This template handles all types
 /// except string (see below overloads).
 ///
-/// \param[in] dimIndex0
-///   One of two axes of `interpolatedArray` along which to interpolate.  This axis corresponds to
-///   that which `varName0`, `varValues0` describes and to which `obVal0` is to be interpolated.
-/// \param[in] dimIndex1
-///   One of two axes of `interpolatedArray` along which to interpolate.  This axis corresponds to
-///   that which `varName1`, `varValues1` describes and to which `obVal1` is to be interpolated.
-/// \param[in] ranges
-///   Ranges of slices of `interpolatedArray` matching all constraints considered so far.
 /// \param[in] varName0
-///   Name of the coordinate along one axis of two over which to interpolate.
-/// \param[in] varName1
-///   Name of the coordinate along one axis of two over which to interpolate.
+///   Name of the coordinate describing the first dimension of 'interpolatedArray' over which we
+///   are to interpolate.
 /// \param[in] varValues0
 ///   Vector of values of the `varName0` coordinate.
-/// \param[in] varValues1
-///   Vector of values of the `varName1` coordinate.
 /// \param[in] obVal0
 ///   Interpolation location along the axis corresponding to `varName0`.
+/// \param[in] range0
+///   Defines how to constrain (slice) `varValues0` and the corresponding first dimension of
+///   'interpolatedArray'.
+/// \param[in] varName1
+///   Name of the coordinate describing the second dimension of 'interpolatedArray' over which we
+///   are to interpolate.
+/// \param[in] varValues1
+///   Vector of values of the `varName1` coordinate.
 /// \param[in] obVal1
 ///   Interpolation location along the axis corresponding to `varName1`.
+/// \param[in] range1
+///   Defines how to constrain (slice) `varValues1` and the corresponding second dimension of
+/// 'interpolatedArray'.
 /// \param[in] interpolatedArray
-///   Interpolated array.
+///   2D interpolated array view.
 template <typename T, typename R>
-float bilinearInterpolation(const size_t dimIndex0,
-                            const std::string &varName0,
-                            const std::vector<T> &varValues0,
-                            const T &obVal0,
-                            const size_t dimIndex1,
-                            const std::string &varName1,
-                            const std::vector<R> &varValues1,
-                            const R &obVal1,
-                            const std::array<ConstrainedRange, 2> &ranges,
-                            const boost::multi_array<float, 2> &interpolatedArray) {
+float bilinearInterpolation(
+    const std::string &varName0,
+    const std::vector<T> &varValues0,
+    const T &obVal0,
+    const ConstrainedRange &range0,
+    const std::string &varName1,
+    const std::vector<R> &varValues1,
+    const R &obVal1,
+    const ConstrainedRange &range1,
+    const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
   const float missing = util::missingValue(missing);
-
-  // Constrain our index range in the relevant dimension.
-  const ConstrainedRange &range0 = ranges[dimIndex0];
-  const ConstrainedRange &range1 = ranges[dimIndex1];
 
   const int nnIndex0 = std::lower_bound(varValues0.begin() + range0.begin(),
                                         varValues0.begin() + range0.end(), obVal0) -
@@ -92,18 +221,9 @@ float bilinearInterpolation(const size_t dimIndex0,
                                         varValues1.begin() + range1.end(), obVal1) -
     varValues1.begin();
 
-  // Convenience function to extract specified index from the multi-array
-  auto getMultiArrayVal = [&] (int index0, int index1) {
-    if (dimIndex0 == 0) {
-      return interpolatedArray[index0][index1];
-    } else {
-      return interpolatedArray[index1][index0];
-    }
-  };
-
   if ((varValues0[nnIndex0] == obVal0) && (varValues1[nnIndex1] == obVal1)) {
     // No interpolation required.
-    return getMultiArrayVal(nnIndex0, nnIndex1);
+    return interpolatedArray[nnIndex0][nnIndex1];
   }
 
   // Setup points
@@ -125,8 +245,8 @@ float bilinearInterpolation(const size_t dimIndex0,
     return missing;
 
   // Z values at these locations
-  const float q11 = getMultiArrayVal(ix1, iy1), q12 = getMultiArrayVal(ix1, iy2),
-      q22 = getMultiArrayVal(ix2, iy2), q21 = getMultiArrayVal(ix2, iy1);
+  const float q11 = interpolatedArray[ix1][iy1], q12 = interpolatedArray[ix1][iy2],
+      q22 = interpolatedArray[ix2][iy2], q21 = interpolatedArray[ix2][iy1];
 
   // Missing data handling
   // - Pick nearest non-missing neighbour of the moore neighbourhood (no diagonals) if any of these
@@ -164,49 +284,49 @@ float bilinearInterpolation(const size_t dimIndex0,
 
 /// \brief Bilinear interpolation template, templated coord1, string coord2.
 template <typename T>
-float bilinearInterpolation(const size_t dimIndex0,
-                            const std::string &varName0,
-                            const std::vector<T> &varValues0,
-                            const T &obVal0,
-                            const size_t dimIndex1,
-                            const std::string &varName1,
-                            const std::vector<std::string> &varValues1,
-                            const std::string &obVal1,
-                            const std::array<ConstrainedRange, 2> &ranges,
-                            const boost::multi_array<float, 2> &interpolatedArray) {
+float bilinearInterpolation(
+    const std::string &varName0,
+    const std::vector<T> &varValues0,
+    const T &obVal0,
+    const ConstrainedRange &range0,
+    const std::string &varName1,
+    const std::vector<std::string> &varValues1,
+    const std::string &obVal1,
+    const ConstrainedRange &range1,
+    const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
   throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
                          "by string variables such as " + varName1 + ".", Here());
 }
 
 
 /// \brief Bilinear interpolation template, string coord1, templated coord2.
-template <typename R>
-float bilinearInterpolation(const size_t dimIndex0,
-                            const std::string &varName0,
-                            const std::vector<std::string> &varValues0,
-                            const std::string &obVal0,
-                            const size_t dimIndex1,
-                            const std::string &varName1,
-                            const std::vector<R> &varValues1,
-                            const R &obVal1,
-                            const std::array<ConstrainedRange, 2> &ranges,
-                            const boost::multi_array<float, 2> &interpolatedArray) {
+template <typename T>
+float bilinearInterpolation(
+    const std::string &varName0,
+    const std::vector<std::string> &varValues0,
+    const std::string &obVal0,
+    const ConstrainedRange &range0,
+    const std::string &varName1,
+    const std::vector<T> &varValues1,
+    const T &obVal1,
+    const ConstrainedRange &range1,
+    const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
   throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
                          "by string variables such as " + varName0 + ".", Here());
 }
 
 
-// Bilinear interpolation template, string coord1, string coord2.
-inline float bilinearInterpolation(const size_t dimIndex0,
-                                   const std::string &varName0,
-                                   const std::vector<std::string> &varValues0,
-                                   const std::string &obVal0,
-                                   const size_t dimIndex1,
-                                   const std::string &varName1,
-                                   const std::vector<std::string> &varValues1,
-                                   const std::string &obVal1,
-                                   const std::array<ConstrainedRange, 2> &ranges,
-                                   const boost::multi_array<float, 2> &interpolatedArray) {
+/// Bilinear interpolation template, string coord1, string coord2.
+inline float bilinearInterpolation(
+    const std::string &varName0,
+    const std::vector<std::string> &varValues0,
+    const std::string &obVal0,
+    const ConstrainedRange &range0,
+    const std::string &varName1,
+    const std::vector<std::string> &varValues1,
+    const std::string &obVal1,
+    const ConstrainedRange &range1,
+    const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
   throw eckit::UserError("Bilinear interpolation cannot be performed along coordinate axes indexed "
                          "by string variables such as " + varName0 + " or " +
                          varName1 + ".", Here());
@@ -349,7 +469,7 @@ class DataExtractor
 
   /// \brief Perform extract, given the observation values associated with the current extract
   /// iteration and the next.
-  /// \details Calls the relevant extract methood (linear), corresponding to the coordinate
+  /// \details Calls the relevant extract method (linear), corresponding to the coordinate
   /// associated with this extract iteration and the next (along with the associated interpolation
   /// method).  This method actually functions as two iterations, passing the current iteration
   /// coordinate and the next iteration coordinate.  These are passed to the underlying binary
@@ -373,7 +493,7 @@ class DataExtractor
   }
 
   /// \brief Fetch the final interpolated value.
-  /// \details This will only be succesful if previous calls to extract() have produced a single
+  /// \details This will only be successful if previous calls to extract() have produced a single
   /// value to return.
   ExtractedValue getResult();
 
@@ -419,7 +539,7 @@ class DataExtractor
       const std::string &filepath);
 
   // Object represent the extraction range in both dimensions.
-  std::array<ConstrainedRange, 2> constrainedRanges_;
+  std::array<ConstrainedRange, 3> constrainedRanges_;
 
   // Container holding coordinate arrays (of all supported types) loaded from the input file.
   typedef boost::variant<std::vector<int>,
@@ -427,7 +547,7 @@ class DataExtractor
                          std::vector<std::string>> CoordinateValues;
   std::unordered_map<std::string, CoordinateValues> coordsVals_;
   // The array to be interpolated (the payload array).
-  boost::multi_array<ExtractedValue, 2> interpolatedArray2D_;
+  DataExtractorPayload<ExtractedValue> interpolatedArray_;
   // Linear interpolation result. Only used when ExtractedValue = float. interpolation.
   float result_;
   // Set to true if result_ is a valid value.
@@ -463,8 +583,7 @@ template <>
 template <typename T, typename R>
 void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
     const T &obValDim0, const R &obValDim1) {
-  auto &range = constrainedRanges_;
-
+  auto &ranges = constrainedRanges_;
   const size_t dimIndex0 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName0 = nextCoordToExtractBy_->name;
   const std::vector<T> &varValues0 = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
@@ -475,11 +594,19 @@ void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
                               "method 'bilinear'.", Here());
   const size_t dimIndex1 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName1 = nextCoordToExtractBy_->name;
-
   const std::vector<R> &varValues1 = boost::get<std::vector<R>>(nextCoordToExtractBy_->values);
-  result_ = bilinearInterpolation(dimIndex0, varName0, varValues0, obValDim0,
-                                  dimIndex1, varName1, varValues1, obValDim1,
-                                  range, interpolatedArray2D_);
+
+  auto interpolatedArray = get2DSlice(interpolatedArray_, dimIndex0, dimIndex1,
+                                      ranges);
+  if (dimIndex1 > dimIndex0) {
+    result_ = bilinearInterpolation(varName0, varValues0, obValDim0, ranges[dimIndex0],
+                                    varName1, varValues1, obValDim1, ranges[dimIndex1],
+                                    interpolatedArray);
+  } else {
+    result_ = bilinearInterpolation(varName1, varValues1, obValDim1, ranges[dimIndex1],
+                                    varName0, varValues0, obValDim0, ranges[dimIndex0],
+                                    interpolatedArray);
+  }
   resultSet_ = true;
 }
 

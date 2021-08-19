@@ -82,7 +82,8 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   int ind = 0;
   for (size_t varn = 0; varn < obserr->nvars(); ++varn) {
     for (size_t locn = 0; locn < obserr->nlocs(); ++locn) {
-      EXPECT(std::abs((*obserr)[varn][locn] - expectedObsError[ind]) < 1e-4);
+      EXPECT(oops::is_close_absolute((*obserr)[varn][locn], expectedObsError[ind], 1e-4f, 0,
+                                     oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
       ind++;
     }
   }

@@ -27,7 +27,9 @@
 
 namespace ufo {
 
+
 namespace {
+
 
 /// \brief Boost visitor which allows us to sort a vector.
 class SortUpdateVisitor : public boost::static_visitor<void> {
@@ -329,16 +331,15 @@ void match(InterpMethod method,
 }
 
 
-/// \brief Perform piecewise linear interpolation along axis `dimIndex` at the 'location' `obVal`.
+/// \brief Perform piecewise linear interpolation of the provided array `varValues` at 'location'
+/// `obVal`.
 ///
-/// \details It is assumed that previous calls to extract() have extracted a single 1D slice of
-/// the interpolated array parallel to the axis `varName`. This function returns the value
-/// produced by piecewise linear interpolation of this slice at the point `obVal`.
+/// \details It is assumed that the provided 1D array is described by coordinate `varName`.
+/// This function returns the value produced by piecewise linear interpolation of this array at
+/// the point `obVal`.
 ///
-/// \param[in] dimIndex
-///   Axis of `interpolatedArray` along which to interpolate.
-/// \param[in] ranges
-///   Ranges of slices of `interpolatedArray` matching all constraints considered so far.
+/// \param[in] range
+///   Defines how to constrain (slice) `varValues` along with `interpolatedArray`.
 /// \param[in] varName
 ///   Name of the coordinate along which to interpolate.
 /// \param[in] varValues
@@ -348,23 +349,12 @@ void match(InterpMethod method,
 /// \param[in] interpolatedArray
 ///   Interpolated array.
 template <typename CoordinateValue>
-float linearInterpolation(size_t dimIndex,
-                          const std::array<ConstrainedRange, 2> &ranges,
-                          const std::string &varName,
-                          const std::vector<CoordinateValue> &varValues,
-                          const CoordinateValue &obVal,
-                          const boost::multi_array<float, 2> &interpolatedArray) {
-  // Sanity check constraint
-  int sizeDim0 = ranges[0].size();
-  int sizeDim1 = ranges[1].size();
-  if ((dimIndex == 1 && !(sizeDim1 > 1 && sizeDim0 == 1)) ||
-      (dimIndex == 0 && !(sizeDim0 > 1 && sizeDim1 == 1))) {
-    throw eckit::Exception("Linear interpolation failed - data must be 1D.", Here());
-  }
-
-  // Constrain our index range in the relevant dimension.
-  const ConstrainedRange &range = ranges[static_cast<size_t>(dimIndex)];
-
+float linearInterpolation(
+    const std::string &varName,
+    const std::vector<CoordinateValue> &varValues,
+    const CoordinateValue &obVal,
+    const ConstrainedRange &range,
+    const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
   if ((obVal > varValues[range.end() - 1]) || (obVal < varValues[range.begin()])) {
     throw eckit::Exception("Linear interpolation failed, value is beyond grid extent."
                            "No extrapolation supported.",
@@ -375,27 +365,13 @@ float linearInterpolation(size_t dimIndex,
                                  varValues.begin() + range.end(),
                                  obVal) - varValues.begin();
 
-  // Determine upper or lower indices from this
-  if (varValues[nnIndex] == obVal) {
-    // No interpolation required (is equal)
-    float res;
-    if (dimIndex == 1) {
-      res = interpolatedArray[ranges[0].begin()][nnIndex];
-    } else {
-      res = interpolatedArray[nnIndex][ranges[1].begin()];
-    }
-    return res;
-  }
+  // No interpolation required (is equal)
+  if (varValues[nnIndex] == obVal)
+    return interpolatedArray[nnIndex];
+
   // Linearly interpolate between these two indices.
-  float zUpper;
-  float zLower;
-  if (dimIndex == 1) {
-    zUpper = interpolatedArray[ranges[0].begin()][nnIndex];
-    zLower = interpolatedArray[ranges[0].begin()][nnIndex-1];
-  } else {
-    zUpper = interpolatedArray[nnIndex][ranges[1].begin()];
-    zLower = interpolatedArray[nnIndex-1][ranges[1].begin()];
-  }
+  const float zUpper = interpolatedArray[nnIndex];
+  const float zLower = interpolatedArray[nnIndex-1];
   float res = ((static_cast<float>(obVal - varValues[nnIndex-1]) /
                 static_cast<float>(varValues[nnIndex] - varValues[nnIndex-1])) *
                (zUpper - zLower)) + zLower;
@@ -403,12 +379,12 @@ float linearInterpolation(size_t dimIndex,
 }
 
 
-float linearInterpolation(size_t dimIndex,
-                          const std::array<ConstrainedRange, 2> &ranges,
-                          const std::string &varName,
-                          const std::vector<std::string> &varValues,
-                          const std::string &obVal,
-                          const boost::multi_array<float, 2> &interpolatedArray) {
+float linearInterpolation(
+    const std::string &varName,
+    const std::vector<std::string> &varValues,
+    const std::string &obVal,
+    const ConstrainedRange &range,
+    const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
   throw eckit::UserError("Linear interpolation cannot be performed along coordinate axes indexed "
                          "by string variables such as " + varName + ".", Here());
 }
@@ -423,9 +399,10 @@ DataExtractor<ExtractedValue>::DataExtractor(const std::string &filepath,
   load(filepath, group);
   // Start by constraining to the full range of our data
   resetExtract();
-  // Initialise splitter for both dimensions
-  splitter_.emplace_back(ufo::RecursiveSplitter(interpolatedArray2D_.shape()[0]));
-  splitter_.emplace_back(ufo::RecursiveSplitter(interpolatedArray2D_.shape()[1]));
+  // Initialise splitter for each dimension
+  splitter_.emplace_back(ufo::RecursiveSplitter(interpolatedArray_.shape()[0]));
+  splitter_.emplace_back(ufo::RecursiveSplitter(interpolatedArray_.shape()[1]));
+  splitter_.emplace_back(ufo::RecursiveSplitter(interpolatedArray_.shape()[2]));
 }
 
 
@@ -437,9 +414,10 @@ void DataExtractor<ExtractedValue>::load(const std::string &filepath,
   coord2DimMapping_ = std::move(input.coord2DimMapping);
   dim2CoordMapping_ = std::move(input.dim2CoordMapping);
   coordsVals_ = std::move(input.coordsVals);
-  interpolatedArray2D_.resize(boost::extents[input.payloadArray.shape()[0]]
-                                            [input.payloadArray.shape()[1]]);
-  interpolatedArray2D_ = std::move(input.payloadArray);
+  interpolatedArray_.resize(boost::extents[input.payloadArray.shape()[0]]
+                                            [input.payloadArray.shape()[1]]
+                                            [input.payloadArray.shape()[2]]);
+  interpolatedArray_ = std::move(input.payloadArray);
   // Set the unconstrained size of matching ranges along both axes of the payload array.
   for (size_t i = 0; i < constrainedRanges_.size(); ++i)
     constrainedRanges_[i] = ConstrainedRange(input.payloadArray.shape()[i]);
@@ -463,49 +441,55 @@ DataExtractor<ExtractedValue>::createBackendFor(const std::string &filepath) {
 
 template <typename ExtractedValue>
 void DataExtractor<ExtractedValue>::sort() {
-  boost::multi_array<ExtractedValue, 2> sortedArray = interpolatedArray2D_;
+  DataExtractorPayload<ExtractedValue> sortedArray = interpolatedArray_;
   nextCoordToExtractBy_ = coordsToExtractBy_.begin();
 
   for (size_t dim = 0; dim < dim2CoordMapping_.size(); ++dim) {
+    if (interpolatedArray_.shape()[dim] == 1)  // Avoid sorting scalar coordinates
+      continue;
+
     // Reorder coordinates
     for (auto &coord : dim2CoordMapping_[dim]) {
       auto &coordVal = coordsVals_[coord];
       SortVisitor visitor(splitter_[dim]);
       boost::apply_visitor(visitor, coordVal);
     }
+
     // Reorder the array to be interpolated
-    if (dim == 0) {
-      int ind = -1;
-      for (const auto &group : splitter_[dim].groups()) {
-        for (const auto &index : group) {
-          ind++;
-          oops::Log::debug() << "Sort index dim0; index-from: " << ind << " index-to: " <<
-            index << std::endl;
-          for (size_t j = 0; j < interpolatedArray2D_.shape()[1]; j++) {
-            sortedArray[ind][j] = interpolatedArray2D_[index][j];
-          }
-        }
+    int ind = 0;
+    std::array<size_t, 2> otherDims;
+    for (size_t odim = 0; odim < interpolatedArray_.dimensionality; ++odim) {
+      if (odim != dim) {
+        otherDims[ind] = odim;
+        ind++;
       }
-      // Replace the unsorted array with the sorted one.
-      interpolatedArray2D_ = sortedArray;
-    } else if (dim == 1) {
-      int ind = -1;
-      for (const auto &group : splitter_[dim].groups()) {
-        for (const auto &index : group) {
-          ind++;
-          oops::Log::debug() << "Sort index dim1; index-from: " << ind << " index-to: " <<
-            index << std::endl;
-          for (size_t i = 0; i < interpolatedArray2D_.shape()[0]; i++) {
-            sortedArray[i][ind] = interpolatedArray2D_[i][index];
-          }
-        }
-      }
-      // Replace the unsorted array with the sorted one.
-      interpolatedArray2D_ = sortedArray;
-    } else {
-        throw eckit::Exception("Unable to reorder the array to be interpolated: "
-                               "it has more than 2 dimensions.", Here());
     }
+
+    ind = 0;
+    for (const auto &group : splitter_[dim].groups()) {
+      for (const auto &index : group) {
+        oops::Log::debug() << "Sort index dim" << dim << "; index-from: " << ind <<
+          " index-to: " << index << std::endl;
+        for (size_t j = 0; j < interpolatedArray_.shape()[otherDims[0]]; j++) {
+          for (size_t k = 0; k < interpolatedArray_.shape()[otherDims[1]]; k++) {
+            if (dim == 0) {
+              sortedArray[ind][j][k] = interpolatedArray_[index][j][k];
+            } else if (dim == 1) {
+              sortedArray[j][ind][k] = interpolatedArray_[j][index][k];
+            } else if (dim == 2) {
+              sortedArray[j][k][ind] = interpolatedArray_[j][k][index];
+            } else {
+              // We shouldn't ever end up here (exception should be thrown eariler).
+              throw eckit::Exception("Unable to reorder the array to be interpolated: "
+                                     "it has more than 3 dimensions.", Here());
+            }
+          }
+        }
+        ind++;
+      }
+    }
+    // Replace the unsorted array with the sorted one.
+    interpolatedArray_ = sortedArray;
   }
 }
 
@@ -590,12 +574,13 @@ void DataExtractor<ExtractedValue>::maybeExtractByLinearInterpolation(const T &o
 template <>
 template <typename T>
 void DataExtractor<float>::maybeExtractByLinearInterpolation(const T &obVal) {
-  result_ = linearInterpolation(nextCoordToExtractBy_->payloadDim,
-                                constrainedRanges_,
-                                nextCoordToExtractBy_->name,
+  int dimIndex = nextCoordToExtractBy_->payloadDim;
+  const auto &interpolatedArray = get1DSlice(interpolatedArray_,
+                                             dimIndex,
+                                             constrainedRanges_);
+  result_ = linearInterpolation(nextCoordToExtractBy_->name,
                                 boost::get<std::vector<T>>(nextCoordToExtractBy_->values),
-                                obVal,
-                                interpolatedArray2D_);
+                                obVal, constrainedRanges_[dimIndex], interpolatedArray);
   resultSet_ = true;
 }
 
@@ -632,14 +617,13 @@ ExtractedValue DataExtractor<ExtractedValue>::getUniqueMatch() const {
   // extraction process.
   ASSERT(!resultSet_);
 
-  int sizeDim0 = constrainedRanges_[0].size();
-  int sizeDim1 = constrainedRanges_[1].size();
-  if (sizeDim0 != 1 || sizeDim1 != 1) {
-    throw eckit::Exception("Previous calls to extract() have failed to identify "
-                           "a single value to return.", Here());
-  }
-  return interpolatedArray2D_[constrainedRanges_[0].begin()]
-                             [constrainedRanges_[1].begin()];
+  for (size_t dim=0; dim < constrainedRanges_.size(); dim++)
+    if (constrainedRanges_[dim].size() != 1)
+      throw eckit::Exception("Previous calls to extract() have failed to identify "
+                             "a single value to return.", Here());
+  return interpolatedArray_[constrainedRanges_[0].begin()]
+                           [constrainedRanges_[1].begin()]
+                           [constrainedRanges_[2].begin()];
 }
 
 

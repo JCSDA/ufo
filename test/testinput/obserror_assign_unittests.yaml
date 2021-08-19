@@ -367,6 +367,8 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
+          - name: air_pressure@MetaData
+            method: exact
           - name: StringVar@MetaData
             method: linear
   expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as StringVar@MetaData

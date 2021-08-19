@@ -76,22 +76,22 @@ class AppendValueVisitor : public boost::static_visitor<void> {
 
 template <typename Source, typename Destination>
 void convertVectorToColumnArray(const std::vector<Source> &source,
-                                    boost::multi_array<Destination, 2> &destination) {
+                                    boost::multi_array<Destination, 3> &destination) {
   const Source missingSource = util::missingValue(Source());
   const Destination missingDestination = util::missingValue(Destination());
-  destination.resize(boost::extents[source.size()][1]);
+  destination.resize(boost::extents[source.size()][1][1]);
   for (size_t i = 0; i < source.size(); ++i)
     if (source[i] != missingSource)
-      destination[i][0] = static_cast<Destination>(source[i]);
+      destination[i][0][0] = static_cast<Destination>(source[i]);
     else
-      destination[i][0] = missingDestination;
+      destination[i][0][0] = missingDestination;
 }
 
 /// Visitor that converts an std::vector to a boost::multi_array with one column.
 template <typename ExtractedValue>
 class ConvertToBoostMultiArrayVisitor : public boost::static_visitor<void> {
  public:
-  explicit ConvertToBoostMultiArrayVisitor(boost::multi_array<ExtractedValue, 2> &output) :
+  explicit ConvertToBoostMultiArrayVisitor(boost::multi_array<ExtractedValue, 3> &output) :
     output_(output)
   {}
 
@@ -99,9 +99,9 @@ class ConvertToBoostMultiArrayVisitor : public boost::static_visitor<void> {
             typename std::enable_if<std::is_convertible<T, ExtractedValue>::value, bool>::type
             = true>
   void operator()(const std::vector<T> &values) {
-    output_.resize(boost::extents[values.size()][1]);
+    output_.resize(boost::extents[values.size()][1][1]);
     for (size_t i = 0; i < values.size(); ++i)
-      output_[i][0] = values[i];
+      output_[i][0][0] = values[i];
   }
 
   template <typename T,
@@ -113,7 +113,7 @@ class ConvertToBoostMultiArrayVisitor : public boost::static_visitor<void> {
   }
 
  private:
-  boost::multi_array<ExtractedValue, 2> &output_;
+  boost::multi_array<ExtractedValue, 3> &output_;
 };
 
 /// \brief Find the index of the column whose name ends with `@` followed by `payloadGroup`

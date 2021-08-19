@@ -34,26 +34,28 @@ float run_basic(const T obVal0, const R obVal1, const std::vector<T> &varValues0
     const int dimIndex1 = 1;
     const std::string &varName0 = "var0";
     const std::string &varName1 = "var1";
-    const std::array<ConstrainedRange, 2> ranges {
+    const std::array<ConstrainedRange, 3> ranges {
         ConstrainedRange(varValues0.size()),
-        ConstrainedRange(varValues1.size())};
+        ConstrainedRange(varValues1.size()),
+        ConstrainedRange(1)};
     assert(varValues0.size() == 5);
     assert(varValues1.size() == 3);
 
-    boost::multi_array<float, 2> interpolatedArray(boost::extents[5][3]);
+    boost::multi_array<float, 3> interpolatedArray(boost::extents[5][3][1]);
     std::vector<float> tmp = {1, 2, 3, 4, 5,
                               6, 7, 8, 9, 10,
                               11, 12, 13, 14, 15};
     size_t ind = 0;
     for (int j=0; j < interpolatedArray.shape()[1]; j++) {
       for (int i=0; i < interpolatedArray.shape()[0]; i++) {
-        interpolatedArray[i][j] = tmp[ind];
+        interpolatedArray[i][j][0] = tmp[ind];
         ind++;
       }
     }
-    return bilinearInterpolation(dimIndex0, varName0, varValues0, obVal0,
-                                 dimIndex1, varName1, varValues1, obVal1,
-                                 ranges, interpolatedArray);
+    auto array = get2DSlice(interpolatedArray, dimIndex0, dimIndex1, ranges);
+    return bilinearInterpolation(varName0, varValues0, obVal0, ranges[dimIndex0],
+                                 varName1, varValues1, obVal1, ranges[dimIndex1],
+                                 array);
 }
 
 
@@ -68,7 +70,7 @@ float run_basic(const T obVal0, const R obVal1) {
 
 CASE("ufo/DataExtractor/bilinearinterp/float_linear") {
   // Effectively becomes linear interpolation along dim1.
-  const float res = run_basic(4.0, 4.2);
+  const float res = run_basic(4.0f, 4.2f);
   EXPECT(oops::is_close_absolute(res, 7.5f, 1e-5f, 0,
                                  oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
 }
@@ -139,6 +141,7 @@ CASE("ufo/DataExtractor/bilinearinterp/int_float_dtype") {
                                  oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
 }
 
+
 CASE("ufo/DataExtractor/bilinearinterp/float_int_dtype") {
   const float res = run_basic(3.0, 3);
   EXPECT(oops::is_close_absolute(res, 4.0f, 1e-5f, 0,
@@ -166,21 +169,23 @@ CASE("ufo/DataExtractor/bilinearinterp/string_dtype") {
 float run_missing(const float obVal0, const float obVal1, const std::vector<float> data) {
   const std::vector<float> varValues0 {2, 4, 6, 8, 10};
   const std::vector<float> varValues1 {2, 4, 6};
-  const std::array<ConstrainedRange, 2> ranges {
+  const std::array<ConstrainedRange, 3> ranges {
       ConstrainedRange(varValues0.size()),
-      ConstrainedRange(varValues1.size())};
+      ConstrainedRange(varValues1.size()),
+      ConstrainedRange(1)};
 
-  boost::multi_array<float, 2> interpolatedArray(boost::extents[5][3]);
+  boost::multi_array<float, 3> interpolatedArray(boost::extents[5][3][1]);
   size_t ind = 0;
   for (int j=0; j < interpolatedArray.shape()[1]; j++) {
     for (int i=0; i < interpolatedArray.shape()[0]; i++) {
-      interpolatedArray[i][j] = data[ind];
+      interpolatedArray[i][j][0] = data[ind];
       ind++;
     }
   }
-  return bilinearInterpolation(0, "var0", varValues0, obVal0,
-                               1, "var1", varValues1, obVal1,
-                               ranges, interpolatedArray);
+  auto array = get2DSlice(interpolatedArray, 0, 1, ranges);
+  return bilinearInterpolation("var0", varValues0, obVal0, ranges[0],
+                               "var1", varValues1, obVal1, ranges[1],
+                               array);
 }
 
 
@@ -216,36 +221,45 @@ CASE("ufo/DataExtractor/bilinearinterp/all_missing") {
 }
 
 
-CASE("ufo/DataExtractor/bilinearinterp/range_constrain") {
-  // Let's constrain the range and change the dimension mapping.
-  const float obVal0 = 3.0, obVal1 = 3.0;
+float run_range_constrained(const float obVal0, const float obVal1,
+                            const std::array<ConstrainedRange, 3> &ranges) {
   // Coordinates containing values that would change the answer if not excluded
   // via the "range" specified.
   const std::vector<float> varValues0 {2, 4, 2, 4, 6};
   const std::vector<float> varValues1 {3, 2, 4};
-
-  ConstrainedRange con0 = ConstrainedRange(varValues0.size());
-  con0.constrain(2, varValues0.size());  // range will ignore 1st two.
-  ConstrainedRange con1 = ConstrainedRange(varValues1.size());
-  con1.constrain(1, varValues1.size());  // range will ignore 1st.
-  const std::array<ConstrainedRange, 2> ranges {con1, con0};
 
   const std::vector<float> data = {1, 6, 11,
                                    2, 7, 12,
                                    3, 8, 13,
                                    4, 9, 14,
                                    5, 10, 15};
-  boost::multi_array<float, 2> interpolatedArray(boost::extents[3][5]);
+  boost::multi_array<float, 3> interpolatedArray(boost::extents[3][5][1]);
   size_t ind = 0;
   for (int j=0; j < interpolatedArray.shape()[1]; j++) {
     for (int i=0; i < interpolatedArray.shape()[0]; i++) {
-      interpolatedArray[i][j] = data[ind];
+      interpolatedArray[i][j][0] = data[ind];
       ind++;
     }
   }
-  const float res = bilinearInterpolation(1, "var0", varValues0, obVal0,
-                                          0, "var1", varValues1, obVal1,
-                                          ranges, interpolatedArray);
+  auto array = get2DSlice(interpolatedArray, 1, 0, ranges);
+  return bilinearInterpolation("var1", varValues1, obVal1, ranges[0],
+                               "var0", varValues0, obVal0, ranges[1],
+                               array);
+}
+
+
+CASE("ufo/DataExtractor/bilinearinterp/range_constrain") {
+  // Let's constrain the range and change the dimension mapping.
+  const float obVal0 = 3.0, obVal1 = 3.0;
+
+  ConstrainedRange con0 = ConstrainedRange(5);
+  con0.constrain(2, 5);  // range will ignore 1st two.
+  ConstrainedRange con1 = ConstrainedRange(3);
+  con1.constrain(1, 3);  // range will ignore 1st.
+  ConstrainedRange con2 = ConstrainedRange(1);
+  const std::array<ConstrainedRange, 3> ranges {con1, con0, con2};
+
+  const float res = run_range_constrained(obVal0, obVal1, ranges);
   EXPECT(oops::is_close_absolute(res, 11.0f, 1e-5f, 0,
                                  oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
 }
@@ -255,34 +269,74 @@ CASE("ufo/DataExtractor/bilinearinterp/range_constrain_extrapolation") {
   // Constraining the range, such that, what would otherwise be within bounds is now out of bounds
   // so returns missing.
   const float obVal0 = 5.0, obVal1 = 3.0;
-  // Coordinates containing values that would change the answer if not excluded
-  // via the "range" specified.
-  const std::vector<float> varValues0 {2, 4, 2, 4, 6};
-  const std::vector<float> varValues1 {3, 2, 4};
 
-  ConstrainedRange con0 = ConstrainedRange(varValues0.size());
-  con0.constrain(2, varValues0.size()-1);  // range will ignore 1st two and the final element.
-  ConstrainedRange con1 = ConstrainedRange(varValues1.size());
-  con1.constrain(1, varValues1.size());  // range will ignore 1st.
-  const std::array<ConstrainedRange, 2> ranges {con1, con0};
+  ConstrainedRange con0 = ConstrainedRange(5);
+  con0.constrain(2, 4);  // range will ignore 1st two and the final element.
+  ConstrainedRange con1 = ConstrainedRange(3);
+  con1.constrain(1, 3);  // range will ignore 1st.
+  ConstrainedRange con2 = ConstrainedRange(1);
+  const std::array<ConstrainedRange, 3> ranges {con1, con0, con2};
 
-  const std::vector<float> data = {1, 6, 11,
-                                   2, 7, 12,
-                                   3, 8, 13,
-                                   4, 9, 14,
-                                   5, 10, 15};
-  boost::multi_array<float, 2> interpolatedArray(boost::extents[3][5]);
+  const float res = run_range_constrained(obVal0, obVal1, ranges);
+  EXPECT_EQUAL(res, missing);
+}
+
+
+CASE("ufo/DataExtractor/bilinearinterp/range_constrain_3D_array") {
+  // Constraining the second dimension. array shape: (5, 6, 3); 2D slice: (:, 2, :)
+  const std::vector<float> varValues0 {2, 4, 6, 8, 10};
+  const std::vector<float> varValues1 {2, 4, 6};
+  const int dimIndex0 = 0;
+  const int dimIndex1 = 2;
+  const std::string &varName0 = "var0";
+  const std::string &varName1 = "var1";
+  std::array<ConstrainedRange, 3> ranges {
+    ConstrainedRange(varValues0.size()),
+    ConstrainedRange(6),
+    ConstrainedRange(varValues1.size())};
+  ranges[1].constrain(2, 3);
+
+  boost::multi_array<float, 3> interpolatedArray(boost::extents[5][6][3]);
+  const std::vector<float> tmp = {1, 2, 3, 4, 5,
+                                  6, 7, 8, 9, 10,
+                                  11, 12, 13, 14, 15};
   size_t ind = 0;
-  for (int j=0; j < interpolatedArray.shape()[1]; j++) {
+  for (int j=0; j < interpolatedArray.shape()[2]; j++) {
     for (int i=0; i < interpolatedArray.shape()[0]; i++) {
-      interpolatedArray[i][j] = data[ind];
+      interpolatedArray[i][2][j] = tmp[ind];
       ind++;
     }
   }
-  const float res = bilinearInterpolation(1, "var0", varValues0, obVal0,
-                                          0, "var1", varValues1, obVal1,
-                                          ranges, interpolatedArray);
-  EXPECT_EQUAL(res, missing);
+  auto array = get2DSlice(interpolatedArray, dimIndex0, dimIndex1, ranges);
+  const float res = bilinearInterpolation(varName0, varValues0, 4.2f, ranges[dimIndex0],
+                                          varName1, varValues1, 4.2f, ranges[dimIndex1],
+                                          array);
+  EXPECT(oops::is_close_absolute(res, 7.6f, 1e-5f, 0,
+                                 oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
+}
+
+
+CASE("ufo/DataExtractor/get2DSlice/not_2d_slice") {
+  // The range specified means that we don't have a single 2D slice of the array
+  // All dimensions here are unconstrained.
+  const std::array<ConstrainedRange, 3> ranges {ConstrainedRange(2), ConstrainedRange(2),
+                                                ConstrainedRange(2)};
+  boost::multi_array<float, 3> interpolatedArray(boost::extents[2][2][2]);
+
+  const std::string msg = "Unable to fetch a 2D array slice with the provided constraints.";
+  EXPECT_THROWS_MSG(get2DSlice(interpolatedArray, 0, 1, ranges), msg.c_str());
+}
+
+
+CASE("ufo/DataExtractor/get1DSlice/not_1d_slice") {
+  // The range specified means that we don't have a single 1D slice of the array
+  // All dimensions here are unconstrained.
+  const std::array<ConstrainedRange, 3> ranges {ConstrainedRange(2), ConstrainedRange(2),
+                                                ConstrainedRange(2)};
+  boost::multi_array<float, 3> interpolatedArray(boost::extents[2][2][2]);
+
+  const std::string msg = "Unable to fetch a 1D array slice with the provided constraints.";
+  EXPECT_THROWS_MSG(get1DSlice(interpolatedArray, 0, ranges), msg.c_str());
 }
 
 
