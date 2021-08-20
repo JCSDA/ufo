@@ -104,9 +104,6 @@ Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
     for (size_t ilocs = 0; ilocs < rSort.size(); ++ilocs) {
       if (extended_obs_space && ((*extended_obs_space)[rSort[ilocs]] != 1))
         continue;
-      oops::Log::debug() << "MetOfficeBuddyCheck: profile index (record_number, location_number)";
-      oops::Log::debug() << " = original obs index; (" << recnum << "," << ilocs << ") = ";
-      oops::Log::debug() << rSort[ilocs] << std::endl;
       profileIndex(recnum, levnum) = rSort[ilocs];
       levnum++;
     }
@@ -332,10 +329,6 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                   varNameAndGrossErrProbs.second);
 
   flagRejectedObservations(filtervars, calculatedGrossErrProbsByVarName, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "MetOfficeBuddyCheck: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable) const {
@@ -485,9 +478,6 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
 
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
-    oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_.dampingFactor1
-                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
     oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  lev  DiffA DiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
@@ -593,9 +583,6 @@ void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> 
 
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
-    oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_.dampingFactor1
-                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
     oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  lev  LDiffA LDiffB TDiffA TDiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }

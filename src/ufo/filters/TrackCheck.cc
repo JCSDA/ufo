@@ -126,10 +126,6 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                                         obsPressureLoc, maxSpeedByPressure, isRejected);
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "TrackCheck: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes(

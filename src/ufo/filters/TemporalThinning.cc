@@ -323,10 +323,6 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
   const std::vector<bool> isThinned = identifyThinnedObservations(apply, filtervars, obsAccessor);
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "TemporalThinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {

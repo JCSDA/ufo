@@ -208,10 +208,6 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
   }
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "PoissonDiskThinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 ObsAccessor PoissonDiskThinning::createObsAccessor() const {

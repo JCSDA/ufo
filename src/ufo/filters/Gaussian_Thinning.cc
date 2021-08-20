@@ -77,10 +77,6 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   const std::vector<bool> isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "Gaussian_Thinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -150,11 +146,6 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
   }
   splitter.groupBy(latBins);
   splitter.groupBy(lonBins);
-
-  oops::Log::debug() << "Gaussian_Thinning: latitudes  = " << lat << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: longitudes = " << lon << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: lat bins   = " << latBins << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: lon bins   = " << lonBins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
@@ -229,9 +220,6 @@ void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
   }
   splitter.groupBy(bins);
 
-  oops::Log::debug() << "Gaussian_Thinning: vertical coords     = " << vcoord << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: vertical coord bins = " << bins << std::endl;
-
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
     const float component = distanceCalculator.nonspatialDistanceComponent(
@@ -296,11 +284,6 @@ void Gaussian_Thinning::groupObservationsByTime(
     bins.push_back(binSelector->bin((times[obsId] - timeOffset).toSeconds()));
   }
   splitter.groupBy(bins);
-
-  oops::Log::debug() << "Gaussian_Thinning: times = ";
-  eckit::__print_list(oops::Log::debug(), times, eckit::VectorPrintSimple());
-  oops::Log::debug() << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: time bins = " << bins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
@@ -392,7 +375,6 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     const ObsAccessor &obsAccessor) const
 {
   if (options_.priorityVariable.value() == boost::none) {
-    oops::Log::debug() << "priority_variable not found" << std::endl;
     return [&distancesToBinCenter](size_t validObsIndexA, size_t validObsIndexB) {
       return distancesToBinCenter[validObsIndexA] < distancesToBinCenter[validObsIndexB];
     };
@@ -402,8 +384,6 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
 
   std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
         priorityVariable.group(), priorityVariable.variable());
-
-  oops::Log::debug() << "priorities = " << priorities << std::endl;
 
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
   return [priorities, &validObsIds, &distancesToBinCenter]
