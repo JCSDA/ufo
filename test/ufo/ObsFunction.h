@@ -52,9 +52,14 @@ const char *expectConstructorToThrow = "expect constructor to throw exception wi
 
 // -----------------------------------------------------------------------------
 
+/// \param[out] num_missing_mismatches
+///   Number of locations containing a missing value in `vals` but not in `ref`, or in `ref` but not
+///   in `vals`.
 void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
-                    const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out) {
-  float missing = util::missingValue(missing);
+                    const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out,
+                    size_t &num_missing_mismatches) {
+  const float missing = util::missingValue(missing);
+  num_missing_mismatches = 0;
   /// Loop through variables and calculate rms for each variable
   for (size_t ivar = 0; ivar < vals.nvars() ; ++ivar) {
     for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
@@ -62,6 +67,9 @@ void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & 
         vals[ivar][jj] -= ref[ivar][jj];
       } else {
         vals[ivar][jj] = missing;
+      }
+      if ((vals[ivar][jj] != missing) ^ (ref[ivar][jj] != missing)) {
+        ++num_missing_mismatches;
       }
     }
     int nobs = globalNumNonMissingObs(*ospace.distribution(), 1, vals[ivar]);
@@ -107,12 +115,15 @@ void checkResults(const ioda::ObsSpace &ospace,
                   ioda::ObsDataVector<float> & vals_ofd,
                   const ioda::ObsDataVector<float> & ref) {
   const double tol = obsfuncconf.getDouble("tolerance");
+  const bool expectMissingToMatch =
+      obsfuncconf.getBool("expect missing value locations to match", false);
   const size_t nvars = ref.nvars();
   EXPECT_EQUAL(vals.nvars(), nvars);
 
   ///  Calculate rms(f(x) - ref) and compare to tolerance
   std::vector<float> rms_out(nvars);
-  dataVectorDiff(ospace, vals, ref, rms_out);
+  size_t numMissingMismatches;
+  dataVectorDiff(ospace, vals, ref, rms_out, numMissingMismatches);
 
   oops::Log::info() << "Vector difference between reference and computed: " << std::endl;
   oops::Log::info() << vals << std::endl;
@@ -120,8 +131,10 @@ void checkResults(const ioda::ObsSpace &ospace,
     // FIXME(someone): whatever this does, it certainly doesn't convert percentages to fractions
     EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
   }
+  if (expectMissingToMatch)
+    EXPECT_EQUAL(numMissingMismatches, 0);
 
-  dataVectorDiff(ospace, vals_ofd, ref, rms_out);
+  dataVectorDiff(ospace, vals_ofd, ref, rms_out, numMissingMismatches);
   oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
                         << std::endl;
   oops::Log::info() << vals_ofd << std::endl;
@@ -129,6 +142,8 @@ void checkResults(const ioda::ObsSpace &ospace,
     // FIXME(someone): whatever this does, it certainly doesn't convert percentages to fractions
     EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
   }
+  if (expectMissingToMatch)
+    EXPECT_EQUAL(numMissingMismatches, 0);
 }
 
 // -----------------------------------------------------------------------------
@@ -244,7 +259,9 @@ class ObsFunction : public oops::Test {
       { testFunction(); });
   }
 
-  void clear() const override {}
+  void clear() const override {
+    ::test::ObsTestsFixture<ObsTraits>::reset();
+  }
 };
 
 // -----------------------------------------------------------------------------

@@ -1,0 +1,27 @@
+# Tests the "skip rejected" option of the SolarZenith ObsFunction, which makes the ObsFunction
+# produce missing values at locations where all simulated variables have been rejected.
+
+window begin: 1900-01-01T00:00:00Z
+window end: 9999-01-01T00:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: Zenith 1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
+    simulated variables: [air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: zenith@MetaData
+      type: float
+      function:
+        name: SolarZenith@ObsFunction
+        options:
+          skip rejected: true
+  compareVariables:
+  - test:
+      name: zenith@MetaData
+    reference:
+      name: zenith_skip_rejected@TestReference
+    relTol: 1e-6

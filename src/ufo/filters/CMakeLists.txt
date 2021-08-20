@@ -233,6 +233,8 @@ set ( filters_files
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      obsfunctions/SolarZenith.cc
+      obsfunctions/SolarZenith.h
       obsfunctions/SunGlintAngle.cc
       obsfunctions/SunGlintAngle.h
       obsfunctions/TropopauseEstimate.cc

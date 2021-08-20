@@ -295,6 +295,8 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_obserrorfactorquotient.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
+  testinput/unit_tests/function_solarzenith.yaml
+  testinput/unit_tests/function_solarzenith_skiprejected.yaml
   testinput/unit_tests/function_wdirdiff.yaml
   testinput/unit_tests/utils_metoffice_sort.yaml
   testinput/unit_tests/variabletransforms_rhumidity.yaml
@@ -2609,6 +2611,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_profilehorizontaldrift
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_solarzenith_skiprejected
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/function_solarzenith_skiprejected.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 # Test Functions
 
 ecbuild_add_test( TARGET  test_ufo_function_bgddepartureanomaly
@@ -2945,6 +2954,13 @@ ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_relativehum
 ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_marinewind
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustMarineWinds.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_solarzenith
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_solarzenith.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
