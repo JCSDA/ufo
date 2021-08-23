@@ -146,3 +146,23 @@ observations:
         maxvalue: 7
   # all observations of variable1 with var1 <= 5 and of variable2 with var1 <= 7 should be accepted
   passedBenchmark: 12
+
+# Test "passivate"
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  HofX: HofX
+  obs filters:
+  # passivate observations with var1 >= 5
+  - filter: BlackList
+    action:
+      name: passivate
+    where:
+      - variable:
+          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 5
+  benchmarkFlag: 1      # passive
+  flaggedBenchmark: 12  # expect 12 observations to be assigned the "passive" flag
+  passedBenchmark: 8    # expect 8 observations to be assigned the "passed" flag

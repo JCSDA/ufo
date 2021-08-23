@@ -131,6 +131,7 @@ void QCmanager::print(std::ostream & os) const {
     {77, nullptr},  // } will be added up and reported together
 
     // "Normal" cases reported in a uniform way
+    {QCflags::passive,       "passive observations"},
     {QCflags::missing,       "missing values"},
     {QCflags::preQC,         "rejected by pre QC"},
     {QCflags::bounds,        "out of bounds"},

@@ -135,6 +135,8 @@ set ( filters_files
       actions/FilterActionBase.h
       actions/InflateError.cc
       actions/InflateError.h
+      actions/PassivateObs.cc
+      actions/PassivateObs.h
       actions/RejectObs.cc
       actions/RejectObs.h
       obsfunctions/BennartzScatIndex.cc
