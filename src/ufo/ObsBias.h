@@ -119,6 +119,9 @@ class ObsBias : public util::Printable,
   oops::Variables geovars_;
   /// Diagnostics that need to be requested from the obs operator (for computation of predictors)
   oops::Variables hdiags_;
+
+  /// MPI rank, used to determine whether the task should output bias coeffs to a file
+  size_t rank_;
 };
 
 // -----------------------------------------------------------------------------
