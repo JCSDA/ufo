@@ -66,6 +66,8 @@ set ( filters_files
       PreQC.h
       ProbabilityGrossErrorWholeReport.cc
       ProbabilityGrossErrorWholeReport.h
+      ProcessAMVQI.cc
+      ProcessAMVQI.h
       QCflags.h
       QCmanager.cc
       QCmanager.h

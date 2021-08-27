@@ -35,6 +35,7 @@
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
+#include "ufo/filters/ProcessAMVQI.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
@@ -137,6 +138,8 @@ template<typename OBS> void instantiateObsFilterFactory() {
            ImpactHeightCheckMaker("GNSSRO Impact Height Check");
   static oops::interface::FilterMaker<OBS, ufo::SatwindInversionCorrection>
              SatwindInversionCorrectionMaker("Satwind Inversion Correction");
+  static oops::interface::FilterMaker<OBS, ufo::ProcessAMVQI>
+             ProcessAMVQIMaker("Process AMV QI");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

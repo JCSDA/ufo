@@ -199,6 +199,7 @@ list( APPEND ufo_test_input
   testinput/qc_poisson_disk_thinning_parallel.yaml
   testinput/qc_preqc.yaml
   testinput/qc_preqc_halo.yaml
+  testinput/qc_processamvqi.yaml
   testinput/qc_profile_background_check.yaml
   testinput/qc_profile_fewobs_check.yaml
   testinput/qc_stuckcheck.yaml
@@ -3414,6 +3415,13 @@ ecbuild_add_test( TARGET  test_satellite_selector_predictor
                   ARGS    "testinput/satellite_selector_predictor.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_processamvqi
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_processamvqi.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 #####################################################################
