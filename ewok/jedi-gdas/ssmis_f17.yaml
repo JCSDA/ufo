@@ -61,7 +61,7 @@ obs filters:
   - name: brightness_temperature
     channels: *ssmis_f17_channels
   absolute threshold: 3.5
-  bias correction parameter: 1.0
+  remove bias correction: true
   action:
     name: reject
 # #step2: clw check

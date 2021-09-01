@@ -59,7 +59,7 @@ observations:
     - name: brightness_temperature
       channels: *channels
     absolute threshold: 3.5
-    bias correction parameter: 1.0
+    remove bias correction: true
     action:
       name: reject
   passedBenchmark: 1555

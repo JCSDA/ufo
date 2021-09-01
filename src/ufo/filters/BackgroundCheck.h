@@ -72,8 +72,8 @@ class BackgroundCheckParameters : public FilterParametersBase {
   oops::OptionalParameter<std::vector<Variable>> functionAbsoluteThreshold{
     "function absolute threshold", this};
 
-  /// add option parameter accounting for with or without bias correction (GSI ssmis case)
-  oops::OptionalParameter<std::string> BiasCorrectionFactor{"bias correction parameter", this};
+  /// The filter uses bias-corrected H(x) unless `remove bias correction` is set to true.
+  oops::Parameter<bool> removeBiasCorrection{"remove bias correction", false, this};
 
   /// Name of the HofX group used to replace the default group (default is HofX)
   oops::Parameter<std::string> test_hofx{"test_hofx", "HofX", this};

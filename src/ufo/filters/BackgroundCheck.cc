@@ -125,7 +125,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
     Variables varbias(filtervars_, "ObsBiasData");
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
-//    H(x)
+//    H(x) (including bias correction)
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
 //    H(x) error
@@ -134,33 +134,27 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       if (thresholdWrtBGerror) {
         data_.get(backgrErrVariable(filtervars[jv]), hofxerr);
       }
-//    H(x) bias correction
-      std::vector<float> bias;
-      data_.get(varbias.variable(jv), bias);
+//    Bias correction (only read in if removeBiasCorrection is set to true, otherwise
+//    set to zero).
+      std::vector<float> bias(obsdb_.nlocs(), 0.0);
+      if (parameters_.removeBiasCorrection) {
+        data_.get(varbias.variable(jv), bias);
+      }
 
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
       std::vector<float> thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
-      std::vector<float> bc_factor(obsdb_.nlocs(), 0.0);
-
       if (parameters_.absoluteThreshold.value())
         abs_thr = getScalarOrFilterData(*parameters_.absoluteThreshold.value(), data_);
       if (parameters_.threshold.value())
         thr = getScalarOrFilterData(*parameters_.threshold.value(), data_);
 
-//    Bias Correction parameter
-      if (parameters_.BiasCorrectionFactor.value())
-        bc_factor = getScalarOrFilterData(*parameters_.BiasCorrectionFactor.value(), data_);
-
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass &&
             (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-          if (parameters_.BiasCorrectionFactor.value()) {
-            ASSERT(bias[jobs] != util::missingValue(bias[jobs]));
-            bc_factor[jobs] = bc_factor[jobs]*bias[jobs];
-          }
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
+          ASSERT(bias[jobs] != util::missingValue(bias[jobs]));
 
           const std::vector<float> &errorMultiplier = thresholdWrtBGerror ?
                                                       hofxerr : (*obserr_)[iv];
@@ -170,8 +164,11 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
           ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
-//        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs] - bc_factor[jobs]) > zz) {
+//        Check distance from background. hofx includes bias correction.
+//        If removeBiasCorrection is set to true, `bias` contains bias correction, and
+//           it is removed from hofx.
+//        Otherwise, `bias` is set to zero, and bias correction is not removed from hofx.
+          if (std::abs(hofx[jobs] - obs[jv][jobs] - bias[jobs]) > zz) {
             flagged[jv][jobs] = true;
           }
         }
