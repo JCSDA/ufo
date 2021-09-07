@@ -32,6 +32,13 @@ use ufo_constants_mod, only: &
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 
+private
+public :: ufo_gnssro_refmetoffice_tlad
+public :: ufo_gnssro_refmetoffice_tlad_setup
+public :: ufo_gnssro_refmetoffice_tlad_settraj
+public :: ufo_gnssro_refmetoffice_simobs_tl
+public :: ufo_gnssro_refmetoffice_simobs_ad
+public :: ufo_gnssro_refmetoffice_tlad_delete
 
 integer, parameter :: max_string=800
 
