@@ -21,6 +21,7 @@
 #include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -34,11 +35,19 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   oops::Log::trace() << "ObsBackgroundErrorVertInterp constructor entered" << std::endl;
 
   requiredVars_.push_back(parameters_.verticalCoordinate);
-  // simulateObs() may be asked to interpolate the background errors of any simulated variables.
-  // We need to assume the worst, i.e. that we'll need to interpolate all of them.
-  const oops::Variables &obsvars = odb.obsvariables();
-  for (size_t ivar = 0; ivar < obsvars.size(); ++ivar)
-    requiredVars_.push_back(obsvars[ivar] + "_background_error");
+
+  /// All simulated variables.
+  const oops::Variables & obsVars = odb.obsvariables();
+
+  // If the `variables` option is specified, only the variables in that list will have
+  // their background errors computed. Otherwise the background errors for all simulated
+  // variables are calculated.
+  std::vector<int> operatorVarIndices;
+  oops::Variables operatorVars;
+  getOperatorVariables(parameters.toConfiguration(), obsVars,
+                       operatorVars, operatorVarIndices);
+  for (auto ivar : operatorVarIndices)
+    requiredVars_.push_back(obsVars[ivar] + "_background_error");
 
   oops::Log::trace() << "ObsBackgroundErrorVertInterp created" << std::endl;
 }
