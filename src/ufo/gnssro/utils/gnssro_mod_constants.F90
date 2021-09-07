@@ -5,9 +5,13 @@ module gnssro_mod_constants
 use kinds
 use iso_c_binding
 use ufo_constants_mod
+
 implicit none
+
+private
 public   :: gnssro_ref_constants
-real(kind_real),            public :: n_a, n_b,n_c
+
+real(kind_real),            public :: n_a, n_b, n_c
 integer, parameter,         public :: max_string    = 800
 integer, parameter,         public :: MAXVARLEN     = 20
 real(kind_real), parameter, public :: r1em6 = 1.0e-6_kind_real

@@ -22,7 +22,7 @@ use ufo_gnssroonedvarcheck_utils_mod, only: &
     Ops_RealSortQuick, deallocate_singleob, &
     allocate_singleob, allocate_singlebg, deallocate_singlebg, find_unique, &
     singlebg_type, singleob_type
-use ufo_gnssroonedvarcheck_get_bmatrix_mod, only: Ops_GPSRO_GetBmatrix, bmatrix_type
+use ufo_gnssroonedvarcheck_get_bmatrix_mod, only: bmatrix_type
 use ufo_gnssroonedvarcheck_do1dvar_mod, only: Ops_GPSRO_Do1DVar_BA
 
 implicit none
@@ -229,7 +229,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
   ! Read in the B-matrix and background profiles
-  call Ops_GPSRO_GetBmatrix(self % bmatrix_filename, prs % nval, q % nval, b_matrix)
+  call b_matrix % get(self % bmatrix_filename, prs % nval, q % nval)
   call allocate_singlebg(Back, prs % nval, q % nval)
   allocate(Tb(q % nval), Ts(q % nval))
 

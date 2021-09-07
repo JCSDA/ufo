@@ -4,7 +4,7 @@
 module lag_interp_mod
 
 use kinds, only: kind_real
-use gnssro_mod_constants,only: zero, one
+use ufo_constants_mod, only: zero, one
 
 implicit none
 

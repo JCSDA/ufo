@@ -8,6 +8,7 @@
 module ufo_gnssro_bndropp2d_tlad_mod_c
   
   use fckit_configuration_module, only: fckit_configuration 
+  use iso_c_binding, only: c_ptr, c_int, c_double
   use ufo_gnssro_bndropp2d_tlad_mod 
   implicit none
   private

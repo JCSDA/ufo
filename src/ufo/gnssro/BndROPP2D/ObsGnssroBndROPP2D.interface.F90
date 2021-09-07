@@ -8,6 +8,7 @@
 module ufo_gnssro_bndropp2d_mod_c
   
   use fckit_configuration_module, only: fckit_configuration 
+  use iso_c_binding, only: c_ptr, c_int, c_double, c_float
   use ufo_gnssro_bndropp2d_mod
   use ufo_gnssro_2d_locs_mod
 

@@ -21,6 +21,9 @@ use missing_values_mod
 use ufo_gnssro_ropp1d_utils_mod
 use fckit_log_module, only : fckit_log
 
+private
+public :: ufo_gnssro_BndROPP1D_tlad
+
 integer, parameter         :: max_string=800
 
 !> Fortran derived type for gnssro trajectory

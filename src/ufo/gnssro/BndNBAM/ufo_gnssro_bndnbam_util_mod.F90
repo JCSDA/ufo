@@ -13,6 +13,7 @@ module ufo_gnssro_bndnbam_util_mod
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
   use gnssro_mod_transform
   use gnssro_mod_grids, only: get_coordinate_value
+  use ufo_constants_mod, only: two, zero
 
   implicit none
   public             :: ufo_gnssro_bndnbam_simobs_single

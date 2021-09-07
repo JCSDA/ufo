@@ -17,7 +17,11 @@ use missing_values_mod
 
 implicit none
 
-public             :: ufo_roobserror_getrmatrix
+private
+public  :: Rmatrix_type
+public  :: ufo_roobserror_getrmatrix
+public  :: ufo_roobserror_interpolate_rmatrix
+public  :: ufo_roobserror_findnearest_rmatrix
 
 type Rmatrix_type
   INTEGER       :: satid = 0             ! Sat ID for each R matrix

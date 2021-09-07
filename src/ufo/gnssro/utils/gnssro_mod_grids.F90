@@ -1,7 +1,7 @@
 module gnssro_mod_grids
 
 use kinds, only: kind_real
-use gnssro_mod_constants, only: one
+use ufo_constants_mod, only: one
 
 public :: get_coordinate_value
 

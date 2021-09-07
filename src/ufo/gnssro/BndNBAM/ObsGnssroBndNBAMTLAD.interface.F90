@@ -8,7 +8,8 @@
 module ufo_gnssro_bndnbam_tlad_mod_c
   
   use fckit_configuration_module, only: fckit_configuration 
-  use ufo_gnssro_bndnbam_tlad_mod 
+  use ufo_gnssro_bndnbam_tlad_mod
+  use iso_c_binding, only: c_ptr, c_int, c_double
   implicit none
   private
   

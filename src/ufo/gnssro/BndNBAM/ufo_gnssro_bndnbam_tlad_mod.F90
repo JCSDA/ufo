@@ -17,7 +17,10 @@ use lag_interp_mod
 use ufo_basis_tlad_mod,only: ufo_basis_tlad
 use gnssro_mod_conf
 use gnssro_mod_constants
+use gnssro_mod_transform, only: geop2geometric
 use fckit_log_module,  only : fckit_log
+use iso_c_binding, only: c_ptr, c_double
+use ufo_constants_mod, only: zero, half, one, two, rd_over_g, rd_over_rv, rv_over_rd
 
 implicit none
 real(c_double)                             :: missing

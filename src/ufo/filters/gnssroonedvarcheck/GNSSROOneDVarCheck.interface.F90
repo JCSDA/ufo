@@ -54,23 +54,25 @@ subroutine ufo_gnssroonedvarcheck_create_c(c_self, &
 !!
 !! \date 09/06/2020: Created
 !!
+use string_f_c_mod
+
 implicit none
 
-integer(c_int), intent(inout)  :: c_self            !< self - inout
-type(c_ptr), value, intent(in) :: c_obspace         !< obsspace - input
-integer(c_int), intent(in)     :: filename_length   !< Length of the filename string
-character(c_char), intent(in)  :: input_filename(filename_length)  !< B-matrix filename
-logical(c_bool), intent(in)    :: capsupersat       !< Whether to remove super-saturation (wrt ice?)
-real(c_float), intent(in)      :: cost_funct_test   !< Threshold value for the cost function convergence test
-real(c_float), intent(in)      :: Delta_ct2         !< Threshold used in calculating convergence
-real(c_float), intent(in)      :: Delta_factor      !< Threshold used in calculating convergence
-real(c_float), intent(in)      :: min_temp_grad     !< The minimum vertical temperature gradient allowed
-integer(c_int), intent(in)     :: n_iteration_test  !< Maximum number of iterations in the 1DVar
-real(c_float), intent(in)      :: OB_test           !< Threshold for the O-B throughout the profile
-logical(c_bool), intent(in)    :: pseudo_ops        !< Whether to use pseudo levels in forward operator
-logical(c_bool), intent(in)    :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
-real(c_float), intent(in)      :: y_test            !< Threshold on distance between observed and solution bending angles
-integer(c_int), intent(in)     :: c_onedvarflag     !< flag for qc manager logging - input
+integer(c_int), intent(inout)             :: c_self            !< self - inout
+type(c_ptr), value, intent(in)            :: c_obspace         !< obsspace - input
+integer(c_int), intent(in)                :: filename_length   !< Length of the filename string
+character(kind=c_char, len=1), intent(in) :: input_filename(filename_length+1)  !< B-matrix filename
+logical(c_bool), intent(in)               :: capsupersat       !< Whether to remove super-saturation (wrt ice?)
+real(c_float), intent(in)                 :: cost_funct_test   !< Threshold value for the cost function convergence test
+real(c_float), intent(in)                 :: Delta_ct2         !< Threshold used in calculating convergence
+real(c_float), intent(in)                 :: Delta_factor      !< Threshold used in calculating convergence
+real(c_float), intent(in)                 :: min_temp_grad     !< The minimum vertical temperature gradient allowed
+integer(c_int), intent(in)                :: n_iteration_test  !< Maximum number of iterations in the 1DVar
+real(c_float), intent(in)                 :: OB_test           !< Threshold for the O-B throughout the profile
+logical(c_bool), intent(in)               :: pseudo_ops        !< Whether to use pseudo levels in forward operator
+logical(c_bool), intent(in)               :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
+real(c_float), intent(in)                 :: y_test            !< Threshold on distance between observed and solution bending angles
+integer(c_int), intent(in)                :: c_onedvarflag     !< flag for qc manager logging - input
 
 character(len=filename_length) :: bmatrix_filename  ! Location of the B-matrix file
 integer :: ifname                                   ! Loop variable for filename
@@ -80,10 +82,7 @@ type(ufo_gnssroonedvarcheck), pointer :: self
 call ufo_gnssroonedvarcheck_registry%setup(c_self, self)
 
 ! copy over the char* into a Fortran character
-do ifname = 1, filename_length
-  if (input_filename(ifname) == c_null_char) exit
-  bmatrix_filename(ifname:ifname) = input_filename(ifname)
-end do
+call c_f_string(input_filename, bmatrix_filename)
 
 call ufo_gnssroonedvarcheck_create(self, &
                                    c_obspace, &

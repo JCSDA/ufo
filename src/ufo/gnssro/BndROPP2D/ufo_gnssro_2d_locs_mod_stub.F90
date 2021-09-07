@@ -3,6 +3,8 @@ module ufo_gnssro_2d_locs_mod
 use iso_c_binding
 use fckit_log_module, only : fckit_log
 use kinds,            only : kind_real
+
+private
 public:: ufo_gnssro_2d_locs_init
 
 contains

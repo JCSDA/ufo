@@ -15,11 +15,12 @@ module ufo_gnssro_bndnbam_mod
   use missing_values_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
-  use gnssro_mod_transform
+  use gnssro_mod_transform, only: geop2geometric, compute_refractivity
   use gnssro_mod_grids,  only : get_coordinate_value
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
   use ufo_utils_mod, only: cmp_strings 
+  use ufo_constants_mod, only: zero, half, one, two, grav, rd, rv_over_rd
 
   implicit none
   public             :: ufo_gnssro_BndNBAM

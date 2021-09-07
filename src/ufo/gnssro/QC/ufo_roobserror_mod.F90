@@ -14,6 +14,8 @@ use oops_variables_mod
 use missing_values_mod
 use gnssro_mod_obserror
 use fckit_log_module, only : fckit_log
+use gnssro_mod_constants, only: max_string
+use iso_c_binding, only: c_ptr, c_int
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
