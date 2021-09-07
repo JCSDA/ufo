@@ -86,7 +86,14 @@ void updateFlatData(std::vector<float> & flatArray, const Eigen::ArrayXXf &array
   }
 }
 
-/// Derive a mapping between the ObsSpace flat data and an unraveled 2D eigen array representation.
+/// Return an array whose rows store the indices of locations belonging to successive profiles
+/// that should be buddy-checked.
+///
+/// The buddy check operates on all profiles unless the ObsSpace contains the
+/// `extended_obs_space@MetaData` variable, in which case only profiles for which this variable is
+/// set to 1 are buddy-checked. All profiles to be buddy-checked must comprise exactly \p numLevels
+/// locations; an exception is thrown if that is not the case.
+///
 Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
                               const int numLevels) {
   // Assume ObsSpace contains only the averaged profiles if this variable isn't present.
@@ -107,14 +114,18 @@ Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
       profileIndex(recnum, levnum) = rSort[ilocs];
       levnum++;
     }
-    if (levnum != numLevels) {
+    if (levnum == numLevels) {
+      recnum++;
+    } else if (levnum == 0) {
+      // Ignore this profile
+    } else {
       std::stringstream msg;
-      msg << "Record (profile): " << recnum << " length: " << levnum+1 << " does not match the "
+      msg << "Record (profile): " << recnum << " length: " << levnum << " does not match the "
           << "number of levels expected: " << numLevels;
       throw eckit::UserError(msg.str(), Here());
     }
-    recnum++;
   }
+  profileIndex.conservativeResize(recnum, Eigen::NoChange);
   return profileIndex;
 }
 

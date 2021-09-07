@@ -91,8 +91,10 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
-  # 10 missing (final pressure level)  (42-10) x3 for air_temperature, eastward_wind and northward_wind
-  passedBenchmark: 96
+  # There are 4 * 10 = 40 locations in the extended obs space and 7 outside it. 10 locations have
+  # missing obs values. Given that there are 3 simulated variables, we expect
+  # (40 + 7 - 10) * 3 = 111 observations to pass.
+  passedBenchmark: 111
   compareVariables:
     - reference:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck
