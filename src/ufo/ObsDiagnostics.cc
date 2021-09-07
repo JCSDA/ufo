@@ -54,19 +54,6 @@ size_t ObsDiagnostics::nlevs(const std::string & var) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var) const {
-  gdiags_.get(vals, var);
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var,
-                         const int lev) const {
-  gdiags_.getAtLevel(vals, var, lev);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsDiagnostics::print(std::ostream & os) const {
   os << "ObsDiagnostics not printing yet.";
 }

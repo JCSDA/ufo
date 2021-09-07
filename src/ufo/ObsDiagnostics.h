@@ -55,8 +55,14 @@ class ObsDiagnostics : public util::Printable,
 
   bool has(const std::string & var) const {return gdiags_.has(var);}
   size_t nlevs(const std::string &) const;
-  void get(std::vector<float> &, const std::string &) const;
-  void get(std::vector<float> &, const std::string &, const int) const;
+  template <typename T>
+  void get(std::vector<T> & vals, const std::string & var, const int lev) const {
+    gdiags_.getAtLevel(vals, var, lev);
+  }
+  template <typename T>
+  void get(std::vector<T> & vals, const std::string & var) const {
+    gdiags_.get(vals, var);
+  }
 
   void write(const eckit::Configuration & config) const {
     gdiags_.write(config);}

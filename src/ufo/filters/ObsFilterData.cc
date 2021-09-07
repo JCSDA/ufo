@@ -171,11 +171,31 @@ void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values)
 }
 
 // -----------------------------------------------------------------------------
-// Overload of get() taking an std::vector and a level index.
-
+// Overload of get() taking an std::vector<float> and a level index.
 // -----------------------------------------------------------------------------
 void ObsFilterData::get(const Variable & varname, const int level,
                         std::vector<float> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
+
+  ASSERT(grp == "GeoVaLs" || grp == "ObsDiag" || grp == "ObsBiasTerm");
+  values.resize(obsdb_.nlocs());
+///  For GeoVaLs read from GeoVaLs (should be available)
+  if (grp == "GeoVaLs") {
+    ASSERT(gvals_);
+    gvals_->getAtLevel(values, var, level);
+///  For ObsDiag get from ObsDiagnostics
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    ASSERT(diags_);
+    diags_->get(values, var, level);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Overload of get() taking an std::vector<double> and a level index.
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, const int level,
+                        std::vector<double> & values) const {
   const std::string var = varname.variable();
   const std::string grp = varname.group();
 
