@@ -413,6 +413,7 @@ void DataExtractor<ExtractedValue>::load(const std::string &filepath,
   DataExtractorInput<ExtractedValue> input = backend->loadData(interpolatedArrayGroup);
   coord2DimMapping_ = std::move(input.coord2DimMapping);
   dim2CoordMapping_ = std::move(input.dim2CoordMapping);
+  coordNDims_ = std::move(input.coordNDims);
   coordsVals_ = std::move(input.coordsVals);
   interpolatedArray_.resize(boost::extents[input.payloadArray.shape()[0]]
                                             [input.payloadArray.shape()[1]]
@@ -511,7 +512,20 @@ void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
   const std::string canonicalVarName = ioda::convertV1PathToV2Path(varName);
 
   const CoordinateValues &coordVal = coordsVals_.at(canonicalVarName);
-  const int dimIndex = coord2DimMapping_.at(canonicalVarName);
+  const std::vector<int> &dimIndices = coord2DimMapping_.at(canonicalVarName);
+  const size_t coordDim = coordNDims_.at(canonicalVarName);
+
+  if (coordDim != dimIndices.size())
+    throw eckit::Exception("Variable: '" + varName + "' has one or more dimension mappings not "
+                           "shared by the payload variable.", Here());
+  if (coordDim > 1) {
+    std::stringstream msg;
+    msg << "Variable: '" + varName + "' is a '" << coordDim << + "' dimensional coordinate."
+        << "  Only 1D coordinates currently supported.";
+    throw eckit::Exception(msg.str(), Here());
+  }
+
+  const int dimIndex = dimIndices[0];
 
   SortUpdateVisitor visitor(splitter_[static_cast<size_t>(dimIndex)]);
   boost::apply_visitor(visitor, coordVal);

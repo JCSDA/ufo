@@ -291,7 +291,7 @@ observations:
   obs function:
     name: DrawValueFromFile@IntObsFunction
     options:
-      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced2.nc
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
       group: IntResult2D
       interpolation:
       - name: longitude@MetaData
@@ -411,7 +411,7 @@ observations:
   obs function:
     name: DrawValueFromFile@StringObsFunction
     options:
-      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced3.nc
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
       group: StringResult2D
       interpolation:
       - name: longitude@MetaData
