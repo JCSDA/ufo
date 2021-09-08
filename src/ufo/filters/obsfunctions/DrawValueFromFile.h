@@ -46,6 +46,16 @@ struct InterpMethodParameterTraitsHelper {
   };
 };
 
+struct ExtrapolationModeParameterTraitsHelper {
+  typedef ExtrapolationMode EnumType;
+  static constexpr char enumTypeName[] = "ExtrapolationMethod";
+  static constexpr util::NamedEnumerator<ExtrapolationMode> namedValues[] = {
+    { ExtrapolationMode::ERROR, "error" },
+    { ExtrapolationMode::NEAREST, "nearest" },
+    { ExtrapolationMode::MISSING, "missing" }
+  };
+};
+
 }  // namespace ufo
 
 
@@ -54,6 +64,11 @@ namespace oops {
 template <>
 struct ParameterTraits<ufo::InterpMethod> :
     public EnumParameterTraits<ufo::InterpMethodParameterTraitsHelper>
+{};
+
+template <>
+struct ParameterTraits<ufo::ExtrapolationMode> :
+    public EnumParameterTraits<ufo::ExtrapolationModeParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -75,6 +90,13 @@ class InterpolationParameters : public oops::Parameters {
   ///
   /// \see InterpMethod for the list of supported methods.
   oops::RequiredParameter<InterpMethod> method{"method", this};
+
+  /// Extrapolation mode for the given variable and interpolation method i.e. behaviour for
+  /// out-of-bounds extract.
+  ///
+  /// \sea ExtrapolationMode for a list of supported modes.
+  oops::Parameter<ExtrapolationMode> extrapMode{
+    "extrapolation mode", ExtrapolationMode::ERROR, this};
 };
 
 
@@ -153,6 +175,7 @@ class DrawValueFromFile : public ObsFunctionBase<T> {
  private:
   Variables allvars_;
   std::unordered_map<std::string, InterpMethod> interpMethod_;
+  std::unordered_map<std::string, ExtrapolationMode> extrapMode_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
   std::vector<int> channels_;

@@ -158,13 +158,19 @@ void nearestMatch(const std::string &varName,
                   const std::vector<T> &varValues,
                   const T &obVal,
                   ConstrainedRange &range) {
+  if (isOutOfBounds(obVal, varValues, range)) {
+    std::stringstream msg;
+    msg << "No match found for 'nearest' extraction of value '" << obVal << "' of the variable '"
+        << varName << "'.  Value is out of bounds.  Consider using extrapolation.";
+    throw eckit::Exception(msg.str(), Here());
+  }
+
   // Find first index of varValues >= obVal
   int nnIndex = std::lower_bound(varValues.begin() + range.begin(),
                                  varValues.begin() + range.end(),
                                  obVal) - varValues.begin();
-  if (nnIndex >= range.end()) {
+  if (nnIndex >= range.end())
     nnIndex = range.end() - 1;
-  }
 
   // Now fetch the nearest neighbour index (lower index prioritised for different values with
   // same distance)
@@ -219,7 +225,8 @@ void leastUpperBoundMatch(const std::string &varName,
   if (leastUpperBoundIt == rangeEnd) {
     std::stringstream msg;
     msg << "No match found for 'least upper bound' extraction of value '" << obVal
-        << "' of the variable '" << varName << "'";
+        << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+           "extrapolation.";
     throw eckit::Exception(msg.str(), Here());
   }
 
@@ -268,7 +275,8 @@ void greatestLowerBoundMatch(const std::string &varName,
   if (greatestLowerBoundIt == reverseRangeEnd) {
     std::stringstream msg;
     msg << "No match found for 'greatest lower bound' extraction of value '" << obVal
-        << "' of the variable '" << varName << "'";
+        << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+           "extrapolation.";
     throw eckit::Exception(msg.str(), Here());
   }
 
@@ -307,7 +315,7 @@ void greatestLowerBoundMatch(const std::string &varName,
 ///   `varValues` that matches all constraints considered so far. On output, the subrange of
 ///   slices matching also the current constraint.
 template <typename T>
-void match(InterpMethod method,
+void match(const InterpMethod method,
            const std::string &varName,
            const std::vector<T> &varValues,
            const T &obVal,
@@ -326,7 +334,7 @@ void match(InterpMethod method,
       greatestLowerBoundMatch(varName, varValues, obVal, range);
       break;
     default:
-      throw eckit::BadParameter("Unrecognized interpolation method", Here());
+      throw eckit::BadParameter("Unrecognized interpolation method for '" + varName + "'", Here());
   }
 }
 
@@ -355,10 +363,12 @@ float linearInterpolation(
     const CoordinateValue &obVal,
     const ConstrainedRange &range,
     const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
-  if ((obVal > varValues[range.end() - 1]) || (obVal < varValues[range.begin()])) {
-    throw eckit::Exception("Linear interpolation failed, value is beyond grid extent."
-                           "No extrapolation supported.",
-                           Here());
+  if (isOutOfBounds(obVal, varValues, range)) {
+      std::stringstream msg;
+      msg << "No match found for 'linear' interpolation of value '" << obVal
+          << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+          << "extrapolation.";
+      throw eckit::Exception(msg.str(), Here());
   }
   // Find first index of varValues >= obVal
   int nnIndex = std::lower_bound(varValues.begin() + range.begin(),
@@ -497,7 +507,8 @@ void DataExtractor<ExtractedValue>::sort() {
 
 template <typename ExtractedValue>
 void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
-                                                 const InterpMethod &method) {
+                                                 const InterpMethod &method,
+                                                 const ExtrapolationMode &extrapMode) {
   if (!std::is_floating_point<ExtractedValue>::value) {
       std::string msg = "interpolation can be used when extracting floating-point values, but not "
                         "integers or strings.";
@@ -531,7 +542,7 @@ void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
   boost::apply_visitor(visitor, coordVal);
 
   // Update our map between coordinate (variable) and interpolation/extract method
-  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, dimIndex});
+  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, extrapMode, dimIndex});
 }
 
 
@@ -559,15 +570,16 @@ void DataExtractor<ExtractedValue>::extractImpl(const T &obVal) {
   if (nextCoordToExtractBy_ == coordsToExtractBy_.cend())
     throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
                            Here());
+  T obValN = applyExtrapolation(obVal);
+  if (resultSet_)
+    return;
 
   // Perform the extraction using the selected method
   if (nextCoordToExtractBy_->method == InterpMethod::LINEAR)
-    maybeExtractByLinearInterpolation(obVal);
+    maybeExtractByLinearInterpolation(obValN);
   else
-    match(nextCoordToExtractBy_->method,
-          nextCoordToExtractBy_->name,
-          boost::get<std::vector<T>>(nextCoordToExtractBy_->values),
-          obVal,
+    match(nextCoordToExtractBy_->method, nextCoordToExtractBy_->name,
+          boost::get<std::vector<T>>(nextCoordToExtractBy_->values), obValN,
           constrainedRanges_[nextCoordToExtractBy_->payloadDim]);
 
   ++nextCoordToExtractBy_;
