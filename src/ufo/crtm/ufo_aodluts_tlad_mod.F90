@@ -32,7 +32,6 @@ MODULE ufo_aodluts_tlad_mod
      PRIVATE
      CHARACTER(len=maxvarlen), PUBLIC, ALLOCATABLE :: varin(:)  ! variablesrequested from the model
      INTEGER, ALLOCATABLE                          :: channels(:)
-     REAL(kind_real), ALLOCATABLE                  :: wavelengths(:)
      TYPE(luts_conf) :: conf
      INTEGER :: n_profiles
      INTEGER :: n_layers
@@ -76,7 +75,7 @@ CONTAINS
     self%varin(1:self%n_aerosols) = var_aerosols
 
     ALLOCATE(self%channels(SIZE(channels)))
-    ALLOCATE(self%wavelengths(SIZE(channels)))
+    ALLOCATE(self%conf%wavelengths(SIZE(channels)))
 
     self%channels(:) = channels(:)
 
@@ -100,7 +99,7 @@ CONTAINS
     IF (ALLOCATED(self%layer_factors)) DEALLOCATE(self%layer_factors)
     IF (ALLOCATED(self%varin)) DEALLOCATE(self%varin)
     IF (ALLOCATED(self%channels)) DEALLOCATE(self%channels)
-    IF (ALLOCATED(self%wavelengths)) DEALLOCATE(self%wavelengths)
+    IF (ALLOCATED(self%conf%wavelengths)) DEALLOCATE(self%conf%wavelengths)
 
   END SUBROUTINE ufo_aodluts_tlad_delete
 
@@ -121,7 +120,7 @@ CONTAINS
     INTEGER        :: n,l,m
     TYPE(ufo_geoval), POINTER :: temp
 
-! define the "non-demoninational" arguments
+! define the "non-denominational" arguments
     TYPE(crtm_channelinfo_type)             :: chinfo(self%conf%n_sensors)
 
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
@@ -129,6 +128,13 @@ CONTAINS
     REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
 
     INTEGER :: rc,nvars
+
+    IF (.NOT. self%conf%use_crtm) THEN
+       message = 'CRTM must be used in this routine - TLAD for '&
+            &//TRIM(self%conf%sensor_id(1))//' not available'
+       CALL display_message( program_name, message, failure )
+       STOP
+    END IF
 
 ! get number of profile and layers from geovals
 
@@ -166,7 +172,7 @@ CONTAINS
 
        wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
 
-       self%wavelengths=wavelengths_all(self%channels)
+       self%conf%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf%aerosol_option,&
             &self%n_aerosols, self%n_profiles, self%n_layers,&
@@ -177,7 +183,7 @@ CONTAINS
 
        CALL get_cf_aod(self%n_layers, self%n_profiles, nvars, &
             &self%n_aerosols, self%conf%rcfile,  &
-            &self%wavelengths, var_aerosols, aero_layers, rh, &
+            &self%conf%wavelengths, var_aerosols, aero_layers, rh, &
             &ext=self%bext, rc = rc)
 
        IF (rc /= 0) THEN
