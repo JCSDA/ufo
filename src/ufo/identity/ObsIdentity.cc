@@ -33,6 +33,9 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
   getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices_);
   requiredVars_ += operatorVars_;
 
+  // Check whether level index 0 is closest to the Earth's surface.
+  levelIndexZeroAtSurface_  = config.getBool("level index 0 is closest to surface", true);
+
   oops::Log::trace() << "ObsIdentity constructor finished" << std::endl;
 }
 
@@ -51,8 +54,11 @@ void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   std::vector<double> vec(ovec.nlocs());
   for (int jvar : operatorVarIndices_) {
     const std::string& varname = ovec.varnames().variables()[jvar];
-    // Get GeoVaL at the lowest level.
-    gv.getAtLevel(vec, varname, 0);
+    // Get GeoVaL at the level closest to the Earth's surface.
+    if (levelIndexZeroAtSurface_)
+      gv.getAtLevel(vec, varname, 0);
+    else
+      gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
       const size_t idx = jloc * ovec.nvars() + jvar;
       ovec[idx] = vec[jloc];

@@ -48,6 +48,9 @@ namespace ufo {
 /// component of the Composite operator. If `variables` is not set, the operator will simulate
 /// all ObsSpace variables. Please see the documentation of the Composite operator for further
 /// details.
+///
+/// The boolean parameter `level index 0 is closest to surface` can be set to `false`
+/// for models whose level index 0 is furthest from the Earth's surface.
 class ObsIdentity : public ObsOperatorBase,
   private util::ObjectCounter<ObsIdentity> {
  public:
@@ -74,6 +77,9 @@ class ObsIdentity : public ObsOperatorBase,
 
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
+
+  /// Level index 0 is closest to surface.
+  bool levelIndexZeroAtSurface_;
 };
 
 // -----------------------------------------------------------------------------

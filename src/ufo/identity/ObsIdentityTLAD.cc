@@ -35,6 +35,9 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices_);
   requiredVars_ += operatorVars_;
 
+  // Check whether level index 0 is closest to the Earth's surface.
+  levelIndexZeroAtSurface_  = config.getBool("level index 0 is closest to surface", true);
+
   oops::Log::trace() << "ObsIdentityTLAD constructor finished" << std::endl;
 }
 
@@ -59,8 +62,11 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) co
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
     const std::string& varname = dy.varnames().variables()[jvar];
-    // Fill dy with dx at the lowest level.
-    dx.getAtLevel(vec, varname, 0);
+    // Fill dy with dx at the level closest to the Earth's surface.
+    if (levelIndexZeroAtSurface_)
+      dx.getAtLevel(vec, varname, 0);
+    else
+      dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
       dy[idx] = vec[jloc];
@@ -80,8 +86,11 @@ void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) co
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
     const std::string& varname = dy.varnames().variables()[jvar];
-    // Get current value of dx at the lowest level.
-    dx.getAtLevel(vec, varname, 0);
+    // Get current value of dx at the level closest to the Earth's surface.
+    if (levelIndexZeroAtSurface_)
+      dx.getAtLevel(vec, varname, 0);
+    else
+      dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     // Increment dx with non-missing values of dy.
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
@@ -89,7 +98,10 @@ void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) co
         vec[jloc] += dy[idx];
     }
     // Store new value of dx.
-    dx.putAtLevel(vec, varname, 0);
+    if (levelIndexZeroAtSurface_)
+      dx.putAtLevel(vec, varname, 0);
+    else
+      dx.putAtLevel(vec, varname, dx.nlevs(varname) - 1);
   }
 
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator finished" << std::endl;
