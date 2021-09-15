@@ -25,6 +25,14 @@ observations:
     channels: &ops_channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs bias: &ObsBias
+    static bc:
+      predictors:
+      - name: thickness
+        layer top: 30000
+        layer base: 85000
+        mean: 7.6
+        standard deviation: 1.3
   obs filters:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
@@ -72,7 +80,7 @@ observations:
     Max1DVarIterations: 7
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1410      # number of passed obs
+  passedBenchmark: 1380      # number of passed obs
 ## Test ML minimizer
 - obs operator:
     name: RTTOV
@@ -97,6 +105,8 @@ observations:
     channels: &ops_channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs bias: 
+    <<: *ObsBias
   obs filters:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
@@ -142,4 +152,4 @@ observations:
     Max1DVarIterations: 7
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1350      # number of passed obs
+  passedBenchmark: 1380      # number of passed obs

@@ -21,15 +21,15 @@ type, public :: ufo_metoffice_bmatrixstatic
   integer :: nbands                                 !< number of latitude bands
   integer :: nsurf                                  !< number of surface type variations
   integer :: nfields                                !< number of fields
-  integer, pointer      :: fields(:,:)              !< fieldtypes and no. elements in each
-  real(kind=kind_real), pointer :: store(:,:,:)     !< original b-matrices read from the file
-  real(kind=kind_real), pointer :: inverse(:,:,:)   !< inverse of above
-  real(kind=kind_real), pointer :: sigma(:,:)       !< diagonal elements
-  real(kind=kind_real), pointer :: proxy(:,:)       !< copy of original for manipulation
-  real(kind=kind_real), pointer :: inv_proxy(:,:)   !< copy of inverse
-  real(kind=kind_real), pointer :: sigma_proxy(:,:) !< copy of diagonal
-  real(kind=kind_real), pointer :: south(:)         !< s limit of each latitude band
-  real(kind=kind_real), pointer :: north(:)         !< n limit of each latitude band
+  integer, allocatable :: fields(:,:)               !< fieldtypes and no. elements in each
+  real(kind=kind_real), allocatable :: store(:,:,:)     !< original b-matrices read from the file
+  real(kind=kind_real), allocatable :: inverse(:,:,:)   !< inverse of above
+  real(kind=kind_real), allocatable :: sigma(:,:)       !< diagonal elements
+  real(kind=kind_real), allocatable :: proxy(:,:)       !< copy of original for manipulation
+  real(kind=kind_real), allocatable :: inv_proxy(:,:)   !< copy of inverse
+  real(kind=kind_real), allocatable :: sigma_proxy(:,:) !< copy of diagonal
+  real(kind=kind_real), allocatable :: south(:)         !< s limit of each latitude band
+  real(kind=kind_real), allocatable :: north(:)         !< n limit of each latitude band
 contains
   procedure :: setup  => ufo_metoffice_bmatrixstatic_setup
   procedure :: delete => ufo_metoffice_bmatrixstatic_delete
@@ -127,7 +127,7 @@ inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
   fileunit = ufo_utils_iogetfreeunit()
   open(unit = fileunit, file = trim(filepath))
-  call rttovonedvarcheck_covariance_InitBmatrix(self)
+  call self % delete()
   call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
   if (testing) then
     call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in)
@@ -178,50 +178,17 @@ character(len=*), parameter :: RoutineName = "ufo_metoffice_bmatrixstatic_delete
 self % status = .false.
 self % nbands = 0
 self % nsurf = 0
-if ( associated(self % fields)      ) deallocate( self % fields      )
-if ( associated(self % store)       ) deallocate( self % store       )
-if ( associated(self % inverse)     ) deallocate( self % inverse     )
-if ( associated(self % sigma)       ) deallocate( self % sigma       )
-if ( associated(self % proxy)       ) deallocate( self % proxy       )
-if ( associated(self % inv_proxy)   ) deallocate( self % inv_proxy   )
-if ( associated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
-if ( associated(self % south)       ) deallocate( self % south       )
-if ( associated(self % north)       ) deallocate( self % north       )
+if ( allocated(self % fields)      ) deallocate( self % fields      )
+if ( allocated(self % store)       ) deallocate( self % store       )
+if ( allocated(self % inverse)     ) deallocate( self % inverse     )
+if ( allocated(self % sigma)       ) deallocate( self % sigma       )
+if ( allocated(self % proxy)       ) deallocate( self % proxy       )
+if ( allocated(self % inv_proxy)   ) deallocate( self % inv_proxy   )
+if ( allocated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
+if ( allocated(self % south)       ) deallocate( self % south       )
+if ( allocated(self % north)       ) deallocate( self % north       )
 
 end subroutine ufo_metoffice_bmatrixstatic_delete
-
-! ------------------------------------------------------------------------------------------------
-!> \brief Routine to initialize the 1D-Var B-matrix
-!!
-!! \details Met Office OPS Heritage: Ops_SatRad_InitBmatrix.f90
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
-
-implicit none
-
-! subroutine arguments:
-type(ufo_metoffice_bmatrixstatic), intent(out) :: self !< B-matrix Covariance
-
-character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
-
-self % status = .false.
-self % nbands = 0
-self % nsurf = 0
-nullify( self % fields      )
-nullify( self % store       )
-nullify( self % inverse     )
-nullify( self % sigma       )
-nullify( self % proxy       )
-nullify( self % inv_proxy   )
-nullify( self % sigma_proxy )
-nullify( self % south       )
-nullify( self % north       )
-
-end subroutine rttovonedvarcheck_covariance_InitBmatrix
 
 ! ------------------------------------------------------------------------------------------------
 !> Routine to initialize the 1D-Var B-matrix
@@ -262,8 +229,7 @@ end subroutine rttovonedvarcheck_covariance_InitBmatrix
 !! processing without affecting the original. we might wish to do this, for
 !! example, to take account of the different surface temperature errors for land
 !! and sea. this routine makes no assumption about the use of these variables,
-!! hence no space is allocated. nullification of unused pointers should take
-!! place outside (use the ops_satrad_initbmatrix routine).
+!! hence no space is allocated.
 !!
 !! \author Met Office
 !!

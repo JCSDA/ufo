@@ -25,6 +25,14 @@ observations:
     channels: &ops_channels 7-12
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
+  obs bias: &ObsBias
+    static bc:
+      predictors:
+      - name: thickness
+        layer top: 30000
+        layer base: 85000
+        mean: 7.6
+        standard deviation: 1.3
   obs filters:
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
@@ -80,4 +88,4 @@ observations:
         name: LWP@OneDVar
       maxvalue: 1.0e-1
     defer to post: true
-  passedBenchmark: 444      # number of passed obs
+  passedBenchmark: 300      # number of passed obs
