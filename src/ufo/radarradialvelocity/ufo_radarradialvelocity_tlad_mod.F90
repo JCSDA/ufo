@@ -210,15 +210,6 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
 ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
 
-! Allocate geovals profile if not yet allocated
-    if (.not. allocated(profile%vals)) then
-       profile%nlocs = self%nlocs
-       profile%nval  = self%nval
-       allocate(profile%vals(profile%nval, profile%nlocs))
-       profile%vals(:,:) = 0.0_kind_real
-    endif
-    if (.not. geovals%linit ) geovals%linit=.true.
-
 ! Interpolate from geovals to observational location into hofx
     do iobs = 1, nlocs
       call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &

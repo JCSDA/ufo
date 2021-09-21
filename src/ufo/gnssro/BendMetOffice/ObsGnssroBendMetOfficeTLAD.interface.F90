@@ -27,19 +27,22 @@ contains
 #include "oops/util/linkedList_c.f"
   
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_gnssro_bendmetoffice_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_gnssro_bendmetoffice_tlad_setup_f90')
+
+subroutine ufo_gnssro_bendmetoffice_tlad_setup_c(c_key_self, &
+                                                 vert_interp_ops, &
+                                                 pseudo_ops, &
+                                                 min_temp_grad) bind(c,name='ufo_gnssro_bendmetoffice_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+logical(c_bool), intent(in) :: vert_interp_ops
+logical(c_bool), intent(in) :: pseudo_ops
+real(c_float), intent(in) :: min_temp_grad
     
 type(ufo_gnssro_bendmetoffice_tlad), pointer :: self
-type(fckit_configuration) :: f_conf
 
 call ufo_gnssro_bendmetoffice_tlad_registry%setup(c_key_self, self)
-f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf)
+call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad)
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_setup_c
   

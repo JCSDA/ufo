@@ -21,7 +21,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -35,7 +35,7 @@ namespace ufo {
   /// over model layers defined by adjacent pressure levels, including the surface pressure.
   class ProfileAverageWindSpeed : public ProfileCheckBase {
    public:
-    explicit ProfileAverageWindSpeed(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAverageWindSpeed(const ConventionalProfileProcessingParameters &options);
 
     /// Average wind speed observations onto model levels and store the results.
     /// \throws eckit::BadValue if vectors produced by the AveragePressure routine

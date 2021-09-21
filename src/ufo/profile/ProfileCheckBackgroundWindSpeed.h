@@ -22,7 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -35,7 +35,8 @@ namespace ufo {
   /// (except those with PGE > 0.999) will be used in vertical averaging.
   class ProfileCheckBackgroundWindSpeed : public ProfileCheckBase {
    public:
-    explicit ProfileCheckBackgroundWindSpeed(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckBackgroundWindSpeed
+      (const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

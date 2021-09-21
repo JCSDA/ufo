@@ -1,14 +1,16 @@
-window begin: 2020-11-01T09:00:00Z
-window end: 2020-11-01T15:00:00Z
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
 
 observations:
 - obs space:
     name: satwinds_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/satwind_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/satwind_obs_2020121500_m.nc
+    obsdataout: 
+      obsfile: Data/satwind_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/satwind_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/satwind_geoval_2020121500_m.nc
   obs filters:
 #
 # Reject all obs with PreQC mark already set above 3
@@ -322,4 +324,4 @@ observations:
         is_in: 243, 245, 246, 251, 253, 254
     defer to post: true
 #
-  passedBenchmark: 18
+  passedBenchmark: 17656

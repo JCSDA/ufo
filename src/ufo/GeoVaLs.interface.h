@@ -35,11 +35,27 @@ namespace ufo {
 
 extern "C" {
   void ufo_geovals_default_constr_f90(F90goms &);
-  void ufo_geovals_setup_f90(F90goms &, const size_t &, const oops::Variables &);
-  void ufo_geovals_allocate_f90(F90goms &, const size_t &, const oops::Variables &);
+  /// Deprecated, use ufo_geovals_setup_f90 instead.
+  /// Creates Fortran GeoVaLs with key \p key, \p nlocs number of locations
+  /// for \p vars variables. Does not allocate internal structures.
+  void ufo_geovals_partial_setup_f90(F90goms & key, const size_t & nlocs,
+                                     const oops::Variables & vars);
+  /// Creates and allocates Fortran GeoVaLs with key \p key, \p nlocs number of
+  /// locations for \p vars variables. \p nlevs is a pointer to the first element
+  /// of array size \p nvars that contains number of values to allocate for each of
+  /// the variables.
+  void ufo_geovals_setup_f90(F90goms & key, const size_t & nlocs,
+                             const oops::Variables & vars,
+                             const size_t & nvars, const size_t & nlevs);
+  /// Deprecated, rely on ufo_geovals_setup_f90 to allocate GeoVaLs instead.
+  /// Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
+  /// If the GeoVaLs for this variable were allocated before with different size,
+  /// aborts.
+  void ufo_geovals_allocate_f90(const F90goms &, const size_t & nlevels,
+                                const oops::Variables & vars);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
-  void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, int &);
+  void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, const int &);
   void ufo_geovals_zero_f90(const F90goms &);
   void ufo_geovals_reorderzdir_f90(const F90goms &, const int &, const char *,
                                    const int &, const char *);

@@ -20,6 +20,7 @@
 #include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.interface.h"
+#include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheckParameters.h"
 #include "ufo/filters/QCflags.h"
 
 namespace eckit {
@@ -48,21 +49,28 @@ namespace ufo {
 class GNSSROOneDVarCheck : public FilterBase,
                      private util::ObjectCounter<GNSSROOneDVarCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef GNSSROOneDVarCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::GNSSROOneDVarCheck";}
 
-  GNSSROOneDVarCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                  std::shared_ptr<ioda::ObsDataVector<int> >,
-                  std::shared_ptr<ioda::ObsDataVector<float> >);
+  GNSSROOneDVarCheck(ioda::ObsSpace &,
+                     const Parameters_ &,
+                     std::shared_ptr<ioda::ObsDataVector<int> >,
+                     std::shared_ptr<ioda::ObsDataVector<float> >);
   ~GNSSROOneDVarCheck();
 
  private:
   void print(std::ostream &) const override;
-  void applyFilter(const std::vector<bool> &, const Variables &,
+  void applyFilter(const std::vector<bool> &,
+                   const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::onedvar;}
 
   F90onedvarcheck key_;
   const eckit::LocalConfiguration config_;
+  GNSSROOneDVarCheckParameters parameters_;
 };
 
 }  // namespace ufo

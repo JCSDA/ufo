@@ -49,7 +49,7 @@ class SatWindsLNVDCheckParameters : public oops::Parameters {
 ///           test_hofx: GsiHofX
 ///       maxvalue: 3
 ///
-class SatWindsLNVDCheck : public ObsFunctionBase {
+class SatWindsLNVDCheck : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "SatWindsLNVDCheck";}
 

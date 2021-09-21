@@ -20,7 +20,7 @@ namespace ufo {
 ///
 /// \brief Calculate Sun glint angles at observation locations.
 ///
-class SunGlintAngle : public ObsFunctionBase {
+class SunGlintAngle : public ObsFunctionBase<float> {
  public:
   explicit SunGlintAngle(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

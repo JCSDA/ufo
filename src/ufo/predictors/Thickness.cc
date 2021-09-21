@@ -17,14 +17,13 @@ static PredictorMaker<Thickness> makerFuncThickness_("thickness");
 
 // -----------------------------------------------------------------------------
 
-Thickness::Thickness(const eckit::Configuration & conf, const oops::Variables & vars)
-    : PredictorBase(conf, vars) {
+Thickness::Thickness(const Parameters_ & parameters, const oops::Variables & vars)
+    : PredictorBase(parameters, vars) {
   // required variables
   geovars_ += oops::Variables({"air_temperature",
                                  "air_pressure"});
   // required options
-  eckit::LocalConfiguration bconf(conf, "options");
-  parameters_.validateAndDeserialize(bconf);
+  parameters_ = parameters;
 
   // override the predictor name to distinguish between
   // thickness predictors at different pressure layers

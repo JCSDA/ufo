@@ -49,7 +49,7 @@ class InterChannelConsistencyCheckParameters : public oops::Parameters {
 ///
 /// \brief Inter-channel consistency check
 ///
-class InterChannelConsistencyCheck : public ObsFunctionBase {
+class InterChannelConsistencyCheck : public ObsFunctionBase<float> {
  public:
   explicit InterChannelConsistencyCheck(const eckit::LocalConfiguration &);
   ~InterChannelConsistencyCheck();

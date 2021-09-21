@@ -49,8 +49,7 @@ ObsGnssroBndROPP2DTLAD::~ObsGnssroBndROPP2DTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP2DTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                           ObsDiagnostics &) {
+void ObsGnssroBndROPP2DTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_gnssro_bndropp2d_tlad_settraj_f90(keyOperGnssroBndROPP2D_, geovals.toFortran(), obsspace());
 }
 

@@ -39,6 +39,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
+  real(kind_real), allocatable :: final_bt_diff(:) !< final bt difference if converged
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
   real(kind_real), allocatable :: background_T(:) !< background temperature used by qsplit
   real(kind_real), allocatable :: output_profile(:) !< retrieved state at converge as profile vector
@@ -89,6 +90,7 @@ missing = missing_value(missing)
 call self % delete()
 
 allocate(self % yobs(nchans))
+allocate(self % final_bt_diff(nchans))
 allocate(self % channels_used(nchans))
 allocate(self % channels_all(nchans_all))
 allocate(self % emiss(nchans_all))
@@ -99,6 +101,7 @@ allocate(self % background_BT(nchans_all))
 allocate(self % calc_emiss(nchans_all))
 
 self % yobs(:) = missing
+self % final_bt_diff(:) = missing
 self % emiss(:) = zero
 self % background_T(:) = missing
 self % output_profile(:) = missing
@@ -146,6 +149,7 @@ self % mwscatt = .false.
 self % mwscatt_totalice = .false.
 
 if (allocated(self % yobs))           deallocate(self % yobs)
+if (allocated(self % final_bt_diff))  deallocate(self % final_bt_diff)
 if (allocated(self % channels_used))  deallocate(self % channels_used)
 if (allocated(self % channels_all))   deallocate(self % channels_all)
 if (allocated(self % emiss))          deallocate(self % emiss)

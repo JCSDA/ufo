@@ -26,7 +26,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -39,7 +39,7 @@ namespace ufo {
   /// Profiles without a pressure sensor are flagged.
   class ProfilePressure : public ProfileCheckBase {
    public:
-    explicit ProfilePressure(const ProfileConsistencyCheckParameters &options);
+    explicit ProfilePressure(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

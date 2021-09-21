@@ -197,12 +197,14 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
       if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
         if (self%troposphere) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
+                                  prsi_obs(:,iobs), prsi%vals(:,iobs), &
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
           hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         else if (self%totalcolumn) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
+                                  prsi_obs(:,iobs), prsi%vals(:,iobs), &
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp)

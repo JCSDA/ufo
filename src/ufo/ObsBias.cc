@@ -8,11 +8,13 @@
 #include "ufo/ObsBias.h"
 
 #include <Eigen/Dense>
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <set>
 
 #include "ioda/Engines/Factory.h"
+#include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
 #include "ioda/ObsVector.h"
@@ -30,16 +32,19 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
-  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()) {
+  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()),
+    rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
-  for (const eckit::LocalConfiguration &conf : params.staticBC.value().predictors.value()) {
-    initPredictor(conf);
+  for (const PredictorParametersWrapper &wrapper :
+       params.staticBC.value().predictors.value()) {
+    initPredictor(wrapper);
     ++numStaticPredictors_;
   }
-  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
-    initPredictor(conf);
+  for (const PredictorParametersWrapper &wrapper :
+       params.variationalBC.value().predictors.value()) {
+    initPredictor(wrapper);
     ++numVariablePredictors_;
   }
 
@@ -62,7 +67,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     numStaticPredictors_(other.numStaticPredictors_),
     numVariablePredictors_(other.numVariablePredictors_),
     vars_(other.vars_),
-    geovars_(other.geovars_), hdiags_(other.hdiags_) {
+    geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
@@ -93,6 +98,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     vars_       = rhs.vars_;
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
+    rank_       = rhs.rank_;
   }
   return *this;
 }
@@ -146,9 +152,74 @@ void ObsBias::read(const Parameters_ & params) {
 }
 
 // -----------------------------------------------------------------------------
+/// Create ObsGroup with dimensions npredictors = size(predictors) and
+/// nchannels = size(channels), variables predictors, channels and
+/// bias_cooefficients (npredictors x nchannels)
+ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
+                                          const std::vector<std::string> & predictors,
+                                          const std::vector<int> & channels,
+                                          const Eigen::MatrixXd & coeffs) {
+    // dimensions
+    ioda::NewDimensionScales_t dims {
+        ioda::NewDimensionScale<int>("npredictors", predictors.size()),
+        ioda::NewDimensionScale<int>("nchannels", channels.size())
+    };
+    // new ObsGroup
+    ioda::ObsGroup ogrp = ioda::ObsGroup::generate(parent, dims);
+
+    // save the predictors
+    ioda::Variable predsVar = ogrp.vars.createWithScales<std::string>(
+                              "predictors", {ogrp.vars["npredictors"]});
+    predsVar.write(predictors);
+    // and the variables
+    ioda::Variable chansVar = ogrp.vars.createWithScales<int>("channels", {ogrp.vars["nchannels"]});
+    chansVar.write(channels);
+
+    // Set up the creation parameters for the bias coefficients variable
+    ioda::VariableCreationParameters float_params;
+    float_params.chunk = true;               // allow chunking
+    float_params.compressWithGZIP();         // compress using gzip
+    float missing_value = util::missingValue(missing_value);
+    float_params.setFillValue<float>(missing_value);
+
+    // Create a variable for bias coefficients, save bias coeffs to the variable
+    ioda::Variable biasVar = ogrp.vars.createWithScales<float>("bias_coefficients",
+                       {ogrp.vars["npredictors"], ogrp.vars["nchannels"]}, float_params);
+    biasVar.writeWithEigenRegular(coeffs);
+    return ogrp;
+}
+
+// -----------------------------------------------------------------------------
 
 void ObsBias::write(const Parameters_ & params) const {
-  oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
+  // only write files out on the task with MPI rank 0
+  if (rank_ != 0) return;
+
+  if (params.outputFile.value() != boost::none) {
+    // FIXME: only implemented for channels currently
+    if (vars_.channels().size() == 0) {
+      throw eckit::NotImplemented("ObsBias::write not implemented for variables without channels",
+                                  Here());
+    }
+    // Create a file, overwrite if exists
+    const std::string output_filename = *params.outputFile.value();
+    ioda::Group group = ioda::Engines::HH::createFile(output_filename,
+                        ioda::Engines::BackendCreateModes::Truncate_If_Exists);
+
+    // put only variable bias predictors into the predictors vector
+    std::vector<std::string> predictors(prednames_.begin() + numStaticPredictors_,
+                                        prednames_.end());
+    // map coefficients to 2D for saving
+    Eigen::Map<const Eigen::MatrixXd>
+        coeffs(biascoeffs_.data(), numVariablePredictors_, vars_.size());
+
+    saveBiasCoeffsWithChannels(group, predictors, vars_.channels(), coeffs);
+  } else {
+    if (numVariablePredictors_ > 0) {
+      oops::Log::warning() << "obs bias.output file is NOT available, bias coefficients "
+                           << "will not be saved." << std::endl;
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -159,7 +230,7 @@ double ObsBias::norm() const {
 
   // Static predictors
   const int numUnitCoeffs = numStaticPredictors_ * vars_.size();
-  zz += numUnitCoeffs * numUnitCoeffs;
+  zz += numUnitCoeffs;
 
   // Variable predictors
   zz += biascoeffs_.squaredNorm();
@@ -170,6 +241,12 @@ double ObsBias::norm() const {
 
   oops::Log::trace() << "ObsBias::norm done." << std::endl;
   return zz;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBias::zero() {
+  biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
 }
 
 // -----------------------------------------------------------------------------
@@ -186,7 +263,7 @@ void ObsBias::print(std::ostream & os) const {
     // map bias coeffs to eigen matrix
     Eigen::Map<const Eigen::MatrixXd>
       coeffs(biascoeffs_.data(), numVariablePredictors_, vars_.size());
-    os << "ObsBias::print " << std::endl;
+    os << "Obs bias coefficients: " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < numStaticPredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
@@ -208,15 +285,14 @@ void ObsBias::print(std::ostream & os) const {
          << coeffs.row(p).norm()
          << std::endl;
     }
-    os << "---------------------------------------------------------------" << std::endl;
-    os << "ObsBias::print done" << std::endl;
+    os << "---------------------------------------------------------------";
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::initPredictor(const eckit::Configuration &predictorConf) {
-  std::shared_ptr<PredictorBase> pred(PredictorFactory::create(predictorConf, vars_));
+void ObsBias::initPredictor(const PredictorParametersWrapper &params) {
+  std::shared_ptr<PredictorBase> pred(PredictorFactory::create(params.predictorParameters, vars_));
   predictors_.push_back(pred);
   prednames_.push_back(pred->name());
   geovars_ += pred->requiredGeovars();

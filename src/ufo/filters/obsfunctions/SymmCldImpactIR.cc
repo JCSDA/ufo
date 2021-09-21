@@ -65,8 +65,8 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
     in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_)[ich], clr);
     in.get(Variable("brightness_temperature@HofX", channels_)[ich], bak);
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ich], obs);
-    if (in.has(Variable("brightness_temperature@ObsBias", channels_)[ich])) {
-      in.get(Variable("brightness_temperature@ObsBias", channels_)[ich], bias);
+    if (in.has(Variable("brightness_temperature@ObsBiasData", channels_)[ich])) {
+      in.get(Variable("brightness_temperature@ObsBiasData", channels_)[ich], bias);
     } else {
       std::fill(bias.begin(), bias.end(), 0.0f);
     }

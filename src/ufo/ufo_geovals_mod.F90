@@ -20,9 +20,9 @@ integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval
 public :: ufo_geovals_get_var
-public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
+public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
-public :: ufo_geovals_allocate
+public :: ufo_geovals_allocate, ufo_geovals_print
 public :: ufo_geovals_profmult
 public :: ufo_geovals_reorderzdir
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
@@ -75,8 +75,43 @@ self%linit = .false.
 
 end subroutine ufo_geovals_default_constr
 
+! ------------------------------------------------------------------------------
+!> Initializes and allocates \p self GeoVaLs with \p nlocs number of locations for
+!> \p vars variables. \p nvals array contains number of values to allocate for
+!> each of the variables
+subroutine ufo_geovals_setup(self, vars, nlocs, nvars, nvals)
+use oops_variables_mod
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(oops_variables), intent(in) :: vars
+integer, intent(in) :: nlocs, nvars
+integer(c_size_t), intent(in) :: nvals(nvars)
 
-subroutine ufo_geovals_setup(self, vars, nlocs)
+integer :: ivar
+
+call ufo_geovals_delete(self)
+self%nlocs = nlocs
+self%missing_value = missing_value(self%missing_value)
+
+self%nvar = vars%nvars()
+allocate(self%geovals(self%nvar))
+allocate(self%variables(self%nvar))
+do ivar = 1, self%nvar
+  self%variables(ivar) = vars%variable(ivar)
+  self%geovals(ivar)%nlocs = nlocs
+  self%geovals(ivar)%nval = nvals(ivar)
+  allocate(self%geovals(ivar)%vals(nvals(ivar), nlocs))
+  self%geovals(ivar)%vals(:,:) = 0.0
+enddo
+self%linit = .true.
+
+end subroutine ufo_geovals_setup
+
+! ------------------------------------------------------------------------------
+!> Deprecated, use ufo_geovals_setup instead.
+!> Partially initializes \p self GeoVaLs with \p nlocs number of locations
+!> \p vars variables. Does not allocate geovals(i)%vals.
+subroutine ufo_geovals_partial_setup(self, vars, nlocs)
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -98,9 +133,10 @@ do ivar = 1, self%nvar
   self%geovals(ivar)%nval = 0
 enddo
 
-end subroutine ufo_geovals_setup
+end subroutine ufo_geovals_partial_setup
 
 ! ------------------------------------------------------------------------------
+!> Deprecated. Rely on ufo_geovals_setup to allocate GeoVaLs instead.
 !> Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
 !> If the GeoVaLs for this variable were allocated before with different size,
 !> aborts.
@@ -367,7 +403,9 @@ type(ufo_geovals) :: selfclone
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 integer:: iobs, ivar, ival, kval
-logical :: do_flip = .false.     !< .true. if all the ufo_geoval arrays inside geovals
+logical :: do_flip                   !< .true. if all the ufo_geoval arrays inside geovals
+
+do_flip = .false.
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_reorderzdir: geovals not allocated")
@@ -1044,7 +1082,7 @@ else
 end if
 
 ! allocate geovals structure
-call ufo_geovals_setup(self, vars, nlocs)
+call ufo_geovals_partial_setup(self, vars, nlocs)
 
 do ivar = 1, self%nvar
 

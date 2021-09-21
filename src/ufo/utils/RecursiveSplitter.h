@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "ufo/utils/ArrowProxy.h"
+#include "ufo/utils/metoffice/MetOfficeSort.h"
 
 namespace ufo {
 
@@ -260,7 +261,12 @@ class RecursiveSplitter
   /// \brief Initialize partitioning of an array of \p numIds elements.
   ///
   /// Initially, all elements are assumed to belong to the same equivalence class.
-  explicit RecursiveSplitter(size_t numIds);
+  ///
+  /// By default, all sorting operations performed by this class are done using a stable sorting
+  /// algorithm, but if \p opsCompatibilityMode is true, the same algorithm as in the Met Office
+  /// OPS system (heap sort) is used instead. This has an effect on the order of elements in each
+  /// equivalence class.
+  explicit RecursiveSplitter(size_t numIds, bool opsCompatibilityMode = false);
 
   /// \brief Split existing equivalence classes according to a new criterion.
   ///
@@ -294,10 +300,10 @@ class RecursiveSplitter
 
   /// \brief Sort the elements in each equivalence class in ascending order.
   ///
-  /// The elements are compared using the binary comparison function \p comp. This function needs
-  /// to satisfy the same requirements as the \c comp argument of std::sort().
-  template <typename Compare>
-  void sortGroupsBy(Compare comp);
+  /// The elements are ranked by keys produced by the unary function \p key taking the index
+  /// of an element of the partitioned array.
+  template <typename UnaryOperation>
+  void sortGroupsBy(const UnaryOperation &key);
 
   /// \brief Randomly shuffle the elements of each equivalence class.
   void shuffleGroups();
@@ -318,20 +324,25 @@ class RecursiveSplitter
   template <typename T>
   void groupByImpl(const std::vector<T> &categories);
 
+  bool opsCompatibilityMode_;
   /// Indices of elements of the partitioned array ordered by equivalence class.
   std::vector<size_t> orderedIds_;
   /// Encoded locations of multi-element equivalence classes in orderedIds_.
   std::vector<size_t> encodedGroups_;
 };
 
-template <typename Compare>
-void RecursiveSplitter::sortGroupsBy(Compare comp) {
+template <typename UnaryOperation>
+void RecursiveSplitter::sortGroupsBy(const UnaryOperation &key) {
   for (Group group : multiElementGroups()) {
     std::vector<size_t>::iterator nonConstGroupBegin =
         orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
     std::vector<size_t>::iterator nonConstGroupEnd =
         orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
-    std::sort(nonConstGroupBegin, nonConstGroupEnd, comp);
+    if (opsCompatibilityMode_)
+      metOfficeSort(nonConstGroupBegin, nonConstGroupEnd, key);
+    else
+      std::stable_sort(nonConstGroupBegin, nonConstGroupEnd,
+                       [&key] (size_t a, size_t b) { return key(a) < key(b); });
   }
 }
 

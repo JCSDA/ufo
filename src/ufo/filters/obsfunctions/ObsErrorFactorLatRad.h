@@ -41,7 +41,7 @@ class ObsErrorFactorLatRadParameters : public oops::Parameters {
 /// The function gives the maximum error bound reduction at equator and decreasing
 /// towards higher latitudes.
 ///
-class ObsErrorFactorLatRad : public ObsFunctionBase {
+class ObsErrorFactorLatRad : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorFactorLatRad(const eckit::LocalConfiguration &);
   ~ObsErrorFactorLatRad();

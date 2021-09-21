@@ -40,8 +40,12 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
+  GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
   GeoVaLs(const Locations &, const oops::Variables &);
+
+  GeoVaLs(const Locations & locs, const oops::Variables & vars,
+          const std::vector<size_t> & nlevs);
+
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
   GeoVaLs(const GeoVaLs &, const int &);
@@ -59,12 +63,17 @@ class GeoVaLs : public util::Printable,
   void split(GeoVaLs &, GeoVaLs &) const;
   void merge(const GeoVaLs &, const GeoVaLs &);
 
-  /// \brief Allocate GeoVaLs for \p vars variables with \p nlev number of levels
-  /// \details Fails if at least one of the \p vars doesn't exist in GeoVaLs.
-  ///          Only allocates variables that haven't been allocated before.
-  ///          Fails if one of \p vars is already allocated with number of levels
-  ///          different than \p nlev; doesn't reallocate variables that are already
-  ///          allocated with \p nlev.
+  /// \brief Deprecated method. Allocates GeoVaLs for \p vars variables with
+  /// \p nlev number of levels
+  /// \details Please do not use in any new code. This method is currently
+  /// only used for ObsDiagnostics and will be removed soon. Rely on
+  /// GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &)
+  /// to allocate GeoVaLs correctly.
+  /// Fails if at least one of the \p vars doesn't exist in GeoVaLs.
+  /// Only allocates variables that haven't been allocated before.
+  /// Fails if one of \p vars is already allocated with number of levels
+  /// different than \p nlev; doesn't reallocate variables that are already
+  /// allocated with \p nlev.
   void allocate(const int & nlev, const oops::Variables & vars);
 
   void zero();
@@ -77,26 +86,34 @@ class GeoVaLs : public util::Printable,
   const oops::Variables & getVars() const {return vars_;}
 
   size_t nlevs(const std::string & var) const;
-  void get(std::vector<float> &, const std::string &, const int) const;
-  void get(std::vector<double> &, const std::string &, const int) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs)
   void get(std::vector<double> &, const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to float
   void get(std::vector<float> &, const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to int
   void get(std::vector<int> &, const std::string & var) const;
+
+  /// Get GeoVaLs at a specified level
+  void getAtLevel(std::vector<double> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified level and convert to float
+  void getAtLevel(std::vector<float> &, const std::string &, const int) const;
+  /// Get GeoVaLs at a specified level and convert to int
+  void getAtLevel(std::vector<int> &, const std::string &, const int) const;
+
   /// Get GeoVaLs at a specified location
   void getAtLocation(std::vector<double> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to float
   void getAtLocation(std::vector<float> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to int
   void getAtLocation(std::vector<int> &, const std::string &, const int) const;
+
   /// Put GeoVaLs for double variable \p var at level \p lev.
-  void put(const std::vector<double> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<double> & vals, const std::string & var, const int lev) const;
   /// Put GeoVaLs for float variable \p var at level \p lev.
-  void put(const std::vector<float> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<float> & vals, const std::string & var, const int lev) const;
   /// Put GeoVaLs for int variable \p var at level \p lev.
-  void put(const std::vector<int> & vals, const std::string & var, const int lev) const;
+  void putAtLevel(const std::vector<int> & vals, const std::string & var, const int lev) const;
+
   /// Put GeoVaLs for double variable \p var at location \p loc.
   void putAtLocation(const std::vector<double> & vals, const std::string & var,
                      const int loc) const;
@@ -104,6 +121,7 @@ class GeoVaLs : public util::Printable,
   void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc) const;
   /// Put GeoVaLs for int variable \p var at location \p loc.
   void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
+
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void write(const eckit::Configuration &) const;
   size_t nlocs() const;

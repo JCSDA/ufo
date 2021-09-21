@@ -12,7 +12,7 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckSign> makerProfileCheckSign_("Sign");
 
-  ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options)
+  ProfileCheckSign::ProfileCheckSign(const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

@@ -72,8 +72,8 @@ void TrackCheckUtils::sortTracksChronologically(const std::vector<size_t> &valid
                                                 RecursiveSplitter &splitter) {
   const std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "datetime");
-  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
-  { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
+  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
+  { return times[validObsIds[obsIndex]]; });
 }
 
 TrackCheckUtils::ObsGroupLocationTimes

@@ -23,7 +23,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Gnssro bending angle observation operators - (Met Office 1D)
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_bendmetoffice_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_bendmetoffice_setup_f90(F90hop &, const bool &, const bool &, const float &);
   void ufo_gnssro_bendmetoffice_delete_f90(F90hop &);
   void ufo_gnssro_bendmetoffice_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                        const int &, double &, const F90goms &);

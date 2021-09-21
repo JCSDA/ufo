@@ -12,33 +12,47 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/multi_array.hpp>
 #include <boost/variant.hpp>
-// cpplint misclassifies this file as a c system include
-#include <Eigen/Core>  // NOLINT(build/include_order)
 
 namespace ufo
 {
 
-/// \brief Input data for the DataExtractor.
+/// \brief Parts of the input data for the DataExtractor that don't depend on the type of the
+/// extracted values.
 ///
 /// Note: the names of all coordinates are expected to be of the form `Group/var` (ioda-v2 style)
 /// rather than `var@Group` (ioda-v1 style).
-struct DataExtractorInput {
-  /// Array from which values will be extracted
-  Eigen::ArrayXXf payloadArray;
-
+struct DataExtractorInputBase {
+  /// \brief A coordinate indexing a dimension of the payload array, i.e. the array from which
+  /// a DataExtractor will extract data.
   typedef boost::variant<std::vector<int>,
                          std::vector<float>,
                          std::vector<std::string>
                         > Coordinate;
+  /// \brief A collection of named coordinate vectors.
   typedef std::unordered_map<std::string, Coordinate> Coordinates;
-  /// Coordinates indexing payloadArray
+
+  /// Coordinates indexing the payload array
   Coordinates coordsVals;
 
   /// Maps coordinate names to dimensions (0 or 1) of the payload array
   std::unordered_map<std::string, int> coord2DimMapping;
   /// Maps dimensions of the payload array (0 or 1) to coordinate names
   std::vector<std::vector<std::string>> dim2CoordMapping;
+};
+
+/// \brief Input data for the DataExtractor.
+///
+/// \tparam ExtractedValue
+///   Type of the values to be extracted. Must be `float`, `int` or `std::string`.
+///
+/// Note: the names of all coordinates are expected to be of the form `Group/var` (ioda-v2 style)
+/// rather than `var@Group` (ioda-v1 style).
+template <typename ExtractedValue>
+struct DataExtractorInput : public DataExtractorInputBase {
+  /// Array from which values will be extracted
+  boost::multi_array<ExtractedValue, 3> payloadArray;
 };
 
 }  // namespace ufo

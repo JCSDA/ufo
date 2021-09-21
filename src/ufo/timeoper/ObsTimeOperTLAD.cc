@@ -20,8 +20,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 #include "ufo/timeoper/ObsTimeOperUtil.h"
 
 namespace ufo {
@@ -34,7 +32,9 @@ ObsTimeOperTLAD::ObsTimeOperTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
   : LinearObsOperatorBase(odb),
     actualoperator_(LinearObsOperatorFactory::create(
-                    odb, eckit::LocalConfiguration(config, "obs operator"))),
+                      odb,
+                      oops::validateAndDeserialize<LinearObsOperatorParametersWrapper>(
+                        eckit::LocalConfiguration(config, "obs operator")).operatorParameters)),
     timeWeights_(timeWeightCreate(odb, config))
 {
   oops::Log::trace() << "ObsTimeOperTLAD created" << std::endl;
@@ -49,7 +49,6 @@ ObsTimeOperTLAD::~ObsTimeOperTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
-                                    const ObsBias & bias,
                                     ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsTimeOperTLAD::setTrajectory entering" << std::endl;
 
@@ -73,7 +72,7 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory final geovals gv1 "
                      << gv1 << std::endl;
 
-  actualoperator_->setTrajectory(gv1, bias, ydiags);
+  actualoperator_->setTrajectory(gv1, ydiags);
 
   oops::Log::debug() << gv1;
 

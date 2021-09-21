@@ -19,7 +19,6 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/PrimitiveVariables.h"
 #include "ufo/utils/StringUtils.h"
@@ -35,9 +34,9 @@ namespace {
 /// closed interval [\p minValue, \p maxValue].
 void flagWhereOutOfBounds(const std::vector<bool> & apply,
                           const std::vector<float> & testValues,
-                          float minValue,
-                          float maxValue,
-                          bool treatMissingAsOutOfBounds,
+                          const float minValue,
+                          const float maxValue,
+                          const bool treatMissingAsOutOfBounds,
                           std::vector<bool> &flagged) {
   const size_t nlocs = testValues.size();
   ASSERT(apply.size() == nlocs);
@@ -109,17 +108,34 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       parameters_.testVariables.value() != boost::none &&
       (parameters_.flagAllFilterVarsIfAnyTestVarOutOfBounds.value() ||
        testvars.nvars() == 1);
+  const bool onlyTestGoodFilterVarsForFlagAllFilterVars =
+      parameters_.onlyTestGoodFilterVarsForFlagAllFilterVars;
   const bool treatMissingAsOutOfBounds = parameters_.treatMissingAsOutOfBounds;
 
   // Do the actual work.
   if (flagAllFilterVarsIfAnyTestVarOutOfBounds) {
-    std::vector<bool> anyTestVarOutOfBounds(obsdb_.nlocs(), false);
+    // If using test only good filter vars then the number of filter
+    // vars must equal the number of test vars
+    if (onlyTestGoodFilterVarsForFlagAllFilterVars && filtervars.nvars() != testvars.nvars())
+      throw eckit::UserError("The number of 'primitive' (single-channel) test variables must "
+                             "match that of 'primitive' filter variables when using the "
+                             "'test only filter variables with passed qc when flagging all "
+                             "filter variables' option.");
+    ASSERT(filtervars.nvars() == flagged.size());
     // Loop over all channels of all test variables and record all locations where any of these
     // channels is out of bounds.
+    std::vector<bool> anyTestVarOutOfBounds(obsdb_.nlocs(), false);
+    size_t ifiltervar = 0;
     for (PrimitiveVariable singleChannelTestVar : PrimitiveVariables(testvars, data_)) {
+      std::vector<bool> testAtLocations = apply;
+      if (onlyTestGoodFilterVarsForFlagAllFilterVars) {
+        for (size_t iloc=0; iloc < testAtLocations.size(); iloc++)
+          if ((*flags_)[ifiltervar][iloc] != QCflags::pass) testAtLocations[iloc] = false;
+      }
       const std::vector<float> & testValues = singleChannelTestVar.values();
-      flagWhereOutOfBounds(apply, testValues, vmin, vmax, treatMissingAsOutOfBounds,
+      flagWhereOutOfBounds(testAtLocations, testValues, vmin, vmax, treatMissingAsOutOfBounds,
                            anyTestVarOutOfBounds);
+      ifiltervar++;
     }
     // Copy these flags to the flags of all filtered variables.
     for (std::vector<bool> &f : flagged)

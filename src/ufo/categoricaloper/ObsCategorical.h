@@ -17,13 +17,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/categoricaloper/ObsCategoricalData.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -84,14 +81,18 @@ namespace ufo {
 class ObsCategorical : public ObsOperatorBase,
   private util::ObjectCounter<ObsCategorical> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsCategoricalParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsCategorical";}
 
-  ObsCategorical(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsCategorical(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsCategorical() override;
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  const oops::Variables & requiredVars() const override { return requiredVars_; }
+  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
 
  private:
   void print(std::ostream &) const override;
@@ -100,20 +101,8 @@ class ObsCategorical : public ObsOperatorBase,
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
 
-  /// Observation operators which are run by the Categorical operator.
-  std::map<std::string, std::unique_ptr<ObsOperatorBase>> components_;
-
-  /// Required variables.
-  oops::Variables requiredVars_;
-
-  /// Value of the categorical variable in the ObsSpace.
-  std::vector <std::string> categoricalVariable_;
-
-  /// Name of the fallback observation operator.
-  std::string fallbackOperatorName_;
-
-  /// Names of the categorised observation operators.
-  std::map<std::string, std::string> categorisedOperatorNames_;
+  /// Data handler for the Categorical operator and TL/AD code.
+  ObsCategoricalData<ObsOperatorBase> data_;
 };
 
 // -----------------------------------------------------------------------------

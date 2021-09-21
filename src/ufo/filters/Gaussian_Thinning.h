@@ -37,7 +37,7 @@ namespace util {
 namespace ufo {
 
 class DistanceCalculator;
-class EquispacedBinSelector;
+class EquispacedBinSelectorBase;
 class GaussianThinningParameters;
 class ObsAccessor;
 class RecursiveSplitter;
@@ -47,7 +47,7 @@ class SpatialBinSelector;
 ///
 /// Cell assignment can be based on an arbitrary combination of:
 /// - horizontal position
-/// - vertical position (in terms of air pressure)
+/// - vertical position (in terms of height or pressure)
 /// - time
 /// - category (arbitrary integer associated with each observation).
 ///
@@ -83,11 +83,11 @@ class Gaussian_Thinning : public FilterBase,
                                           RecursiveSplitter &splitter,
                                           std::vector<float> &distancesToBinCenter) const;
 
-  void groupObservationsByPressure(const std::vector<size_t> &validObsIds,
-                                   const DistanceCalculator &distanceCalculator,
-                                   const ObsAccessor &obsAccessor,
-                                   RecursiveSplitter &splitter,
-                                   std::vector<float> &distancesToBinCenter) const;
+  void groupObservationsByVerticalCoordinate(const std::vector<size_t> &validObsIds,
+                                             const DistanceCalculator &distanceCalculator,
+                                             const ObsAccessor &obsAccessor,
+                                             RecursiveSplitter &splitter,
+                                             std::vector<float> &distancesToBinCenter) const;
 
   void groupObservationsByTime(const std::vector<size_t> &validObsIds,
                                const DistanceCalculator &distanceCalculator,
@@ -109,11 +109,14 @@ class Gaussian_Thinning : public FilterBase,
   static boost::optional<SpatialBinSelector> makeSpatialBinSelector(
       const GaussianThinningParameters &options);
 
-  static boost::optional<EquispacedBinSelector> makePressureBinSelector(
+  static std::unique_ptr<EquispacedBinSelectorBase> makeVerticalBinSelector(
       const GaussianThinningParameters &options);
 
-  static boost::optional<EquispacedBinSelector> makeTimeBinSelector(
-      const GaussianThinningParameters &options, util::DateTime &timeOffset);
+  static std::unique_ptr<EquispacedBinSelectorBase> makeTimeBinSelector(
+      const GaussianThinningParameters &options,
+      const util::DateTime &windowStart,
+      const util::DateTime &windowEnd,
+      util::DateTime &timeOffset);
 
   static std::unique_ptr<DistanceCalculator> makeDistanceCalculator(
       const GaussianThinningParameters &options);

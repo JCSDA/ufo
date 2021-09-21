@@ -1,0 +1,25 @@
+obs space:
+  name: insitu_prof
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/insitu_prof.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).insitu_prof_s.{{window_begin}}.nc4
+  simulated variables: [sea_water_salinity]
+obs operator:
+  name: MarineVertInterp
+obs error:
+  covariance model: diagonal
+  obs filters:
+  - filter: Domain Check
+    where:
+    - variable: {name: sea_area_fraction@GeoVaLs}
+      minvalue: 0.9
+  - filter: Domain Check
+    where:
+    - variable: {name: z@ObsError}
+      minvalue: 0.0001
+  - filter: Bounds Check
+    minvalue: 1.0
+    maxvalue: 40.0
+  - filter: Background Check
+    threshold: 5.0

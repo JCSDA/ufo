@@ -19,7 +19,6 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
@@ -30,34 +29,63 @@ namespace ufo {
 // We keep them as a filter for now. The main reason for this is to be able to use
 // the factory for models not in UFO/IODA.
 
+namespace {
+
+/// At each location, set the QC flag to QCflags::missing if the current QC flag is invalid
+/// or if the ObsValue is missing.
+void updateQCFlags(const std::vector<float> *obsValues, std::vector<int>& qcflags) {
+  const float rmiss = util::missingValue(rmiss);
+  const int imiss = util::missingValue(imiss);
+  for (size_t jobs = 0; jobs < qcflags.size(); ++jobs) {
+    if (qcflags[jobs] == imiss || !obsValues || (*obsValues)[jobs] == rmiss) {
+      qcflags[jobs] = QCflags::missing;
+    }
+  }
+}
+
+}  // namespace
+
 // -----------------------------------------------------------------------------
 
-QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*config*/,
                      std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(qcflags),
-    observed_(obsdb.obsvariables())
+                     std::shared_ptr<ioda::ObsDataVector<float> > /*obserr*/)
+  : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(qcflags)
 {
-  oops::Log::trace() << "QCmanager::QCmanager starting " << config_ << std::endl;
+  oops::Log::trace() << "QCmanager::QCmanager starting" << std::endl;
 
   ASSERT(qcflags);
-  ASSERT(obserr);
 
-  ASSERT(flags_->nvars() == observed_.size());
+  const oops::Variables &allSimulatedVars = obsdb.obsvariables();
+  const oops::Variables &initialSimulatedVars = obsdb.initial_obsvariables();
+  const oops::Variables &derivedSimulatedVars = obsdb.derived_obsvariables();
+
+  ASSERT(allSimulatedVars.size() == initialSimulatedVars.size() + derivedSimulatedVars.size());
+  ASSERT(flags_->nvars() == allSimulatedVars.size());
   ASSERT(flags_->nlocs() == obsdb_.nlocs());
-  ASSERT(obserr->nvars() == observed_.size());
-  ASSERT(obserr->nlocs() == obsdb_.nlocs());
 
   const float rmiss = util::missingValue(rmiss);
   const int imiss = util::missingValue(imiss);
 
-  const ioda::ObsDataVector<float> obs(obsdb, observed_, "ObsValue");
+  const ioda::ObsDataVector<float> obs(obsdb, initialSimulatedVars, "ObsValue");
 
-  for (size_t jv = 0; jv < observed_.size(); ++jv) {
-    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if ((*flags_)[jv][jobs] == imiss || obs[jv][jobs] == rmiss || (*obserr)[jv][jobs] == rmiss) {
-        (*flags_)[jv][jobs] = QCflags::missing;
-      }
+  // Iterate over initial simulated variables
+  for (size_t jv = 0; jv < initialSimulatedVars.size(); ++jv) {
+    const ioda::ObsDataRow<float> &currentObsValues = obs[jv];
+    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[obs.varnames()[jv]];
+    updateQCFlags(&currentObsValues, currentQCFlags);
+  }
+
+  // Iterate over derived simulated variables and if they don't exist yet, set their QC flags to
+  // 'missing'.
+  for (size_t jv = 0; jv < derivedSimulatedVars.size(); ++jv) {
+    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[derivedSimulatedVars[jv]];
+    if (!obsdb.has("ObsValue", derivedSimulatedVars[jv])) {
+      updateQCFlags(nullptr, currentQCFlags);
+    } else {
+      std::vector<float> currentObsValues(obsdb_.nlocs());
+      obsdb_.get_db("ObsValue", derivedSimulatedVars[jv], currentObsValues);
+      updateQCFlags(&currentObsValues, currentQCFlags);
     }
   }
 
@@ -66,14 +94,17 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config
 
 // -----------------------------------------------------------------------------
 
-void QCmanager::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
+void QCmanager::postFilter(const ioda::ObsVector & hofx,
+                           const ioda::ObsVector & /*bias*/,
+                           const ObsDiagnostics & /*diags*/) {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const double missing = util::missingValue(missing);
+  const oops::Variables &allSimulatedVars = obsdb_.obsvariables();
 
-  for (size_t jv = 0; jv < observed_.size(); ++jv) {
+  for (size_t jv = 0; jv < allSimulatedVars.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      size_t iobs = observed_.size() * jobs + jv;
+      size_t iobs = allSimulatedVars.size() * jobs + jv;
       if ((*flags_)[jv][jobs] == 0 && hofx[iobs] == missing) {
         (*flags_)[jv][jobs] = QCflags::Hfailed;
       }
@@ -100,6 +131,7 @@ void QCmanager::print(std::ostream & os) const {
     {77, nullptr},  // } will be added up and reported together
 
     // "Normal" cases reported in a uniform way
+    {QCflags::passive,       "passive observations"},
     {QCflags::missing,       "missing values"},
     {QCflags::preQC,         "rejected by pre QC"},
     {QCflags::bounds,        "out of bounds"},
@@ -124,7 +156,9 @@ void QCmanager::print(std::ostream & os) const {
   const size_t nlocs = obsdb_.nlocs();
   const size_t gnlocs = obsdb_.globalNumLocs();
 
-  for (size_t jvar = 0; jvar < observed_.size(); ++jvar) {
+  const oops::Variables &allSimulatedVars = obsdb_.obsvariables();
+
+  for (size_t jvar = 0; jvar < allSimulatedVars.size(); ++jvar) {
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> accumulator =
         obsdb_.distribution()->createAccumulator<size_t>(cases.size());
 
@@ -137,7 +171,7 @@ void QCmanager::print(std::ostream & os) const {
     const std::vector<std::size_t> counts = accumulator->computeResult();
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_->obstype() + " " + observed_[jvar] + ": ";
+      const std::string info = "QC " + flags_->obstype() + " " + allSimulatedVars[jvar] + ": ";
 
       // Normal cases
       for (size_t i = numSpecialCases; i < counts.size(); ++i)

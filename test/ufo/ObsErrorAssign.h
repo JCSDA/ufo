@@ -34,7 +34,9 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsParams;
+  obsParams.validateAndDeserialize(obsSpaceConf);
+  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   std::vector<std::string> varnames {"air_pressure", "station_id", "observation_type",
                                      "latitude_band", "channel_number", "processing_center",
@@ -80,7 +82,8 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   int ind = 0;
   for (size_t varn = 0; varn < obserr->nvars(); ++varn) {
     for (size_t locn = 0; locn < obserr->nlocs(); ++locn) {
-      EXPECT(std::abs((*obserr)[varn][locn] - expectedObsError[ind]) < 1e-4);
+      EXPECT(oops::is_close_absolute((*obserr)[varn][locn], expectedObsError[ind], 1e-4f, 0,
+                                     oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
       ind++;
     }
   }

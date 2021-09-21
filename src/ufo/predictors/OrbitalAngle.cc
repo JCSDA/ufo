@@ -14,19 +14,22 @@
 
 namespace ufo {
 
+constexpr char FourierTermTypeParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<FourierTermType>
+  FourierTermTypeParameterTraitsHelper::namedValues[];
+
 static PredictorMaker<OrbitalAngle> makerFuncOrbitalAngle_("orbital_angle");
 
 // -----------------------------------------------------------------------------
 
-OrbitalAngle::OrbitalAngle(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars), order_(1) {
-    // get the order if it is provided in options
-    conf.get("options.order", order_);
-    conf.get("options.component", component_);
-
-    // override the predictor name to distinguish between Orbital angle predictors of
-    // different orders as well as the two components, sine and cosine.
-    name() = name() + "_" + std::to_string(order_)+ "_" + component_;
+OrbitalAngle::OrbitalAngle(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars),
+    order_(parameters.order),
+    component_(parameters.component) {
+  // override the predictor name to distinguish between Orbital angle predictors of
+  // different orders as well as the two components, sine and cosine.
+  name() = name() + "_order_" + std::to_string(order_)+ "_" +
+      (component_ == FourierTermType::SIN ? "sin" : "cos");
 }
 
 // -----------------------------------------------------------------------------
@@ -42,10 +45,9 @@ void OrbitalAngle::compute(const ioda::ObsSpace & odb,
   std::vector<double> orbital_angle(nlocs, 0.0);
   odb.get_db("MetaData", "satellite_orbital_angle", orbital_angle);
 
-  ASSERT(component_ == "cos" || component_ == "sin");
-  switch (component_ == "cos")
+  switch (component_)
   {
-    case true:
+    case FourierTermType::COS:
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
         double cos_oa{ std::cos(orbital_angle[jl]*order_*Constants::deg2rad)};
         for (std::size_t jb = 0; jb < nvars; ++jb) {
@@ -53,7 +55,7 @@ void OrbitalAngle::compute(const ioda::ObsSpace & odb,
         }
       }
       break;
-    case false:
+    case FourierTermType::SIN:
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
         double sin_oa{ std::sin(orbital_angle[jl]*order_*Constants::deg2rad)};
         for (std::size_t jb = 0; jb < nvars; ++jb) {

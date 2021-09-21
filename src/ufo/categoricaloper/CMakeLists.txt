@@ -6,7 +6,10 @@
 set ( categoricaloper_files
     ObsCategorical.h
     ObsCategorical.cc
+    ObsCategoricalData.h
     ObsCategoricalParameters.h
+    ObsCategoricalTLAD.h
+    ObsCategoricalTLAD.cc
 )
 PREPEND( _p_categoricaloper_files     "categoricaloper"     ${categoricaloper_files} )
 

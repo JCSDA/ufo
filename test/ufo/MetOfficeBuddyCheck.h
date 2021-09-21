@@ -37,7 +37,9 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsParams;
+  obsParams.validateAndDeserialize(obsSpaceConf);
+  ioda::ObsSpace obsSpace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   const eckit::LocalConfiguration floatVarInitConf(conf, "FloatVariables");
   for (const std::string & varNameGroup : floatVarInitConf.keys()) {
@@ -67,8 +69,11 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   filter.preProcess();
 
   ioda::ObsVector hofx(obsSpace, "HofX");
-  ufo::Locations locations(conf, obsSpace.comm());
 
+  ioda::ObsVector bias(obsSpace);
+  bias.zero();
+
+  ufo::Locations locations(conf, obsSpace.comm());
   const eckit::LocalConfiguration diagConf = conf.getSubConfiguration("obs diagnostics");
   oops::Variables diagVars;
   for (const std::string &name : diagConf.keys())
@@ -77,10 +82,10 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   obsDiags.allocate(1, diagVars);
   for (const std::string &name : diagConf.keys()) {
     const std::vector<double> diag = diagConf.getDoubleVector(name);
-    obsDiags.save(diag, name, 1);
+    obsDiags.save(diag, name, 0);
   }
 
-  filter.postFilter(hofx, obsDiags);
+  filter.postFilter(hofx, bias, obsDiags);
 
   const eckit::LocalConfiguration pgeConf(conf, "ExpectedGrossErrorProbabilities");
   for (const std::string & varNameGroup : pgeConf.keys()) {

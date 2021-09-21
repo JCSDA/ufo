@@ -10,9 +10,12 @@
 
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <string>
 
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/Variable.h"
 
@@ -36,8 +39,9 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
 
   // Include list of required data from ObsSpace
   invars_ += Variable(vcoord+"@MetaData");
-  invars_ += Variable("percent_confidence_2@MetaData");
   invars_ += Variable(profile+"@hofx");
+  invars_ += options_.pressure_error;
+  invars_ += options_.quality_index;
 
   // Include list of required data from GeoVaLs
   invars_ += Variable(vcoord+"@GeoVaLs");
@@ -58,7 +62,7 @@ SatwindIndivErrors::~SatwindIndivErrors() {}
  * estimates of the vector error and height error from the data producers.
  *
  * Currently the vector error estimate \f$E_{vector}\f$
- * is based on the model-independent quality index (QI) and is calculated as:
+ * is based on the quality index (QI) (ideally model-independent) and is calculated as:
  * \f[
  * E_{vector} = \text{EuMult}\left(QI \times 0.01\right) + \text{EuAdd}
  * \f]
@@ -102,11 +106,13 @@ SatwindIndivErrors::~SatwindIndivErrors() {}
 
 void SatwindIndivErrors::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & obserr) const {
+  // Get obs space
+  auto & obsdb = in.obsspace();
+
   // Get parameters from options
   float const eu_add = options_.eu_add.value();
   float const eu_mult = options_.eu_mult.value();
-  float const default_err_p = options_.default_err_p.value();  // Pa
-  float const min_press = options_.min_press.value().value_or(10000);  // Pa
+  float const min_press = options_.min_press.value();  // Pa
   std::string const profile = options_.profile.value();
   std::string const vcoord = options_.vcoord.value();
   oops::Log::debug() << "Wind profile for calculating observation errors is "
@@ -136,27 +142,30 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Get variables from ObsSpace if present. If not, throw an exception
   std::vector<float> ob_p;
-  std::vector<float> ob_qi;
   std::vector<float> bg_windcomponent;
+  std::vector<float> pressure_error;
+  std::vector<float> ob_qi;
   in.get(Variable(vcoord+"@MetaData"), ob_p);
-  in.get(Variable("percent_confidence_2@MetaData"), ob_qi);
   in.get(Variable(profile+"@hofx"), bg_windcomponent);
-
-  // Set pressure error (use default 100 hPa for now)
-  std::vector<float> err_p(nlocs, default_err_p);
+  in.get(options_.pressure_error, pressure_error);
+  in.get(options_.quality_index, ob_qi);
 
   // Get variables from GeoVals
   // Get pressure [Pa] (nlevs, nlocs)
   std::vector<std::vector<float>> cx_p(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(vcoord+"@GeoVaLs"), ilev + 1, cx_p[ilev]);
+    in.get(Variable(vcoord+"@GeoVaLs"), ilev, cx_p[ilev]);
   }
 
   // Get wind component (nlevs, nlocs)
   std::vector<std::vector<float>> cx_windcomponent(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(profile+"@GeoVaLs"), ilev + 1, cx_windcomponent[ilev]);
+    in.get(Variable(profile+"@GeoVaLs"), ilev, cx_windcomponent[ilev]);
   }
+
+  // diagnostic variables to be summed over all processors at the end of the routine
+  std::unique_ptr<ioda::Accumulator<size_t>> countQiAccumulator =
+    obsdb.distribution()->createAccumulator<size_t>();
 
   // Loop through locations
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
@@ -168,18 +177,26 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     double sum_weight = 0.0;
     obserr[0][iloc] = missing;
 
-    // check for valid pressure error estimate
-    float const min_err_p = 100;  // 1 Pa
-    if ( err_p[iloc] == missing || err_p[iloc] < min_err_p ) {
-        errString << "Pressure error estimate invalid: " << err_p[iloc] << " Pa" << std::endl;
+    // Check for valid pressure error estimate.
+    // The choice of minimum pressure error is somewhat arbitrary.
+    // Having a minimum helps catch cases where we may have forgotten to specify in Pa
+    // and instead used hPa, e.g. 60 Pa instead of 6000 Pa.
+    float const min_pressure_error =   500;  //   5 hPa
+    float const max_pressure_error = 50000;  // 500 hPa
+    if ( pressure_error[iloc] == missing ||
+         pressure_error[iloc] < min_pressure_error ||
+         pressure_error[iloc] > max_pressure_error ) {
+        errString << "Pressure error invalid: " << pressure_error[iloc] << " Pa" << std::endl;
         throw eckit::BadValue(errString.str());
     }
 
     // Calculate vector error using QI
-    if ( (ob_qi[iloc] != missing) && (ob_qi[iloc] > 0.0) ) {
+    if ( (ob_qi[iloc] != missing) &&
+         (ob_qi[iloc] > 0.0) &&
+         (ob_qi[iloc] <= 100.0)) {
       error_vector = eu_mult * (ob_qi[iloc] * 0.01) + eu_add;
     } else {
-      oops::Log::warning() << "No valid QI. Using default vector err" << error_vector << std::endl;
+      countQiAccumulator->addTerm(iloc, 1);
     }
 
     // Calculate the error in vector due to error in pressure
@@ -190,9 +207,9 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
         continue;
       }
       // Calculate weight for each background level, avoiding zero divide.
-      if (err_p[iloc] > 0) {
+      if (pressure_error[iloc] > 0) {
         weight = exp(-0.5 * pow(cx_p[ilev][iloc] - ob_p[iloc], 2) /
-                             pow(err_p[iloc], 2) )
+                            pow(pressure_error[iloc], 2) )
                  * std::abs(cx_p[ilev][iloc] - cx_p[ilev - 1][iloc]);
       } else {
           weight = 0.0;
@@ -214,6 +231,12 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
     obserr[0][iloc] = sqrt(pow(error_vector, 2) +
                            pow(error_press, 2) );
+  }
+  // sum number of bad QI values
+  const std::size_t countQi = countQiAccumulator->computeResult();
+  if (countQi > 0) {
+    oops::Log::warning() << "Satwind Indiv Errors: " << countQi
+      << " observations with bad/missing QI. Using default vector err in these cases" << std::endl;
   }
 }
 

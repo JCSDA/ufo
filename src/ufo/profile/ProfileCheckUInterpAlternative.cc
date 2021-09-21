@@ -17,7 +17,7 @@ namespace ufo {
   makerProfileCheckUInterpAlternative_("UInterpAlternative");
 
   ProfileCheckUInterpAlternative::ProfileCheckUInterpAlternative
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options),
     ProfileStandardLevels(options)
   {}

@@ -203,9 +203,13 @@ else
   self % elevation(:) = zero
 endif
 
-! Read in surface type from model data
-call ufo_geovals_get_var(geovals, "surface_type", geoval)
-self % surface_type(:) = geoval%vals(1, 1)
+! Read in surface type from ObsSpace or model data (deprecated)
+if (obsspace_has(config % obsdb, "MetaData", "surface_type")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "surface_type", self % surface_type(:))
+else
+  call ufo_geovals_get_var(geovals, "surface_type", geoval)
+  self % surface_type(:) = geoval%vals(1, :)
+endif
 
 ! Setup emissivity
 if (config % pcemiss) then

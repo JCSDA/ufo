@@ -14,6 +14,10 @@ set ( profile_files
       ObsProfileAverage.cc
       ObsProfileAverage.h
       ObsProfileAverageParameters.h
+      ObsProfileAverageData.cc
+      ObsProfileAverageData.h
+      ObsProfileAverageTLAD.cc
+      ObsProfileAverageTLAD.h
       ProfileAveragePressure.cc
       ProfileAveragePressure.h
       ProfileAverageRelativeHumidity.cc
@@ -77,6 +81,8 @@ set ( profile_files
       ProfileVerticalInterpolation.h
       ProfileWindProfilerFlags.cc
       ProfileWindProfilerFlags.h
+      SlantPathLocations.cc
+      SlantPathLocations.h
       VariableNames.cc
       VariableNames.h
 )

@@ -404,14 +404,11 @@ onedvar_success = converged
 call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
 ob % final_cost = Jout(1)
 ob % niter = iter
+ob % final_bt_diff = Ydiff
 
 ! Pass output profile, final BTs and final cost out
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
-
-  ! Recalculate final cost - to make sure output when using profile convergence
-  call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
-  ob % final_cost = Jout(1)
 
   ! If lwp output required then recalculate
   if (self % Store1DVarLWP) then

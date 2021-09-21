@@ -12,4 +12,23 @@
 namespace ufo {
 constexpr char DistanceNormParameterTraitsHelper::enumTypeName[];
 constexpr util::NamedEnumerator<DistanceNorm> DistanceNormParameterTraitsHelper::namedValues[];
+
+void GaussianThinningParameters::deserialize(util::CompositePath &path,
+                                             const eckit::Configuration &config) {
+  oops::Parameters::deserialize(path, config);
+
+  if (opsCompatibilityMode) {
+    if (roundHorizontalBinCountToNearest.value() != boost::none &&
+        *roundHorizontalBinCountToNearest.value() == false)
+      throw eckit::UserError(
+            path.path() + ": round_horizontal_bin_count_to_nearest must not be set to false when "
+                          "ops_compatibility_mode is set to true", Here());
+    if (distanceNorm.value() != boost::none &&
+        *distanceNorm.value() == DistanceNorm::GEODESIC)
+      throw eckit::UserError(
+            path.path() + ": distance_norm must not be set to 'geodesic' when "
+                          "ops_compatibility_mode is set to true", Here());
+  }
+}
+
 }  // namespace ufo

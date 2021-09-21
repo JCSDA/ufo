@@ -16,7 +16,6 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/actions/FilterAction.h"
@@ -55,7 +54,8 @@ void ObsProcessorBase::preProcess() {
   oops::Log::trace() << "ObsProcessorBase preProcess begin" << std::endl;
 // Cannot determine earlier when to apply filter because subclass
 // constructors add to allvars
-  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") || deferToPost_) {
+  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") ||
+      allvars_.hasGroup("ObsBiasData") || deferToPost_) {
     post_ = true;
   } else {
     if (allvars_.hasGroup("GeoVaLs")) {
@@ -78,10 +78,13 @@ void ObsProcessorBase::priorFilter(const GeoVaLs & gv) {
 
 // -----------------------------------------------------------------------------
 
-void ObsProcessorBase::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
+void ObsProcessorBase::postFilter(const ioda::ObsVector & hofx,
+                                  const ioda::ObsVector & bias,
+                                  const ObsDiagnostics & diags) {
   oops::Log::trace() << "ObsProcessorBase postFilter begin" << std::endl;
   if (post_) {
     data_.associate(hofx, "HofX");
+    data_.associate(bias, "ObsBiasData");
     data_.associate(diags);
     this->doFilter();
   }

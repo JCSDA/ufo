@@ -62,8 +62,7 @@ ObsGnssroBndNBAMTLAD::~ObsGnssroBndNBAMTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                         ObsDiagnostics &) {
+void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_gnssro_bndnbam_tlad_settraj_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace());
 }
 

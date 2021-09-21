@@ -1,0 +1,24 @@
+window begin: 2018-06-18T21:00:00Z
+window end: 2018-06-19T03:00:00Z
+
+observations:
+- obs space:
+    name: test_relative_humidity1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "datetime"
+        sort order: "descending"
+    simulated variables: [dew_point_temperature_surface, air_temperature_surface, pressure_surface]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: ["RelativeHumidity"]
+    Method: UKMO 
+    AllowSuperSaturation: true
+  compareVariables:                 
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity_surface@DerivedObsValue
+      relTol: 1.0e-5

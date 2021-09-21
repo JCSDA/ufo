@@ -41,7 +41,8 @@ struct InterpMethodParameterTraitsHelper {
     { InterpMethod::NEAREST, "nearest" },
     { InterpMethod::LEAST_UPPER_BOUND, "least upper bound" },
     { InterpMethod::GREATEST_LOWER_BOUND, "greatest lower bound" },
-    { InterpMethod::LINEAR, "linear" }
+    { InterpMethod::LINEAR, "linear" },
+    { InterpMethod::BILINEAR, "bilinear" }
   };
 };
 
@@ -111,6 +112,9 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// \brief Produce values by interpolating an array loaded from a file, indexed by
 /// coordinates whose names correspond to ObsSpace variables.
 ///
+/// \tparam T
+///   Type of values produced by this ObsFunction. Must be `float`, `int` or `std::string`.
+///
 /// \details See DataExtractor for details on the format of this file.
 ///
 /// ### example configurations: ###
@@ -118,14 +122,14 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// \code{.yaml}
 ///     - filter: Variable Assignment
 ///       assignments:
-///       - name: interpolated_value@DerivedValue
+///       - name: interpolated_value@DerivedObsValue
 ///         function:
 ///           name: DrawValueFromFile@ObsFunction
 ///           channels: 1-3
 ///           options:
 ///             file: <filepath>
 ///             channels: 1-3
-///             group: DerivedValue
+///             group: DerivedObsValue
 ///             interpolation:
 ///             - name: satellite_id@MetaData
 ///               method: exact
@@ -137,60 +141,21 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 ///
 /// Note that channel number extraction is implicit, using the channels selected and performed as
 /// an exact match before any user defined interpolation takes place.
-class DrawValueFromFile : public ObsFunctionBase {
+template <typename T>
+class DrawValueFromFile : public ObsFunctionBase<T> {
  public:
-  static const std::string classname() {return "DrawValueFromFile";}
-
   explicit DrawValueFromFile(const eckit::LocalConfiguration &);
-  ~DrawValueFromFile();
 
   void compute(const ObsFilterData &,
-               ioda::ObsDataVector<float> &) const;
+               ioda::ObsDataVector<T> &) const;
   const ufo::Variables & requiredVariables() const;
 
  private:
-  typedef std::list<std::pair<std::string, boost::variant<std::vector<int>,
-                                                          std::vector<float>,
-                                                          std::vector<std::string>>
-                             >> ObData;
-
   Variables allvars_;
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
   std::vector<int> channels_;
-
-  static std::string get_full_name(const ufo::Variable &variable) {
-    std::string name = variable.variable();
-    if (variable.group().size() > 0) name += ("@"+variable.group());
-    return name;
-  }
-
-  /// \brief This is a convenience function for updating our container for useful observation data
-  template <typename T>
-  static void updateObData(const ObsFilterData &in, const ufo::Variable &var, ObData &obData) {
-    std::vector<T> dat;
-    in.get(var, dat);
-    std::string name = get_full_name(var);
-    obData.emplace_back(name, std::move(dat));
-  }
-
-  /// \brief Add datetime observation information data to our container.
-  /// \details We simply convert the datetimes to strings as our implementation is not discriminate
-  /// between the two types.
-  static void updateObDataDateTime(const ObsFilterData &in, const ufo::Variable &var,
-                                   ObData &obData) {
-    std::vector<util::DateTime> dat;
-    std::vector<std::string> datConv;
-    in.get(var, dat);
-    datConv.resize(dat.size());
-
-    // Convert the vec. of datetime. to strings
-    std::transform(dat.begin(), dat.end(), datConv.begin(),
-                   [](util::DateTime dt){return dt.toString();});
-    std::string name = get_full_name(var);
-    obData.emplace_back(name, std::move(datConv));
-  }
 };
 
 }  // namespace ufo

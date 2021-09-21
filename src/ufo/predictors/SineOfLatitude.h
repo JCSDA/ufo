@@ -10,10 +10,6 @@
 
 #include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace oops {
   class Variables;
 }
@@ -28,7 +24,11 @@ namespace ufo {
 
 class SineOfLatitude : public PredictorBase {
  public:
-  SineOfLatitude(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef EmptyPredictorParameters Parameters_;
+
+  SineOfLatitude(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

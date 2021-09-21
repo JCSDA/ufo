@@ -143,14 +143,14 @@ refracerr = .FALSE.
 DO i = 1, nlevq
   IF (P(i) == missing_value(P(i))) THEN  ! pressure missing
     refracerr = .TRUE.
-    WRITE(message, *) RoutineName, "Input pressure missing", i
+    WRITE(message, *) RoutineName, " Input pressure missing", i
     CALL fckit_log % warning(message)
     EXIT
   END IF
 
   IF (P(i) - P(i + 1) < 0.0) THEN  ! or non-monotonic pressure
     refracerr = .TRUE.
-    WRITE(message, *) RoutineName, "Input pressure non-monotonic", i
+    WRITE(message, *) RoutineName, " Input pressure non-monotonic", i, P(i), P(i+1)
     CALL fckit_log % warning(message)
     EXIT
   END IF
@@ -158,7 +158,7 @@ END DO
 
 IF (ANY (P(:) <= 0.0)) THEN        ! pressure zero or negative
   refracerr = .TRUE.
-  WRITE(message, *) RoutineName, "Input pressure not physical"
+  WRITE(message, *) RoutineName, " Input pressure not physical"
   CALL fckit_log % warning(message)
 END IF
 
@@ -331,13 +331,12 @@ REAL(kind_real), OPTIONAL, INTENT(OUT)    :: dPb_dP(nlevq,nlevP)       !< Gradie
 REAL(kind_real), OPTIONAL, INTENT(OUT), ALLOCATABLE :: refractivity(:) !< Calculated refractivity
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER               :: RoutineName = "ufo_refractivity_kmat"
 INTEGER                                   :: i
 INTEGER                                   :: counter
-REAL(kind_real)                           :: Exner(nlevP)
 REAL(kind_real)                           :: Pb(nlevq)
 REAL(kind_real)                           :: T_virtual(nlevq)
 REAL(kind_real)                           :: T(nlevq)
+REAL(kind_real)                           :: refrac(nlevq)                   ! Refractivity on model levels
 REAL(kind_real)                           :: Extheta
 REAL(kind_real)                           :: pwt1
 REAL(kind_real)                           :: pwt2
@@ -352,6 +351,7 @@ REAL(kind_real)                           :: dT_dTv(nlevq,nlevq)
 REAL(kind_real)                           :: dT_dq(nlevq,nlevq)
 REAL(kind_real)                           :: dref_dPb(nlevq,nlevq)
 REAL(kind_real)                           :: dref_dT(nlevq,nlevq)
+REAL(kind_real)                           :: dref_dq_model(nlevq,nlevq)      ! Gradient of refractivity wrt specific humidity on model levels
 REAL(kind_real)                           :: m1(nRefLevels,nlevq)
 REAL(kind_real)                           :: m2(nRefLevels,nlevP)
 REAL(kind_real)                           :: m3(nRefLevels,nlevq)
@@ -427,107 +427,28 @@ END IF
 ! 1. Initialise matrices
 !-----------------------
 
-dPb_dP_local(:,:) = 0.0
-dExtheta_dPb(:,:) = 0.0
-dEx_dP(:,:) = 0.0
-dTv_dExtheta(:,:) = 0.0
-dTv_dEx(:,:) = 0.0
-dT_dTv(:,:) = 0.0
-dT_dq(:,:) = 0.0
-dref_dpb(:,:) = 0.0
-dref_dT(:,:) = 0.0
-dref_dq(:,:) = 0.0
 dref_dp(:,:) = 0.0
 
-! Calculate exner on rho levels.
-
-Exner(:) = (P(:) / Pref) ** rd_over_cp
-
-DO i = 1,nlevp
-
-  dEx_dP(i,i) = rd_over_cp / Pref * (P(i) / Pref) ** (rd_over_cp - 1.0)
-
-END DO
-
-!----------------------------------------------
-! 2. Calculate the refractivity on the temperature/theta levels
-!----------------------------------------------
-
-DO i = 1, nlevq
-
-  ! Calc. pressure on b levels
-
-  pwt1 = (za(i + 1) - zb(i)) / (za(i + 1) - za(i))
-
-  pwt2 = 1.0 - pwt1
-
-  ! calculate the pressure on the theta level.
-  IF (vert_interp_ops) THEN
-    Pb(i) = EXP (pwt1 * LOG (P(i)) + pwt2 * LOG (P(i + 1)))
-
-    dPb_dP_local(i,i) = Pb(i) * pwt1 / P(i)
-    dPb_dP_local(i,i + 1) = Pb(i) * pwt2 / P(i + 1)
-  ELSE
-    ! Assume Exner varies linearly with height
-    Pb(i) = Pref * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp)
-
-    dPb_dP_local(i,i) = pwt1 * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * &
-     (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp - 1.0) * (P(i) / Pref) ** (rd_over_cp - 1.0)
-    dPb_dP_local(i,i + 1) = pwt2 * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * &
-     (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp - 1.0) * (P(i + 1) / Pref) ** (rd_over_cp-1.0)
-  END IF
-
-  ! calculate Exner on the theta level.
-
-  Extheta = (Pb(i) / Pref) ** rd_over_cp
-
-  dExtheta_dPb(i,i) = rd_over_cp * (Pb(i) ** (rd_over_cp - 1.0)) / (Pref ** rd_over_cp)
-
-  ! Calculate mean layer T_virtual on staggered vertical levels
-
-  T_virtual(i) = grav * (za(i + 1) - za(i)) * Extheta / (Cp * (Exner(i) - Exner(i + 1)))
-
-  dTv_dExtheta(i,i) = T_virtual(i) / Extheta
-
-  dTv_dEx(i,i) = -T_virtual(i) / (Exner(i) - Exner(i + 1))
-
-  dTv_dEx(i,i + 1) = T_virtual(i) / (Exner(i) - Exner(i + 1))
-
-  IF (i > nlevq) THEN
-
-    T(i) = T_virtual(i)
-
-    dT_dTv(i,i) = 1.0
-
-    ! no wet component
-
-    Nwet = 0.0
-
-  ELSE
-
-    T(i) = T_virtual(i) / (1.0 + C_virtual * q(i))
-
-    dT_dTv(i,i) = 1.0 / (1.0 + C_virtual * q(i))
-
-    dT_dq(i,i) = -C_virtual * T(i) / (1.0 + C_virtual * q(i))
-
-    ! wet component
-
-    Nwet = n_beta * Pb(i) * q(i) / (T(i) ** 2 * (mw_ratio + (1.0 - mw_ratio) * q(i)))
-
-    dref_dq(i,i) = n_beta * Pb(i) * mw_ratio / (T(i) * (mw_ratio + (1.0 - mw_ratio) * q(i))) ** 2
-
-  END IF
-
-  Ndry = n_alpha * Pb(i) / T(i)
-
-  if (PRESENT(refractivity) .AND. .NOT. pseudo_ops) refractivity(i) = Ndry + Nwet
-
-  dref_dPb(i,i) = (Ndry + Nwet) / Pb(i)
-
-  dref_dT(i,i) = -(Ndry + 2.0 * Nwet) / T(i)
-
-END DO
+call ufo_refractivity_partial_derivatives(nlevP,           &
+                                          nlevq,           &
+                                          za,              &
+                                          zb,              &
+                                          P,               &
+                                          q,               &
+                                          vert_interp_ops, &
+                                          dT_dTv,          &
+                                          dT_dq,           &
+                                          dref_dPb,        &
+                                          dref_dT,         &
+                                          dref_dq_model,   &
+                                          refrac,          &
+                                          T,               &
+                                          Pb,              &
+                                          dEx_dP,          &
+                                          dExtheta_dPb,    &
+                                          dTv_dExtheta,    &
+                                          dPb_dP_local,    &
+                                          dTv_dEx)
 
 IF (pseudo_ops) THEN
   !----------------------------------!
@@ -548,7 +469,7 @@ IF (pseudo_ops) THEN
 
       dref_dPpseudo(i,i) = dref_dPb(counter,counter)
       dref_dTpseudo(i,i) = dref_dT(counter,counter)
-      dref_dqpseudo(i,i) = dref_dq(counter,counter)
+      dref_dqpseudo(i,i) = dref_dq_model(counter,counter)
 
       dPpseudo_dPb(i,counter) = 1.0
       dTpseudo_dTb(i,counter) = 1.0
@@ -667,6 +588,8 @@ IF (pseudo_ops) THEN
 ! Normal model levels
 ELSE
 
+  if (PRESENT(refractivity)) refractivity = refrac
+
   !-------------------------------------------------
   ! 3. Evaluate the Kmatrix by matrix multiplication
   !-------------------------------------------------
@@ -687,7 +610,7 @@ ELSE
 
   ! calc Kmatrix for q on theta levels
   !  dNmod/dq = (dNmod/dq) + (dNmod/dT*dT/dq)
-  dref_dq(:,:) = dref_dq(:,:) + MATMUL (dref_dT, dT_dq)
+  dref_dq(:,:) = dref_dq_model(:,:) + MATMUL (dref_dT, dT_dq)
 
 END IF
 
@@ -709,5 +632,162 @@ IF (ALLOCATED (dPpseudo_dP)) DEALLOCATE (dPpseudo_dP)
 IF (ALLOCATED (dTpseudo_dP)) DEALLOCATE (dTpseudo_dP)
 
 END SUBROUTINE ufo_refractivity_kmat
+
+!-------------------------------------------------------------------------------
+!> \brief Calculate some partial derivatives of refractivity on model levels
+!!
+!! \details **ufo_refractivity_partial_derivatives**
+!! * Calculate the pressure on model theta levels
+!! * Calculate exner on model theta level
+!! * Calculate mean layer T_virtual, and then various partial derivatives
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 May 2021
+!!
+!-------------------------------------------------------------------------------
+
+subroutine ufo_refractivity_partial_derivatives(nlevP,           &
+                                                nlevq,           &
+                                                za,              &
+                                                zb,              &
+                                                P,               &
+                                                q,               &
+                                                vert_interp_ops, &
+                                                dT_dTv,          &
+                                                dT_dq,           &
+                                                dref_dPb,        &
+                                                dref_dT,         &
+                                                dref_dq,         &
+                                                refractivity,    &
+                                                T,               &
+                                                Pb,              &
+                                                dEx_dP,          &
+                                                dExtheta_dPb,    &
+                                                dTv_dExtheta,    &
+                                                dPb_dP_local,    &
+                                                dTv_dEx)
+
+IMPLICIT NONE
+
+! Subroutine arguments:
+INTEGER, INTENT(IN)                       :: nlevP                     !< no. of pressure levels
+INTEGER, INTENT(IN)                       :: nlevq                     !< no. of specific humidity levels
+REAL(kind_real), INTENT(IN)               :: za(nlevp)                 !< Height of the pressure levels
+REAL(kind_real), INTENT(IN)               :: zb(nlevq)                 !< Height of the specific humidity levels
+REAL(kind_real), INTENT(IN)               :: P(nlevp)                  !< Pressure
+REAL(kind_real), INTENT(IN)               :: q(nlevq)                  !< Specific humidity
+LOGICAL, INTENT(IN)                       :: vert_interp_ops           !< Whether to interpolate vertically using exner or ln(p)
+REAL(kind_real), INTENT(OUT)              :: dT_dTv(nlevq,nlevq)       !< Partial derivative of temperature wrt virtual temperature
+REAL(kind_real), INTENT(OUT)              :: dT_dq(nlevq,nlevq)        !< Partial derivative of temperature wrt specific humidity
+REAL(kind_real), INTENT(OUT)              :: dref_dPb(nlevq,nlevq)     !< Partial derivative of refractivity wrt pressure on model theta levels
+REAL(kind_real), INTENT(OUT)              :: dref_dT(nlevq,nlevq)      !< Partial derivative of refractivity wrt temperature
+REAL(kind_real), INTENT(OUT)              :: dref_dq(nlevq,nlevq)      !< Partial derivative of refractivity wrt specific humidity
+REAL(kind_real), INTENT(OUT)              :: refractivity(nlevq)       !< Calculated refractivity
+REAL(kind_real), INTENT(OUT)              :: T(nlevq)                  !< Calculated temperature
+REAL(kind_real), INTENT(OUT)              :: Pb(nlevq)                 !< Pressure on model theta levels
+REAL(kind_real), INTENT(OUT)              :: dEx_dP(nlevP,nlevP)       !< Partial derivative of exner wrt pressure
+REAL(kind_real), INTENT(OUT)              :: dExtheta_dPb(nlevq,nlevq) !< Partial derivative of refractivity wrt pressure (at ob location)
+REAL(kind_real), INTENT(OUT)              :: dTv_dExtheta(nlevq,nlevq) !< Virtual temperature divided by exner on theta levels
+REAL(kind_real), INTENT(OUT)              :: dPb_dP_local(nlevq,nlevP) !< Partial derivative of pressure on theta levels wrt pressure on pressure levels
+REAL(kind_real), INTENT(OUT)              :: dTv_dEx(nlevq,nlevP)      !< Partial derivative of virtual temperature wrt exner
+
+! Local declarations:
+INTEGER                                   :: i                         ! Loop variable
+REAL(kind_real)                           :: Exner(nlevP)              ! Exner on model pressure levels
+REAL(kind_real)                           :: T_virtual(nlevq)          ! Virtual temperature
+REAL(kind_real)                           :: Extheta                   ! Exner on model theta levels
+REAL(kind_real)                           :: pwt1                      ! Weight given to the lower model level in interpolation
+REAL(kind_real)                           :: pwt2                      ! Weight given to the upper model level in interpolation
+REAL(kind_real)                           :: Ndry                      ! Contribution to refractivity from dry terms
+REAL(kind_real)                           :: Nwet                      ! Contribution to refractivity from wet terms
+
+!-----------------------
+! 1. Initialise matrices
+!-----------------------
+
+dPb_dP_local(:,:) = 0.0
+dExtheta_dPb(:,:) = 0.0
+dTv_dExtheta(:,:) = 0.0
+dTv_dEx(:,:) = 0.0
+dT_dTv(:,:) = 0.0
+dT_dq(:,:) = 0.0
+dref_dpb(:,:) = 0.0
+dref_dT(:,:) = 0.0
+dref_dq(:,:) = 0.0
+dEx_dP(:,:) = 0.0
+
+! Calculate exner on rho levels.
+Exner(:) = (P(:) / Pref) ** rd_over_cp
+DO i = 1,nlevp
+  dEx_dP(i,i) = rd_over_cp / Pref * (P(i) / Pref) ** (rd_over_cp - 1.0)
+END DO
+
+!----------------------------------------------
+! 2. Calculate the refractivity on the temperature/theta levels
+!----------------------------------------------
+
+DO i = 1, nlevq
+
+  pwt1 = (za(i + 1) - zb(i)) / (za(i + 1) - za(i))
+
+  pwt2 = 1.0 - pwt1
+
+  ! calculate the pressure on the theta level.
+  IF (vert_interp_ops) THEN
+    Pb(i) = EXP (pwt1 * LOG (P(i)) + pwt2 * LOG (P(i + 1)))
+
+    dPb_dP_local(i,i) = Pb(i) * pwt1 / P(i)
+    dPb_dP_local(i,i + 1) = Pb(i) * pwt2 / P(i + 1)
+  ELSE
+    ! Assume Exner varies linearly with height
+    Pb(i) = Pref * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp)
+
+    dPb_dP_local(i,i) = pwt1 * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * &
+     (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp - 1.0) * (P(i) / Pref) ** (rd_over_cp - 1.0)
+    dPb_dP_local(i,i + 1) = pwt2 * (pwt1 * (P(i) / Pref) ** rd_over_cp + pwt2 * &
+     (P(i + 1) / Pref) ** rd_over_cp) ** (1.0 / rd_over_cp - 1.0) * (P(i + 1) / Pref) ** (rd_over_cp-1.0)
+  END IF
+
+  ! calculate Exner on the theta level.
+
+  Extheta = (Pb(i) / Pref) ** rd_over_cp
+
+  dExtheta_dPb(i,i) = rd_over_cp * (Pb(i) ** (rd_over_cp - 1.0)) / (Pref ** rd_over_cp)
+
+  ! Calculate mean layer T_virtual on staggered vertical levels
+
+  T_virtual(i) = grav * (za(i + 1) - za(i)) * Extheta / (Cp * (Exner(i) - Exner(i + 1)))
+
+  dTv_dExtheta(i,i) = T_virtual(i) / Extheta
+
+  dTv_dEx(i,i) = -T_virtual(i) / (Exner(i) - Exner(i + 1))
+
+  dTv_dEx(i,i + 1) = T_virtual(i) / (Exner(i) - Exner(i + 1))
+
+  T(i) = T_virtual(i) / (1.0 + C_virtual * q(i))
+
+  dT_dTv(i,i) = 1.0 / (1.0 + C_virtual * q(i))
+
+  dT_dq(i,i) = -C_virtual * T(i) / (1.0 + C_virtual * q(i))
+
+  ! wet component
+
+  Nwet = n_beta * Pb(i) * q(i) / (T(i) ** 2 * (mw_ratio + (1.0 - mw_ratio) * q(i)))
+
+  dref_dq(i,i) = n_beta * Pb(i) * mw_ratio / (T(i) * (mw_ratio + (1.0 - mw_ratio) * q(i))) ** 2
+
+  Ndry = n_alpha * Pb(i) / T(i)
+
+  refractivity(i) = Ndry + Nwet
+
+  dref_dPb(i,i) = (Ndry + Nwet) / Pb(i)
+
+  dref_dT(i,i) = -(Ndry + 2.0 * Nwet) / T(i)
+
+END DO
+
+end subroutine ufo_refractivity_partial_derivatives
+
 
 end module ufo_utils_refractivity_calculator

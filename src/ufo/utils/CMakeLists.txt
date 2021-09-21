@@ -6,6 +6,7 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      dataextractor/ConstrainedRange.h
       dataextractor/DataExtractor.h
       dataextractor/DataExtractor.cc
       dataextractor/DataExtractorBackend.h
@@ -15,7 +16,7 @@ set ( utils_files
       dataextractor/DataExtractorNetCDFBackend.h
       dataextractor/DataExtractorNetCDFBackend.cc
       DistanceCalculator.h
-      EquispacedBinSelector.h
+      EquispacedBinSelectorBase.h
       GeodesicDistanceCalculator.h
       IodaGroupIndices.cc
       IodaGroupIndices.h
@@ -29,6 +30,7 @@ set ( utils_files
       metoffice/MetOfficeRMatrixRadiance.h
       metoffice/MetOfficeRMatrixRadiance.interface.h
       metoffice/MetOfficeRMatrixRadiance.interface.F90
+      metoffice/MetOfficeSort.h
       metoffice/MetOfficeObservationIDs.h
       metoffice/ufo_metoffice_bmatrixstatic_mod.f90
       metoffice/ufo_metoffice_rmatrixradiance_mod.f90
@@ -46,10 +48,13 @@ set ( utils_files
       RecursiveSplitter.cc
       RecursiveSplitter.h
       RefractivityCalculator.F90
+      RoundingEquispacedBinSelector.h
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      SurfaceReportConstants.h
+      TruncatingEquispacedBinSelector.h
       ufo_utils_mod.F90
       ufo_utils.interface.F90
       ufo_utils.interface.h

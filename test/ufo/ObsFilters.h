@@ -35,6 +35,7 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsBiasParameters.h"
@@ -90,8 +91,7 @@ class ObsTypeParameters : public oops::Parameters {
 
  public:
   /// Options used to configure the observation space.
-  oops::Parameter<eckit::LocalConfiguration> obsSpace{
-    "obs space", eckit::LocalConfiguration(), this};
+  oops::Parameter<ioda::ObsTopLevelParameters> obsSpace{"obs space", {}, this};
 
   /// Options used to configure observation filters.
   oops::Parameter<std::vector<oops::ObsFilterParametersWrapper<ObsTraits>>> obsFilters{
@@ -103,7 +103,7 @@ class ObsTypeParameters : public oops::Parameters {
   /// precalculated and stored in the IODA file used to initialize the ObsSpace. In that case the
   /// `obs operator` keyword should be omitted and instead the `HofX` option should be set to the
   /// name of the group of ObsSpace variables containing the precalculated model equivalents.
-  oops::OptionalParameter<eckit::LocalConfiguration> obsOperator{"obs operator", this};
+  oops::OptionalParameter<ObsOperatorParametersWrapper> obsOperator{"obs operator", this};
 
   /// Group of variables storing precalculated model equivalents of observations. See the
   /// description of the `obs operator` option for more information.
@@ -173,6 +173,23 @@ class ObsFiltersParameters : public oops::Parameters {
   /// observations from individual observation spaces.
   oops::Parameter<std::vector<ObsTypeParameters>> observations{"observations", {}, this};
 };
+
+// -----------------------------------------------------------------------------
+
+//!
+//! \brief Run the FinalCheck filter.
+//!
+//! This needs to be done manually if post-filters aren't run because the HofX vector
+//! is not available.
+//!
+void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
+                   oops::ObsDataVector<ufo::ObsTraits, int> &qcflags,
+                   oops::ObsVector<ufo::ObsTraits> &obserr) {
+  FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
+                        qcflags.obsdatavectorptr(),
+                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsvector()));
+  finalCheck.doFilter();
+}
 
 // -----------------------------------------------------------------------------
 
@@ -386,6 +403,11 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
   oops::Variables diagvars = filters.requiredHdiagnostics();
+
+/// initialize zero bias
+  ObsVector_ bias(obspace);
+  bias.zero();
+
   if (params.hofx.value() != boost::none) {
 ///   read GeoVaLs from file if required
     std::unique_ptr<const GeoVaLs_> gval;
@@ -413,7 +435,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
                         << std::endl;
     }
     const ObsDiags_ diags(obsdiagconf, obspace, diagvars);
-    filters.postFilter(hofx, diags);
+    filters.postFilter(hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
@@ -433,9 +455,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
-    hop.simulateObs(gval, hofx, ybias, diags);
+    hop.simulateObs(gval, hofx, ybias, bias, diags);
     hofx.save("hofx");
-    filters.postFilter(hofx, diags);
+    filters.postFilter(hofx, bias, diags);
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
     if (params.geovals.value() == boost::none)
@@ -445,10 +467,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
+///   apply the FinalCheck filter (which should always be run after all other filters).
+    runFinalCheck(obspace, *qcflags, obserr);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
+///   apply the FinalCheck filter (which should always be run after all other filters).
+    runFinalCheck(obspace, *qcflags, obserr);
   }
 
   qcflags->save("EffectiveQC");

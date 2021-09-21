@@ -8,32 +8,45 @@
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/DateTime.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsFunction::ObsFunction(const Variable & var)
-  : obsfct_(ObsFunctionFactory::create(var))
+template <typename FunctionValue>
+ObsFunction<FunctionValue>::ObsFunction(const Variable & var)
+  : obsfct_(ObsFunctionFactory<FunctionValue>::create(var))
 {}
 
 // -----------------------------------------------------------------------------
 
-ObsFunction::~ObsFunction() {}
+template <typename FunctionValue>
+ObsFunction<FunctionValue>::~ObsFunction() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunction::compute(const ObsFilterData & in,
-                          ioda::ObsDataVector<float> & out) const {
+template <typename FunctionValue>
+void ObsFunction<FunctionValue>::compute(const ObsFilterData & in,
+                             ioda::ObsDataVector<FunctionValue> & out) const {
   obsfct_->compute(in, out);
 }
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunction::requiredVariables() const {
+template <typename FunctionValue>
+const ufo::Variables & ObsFunction<FunctionValue>::requiredVariables() const {
   return obsfct_->requiredVariables();
 }
+
+// -----------------------------------------------------------------------------
+
+// Explicit instantiations for the supported value types
+template class ObsFunction<float>;
+template class ObsFunction<int>;
+template class ObsFunction<std::string>;
+template class ObsFunction<util::DateTime>;
 
 // -----------------------------------------------------------------------------
 

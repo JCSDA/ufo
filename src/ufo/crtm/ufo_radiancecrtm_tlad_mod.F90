@@ -888,14 +888,6 @@ real(c_double) :: missing
  ! Get t from geovals
  call ufo_geovals_get_var(geovals, var_ts, geoval_d)
 
- ! allocate if not yet allocated
- if (.not. allocated(geoval_d%vals)) then
-    geoval_d%nlocs = self%n_Profiles
-    geoval_d%nval = self%n_Layers
-    allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
-    geoval_d%vals = 0.0_kind_real
- endif
-
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
    if (.not.self%Skip_Profiles(jprofile)) then
@@ -917,14 +909,6 @@ real(c_double) :: missing
  do jspec = 1, self%conf%n_Absorbers
    ! Get Absorber from geovals
    call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
-
-   ! allocate if not yet allocated
-   if (.not. allocated(geoval_d%vals)) then
-      geoval_d%nlocs = self%n_Profiles
-      geoval_d%nval = self%n_Layers
-      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
-      geoval_d%vals = 0.0_kind_real
-   endif
 
    ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
 
@@ -951,14 +935,6 @@ real(c_double) :: missing
    ! Get Cloud from geovals
    call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
 
-   ! allocate if not yet allocated
-   if (.not. allocated(geoval_d%vals)) then
-      geoval_d%nlocs = self%n_Profiles
-      geoval_d%nval = self%n_Layers
-      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
-      geoval_d%vals = 0.0_kind_real
-   endif
-
    ispec = ufo_vars_getindex(self%conf_traj%Clouds(:,1), self%conf%Clouds(jspec,1))
 
    ! Multiply by Jacobian and add to hofx (adjoint)
@@ -983,14 +959,6 @@ real(c_double) :: missing
  do jspec = 1, self%conf%n_Surfaces
    ! Get Cloud from geovals
    call ufo_geovals_get_var(geovals, self%conf%Surfaces(jspec), geoval_d)
-
-   ! allocate if not yet allocated
-   if (.not. allocated(geoval_d%vals)) then
-      geoval_d%nlocs = self%n_Profiles
-      geoval_d%nval = self%n_Layers
-      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
-      geoval_d%vals = 0.0_kind_real
-   endif
 
    select case(self%conf%Surfaces(jspec))
 

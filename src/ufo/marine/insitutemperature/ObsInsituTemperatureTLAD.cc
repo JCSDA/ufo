@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -46,8 +45,7 @@ ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                             ObsDiagnostics &) {
+void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_insitutemperature_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: trajectory set" << std::endl;
 }

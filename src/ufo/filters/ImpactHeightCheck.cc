@@ -65,7 +65,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   const size_t nRefLevels = data_.nlevs(refractivityVariable);
   std::vector<std::vector<float>> refractivity;
 
-  for (size_t iLevel = 1; iLevel < nRefLevels+1; ++iLevel) {
+  for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel) {
     std::vector<float> inputData;
     data_.get(refractivityVariable, static_cast<int>(iLevel), inputData);
     refractivity.push_back(inputData);
@@ -90,7 +90,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   std::vector<std::vector<float>> modelHeights;
 
   // Read the heights of the refractivity levels
-  for (size_t iLevel = 1; iLevel < nRefLevels+1; ++iLevel) {
+  for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel) {
     std::vector<float> inputData;
     data_.get(modelHeightsVariable, static_cast<int>(iLevel), inputData);
     modelHeights.push_back(inputData);

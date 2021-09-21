@@ -20,8 +20,8 @@ static PredictorMaker<SineOfLatitude>
 
 // -----------------------------------------------------------------------------
 
-SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
+SineOfLatitude::SineOfLatitude(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars) {
 }
 
 // -----------------------------------------------------------------------------

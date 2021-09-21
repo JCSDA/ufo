@@ -201,13 +201,6 @@ character(len=MAXVARLEN) :: geovar
 
    geovar = self%geovars%variable(iq)                   !self%geovars contains tracers 
    call ufo_geovals_get_var(geovals, geovar, aer_profile)
-   if (.not. allocated(aer_profile%vals)) then
-       aer_profile%nlocs = nlocs
-       aer_profile%nval  = self%nlayers
-       allocate(aer_profile%vals(aer_profile%nval, aer_profile%nlocs))
-       aer_profile%vals(:,:) = 0.0_kind_real
-   endif
-
    qm_ad(iq,:,:) = qm_ad(iq,:,:) * self%delp / grav
    aer_profile%vals = qm_ad(iq,:,:)
 

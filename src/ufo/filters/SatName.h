@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/missingValues.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -28,6 +29,7 @@ namespace ioda {
   class ObsSpace;
 }
 namespace ufo {
+  static const std::string missing_value_string = util::missingValue(missing_value_string);
 //
 // table in yaml file to relate satellite name and wmo number label in yaml "Satellite_id"
 //

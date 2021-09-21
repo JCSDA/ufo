@@ -46,8 +46,8 @@ class MetOfficeBuddyPair;
 /// updating their gross error probabilities (PGEs) and rejecting observations whose PGE exceeds
 /// a threshold specified in the filter parameters.
 ///
-/// Variables to be checked should be specified using the "filter variables" YAML option. Currently
-/// only surface (single-level) variables are supported. Variables can be either scalar or vector
+/// Variables to be checked should be specified using the "filter variables" YAML option, supporting
+/// surface (single-level) and multi-level variables. Variables can be either scalar or vector
 /// (with two Cartesian components, such as the eastward and northward wind components). In the
 /// latter case the two components need to specified one after the other in the "filter variables"
 /// list, with the first component having the \c first_component_of_two option set to true.
@@ -104,10 +104,12 @@ class MetOfficeBuddyCheck : public FilterBase,
   Variable backgroundErrorVariable(const Variable &filterVariable) const;
 
   /// \brief Returns a vector of IDs of all observations that should be buddy-checked.
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+  std::vector<size_t> getValidObservationIds(
+      const std::vector<bool> & apply,
+      const boost::optional<Eigen::ArrayXXi> & profileIndex) const;
 
-  /// \brief Collects and return smetadata of all observations.
-  MetaData collectMetaData() const;
+  /// \brief Collects and returns metadata of all observations.
+  MetaData collectMetaData(const boost::optional<Eigen::ArrayXXi> & profileIndex) const;
 
   /// \brief Returns a vector of integer-valued station IDs, obtained from the source indicated by
   /// the filter parameters.
@@ -136,7 +138,7 @@ class MetOfficeBuddyCheck : public FilterBase,
       const std::vector<int> &stationIds,
       const std::vector<float> &bgErrorHorizCorrScales) const;
 
-  /// \brief Buddy check for scalar surface quantities.
+  /// \brief Buddy check for scalar quantities.
   ///
   /// Method: see the OPS Scientific Documentation Paper 2, sections 3.6 and 3.7
   ///
@@ -152,6 +154,12 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Station IDs ("call signs").
   /// \param datetimes
   ///   Observation times.
+  /// \param pressures
+  ///   Model average pressures can be null, representing surface data, single-level (num_levels
+  ///   parameter == 1) data or multi-level (num_levels > 1) data.  In all cases except
+  ///   the single-level case, a vertical correlation of 1 is assumed.  For single-level data,
+  ///   the estimate of the background error correlation depends upon the ratio of pressures
+  ///   between each pair of observations.
   /// \param obsValues
   ///   Observed values.
   /// \param obsErrors
@@ -162,19 +170,20 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Estimated errors of background values.
   /// \param[inout] pges
   ///   Gross error probabilities. These values are updated by the buddy check.
-  void checkScalarSurfaceData(const std::vector<MetOfficeBuddyPair> &pairs,
-                              const std::vector<int> &flags,
-                              const std::vector<bool> &verbose,
-                              const std::vector<float> &bgErrorHorizCorrScales,
-                              const std::vector<int> &stationIds,
-                              const std::vector<util::DateTime> &datetimes,
-                              const std::vector<float> &obsValues,
-                              const std::vector<float> &obsErrors,
-                              const std::vector<float> &bgValues,
-                              const std::vector<float> &bgErrors,
-                              std::vector<float> &pges) const;
+  void checkScalarData(const std::vector<MetOfficeBuddyPair> &pairs,
+                       const std::vector<int> &flags,
+                       const std::vector<bool> &verbose,
+                       const std::vector<float> &bgErrorHorizCorrScales,
+                       const std::vector<int> &stationIds,
+                       const std::vector<util::DateTime> &datetimes,
+                       const Eigen::ArrayXXf *pressures,
+                       const Eigen::ArrayXXf &obsValues,
+                       const Eigen::ArrayXXf &obsErrors,
+                       const Eigen::ArrayXXf &bgValues,
+                       const Eigen::ArrayXXf &bgErrors,
+                       Eigen::ArrayXXf &pges) const;
 
-  /// \brief Buddy check for vector (two-dimensional) surface quantities.
+  /// \brief Buddy check for vector (two-dimensional) quantities.
   ///
   /// Method: see the OPS Scientific Documentation Paper 2, sections 3.6 and 3.7
   ///
@@ -190,6 +199,12 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Station IDs ("call signs").
   /// \param datetimes
   ///   Observation times.
+  /// \param pressures
+  ///   Model average pressures can be null, represent surface data, single-level (num_levels
+  ///   parameter == 1) data or multi-level (num_levels > 1) data.  In all cases except
+  ///   the single-level case, a vertical correlation of 1 is assumed.  For single-level data,
+  ///   the estimate of the background error correlation depends upon the ratio of pressures
+  ///   between each pair of observations.
   /// \param uObsValues
   ///   Observed values of the first component, u.
   /// \param vObsValues
@@ -204,19 +219,20 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Estimated errors of background values (u or v).
   /// \param[inout] pges
   ///   Probabilities of gross error in u or v. These values are updated by the buddy check.
-  void checkVectorSurfaceData(const std::vector<MetOfficeBuddyPair> &pairs,
-                              const std::vector<int> &flags,
-                              const std::vector<bool> &verbose,
-                              const std::vector<float> &bgErrorHorizCorrScales,
-                              const std::vector<int> &stationIds,
-                              const std::vector<util::DateTime> &datetimes,
-                              const std::vector<float> &uObsValues,
-                              const std::vector<float> &vObsValues,
-                              const std::vector<float> &obsErrors,
-                              const std::vector<float> &uBgValues,
-                              const std::vector<float> &vBgValues,
-                              const std::vector<float> &bgErrors,
-                              std::vector<float> &pges) const;
+  void checkVectorData(const std::vector<MetOfficeBuddyPair> &pairs,
+                       const std::vector<int> &flags,
+                       const std::vector<bool> &verbose,
+                       const std::vector<float> &bgErrorHorizCorrScales,
+                       const std::vector<int> &stationIds,
+                       const std::vector<util::DateTime> &datetimes,
+                       const Eigen::ArrayXXf *pressures,
+                       const Eigen::ArrayXXf &uObsValues,
+                       const Eigen::ArrayXXf &vObsValues,
+                       const Eigen::ArrayXXf &obsErrors,
+                       const Eigen::ArrayXXf &uBgValues,
+                       const Eigen::ArrayXXf &vBgValues,
+                       const Eigen::ArrayXXf &bgErrors,
+                       Eigen::ArrayXXf  &pges) const;
 
   /// Marks observations whose gross error probability is >= options_->rejectionThreshold
   /// as rejected by the buddy check.

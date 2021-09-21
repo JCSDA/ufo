@@ -43,8 +43,9 @@ namespace ufo
 /// observation. The details of this comparison (e.g. whether an exact match is required, the
 /// nearest match is used, or piecewise linear interpolation is performed) depend on how the class
 /// using the extracted data (e.g. the DrawValueFromFile ObsFunction) is configured. The data type
-/// of each column must match the data type of the corresponding ObsSpace variable. The payload
-/// column must be of type `float` or `int`. The column order does not matter.
+/// of each column must match the data type of the corresponding ObsSpace variable. The type of the
+/// payload column should match the template parameter `ExtractedValue`, which must be set to
+/// either `float`, `int` or `std::string`. The column order does not matter.
 ///
 /// Notes:
 ///
@@ -80,14 +81,15 @@ namespace ufo
 ///
 /// Refer to the documentation of the DrawValueFromFile ObsFunction for more information about the
 /// available extraction methods.
-class DataExtractorCSVBackend : public DataExtractorBackend {
+template <typename ExtractedValue>
+class DataExtractorCSVBackend : public DataExtractorBackend<ExtractedValue> {
  public:
   /// \brief Create a new instance.
   ///
   /// \param filepath Path to the CSV file that will be read by loadData().
   explicit DataExtractorCSVBackend(const std::string &filepath);
 
-  DataExtractorInput loadData(const std::string &payloadGroup) const override;
+  DataExtractorInput<ExtractedValue> loadData(const std::string &payloadGroup) const override;
 
  private:
   std::string filepath_;

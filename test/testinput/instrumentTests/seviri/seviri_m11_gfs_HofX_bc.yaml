@@ -23,23 +23,18 @@ observations:
       predictors:
       - name: constant
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &seviri_m11_tlap Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_tlapmean.txt
+        order: 2
+        tlapse: &seviri_m11_tlap Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *seviri_m11_tlap
+        tlapse: *seviri_m11_tlap
       - name: emissivity
 # The scan angle here actually is used as for scan positions in the input ioda file to replicate gsi
       - name: scan_angle
-        options:
-          order: 4
+        order: 4
       - name: scan_angle
-        options:
-          order: 3
+        order: 3
       - name: scan_angle
-        options:
-          order: 2
+        order: 2
       - name: scan_angle
   vector ref: GsiHofXBc
   tolerance: 1.e-6

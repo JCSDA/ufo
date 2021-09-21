@@ -64,11 +64,12 @@ void SatWindsLNVDCheck::compute(const ObsFilterData & in,
 
   for (size_t jj = 0; jj < nlocs; ++jj) {
     if (u[jj] != missing && v[jj] != missing) {
-      out[0][jj] = sqrt((u[jj]-um[jj])*(u[jj]-um[jj]) + (v[jj]-vm[jj])*(v[jj]-vm[jj]))
+      if ((u[jj]*u[jj] + v[jj]*v[jj]) > 1.01f) {
+        out[0][jj] = sqrt((u[jj]-um[jj])*(u[jj]-um[jj]) + (v[jj]-vm[jj])*(v[jj]-vm[jj]))
                     / log(sqrt(u[jj]*u[jj] + v[jj]*v[jj]));
-      oops::Log::debug() << "u, v: " << u[jj] << ", " << v[jj]
-                         << " um, vm: " << um[jj] << ", " << vm[jj]
-                         << " LNVD: " << out[0][jj] << std::endl;
+      } else {
+        out[0][jj] = sqrt((u[jj]-um[jj])*(u[jj]-um[jj]) + (v[jj]-vm[jj])*(v[jj]-vm[jj]));
+      }
     } else {
       out[0][jj] = missing;
     }

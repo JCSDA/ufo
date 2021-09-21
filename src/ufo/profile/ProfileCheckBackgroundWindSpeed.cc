@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckBackgroundWindSpeed_("BackgroundWindSpeed");
 
   ProfileCheckBackgroundWindSpeed::ProfileCheckBackgroundWindSpeed
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

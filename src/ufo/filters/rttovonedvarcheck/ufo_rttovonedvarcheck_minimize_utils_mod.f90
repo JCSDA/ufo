@@ -7,9 +7,11 @@
 
 module ufo_rttovonedvarcheck_minimize_utils_mod
 
-use kinds
-use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q
 use fckit_log_module, only : fckit_log
+use iso_c_binding
+use kinds
+use oops_variables_mod
+use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
@@ -30,6 +32,7 @@ public ufo_rttovonedvarcheck_CostFunction
 public ufo_rttovonedvarcheck_CheckIteration
 public ufo_rttovonedvarcheck_CheckCloudyIteration
 public ufo_rttovonedvarcheck_PrintIterInfo
+public ufo_rttovonedvarcheck_hofxdiags_levels
 
 character(len=max_string) :: message
 
@@ -164,13 +167,13 @@ end if
 !  prof_x(profindex % cloudfrac) = ob % cloudfrac
 !end if
 
-! Windspeed - var_u = "eastward_wind"
-!           - var_v = "northward_wind"
+! Windspeed - var_sfc_u10 = "uwind_at_10m"
+!           - var_sfc_v10 = "vwind_at_10m"
 !           - windsp = sqrt (u*u + v*v)
 if (profindex % windspeed > 0) then
-  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
-  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_v10), geoval)
   v = geoval % vals(1, 1)
   prof_x(profindex % windspeed) = sqrt(u ** 2 + v ** 2)
 end if
@@ -389,9 +392,9 @@ end if
 
 ! windspeed
 if (profindex % windspeed > 0) then
-  call ufo_geovals_get_var(geovals, trim(var_u), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
-  call ufo_geovals_get_var(geovals, trim(var_v), geoval)
+  call ufo_geovals_get_var(geovals, trim(var_sfc_v10), geoval)
   v = geoval % vals(1, 1)
   windsp = sqrt (u ** 2 + v ** 2)
 
@@ -408,14 +411,14 @@ if (profindex % windspeed > 0) then
   ! Write back updated u component
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_u) == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_u10) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = u
 
   ! Write back updated v component
   gv_index = 0
   do i=1,geovals%nvar
-    if (trim(var_v) == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_v10) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = v
 end if
@@ -1232,6 +1235,46 @@ end do
 write(*,*) "Finished print iter info"
 
 end subroutine ufo_rttovonedvarcheck_PrintIterInfo
+
+! ----------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_hofxdiags_levels(retrieval_vars, nlevels, ret_nlevs)
+
+implicit none
+
+type(oops_variables), intent(in) :: retrieval_vars !< retrieval variables for 1D-Var
+integer, intent(in)              :: nlevels
+integer(c_size_t), intent(inout) :: ret_nlevs(:) !< number of levels for each retreival val
+
+character(MAXVARLEN), allocatable :: varlist(:)
+character(MAXVARLEN) :: varname, message
+integer :: i, ss, ee
+
+ret_nlevs(:) = zero
+varlist = retrieval_vars % varlist()
+do i = 1, size(varlist)
+  ss = index(varlist(i), "jacobian_", .false.) + 9
+  ee  = index(varlist(i), "_", .true.) - 1
+  varname = varlist(i)(ss:ee)
+  if (trim(varname) == trim(var_ts) .or. &
+      trim(varname) == trim(var_q) .or. &
+      trim(varname) == trim(var_clw) .or. &
+      trim(varname) == trim(var_cli)) then
+    ret_nlevs(i) = nlevels
+  else if (trim(varname) == trim(var_sfc_t2m) .or. &
+           trim(varname) == trim(var_sfc_q2m) .or. &
+           trim(varname) == trim(var_sfc_p2m) .or. &
+           trim(varname) == trim(var_sfc_tskin) .or. &
+           trim(varname) == trim(var_sfc_u10) .or. &
+           trim(varname) == trim(var_sfc_v10)) then
+    ret_nlevs(i) = 1
+  else
+    write(message, *) trim(varlist(i)), " not setup for retrieval yet: aborting"
+    call abor1_ftn(message)
+  end if
+end do
+
+end subroutine ufo_rttovonedvarcheck_hofxdiags_levels
 
 ! ----------------------------------------------------------
 

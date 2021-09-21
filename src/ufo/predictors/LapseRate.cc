@@ -26,14 +26,12 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapse_rate");
 
 // -----------------------------------------------------------------------------
 
-LapseRate::LapseRate(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars), order_(1)
+LapseRate::LapseRate(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars),
+    order_(parameters.order.value().value_or(1))
 {
-  // get the order if it is provided in options
-  if (conf.has("options.order")) {
-    conf.get("options.order", order_);
-
-    // override the predictor name for differentiable
+  if (parameters.order.value() != boost::none) {
+    // override the predictor name to distinguish between lapse_rate predictors of different orders
     name() = name() + "_order_" + std::to_string(order_);
   }
 
@@ -50,29 +48,24 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const oops::Variables & 
 
   // This is a very preliminary method, please revisit
   // more flexibilites are needed
-  if (conf.has("options.tlapse")) {
-    const std::string tlapse_file = conf.getString("options.tlapse");
-    std::ifstream infile(tlapse_file);
-    std::string nusis;   //  sensor/instrument/satellite
-    int nuchan;  //  channel number
-    float tlapse;
+  const std::string & tlapse_file = parameters.tlapse;
+  std::ifstream infile(tlapse_file);
+  std::string nusis;   //  sensor/instrument/satellite
+  int nuchan;  //  channel number
+  float tlapse;
 
-    if (infile.is_open()) {
-      while (!infile.eof()) {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> tlapse;
-        tlapmean_[nuchan] = tlapse;
-      }
-      infile.close();
-    } else {
-      oops::Log::error() << "Unable to open file : "
-                         << tlapse_file << std::endl;
-      ABORT("Unable to open tlap file ");
+  if (infile.is_open()) {
+    while (!infile.eof()) {
+      infile >> nusis;
+      infile >> nuchan;
+      infile >> tlapse;
+      tlapmean_[nuchan] = tlapse;
     }
+    infile.close();
   } else {
-    oops::Log::error() << "tlapse file is not provided !" << std::endl;
-    ABORT("tlapse file is not provided !");
+    oops::Log::error() << "Unable to open file : "
+                       << tlapse_file << std::endl;
+    ABORT("Unable to open tlapse file ");
   }
 }
 
@@ -101,7 +94,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
     hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(vars_.channels()[jvar]);
     tmpvar.clear();
     for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
-      ydiags.get(pred, hdiags, js+1);
+      ydiags.get(pred, hdiags, js);
       tmpvar.push_back(pred);
     }
     ptau5.push_back(tmpvar);
@@ -111,7 +104,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   std::vector<std::vector<float>> tvp;
   std::size_t nlevs = geovals.nlevs("air_temperature");
   for (std::size_t js = 0; js < nlevs; ++js) {
-    geovals.get(pred, "air_temperature", js+1);
+    geovals.getAtLevel(pred, "air_temperature", js);
     tvp.push_back(pred);
   }
   nlevs = geovals.nlevs("air_pressure");

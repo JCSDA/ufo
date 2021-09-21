@@ -88,12 +88,13 @@ end subroutine ufo_example_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx, c_key_hofxdiags) bind(c,name='ufo_example_post_f90')
+subroutine ufo_example_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx, c_hofxbias, c_key_hofxdiags) bind(c,name='ufo_example_post_f90')
 implicit none
 integer(c_int), intent(in) :: c_self
 type(c_ptr), value, intent(in) :: c_obspace
 integer(c_int), intent(in) :: c_nvars, c_nlocs
 real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
+real(c_double), intent(in) :: c_hofxbias(c_nvars, c_nlocs)
 integer(c_int), intent(in) :: c_key_hofxdiags
 
 type(ufo_example), pointer :: self
@@ -102,7 +103,7 @@ type(ufo_geovals), pointer :: hofxdiags
 call ufo_example_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_key_hofxdiags, hofxdiags)
 
-call ufo_example_post(self, c_obspace, c_nvars, c_nlocs, c_hofx, hofxdiags)
+call ufo_example_post(self, c_obspace, c_nvars, c_nlocs, c_hofx, c_hofxbias, hofxdiags)
 
 end subroutine ufo_example_post_c
 

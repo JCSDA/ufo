@@ -23,11 +23,11 @@
 #include "eckit/geometry/Point3.h"
 #include "eckit/geometry/UnitSphere.h"
 
-#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/ObsLocalizationBase.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/obslocalization/ObsLocParameters.h"
 #include "ufo/ObsTraits.h"
@@ -47,11 +47,10 @@ class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef eckit::KDTreeMemory<TreeTrait> KDTree;
   ObsLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
 
-  /// compute localization and save localization values in \p obsvector and
-  /// localization flags (1: outside of localization; 0: inside localization area)
-  /// in \p outside
-  void computeLocalization(const GeometryIterator_ &, ioda::ObsDataVector<int> & outside,
-                           ioda::ObsVector & obsvector) const override;
+  /// compute localization and save localization values in \p locvector
+  /// (missing values indicate that observation is outside of localization)
+  void computeLocalization(const GeometryIterator_ &,
+                           ioda::ObsVector & locvector) const override;
 
   const std::vector<int> & localobs() const {return localobs_;}
   const std::vector<double> & horizontalObsdist() const {return obsdist_;}
@@ -118,8 +117,7 @@ ObsLocalization<MODEL>::ObsLocalization(const eckit::Configuration & config,
 
 template<typename MODEL>
 void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
-                                            ioda::ObsDataVector<int> & outside,
-                                            ioda::ObsVector & locvector) const {
+                                                 ioda::ObsVector & locvector) const {
   oops::Log::trace() << "ObsLocalization::computeLocalization" << std::endl;
 
   // check that this distribution supports local obs space
@@ -207,16 +205,19 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
       obsdist_.resize(*maxnobs);
     }
   }
-  for (size_t jloc = 0; jloc < outside.nlocs(); ++jloc) {
-    for (size_t jvar = 0; jvar < outside.nvars(); ++jvar) {
-      outside[jvar][jloc] = 1;
-    }
+
+  // set all to missing (outside of localization distance)
+  const double missing = util::missingValue(double());
+  for (size_t jj = 0; jj < locvector.size(); ++jj) {
+    locvector[jj] = missing;
   }
+
+  // set localization for the obs inside localization distance to 1.0
   const size_t nvars = locvector.nvars();
-  for (size_t jlocal = 0; jlocal < localobs_.size(); ++jlocal) {
+  const size_t nlocal = localobs_.size();
+  for (size_t jlocal = 0; jlocal < nlocal; ++jlocal) {
     // obsdist is calculated at each location; need to update R for each variable
     for (size_t jvar = 0; jvar < nvars; ++jvar) {
-      outside[jvar][localobs_[jlocal]] = 0;
       locvector[jvar + localobs_[jlocal] * nvars] = 1.0;
     }
   }

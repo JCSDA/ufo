@@ -21,7 +21,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -42,7 +42,7 @@ namespace ufo {
   /// and the associated temperature thresholds.
   class ProfileAverageRelativeHumidity : public ProfileCheckBase {
    public:
-    explicit ProfileAverageRelativeHumidity(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileAverageRelativeHumidity(const ConventionalProfileProcessingParameters &options);
 
     /// Average relative humidity observations onto model levels and store the results.
     /// \throws eckit::BadValue if vectors produced by the AveragePressure routine

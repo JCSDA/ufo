@@ -82,8 +82,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   // Determine if pressure is ascending or descending (B-matrix assumption)
   size_t np = in.nlevs(Variable("air_pressure@GeoVaLs"));
   std::vector<float> gv_pres_1(nlocs), gv_pres_N(nlocs);
-  in.get(Variable("air_pressure@GeoVaLs"), 1, gv_pres_1);
-  in.get(Variable("air_pressure@GeoVaLs"), np, gv_pres_N);
+  in.get(Variable("air_pressure@GeoVaLs"), 0, gv_pres_1);
+  in.get(Variable("air_pressure@GeoVaLs"), np - 1, gv_pres_N);
   const float missing = util::missingValue(missing);
   ASSERT(gv_pres_1[0] != missing);
   ASSERT(gv_pres_N[0] != missing);
@@ -102,8 +102,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     size_t nlevs = in.nlevs(Variable(jac_name, channels_)[0]);
     std::vector<float> jac_store(nlocs);
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level_gv = (p_ascending ? ilev+1 : nlevs-ilev);
-      int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv+1 : level_gv);
+      const int level_gv = (p_ascending ? ilev : nlevs-ilev-1);
+      const int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv-1 : level_gv);
       if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
         in.get(Variable("air_pressure@GeoVaLs"), level_gv, gv_pres);
         in.get(Variable("air_temperature@GeoVaLs"), level_gv, gv_temp);
@@ -117,7 +117,20 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           // Ensure specific humidity is within limits
           gv_qgas[iloc] = std::max(gv_qgas[iloc], options_.min_q.value());
           gv_qgas[iloc] = std::min(gv_qgas[iloc], qsaturated[iloc]);
-          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc] + gv_ciw[iloc];
+          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc];  // ice is neglected for partitioning
+        }
+        int qsplit_partition_mode = 1;  // partition total water into vapour, liquid and ice
+        std::vector<float> qsplit_gas(nlocs), qsplit_clw(nlocs), qsplit_ciw(nlocs);
+        ufo_ops_satrad_qsplit_f90(qsplit_partition_mode, static_cast<int>(nlocs), gv_pres.data(),
+                                  gv_temp.data(), humidity_total.data(), qsplit_gas.data(),
+                                  qsplit_clw.data(), qsplit_ciw.data(), split_rain);
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          // For scattering use sum of geovals for qtotal, otherwise use partitioned quantities
+          if (options_.scattering_switch.value()) {
+            humidity_total[iloc] += gv_ciw[iloc];
+          } else {
+            humidity_total[iloc] = qsplit_gas[iloc] + qsplit_clw[iloc] + qsplit_ciw[iloc];
+          }
         }
       }
 
@@ -131,8 +144,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           in.get(Variable("brightness_temperature_jacobian_"+ciw_name+"@ObsDiag", channels_)[ichan],
                  level_jac, jac_ciw);
           std::vector<float> dq_dqtotal(nlocs), dql_dqtotal(nlocs), dqi_dqtotal(nlocs);
-          int qsplit_mode = 2;  // compute derivatives
-          ufo_ops_satrad_qsplit_f90(qsplit_mode, static_cast<int>(nlocs), gv_pres.data(),
+          int qsplit_derivative_mode = 2;  // compute derivatives
+          ufo_ops_satrad_qsplit_f90(qsplit_derivative_mode, static_cast<int>(nlocs), gv_pres.data(),
                                     gv_temp.data(), humidity_total.data(), dq_dqtotal.data(),
                                     dql_dqtotal.data(), dqi_dqtotal.data(), split_rain);
           // Jacobian dy/dx for observation y, humdity x in units kg/kg

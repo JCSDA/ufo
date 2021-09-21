@@ -161,7 +161,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
                                       std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  const std::vector<size_t> validObsIds = getValidObservationIds(apply, obsAccessor);
+  const std::vector<size_t> validObsIds = getValidObservationIds(apply, filtervars, obsAccessor);
 
   int numSpatialDims, numNonspatialDims;
   ObsData obsData = getObsData(obsAccessor, numSpatialDims, numNonspatialDims);
@@ -208,10 +208,6 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
   }
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "PoissonDiskThinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 ObsAccessor PoissonDiskThinning::createObsAccessor() const {
@@ -288,8 +284,9 @@ void PoissonDiskThinning::validateSpacings(
 
 std::vector<size_t> PoissonDiskThinning::getValidObservationIds(
     const std::vector<bool> & apply,
+    const Variables & filtervars,
     const ObsAccessor &obsAccessor) const {
-  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
   if (!options_.shuffle) {
     // The user wants to process observations in fixed (non-random) order. Ensure the filter

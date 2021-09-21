@@ -56,6 +56,9 @@ class GaussianThinningParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(GaussianThinningParameters, FilterParametersBase)
 
  public:
+  /// Reimplemented to detect incompatible options.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+
   // Horizontal grid
 
   /// Cell size (in km) along the meridians. Thinning in the horizontal direction is disabled if
@@ -74,20 +77,25 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// False to set the number of zonal bands so that the band width is as small as possible, but
   /// no smaller than \c horizontal_mesh, and the bin width in the zonal direction is as small as
   /// possible, but no smaller than in the meridional direction.
-  oops::Parameter<bool> roundHorizontalBinCountToNearest{
-    "round_horizontal_bin_count_to_nearest", false, this};
+  ///
+  /// Defaults to \c false unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c true.
+  oops::OptionalParameter<bool> roundHorizontalBinCountToNearest{
+    "round_horizontal_bin_count_to_nearest", this};
 
   // Vertical grid
 
-  /// Cell size (in Pa) in the vertical direction. Thinning in the vertical direction is disabled
+  /// Cell size in the vertical direction. Thinning in the vertical direction is disabled
   /// if this parameter is not specified or negative.
   oops::Parameter<float> verticalMesh{"vertical_mesh", -1.0f, this};
-  /// Lower bound of the pressure interval split into cells of size \c vertical_mesh.
+  /// Lower bound of the vertical coordinate interval split into cells of size \c vertical_mesh.
   oops::Parameter<float> verticalMin{"vertical_min", 100.0f, this};
-  /// Upper bound of the pressure interval split into cells of size \c vertical_mesh.
+  /// Upper bound of the vertical coordinate interval split into cells of size \c vertical_mesh.
   /// This parameter is rounded upwards to the nearest multiple of \c vertical_mesh starting from
   /// \c vertical_min.
   oops::Parameter<float> verticalMax{"vertical_max", 110000.0f, this};
+  /// Observation vertical coordinate.
+  oops::Parameter<std::string> verticalCoord{"vertical_coordinate", "air_pressure", this};
 
   // Temporal grid
 
@@ -124,13 +132,51 @@ class GaussianThinningParameters : public FilterParametersBase {
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
 
   /// Determines which of the highest-priority observations lying in a cell is retained.
+  ///
   /// Allowed values:
+  ///
   /// - \c geodesic: retain the observation closest to the cell centre in the horizontal direction
-  ///   (air pressure and time are ignored)
+  ///   (the vertical coordinate and time are ignored)
   /// - \c maximum: retain the observation lying furthest from the cell's bounding box in the
   ///   system of coordinates in which the cell is a unit cube (all dimensions along which thinning
   ///   is enabled are taken into account).
-  oops::Parameter<DistanceNorm> distanceNorm{"distance_norm", DistanceNorm::GEODESIC, this};
+  ///
+  /// Defaults to \c geodesic unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c maximum.
+  oops::OptionalParameter<DistanceNorm> distanceNorm{"distance_norm", this};
+
+  /// Set this option to \c true to make the filter produce identical results as the Ops_Thinning
+  /// subroutine from the Met Office OPS system when both are run serially (on a single process).
+  ///
+  /// The filter behavior is modified in several ways:
+  ///
+  /// - The \c round_horizontal_bin_count_to_nearest option is set to \c true.
+  ///
+  /// - The \c distance_norm option is set to \c maximum.
+  ///
+  /// - Bin indices are calculated by rounding values away from rather towards zero. This can alter
+  ///   the bin indices assigned to observations lying at bin boundaries.
+  ///
+  /// - The bin lattice is assumed to cover the whole real axis (for times and pressures) or the
+  ///   [-360, 720] degrees interval (for longitudes) rather than just the intervals [\c time_min,
+  ///   \c time_max], [\c pressure_min, \c pressure_max] and [0, 360] degrees, respectively. This
+  ///   may cause observations lying at the boundaries of the latter intervals to be put in bins of
+  ///   their own, which is normally undesirable.
+  ///
+  /// - A different (non-stable) sorting algorithm is used to order observations before inspection.
+  ///   This can alter the set of retained observations if some bins contain multiple equally good
+  ///   observations (with the same priority and distance to the cell center measured with the
+  ///   selected norm). If this happens for a significant fraction of bins, it may be a sign the
+  ///   criteria used to rank observations (the priority and the distance norm) are not specific
+  ///   enough.
+  oops::Parameter<bool> opsCompatibilityMode{"ops_compatibility_mode", false, this};
+
+  /// Option to choose how to treat observations where there are multiple filter variables. If true,
+  /// treats an observation location as valid if any filter variables have not been rejected.
+  /// If false, observations are treated as valid only if all filter variables have passed QC.
+  /// This is an optional parameter, if omitted the default value is true.
+  oops::Parameter<bool>
+    thinIfAnyFilterVariablesAreValid{"thin_if_any_filter_variables_are_valid", true, this};
 
  private:
   static float defaultHorizontalMesh() {

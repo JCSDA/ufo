@@ -109,7 +109,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
   // Get GeoVals of air pressure [Pa] in vertical column
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    data.get(Variable("air_pressure@GeoVaLs"), ilev+1, prsl[ilev]);
+    data.get(Variable("air_pressure@GeoVaLs"), ilev, prsl[ilev]);
   }
 
   for (size_t iv = 0; iv < varsize; ++iv) {   // Variable loop

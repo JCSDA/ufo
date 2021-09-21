@@ -25,7 +25,7 @@
 #include "oops/util/missingValues.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/filters/ConventionalProfileProcessingParameters.h"
 
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
@@ -37,7 +37,7 @@ namespace ufo {
   /// \brief Profile QC checker base class
   class ProfileCheckBase {
    public:
-    explicit ProfileCheckBase(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckBase(const ConventionalProfileProcessingParameters &options);
 
     virtual ~ProfileCheckBase() {}
 
@@ -104,7 +104,7 @@ namespace ufo {
 
    protected:  // variables
     /// Configurable parameters
-    const ProfileConsistencyCheckParameters &options_;
+    const ConventionalProfileProcessingParameters &options_;
 
     /// Missing value (int)
     const int missingValueInt = util::missingValue(1);
@@ -118,12 +118,13 @@ namespace ufo {
   {
    public:
     static std::unique_ptr<ProfileCheckBase> create(const std::string&,
-                                                    const ProfileConsistencyCheckParameters&);
+                                                    const ConventionalProfileProcessingParameters&);
     virtual ~ProfileCheckFactory() = default;
    protected:
     explicit ProfileCheckFactory(const std::string &);
    private:
-    virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&) = 0;
+    virtual std::unique_ptr<ProfileCheckBase> make
+      (const ConventionalProfileProcessingParameters&) = 0;
 
     static std::map <std::string, ProfileCheckFactory*> & getMakers()
       {
@@ -136,7 +137,7 @@ namespace ufo {
     class ProfileCheckMaker : public ProfileCheckFactory
     {
       virtual std::unique_ptr<ProfileCheckBase>
-        make(const ProfileConsistencyCheckParameters &options)
+        make(const ConventionalProfileProcessingParameters &options)
       {
         return std::unique_ptr<ProfileCheckBase>(new T(options));
       }

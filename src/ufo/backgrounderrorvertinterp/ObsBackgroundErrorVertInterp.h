@@ -17,18 +17,14 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -40,16 +36,10 @@ namespace ufo {
   class ObsDiagnostics;
 
 /// \brief Options controlling the ObsBackgroundErrorVertInterp observation operator.
-class ObsBackgroundErrorVertInterpParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsBackgroundErrorVertInterpParameters, Parameters)
+class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsBackgroundErrorVertInterpParameters, ObsOperatorParametersBase)
 
  public:
-  /// Name of the ObsOperator. Must be BackgroundErrorVertInterp.
-  ///
-  /// TODO(wsmigaj): create an ObsOperatorParametersBase class, move this parameter there and
-  /// derive ObsBackgroundErrorVertInterpParameters from that class.
-  oops::Parameter<std::string> name{"name", "", this};
-
   /// Simulated variables whose background errors may be calculated by this operator.
   /// If not specified, defaults to the list of all simulated variables in the ObsSpace.
   oops::OptionalParameter<std::vector<Variable>> variables{"variables", this};
@@ -99,9 +89,13 @@ class ObsBackgroundErrorVertInterpParameters : public oops::Parameters {
 class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
                                      private util::ObjectCounter<ObsBackgroundErrorVertInterp> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsBackgroundErrorVertInterpParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsBackgroundErrorVertInterp";}
 
-  ObsBackgroundErrorVertInterp(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBackgroundErrorVertInterp(const ioda::ObsSpace &, const Parameters_ &);
 
   virtual ~ObsBackgroundErrorVertInterp();
 
@@ -116,7 +110,7 @@ class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
 
  private:
   const ioda::ObsSpace& odb_;
-  ObsBackgroundErrorVertInterpParameters parameters_;
+  Parameters_ parameters_;
   oops::Variables requiredVars_;
 };
 

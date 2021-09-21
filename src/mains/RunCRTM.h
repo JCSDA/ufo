@@ -57,8 +57,9 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
       eckit::LocalConfiguration obsopconf(conf[jj], "obs operator");
-
-      ObsOperator_ hop(obsdb[jj], obsopconf);
+      typename ObsOperator_::Parameters_ obsopparams;
+      obsopparams.validateAndDeserialize(obsopconf);
+      ObsOperator_ hop(obsdb[jj], obsopparams);
 
       const eckit::LocalConfiguration gconf(conf[jj], "geovals");
       const GeoVaLs_ gval(gconf, obsdb[jj], hop.requiredVars());
@@ -69,9 +70,11 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
 
       ObsVector_ hofx(obsdb[jj]);
+      ObsVector_ bias(obsdb[jj]);
+      bias.zero();
       ObsDiags_ diag(obsdb[jj], hop.locations(), diagvars);
 
-      hop.simulateObs(gval, hofx, ybias, diag);
+      hop.simulateObs(gval, hofx, ybias, bias, diag);
 
       const double zz = hofx.rms();
       const double xx = conf[jj].getDouble("rms ref");

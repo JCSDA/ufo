@@ -7,12 +7,14 @@
 
 #ifndef UFO_PREDICTORS_SCANANGLE_H_
 #define UFO_PREDICTORS_SCANANGLE_H_
-#include <string>
-#include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
+#include <string>
+
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+
+#include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
   class Variables;
@@ -26,9 +28,30 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
+/// Configuration parameters of the ScanAngle predictor.
+class ScanAngleParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ScanAngleParameters, PredictorParametersBase);
+
+ public:
+  /// Power to which to raise the scan angle. By default, 1.
+  ///
+  /// \note If this option is set, a suffix containing its value (even if it's equal to 1) will be
+  /// appended to the predictor name.
+  oops::OptionalParameter<int> order{"order", this};
+
+  /// Name of the variable (from the MetaData group) containing the scan angle.
+  oops::Parameter<std::string> varName{"var_name", "sensor_view_angle", this};
+};
+
+// -----------------------------------------------------------------------------
+
 class ScanAngle : public PredictorBase {
  public:
-  ScanAngle(const eckit::Configuration &, const oops::Variables &);
+  /// The type of parameters accepted by the constructor of this predictor.
+  /// This typedef is used by the PredictorFactory.
+  typedef ScanAngleParameters Parameters_;
+
+  ScanAngle(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

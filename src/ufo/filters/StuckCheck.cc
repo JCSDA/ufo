@@ -157,8 +157,6 @@ void StuckCheck::potentiallyRejectStreak(
       size_t observationIndex) {
     const size_t obsIndex = validObsIds.at(*(stationIndicesBegin + observationIndex));
     isRejected[obsIndex] = true;
-    oops::Log::trace() << "StuckCheck: Observation " << observationIndex <<
-                          " rejected from station " << stationId << std::endl;
   };
 
   size_t streakLength = endOfStreakIndex - startOfStreakIndex + 1;

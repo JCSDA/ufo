@@ -109,7 +109,7 @@ class CloudCostFunctionParameters : public oops::Parameters {
 /// Quart. J. Royal Meterol. Soc., Vol. 125, pp. 2359-2378 (1999).
 /// https://doi.org/10.1002/qj.49712555902
 
-class CloudCostFunction : public ObsFunctionBase {
+class CloudCostFunction : public ObsFunctionBase<float> {
  public:
   explicit CloudCostFunction(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

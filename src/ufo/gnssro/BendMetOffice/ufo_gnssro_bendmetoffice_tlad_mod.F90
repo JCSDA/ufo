@@ -50,16 +50,18 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, f_conf)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
 
-use fckit_configuration_module, only: fckit_configuration
 implicit none
-class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self
-type(fckit_configuration), intent(in)   :: f_conf
 
-call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self
+logical(c_bool), intent(in) :: vert_interp_ops
+logical(c_bool), intent(in) :: pseudo_ops
+real(c_float), intent(in) :: min_temp_grad
+
+self % vert_interp_ops = vert_interp_ops
+self % pseudo_ops = pseudo_ops
+self % min_temp_grad = min_temp_grad
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -287,22 +289,6 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure
-
-! Allocate the output for the air pressure
-  if (.not. allocated(prs_d%vals)) then
-      prs_d % nlocs = self % nlocs
-      prs_d % nval = self % nlevp
-      allocate(prs_d%vals(prs_d%nval, prs_d%nlocs))
-      prs_d % vals = 0.0_kind_real
-  endif
-
-! Allocate the output for the specific humidity
-  if (.not. allocated(q_d%vals)) then
-      q_d % nlocs = self % nlocs
-      q_d % nval = self % nlevq
-      allocate(q_d%vals(q_d%nval, q_d%nlocs))
-      q_d % vals = 0.0_kind_real
-  endif
 
   missing = missing_value(missing)
   allocate(x_d(1:prs_d%nval + q_d%nval))

@@ -14,7 +14,7 @@
 #include "ufo/profile/ProfileDataHandler.h"
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -22,7 +22,7 @@ namespace ufo {
   /// \brief Profile QC: same P/different T check
   class ProfileCheckSamePDiffT : public ProfileCheckBase {
    public:
-    explicit ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckSamePDiffT(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

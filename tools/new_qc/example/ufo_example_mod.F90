@@ -61,12 +61,13 @@ end subroutine ufo_example_prior
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_post(self, obspace, nvars, nlocs, hofx, hofxdiags)
+subroutine ufo_example_post(self, obspace, nvars, nlocs, hofx, hofxbias, hofxdiags)
 implicit none
 type(ufo_example),  intent(in) :: self
 type(c_ptr), value, intent(in) :: obspace
 integer,            intent(in) :: nvars, nlocs
 real(c_double),     intent(in) :: hofx(nvars, nlocs)
+real(c_double),     intent(in) :: hofxbias(nvars, nlocs)
 type(ufo_geovals),  intent(in) :: hofxdiags
 
 end subroutine ufo_example_post

@@ -12,6 +12,7 @@
 #include <functional>
 #include <iomanip>
 #include <map>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -31,12 +32,91 @@
 #include "ufo/filters/MetOfficeBuddyPairFinder.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 
+
 namespace ufo {
 
 namespace {
 
 const double expArgMax = 80.0;  // maximum argument of the exponential function
 const float maxGrossErrorProbability = 1.0;  // maximum allowed value for PGE
+
+/// brief Extract 1st level data from the provided flattened vector.
+template<typename T>
+std::vector<T> extract1stLev(const std::vector<T> &flattenedArray,
+                             const boost::optional<Eigen::ArrayXXi> &profileIndex) {
+  if ( !profileIndex )
+    return flattenedArray;
+
+  std::vector<T> res;
+  res.resize((*profileIndex).rows());
+  for (size_t row=0; row < (*profileIndex).rows(); row++) {
+    res[row] = flattenedArray[(*profileIndex)(row, 0)];
+  }
+  return res;
+}
+
+/// Return a 2D eigen array from the provided flattened vector.
+Eigen::ArrayXXf unravel(const std::vector<float> &flattenedArray,
+                        const boost::optional<Eigen::ArrayXXi> &profileIndex) {
+  if (profileIndex) {
+    Eigen::ArrayXXf res((*profileIndex).rows(), (*profileIndex).cols());
+    for (size_t row=0; row < (*profileIndex).rows(); row++)
+      for (size_t col=0; col < (*profileIndex).cols(); col++)
+        res(row, col) = flattenedArray[(*profileIndex)(row, col)];
+    return res;
+  } else {
+    Eigen::ArrayXXf res(flattenedArray.size(), 1);
+    for (size_t row=0; row < flattenedArray.size(); row++)
+      res(row, 0) = flattenedArray[row];
+    return res;
+  }
+}
+
+/// Update the provided flat array with values from the provided eigen array
+void updateFlatData(std::vector<float> & flatArray, const Eigen::ArrayXXf &array,
+                    const boost::optional<Eigen::ArrayXXi> &profileIndex) {
+  if (profileIndex) {
+    for (size_t row=0; row < (*profileIndex).rows(); row++)
+      for (size_t col=0; col < (*profileIndex).cols(); col++)
+        flatArray[(*profileIndex)(row, col)] = array(row, col);
+  } else {
+    ASSERT(array.cols() == 1);
+    for (size_t row=0; row < array.rows(); row++)
+      flatArray[row] = array(row, 0);
+  }
+}
+
+/// Derive a mapping between the ObsSpace flat data and an unraveled 2D eigen array representation.
+Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
+                              const int numLevels) {
+  // Assume ObsSpace contains only the averaged profiles if this variable isn't present.
+  boost::optional<std::vector<int>> extended_obs_space;
+  if (obsdb.has("MetaData", "extended_obs_space")) {
+    extended_obs_space = std::vector<int>(obsdb.nlocs());
+    obsdb.get_db("MetaData", "extended_obs_space", *extended_obs_space);
+  }
+  Eigen::ArrayXXi profileIndex {obsdb.nrecs(), numLevels};
+
+  int recnum = 0;
+  for (ioda::ObsSpace::RecIdxIter irec = obsdb.recidx_begin(); irec != obsdb.recidx_end(); ++irec) {
+    int levnum = 0;
+    const std::vector<std::size_t> &rSort = obsdb.recidx_vector(irec);
+    for (size_t ilocs = 0; ilocs < rSort.size(); ++ilocs) {
+      if (extended_obs_space && ((*extended_obs_space)[rSort[ilocs]] != 1))
+        continue;
+      profileIndex(recnum, levnum) = rSort[ilocs];
+      levnum++;
+    }
+    if (levnum != numLevels) {
+      std::stringstream msg;
+      msg << "Record (profile): " << recnum << " length: " << levnum+1 << " does not match the "
+          << "number of levels expected: " << numLevels;
+      throw eckit::UserError(msg.str(), Here());
+    }
+    recnum++;
+  }
+  return profileIndex;
+}
 
 std::string fullVariableName(const Variable &var)
 {
@@ -74,15 +154,18 @@ std::vector<int> mapDistinctValuesToDistinctInts(const std::vector<T> &values)
   return ints;
 }
 
-struct ScalarSingleLevelVariableData {
-  const std::vector<int> *varFlags = nullptr;
-  const std::vector<float> *obsValues = nullptr;
-  const std::vector<float> *obsBiases = nullptr;
-  const std::vector<float> *obsErrors = nullptr;
-  std::vector<float> bgValues;
-  std::vector<float> bgErrors;
-  std::vector<float> grossErrorProbabilities;
+
+struct ScalarVariableData {
+  std::vector<int> varFlags;
+  Eigen::ArrayXXf obsValues;
+  Eigen::ArrayXXf obsBiases;
+  Eigen::ArrayXXf obsErrors;
+  Eigen::ArrayXXf bgValues;
+  Eigen::ArrayXXf bgErrors;
+  std::vector<float> flatGrossErrorProbabilities;
+  Eigen::ArrayXXf grossErrorProbabilities;
 };
+
 
 }  // namespace
 
@@ -92,6 +175,7 @@ struct MetOfficeBuddyCheck::MetaData {
   std::vector<float> longitudes;
   std::vector<util::DateTime> datetimes;
   boost::optional<std::vector<float>> pressures;
+  boost::optional<Eigen::ArrayXXf> pressuresML;
   std::vector<int> stationIds;
 };
 
@@ -110,40 +194,27 @@ MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters
 MetOfficeBuddyCheck::~MetOfficeBuddyCheck()
 {}
 
+
+
 void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
-  // Identify observations to process and collect their data and metadata
+  // Fetch metadata required for identifying buddy pairs.
 
-  const std::vector<size_t> validObsIds = getValidObservationIds(apply);
-  MetaData obsData = collectMetaData();
+  const boost::optional<int> &numLevels = options_.numLevels.value();
+
+  boost::optional<Eigen::ArrayXXi> profileIndex;
+  if (numLevels)
+    profileIndex = deriveIndices(obsdb_, *numLevels);
+
+  const std::vector<size_t> validObsIds = getValidObservationIds(apply, profileIndex);
+  MetaData obsData = collectMetaData(profileIndex);
+
   const std::vector<float> bgErrorHorizCorrScales = calcBackgroundErrorHorizontalCorrelationScales(
         validObsIds, obsData.latitudes);
   const std::vector<bool> verbose = flagAndPrintVerboseObservations(
         validObsIds, obsData.latitudes, obsData.longitudes, obsData.datetimes,
         obsData.pressures.get_ptr(), obsData.stationIds, bgErrorHorizCorrScales);
-
-  const oops::Variables &observedVars = obsdb_.obsvariables();
-  ioda::ObsDataVector<float> obsValues(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-
-  auto getFilterVariableName = [&] (size_t filterVarIndex) {
-    return filtervars.variable(filterVarIndex).variable();
-  };
-
-  auto getScalarSingleLevelVariableData = [&] (size_t filterVarIndex) {
-    const size_t observedVarIndex = observedVars.find(getFilterVariableName(filterVarIndex));
-
-    ScalarSingleLevelVariableData data;
-    data.varFlags = &(*flags_)[observedVarIndex];
-    data.obsValues = &obsValues[filterVarIndex];
-    data.obsErrors = &(*obserr_)[observedVarIndex];
-    data_.get(ufo::Variable(filtervars[filterVarIndex], "HofX"), data.bgValues);
-    data_.get(backgroundErrorVariable(filtervars[filterVarIndex]), data.bgErrors);
-    // TODO(wsmigaj): How is this variable going to be initialized?
-    data_.get(ufo::Variable(filtervars[filterVarIndex], "GrossErrorProbability"),
-              data.grossErrorProbabilities);
-    return data;
-  };
 
   // Identify buddy pairs
 
@@ -153,6 +224,38 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                            obsData.datetimes, pressures,
                                            obsData.stationIds);
   const std::vector<MetOfficeBuddyPair> buddyPairs = buddyPairFinder.findBuddyPairs(validObsIds);
+
+  // Fetch data/metadata required for buddy-check calculation.
+  const oops::Variables &observedVars = obsdb_.obsvariables();
+  ioda::ObsDataVector<float> obsValues(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+
+  auto getFilterVariableName = [&] (size_t filterVarIndex) {
+    return filtervars.variable(filterVarIndex).variable();
+  };
+
+  auto getScalarVariableData = [&] (size_t filterVarIndex) {
+    // Fetch raw data corresponding this the specific variable of interest.
+    const size_t observedVarIndex = observedVars.find(getFilterVariableName(filterVarIndex));
+
+    std::vector<float> bgValues;
+    data_.get(ufo::Variable(filtervars[filterVarIndex], "HofX"), bgValues);
+    std::vector<float> bgErrors;
+    data_.get(backgroundErrorVariable(filtervars[filterVarIndex]), bgErrors);
+
+    // Store data for usage.
+    ScalarVariableData data;
+    data_.get(ufo::Variable(filtervars[filterVarIndex], "GrossErrorProbability"),
+              data.flatGrossErrorProbabilities);
+
+    // Unravel these flattened vectors.
+    data.varFlags = extract1stLev((*flags_)[observedVarIndex], profileIndex);
+    data.obsValues = unravel(obsValues[filterVarIndex], profileIndex);
+    data.obsErrors = unravel((*obserr_)[observedVarIndex], profileIndex);
+    data.bgValues = unravel(bgValues, profileIndex);
+    data.bgErrors = unravel(bgErrors, profileIndex);
+    data.grossErrorProbabilities = unravel(data.flatGrossErrorProbabilities, profileIndex);
+    return data;
+  };
 
   // Buddy-check all filter variables
 
@@ -164,75 +267,76 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
   for (size_t filterVarIndex = 0; filterVarIndex < filtervars.size(); ++filterVarIndex) {
     if (previousVariableWasFirstComponentOfTwo) {
       // Vector (two-component) variable
-      ScalarSingleLevelVariableData firstComponentData =
-          getScalarSingleLevelVariableData(filterVarIndex - 1);
-      ScalarSingleLevelVariableData secondComponentData =
-          getScalarSingleLevelVariableData(filterVarIndex);
+      ScalarVariableData firstComponentData =
+          getScalarVariableData(filterVarIndex - 1);
+      ScalarVariableData secondComponentData =
+          getScalarVariableData(filterVarIndex);
 
-      for (size_t i = 0; i < firstComponentData.grossErrorProbabilities.size(); ++i)
-        firstComponentData.grossErrorProbabilities[i] =
-            std::max(firstComponentData.grossErrorProbabilities[i],
-                     secondComponentData.grossErrorProbabilities[i]);
+      for (Eigen::Index i = 0; i < firstComponentData.grossErrorProbabilities.rows(); ++i) {
+        for (Eigen::Index j = 0; j < firstComponentData.grossErrorProbabilities.cols(); ++j) {
+          firstComponentData.grossErrorProbabilities(i, j) =
+              std::max(firstComponentData.grossErrorProbabilities(i, j),
+                       secondComponentData.grossErrorProbabilities(i, j));
+        }
+      }
 
-      checkVectorSurfaceData(buddyPairs,
-                             *firstComponentData.varFlags,
-                             verbose, bgErrorHorizCorrScales,
-                             obsData.stationIds, obsData.datetimes,
-                             *firstComponentData.obsValues,
-                             *secondComponentData.obsValues,
-                             *firstComponentData.obsErrors,
-                             firstComponentData.bgValues, secondComponentData.bgValues,
-                             firstComponentData.bgErrors,
-                             firstComponentData.grossErrorProbabilities);
+      checkVectorData(buddyPairs, firstComponentData.varFlags, verbose,
+                      bgErrorHorizCorrScales, obsData.stationIds, obsData.datetimes,
+                      obsData.pressuresML.get_ptr(), firstComponentData.obsValues,
+                      secondComponentData.obsValues, firstComponentData.obsErrors,
+                      firstComponentData.bgValues, secondComponentData.bgValues,
+                      firstComponentData.bgErrors, firstComponentData.grossErrorProbabilities);
       // OPS doesn't update the gross error probabilities of the second component variable,
       // but it seems more consistent to do so (and it facilitates the implementation of
       // flagRejectedObservations().
       // The implementation of checkVectorSurfaceData() still assumes that the *input* gross error
       // probabilities, flags and background error estimates are the same for both components.
-      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex - 1)] =
-          firstComponentData.grossErrorProbabilities;
-      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-          std::move(firstComponentData.grossErrorProbabilities);
 
+      // Update the flat GPE values.
+      updateFlatData(firstComponentData.flatGrossErrorProbabilities,
+                     firstComponentData.grossErrorProbabilities, profileIndex);
+      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex - 1)] =
+          firstComponentData.flatGrossErrorProbabilities;
+      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
+          std::move(firstComponentData.flatGrossErrorProbabilities);
       previousVariableWasFirstComponentOfTwo = false;
     } else {
       if (filtervars[filterVarIndex].options().getBool("first_component_of_two", false)) {
         previousVariableWasFirstComponentOfTwo = true;
       } else {
         // Scalar variable
-        ScalarSingleLevelVariableData data =
-            getScalarSingleLevelVariableData(filterVarIndex);
-        checkScalarSurfaceData(buddyPairs,
-                               *data.varFlags, verbose, bgErrorHorizCorrScales,
-                               obsData.stationIds, obsData.datetimes,
-                               *data.obsValues, *data.obsErrors,
-                               data.bgValues, data.bgErrors,
-                               data.grossErrorProbabilities);
+        ScalarVariableData data =
+            getScalarVariableData(filterVarIndex);
+        checkScalarData(buddyPairs, data.varFlags, verbose, bgErrorHorizCorrScales,
+                        obsData.stationIds, obsData.datetimes, obsData.pressuresML.get_ptr(),
+                        data.obsValues, data.obsErrors,
+                        data.bgValues, data.bgErrors,
+                        data.grossErrorProbabilities);
+
+        // Update the flat GPE values.
+        updateFlatData(data.flatGrossErrorProbabilities, data.grossErrorProbabilities,
+                       profileIndex);
         calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-            std::move(data.grossErrorProbabilities);
+            std::move(data.flatGrossErrorProbabilities);
       }
     }
   }
 
   // Update observations flags and gross error probabilities
 
-  for (const auto &varNameAndGrossErrProbs : calculatedGrossErrProbsByVarName) {
+  for (const auto &varNameAndGrossErrProbs : calculatedGrossErrProbsByVarName)
     obsdb_.put_db("GrossErrorProbability", varNameAndGrossErrProbs.first,
                   varNameAndGrossErrProbs.second);
-  }
 
   flagRejectedObservations(filtervars, calculatedGrossErrProbsByVarName, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "MetOfficeBuddyCheck: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable) const {
   return Variable(filterVariable.variable() + "_background_error@ObsDiag");
 }
 
-MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData() const {
+MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
+    const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
   MetaData obsData;
 
   obsData.latitudes.resize(obsdb_.nlocs());
@@ -247,10 +351,19 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData() const {
   if (obsdb_.has("MetaData", "air_pressure")) {
     obsData.pressures = std::vector<float>(obsdb_.nlocs());
     obsdb_.get_db("MetaData", "air_pressure", *obsData.pressures);
+    obsData.pressuresML = unravel(*obsData.pressures, profileIndex);
   }
-
   obsData.stationIds = getStationIds();
 
+  if (profileIndex) {
+    obsData.latitudes = extract1stLev(obsData.latitudes, profileIndex);
+    obsData.longitudes = extract1stLev(obsData.longitudes, profileIndex);
+    obsData.datetimes = extract1stLev(obsData.datetimes, profileIndex);
+    obsData.stationIds = extract1stLev(obsData.stationIds, profileIndex);
+    if (obsdb_.has("MetaData", "air_pressure")) {
+      obsData.pressures = extract1stLev(*obsData.pressures, profileIndex);
+    }
+  }
   return obsData;
 }
 
@@ -346,199 +459,247 @@ std::vector<bool> MetOfficeBuddyCheck::flagAndPrintVerboseObservations(
   return verbose;
 }
 
-void MetOfficeBuddyCheck::checkScalarSurfaceData(const std::vector<MetOfficeBuddyPair> &pairs,
-                                                 const std::vector<int> &flags,
-                                                 const std::vector<bool> &verbose,
-                                                 const std::vector<float> &bgErrorHorizCorrScales,
-                                                 const std::vector<int> &stationIds,
-                                                 const std::vector<util::DateTime> &datetimes,
-                                                 const std::vector<float> &obsValues,
-                                                 const std::vector<float> &obsErrors,
-                                                 const std::vector<float> &bgValues,
-                                                 const std::vector<float> &bgErrors,
-                                                 std::vector<float> &pges) const {
+void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> &pairs,
+                                          const std::vector<int> &flags,
+                                          const std::vector<bool> &verbose,
+                                          const std::vector<float> &bgErrorHorizCorrScales,
+                                          const std::vector<int> &stationIds,
+                                          const std::vector<util::DateTime> &datetimes,
+                                          const Eigen::ArrayXXf *pressures,
+                                          const Eigen::ArrayXXf &obsValues,
+                                          const Eigen::ArrayXXf &obsErrors,
+                                          const Eigen::ArrayXXf &bgValues,
+                                          const Eigen::ArrayXXf &bgErrors,
+                                          Eigen::ArrayXXf &pges) const {
   using util::sqr;
+  const boost::optional<int> &nolevs = options_.numLevels.value();
+  const int numLevels = nolevs ? *nolevs : 0;  // number of actual levels
+  const Eigen::Index cols = obsValues.cols();  // number of data columns (levels) to loop over
 
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
-    oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_.dampingFactor1
-                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
-    oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  DiffA DiffB "
+    oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  lev  DiffA DiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
 
   const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
+  const float missing = util::missingValue(1.0f);
 
+  // Loop over buddy pairs
   for (const MetOfficeBuddyPair &pair : pairs) {
     const size_t jA = pair.obsIdA;
     const size_t jB = pair.obsIdB;
 
     // Check that observations are valid and buddy check is required
-    if (!(flags[jA] == QCflags::pass && flags[jB] == QCflags::pass &&
-          pges[jA] < maxGrossErrorProbability && pges[jB] < maxGrossErrorProbability))
-      continue;
+    if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
+      continue;  // skip to next pair
 
     // eqn 3.9
+    // - hcScale: horizontal error scale for the pair of obs
+    // - scaledDist: scaled Distance between observations
     const double hcScale = 0.5 * (bgErrorHorizCorrScales[jA] + bgErrorHorizCorrScales[jB]);
     const double scaledDist = pair.distanceInKm / hcScale;
 
-    // Background error correlation between ob positions.
-    // Surface data; treat vertical correlation as 1.0
+    // Background error correlation between observation positions.
     // eqns 3.10, 3.11
-    const double corr = (1.0 + scaledDist) *
-        std::exp(-scaledDist - sqr((datetimes[jA] - datetimes[jB]).toSeconds() *
-                                   invTemporalCorrScale));
-
-    if (corr < 0.1)
+    double corr;
+    if (numLevels == 1) {
+      // Single level data.
+      corr = (1.0 + scaledDist) *
+             std::exp(-scaledDist -
+                      options_.verticalCorrelationScale.value() *
+                      sqr(std::log((*pressures)(jA, 0)/(*pressures)(jB, 0))) -
+                      sqr((datetimes[jA] - datetimes[jB]).toSeconds() * invTemporalCorrScale));
+    } else {
+      // Multi-level/surface data; treat vertical correlation as 1.0
+      corr = (1.0 + scaledDist) *
+             std::exp(-scaledDist -
+                      sqr((datetimes[jA] - datetimes[jB]).toSeconds() * invTemporalCorrScale));
+    }
+    if (corr < 0.1)  // Check against minimum background error correlation.
       continue;  // skip to next pair
 
-    // Differences from background
-    double diffA = obsValues[jA] - bgValues[jA];
-    double diffB = obsValues[jB] - bgValues[jB];
-    // Estimated error variances (ob+bk) (eqn 2.5)
-    double errVarA = sqr(obsErrors[jA]) + sqr(bgErrors[jA]);
-    double errVarB = sqr(obsErrors[jB]) + sqr(bgErrors[jB]);
-    // Background error covariance between ob positions (eqn 3.13)
-    double covar = corr * bgErrors[jA] * bgErrors[jB];
-    // (Total error correlation between ob positions)**2 (eqn 3.14)
-    double rho2 = sqr(covar) / (errVarA * errVarB);
-    // Argument for exponents
-    double expArg = -(0.5 * rho2 / (1.0 - rho2)) *
-        (sqr(diffA) / errVarA + sqr(diffB) / errVarB - 2.0 * diffA * diffB / covar);
-    expArg = options_.dampingFactor1 * (-0.5 * std::log(1.0 - rho2) + expArg);  // exponent of
-    expArg = std::min(expArgMax, std::max(-expArgMax, expArg));                 // eqn 3.18
-    // Z = P(OA)*P(OB)/P(OA and OB)
-    double z = 1.0 / (1.0 - (1.0 - pges[jA]) * (1.0 - pges[jB]) * (1.0 - std::exp(expArg)));
-    if (z <= 0.0)
-      z = 1.0;  // rounding error control
-    z = std::pow(z, options_.dampingFactor2);  // eqn 3.16
-    pges[jA] *= z;                              // eqn 3.17
-    pges[jB] *= z;                              // eqn 3.17
-    if (isMaster && (verbose[jA] || verbose[jB])) {
-      oops::Log::trace() << boost::format("%5d %5d %8d %8d "
-                                          "%5.1f %5.1f %6.1f "
-                                          "%5.3f %6.3f %6.3f %6.3f %6.3f\n") %
-                            jA % jB % stationIds[jA] % stationIds[jB] %
-                            diffA % diffB % pair.distanceInKm %
-                            corr % std::exp(expArg) % pges[jA] % pges[jB] % z;
+    // Loop over each level
+    for (Eigen::Index jlev=0; jlev < cols; jlev++) {
+      if (pges(jA, jlev) >= maxGrossErrorProbability ||
+          pges(jB, jlev) >= maxGrossErrorProbability ||
+          pges(jA, jlev) == missing || pges(jB, jlev) == missing)
+        continue;  // skip to next level
+
+      // Differences from background
+      const double diffA = obsValues(jA, jlev) - bgValues(jA, jlev);
+      const double diffB = obsValues(jB, jlev) - bgValues(jB, jlev);
+      // Estimated error variances (ob+bk) (eqn 2.5)
+      const double errVarA = sqr(obsErrors(jA, jlev)) + sqr(bgErrors(jA, jlev));
+      const double errVarB = sqr(obsErrors(jB, jlev)) + sqr(bgErrors(jB, jlev));
+      // Background error covariance between ob positions (eqn 3.13)
+      const double covar = corr * bgErrors(jA, jlev) * bgErrors(jB, jlev);
+      // (Total error correlation between ob positions)**2 (eqn 3.14)
+      const double rho2 = sqr(covar) / (errVarA * errVarB);
+      // Argument for exponents
+      double expArg = -(0.5 * rho2 / (1.0 - rho2)) *
+          (sqr(diffA) / errVarA + sqr(diffB) / errVarB - 2.0 * diffA * diffB / covar);
+      expArg = options_.dampingFactor1 * (-0.5 * std::log(1.0 - rho2) + expArg);  // exponent of
+      expArg = std::min(expArgMax, std::max(-expArgMax, expArg));                 // eqn 3.18
+      // Z = P(OA)*P(OB)/P(OA and OB)
+      double z = 1.0 / (1.0 - (1.0 - pges(jA, jlev)) * (1.0 - pges(jB, jlev)) *
+          (1.0 - std::exp(expArg)));
+      if (z <= 0.0)
+        z = 1.0;  // rounding error control
+      z = std::pow(z, options_.dampingFactor2);  // eqn 3.16
+      pges(jA, jlev) *= z;                       // eqn 3.17
+      pges(jB, jlev) *= z;                       // eqn 3.17
+      if (isMaster && (verbose[jA] || verbose[jB])) {
+        oops::Log::trace() << boost::format("%5d %5d %8d %8d %5d "
+                                            "%5.1f %5.1f %6.1f "
+                                            "%5.3f %6.3f %6.3f %6.3f %6.3f\n") %
+                              jA % jB % stationIds[jA] % stationIds[jB] % jlev %
+                              diffA % diffB % pair.distanceInKm %
+                              corr % std::exp(expArg) % pges(jA, jlev) % pges(jB, jlev) % z;
+      }
     }
   }
 }
 
-void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBuddyPair> &pairs,
-                                                 const std::vector<int> &flags,
-                                                 const std::vector<bool> &verbose,
-                                                 const std::vector<float> &bgErrorHorizCorrScales,
-                                                 const std::vector<int> &stationIds,
-                                                 const std::vector<util::DateTime> &datetimes,
-                                                 const std::vector<float> &uObsValues,
-                                                 const std::vector<float> &vObsValues,
-                                                 const std::vector<float> &obsErrors,
-                                                 const std::vector<float> &uBgValues,
-                                                 const std::vector<float> &vBgValues,
-                                                 const std::vector<float> &bgErrors,
-                                                 std::vector<float> &pges) const {
+
+void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> &pairs,
+                                          const std::vector<int> &flags,
+                                          const std::vector<bool> &verbose,
+                                          const std::vector<float> &bgErrorHorizCorrScales,
+                                          const std::vector<int> &stationIds,
+                                          const std::vector<util::DateTime> &datetimes,
+                                          const Eigen::ArrayXXf *pressures,
+                                          const Eigen::ArrayXXf &uObsValues,
+                                          const Eigen::ArrayXXf &vObsValues,
+                                          const Eigen::ArrayXXf &obsErrors,
+                                          const Eigen::ArrayXXf &uBgValues,
+                                          const Eigen::ArrayXXf &vBgValues,
+                                          const Eigen::ArrayXXf &bgErrors,
+                                          Eigen::ArrayXXf &pges) const {
   using util::sqr;
+  const boost::optional<int> &nolevs = options_.numLevels.value();
+  const int numLevels = nolevs ? *nolevs : 0;  // number of actual levels
+  const Eigen::Index cols = uObsValues.cols();  // number of data columns (levels) to loop over
 
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
-    oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_.dampingFactor1
-                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
-    oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  LDiffA LDiffB TDiffA TDiffB "
+    oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  lev  LDiffA LDiffB TDiffA TDiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
-
   const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
+  const float missing = util::missingValue(1.0f);
 
+  // Loop over buddy pairs
   for (const MetOfficeBuddyPair &pair : pairs) {
     const size_t jA = pair.obsIdA;
     const size_t jB = pair.obsIdB;
 
     // Check that observations are valid and buddy check is required
-    if (!(flags[jA] == QCflags::pass && flags[jB] == QCflags::pass &&
-          pges[jA] < maxGrossErrorProbability && pges[jB] < maxGrossErrorProbability))
-      continue;
+    if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
+      continue;  // skip to next pair
 
     // eqn 3.9
-    double horizCorrScale = 0.5 * (bgErrorHorizCorrScales[jA] + bgErrorHorizCorrScales[jB]);
-    double scaleDist = pair.distanceInKm / horizCorrScale;
-    // Background error correlation between ob positions.
-    // Surface data; treat vertical correlation as 1.0
-    // eqns 3.10, 3.11
-    const double lCorr = std::exp(-scaleDist - sqr((datetimes[jA] - datetimes[jB]).toSeconds() *
-                                   invTemporalCorrScale));
+    // - hcScale: horizontal error scale for the pair of obs
+    // - scaledDist: scaled Distance between observations
+    const double hcScale = 0.5 * (bgErrorHorizCorrScales[jA] + bgErrorHorizCorrScales[jB]);
+    const double scaledDist = pair.distanceInKm / hcScale;
 
-    if ((1.0 + scaleDist) * lCorr < 0.1)
+    // Background error correlation between observation positions.
+    // eqns 3.10, 3.11
+    double lCorr;
+    if (numLevels == 1) {
+      lCorr = std::exp(-scaledDist -
+                       options_.verticalCorrelationScale.value() *
+                       sqr(std::log((*pressures)(jA, 0)/(*pressures)(jB, 0))) -
+                       sqr((datetimes[jA] - datetimes[jB]).toSeconds() * invTemporalCorrScale));
+    } else {
+      // Multi-level/surface data; treat vertical correlation as 1.0
+      lCorr = std::exp(-scaledDist -
+                       sqr((datetimes[jA] - datetimes[jB]).toSeconds() * invTemporalCorrScale));
+    }
+    if ((1.0 + scaledDist) * lCorr < 0.1)  // Check against minimum background error correlation.
       continue;  // skip to next pair
 
     // Calculate longitudinal and transverse wind components
-    double sinRot = std::sin(pair.rotationAInRad);
-    double cosRot = std::cos(pair.rotationAInRad);
-    // Difference from background - longitudinal wind
-    double lDiffA = cosRot  * (uObsValues[jA] - uBgValues[jA])
-        + sinRot * (vObsValues[jA] - vBgValues[jA]);           // eqn 3.19
-    // Difference from background - transverse wind
-    double tDiffA = - sinRot * (uObsValues[jA] - uBgValues[jA])
-        + cosRot * (vObsValues[jA] - vBgValues[jA]);           // eqn 3.20
-    sinRot = std::sin(pair.rotationBInRad);
-    cosRot  = std::cos(pair.rotationBInRad);
-    // Difference from background - longitudinal wind
-    double lDiffB = cosRot  * (uObsValues[jB] - uBgValues[jB])
-        + sinRot * (vObsValues[jB] - vBgValues[jB]);           // eqn 3.19
-    // Difference from background - transverse wind
-    double tDiffB = - sinRot * (uObsValues[jB] - uBgValues[jB])
-        + cosRot  * (vObsValues[jB] - vBgValues[jB]);          // eqn 3.20
+    const double sinRotA = std::sin(pair.rotationAInRad);
+    const double cosRotA = std::cos(pair.rotationAInRad);
+    const double sinRotB = std::sin(pair.rotationBInRad);
+    const double cosRotB = std::cos(pair.rotationBInRad);
 
-    // Estimated error variances (ob + bk; component wind variance)
-    double errVarA = sqr(obsErrors[jA]) + sqr(bgErrors[jA]);                // eqn 2.5
-    double errVarB = sqr(obsErrors[jB]) + sqr(bgErrors[jB]);                // eqn 2.5
+    // Loop over each level
+    for (Eigen::Index jlev=0; jlev < cols; jlev++) {
+      if (pges(jA, jlev) >= maxGrossErrorProbability ||
+          pges(jB, jlev) >= maxGrossErrorProbability ||
+          pges(jA, jlev) == missing || pges(jB, jlev) == missing)
+        continue;  // skip to next level
 
-    // Calculate covariances and probabilities
-    double lCovar = lCorr * bgErrors[jA] * bgErrors[jB];                    // eqn 3.13
-    double tCovar = (1.0 - options_.nonDivergenceConstraint * scaleDist) * lCovar;  // eqn 3.12, 13
-    // rho2 = (total error correlation between ob positions)**2
-    double lRho2 = sqr(lCovar) / (errVarA * errVarB);                       // eqn 3.14
-    double tRho2 = sqr(tCovar) / (errVarA * errVarB);                       // eqn 3.14
-    // Argument for exponents
-    double expArg;
-    if (std::abs (tRho2) <= 0.00001)
-      expArg = 0.0;    // prevent division by tCovar=0.0
-    else
-      expArg = -(0.5 * tRho2 / (1.0 - tRho2)) *
-          (sqr(tDiffA) / errVarA + sqr(tDiffB) / errVarB - 2.0 * tDiffA * tDiffB / tCovar);
-    expArg = expArg - (0.5 * lRho2 / (1.0 - lRho2)) *
-        (sqr(lDiffA) / errVarA + sqr(lDiffB) / errVarB - 2.0 * lDiffA * lDiffB / lCovar);
-    expArg = options_.dampingFactor1 * (-0.5 * std::log((1.0 - lRho2) * (1.0 - lRho2)) + expArg);
-    expArg = std::min(expArgMax, std::max(-expArgMax, expArg));           // eqn 3.22
-    // Z = P(OA)*P(OB)/P(OA and OB)
-    double z = 1.0 / (1.0 - (1.0 - pges[jA]) * (1.0 - pges[jB]) * (1.0 - std::exp(expArg)));
-    if (z <= 0.0)
-      z = 1.0;  // rounding error control
-    z = std::pow(z, options_.dampingFactor2);         // eqn 3.16
-    pges[jA] *= z;                                     // eqn 3.17
-    pges[jB] *= z;                                     // eqn 3.17
+      // Difference from background - longitudinal wind (eqn 3.19)
+      const double lDiffA = cosRotA  * (uObsValues(jA, jlev) - uBgValues(jA, jlev))
+          + sinRotA * (vObsValues(jA, jlev) - vBgValues(jA, jlev));
+      // Difference from background - transverse wind (eqn 3.20)
+      const double tDiffA = - sinRotA * (uObsValues(jA, jlev) - uBgValues(jA, jlev))
+          + cosRotA * (vObsValues(jA, jlev) - vBgValues(jA, jlev));
+      // Difference from background - longitudinal wind (eqn 3.19)
+      const double lDiffB = cosRotB  * (uObsValues(jB, jlev) - uBgValues(jB, jlev))
+          + sinRotB * (vObsValues(jB, jlev) - vBgValues(jB, jlev));
+      // Difference from background - transverse wind (eqn 3.20)
+      const double tDiffB = - sinRotB * (uObsValues(jB, jlev) - uBgValues(jB, jlev))
+          + cosRotB  * (vObsValues(jB, jlev) - vBgValues(jB, jlev));
 
-    if (isMaster && (verbose[jA] || verbose[jB])) {
-      oops::Log::trace() << boost::format("%5d %5d %8d %8d "
-                                          "%6.1f %6.1f %6.1f %6.1f %6.1f "
-                                          "%5.3f %6.3f %6.3f %6.3f %6.3f\n") %
-                            jA % jB % stationIds[jA] % stationIds[jB] %
-                            lDiffA % lDiffB % tDiffA % tDiffB % pair.distanceInKm %
-                            lCorr % std::exp(expArg) % pges[jA] % pges[jB] % z;
+      // Estimated error variances (ob + bk; component wind variance; eqn 2.5)
+      const double errVarA = sqr(obsErrors(jA, jlev)) + sqr(bgErrors(jA, jlev));
+      const double errVarB = sqr(obsErrors(jB, jlev)) + sqr(bgErrors(jB, jlev));
+
+      // Calculate covariances and probabilities eqn 3.12, 3.13
+      const double lCovar = lCorr * bgErrors(jA, jlev) * bgErrors(jB, jlev);
+      const double tCovar = (1.0 - options_.nonDivergenceConstraint * scaledDist) * lCovar;
+      // rho2 = (total error correlation between ob positions)**2
+      const double lRho2 = sqr(lCovar) / (errVarA * errVarB);  // eqn 3.14
+      const double tRho2 = sqr(tCovar) / (errVarA * errVarB);  // eqn 3.14
+      // Argument for exponents
+      double expArg;
+      if (std::abs (tRho2) <= 0.00001)
+        expArg = 0.0;    // prevent division by tCovar=0.0
+      else
+        expArg = -(0.5 * tRho2 / (1.0 - tRho2)) *
+            (sqr(tDiffA) / errVarA + sqr(tDiffB) / errVarB - 2.0 * tDiffA * tDiffB / tCovar);
+      expArg = expArg - (0.5 * lRho2 / (1.0 - lRho2)) *
+          (sqr(lDiffA) / errVarA + sqr(lDiffB) / errVarB - 2.0 * lDiffA * lDiffB / lCovar);
+      expArg = options_.dampingFactor1 * (-0.5 * std::log((1.0 - lRho2) * (1.0 - lRho2)) + expArg);
+      expArg = std::min(expArgMax, std::max(-expArgMax, expArg));           // eqn 3.22
+      // Z = P(OA)*P(OB)/P(OA and OB)
+      double z = 1.0 / (1.0 - (1.0 - pges(jA, jlev)) * (1.0 - pges(jB, jlev)) *
+          (1.0 - std::exp(expArg)));
+      if (z <= 0.0)
+        z = 1.0;  // rounding error control
+      z = std::pow(z, options_.dampingFactor2);         // eqn 3.16
+      pges(jA, jlev) *= z;                                     // eqn 3.17
+      pges(jB, jlev) *= z;                                     // eqn 3.17
+
+      if (isMaster && (verbose[jA] || verbose[jB])) {
+        oops::Log::trace() << boost::format("%5d %5d %8d %8d %5d "
+                                            "%6.1f %6.1f %6.1f %6.1f %6.1f "
+                                            "%5.3f %6.3f %6.3f %6.3f %6.3f\n") %
+                              jA % jB % stationIds[jA] % stationIds[jB] % jlev %
+                              lDiffA % lDiffB % tDiffA % tDiffB % pair.distanceInKm %
+                              lCorr % std::exp(expArg) % pges(jA, jlev) % pges(jB, jlev) % z;
+      }
     }
   }
 }
 
+
 std::vector<size_t> MetOfficeBuddyCheck::getValidObservationIds(
-    const std::vector<bool> & apply) const {
+    const std::vector<bool> & apply, const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    // TODO(wsmigaj): The second condition below may need reviewing.
+
+  const auto lev1flags = extract1stLev((*flags_)[0], profileIndex);
+  const std::vector<bool> lev1apply = extract1stLev(apply, profileIndex);
+  for (size_t obsId = 0; obsId < lev1flags.size(); ++obsId)
+    // TODO(wsmigaj): The condition below may need reviewing.
     // Perhaps we should process only observations marked as passed in all filter variables?
     // Or those marked as passed in at least one filter variable?
-    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
+    if (lev1apply[obsId] && lev1flags[obsId] == QCflags::pass)
       validObsIds.push_back(obsId);
   return validObsIds;
 }

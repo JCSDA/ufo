@@ -84,6 +84,9 @@ class ObsBias : public util::Printable,
   /// Return the list of bias-corrected variables.
   const oops::Variables & correctedVars() const {return vars_;}
 
+  /// Set all variable predictors coefficients to zero (used in the test)
+  void zero();
+
   // Operator
   operator bool() const {
     return (numStaticPredictors_ > 0 || numVariablePredictors_ > 0) && vars_.size() > 0;
@@ -95,7 +98,7 @@ class ObsBias : public util::Printable,
   /// index in the flattened biascoeffs_ for predictor \p jpred and variable \p jvar
   size_t index(size_t jpred, size_t jvar) const {return jvar*numVariablePredictors_ + jpred;}
 
-  void initPredictor(const eckit::Configuration &predictorConf);
+  void initPredictor(const PredictorParametersWrapper &params);
 
   /// bias correction coefficients (npredictors x nprimitivevariables)
   Eigen::VectorXd biascoeffs_;
@@ -116,6 +119,9 @@ class ObsBias : public util::Printable,
   oops::Variables geovars_;
   /// Diagnostics that need to be requested from the obs operator (for computation of predictors)
   oops::Variables hdiags_;
+
+  /// MPI rank, used to determine whether the task should output bias coeffs to a file
+  size_t rank_;
 };
 
 // -----------------------------------------------------------------------------

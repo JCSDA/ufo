@@ -13,6 +13,7 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileDataHolder.h"
+#include "ufo/profile/SlantPathLocations.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
@@ -192,6 +193,21 @@ namespace ufo {
     }
   }
 
+  std::string ProfileDataHandler::getAssociatedVerticalCoordinate
+  (const std::string & variableName) const
+  {
+    // Obtain the map between non-default vertical coordinates and variable names.
+    const auto & alternativeVerticalCoordinate = options_.alternativeVerticalCoordinate.value();
+    auto it_altCoord = alternativeVerticalCoordinate.find(variableName);
+    if (it_altCoord != alternativeVerticalCoordinate.end()) {
+      // This variable has an associated alternative vertical coordinate.
+      return it_altCoord->second;
+    } else {
+      // This variable uses the default vertical coordinate.
+      return options_.defaultVerticalCoordinate.value();
+    }
+  }
+
   std::vector <float>& ProfileDataHandler::getGeoVaLVector(const std::string &variableName)
   {
     auto it_GeoVaLData = GeoVaLData_.find(variableName);
@@ -205,16 +221,33 @@ namespace ufo {
       if (geovals_ &&
           obsdb_.nlocs() > 0 &&
           geovals_->has(variableName)) {
-        // Location at which to retrieve the GeoVaL.
-        // This assumes each model column for each observation in a profile is identical
-        // so takes the first entry in each case.
-        // todo(ctgh): this is an approximation that should be revisited
-        // when considering horizontal drift.
-        const size_t jloc = profileIndices_->getProfileIndices()[0];
+        // Locations at which to retrieve the GeoVaL.
+        const std::vector<std::size_t> slant_path_location =
+          ufo::getSlantPathLocations(obsdb_,
+                                     *geovals_,
+                                     profileIndices_->getProfileIndices(),
+                                     this->getAssociatedVerticalCoordinate(variableName));
         // Vector storing GeoVaL data for current profile.
         vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);
-        // Get GeoVaLs at the specified location.
-        geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
+        // Check the number of entries in the slant path location vector is equal
+        // to the number of entries in the GeoVaL for this variable.
+        // If not, the GeoVaL at the first location in the profile is used;
+        // in other words, drift is not accounted for.
+        // todo(ctgh): revisit this choice in a future PR.
+        if (slant_path_location.size() == vec_GeoVaL_column.size()) {
+          std::vector<float> vec_GeoVaL_loc(geovals_->nlevs(variableName));
+          // Take the GeoVaL at each slant path location and copy the relevant
+          // value from each GeoVaL into the output vector.
+          for (std::size_t mlev = 0; mlev < slant_path_location.size(); ++mlev) {
+            const std::size_t jloc = slant_path_location[mlev];
+            geovals_->getAtLocation(vec_GeoVaL_loc, variableName, jloc);
+            vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[mlev];
+          }
+        } else {
+          // Take the GeoVaL at the first location.
+          const std::size_t jloc = profileIndices_->getProfileIndices()[0];
+          geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
+        }
       }
       // Add GeoVaL vector to map (even if it is empty).
       GeoVaLData_.emplace(variableName, std::move(vec_GeoVaL_column));

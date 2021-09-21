@@ -57,10 +57,10 @@ class CLWRetMWParameters : public oops::Parameters {
   ///          bias_application: ObsValue
   oops::Parameter<std::string> addBias{"bias_application", "HofX", this};
 
-  /// Name of the bias correction group used to replace the default group (default is ObsBias)
+  /// Name of the bias correction group used to replace the default group (default is ObsBiasData)
   /// Example: use observation bias correction values from GSI
   ///          test_bias: GsiObsBias
-  oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
+  oops::Parameter<std::string> testBias{"test_bias", "ObsBiasData", this};
 
   /// Cloud index CIret_37v37h_diff:
   /// 1.0 - (Tb_37v - Tb_37h)/(Tb_37v_clr - Tb_37h_clr), which is used in
@@ -85,7 +85,7 @@ class CLWRetMWParameters : public oops::Parameters {
 /// the NOAA 15 advanced microwave sounding unit
 /// Journal of Geophysical Research (Vol. 106, No. D3, Pages 2943-2953)
 ///
-class CLWRetMW : public ObsFunctionBase {
+class CLWRetMW : public ObsFunctionBase<float> {
  public:
   explicit CLWRetMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

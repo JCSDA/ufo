@@ -57,7 +57,7 @@ class NearSSTRetCheckIRParameters : public oops::Parameters {
 /// 0 = channel is retained for assimilation
 /// 1 = channel is not retained for assimilation
 ///
-class NearSSTRetCheckIR : public ObsFunctionBase {
+class NearSSTRetCheckIR : public ObsFunctionBase<float> {
  public:
   explicit NearSSTRetCheckIR(const eckit::LocalConfiguration &);
   ~NearSSTRetCheckIR();

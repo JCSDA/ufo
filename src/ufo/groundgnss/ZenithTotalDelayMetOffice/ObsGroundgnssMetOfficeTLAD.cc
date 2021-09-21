@@ -52,8 +52,7 @@ ObsGroundgnssMetOfficeTLAD::~ObsGroundgnssMetOfficeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGroundgnssMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                           ObsDiagnostics &) {
+void ObsGroundgnssMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_groundgnss_metoffice_tlad_settraj_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
                                             obsspace());
 }

@@ -43,6 +43,9 @@ void testVariable() {
     for (std::size_t jvar = 0; jvar < var.size(); ++jvar) {
       EXPECT(var.variable(jvar) == refvars[jvar]);
     }
+    // test the fullName() method
+    const std::string refFullName = conf[jj].getString("reference full name");
+    EXPECT_EQUAL(var.fullName(), refFullName);
   }
 }
 
@@ -79,25 +82,53 @@ bool hasVariable(const Variables & vars, const Variable & var) {
 
 
 // -----------------------------------------------------------------------------
-// Test that ufo::Variables::allFromGroup() gets variables from the functions
-void testAllFromGroup() {
-  Variables vars;
-  vars += Variable("height@GeoVaLs");
-  vars += Variable("Velocity@ObsFunction");
-  vars += Variable("latitude@MetaData");
-  vars += Variable("temperature@ObsValue");
-  vars += Variable("longitude@MetaData");
+void testAllFromGroupFor(const std::string &funcName,
+                         const eckit::LocalConfiguration &funcConf,
+                         const ufo::Variables &initialVars) {
+  ufo::Variables vars = initialVars;
+  vars += Variable(funcName, funcConf);
 
   Variables res = vars.allFromGroup("ObsValue");
   oops::Log::info() << res << std::endl;
 
-  EXPECT(res.size() == 3);
+  EXPECT(res.size() == 2);
   EXPECT(hasVariable(res, Variable("eastward_wind@ObsValue")));
-  EXPECT(hasVariable(res, Variable("northward_wind@ObsValue")));
   EXPECT(hasVariable(res, Variable("temperature@ObsValue")));
 }
 
 // -----------------------------------------------------------------------------
+// Test that ufo::Variables::allFromGroup() gets variables from the functions
+void testAllFromGroup() {
+  Variables vars;
+  vars += Variable("height@GeoVaLs");
+  vars += Variable("latitude@MetaData");
+  vars += Variable("temperature@ObsValue");
+  vars += Variable("longitude@MetaData");
+
+  const eckit::Configuration &conf = ::test::TestEnvironment::config();
+  testAllFromGroupFor("Conditional@ObsFunction",
+                      eckit::LocalConfiguration(conf, "float conditional"),
+                      vars);
+  testAllFromGroupFor("Conditional@IntObsFunction",
+                      eckit::LocalConfiguration(conf, "int conditional"),
+                      vars);
+  testAllFromGroupFor("Conditional@StringObsFunction",
+                      eckit::LocalConfiguration(conf, "string conditional"),
+                      vars);
+  testAllFromGroupFor("Conditional@DateTimeObsFunction",
+                      eckit::LocalConfiguration(conf, "datetime conditional"),
+                      vars);
+}
+
+// -----------------------------------------------------------------------------
+void testHasGroupFor(const std::string &funcName,
+                     const eckit::LocalConfiguration &funcConf,
+                     const ufo::Variables &initialVars) {
+  ufo::Variables vars = initialVars;
+  vars += Variable(funcName, funcConf);
+  EXPECT(vars.hasGroup("ObsValue"));
+}
+
 // Test that ufo::Variables::hasGroup() works for functions
 void testHasGroup() {
   ufo::Variables vars;
@@ -107,11 +138,20 @@ void testHasGroup() {
   EXPECT(vars.hasGroup("MetaData"));
   EXPECT(!vars.hasGroup("ObsValue"));
 
-  vars += Variable("Velocity@ObsFunction");
-
-  EXPECT(vars.hasGroup("ObsValue"));
+  const eckit::Configuration &conf = ::test::TestEnvironment::config();
+  testHasGroupFor("Conditional@ObsFunction",
+                  eckit::LocalConfiguration(conf, "float conditional"),
+                  vars);
+  testHasGroupFor("Conditional@IntObsFunction",
+                  eckit::LocalConfiguration(conf, "int conditional"),
+                  vars);
+  testHasGroupFor("Conditional@StringObsFunction",
+                  eckit::LocalConfiguration(conf, "string conditional"),
+                  vars);
+  testHasGroupFor("Conditional@DateTimeObsFunction",
+                  eckit::LocalConfiguration(conf, "datetime conditional"),
+                  vars);
 }
-
 
 // -----------------------------------------------------------------------------
 

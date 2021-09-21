@@ -51,7 +51,7 @@ class WindDirAngleDiffParameters : public oops::Parameters {
 ///           test_hofx: GsiHofX
 ///       maxvalue: 50
 ///
-class WindDirAngleDiff : public ObsFunctionBase {
+class WindDirAngleDiff : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "WindDirAngleDiff";}
 

@@ -56,6 +56,7 @@ type, public :: ufo_rttovonedvarcheck
   integer                          :: JConvergenceOption !< integer to select convergence option
   integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
   integer                          :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
+  real(kind_real)                  :: RetrievedErrorFactor !< check retrieved BTs all within factor * stdev of obs
   real(kind_real)                  :: ConvergenceFactor !< 1d-var convergence if using change in profile
   real(kind_real)                  :: Cost_ConvergenceFactor !< 1d-var convergence if using % change in cost
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
@@ -149,6 +150,11 @@ call f_conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
 
 ! Choose which iteration to start checking the liquid water path
 call f_conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
+
+! Check the retrieved brightness temperatures are within a factor * error of the
+! observed and bias corrected BTs.  If this value is less than 0.0 this check is
+! not performed
+call f_conf % get_or_die("RetrievedErrorFactor", self % RetrievedErrorFactor)
 
 ! Convergence factor used when the absolute difference in the profile is used
 ! to determine convergence.

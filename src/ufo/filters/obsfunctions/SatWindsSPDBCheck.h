@@ -64,7 +64,7 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
 ///           error_max: 20.0
 ///       maxvalue: 1.75            # gross error * 0.7
 ///
-class SatWindsSPDBCheck : public ObsFunctionBase {
+class SatWindsSPDBCheck : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "SatWindsSPDBCheck";}
 

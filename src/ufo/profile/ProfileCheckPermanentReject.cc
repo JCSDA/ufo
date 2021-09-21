@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckPermanentReject_("PermanentReject");
 
   ProfileCheckPermanentReject::ProfileCheckPermanentReject
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

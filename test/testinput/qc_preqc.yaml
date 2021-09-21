@@ -27,3 +27,18 @@ observations:
     minvalue: -2
     maxvalue:  8
   passedBenchmark: 377
+- obs space:
+    name: amsua_n19, with where statement
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 4-8
+  obs filters:
+  - filter: PreQC
+    where: # will select 4 locations
+    - variable:
+        name: latitude@MetaData
+      maxvalue: -70
+    minvalue: -2
+    maxvalue:  8
+  failedBenchmark: 9

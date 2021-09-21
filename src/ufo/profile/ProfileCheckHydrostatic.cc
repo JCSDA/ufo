@@ -12,7 +12,8 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckHydrostatic> makerProfileCheckHydrostatic_("Hydrostatic");
 
-  ProfileCheckHydrostatic::ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options)
+  ProfileCheckHydrostatic::ProfileCheckHydrostatic
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options),
     ProfileStandardLevels(options)
   {}

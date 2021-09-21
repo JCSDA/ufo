@@ -175,7 +175,7 @@ class ObsErrorModelRampParameters : public oops::Parameters {
 ///             err0: [{ERR0}]
 ///             err1: [{ERR1}]
 ///
-class ObsErrorModelRamp : public ObsFunctionBase {
+class ObsErrorModelRamp : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorModelRamp";}
 

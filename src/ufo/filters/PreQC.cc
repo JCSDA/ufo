@@ -8,70 +8,61 @@
 #include "ufo/filters/PreQC.h"
 
 #include <string>
-
-#include "eckit/config/Configuration.h"
+#include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
-#include "ufo/filters/QCflags.h"
 
 namespace ufo {
 
-// Presets for QC filters could be performed in a function outside of any class.
-// We keep them as a filter for now. The main reason for this is to be able to use
-// the factory for models not in UFO/IODA.
+PreQC::PreQC(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
+             std::shared_ptr<ioda::ObsDataVector<int> > flags,
+             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
+{
+  oops::Log::debug() << "PreQC: config = " << parameters_ << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
-PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-             std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : nogeovals_()
-{
-  oops::Log::trace() << "PreQC::PreQC starting " << config << std::endl;
+void PreQC::applyFilter(const std::vector<bool> & apply,
+                        const Variables & filtervars,
+                        std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "PreQC applyFilter starting " << std::endl;
+
   const int missing = util::missingValue(missing);
 
-// Basic arguments checks
-  ASSERT(qcflags);
-  ASSERT(obserr);
-
-  const oops::Variables observed = obsdb.obsvariables();
-
-  ASSERT(qcflags->nvars() == observed.size());
-  ASSERT(qcflags->nlocs() == obsdb.nlocs());
-  ASSERT(obserr->nvars() == observed.size());
-  ASSERT(obserr->nlocs() == obsdb.nlocs());
-
-// Read QC flags from pre-processing
-  const std::string qcin = config.getString("inputQC", "PreQC");
-  ioda::ObsDataVector<int> preqc(obsdb, observed, qcin);
+  // Read QC flags from pre-processing
+  ioda::ObsDataVector<int> preqc(obsdb_,
+                                 filtervars.toOopsVariables(),
+                                 parameters_.inputQC);
   oops::Log::debug() << "PreQC::PreQC preqc: " << preqc;
 
-// Get min and max values and reject outside range
-  const int qcmin = config.getInt("minvalue", 0);
-  const int qcmax = config.getInt("maxvalue", 0);
+  // Get min and max values and reject outside range
+  const int qcmin = parameters_.minvalue;
+  const int qcmax = parameters_.maxvalue;
 
-  for (size_t jv = 0; jv < observed.size(); ++jv) {
-    for (size_t jobs = 0; jobs < obsdb.nlocs(); ++jobs) {
-      if (preqc[jv][jobs] == missing ||
-          preqc[jv][jobs] > qcmax ||
-          preqc[jv][jobs] < qcmin) {
-        (*qcflags)[jv][jobs] = QCflags::preQC;
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+    const ioda::ObsDataRow<int> &currentPreQC = preqc[jv];
+    std::vector<bool> &currentFlagged = flagged[jv];
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (apply[jobs] &&
+          (currentPreQC[jobs] == missing ||
+           currentPreQC[jobs] > qcmax ||
+           currentPreQC[jobs] < qcmin)) {
+        currentFlagged[jobs] = true;
       }
     }
   }
 
-  oops::Log::trace() << "PreQC::PreQC done" << std::endl;
+  oops::Log::trace() << "PreQC applyFilter done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void PreQC::print(std::ostream & os) const {
-  os << "PreQC";
+  os << "PreQC: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

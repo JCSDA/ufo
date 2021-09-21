@@ -18,7 +18,6 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/rttovcpp/ObsRadianceRTTOVCPPTLAD.h"
 #include "ufo/rttovcpp/rttovcpp_interface.h"
@@ -63,8 +62,7 @@ ObsRadianceRTTOVCPPTLAD::~ObsRadianceRTTOVCPPTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                            ObsDiagnostics &) {
+void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 //
   ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, CoefFileName, channels_,
                           nlevels, skip_profile);
@@ -85,13 +83,13 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
 
   // Retrieve temperature increment in K
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.get(tmpvar2d, "air_temperature", i+1);  // get one level T
+      dx.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
       dT.push_back(tmpvar2d);  // push one level T into 3D T
   }
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.get(tmpvar2d, "specific_humidity", i+1);  // get one level Q
+      dx.getAtLevel(tmpvar2d, "specific_humidity", i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -125,24 +123,19 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
   std::size_t nprofiles = dy.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();
 
-  if ( dx.nlevs("air_temperature") == 0 ) {   // if dx is not allocated
-     dx.allocate(nlevels, varin_);
-     dx.zero();
-  }
-
   std::vector<double>  tmpvar2d(nprofiles, 0.0);  // one single level field
   std::vector<std::vector<double>> dT;  // [nlevels][nprofiles]
   std::vector<std::vector<double>> dQ;  // [nlevels][nprofiles]
 
   // Retrieve temperature increment in K
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.get(tmpvar2d, "air_temperature", i+1);  // get one level T
+      dx.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
       dT.push_back(tmpvar2d);  // push one level T into 3D T
   }
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.get(tmpvar2d, "specific_humidity", i+1);  // get one level Q
+      dx.getAtLevel(tmpvar2d, "specific_humidity", i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -177,7 +170,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dT[l][p];
       }
-      dx.put(tmpvar2d, "air_temperature", l+1);  // put one level T
+      dx.putAtLevel(tmpvar2d, "air_temperature", l);  // put one level T
   }
 
   // Put specific humidity increment in kg/kg
@@ -185,7 +178,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dQ[l][p];
       }
-      dx.put(tmpvar2d, "specific_humidity", l+1);  // put one level Q
+      dx.putAtLevel(tmpvar2d, "specific_humidity", l);  // put one level Q
   }
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsAD done" << std::endl;

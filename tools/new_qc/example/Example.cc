@@ -13,7 +13,6 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -41,17 +40,18 @@ Example::~Example() {
 
 // -----------------------------------------------------------------------------
 
-void Example::priorFilter(const GeoVaLs & gv) const {
+void Example::priorFilter(const GeoVaLs & gv) {
   oops::Log::trace() << "Example priorFilter" << std::endl;
   ufo_example_prior_f90(key_, obsdb_, gv.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void Example::postFilter(const ioda::ObsVector & hofxb, const ObsDiagnostics & diags) const {
+void Example::postFilter(const ioda::ObsVector & hofxb, const ioda::ObsVector & bias,
+                         const ObsDiagnostics & diags) {
   oops::Log::trace() << "Example postFilter" << std::endl;
   ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran(),
-                       diags.toFortran());
+                       bias.toFortran(), diags.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -60,7 +60,7 @@ class ObsErrorBoundIRParameters : public oops::Parameters {
 /// Residual Threshold = MIN( (3.0 * ( 1 / Errflat )^2 * (1 / Errftaotop )^2), ErrobsMax )
 /// Filter out data if |obs-h(x)| > Residual Threshold
 ///
-class ObsErrorBoundIR : public ObsFunctionBase {
+class ObsErrorBoundIR : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorBoundIR(const eckit::LocalConfiguration &);
   ~ObsErrorBoundIR();

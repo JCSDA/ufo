@@ -54,7 +54,10 @@ class ObsBoundsCheckParameters : public FilterParametersBase {
   /// * If this option is set to a single-element list containing only one single-channel variable
   ///   or the `flag all filter variables if any test variable is out of bounds` option is set to
   ///   `true`, the filter will flag each filter variable at each location where any test variable
-  ///   lies outside the specified bounds.
+  ///   lies outside the specified bounds. If
+  ///   `test only filter variables with passed qc when flagging all filter variables` is set to
+  ///   true and the number of filter vars is not equal to the number of test vars an error
+  ///   will be thrown.
   ///
   /// * If this option is set to a list with as many elements as there are filter variables and
   ///   the `flag all filter variables if any test variable is out of bounds` option is set to
@@ -68,6 +71,13 @@ class ObsBoundsCheckParameters : public FilterParametersBase {
   /// This option is ignored if the `test variables` option is not set.
   oops::Parameter<bool> flagAllFilterVarsIfAnyTestVarOutOfBounds{
     "flag all filter variables if any test variable is out of bounds", false, this};
+
+  /// Set this option to `true` to only test the current filter variable if it is flagged
+  /// as pass qc when using "flag all filter variables if any test variables out of bounds".
+  ///
+  /// This option is not used if "flagAllFilterVarsIfAnyTestVarOutOfBounds" is false.
+  oops::Parameter<bool> onlyTestGoodFilterVarsForFlagAllFilterVars{
+    "test only filter variables with passed qc when flagging all filter variables", false, this};
 
   /// By default, the filter flags filter variables at locations where the corresponding test
   /// variable is set to the missing value indicator. Set this option to `false` to stop it from

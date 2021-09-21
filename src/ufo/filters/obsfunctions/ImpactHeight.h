@@ -20,7 +20,7 @@ namespace ufo {
 /// \brief Function calculates the GNSS-RO impact height as the difference
 /// between the impact parameter and earth's radius of curvature.
 ///
-class ImpactHeight : public ObsFunctionBase {
+class ImpactHeight : public ObsFunctionBase<float> {
  public:
   explicit ImpactHeight(const eckit::LocalConfiguration &);
   ~ImpactHeight();

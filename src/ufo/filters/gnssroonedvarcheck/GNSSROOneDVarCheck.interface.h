@@ -26,11 +26,26 @@ typedef int F90onedvarcheck;
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_gnssroonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &,
-                      const eckit::Configuration *, const int &);
+  void ufo_gnssroonedvarcheck_create_f90(F90onedvarcheck &,
+                                         const ioda::ObsSpace &,
+                                         const int &,
+                                         const char *,
+                                         const bool &,
+                                         const float &,
+                                         const float &,
+                                         const float &,
+                                         const float &,
+                                         const int &,
+                                         const float &,
+                                         const bool &,
+                                         const bool &,
+                                         const float &,
+                                         const int &);
   void ufo_gnssroonedvarcheck_delete_f90(F90onedvarcheck &);
-  void ufo_gnssroonedvarcheck_apply_f90(const F90onedvarcheck &, const F90goms &, const int &,
-                                       const char &);
+  void ufo_gnssroonedvarcheck_apply_f90(const F90onedvarcheck &,
+                                        const F90goms &,
+                                        const int &,
+                                        const char &);
 }  // extern C
 
 }  // namespace ufo

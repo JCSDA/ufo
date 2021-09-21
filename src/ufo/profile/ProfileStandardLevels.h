@@ -17,7 +17,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/filters/ConventionalProfileProcessingParameters.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
@@ -30,7 +30,7 @@ namespace ufo {
   /// \brief Calculate standard levels
   class ProfileStandardLevels {
    public:
-    explicit ProfileStandardLevels(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileStandardLevels(const ConventionalProfileProcessingParameters &options);
     virtual ~ProfileStandardLevels() {}
 
    protected:  // functions
@@ -58,7 +58,7 @@ namespace ufo {
     std::vector <float> BigGaps_;
 
     /// Configurable parameters
-    const ProfileConsistencyCheckParameters &optionsSL_;
+    const ConventionalProfileProcessingParameters &optionsSL_;
 
     /// Number of significant levels
     int NumSig_;

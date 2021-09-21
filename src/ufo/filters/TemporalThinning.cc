@@ -320,13 +320,9 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
                                    std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  const std::vector<bool> isThinned = identifyThinnedObservations(apply, obsAccessor);
+  const std::vector<bool> isThinned = identifyThinnedObservations(apply, filtervars, obsAccessor);
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "TemporalThinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {
@@ -344,15 +340,17 @@ ObsAccessor TemporalThinning::createObsAccessor() const {
 
 std::vector<bool> TemporalThinning::identifyThinnedObservations(
     const std::vector<bool> & apply,
+    const Variables & filtervars,
     const ObsAccessor &obsAccessor) const {
-  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  const std::vector<size_t> validObsIds
+                                   = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "datetime");
-  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
-                        { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
+  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
+                        { return times[validObsIds[obsIndex]]; });
 
   boost::optional<std::vector<int>> priorities = getObservationPriorities(obsAccessor);
 

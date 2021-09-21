@@ -45,11 +45,10 @@ void TotalColumnVaporGuess::compute(const ObsFilterData & in,
   std::vector<float> tcwv(nlocs, 0.0);
   std::vector<float> pre_lev0(nlocs), pre_levl(nlocs);
 
-  in.get(Variable("air_pressure_levels@GeoVaLs"), 1, pre_lev0);
+  in.get(Variable("air_pressure_levels@GeoVaLs"), 0, pre_lev0);
   for (size_t ilev = 1; ilev < nlevs; ++ilev) {
-    int ilevp1 = ilev + 1;
-    in.get(Variable("air_pressure_levels@GeoVaLs"), ilevp1, pre_levl);
-    in.get(Variable("humidity_mixing_ratio@GeoVaLs"), ilev, q_mixrati);
+    in.get(Variable("air_pressure_levels@GeoVaLs"), ilev, pre_levl);
+    in.get(Variable("humidity_mixing_ratio@GeoVaLs"), ilev - 1, q_mixrati);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       // Change the unit of q_mixing g/kg => kg/kg.
       q_mixrati[iloc] *= 0.001;

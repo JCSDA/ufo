@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -44,8 +43,7 @@ ObsSeaIceThicknessTLAD::~ObsSeaIceThicknessTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                           ObsDiagnostics &) {
+void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   ufo_seaicethickness_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: trajectory set" << std::endl;
 }

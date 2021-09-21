@@ -111,7 +111,8 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
 
-  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  const std::vector<size_t> validObsIds
+                                   = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
@@ -125,10 +126,6 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                                         obsPressureLoc, maxSpeedByPressure, isRejected);
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "TrackCheck: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes(

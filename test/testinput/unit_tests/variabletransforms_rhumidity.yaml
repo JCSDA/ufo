@@ -15,7 +15,7 @@ observations:
     - reference:
         name: relative_humidity_NOAA@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
 
@@ -28,31 +28,12 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: ["RelativeHumidity"]
-    Method: UKMO                 # Using UKMO method and UKMO default formulation 
-  compareVariables:              # test output matches precalculated values
-    - reference:
-        name: relative_humidity_UKMO@TestReference
-      test:
-        name: relative_humidity@DerivedValue
-      absTol: 1.0e-5
-  passedBenchmark: 99
-
-# Exercise the method using UKMO saturation vapor pressure method.
-- obs space:
-    name: test_relative_humidity2
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    simulated variables: [specific_humidity, air_temperature, surface_pressure]
-  obs filters:
-  - filter: Variable Transforms
-    Transform: ["RelativeHumidity"]
-    Method: UKMO                 # Using UKMO method 
     Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_UKMO@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -70,7 +51,7 @@ observations:
     - reference:
         name: relative_humidity_Walko@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -88,6 +69,6 @@ observations:
     - reference:
         name: relative_humidity_Murphy@TestReference
       test:
-        name: relative_humidity@DerivedValue
+        name: relative_humidity@DerivedObsValue
       absTol: 1.0e-5
   passedBenchmark: 99

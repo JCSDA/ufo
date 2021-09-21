@@ -110,7 +110,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
        dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level = nlevs - ilev;
+      const int level = nlevs - ilev - 1;
       in.get(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
                        channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
@@ -121,7 +121,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
        tao(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level = nlevs - ilev;
+      const int level = nlevs - ilev - 1;
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag",
              channels_)[ichan], level,  tao[ichan][ilev]);
     }
@@ -224,14 +224,14 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   // Get air pressure [Pa]
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = nlevs - ilev;
+    const size_t level = nlevs - ilev - 1;
     in.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
   }
 
   // Get air temperature
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = nlevs - ilev;
+    const size_t level = nlevs - ilev - 1;
     in.get(Variable("air_temperature@GeoVaLs"), level, tair[ilev]);
   }
 

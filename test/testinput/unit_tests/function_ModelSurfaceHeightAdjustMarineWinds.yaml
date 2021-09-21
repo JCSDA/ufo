@@ -1,0 +1,25 @@
+window begin: 2021-05-21T00:00:00Z
+window end: 2021-05-21T23:00:00Z
+
+observations:
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+    simulated variables: [eastward_wind,northward_wind]
+
+  obs function:
+    name: ModelHeightAdjustedEastwardMarineWind@ObsFunction
+    variables: [eastward_wind]
+    tolerance: 1.0e-6
+
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+    simulated variables: [eastward_wind,northward_wind]
+
+  obs function:
+    name: ModelHeightAdjustedNorthwardMarineWind@ObsFunction
+    variables: [northward_wind]
+    tolerance: 1.0e-6

@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "oops/base/ObsFilterParametersBase.h"
+#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/PolymorphicParameter.h"

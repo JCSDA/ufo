@@ -31,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
@@ -45,7 +44,7 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
   virtual ~ObsRadianceRTTOVCPPTLAD();
 
   // Calculate Jacobian H(x_g) of obs operator
-  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
   // Calculate dy = H dx
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   // Calculate H^T dy

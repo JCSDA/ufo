@@ -56,26 +56,22 @@ std::set<std::string> getVariableNamesWithoutChannels(const oops::Variables &var
 
 static PredictorMaker<InterpolateDataFromFile> maker("interpolate_data_from_file");
 
-InterpolateDataFromFile::InterpolateDataFromFile(const eckit::Configuration & conf,
+InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
                                                  const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
-  InterpolateDataFromFileParameters params;
-  eckit::LocalConfiguration optionsConf(conf, "options");
-  params.validateAndDeserialize(optionsConf);
-
+  : PredictorBase(parameters, vars) {
   const std::set<std::string> channellessVariables = getVariableNamesWithoutChannels(vars_);
 
-  for (const VariableCorrectionParameters & varParams : params.correctedVariables.value()) {
+  for (const VariableCorrectionParameters & varParams : parameters.correctedVariables.value()) {
     if (!oops::contains(channellessVariables, varParams.name))
       throw eckit::UserError("'" + varParams.name.value() +
                              "' is not in the list of bias-corrected variables", Here());
     eckit::LocalConfiguration varConfig = varParams.details.toConfiguration();
     varConfig.set("group", "ObsBias");
-    obsFunctions_[varParams.name] = boost::make_unique<DrawValueFromFile>(varConfig);
+    obsFunctions_[varParams.name] = boost::make_unique<DrawValueFromFile<float>>(varConfig);
   }
 
   for (const auto &varAndObsFunction : obsFunctions_) {
-    const DrawValueFromFile &obsFunction = *varAndObsFunction.second;
+    const DrawValueFromFile<float> &obsFunction = *varAndObsFunction.second;
     const ufo::Variables &requiredVariables = obsFunction.requiredVariables();
     geovars_ += requiredVariables.allFromGroup("GeoVaLs").toOopsVariables();
     hdiags_ += requiredVariables.allFromGroup("ObsDiag").toOopsVariables();
@@ -94,7 +90,7 @@ void InterpolateDataFromFile::compute(const ioda::ObsSpace & /*odb*/,
 
   for (const auto &varAndObsFunction : obsFunctions_) {
     const std::string &varName = varAndObsFunction.first;
-    const DrawValueFromFile &obsFunction = *varAndObsFunction.second;
+    const DrawValueFromFile<float> &obsFunction = *varAndObsFunction.second;
 
     oops::Variables currentVars({varName}, vars_.channels());
     ioda::ObsDataVector<float> obsFunctionResult(out.space(), currentVars);

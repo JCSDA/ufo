@@ -54,9 +54,9 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   std::vector<std::vector<double>> chl;
   std::vector<std::vector<double>> h;
   for ( std::size_t k = 0; k < nlevs; ++k ) {
-    gv.get(tmp, "sea_water_cell_thickness", k+1);
+    gv.getAtLevel(tmp, "sea_water_cell_thickness", k);
     h.push_back(tmp);
-    gv.get(tmp, "mass_concentration_of_chlorophyll_in_sea_water", k+1);
+    gv.getAtLevel(tmp, "mass_concentration_of_chlorophyll_in_sea_water", k);
     chl.push_back(tmp);
   }
 

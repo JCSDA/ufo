@@ -25,39 +25,32 @@ observations:
       predictors:
       - name: constant
       - name: cloud_liquid_water
-        options:
-          satellite: SSMIS
-          ch19h: 12
-          ch19v: 13
-          ch22v: 14
-          ch37h: 15
-          ch37v: 16
-          ch91v: 17
-          ch91h: 18
+        satellite: SSMIS
+        ch19h: 12
+        ch19v: 13
+        ch22v: 14
+        ch37h: 15
+        ch37v: 16
+        ch91v: 17
+        ch91h: 18
       - name: cosine_of_latitude_times_orbit_node
       - name: sine_of_latitude
       - name: lapse_rate
-        options:
-          order: 2
-          tlapse: &ssmis_f17_tlap Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_tlapmean.txt
+        order: 2
+        tlapse: &ssmis_f17_tlap Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_tlapmean.txt
       - name: lapse_rate
-        options:
-          tlapse: *ssmis_f17_tlap
+        tlapse: *ssmis_f17_tlap
       - name: emissivity
       - name: scan_angle
-        options:
-          var_name: scan_position
-          order: 4
+        var_name: scan_position
+        order: 4
       - name: scan_angle
-        options:
-          var_name: scan_position
-          order: 3
+        var_name: scan_position
+        order: 3
       - name: scan_angle
-        options:
-          var_name: scan_position
-          order: 2
+        var_name: scan_position
+        order: 2
       - name: scan_angle
-        options:
-          var_name: scan_position
+        var_name: scan_position
   vector ref: GsiHofXBc
   tolerance: 1.e-5

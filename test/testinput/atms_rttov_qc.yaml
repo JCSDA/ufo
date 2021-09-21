@@ -5,7 +5,7 @@ observations:
 - obs operator:
     name: RTTOV
     GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour, CLW]
+    Absorbers: &rttov_absorbers [Water_vapour, CLW]
     linear obs operator:
       Absorbers: [Water_vapour]
     obs options: &rttov_options
@@ -20,10 +20,25 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
-    channels: 1-22
+    channels: &all_channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
+### Assign BiasCorrObsValue ###
+  - filter: Variable Assignment
+    assignments:
+    - name: brightness_temperature@BiasCorrObsValue
+      type: float
+      channels: *all_channels
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables:
+          - name: brightness_temperature@ObsValue
+            channels: *all_channels
+          - name: brightness_temperature@ObsBias
+            channels: *all_channels
+          coefs: [1.0,-1.0]
 ### Bennartz scattering test [over land] ###
   - filter: Bounds Check
     filter variables:

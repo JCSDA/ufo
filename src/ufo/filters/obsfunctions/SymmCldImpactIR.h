@@ -37,7 +37,7 @@ class SymmCldImpactIRParameters : public oops::Parameters {
 /// Okamoto, K., McNally, A.P. and Bell, W. (2014), Progress towards the
 ///   assimilation of all‐sky infrared radiances: an evaluation of cloud
 ///   effects. Q.J.R. Meteorol. Soc., 140: 1603-1614. doi:10.1002/qj.2242
-class SymmCldImpactIR : public ObsFunctionBase {
+class SymmCldImpactIR : public ObsFunctionBase<float> {
  public:
   explicit SymmCldImpactIR(const eckit::LocalConfiguration);
   ~SymmCldImpactIR();

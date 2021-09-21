@@ -1,0 +1,31 @@
+#
+#=== Profile pressure ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [geopotential_height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: geopotential_height
+    Checks: ["Basic", "Pressure"]
+    compareWithOPS: false
+    BChecks_Skip: true
+    flagBasicChecksFail: false
+    PrintStationID: true
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 21
+  benchmarkFlag: 24
+  flaggedBenchmark: 0

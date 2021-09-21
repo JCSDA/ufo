@@ -72,18 +72,11 @@ void MetOfficeBuddyPairFinder::sortObservations(const std::vector<size_t> & vali
   RecursiveSplitter splitter(validObsIds.size());
   splitter.groupBy(bandIndices);
   splitter.sortGroupsBy(
-        [this, &validObsIds](size_t obsIndexA, size_t obsIndexB)
+        [this, &validObsIds](size_t obsIndex)
         {
-          size_t obsIdA = validObsIds[obsIndexA];
-          size_t obsIdB = validObsIds[obsIndexB];
-          if (pressures_ != nullptr)
-            return std::make_tuple(longitudes_[obsIdA], -latitudes_[obsIdA],
-                                   (*pressures_)[obsIdA], datetimes_[obsIdA]) <
-                   std::make_tuple(longitudes_[obsIdB], -latitudes_[obsIdB],
-                                   (*pressures_)[obsIdB], datetimes_[obsIdB]);
-          else
-            return std::make_tuple(longitudes_[obsIdA], -latitudes_[obsIdA], datetimes_[obsIdA]) <
-                   std::make_tuple(longitudes_[obsIdB], -latitudes_[obsIdB], datetimes_[obsIdB]);
+          size_t obsId = validObsIds[obsIndex];
+          return std::make_tuple(longitudes_[obsId], -latitudes_[obsId],
+                                 pressures_ ? (*pressures_)[obsId] : 0.0f, datetimes_[obsId]);
         });
 
   // Fill the validObsIdsInSortOrder and bandLbounds vectors

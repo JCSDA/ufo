@@ -15,7 +15,8 @@
 namespace ufo
 {
 
-RecursiveSplitter::RecursiveSplitter(size_t numIds) {
+RecursiveSplitter::RecursiveSplitter(size_t numIds, bool opsCompatibilityMode) :
+  opsCompatibilityMode_(opsCompatibilityMode) {
   orderedIds_.resize(numIds);
   std::iota(orderedIds_.begin(), orderedIds_.end(), 0);
   initializeEncodedGroups();
@@ -46,10 +47,16 @@ void RecursiveSplitter::groupByImpl(const std::vector<T> &categories) {
       break;
     lastIndexInGroup = encodedGroups_[firstIndexInGroup + 1];
 
-    std::stable_sort(orderedIds_.begin() + firstIndexInGroup,
-                     orderedIds_.begin() + lastIndexInGroup + 1,
-                     [&categories](size_t idA, size_t idB)
-                     { return categories[idA] < categories[idB];});
+    if (opsCompatibilityMode_) {
+      metOfficeSort(orderedIds_.begin() + firstIndexInGroup,
+                    orderedIds_.begin() + lastIndexInGroup + 1,
+                    [&categories](size_t id) { return categories[id]; });
+    } else {
+      std::stable_sort(orderedIds_.begin() + firstIndexInGroup,
+                       orderedIds_.begin() + lastIndexInGroup + 1,
+                       [&categories](size_t idA, size_t idB)
+                       { return categories[idA] < categories[idB]; });
+    }
 
     // Now update the group
     size_t newFirstIndex = firstIndexInGroup;

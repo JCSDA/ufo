@@ -13,7 +13,7 @@ namespace ufo {
   makerProfileCheckBackgroundTemperature_("BackgroundTemperature");
 
   ProfileCheckBackgroundTemperature::ProfileCheckBackgroundTemperature
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

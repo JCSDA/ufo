@@ -148,7 +148,7 @@ subroutine sfc_wind_fact_gsi(u, v, tsen, q, psfc, prsi1, prsi2,&
   fm = fm - pm
   fh = fh - ph
   fm10 = fm10 - pm10
-  f10m = fm10 / fm
+  f10m = max(zero, min(fm10/fm, one))
 
   return
 

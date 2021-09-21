@@ -8,6 +8,7 @@
 #ifndef UFO_PROFILE_DATAHANDLERPARAMETERS_H_
 #define UFO_PROFILE_DATAHANDLERPARAMETERS_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -93,6 +94,23 @@ namespace ufo {
     /// Output filename for saving derived values on model levels.
     oops::Parameter<std::string> ModelLevelsDerivedValuesFilename
       {"ModelLevelsDerivedValuesFilename", "ModelLevelsDerivedValues.nc4", this};
+
+    /// Default vertical coordinate to use in the slant path location algorithm.
+    /// This can be overridden for each variable by using the \p alternativeVerticalCoordinate
+    /// option.
+    oops::Parameter<std::string> defaultVerticalCoordinate
+      {"defaultVerticalCoordinate", "air_pressure", this};
+
+    /// Alternative vertical coordinate(s) to use in the slant path location algorithm.
+    /// The first string in each pair is the name of the variable whose slanted profile is to
+    /// be determined, and the second string is the vertical coordinate that should be used to
+    /// find the slant path locations for the variable.
+    /// This will typically be useful for models whose variables appear on staggered vertical levels
+    /// (e.g. with vertical coordinates 'air_pressure' and 'air_pressure_levels').
+    oops::Parameter<std::map<std::string, std::string>> alternativeVerticalCoordinate
+      {"alternativeVerticalCoordinate",
+          {{"eastward_wind", "air_pressure_levels"}, {"northward_wind", "air_pressure_levels"},
+                {"ExnerPA", "air_pressure_levels"}, {"LogPA", "air_pressure_levels"}}, this};
 
     /// Parameters related to the model.
     ModelParameters ModParameters{this};

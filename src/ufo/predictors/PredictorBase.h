@@ -13,17 +13,16 @@
 #include <string>
 #include <vector>
 
+#include <boost/make_unique.hpp>
 #include <boost/noncopyable.hpp>
-
-#include "eckit/config/LocalConfiguration.h"
 
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-
-namespace eckit {
-  class Configuration;
-}
+#include "oops/util/AssociativeContainers.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 namespace ioda {
   class ObsSpace;
@@ -34,11 +33,35 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// Base class for computing predictors
+/// Base class for predictor parameters
+class PredictorParametersBase : public oops::Parameters {
+  OOPS_ABSTRACT_PARAMETERS(PredictorParametersBase, Parameters)
 
+ public:
+  /// \brief Predictor name.
+  oops::RequiredParameter<std::string> name{"name", this};
+};
+
+// -----------------------------------------------------------------------------
+/// Concrete implementation of PredictorParametersBase with no new parameters. Useful for predictors
+/// that don't take any options.
+class EmptyPredictorParameters : public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(EmptyPredictorParameters, PredictorParametersBase)
+
+  // no other parameters needed
+};
+
+// -----------------------------------------------------------------------------
+/// Base class for computing predictors
+///
+/// Note: each concrete implementation should typedef `Parameters_` to the name of a subclass of
+/// PredictorParametersBase encapsulating its configuration options. It should also provide
+/// a constructor with the following signature:
+///
+///     PredictorBase(const Parameters_ &, const oops::Variables &);
 class PredictorBase : private boost::noncopyable {
  public:
-  explicit PredictorBase(const eckit::Configuration &, const oops::Variables &);
+  explicit PredictorBase(const PredictorParametersBase &, const oops::Variables &);
   virtual ~PredictorBase() = default;
 
   /// compute the predictor
@@ -73,13 +96,38 @@ typedef std::vector<std::shared_ptr<PredictorBase>> Predictors;
 /// Predictor Factory
 class PredictorFactory {
  public:
-  static PredictorBase * create(const eckit::Configuration &, const oops::Variables &);
+  /// \brief Create and return a new predictor.
+  ///
+  /// The predictor type is determined by the \c name attribute of \p parameters.
+  /// \p parameters must be an instance of the subclass of PredictorParametersBase
+  /// associated with that predictor type, otherwise an exception will be thrown.
+  static std::unique_ptr<PredictorBase> create(const PredictorParametersBase &parameters,
+                                               const oops::Variables &vars);
+
+  /// \brief Create and return an instance of the subclass of PredictorParametersBase
+  /// storing parameters of predictors of the specified type.
+  static std::unique_ptr<PredictorParametersBase> createParameters(const std::string &name);
+
+  /// \brief Return the names of all predictors that can be created by one of the registered makers.
+  static std::vector<std::string> getMakerNames() {
+    return oops::keys(getMakers());
+  }
+
+  /// \brief Return true if a maker has been registered for a predictor of type \p name.
+  static bool predictorExists(const std::string &name);
+
   virtual ~PredictorFactory() = default;
-  static bool predictorExists(const std::string &);
+
  protected:
-  explicit PredictorFactory(const std::string &);
+  /// \brief Register a maker able to create predictors of type \p name.
+  explicit PredictorFactory(const std::string &name);
+
  private:
-  virtual PredictorBase * make(const eckit::Configuration &, const oops::Variables &) = 0;
+  virtual std::unique_ptr<PredictorBase> make(const PredictorParametersBase &,
+                                              const oops::Variables &) = 0;
+
+  virtual std::unique_ptr<PredictorParametersBase> makeParameters() const = 0;
+
   static std::map < std::string, PredictorFactory * > & getMakers() {
     static std::map < std::string, PredictorFactory * > makers_;
     return makers_;
@@ -90,8 +138,18 @@ class PredictorFactory {
 
 template<class T>
 class PredictorMaker : public PredictorFactory {
-  virtual PredictorBase * make(const eckit::Configuration & conf, const oops::Variables & vars)
-    { return new T(conf, vars); }
+  typedef typename T::Parameters_ Parameters_;
+
+  std::unique_ptr<PredictorBase> make(const PredictorParametersBase& parameters,
+                                      const oops::Variables & vars) override {
+    const auto &stronglyTypedParameters = dynamic_cast<const Parameters_&>(parameters);
+    return boost::make_unique<T>(stronglyTypedParameters, vars);
+  }
+
+  std::unique_ptr<PredictorParametersBase> makeParameters() const override {
+    return boost::make_unique<Parameters_>();
+  }
+
  public:
   explicit PredictorMaker(const std::string & name)
     : PredictorFactory(name) {}

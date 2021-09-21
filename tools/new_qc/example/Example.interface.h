@@ -34,7 +34,7 @@ extern "C" {
   void ufo_example_prior_f90(const F90check &, const ioda::ObsSpace &,
                              const F90goms &);
   void ufo_example_post_f90(const F90check &, const ioda::ObsSpace &, const int &,
-                            const int &, const double &, const F90goms &);
+                            const int &, const double &, const double &, const F90goms &);
 }  // extern C
 
 }  // namespace ufo

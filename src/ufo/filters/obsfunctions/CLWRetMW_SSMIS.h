@@ -51,7 +51,7 @@ class CLWRetMW_SSMISParameters : public oops::Parameters {
 ///          Sounder (SSMIS) and Special Sensor Microwave Imager (SSM/I)', TGARS Special
 ///          Issue on the DMSP SSMIS, 46, 984-995.
 ///
-class CLWRetMW_SSMIS : public ObsFunctionBase {
+class CLWRetMW_SSMIS : public ObsFunctionBase<float> {
  public:
   explicit CLWRetMW_SSMIS(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

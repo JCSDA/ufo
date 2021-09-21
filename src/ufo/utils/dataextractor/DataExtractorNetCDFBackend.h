@@ -22,8 +22,9 @@ namespace ufo
 ///   - It should contain exactly one variable whose name ends with the `@<group>` suffix, where
 ///     <group> is the value of the `payloadGroup` parameter passed to the loadData() method.
 ///     This is the variable containing the values to be extracted (also known as the _payload_).
-///     It should be of type `float`.
-///   - For most types of data, the above array should be 1D or 2D. As a special case,
+///     Its type needs to match the template parameter `ExtractedValue`, which must be
+///     set to either `float`, `int` or `std::string`.
+///   - For most types of data, the above array should be 1D, 2D or 3D. As a special case,
 ///     if this class is used to extract variances, the file may contain a full 2D covariance
 ///     matrix or a stack of such matrices stored as a 3D array, with variances located on the
 ///     diagonal of each matrix. In that case, the array should be equipped with a `full` attribute
@@ -110,14 +111,15 @@ namespace ufo
 ///       air_temperature:coordinates = "/MetaData/air_pressure /MetaData/observation_type" ;
 /// }
 /// \endcode
-class DataExtractorNetCDFBackend : public DataExtractorBackend {
+template <typename ExtractedValue>
+class DataExtractorNetCDFBackend : public DataExtractorBackend<ExtractedValue> {
  public:
   /// \brief Create a new instance.
   ///
   /// \param filepath Path to the NetCDF file that will be read by loadData().
   explicit DataExtractorNetCDFBackend(const std::string &filepath);
 
-  DataExtractorInput loadData(const std::string &payloadGroup) const override;
+  DataExtractorInput<ExtractedValue> loadData(const std::string &payloadGroup) const override;
 
  private:
   std::string filepath_;

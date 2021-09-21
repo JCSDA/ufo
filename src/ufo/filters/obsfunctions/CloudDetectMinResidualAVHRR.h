@@ -48,8 +48,8 @@ class CloudDetectMinResidualAVHRRParameters : public oops::Parameters {
   /// Name of the HofX group used to replace the default group (default is HofX)
   oops::Parameter<std::string> testHofX{"test_hofx", "HofX", this};
 
-  /// Name of the bias correction group used to replace the default group (default is ObsBias)
-  oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
+  /// Name of the bias correction group used to replace the default group (default is ObsBiasData)
+  oops::Parameter<std::string> testBias{"test_bias", "ObsBiasData", this};
 
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
@@ -63,7 +63,7 @@ class CloudDetectMinResidualAVHRRParameters : public oops::Parameters {
 /// 1 = channel is affected by clouds (cloudy channel)
 /// 2 = channel is not affected by clouds but too sensitive to surface condition
 ///
-class CloudDetectMinResidualAVHRR : public ObsFunctionBase {
+class CloudDetectMinResidualAVHRR : public ObsFunctionBase<float> {
  public:
   explicit CloudDetectMinResidualAVHRR(const eckit::LocalConfiguration &);
   ~CloudDetectMinResidualAVHRR();

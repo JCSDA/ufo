@@ -17,7 +17,7 @@
 #include "ufo/profile/ProfileStandardLevels.h"
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -26,7 +26,7 @@ namespace ufo {
   class ProfileCheckInterpolation : public ProfileCheckBase,
     private ProfileStandardLevels {
    public:
-    explicit ProfileCheckInterpolation(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckInterpolation(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2017-2021 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,6 +11,7 @@ list( APPEND ufo_src_files
     GeoVaLs.h
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
+    instantiateObsErrorFactory.h
     instantiateObsFilterFactory.h
     instantiateObsLocFactory.h
     LinearObsBiasOperator.cc
@@ -36,6 +37,7 @@ list( APPEND ufo_src_files
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
+    ObsOperatorParametersBase.h
     ObsTraits.h
     locations_f.cc
     locations_f.h
@@ -58,6 +60,7 @@ endfunction(PREPEND)
 add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( predictors )
+add_subdirectory( errors )
 add_subdirectory( filters )
 add_subdirectory( obslocalization )
 add_subdirectory( identity )
@@ -92,6 +95,7 @@ list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
     ${predictor_src_files}
+    ${errors_src_files}
     ${filters_src_files}
     ${obslocalization_src_files}
     ${identity_src_files}

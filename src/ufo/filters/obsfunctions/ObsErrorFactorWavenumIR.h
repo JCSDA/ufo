@@ -42,7 +42,7 @@ class ObsErrorFactorWavenumIRParameters : public oops::Parameters {
 /// z = solar zenith angle [radian]
 /// EIF = SQRT[ 1 / ( 1 - (x - 2000)) * y * MAX(0, COS(z)) / 4000 ]
 ///
-class ObsErrorFactorWavenumIR : public ObsFunctionBase {
+class ObsErrorFactorWavenumIR : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorFactorWavenumIR(const eckit::LocalConfiguration &);
   ~ObsErrorFactorWavenumIR();

@@ -28,16 +28,16 @@ namespace ufo {
 static ObsOperatorMaker<ObsComposite> obsCompositeMaker_("Composite");
 // -----------------------------------------------------------------------------
 
-ObsComposite::ObsComposite(const ioda::ObsSpace & odb,
-                           const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), odb_(odb)
+ObsComposite::ObsComposite(const ioda::ObsSpace & odb, const Parameters_ & parameters)
+  : ObsOperatorBase(odb), odb_(odb)
 {
   oops::Log::trace() << "ObsComposite constructor starting" << std::endl;
 
-  ObsCompositeParameters parameters;
-  parameters.validateAndDeserialize(config);
   for (const eckit::LocalConfiguration &operatorConfig : parameters.components.value()) {
-    std::unique_ptr<ObsOperatorBase> op(ObsOperatorFactory::create(odb, operatorConfig));
+    ObsOperatorParametersWrapper operatorParams;
+    operatorParams.validateAndDeserialize(operatorConfig);
+    std::unique_ptr<ObsOperatorBase> op(
+          ObsOperatorFactory::create(odb, operatorParams.operatorParameters));
     requiredVars_ += op->requiredVars();
     components_.push_back(std::move(op));
   }

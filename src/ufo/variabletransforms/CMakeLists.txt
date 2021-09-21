@@ -6,10 +6,17 @@
 set ( variabletransforms_files
       Cal_PressureFromHeight.h
       Cal_PressureFromHeight.cc
+      Cal_HeightFromPressure.h
+      Cal_HeightFromPressure.cc
       Cal_Humidity.h
       Cal_Humidity.cc
+      Cal_RemapScanPosition.h
+      Cal_RemapScanPosition.cc
       Cal_Wind.h
       Cal_Wind.cc
+      Cal_ProfileHorizontalDrift.h
+      Cal_ProfileHorizontalDrift.cc
+      LookupTable.h
       TransformBase.cc
       TransformBase.h
       Formulas.cc

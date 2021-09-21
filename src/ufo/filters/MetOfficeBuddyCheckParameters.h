@@ -46,6 +46,8 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// \name Parameters controlling buddy pair identification
   /// @{
 
+  oops::OptionalParameter<int> numLevels{"num_levels", this};
+
   /// Maximum distance between two observations that may be classified as buddies, in km.
   oops::Parameter<float> searchRadius{"search_radius", 100, this};
 
@@ -122,6 +124,9 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// Temporal correlation scale.
   oops::Parameter<util::Duration> temporalCorrelationScale{"temporal_correlation_scale",
                                                            util::Duration("PT6H"), this};
+
+  /// Vertical correlation scale (relates to the ratio of pressures).
+  oops::Parameter<double> verticalCorrelationScale{"vertical_correlation_scale", 6, this};
 
   /// Parameter used to "damp" gross error probability updates using method 1 described in section
   /// 3.8 of the OPS Scientific Documentation Paper 2 to make the buddy check

@@ -1,0 +1,21 @@
+obs space:
+  name: adt_3b
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/adt_3b.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).adt_3b.{{window_begin}}.nc4
+  simulated variables: [obs_absolute_dynamic_topography]
+obs operator:
+  name: ADT
+obs error:
+  covariance model: diagonal
+obs filters:
+  - filter: Domain Check
+    where:
+    - variable: {name: sea_area_fraction@GeoVaLs}
+      minvalue: 0.9
+  - filter: Bounds Check
+    minvalue: -2.0
+    maxvalue: 36.0
+  - filter: Background Check
+    threshold: 5.0

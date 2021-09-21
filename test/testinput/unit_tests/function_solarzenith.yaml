@@ -1,0 +1,14 @@
+window begin: 1900-01-01T00:00:00Z
+window end: 9999-01-01T00:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: Zenith 1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
+    simulated variables: [air_temperature, surface_pressure]
+  obs function: &ObsFunction
+    name: SolarZenith@ObsFunction
+    variables: [zenith]
+    tolerance: 1.0e-7
+    expect missing value locations to match: true

@@ -6,7 +6,6 @@
  */
 
 #include "ufo/variabletransforms/Cal_PressureFromHeight.h"
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
@@ -18,13 +17,13 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
     makerCal_PressureFromHeightForProfile_("PressureFromHeightForProfile");
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
+    const VariableTransformsParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_PressureFromHeightForProfile::runTransform() {
+void Cal_PressureFromHeightForProfile::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve Pressure From Height (Profile)"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -37,7 +36,7 @@ void Cal_PressureFromHeightForProfile::runTransform() {
     case formulas::MethodFormulation::NOAA:
     case formulas::MethodFormulation::UKMO:
     default: {
-      methodUKMO();
+      methodUKMO(apply);
       break;
     }
   }
@@ -45,7 +44,7 @@ void Cal_PressureFromHeightForProfile::runTransform() {
 
 /************************************************************************************/
 
-void Cal_PressureFromHeightForProfile::methodUKMO() {
+void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply) {
   std::vector<float> airTemperature;
   std::vector<float> airTemperatureSurface;
   std::vector<float> geopotentialHeight;
@@ -164,7 +163,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
       // Update Tprev if Rh is valid
       if (relativeHumidity[rSort[ilocs]] != missingValueFloat) {
         Pvap = formulas::SatVaporPres_fromTemp(Tprev, formulation());
-        Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, formulation());
+        Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, -1.0, formulation());
         Tprev = formulas::VirtualTemp_From_Rh_Psat_P_T(
             relativeHumiditySurface[rSort[ilocs]], Pvap, Pprev, Tprev, formulation());
       }
@@ -176,6 +175,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
                                       formulation());
         Pvap = formulas::SatVaporPres_correction(Pvap,
                                                  dewPointTemperatureSurface[rSort[ilocs]],
+                                                 -1.0,
                                                  formulation());
         Tprev = formulas::VirtualTemp_From_Psat_P_T(Pvap, Pprev, Tprev, formulation());
       }
@@ -183,6 +183,9 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
 
     // 4.2 Loop over the length of the profile
     for (ilocs = 0; ilocs < rSort.size(); ++ilocs) {
+      // if the data have been excluded by the where statement
+      if (!apply[rSort[ilocs]]) continue;
+
       // Take current level values
       Zcurrent = geopotentialHeight[rSort[ilocs]];
       Tcurrent = airTemperature[rSort[ilocs]];
@@ -198,17 +201,18 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
         // Update Tcurrent if Rh is valid
         if (relativeHumidity[rSort[ilocs]] != missingValueFloat) {
           Pvap = formulas::SatVaporPres_fromTemp(Tprev, formulation());
-          Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, formulation());
+          Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, -1.0, formulation());
           Tcurrent = formulas::VirtualTemp_From_Rh_Psat_P_T(
               relativeHumidity[rSort[ilocs]], Pvap, Pprev, Tcurrent, formulation());
         }
       } else {
         // Update Tcurrent if dew point positive
         if (dewPointTemperature[rSort[ilocs]] != missingValueFloat) {
-          Pvap =
-              formulas::SatVaporPres_fromTemp(dewPointTemperature[rSort[ilocs]], formulation());
+          Pvap = formulas::SatVaporPres_fromTemp(dewPointTemperature[rSort[ilocs]],
+                                                 formulation());
           Pvap = formulas::SatVaporPres_correction(Pvap,
                                                    dewPointTemperature[rSort[ilocs]],
+                                                   -1.0,
                                                    formulation());
           Tcurrent = formulas::VirtualTemp_From_Psat_P_T(Pvap, Pprev, Tcurrent, formulation());
         }
@@ -228,8 +232,8 @@ void Cal_PressureFromHeightForProfile::methodUKMO() {
 
   if (hasBeenUpdated) {
     // if updated the airPressure
-    // assign the derived air pressure as DerivedValue
-    obsdb_.put_db(outputTag, "air_pressure", airPressure);
+    // assign the derived air pressure as DerivedObsValue
+    putObservation("air_pressure", airPressure);
   }
 }
 
@@ -240,13 +244,13 @@ static TransformMaker<Cal_PressureFromHeightForICAO>
     makerCal_PressureFromHeightForICAO_("PressureFromHeightForICAO");
 
 Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
+    const VariableTransformsParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_PressureFromHeightForICAO::runTransform() {
+void Cal_PressureFromHeightForICAO::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " Retrieve Pressure From Height (ICAO)" << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
   oops::Log::trace() << "      --> formulation: " << formulation() << std::endl;
@@ -258,14 +262,14 @@ void Cal_PressureFromHeightForICAO::runTransform() {
     case formulas::MethodFormulation::NOAA:
     case formulas::MethodFormulation::UKMO:
     default: {
-      methodUKMO();
+      methodUKMO(apply);
       break;
     }
   }
 }
 /************************************************************************************/
 
-void Cal_PressureFromHeightForICAO::methodUKMO() {
+void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
   std::vector<float> geopotentialHeight;
   std::vector<float> airPressure;
   std::vector<float> airPressure_ref;
@@ -305,6 +309,9 @@ void Cal_PressureFromHeightForICAO::methodUKMO() {
 
     // 3.1 Loop over each record
     for (ilocs = 0; ilocs < rSort.size(); ++ilocs) {
+      // if the data have been excluded by the where statement
+      if (!apply[rSort[ilocs]]) continue;
+
       // Cycle if airPressure is valid
       if (airPressure[rSort[ilocs]] != missingValueFloat) continue;
 
@@ -317,10 +324,9 @@ void Cal_PressureFromHeightForICAO::methodUKMO() {
 
   if (hasBeenUpdated) {
     // if updated the airPressure
-    // assign the derived air pressure as DerivedValue
-    obsdb_.put_db(outputTag, "air_pressure", airPressure);
+    // assign the derived air pressure as DerivedObsValue
+    putObservation("air_pressure", airPressure);
   }
 }
-
 }  // namespace ufo
 

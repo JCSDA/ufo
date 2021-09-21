@@ -15,8 +15,9 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
+#include "oops/interface/ObsFilterBase.h"
 #include "tools/new_qc/example/Example.interface.h"
+#include "ufo/ObsTraits.h"
 
 namespace eckit {
   class Configuration;
@@ -33,7 +34,7 @@ namespace ufo {
 
 /// Example filter
 
-class Example : public util::Printable,
+class Example : public oops::interface::ObsFilterBase<ObsTraits>,
                 private util::ObjectCounter<Example> {
  public:
   static const std::string classname() {return "ufo::Example";}
@@ -43,15 +44,16 @@ class Example : public util::Printable,
           std::shared_ptr<ioda::ObsDataVector<float> >);
   ~Example();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
+  void preProcess() override {}
+  void priorFilter(const GeoVaLs &) override;
+  void postFilter(const ioda::ObsVector &, const ioda::ObsVector &,
+                  const ObsDiagnostics &) override;
 
-  const oops::Variables & requiredVars() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagnostics_;}
+  oops::Variables requiredVars() const override {return geovars_;}
+  oops::Variables requiredHdiagnostics() const override {return diagnostics_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90check key_;
 
   ioda::ObsSpace & obsdb_;

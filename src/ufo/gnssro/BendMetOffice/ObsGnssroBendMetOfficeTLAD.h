@@ -16,6 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOfficeTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ObsGnssroBendMetOfficeParameters.h"
 
 // Forward declarations
 namespace eckit {
@@ -29,7 +30,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ class ObsGnssroBendMetOfficeTLAD : public LinearObsOperatorBase,
   virtual ~ObsGnssroBendMetOfficeTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
@@ -57,6 +57,7 @@ class ObsGnssroBendMetOfficeTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperGnssroBendMetOffice_;
   std::unique_ptr<const oops::Variables> varin_;
+  ObsGnssroBendMetOfficeParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

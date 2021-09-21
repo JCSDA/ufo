@@ -34,7 +34,7 @@ class Locations : public util::Printable,
   /// \brief constructor from passed \p lons, \p lats, \p times
   Locations(const std::vector<float> & lons, const std::vector<float> & lats,
             const std::vector<util::DateTime> & times,
-            const std::shared_ptr<const ioda::Distribution>);
+            std::shared_ptr<const ioda::Distribution>);
   /// \brief constructor used in oops tests
   Locations(const eckit::Configuration &, const eckit::mpi::Comm &);
 

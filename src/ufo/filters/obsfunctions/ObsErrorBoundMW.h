@@ -68,7 +68,7 @@ class ObsErrorBoundMWParameters : public oops::Parameters {
 /// Residual Threshold = MIN( (3.0 * ( 1 / Errflat )^2 * (1 / Errftaotop )^2), ErrobsMax )
 /// Filter out data if |obs-h(x)| > Residual Threshold
 ///
-class ObsErrorBoundMW : public ObsFunctionBase {
+class ObsErrorBoundMW : public ObsFunctionBase<float> {
  public:
   explicit ObsErrorBoundMW(const eckit::LocalConfiguration &);
   ~ObsErrorBoundMW();

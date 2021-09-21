@@ -18,7 +18,6 @@
 
 #include "ufo/compositeoper/ObsCompositeParameters.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -26,17 +25,16 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsCompositeTLAD> makerCompositeTL_("Composite");
 // -----------------------------------------------------------------------------
 
-ObsCompositeTLAD::ObsCompositeTLAD(const ioda::ObsSpace & odb,
-                                   const eckit::Configuration & config)
+ObsCompositeTLAD::ObsCompositeTLAD(const ioda::ObsSpace & odb, const Parameters_ & parameters)
   : LinearObsOperatorBase(odb)
 {
   oops::Log::trace() << "ObsCompositeTLAD constructor starting" << std::endl;
 
-  ObsCompositeParameters parameters;
-  parameters.validateAndDeserialize(config);
   for (const eckit::LocalConfiguration &operatorConfig : parameters.components.value()) {
+    LinearObsOperatorParametersWrapper operatorParams;
+    operatorParams.validateAndDeserialize(operatorConfig);
     std::unique_ptr<LinearObsOperatorBase> op(
-          LinearObsOperatorFactory::create(odb, operatorConfig));
+          LinearObsOperatorFactory::create(odb, operatorParams.operatorParameters));
     requiredVars_ += op->requiredVars();
     components_.push_back(std::move(op));
   }
@@ -52,12 +50,11 @@ ObsCompositeTLAD::~ObsCompositeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                    ObsDiagnostics & ydiags) {
+void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory entered" << std::endl;
 
   for (const std::unique_ptr<LinearObsOperatorBase> &component : components_)
-    component->setTrajectory(geovals, bias, ydiags);
+    component->setTrajectory(geovals, ydiags);
 
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory exit " <<  std::endl;
 }

@@ -48,13 +48,17 @@ void testObsDiagnostics() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsTopLevelParameters obsparams;
+  obsparams.validateAndDeserialize(obsconf);
+  ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,
   // variables simulated by the observation operator, other init)
   eckit::LocalConfiguration obsopconf(conf, "obs operator");
-  ObsOperator hop(ospace, obsopconf);
+  ObsOperatorParametersWrapper obsopparams;
+  obsopparams.validateAndDeserialize(obsopconf);
+  ObsOperator hop(ospace, obsopparams);
 
   // read geovals from the file
   eckit::LocalConfiguration gconf(conf, "geovals");
@@ -69,6 +73,10 @@ void testObsDiagnostics() {
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);
 
+  // create obsvector to hold bias
+  ioda::ObsVector bias(ospace);
+  bias.zero();
+
   // create diagnostics to hold HofX diags
   eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
   oops::Variables diagvars(diagconf, "variables");
@@ -77,7 +85,7 @@ void testObsDiagnostics() {
   ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
 
   // call H(x) to compute diagnostics
-  hop.simulateObs(gval, hofx, ybias, diags);
+  hop.simulateObs(gval, hofx, ybias, bias, diags);
 
   // read tolerance and reference Diagnostics
   const double tol = conf.getDouble("tolerance");
@@ -91,8 +99,8 @@ void testObsDiagnostics() {
     for (size_t ilev = 0; ilev < nlevs; ilev++) {
       std::vector<float> ref(nlocs);
       std::vector<float> computed(nlocs);
-      diags.get(computed, diagvars[ivar], ilev+1);
-      diagref.get(ref, diagvars[ivar], ilev+1);
+      diags.get(computed, diagvars[ivar], ilev);
+      diagref.get(ref, diagvars[ivar], ilev);
 
       float rms = 0.0;
       for (size_t iloc = 0; iloc < nlocs; iloc++) {

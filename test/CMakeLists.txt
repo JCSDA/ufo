@@ -83,6 +83,8 @@ list( APPEND ufo_test_input
   testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
   testinput/function_reperr.yaml
+  testinput/function_setsurfacetype.yaml
+  testinput/function_setsurfacetype_ssmis.yaml
   testinput/function_satwind_indiv_errors.yaml
   testinput/function_scatret.yaml
   testinput/function_scatret_atms.yaml
@@ -104,6 +106,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobendmetoffice_obserror.yaml
   testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobendmetoffice_qc.yaml
+  testinput/gnssrorefmetoffice.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp1d_qc.yaml
   testinput/gnssrobndropp2d.yaml
@@ -127,6 +130,7 @@ list( APPEND ufo_test_input
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
+  testinput/identity.yaml
   testinput/interpolate_data_from_file_predictor.yaml
   testinput/legendre_predictor.yaml
   testinput/locations.yaml
@@ -147,6 +151,8 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_iasi_jacobian.yaml
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obserror_assign_unittests.yaml
+  testinput/obserrordiagonal.yaml
+  testinput/obserrorcrossvarcorr.yaml
   testinput/obsfilterdata.yaml
   testinput/omi_aura.yaml
   testinput/omi_aura_flipz.yaml
@@ -174,13 +180,18 @@ list( APPEND ufo_test_input
   testinput/qc_derivative_dpdt.yaml
   testinput/qc_derivative_dxdt.yaml
   testinput/qc_differencecheck.yaml
+  testinput/qc_finalcheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_gauss_thinning_ops.yaml
   testinput/qc_gauss_thinning_unittests.yaml
+  testinput/qc_grosserrorwholereport.yaml
   testinput/qc_historycheck_unittests.yaml
   testinput/qc_met_office_buddy_check.yaml
   testinput/qc_met_office_buddy_check_unittests.yaml
   testinput/qc_met_office_buddy_pair_finder.yaml
+  testinput/qc_modelbestfitpressure.yaml
   testinput/qc_modelobthreshold.yaml
+  testinput/qc_multichannel_thinning.yaml
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_performaction.yaml
   testinput/qc_poisson_disk_thinning.yaml
@@ -188,6 +199,7 @@ list( APPEND ufo_test_input
   testinput/qc_poisson_disk_thinning_parallel.yaml
   testinput/qc_preqc.yaml
   testinput/qc_preqc_halo.yaml
+  testinput/qc_processamvqi.yaml
   testinput/qc_profile_background_check.yaml
   testinput/qc_profile_fewobs_check.yaml
   testinput/qc_stuckcheck.yaml
@@ -205,9 +217,11 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
+  testinput/satellite_selector_predictor.yaml
   testinput/satname.yaml
   testinput/sattcwv.yaml
   testinput/satwind.yaml
+  testinput/satwind_inversion_correction.yaml
   testinput/satwind_metoffice.yaml
   testinput/sbuv2_n19.yaml
   testinput/sbuv2_n19_flipz.yaml
@@ -222,43 +236,43 @@ list( APPEND ufo_test_input
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
   testinput/thickness_predictor.yaml
-  testinput/profileconsistencychecks_monolithicfilter.yaml
-  testinput/profileconsistencychecks_OPScomparison.yaml
-  testinput/profileconsistencychecks_wrongOPScomparison.yaml
-  testinput/profileconsistencychecks_separatefilters.yaml
-  testinput/profileconsistencychecks_unittests.yaml
-  testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml
-  testinput/profileconsistencychecks_unittests_vertaverage.yaml
-  testinput/profileconsistencychecks_unittests_vertaverage_ascending.yaml
-  testinput/profileconsistencychecks_unittests_vertinterp.yaml
-  testinput/profileconsistencychecks_unittests_profiledataholder.yaml
-  testinput/profileconsistencychecks_RH_obsfilter.yaml
-  testinput/profileconsistencychecks_RH_OPScomparison.yaml
-  testinput/profileconsistencychecks_UInterp_obsfilter.yaml
-  testinput/profileconsistencychecks_UInterp_OPScomparison.yaml
-  testinput/profileconsistencychecks_UInterpAlternative_obsfilter.yaml
-  testinput/profileconsistencychecks_UInterpAlternative_OPScomparison.yaml
-  testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml
-  testinput/profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter.yaml
-  testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml
-  testinput/profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter.yaml
-  testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml
-  testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml
-  testinput/profileconsistencychecks_sondeflags_obsfilter.yaml
-  testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml
-  testinput/profileconsistencychecks_winproflags_obsfilter.yaml
-  testinput/profileconsistencychecks_winproflags_OPScomparison.yaml
-  testinput/profileconsistencychecks_pressure_obsfilter.yaml
-  testinput/profileconsistencychecks_pressure_OPScomparison.yaml
-  testinput/profileconsistencychecks_average_pressure_obsfilter.yaml
-  testinput/profileconsistencychecks_average_pressure_OPScomparison.yaml
-  testinput/profileconsistencychecks_average_temperature_obsfilter.yaml
-  testinput/profileconsistencychecks_average_temperature_OPScomparison.yaml
-  testinput/profileconsistencychecks_average_windspeed_obsfilter.yaml
-  testinput/profileconsistencychecks_average_windspeed_OPScomparison.yaml
-  testinput/profileconsistencychecks_average_relativehumidity_obsfilter.yaml
-  testinput/profileconsistencychecks_average_relativehumidity_OPScomparison.yaml
-  testinput/profileconsistencychecks_opr_average.yaml
+  testinput/conventionalprofileprocessing_monolithicfilter.yaml
+  testinput/conventionalprofileprocessing_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_wrongOPScomparison.yaml
+  testinput/conventionalprofileprocessing_separatefilters.yaml
+  testinput/conventionalprofileprocessing_unittests.yaml
+  testinput/conventionalprofileprocessing_unittest_oneprofileMPI.yaml
+  testinput/conventionalprofileprocessing_unittests_vertaverage.yaml
+  testinput/conventionalprofileprocessing_unittests_vertaverage_ascending.yaml
+  testinput/conventionalprofileprocessing_unittests_vertinterp.yaml
+  testinput/conventionalprofileprocessing_unittests_profiledataholder.yaml
+  testinput/conventionalprofileprocessing_RH_obsfilter.yaml
+  testinput/conventionalprofileprocessing_RH_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_UInterp_obsfilter.yaml
+  testinput/conventionalprofileprocessing_UInterp_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_UInterpAlternative_obsfilter.yaml
+  testinput/conventionalprofileprocessing_UInterpAlternative_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_bkgqc_modobs_obsfilter.yaml
+  testinput/conventionalprofileprocessing_bkgqc_modobs_separatefilters_obsfilter.yaml
+  testinput/conventionalprofileprocessing_bkgqc_repobs_obsfilter.yaml
+  testinput/conventionalprofileprocessing_bkgqc_repobs_separatefilters_obsfilter.yaml
+  testinput/conventionalprofileprocessing_bkgqc_modobs_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_bkgqc_repobs_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_sondeflags_obsfilter.yaml
+  testinput/conventionalprofileprocessing_sondeflags_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_winproflags_obsfilter.yaml
+  testinput/conventionalprofileprocessing_winproflags_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_pressure_obsfilter.yaml
+  testinput/conventionalprofileprocessing_pressure_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_average_pressure_obsfilter.yaml
+  testinput/conventionalprofileprocessing_average_pressure_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_average_temperature_obsfilter.yaml
+  testinput/conventionalprofileprocessing_average_temperature_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_average_windspeed_obsfilter.yaml
+  testinput/conventionalprofileprocessing_average_windspeed_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_average_relativehumidity_obsfilter.yaml
+  testinput/conventionalprofileprocessing_average_relativehumidity_OPScomparison.yaml
+  testinput/conventionalprofileprocessing_opr_average.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml
   testinput/timeoper.yaml
@@ -266,20 +280,36 @@ list( APPEND ufo_test_input
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
+  testinput/unit_tests/composite_GsiSfcModel_SfcPCorrected.yaml
+  testinput/unit_tests/composite_vertInterp_SfcPCorrected.yaml
   testinput/unit_tests/function_clwret_ssmis.yaml
+  testinput/unit_tests/function_conditional.yaml
+  testinput/unit_tests/function_drawvaluefromfile.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
   testinput/unit_tests/function_lam_domaincheck.yaml
   testinput/unit_tests/function_lam_domaincheck_circle.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustMarineWinds.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustRelativeHumidity.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustWindVector.yaml
+  testinput/unit_tests/function_ModelSurfaceHeightAdjustTemperature.yaml
+  testinput/unit_tests/function_linear_combination_multichannel.yaml
   testinput/unit_tests/function_obserrorfactorquotient.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
+  testinput/unit_tests/function_solarzenith.yaml
+  testinput/unit_tests/function_solarzenith_skiprejected.yaml
   testinput/unit_tests/function_wdirdiff.yaml
+  testinput/unit_tests/utils_metoffice_sort.yaml
   testinput/unit_tests/variabletransforms_rhumidity.yaml
+  testinput/unit_tests/variabletransforms_rhumidity_part2.yaml
   testinput/unit_tests/variabletransforms_shumidity.yaml
+  testinput/unit_tests/variabletransforms_scanposition.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeightICAO.yaml
+  testinput/unit_tests/variabletransforms_SondeHeightFromPressure.yaml
   testinput/unit_tests/variabletransforms_windcomponents.yaml
   testinput/unit_tests/variabletransforms_windspeedanddirection.yaml
+  testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml
 )
 
 
@@ -319,15 +349,17 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   # If REPO branch is being built set GIT_BRANCH_FUNC to REPO's current branch.
   # If a tagged version of REPO is being built set GIT_TAG_FUNC to REPO's current tag.
   find_branch_name(REPO_DIR_NAME ${repo})
+
+  if ( ${repo} STREQUAL "crtm" )
+    set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
+  endif()
+
   if( DEFINED GIT_BRANCH_FUNC )
     set( REPO_GIT_BRANCH ${GIT_BRANCH_FUNC} )
   elseif( DEFINED GIT_TAG_FUNC )
     set( REPO_GIT_BRANCH ${GIT_TAG_FUNC} )
   endif()
 
-  if ( ${repo} STREQUAL "crtm" )
-    set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
-  endif()
 
   # When env veriable LOCAL_PATH_JEDI_TESTFILES is set, simply link test files
   # to build directory. get_${repo}_test_data checks the existence of test file directory.
@@ -354,32 +386,31 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   elseif( DEFINED GIT_TAG_FUNC)
     message( STATUS "Tagged version of ${repo} is used" )
     # set ARGS for get_${repo}_test_data
-    set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147_miesch/version/1.1.0/file )
-    set( DIRNAME ${GIT_TAG_FUNC} )
-    set( checksum "0" )
-    set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${DIRNAME}" )
 
-    # Create test-data-release in source directory
-    file( MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/test-data-release )
+    # ECBUILD_DOWNLOAD_BASE_URL env var can be used to force test files and
+    # crtm coef to be downloaded from other databases such as S3 instead of DASH
+    # example ECBUILD_DOWNLOAD_BASE_URL=https://jedi-test-files.s3.amazonaws.com
 
-    # temporary solution for release 1.1.0
-    if ( ${repo} STREQUAL "crtm" )
-      list( APPEND REPO_DATA_DOWNLOADER_ARGS
-            ${ECBUILD_DOWNLOAD_BASE_URL}
-            ${TESTFILE_DIR_REPO}
-            ${test_files_dirname}
-            ${checksum} )
-      file( MAKE_DIRECTORY ${TESTFILE_DIR_REPO} )
+    if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL} )
+      set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL}/${repo}/${GIT_TAG_FUNC}" )
     else()
-      list( APPEND REPO_DATA_DOWNLOADER_ARGS
-            ${ECBUILD_DOWNLOAD_BASE_URL}
-            ${CMAKE_SOURCE_DIR}/test-data-release
-            ${test_files_dirname}
-            ${checksum} )
+      set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147b_jcsda/version/1.0.0/file )
     endif()
 
+    set( checksum "0" )
+    set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${GIT_TAG_FUNC}" )
+    # Create test-data-release in source directory
+    file( MAKE_DIRECTORY ${TESTFILE_DIR_REPO} )
+    list( APPEND REPO_DATA_DOWNLOADER_ARGS
+          ${ECBUILD_DOWNLOAD_BASE_URL}
+          ${CMAKE_SOURCE_DIR}/test-data-release
+          ${test_files_dirname}
+          ${checksum} )
+
+    message( STATUS "Test files will be downloaded from DASH and
+    saved to ${TESTFILE_DIR_REPO} for ${repo}")
+
     set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
-    message( STATUS "Test data will be downloaded from: ${ECBUILD_DOWNLOAD_BASE_URL}" )
 
   # Any branch of REPO is being built.
   # repo-data repository is already cloned by bundle/CMakeLists.txt.
@@ -422,15 +453,17 @@ endfunction()
 # add tests to download ufo & crtm data
 
 ADD_DOWNLOAD_TEST( "ufo" ${ufo_test_data} UFO_UFO_TESTFILES_PATH )
-ADD_DOWNLOAD_TEST( "crtm" ${crtm_test_data} UFO_CRTM_TESTFILES_PATH )
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${UFO_UFO_TESTFILES_PATH}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
 
-execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                ${UFO_CRTM_TESTFILES_PATH}
-                ${CMAKE_CURRENT_BINARY_DIR}/Data/crtm)
+if( crtm_FOUND )
+  ADD_DOWNLOAD_TEST( "crtm" ${crtm_test_data} UFO_CRTM_TESTFILES_PATH )
+  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                   ${UFO_CRTM_TESTFILES_PATH}
+                   ${CMAKE_CURRENT_BINARY_DIR}/Data/crtm)
+endif( crtm_FOUND )
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
@@ -470,8 +503,8 @@ ecbuild_add_executable( TARGET  test_ObsFunction.x
                         LIBS    ufo
                        )
 
-ecbuild_add_executable( TARGET  test_ProfileConsistencyChecks.x
-                        SOURCES mains/TestProfileConsistencyChecks.cc
+ecbuild_add_executable( TARGET  test_ConventionalProfileProcessing.x
+                        SOURCES mains/TestConventionalProfileProcessing.cc
                         LIBS    ufo
                        )
 
@@ -495,13 +528,38 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
-                  MPI     2
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_geovals_mpi
+                  SOURCES mains/TestGeoVaLs.cc
+                  ARGS    "testinput/geovals.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  MPI     4
+                  LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc ufo/Locations.h ufo/locations_test.F90
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+# Test ObsError implementations
+
+ecbuild_add_test( TARGET  test_ufo_obserrordiagonal
+                  SOURCES mains/TestObsErrorCovariance.cc
+                  ARGS    "testinput/obserrordiagonal.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  MPI     4
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obserrorcrossvarcorr
+                  SOURCES mains/TestObsErrorCovariance.cc
+                  ARGS    "testinput/obserrorcrossvarcorr.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  MPI     4
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
@@ -898,6 +956,14 @@ if( ${rttov_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_variabletransforms_scanposition
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/unit_tests/variabletransforms_scanposition.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
 endif( ${rttov_FOUND} )
 
 
@@ -1299,6 +1365,20 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRefMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrorefmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroRefMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrorefmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 if( ${ropp-ufo_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1509,6 +1589,20 @@ ecbuild_add_test( TARGET  test_ufo_linopr_composite
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_opr_compositeSfc
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/unit_tests/composite_GsiSfcModel_SfcPCorrected.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_compositeSonde
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/unit_tests/composite_vertInterp_SfcPCorrected.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_opr_categorical
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/categorical.yaml"
@@ -1516,12 +1610,40 @@ ecbuild_add_test( TARGET  test_ufo_opr_categorical
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_linopr_categorical
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/categorical.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_opr_profile_average
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/profileconsistencychecks_opr_average.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_opr_average.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_profile_average
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/conventionalprofileprocessing_opr_average.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_identity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/identity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test UFO ObsFilters (generic)
 
@@ -1574,9 +1696,23 @@ ecbuild_add_test( TARGET  test_ufo_satname
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_satwind_inversion_correction
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/satwind_inversion_correction.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_gen_boundscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_boundscheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_grosserror_wholereport
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_grosserrorwholereport.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1637,6 +1773,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_derivative_speed
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_qc_finalcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_finalcheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_gen_defer_to_post
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_defer_to_post.yaml"
@@ -1666,9 +1809,23 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning_ops
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_gauss_thinning_ops.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_met_office_buddy_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_multichannel_thinning
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_multichannel_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1703,12 +1860,19 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc_halo
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_qc_modelbestfitpressure
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_modelbestfitpressure.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_modelobthreshold
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_modelobthreshold.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_stuckcheck
                   MPI     4
@@ -1741,101 +1905,101 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_monolithicfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_monolithicfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_monolithicfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_separatefilters
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_separatefilters
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_separatefilters.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_separatefilters.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_unittests.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittest_oneprofileMPI
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittest_oneprofileMPI
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_unittest_oneprofileMPI.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_RH_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_RH_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_RH_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_RH_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_UInterp_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_UInterp_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_UInterp_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterpAlternative_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_UInterpAlternative_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_UInterpAlternative_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_UInterpAlternative_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_repobs_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_repobs_separatefilters_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_separatefilters_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_modobs_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_modobs_separatefilters_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_separatefilters_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_sondeflags_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_sondeflags_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_sondeflags_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_winproflags_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_winproflags_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_winproflags_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_pressure_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_pressure_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_pressure_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_pressure_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1875,30 +2039,37 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondePressureFromHeightICA
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_pressure_obsfilter
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondeHeightFromPressure
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_pressure_obsfilter.yaml"
+                  ARGS    "testinput/unit_tests/variabletransforms_SondeHeightFromPressure.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_temperature_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_pressure_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_temperature_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_pressure_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_windspeed_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_temperature_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_windspeed_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_temperature_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_relativehumidity_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_windspeed_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_relativehumidity_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_windspeed_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_relativehumidity_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1910,138 +2081,138 @@ ecbuild_add_test( TARGET  test_ufo_qc_acceptlist
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_monolithicfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_monolithicfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_monolithicfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_monolithicfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_separatefilters
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_separatefilters
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_separatefilters.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_separatefilters.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_unittests
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_unittests
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_unittests.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_RH_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_RH_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_RH_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_RH_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_UInterp_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_UInterp_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_UInterp_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_UInterp_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_UInterpAlternative_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_UInterpAlternative_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_UInterpAlternative_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_UInterpAlternative_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_repobs_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_repobs_separatefilters_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_separatefilters_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_separatefilters_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_modobs_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_modobs_separatefilters_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_separatefilters_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_separatefilters_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_sondeflags_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_sondeflags_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_sondeflags_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_sondeflags_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_winproflags_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_winproflags_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_winproflags_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_winproflags_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_pressure_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_pressure_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_pressure_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_pressure_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_pressure_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_pressure_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_pressure_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_pressure_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_temperature_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_temperature_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_temperature_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_temperature_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_windspeed_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_windspeed_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_windspeed_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_windspeed_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_relativehumidity_obsfilter
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_relativehumidity_obsfilter
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/profileconsistencychecks_average_relativehumidity_obsfilter.yaml"
+                  ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -2071,6 +2242,15 @@ ecbuild_add_test( TARGET  test_ufo_gaussianthinning
 
 ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   SOURCES mains/TestRecursiveSplitter.cc
+                  # This test doesn't need a configuration file, but oops::Run::Run() requires
+                  # a path to a configuration file to be passed in the first command-line parameter.
+                  ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_dataextractor
+                  SOURCES mains/TestDataExtractor.cc
                   # This test doesn't need a configuration file, but oops::Run::Run() requires
                   # a path to a configuration file to be passed in the first command-line parameter.
                   ARGS    "testinput/empty.yaml"
@@ -2142,102 +2322,102 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_parallel
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_modobs_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_bkgqc_repobs_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_RH_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_RH_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_RH_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_RH_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_wrongOPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_wrongOPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_wrongOPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_wrongOPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_UInterp_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_UInterp_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_UInterp_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterpAlternative_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_UInterpAlternative_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_UInterpAlternative_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_UInterpAlternative_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_sondeflags_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_sondeflags_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_winproflags_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_winproflags_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_winproflags_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_pressure_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_pressure_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_pressure_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_pressure_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertaverage
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_unittests_vertaverage.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_vertaverage
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_unittests_vertaverage.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertaverage_ascending
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_unittests_vertaverage_ascending.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_vertaverage_ascending
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_unittests_vertaverage_ascending.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertinterp
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_unittests_vertinterp.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_vertinterp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_unittests_vertinterp.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_profiledataholder
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_unittests_profiledataholder.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_profiledataholder
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_unittests_profiledataholder.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
@@ -2254,128 +2434,128 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_pressure_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_pressure_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_pressure_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_pressure_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_temperature_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_temperature_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_temperature_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_temperature_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_windspeed_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_windspeed_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_windspeed_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_windspeed_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_average_relativehumidity_OPScomparison
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_relativehumidity_OPScomparison.yaml"
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_average_relativehumidity_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_modobs_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_modobs_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_bkgqc_repobs_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_bkgqc_repobs_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_RH_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_RH_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_RH_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_RH_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_UInterp_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_UInterp_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_UInterp_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_UInterp_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_sondeflags_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_sondeflags_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_sondeflags_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_winproflags_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_winproflags_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_winproflags_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_winproflags_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_pressure_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_pressure_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_pressure_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_pressure_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_pressure_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_pressure_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_pressure_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_pressure_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_temperature_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_temperature_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_temperature_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_temperature_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_windspeed_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_windspeed_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_windspeed_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_windspeed_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_MPI_average_relativehumidity_OPScomparison
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_relativehumidity_OPScomparison
                   MPI 2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
-                  ARGS    "testinput/profileconsistencychecks_average_relativehumidity_OPScomparison.yaml"
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+                  ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ProfileConsistencyChecks.x
+                  DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test Variable Transforms
@@ -2401,9 +2581,30 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative_part2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_rhumidity_part2.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityspecific
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/variabletransforms_shumidity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_profilehorizontaldrift
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_solarzenith_skiprejected
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/function_solarzenith_skiprejected.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -2518,6 +2719,20 @@ ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval
 ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval_atms
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_clwret_obsval_atms.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_conditional
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_conditional.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_drawvaluefromfile
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_drawvaluefromfile.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
@@ -2681,7 +2896,65 @@ ecbuild_add_test( TARGET  test_ufo_function_linear_combination
                   ARGS    "testinput/function_reperr.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
-                  TEST_DEPENDS test_ufo_function_representation_err_synthetic_data)
+                  TEST_DEPENDS
+                  test_ufo_function_representation_err_synthetic_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_linear_combination_multichannel
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_linear_combination_multichannel.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_setsurfacetype.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype_ssmis
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_setsurfacetype_ssmis.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_windvector
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustWindVector.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_temperature
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustTemperature.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_relativehumidity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustRelativeHumidity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+
+ecbuild_add_test( TARGET  test_ufo_function_modelsurfaceheightadjust_marinewind
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_ModelSurfaceHeightAdjustMarineWinds.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_solarzenith
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_solarzenith.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
 
 # Test Diagnostics
 
@@ -2826,6 +3099,13 @@ ecbuild_add_test( TARGET  test_ufo_primitive_variables
 ecbuild_add_test( TARGET  test_ufo_metoffice_error_matrices
                   SOURCES mains/TestMetOfficeRadianceErrorMatrices.cc
                   ARGS    "testinput/metoffice_radiance_error_matrices.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test the sorting algorithm used for compatibility with the Met Office OPS system
+ecbuild_add_test( TARGET  test_ufo_metoffice_sort
+                  SOURCES mains/TestMetOfficeSort.cc
+                  ARGS    "testinput/unit_tests/utils_metoffice_sort.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -3007,6 +3287,13 @@ ecbuild_add_test( TARGET  test_ufo_bias_coeffs
                   DEPENDS test_ObsBias.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
+ecbuild_add_test( TARGET  test_ufo_bias_coeffs_readwrite
+                  SOURCES mains/TestUfoObsBias.cc
+                  ARGS    "testinput/bias_coeff.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
 ecbuild_add_test( TARGET  test_ufo_bias_coeff_increment
                   SOURCES mains/TestObsBiasIncrement.cc
                   ARGS    "testinput/bias_coeff_cov.yaml"
@@ -3111,6 +3398,20 @@ ecbuild_add_test( TARGET  test_interpolate_data_from_file_predictor
                   ARGS    "testinput/interpolate_data_from_file_predictor.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_satellite_selector_predictor
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+                  ARGS    "testinput/satellite_selector_predictor.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_Predictor.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_processamvqi
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_processamvqi.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 #####################################################################

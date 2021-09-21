@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
@@ -50,8 +49,7 @@ ObsAtmVertInterpTLAD::~ObsAtmVertInterpTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                         ObsDiagnostics &) {
+void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   oops::Log::trace() << "ObsAtmVertInterpTLAD::setTrajectory entering" << std::endl;
 
   ufo_atmvertinterp_tlad_settraj_f90(keyOperAtmVertInterp_, geovals.toFortran(), obsspace());

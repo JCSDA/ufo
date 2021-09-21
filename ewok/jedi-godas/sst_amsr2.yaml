@@ -1,0 +1,21 @@
+obs space:
+  name: sst_amsr2
+  obsdatain:
+    obsfile: $(experiment_dir)/{{current_cycle}}/sst_amsr2.{{window_begin}}.nc4
+  obsdataout:
+    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).sst_amsr2.{{window_begin}}.nc4
+  simulated variables: [sea_surface_temperature]
+obs operator:
+  name: Identity
+obs error:
+  covariance model: diagonal
+obs filters:
+  - filter: Domain Check
+    where:
+    - variable: {name: sea_area_fraction@GeoVaLs}
+      minvalue: 0.9
+  - filter: Bounds Check
+    minvalue: -2.0
+    maxvalue: 36.0
+  - filter: Background Check
+    threshold: 5.0

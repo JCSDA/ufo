@@ -13,6 +13,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/variabletransforms/Formulas.h"
+#include "ufo/variabletransforms/LookupTable.h"
 
 namespace ufo {
 
@@ -63,6 +64,39 @@ float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
       }
       break;
     }
+    case formulas::MethodFormulation::LandoltBornstein: {
+      /* Returns a saturation mixing ratio given a temperature and pressure
+         using saturation vapour pressures caluclated using the Goff-Gratch
+         formulae, adopted by the WMO as taken from Landolt-Bornstein, 1987
+         Numerical Data and Functional relationships in Science and
+         Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
+         properties of Air, P35.
+      */
+      if (temp_K != missingValueFloat) {
+        float adj_Temp;
+        float lookup_a;
+        int lookup_i;
+
+        const float Low_temp_thd = 183.15;   // Lowest temperature for which look-up table is valid
+        const float High_temp_thd = 338.15;  // Highest temperature for which look-up table is valid
+        const float Delta_Temp = 0.1;        // Temperature increment of look-up table
+
+        //  Use the lookup table to find saturated vapour pressure.
+        adj_Temp = std::max(Low_temp_thd, temp_K);
+        adj_Temp = std::min(High_temp_thd, adj_Temp);
+
+        lookup_a = (adj_Temp - Low_temp_thd + Delta_Temp) / Delta_Temp;
+        lookup_i = static_cast<int>(lookup_a);
+        lookup_a = lookup_a - lookup_i;
+        e_sub_s = (1.0 - lookup_a) *
+                  lookuptable::LandoltBornstein_lookuptable[lookup_i] +
+                  lookup_a *
+                  lookuptable::LandoltBornstein_lookuptable[lookup_i + 1];
+      } else {
+        e_sub_s = 0.0f;
+      }
+      break;
+    }
     case formulas::MethodFormulation::Walko: {
           // Polynomial fit of Goff-Gratch (1946) formulation. (Walko, 1991)
           float x = std::max(-80.0f, temp_K-t0c);
@@ -95,7 +129,8 @@ float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
 }
 
 /* -------------------------------------------------------------------------------------*/
-float SatVaporPres_correction(float e_sub_s, float temp_K, MethodFormulation formulation) {
+float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
+                              MethodFormulation formulation) {
   const float t0c = static_cast<float>(ufo::Constants::t0c);
 
   switch (formulation) {
@@ -103,15 +138,16 @@ float SatVaporPres_correction(float e_sub_s, float temp_K, MethodFormulation for
     case formulas::MethodFormulation::NOAA:
     case formulas::MethodFormulation::UKMO:
     case formulas::MethodFormulation::Sonntag: {
-      /* e_sub_s above is the saturation vapour pressure of pure water vapour
-         FsubW (~ 1.005 at 1000 hPa) is the enhancement factor needed for moist
-          air (eg eqns 20, 22 of Sonntag, but for consistency with QSAT the formula
-          below is from eqn A4.6 of Adrian Gill's book)
+      /* e_sub_s is the saturation vapour pressure of pure water vapour.FsubW (~ 1.005
+         at 1000 hPa) is the enhancement factor needed for moist air.
+         If P is set to -1: then eg eqns 20, 22 of Sonntag is used
+         If P > 0 then eqn A4.6 of Adrian Gill's book is used to guarantee consistency with the
+         saturated specific humidity.
       */
       float FsubW;  // Enhancement factor
-      FsubW = 1.0f - 1.0E-8f *
-          (4.5f + 6.0E-4f * (temp_K - t0c) *(temp_K - t0c));
+      FsubW = 1.0f + 1.0E-8f * pressure * (4.5f + 6.0E-4f * (temp_K - t0c) *(temp_K - t0c));
       e_sub_s = e_sub_s * FsubW;
+
       break;
     }
     default: {
@@ -135,6 +171,8 @@ float Qsat_From_Psat(float Psat, float P, MethodFormulation formulation) {
     default: {
       // Calculation using the Sonntag (1994) formula. (With fix at low
       // pressure)
+      //  Note that at very low pressures we apply a fix, to prevent a
+      //     singularity (Qsat tends to 1.0 kg/kg).
       QSat = (Constants::epsilon * Psat) /
              (std::max(P, Psat) - (1.0f - Constants::epsilon) * Psat);
       break;
@@ -228,6 +266,60 @@ float Height_To_Pressure_ICAO_atmos(float height, MethodFormulation formulation)
   return Pressure;
 }
 
+/* -------------------------------------------------------------------------------------*/
+
+float Pressure_To_Height(float pressure, MethodFormulation method) {
+  const float missingValueFloat = util::missingValue(1.0f);
+  const float pressure_hPa = pressure * 0.01;
+  float height = missingValueFloat;
+
+  switch (method) {
+    case formulas::MethodFormulation::NCAR:
+      // The NCAR-RAL method: a fast approximation for pressures > 120 hPa.
+      // Above 120hPa (~15km) use the ICAO atmosphere.
+      if (pressure == missingValueFloat || pressure <= 0.0f) {
+        height = missingValueFloat;
+      } else if (pressure_hPa <= 120.0f &&
+                 pressure_hPa > Constants::icao_pressure_u) {
+        pressure = std::log(Constants::icao_pressure_l) - std::log(pressure_hPa);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::g_over_rd +
+          Constants::icao_height_l;
+      } else if (pressure_hPa <= Constants::icao_pressure_u) {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_u,
+                                  Constants::icao_lapse_rate_u / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::icao_lapse_rate_u +
+          Constants::icao_height_u;
+      } else {
+        height = 44307.692 * (1.0 - std::pow(pressure / 101325.0, 0.190));
+      }
+      break;
+
+    case formulas::MethodFormulation::NOAA:
+    case formulas::MethodFormulation::UKMO:
+    default: {
+      if (pressure == missingValueFloat || pressure <= 0.0f) {
+        height = missingValueFloat;
+      } else if (pressure_hPa > Constants::icao_pressure_l) {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_surface,
+                                  Constants::icao_lapse_rate_l / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_surface / Constants::icao_lapse_rate_l;
+      } else if (pressure_hPa <= Constants::icao_pressure_l &&
+                 pressure_hPa > Constants::icao_pressure_u) {
+        pressure = std::log(Constants::icao_pressure_l) - std::log(pressure_hPa);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::g_over_rd +
+          Constants::icao_height_l;
+      } else {
+        pressure = 1.0 - std::pow(pressure_hPa / Constants::icao_pressure_u,
+                                  Constants::icao_lapse_rate_u / Constants::g_over_rd);
+        height = pressure * Constants::icao_temp_isothermal_layer / Constants::icao_lapse_rate_u +
+          Constants::icao_height_u;
+      }
+      break;
+    }
+  }
+  return height;
+}
+
 float GetWindDirection(float u, float v) {
   const float missing = util::missingValue(1.0f);
   float windDirection = missing;  // wind direction
@@ -275,6 +367,123 @@ float GetWind_V(float windSpeed, float windFromDirection) {
   return v;
 }
 
+/* -------------------------------------------------------------------------------------*/
 
+int RenumberScanPosition(int scanpos) {
+  // Renumber from 2,5,8,... to 1,2,3,...
+  int newpos = (scanpos + 1)/3;
+  return newpos;
+}
+
+/* -------------------------------------------------------------------------------------*/
+
+void horizontalDrift
+(const std::vector<size_t> & locs,
+ const std::vector<bool> & apply,
+ const std::vector<float> & lat_in,
+ const std::vector<float> & lon_in,
+ const std::vector<util::DateTime> & time_in,
+ const std::vector<float> & height,
+ const std::vector<float> & windspd,
+ const std::vector<float> & winddir,
+ std::vector<float> & lat_out,
+ std::vector<float> & lon_out,
+ std::vector<util::DateTime> & time_out,
+ MethodFormulation formulation) {
+  const float missingValueFloat = util::missingValue(1.0f);
+
+  switch (formulation) {
+  case formulas::MethodFormulation::NCAR:
+  case formulas::MethodFormulation::NOAA:
+  case formulas::MethodFormulation::UKMO:
+  default: {
+    // Location of the first entry in the profile.
+    const size_t loc0 = locs.front();
+
+    // Values of latitude, longitude and datetime at the first entry of the profile.
+    const double lat0 = lat_in[loc0];
+    const double lon0 = lon_in[loc0];
+    const util::DateTime time0 = time_in[loc0];
+
+    // The drift computation is not performed for very high latitude sites.
+    if (std::abs(lat0) >= 89.0) return;
+
+    // Fill vector of valid locations.
+    std::vector<size_t> locs_valid;
+    for (size_t jloc : locs) {
+      // If not selected by the where clause.
+      if (!apply[jloc]) continue;
+      // The location is classed as valid if the wind speed and height are not missing.
+      if (windspd[jloc] != missingValueFloat && height[jloc] != missingValueFloat)
+        locs_valid.push_back(jloc);
+    }
+
+    // If there are zero or one valid locations, exit the routine.
+    if (locs_valid.size() < 2) return;
+
+    // Average ascent speed (m/s).
+    const double ascent_speed = 5.16;
+
+    // Cumulative values of change in time.
+    // This value is converted to a util::Duration object rather than performing the
+    // same conversion to each individual change in time.
+    // This avoids a loss in precision given util::Duration is accurate to the nearest second.
+    double dt_cumul = 0.0;
+
+    for (size_t k = 0; k < locs_valid.size() - 1; ++k) {
+      // Locations of the current and next valid observations in the profile.
+      const size_t loc_current = locs_valid[k];
+      const size_t loc_next = locs_valid[k + 1];
+
+      // Compute changes in latitude, longitude and time between adjacent valid levels.
+      // Change in height.
+      const double dh = height[loc_next] - height[loc_current];
+      // Change in time.
+      const double dt = dh / ascent_speed;
+      // Average eastward and northward wind between the two levels.
+      // 180 degrees is subtracted from the wind direction in order to account for the different
+      // conventions used in the observations and in this calculation.
+      const double avgu = 0.5 *
+        (windspd[loc_current] * std::sin((winddir[loc_current] - 180.0) * Constants::deg2rad) +
+         windspd[loc_next] * std::sin((winddir[loc_next] - 180.0) * Constants::deg2rad));
+      const double avgv = 0.5 *
+        (windspd[loc_current] * std::cos((winddir[loc_current] - 180.0) * Constants::deg2rad) +
+         windspd[loc_next] * std::cos((winddir[loc_next] - 180.0) * Constants::deg2rad));
+      // Total height of the observation above the centre of the Earth.
+      const double totalheight = ufo::Constants::mean_earth_rad * 1000.0 + height[loc_current];
+      // Change in latitude.
+      const double dlat = ufo::Constants::rad2deg * avgv * dt / totalheight;
+      // Change in longitude.
+      const double dlon = ufo::Constants::rad2deg * avgu * dt /
+        (totalheight * std::cos(lat_out[loc_current] * ufo::Constants::Constants::deg2rad));
+
+      // Fill output values.
+      lat_out[loc_next] = lat_out[loc_current] + dlat;
+      lon_out[loc_next] = lon_out[loc_current] + dlon;
+      // Convert the cumulative change in time to a util::Duration.
+      dt_cumul += dt;
+      time_out[loc_next] = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+    }
+
+    // Copy latitude, longitude and time at each valid location to all invalid
+    // locations that lie between the current valid location and the next one above it.
+    double lat = lat0;
+    double lon = lon0;
+    util::DateTime time = time0;
+    for (size_t jloc : locs) {
+      if (std::find(locs_valid.begin(), locs_valid.end(), jloc) != locs_valid.end()) {
+        lat = lat_out[jloc];
+        lon = lon_out[jloc];
+        time = time_out[jloc];
+      } else {
+        lat_out[jloc] = lat;
+        lon_out[jloc] = lon;
+        time_out[jloc] = time;
+      }
+    }
+    break;
+  }
+  }
+}
 }  // namespace formulas
 }  // namespace ufo

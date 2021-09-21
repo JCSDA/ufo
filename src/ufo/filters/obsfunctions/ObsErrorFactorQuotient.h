@@ -62,7 +62,7 @@ class ObsErrorFactorQuotientParameters : public oops::Parameters {
 ///               name: air_temperature@ObsError
 ///       defer to post: true                         # Likely necessary for order of filters
 ///
-class ObsErrorFactorQuotient : public ObsFunctionBase {
+class ObsErrorFactorQuotient : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorFactorQuotient";}
 

@@ -11,18 +11,17 @@ observations:
     static bc:
       predictors:
       - name: interpolate_data_from_file
-        options:
-          corrected variables:
-          - name: air_temperature
-            file: Data/ufo/testinput_tier_1/bias_interpolation_air_temperature.nc4
-            interpolation:
-            - name: station_id@MetaData
-              method: exact
-          - name: specific_humidity
-            file: Data/ufo/testinput_tier_1/bias_interpolation_specific_humidity.nc4
-            interpolation:
-            - name: station_id@MetaData
-              method: exact
+        corrected variables:
+        - name: air_temperature
+          file: Data/ufo/testinput_tier_1/bias_interpolation_air_temperature.nc4
+          interpolation:
+          - name: station_id@MetaData
+            method: exact
+        - name: specific_humidity
+          file: Data/ufo/testinput_tier_1/bias_interpolation_specific_humidity.nc4
+          interpolation:
+          - name: station_id@MetaData
+            method: exact
   tolerance: 1.0e-16
 - obs space:
     name: Satellite
@@ -34,15 +33,14 @@ observations:
     static bc:
       predictors:
       - name: interpolate_data_from_file
-        options:
-          corrected variables:
-          - name: brightness_temperature
-            channels: *channels
-            file: Data/ufo/testinput_tier_1/bias_interpolation_brightness_temperature.nc4
-            interpolation:
-            - name: scan_position@MetaData
-              method: nearest  # In practice, 'exact' would probably be used. 'nearest' is used
-                               # here to reduce the size of the NetCDF file used by this test.
-            # The predictor's output will depend on the scan position and also (because the
-            # 'channels' option is set) on the channel number
+        corrected variables:
+        - name: brightness_temperature
+          channels: *channels
+          file: Data/ufo/testinput_tier_1/bias_interpolation_brightness_temperature.nc4
+          interpolation:
+          - name: scan_position@MetaData
+            method: nearest  # In practice, 'exact' would probably be used. 'nearest' is used
+                             # here to reduce the size of the NetCDF file used by this test.
+                             # The predictor's output will depend on the scan position and also (because the
+                             # 'channels' option is set) on the channel number
   tolerance: 1.0e-16

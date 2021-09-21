@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/DateTime.h"
+#include "oops/util/Duration.h"
 #include "oops/util/missingValues.h"
 #include "ufo/utils/Constants.h"
 
@@ -31,6 +33,7 @@ enum MethodFormulation {
   // Formulations: Specific authors
   Murphy,
   Sonntag,
+  LandoltBornstein,
   Walko,
   Rogers
 };
@@ -88,10 +91,12 @@ float SatVaporPres_fromTemp(const float temp_K,
 * \param e_sub_s
 *     saturation vapour pressure
 * \param temp_K
-*     Temperature [k]
+*     temperature [k]
+* \param pressure
+*     air pressure [Pa]
 * \return saturated vapour pressure
 */
-float SatVaporPres_correction(float e_sub_s, float temp_K,
+float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
                         const MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
 // -------------------------------------------------------------------------------------
 /*!
@@ -181,6 +186,23 @@ float Height_To_Pressure_ICAO_atmos(float Height,
 
 // -------------------------------------------------------------------------------------
 /*!
+* \brief Converts pressure to height.
+*
+* \b Formulation \b available:
+*      - NCAR: uses a fast approximation for pressures > 120 hPa and the ICAO atmosphere otherwise.
+*      - NOAA: as default
+*      - UKMO: as default
+*      - DEFAULT: uses the ICAO atmosphere for all pressures.
+*
+* \param pressure
+*     observation pressure in Pa
+* \return height in geopotential metres
+*/
+float Pressure_To_Height(float pressure,
+                         MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
+
+// -------------------------------------------------------------------------------------
+/*!
 * \brief Converts u and v wind component into wind direction.
 * Wind direction is defined such that a northerly wind is 0°, an easterly wind is 90°,
 * a southerly wind is 180°, and a westerly wind is 270°.
@@ -228,6 +250,78 @@ float GetWind_U(float windSpeed, float windFromDirection);
 * \return v
 */
 float GetWind_V(float windSpeed, float windFromDirection);
+
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Get renumbered scan position 1,2,3,... for satellite instrument
+* which has been spatially resampled and for which scan position is 2,5,8,...
+*
+* \param scanpos
+*     satellite instrument scan position
+* \return newpos
+*/
+int RenumberScanPosition(int scanpos);
+
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Compute horizontal drift latitude, longitude and time for an atmospheric profile.
+* This formula accepts input and output vectors that correspond to the entire data sample
+* as well as a vector of the locations of the current profile in the entire sample.
+* The latter vector is used to select the relevant observations from the entire sample
+* prior to running the horizontal drift algorithm.
+* The outputs of the algorithm are placed in the relevant locations in the entire sample.
+*
+* \b Formulations \b available:
+*      - DEFAULT:
+*        Calculation is using Eq. 4. of Laroche and Sarrazin (2013).
+*        Reference: "Laroche, S. and Sarrazin, R.,
+*                   Impact of Radiosonde Balloon Drift on
+*                   Numerical Weather Prediction and Verification,
+*                   Weather and Forecasting, 28(3), 772-782, 2013."
+*      - UKMO: as default
+*      - NCAR: as default
+*      - NOAA: as default
+*
+* \param locs
+*     Vector of locations of the current profile in the entire data sample.
+* \param apply
+*     Vector specifying whether a location should be used or not (governed by the where clause).
+* \param lat_in
+*     Vector of input latitudes in the entire sample [degrees].
+* \param lon_in
+*     Vector of input longitudes in the entire sample [degrees].
+* \param time_in
+*     Vector of input datetimes in the entire sample [ISO 8601 format].
+* \param height
+*     Vector of input heights in the entire sample [m].
+* \param windspd
+*     Vector of input wind speeds in the entire sample [m/s].
+* \param winddir
+*     Vector of input wind directions in the entire sample [degrees].
+*     Wind direction is defined such that a northerly wind is 0°, an easterly wind is 90°,
+*     a southerly wind is 180°, and a westerly wind is 270°.
+* \param [out] lat_out
+*     Vector of output latitudes in the entire sample [degrees].
+* \param [out] lon_out
+*     Vector of output longitudes in the entire sample [degress].
+* \param [out] time_out
+*     Vector of output datetimes in the entire sample [ISO 8601 format].
+* \param formulation
+*     Method used to determine the horizontal drift positions.
+*/
+void horizontalDrift
+(const std::vector<size_t> & locs,
+ const std::vector<bool> & apply,
+ const std::vector<float> & lat_in,
+ const std::vector<float> & lon_in,
+ const std::vector<util::DateTime> & time_in,
+ const std::vector<float> & height,
+ const std::vector<float> & windspd,
+ const std::vector<float> & winddir,
+ std::vector<float> & lat_out,
+ std::vector<float> & lon_out,
+ std::vector<util::DateTime> & time_out,
+ MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
 
 }  // namespace formulas
 }  // namespace ufo

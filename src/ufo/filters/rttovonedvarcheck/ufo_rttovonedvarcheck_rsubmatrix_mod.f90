@@ -32,6 +32,7 @@ contains
   procedure :: multiply_inverse_vector => rsubmatrix_inv_multiply
   procedure :: multiply_inverse_matrix => rsubmatrix_multiply_inv_matrix
   procedure :: add_to_matrix => rsubmatrix_add_to_u
+  procedure :: multiply_factor_by_stdev => rsubmatrix_multiply_factor_by_stdev
 
 end type ufo_rttovonedvarcheck_rsubmatrix
 
@@ -270,6 +271,38 @@ if (self % diagonal_flag) then
 end if
 
 end subroutine rsubmatrix_add_to_u
+
+! ------------------------------------------------------------------------------
+!> Multiply a vector by the r-matrix diagonal standard deviation
+!!
+!! \author Met Office
+!!
+!! \date 16/06/2021: Created
+!!
+subroutine rsubmatrix_multiply_factor_by_stdev(self,factor,xout)
+
+implicit none
+class(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: self
+real(kind_real), intent(in)        :: factor
+real(kind_real), intent(inout)     :: xout(:)
+
+integer :: ii
+
+if (size(xout) /= self % nchans) then
+  call abor1_ftn("rsubmatrix_multiply_factor_by_stdev: arrays incompatible sizes")
+end if
+
+! Full R matrix
+if (self % full_flag) then
+  do ii=1, self % nchans
+    xout(ii) = factor * sqrt(self % matrix(ii,ii))
+  end do
+end if
+
+! Diagonal R matrix
+if (self % diagonal_flag) xout(:) = factor * sqrt(self % diagonal(:))
+
+end subroutine rsubmatrix_multiply_factor_by_stdev
 
 ! ------------------------------------------------------------------------------
 !> Print the contents of the r-matrix

@@ -25,8 +25,10 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
   oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory
-  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
-    std::unique_ptr<PredictorBase> predictor(PredictorFactory::create(conf, vars_));
+  for (const PredictorParametersWrapper &wrapper :
+       params.variationalBC.value().predictors.value()) {
+    std::unique_ptr<PredictorBase> predictor(PredictorFactory::create(wrapper.predictorParameters,
+                                                                      vars_));
     prednames_.push_back(predictor->name());
   }
 

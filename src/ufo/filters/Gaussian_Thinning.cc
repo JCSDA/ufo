@@ -24,11 +24,14 @@
 #include "ufo/filters/GaussianThinningParameters.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/EquispacedBinSelector.h"
+#include "ufo/utils/EquispacedBinSelectorBase.h"
 #include "ufo/utils/GeodesicDistanceCalculator.h"
 #include "ufo/utils/MaxNormDistanceCalculator.h"
+#include "ufo/utils/metoffice/MetOfficeSort.h"
 #include "ufo/utils/RecursiveSplitter.h"
+#include "ufo/utils/RoundingEquispacedBinSelector.h"
 #include "ufo/utils/SpatialBinSelector.h"
+#include "ufo/utils/TruncatingEquispacedBinSelector.h"
 
 namespace ufo {
 
@@ -50,14 +53,22 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_,
+                                     filtervars, options_.thinIfAnyFilterVariablesAreValid.value());
+
+  if (options_.opsCompatibilityMode) {
+    // Sort observations by latitude
+    const std::vector<float> lat = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
+    metOfficeSort(validObsIds.begin(), validObsIds.end(), [&lat] (size_t id) { return lat[id]; });
+  }
 
   std::vector<float> distancesToBinCenter(validObsIds.size(), 0.f);
   std::unique_ptr<DistanceCalculator> distanceCalculator = makeDistanceCalculator(options_);
 
-  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
-  groupObservationsByPressure(validObsIds, *distanceCalculator, obsAccessor,
-                              splitter, distancesToBinCenter);
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(
+        validObsIds, options_.opsCompatibilityMode);
+  groupObservationsByVerticalCoordinate(validObsIds, *distanceCalculator, obsAccessor,
+                                        splitter, distancesToBinCenter);
   groupObservationsByTime(validObsIds, *distanceCalculator, obsAccessor,
                           splitter, distancesToBinCenter);
   groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsAccessor,
@@ -66,10 +77,6 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   const std::vector<bool> isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-
-  if (filtervars.size() != 0) {
-    oops::Log::trace() << "Gaussian_Thinning: flagged? = " << flagged[0] << std::endl;
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -87,7 +94,10 @@ ObsAccessor Gaussian_Thinning::createObsAccessor() const {
 
 std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
     const GaussianThinningParameters &options) {
-  switch (options.distanceNorm.value()) {
+  DistanceNorm distanceNorm = options.distanceNorm.value().value_or(DistanceNorm::GEODESIC);
+  if (options.opsCompatibilityMode)
+    distanceNorm = DistanceNorm::MAXIMUM;
+  switch (distanceNorm) {
   case DistanceNorm::GEODESIC:
     return std::unique_ptr<DistanceCalculator>(new GeodesicDistanceCalculator());
   case DistanceNorm::MAXIMUM:
@@ -115,15 +125,18 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
 
   std::vector<float> lat = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
   std::vector<float> lon = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
-  // Longitudes will typically be either in the [-180, 180] degree range or in the [0, 360]
-  // degree range. The spatial bin selector is written with the latter convention in mind,
-  // so let's shift any negative longitudes up by 360 degrees.
-  for (float &longitude : lon)
-    if (longitude < 0)
-      longitude += 360;
+  if (!options_.opsCompatibilityMode) {
+    // Longitudes will typically be either in the [-180, 180] degree range or in the [0, 360]
+    // degree range. When the OPS compatibility mode is off, the spatial bin selector is constructed
+    // with the latter convention in mind, so we need to shift any negative longitudes up by 360
+    // degrees.
+    for (float &longitude : lon)
+      if (longitude < 0)
+        longitude += 360;
+  }
 
-  std::vector<size_t> latBins;
-  std::vector<size_t> lonBins;
+  std::vector<int> latBins;
+  std::vector<int> lonBins;
   latBins.reserve(validObsIds.size());
   lonBins.reserve(validObsIds.size());
   for (size_t obsId : validObsIds) {
@@ -133,11 +146,6 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
   }
   splitter.groupBy(latBins);
   splitter.groupBy(lonBins);
-
-  oops::Log::debug() << "Gaussian_Thinning: latitudes  = " << lat << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: longitudes = " << lon << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: lat bins   = " << latBins << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: lon bins   = " << lonBins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
@@ -162,7 +170,11 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
   oops::Log::debug() << "Gaussian_Thinning: requested horizontal bin size (km) = "
                      << options.horizontalMesh << std::endl;
 
-  SpatialBinCountRoundingMode roundingMode = options.roundHorizontalBinCountToNearest ?
+  bool roundHorizontalBinCountToNearest =
+      options.roundHorizontalBinCountToNearest.value().value_or(false);
+  if (options.opsCompatibilityMode)
+    roundHorizontalBinCountToNearest = true;
+  SpatialBinCountRoundingMode roundingMode = roundHorizontalBinCountToNearest ?
         SpatialBinCountRoundingMode::NEAREST : SpatialBinCountRoundingMode::DOWN;
 
   const float earthRadius = Constants::mean_earth_rad;  // km
@@ -172,46 +184,46 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
   if (options.useReducedHorizontalGrid) {
     // Use fewer bins at high latitudes
-    return SpatialBinSelector(numLatBins, roundingMode);
+    return SpatialBinSelector(numLatBins, roundingMode, options.opsCompatibilityMode);
   } else {
     // Use the same number of bins at all latitudes
     const int equatorToMeridianLengthRatio = 2;
-    return SpatialBinSelector(numLatBins, equatorToMeridianLengthRatio * numLatBins);
+    return SpatialBinSelector(numLatBins, equatorToMeridianLengthRatio * numLatBins,
+                              options.opsCompatibilityMode);
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void Gaussian_Thinning::groupObservationsByPressure(
+void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
     const std::vector<size_t> &validObsIds,
     const DistanceCalculator &distanceCalculator,
     const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
-  boost::optional<EquispacedBinSelector> binSelector = makePressureBinSelector(options_);
-  if (binSelector == boost::none)
+  std::unique_ptr<EquispacedBinSelectorBase> binSelector = makeVerticalBinSelector(options_);
+  if (!binSelector)
     return;
 
-  oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
-                     << binSelector->numBins() << std::endl;
+  if (binSelector->numBins() != boost::none)
+    oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
+                       << *binSelector->numBins() << std::endl;
 
-  std::vector<float> pres = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+  std::vector<float> vcoord = obsAccessor.getFloatVariableFromObsSpace(
+        "MetaData", options_.verticalCoord);
 
-  std::vector<size_t> bins;
+  std::vector<int> bins;
   bins.reserve(validObsIds.size());
   for (size_t obsId : validObsIds)
   {
-    bins.push_back(binSelector->bin(pres[obsId]));
+    bins.push_back(binSelector->bin(vcoord[obsId]));
   }
   splitter.groupBy(bins);
-
-  oops::Log::debug() << "Gaussian_Thinning: pressures     = " << pres << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: pressure bins = " << bins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
     const float component = distanceCalculator.nonspatialDistanceComponent(
-          pres[obsId], binSelector->binCenter(bins[validObsIndex]),
+          vcoord[obsId], binSelector->binCenter(bins[validObsIndex]),
           binSelector->inverseBinWidth());
     distancesToBinCenter[validObsIndex] = distanceCalculator.combineDistanceComponents(
           distancesToBinCenter[validObsIndex], component);
@@ -220,22 +232,28 @@ void Gaussian_Thinning::groupObservationsByPressure(
 
 // -----------------------------------------------------------------------------
 
-boost::optional<EquispacedBinSelector> Gaussian_Thinning::makePressureBinSelector(
+std::unique_ptr<EquispacedBinSelectorBase> Gaussian_Thinning::makeVerticalBinSelector(
     const GaussianThinningParameters &options) {
   if (options.verticalMesh <= 0)
-    return boost::none;
+    return nullptr;
 
-  const int numVerticalBins = std::max(
-        1,
-        static_cast<int>(std::ceil((options.verticalMax - options.verticalMin) /
-                                   options.verticalMesh)));
-  // Adjust verticalMax upwards to make the range of pressures
-  // evenly divisible into bins of width verticalMesh.
-  const float adjustedVerticalMax = options.verticalMin + numVerticalBins * options.verticalMesh;
+  if (options.opsCompatibilityMode) {
+    return std::make_unique<RoundingEquispacedBinSelector>(
+          options.verticalMesh, options.verticalMin + options.verticalMesh / 2);
+  } else {
+    const int numVerticalBins = std::max(
+          1,
+          static_cast<int>(std::ceil((options.verticalMax - options.verticalMin) /
+                                     options.verticalMesh)));
+    // Adjust verticalMax upwards to make the range of vertical coordinates
+    // evenly divisible into bins of width verticalMesh.
+    const float adjustedVerticalMax = options.verticalMin + numVerticalBins * options.verticalMesh;
 
-  oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
+    oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
                      << numVerticalBins << std::endl;
-  return EquispacedBinSelector(options.verticalMin, adjustedVerticalMax, numVerticalBins);
+    return std::make_unique<TruncatingEquispacedBinSelector>(
+          options.verticalMin, adjustedVerticalMax, numVerticalBins);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -247,28 +265,25 @@ void Gaussian_Thinning::groupObservationsByTime(
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
   util::DateTime timeOffset;
-  boost::optional<EquispacedBinSelector> binSelector = makeTimeBinSelector(options_, timeOffset);
-  if (binSelector == boost::none)
+  std::unique_ptr<EquispacedBinSelectorBase> binSelector =
+      makeTimeBinSelector(options_, obsdb_.windowStart(), obsdb_.windowEnd(), timeOffset);
+  if (!binSelector)
     return;
 
-  oops::Log::debug() << "Gaussian_Thinning: number of time bins = "
-                     << binSelector->numBins() << std::endl;
+  if (binSelector->numBins() != boost::none)
+    oops::Log::debug() << "Gaussian_Thinning: number of time bins = "
+                       << *binSelector->numBins() << std::endl;
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "datetime");
 
-  std::vector<size_t> bins;
+  std::vector<int> bins;
   bins.reserve(validObsIds.size());
   for (size_t obsId : validObsIds)
   {
     bins.push_back(binSelector->bin((times[obsId] - timeOffset).toSeconds()));
   }
   splitter.groupBy(bins);
-
-  oops::Log::debug() << "Gaussian_Thinning: times = ";
-  eckit::__print_list(oops::Log::debug(), times, eckit::VectorPrintSimple());
-  oops::Log::debug() << std::endl;
-  oops::Log::debug() << "Gaussian_Thinning: time bins = " << bins << std::endl;
 
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
     const size_t obsId = validObsIds[validObsIndex];
@@ -283,16 +298,19 @@ void Gaussian_Thinning::groupObservationsByTime(
 
 // -----------------------------------------------------------------------------
 
-boost::optional<EquispacedBinSelector> Gaussian_Thinning::makeTimeBinSelector(
-    const GaussianThinningParameters &options, util::DateTime &timeOffset) {
+std::unique_ptr<EquispacedBinSelectorBase> Gaussian_Thinning::makeTimeBinSelector(
+    const GaussianThinningParameters &options,
+    const util::DateTime &windowStart,
+    const util::DateTime &windowEnd,
+    util::DateTime &timeOffset) {
   if (options.timeMesh.value() == boost::none ||
       options.timeMin.value() == boost::none ||
       options.timeMax.value() == boost::none)
-    return boost::none;
+    return nullptr;
 
   const util::Duration timeMesh = options.timeMesh.value().get();
   if (timeMesh.toSeconds() == 0)
-    return boost::none;
+    return nullptr;
 
   const util::DateTime timeMin = options.timeMin.value().get();
   const util::DateTime timeMax = options.timeMax.value().get();
@@ -301,16 +319,27 @@ boost::optional<EquispacedBinSelector> Gaussian_Thinning::makeTimeBinSelector(
                      << ((timeMax - timeMin).toSeconds()) << std::endl;
   oops::Log::debug() << "timeMesh.toSeconds() = " << timeMesh.toSeconds() << std::endl;
 
-  const int numTimeBins = std::max(
-        1,
-        static_cast<int>(std::ceil((timeMax - timeMin).toSeconds() /
-                                   static_cast<float>(timeMesh.toSeconds()))));
-
-  // NOTE: the upper bound of the time interval is effectively adjusted upwards
-  // to make space for an integral number of bins of specified width.
-
   timeOffset = timeMin;
-  return EquispacedBinSelector(0.0f, numTimeBins * timeMesh.toSeconds(), numTimeBins);
+
+  if (options.opsCompatibilityMode) {
+    // Put bin 0 at the center of the assimilation window.
+    const util::Duration windowLength = windowEnd - windowStart;
+    const int numFullBinsLeftOfWindowCenter = (windowLength / 2).toSeconds() / timeMesh.toSeconds();
+    const util::DateTime bin0Center = timeMin + numFullBinsLeftOfWindowCenter * timeMesh +
+                                      timeMesh / 2;
+    return std::make_unique<RoundingEquispacedBinSelector>(
+          timeMesh.toSeconds(), (bin0Center - timeOffset).toSeconds());
+  } else {
+    // The upper bound of the time interval is effectively adjusted upwards
+    // to make space for an integral number of bins of specified width.
+    const int numTimeBins = std::max(
+          1,
+          static_cast<int>(std::ceil((timeMax - timeMin).toSeconds() /
+                                     static_cast<float>(timeMesh.toSeconds()))));
+
+    return std::make_unique<TruncatingEquispacedBinSelector>(
+          0.0f, numTimeBins * timeMesh.toSeconds(), numTimeBins);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -346,7 +375,6 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     const ObsAccessor &obsAccessor) const
 {
   if (options_.priorityVariable.value() == boost::none) {
-    oops::Log::debug() << "priority_variable not found" << std::endl;
     return [&distancesToBinCenter](size_t validObsIndexA, size_t validObsIndexB) {
       return distancesToBinCenter[validObsIndexA] < distancesToBinCenter[validObsIndexB];
     };
@@ -356,8 +384,6 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
 
   std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
         priorityVariable.group(), priorityVariable.variable());
-
-  oops::Log::debug() << "priorities = " << priorities << std::endl;
 
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
   return [priorities, &validObsIds, &distancesToBinCenter]

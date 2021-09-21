@@ -95,14 +95,14 @@ end subroutine ufo_rttovonedvarcheck_delete
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geovals, apply)
+subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geovals, apply)
   use ufo_utils_mod, only: cmp_strings
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
   type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
   type(oops_variables), intent(in)           :: vars     !< channels for 1D-Var
-  type(oops_variables), intent(in)           :: retrieval_vars !< retrieval variables for 1D-Var
+  type(oops_variables), intent(in)           :: hofxdiags_vars !< retrieval variables for 1D-Var
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
@@ -132,10 +132,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
+  real(kind_real), allocatable       :: max_error(:)    ! max_error = error(stdev) * factor
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
   type(ufo_radiancerttov)            :: rttov_simobs
+  integer(c_size_t), allocatable     :: ret_nlevs(:)
 
   ! ------------------------------------------
   ! 1. Setup
@@ -179,6 +181,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
+  allocate(ret_nlevs(hofxdiags_vars % nvars()))
 
   ! Decide on loop parameters - testing
   if (self % StartOb == 0) self % StartOb = 1
@@ -187,6 +190,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
     write(message,*) "start loop ",self % StartOb," is greater than finish loop ",self % FinishOb
     call abor1_ftn(message)
   end if
+
+  ! Calculate hofxdiags levels for each variable
+  call ufo_rttovonedvarcheck_hofxdiags_levels(hofxdiags_vars, self % nlevels, ret_nlevs)
 
   ! ------------------------------------------
   ! 2. Beginning main observation loop
@@ -263,7 +269,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
       call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
 
       ! Setup hofxdiags for this retrieval
-      call ufo_geovals_setup(hofxdiags, retrieval_vars, 1)
+      call ufo_geovals_setup(hofxdiags, hofxdiags_vars, 1, hofxdiags_vars % nvars(), ret_nlevs)
 
       if (self % FullDiagnostics) then
         call ob % info()
@@ -308,6 +314,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
         end do
       end if
 
+      ! Check the BTs are within a factor of the error
+      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == 0)) then
+        allocate(max_error(size(ob % channels_used)))
+        call r_submatrix % multiply_factor_by_stdev(self % RetrievedErrorFactor, max_error)
+        if (any(abs(ob % final_bt_diff(:)) > max_error(:))) then
+          do jvar = 1, self % nchans
+            if( obs % QCflags(jvar,jobs) == 0 ) then
+              obs % QCflags(jvar,jobs) = self % onedvarflag
+            end if
+          end do
+        end if
+        deallocate(max_error)
+      end if
+
       ! Tidy up memory specific to a single observation
       call ufo_geovals_delete(local_geovals)
       call ufo_geovals_delete(hofxdiags)
@@ -340,6 +360,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geova
   if (allocated(b_matrix))  deallocate(b_matrix)
   if (allocated(b_inverse)) deallocate(b_inverse)
   if (allocated(b_sigma))   deallocate(b_sigma)
+  if (allocated(ret_nlevs)) deallocate(ret_nlevs)
   call rttov_simobs % delete()
 
 end subroutine ufo_rttovonedvarcheck_apply

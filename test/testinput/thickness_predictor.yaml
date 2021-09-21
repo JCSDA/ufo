@@ -2,52 +2,44 @@ window begin: 2019-12-29T21:00:00Z
 window end: 2019-12-30T03:00:00Z
 
 observations:
-- obs space:
+- obs space: &ObsSpace
     name: atms_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_predictors.nc4
+      obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
     simulated variables: [brightness_temperature]
-    channels: &channels 1-22
+    channels: 1-22
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
+    filename: &geovalsin Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
   obs bias:
     variational bc:
       predictors:
       - name: thickness
-        options:
-          layer top: 300000
-          layer base: 850000
-          mean: 7.6
-          standard deviation: 0.4
+        layer top: 300000
+        layer base: 850000
+        mean: 7.6
+        standard deviation: 0.4
   expectExceptionWithMessage: layer top is greater than largest model pressure level
 
 - obs space:
-    name: atms_n20
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_predictors.nc4
-    simulated variables: [brightness_temperature]
-    channels: &channels 1-22
+    <<: *ObsSpace
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
+    filename: *geovalsin
   obs bias:
     variational bc:
       predictors:
       - name: thickness
-        options:
-          layer top: 30000
-          layer base: 85000
-          mean: 7.6
-          standard deviation: 0.4
+        layer top: 30000
+        layer base: 85000
+        mean: 7.6
+        standard deviation: 0.4
       - name: thickness
-        options:
-          layer top: 5000
-          layer base: 20000
-          mean: 8.6
-          standard deviation: 0.4 
+        layer top: 5000
+        layer base: 20000
+        mean: 8.6
+        standard deviation: 0.4 
       - name: thickness
-        options:
-          layer top: 85000
-          layer base: 100000
-          mean: 1.2
-          standard deviation: 0.4
+        layer top: 85000
+        layer base: 100000
+        mean: 1.2
+        standard deviation: 0.4
   tolerance: 5.0e-5

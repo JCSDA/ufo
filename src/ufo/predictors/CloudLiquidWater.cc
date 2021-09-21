@@ -25,10 +25,10 @@ static PredictorMaker<CloudLiquidWater>
 
 // -----------------------------------------------------------------------------
 
-CloudLiquidWater::CloudLiquidWater(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
+CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars) {
   // Initialize options
-  options_.deserialize(conf.getSubConfiguration("options"));
+  options_ = parameters;
   const std::string &satellite = options_.satellite.value();
 
   // Currently the code is designed only for SSMIS brightness temperatures from

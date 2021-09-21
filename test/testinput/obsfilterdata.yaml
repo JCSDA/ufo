@@ -33,6 +33,14 @@ obs filter data:
     variables:
     - name: eastward_wind@HofX
     - name: northward_wind@HofX
+  ObsError:
+    variables:
+    - name: eastward_wind@ObsErrorData
+    - name: northward_wind@ObsErrorData
+  QCFlags:
+    variables:
+    - name: eastward_wind@QCFlagsData
+    - name: northward_wind@QCFlagsData
 - obs space:
     name: amsua_n19
     obsdatain:
@@ -69,4 +77,12 @@ obs filter data:
     group: GsiHofX
     variables:
     - name: brightness_temperature@HofX
+      channels: 1-10,15
+  ObsError:
+    variables:
+    - name: brightness_temperature@ObsErrorData
+      channels: 1-10,15
+  QCFlags:
+    variables:
+    - name: brightness_temperature@QCFlagsData
       channels: 1-10,15

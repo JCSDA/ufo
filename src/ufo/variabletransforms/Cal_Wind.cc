@@ -6,8 +6,10 @@
  */
 
 #include "ufo/variabletransforms/Cal_Wind.h"
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/utils/Constants.h"
+
+#include "ufo/filters/VariableTransformsParameters.h"
+
 
 namespace ufo {
 
@@ -19,13 +21,14 @@ static TransformMaker<Cal_WindSpeedAndDirection>
     makerCal_WindSpeedAndDirection_("WindSpeedAndDirection");
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
+    const VariableTransformsParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    : TransformBase(options, data, flags) {
+}
 
 /************************************************************************************/
 
-void Cal_WindSpeedAndDirection::runTransform() {
+void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve wind speed and direction"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -53,6 +56,9 @@ void Cal_WindSpeedAndDirection::runTransform() {
 
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    // if the data have been excluded by the where statement
+    if (!apply[jobs]) continue;
+
     // Calculate wind vector
     if (u[jobs] != missingValueFloat && v[jobs] != missingValueFloat) {
        windFromDirection[jobs] = formulas::GetWindDirection(u[jobs], v[jobs]);
@@ -60,8 +66,8 @@ void Cal_WindSpeedAndDirection::runTransform() {
     }
   }
   // put new variable at existing locations
-  obsdb_.put_db(outputTag, "wind_speed", windSpeed);
-  obsdb_.put_db(outputTag, "wind_from_direction", windFromDirection);
+  putObservation("wind_speed", windSpeed);
+  putObservation("wind_from_direction", windFromDirection);
 }
 
 /************************************************************************************/
@@ -71,13 +77,14 @@ static TransformMaker<Cal_WindComponents>
     makerCal_WindComponents_("WindComponents");
 
 Cal_WindComponents::Cal_WindComponents(
-    const VariableTransformsParameters &options, ioda::ObsSpace &os,
+    const VariableTransformsParameters &options,
+    const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, os, flags) {}
+    : TransformBase(options, data, flags) {}
 
 /************************************************************************************/
 
-void Cal_WindComponents::runTransform() {
+void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " --> Retrieve wind component"
             << std::endl;
   oops::Log::trace() << "      --> method: " << method() << std::endl;
@@ -105,6 +112,9 @@ void Cal_WindComponents::runTransform() {
 
   // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    // if the data have been excluded by the where statement
+    if (!apply[jobs]) continue;
+
     // Calculate wind vector
     if (windFromDirection[jobs] != missingValueFloat &&
           windSpeed[jobs] != missingValueFloat && windSpeed[jobs] >= 0) {
@@ -114,8 +124,8 @@ void Cal_WindComponents::runTransform() {
   }
 
   // put new variable at existing locations
-  obsdb_.put_db(outputTag, "eastward_wind", u);
-  obsdb_.put_db(outputTag,  "northward_wind", v);
+  putObservation("eastward_wind", u);
+  putObservation("northward_wind", v);
 }
 }  // namespace ufo
 

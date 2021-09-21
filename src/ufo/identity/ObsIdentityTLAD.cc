@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2021 UCAR
+ * (C) Copyright 2021 UK Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -15,9 +15,9 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
@@ -28,54 +28,77 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
-  : LinearObsOperatorBase(odb), keyOperObsIdentity_(0), varin_()
+  : LinearObsOperatorBase(odb)
 {
-  std::vector<int> operatorVarIndices;
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+  oops::Log::trace() << "ObsIdentityTLAD constructor starting" << std::endl;
 
-  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, config,
-                              operatorVars_,
-                              operatorVarIndices.data(), operatorVarIndices.size(),
-                              varin_);
+  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices_);
+  requiredVars_ += operatorVars_;
 
-  oops::Log::trace() << "ObsIdentityTLAD created." << std::endl;
+  oops::Log::trace() << "ObsIdentityTLAD constructor finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsIdentityTLAD::~ObsIdentityTLAD() {
-  ufo_identity_tlad_delete_f90(keyOperObsIdentity_);
   oops::Log::trace() << "ObsIdentityTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                    ObsDiagnostics &) {
-  ufo_identity_tlad_settraj_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace());
+void ObsIdentityTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+  // The trajectory is not needed because the observation operator is linear.
   oops::Log::trace() << "ObsIdentityTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_identity_simobs_tl_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace(),
-                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-  oops::Log::trace() << "ObsIdentityTLAD: TL observation operator run" << std::endl;
+void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
+  oops::Log::trace() << "ObsIdentityTLAD: TL observation operator starting" << std::endl;
+
+  std::vector<double> vec(dy.nlocs());
+  for (int jvar : operatorVarIndices_) {
+    const std::string& varname = dy.varnames().variables()[jvar];
+    // Fill dy with dx at the lowest level.
+    dx.getAtLevel(vec, varname, 0);
+    for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
+      const size_t idx = jloc * dy.nvars() + jvar;
+      dy[idx] = vec[jloc];
+    }
+  }
+
+  oops::Log::trace() << "ObsIdentityTLAD: TL observation operator finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_identity_simobs_ad_f90(keyOperObsIdentity_, geovals.toFortran(), obsspace(),
-                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-  oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator run" << std::endl;
+void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
+  oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator starting" << std::endl;
+
+  const double missing = util::missingValue(missing);
+
+  std::vector<double> vec(dy.nlocs());
+  for (int jvar : operatorVarIndices_) {
+    const std::string& varname = dy.varnames().variables()[jvar];
+    // Get current value of dx at the lowest level.
+    dx.getAtLevel(vec, varname, 0);
+    // Increment dx with non-missing values of dy.
+    for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
+      const size_t idx = jloc * dy.nvars() + jvar;
+      if (dy[idx] != missing)
+        vec[jloc] += dy[idx];
+    }
+    // Store new value of dx.
+    dx.putAtLevel(vec, varname, 0);
+  }
+
+  oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsIdentityTLAD::print(std::ostream & os) const {
-  os << "ObsIdentityTLAD::print not implemented" << std::endl;
+  os << "ObsIdentityTLAD operator" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

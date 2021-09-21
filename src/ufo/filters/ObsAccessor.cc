@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "ioda/distribution/InefficientDistribution.h"
-#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/RecursiveSplitter.h"
@@ -98,11 +97,21 @@ ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
 }
 
 std::vector<size_t> ObsAccessor::getValidObservationIds(
-    const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags) const {
+    const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
+        const ufo::Variables &filtervars, bool validIfAnyFilterVariablePassedQC) const {
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
   std::vector<int> globalApply(apply.size());
+  std::vector<ioda::ObsDataRow<int>> filterVariableFlags;
+  // Select flags for respective filtervars
+  for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
+    std::string filterVariableName = filtervars.variable(ivar).variable();
+    auto it = std::find(flags.varnames().variables().begin(), flags.varnames().variables().end(),
+                        filterVariableName);
+    filterVariableFlags.push_back(flags[*it]);
+  }
   for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    globalApply[obsId] = apply[obsId] && flags[0][obsId] == QCflags::pass;
+    globalApply[obsId] = apply[obsId]
+                           && isValid(filterVariableFlags, obsId, validIfAnyFilterVariablePassedQC);
   obsDistribution_->allGatherv(globalApply);
 
   std::vector<size_t> validObsIds;
@@ -162,9 +171,32 @@ size_t ObsAccessor::totalNumObservations() const {
   return obsdb_->globalNumLocs();
 }
 
+bool ObsAccessor::isValid(const std::vector<ioda::ObsDataRow<int>> &flags, size_t obsId,
+                          bool validIfAnyFilterVariablePassedQC) const {
+  bool obIsNotFlagged;
+  if (validIfAnyFilterVariablePassedQC) {
+    obIsNotFlagged = false;
+    for (size_t irow = 0; irow < flags.size(); ++irow) {
+      if (flags[irow][obsId] == QCflags::pass) {
+        obIsNotFlagged = true;
+        break;
+      }
+    }
+  } else {
+    obIsNotFlagged = true;
+    for (size_t irow = 0; irow < flags.size(); ++irow) {
+      if (flags[irow][obsId] != QCflags::pass) {
+        obIsNotFlagged = false;
+        break;
+      }
+    }
+  }
+  return obIsNotFlagged;
+}
+
 RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
-    const std::vector<size_t> &validObsIds) const {
-  RecursiveSplitter splitter(validObsIds.size());
+    const std::vector<size_t> &validObsIds, bool opsCompatibilityMode) const {
+  RecursiveSplitter splitter(validObsIds.size(), opsCompatibilityMode);
   switch (groupBy_) {
   case GroupBy::NOTHING:
     // Nothing to do

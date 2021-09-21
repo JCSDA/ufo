@@ -23,18 +23,13 @@ static PredictorMaker<ScanAngle> makerFuncScanAngle_("scan_angle");
 
 // -----------------------------------------------------------------------------
 
-ScanAngle::ScanAngle(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars), order_(1) {
-  // get the order if it is provided in options
-  if (conf.has("options.order")) {
-    conf.get("options.order", order_);
-
-    // override the predictor name for differentiable
+ScanAngle::ScanAngle(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars),
+    order_(parameters.order.value().value_or(1)),
+    var_name_(parameters.varName) {
+  if (parameters.order.value() != boost::none) {
+    // override the predictor name to distinguish between scan_angle predictors of different orders
     name() = name() + "_order_" + std::to_string(order_);
-  }
-
-  if (conf.has("options.var_name")) {
-    conf.get("options.var_name", var_name_);
   }
 }
 
@@ -49,11 +44,7 @@ void ScanAngle::compute(const ioda::ObsSpace & odb,
 
   // retrieve the sensor view angle
   std::vector<float> view_angle(nlocs, 0.0);
-  if ( var_name_.empty() ) {
-    odb.get_db("MetaData", "sensor_view_angle", view_angle);
-  } else {
-    odb.get_db("MetaData", var_name_, view_angle);
-  }
+  odb.get_db("MetaData", var_name_, view_angle);
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {

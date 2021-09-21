@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
@@ -30,7 +28,7 @@ class LinearCombinationParameters : public oops::Parameters {
 
  public:
   /// Input variables of the linear combination
-  oops::RequiredParameter<std::vector<ufo::Variable>> variables{"variables", this};
+  oops::RequiredParameter<std::vector<Variable>> variables{"variables", this};
   /// coefficient associated with the above variables
   oops::RequiredParameter<std::vector<float>> coefs{"coefs", this};
 };
@@ -39,7 +37,7 @@ class LinearCombinationParameters : public oops::Parameters {
 
 /// \brief Outputs a linear combination of variables
 ///
-/// For example, the following
+/// Example 1
 ///
 ///  obs function:
 ///    name: LinearCombination@ObsFunction
@@ -49,12 +47,28 @@ class LinearCombinationParameters : public oops::Parameters {
 ///      coefs: [0.1,
 ///              1.0]
 ///
-/// will return 0.1 *representation_error@GeoVaLs +
+/// will return 0.1 * representation_error@GeoVaLs +
 ///             1.0 * sea_water_temperature@ObsError
 ///
+/// Example 2 - multi-channel
+///
+///  obs function:
+///    name: LinearCombination@ObsFunction
+///    channels: &select_chans 6-15, 18-22 # this line may be needed depending on the filter used
+///    options:
+///      variables:
+///      - name: brightness_temperature@ObsValue
+///        channels: *select_chans
+///      - name: brightness_temperature@ObsError
+///        channels: *select_chans
+///      coefs: [1.0,
+///              0.5]
+///
+/// will return 1.0 * brightness_temperature_<channel>@ObsValue +
+///             0.5 * brightness_temperature_<channel>@ObsError
+///
 
-
-class LinearCombination : public ObsFunctionBase {
+class LinearCombination : public ObsFunctionBase<float> {
  public:
   explicit LinearCombination(const eckit::LocalConfiguration &);
   ~LinearCombination();

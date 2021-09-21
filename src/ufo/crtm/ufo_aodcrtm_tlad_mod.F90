@@ -397,13 +397,6 @@ INTEGER :: jaero
  DO jaero=1,self%conf%n_aerosols
 
     CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
-! allocate if not yet allocated
-    IF (.NOT. ALLOCATED(var_p%vals)) THEN
-       var_p%nlocs = self%n_Profiles
-       var_p%nval = self%n_Layers
-       ALLOCATE(var_p%vals(var_p%nval,var_p%nlocs))
-       var_p%vals = 0.0_kind_real
-    ENDIF
 
 ! Multiply by Jacobian and add to hofx (adjoint)
     DO jprofile = 1, self%n_Profiles

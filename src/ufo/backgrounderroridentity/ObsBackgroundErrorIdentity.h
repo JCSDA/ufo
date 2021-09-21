@@ -17,17 +17,13 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
 
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -39,16 +35,10 @@ namespace ufo {
   class ObsDiagnostics;
 
 /// \brief Options controlling the ObsBackgroundErrorIdentity observation operator.
-class ObsBackgroundErrorIdentityParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsBackgroundErrorIdentityParameters, Parameters)
+class ObsBackgroundErrorIdentityParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsBackgroundErrorIdentityParameters, ObsOperatorParametersBase)
 
  public:
-  /// Name of the ObsOperator. Must be BackgroundErrorIdentity.
-  ///
-  /// TODO(wsmigaj): create an ObsOperatorParametersBase class, move this parameter there and
-  /// derive ObsBackgroundErrorIdentityParameters from that class.
-  oops::Parameter<std::string> name{"name", "", this};
-
   /// Simulated variables whose background errors may be calculated by this operator.
   /// If not specified, defaults to the list of all simulated variables in the ObsSpace.
   oops::OptionalParameter<std::vector<Variable>> variables{"variables", this};
@@ -82,9 +72,13 @@ class ObsBackgroundErrorIdentityParameters : public oops::Parameters {
 class ObsBackgroundErrorIdentity : public ObsOperatorBase,
                                      private util::ObjectCounter<ObsBackgroundErrorIdentity> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsBackgroundErrorIdentityParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsBackgroundErrorIdentity";}
 
-  ObsBackgroundErrorIdentity(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBackgroundErrorIdentity(const ioda::ObsSpace &, const Parameters_ &);
 
   virtual ~ObsBackgroundErrorIdentity();
 
@@ -99,7 +93,7 @@ class ObsBackgroundErrorIdentity : public ObsOperatorBase,
 
  private:
   const ioda::ObsSpace& odb_;
-  ObsBackgroundErrorIdentityParameters parameters_;
+  Parameters_ parameters_;
   oops::Variables requiredVars_;
 };
 

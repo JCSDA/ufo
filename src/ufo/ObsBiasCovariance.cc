@@ -42,8 +42,10 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
-  for (const eckit::LocalConfiguration &conf : params.variationalBC.value().predictors.value()) {
-    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(conf, vars_));
+  for (const PredictorParametersWrapper &wrapper :
+       params.variationalBC.value().predictors.value()) {
+    std::shared_ptr<PredictorBase> pred(PredictorFactory::create(wrapper.predictorParameters,
+                                                                 vars_));
     prednames_.push_back(pred->name());
   }
 
@@ -194,17 +196,17 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
           odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
 
       // Retrieve the QC flags of previous outer loop and recalculate the number of effective obs.
-      const std::string group_name = "EffectiveQC" + std::to_string(jouter-1);
+      const std::string qc_group_name = "EffectiveQC" + std::to_string(jouter-1);
       const std::vector<std::string> vars = odb_.obsvariables().variables();
       std::vector<int> qc_flags(odb_.nlocs(), 999);
       for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
-        if (odb_.has(group_name, vars[jvar])) {
-          odb_.get_db(group_name, vars[jvar], qc_flags);
+        if (odb_.has(qc_group_name, vars[jvar])) {
+          odb_.get_db(qc_group_name, vars[jvar], qc_flags);
           for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
             if (qc_flags[jloc] == 0)
               obs_num_accumulator->addTerm(jloc, jvar, 1);
         } else {
-          throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + group_name);
+          throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + qc_group_name);
         }
       }
 
@@ -215,7 +217,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
       // compute the hessian contribution from Jo bias terms channel by channel
       // retrieve the effective error (after QC) for this channel
-      ioda::ObsVector r_inv(odb_, "EffectiveError");
+      const std::string err_group_name = "EffectiveError" + std::to_string(jouter-1);
+      ioda::ObsVector r_inv(odb_, err_group_name);
 
       // compute \mathrm{R}^{-1}
       std::size_t nvars = r_inv.nvars();

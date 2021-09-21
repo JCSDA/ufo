@@ -704,7 +704,7 @@ do jvar = 1, nmvars
         call abor1_ftn("rttovonedvarcheck not setup for independent clw yet")
       end if
 
-    case (var_u, var_v)
+    case (var_sfc_u10, var_sfc_v10)
       fields_in(counter) = 11 ! surface wind speed
 
     ! 12 - o3profile is not implmented yet

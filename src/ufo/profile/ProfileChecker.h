@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/filters/ConventionalProfileProcessingParameters.h"
 
 namespace ufo {
   class ProfileDataHandler;
@@ -36,7 +36,7 @@ namespace ufo {
   /// Runs the various QC checks on individual profiles and modifies flags accordingly.
   class ProfileChecker {
    public:
-    explicit ProfileChecker(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileChecker(const ConventionalProfileProcessingParameters &options);
 
     /// Type for container of check subgroups.
     typedef std::vector <CheckSubgroup> CheckSubgroupList;
@@ -65,7 +65,7 @@ namespace ufo {
 
    private:
     /// Configurable parameters
-    const ProfileConsistencyCheckParameters &options_;
+    const ConventionalProfileProcessingParameters &options_;
 
     /// Checks to perform
     std::vector <std::string> checks_;

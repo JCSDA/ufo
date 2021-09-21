@@ -75,7 +75,7 @@ class BennartzScatIndexParameters : public oops::Parameters {
 /// support of nowcasting applications
 /// Meteorol. Appl. 9, 177-189 (2002) DOI:10.1017/S1350482702002037
 
-class BennartzScatIndex : public ObsFunctionBase {
+class BennartzScatIndex : public ObsFunctionBase<float> {
  public:
   explicit BennartzScatIndex(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());

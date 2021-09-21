@@ -27,13 +27,11 @@ namespace ufo {
 static ObsOperatorMaker<ObsBackgroundErrorIdentity> maker("BackgroundErrorIdentity");
 
 ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & odb,
-                                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config),
-    odb_(odb)
+                                                       const Parameters_ & parameters)
+  : ObsOperatorBase(odb),
+    odb_(odb), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBackgroundErrorIdentity constructor entered" << std::endl;
-
-  parameters_.validateAndDeserialize(config);
 
   // simulateObs() may be asked to interpolate the background errors of any simulated variables.
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.

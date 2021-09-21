@@ -115,39 +115,36 @@ observations:
     reference:
       name: assigned_string_variable_2@TestReference
 
-# We can't test datetime variables yet because there's no way to store reference data in the
-# ObsSpace: the loader recognizes only a single variable of type DateTime: datetime@MetaData.
-#
-#- obs space:
-#    <<: *ObsSpace
-#    name: Assign a fixed value to a pre-existing datetime variable
-#  obs filters:
-#  - filter: Variable Assignment
-#    where: *Where
-#    assignments:
-#    - name: datetime@MetaData
-#      value: 2000-01-02T03:04:05Z
-#  compareVariables:
-#  - test:
-#      name: datetime@MetaData
-#    reference:
-#      name: assigned_datetime_variable_1@TestReference
-#
-#- obs space:
-#    <<: *ObsSpace
-#    name: Assign a fixed value to a new datetime variable
-#  obs filters:
-#  - filter: Variable Assignment
-#    where: *Where
-#    assignments:
-#    - name: new_variable@MetaData
-#      value: 2000-01-02T03:04:05Z
-#      type: string
-#  compareVariables:
-#  - test:
-#      name: new_variable@MetaData
-#    reference:
-#      name: assigned_datetime_variable_2@TestReference
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: datetime@MetaData
+      value: 2000-01-02T03:04:05Z
+  compareVariables:
+  - test:
+      name: datetime@MetaData
+    reference:
+      name: assigned_datetime_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a new datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      value: 2000-01-02T03:04:05Z
+      type: datetime
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_datetime_variable_2@TestReference
 
 - obs space:
     <<: *ObsSpace
@@ -265,6 +262,153 @@ observations:
     reference:
       name: assigned_int_variable_4@TestReference
 
+- obs space:
+    <<: *ObsSpace
+    name: Copy a float variable to another (pre-existing) float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: float_variable_1@MetaData
+      source variable:
+        name: assigned_float_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a float variable to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      type: float
+      source variable:
+        name: assigned_float_variable_3@TestReference
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_float_variable_4@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy an int variable to another (pre-existing) int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: int_variable_1@MetaData                  # [1, 75, 75, 75, 5]
+      source variable:
+        name: assigned_int_variable_3@TestReference  # [1, 2, 3, 4, 5]
+  compareVariables:
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy an int variable to a new int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: new_variable@MetaData
+      type: int
+      source variable:
+        name: assigned_int_variable_3@TestReference  # [1, 2, 3, 4, 5]
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_int_variable_4@TestReference    # [_, 2, 3, 4, _]
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a string variable to another (pre-existing) string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: string_variable_1@MetaData                 # ["ABC", "DEF", "GHI", "JKL", "MNO"]
+      source variable:
+        name: assigned_string_variable_2@TestReference # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+  compareVariables:
+  - test:
+      name: string_variable_1@MetaData
+    reference:
+      name: assigned_string_variable_1@TestReference   # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a string variable to a new string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: new_variable@MetaData
+      type: string
+      source variable:
+        name: assigned_string_variable_1@TestReference  # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_string_variable_2@TestReference    # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a datetime variable to another (pre-existing) datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: datetime@MetaData                            # ["2018-04-15T06:00:00Z", "2018-04-16T15:00:00Z", "2018-04-17T06:00:00Z", "2018-04-18T15:00:00Z", "2018-04-19T06:00:00Z"]
+      source variable:
+        name: assigned_datetime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+  compareVariables:
+  - test:
+      name: datetime@MetaData
+    reference:
+      name: assigned_datetime_variable_1@TestReference   # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a datetime variable to a new datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where  # selects observations 1, 2 and 3
+    assignments:
+    - name: new_variable@MetaData
+      type: datetime
+      source variable:
+        name: assigned_datetime_variable_1@TestReference  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_datetime_variable_2@TestReference    # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a float variable to a (pre-existing) int variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: int_variable_1@MetaData                       # [1, 2, 3, 4, 5]
+      source variable:
+        name: assigned_float_variable_7@TestReference     # [_, 74.5, 74.9, 75.4, _]
+  compareVariables:
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_2@TestReference         # [_, 75, 75, 75, _]
+
 ## Test Conditional ObsFunction "add on" - Example 1
 ## Float variable assignment including multiple where in a case
 - obs space:
@@ -331,6 +475,56 @@ observations:
       name: conditional_assignment_variable_1@MetaData
     reference:
       name: assigned_int_variable_2@TestReference
+
+- obs space: &ObsSpace
+    name: Assign values produced by a string-valued ObsFunction to a string variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: string_variable_1@MetaData
+      function:
+        name: Conditional@StringObsFunction
+        options:
+          cases:
+          - where:
+            - variable:
+                # [1, 2, 3, 4, 5]
+                name: int_variable_1@MetaData
+              is_in: 2-4
+            value: XYZ
+  compareVariables:
+  - test:
+      name: string_variable_1@MetaData
+    reference:
+      name: assigned_string_variable_2@TestReference # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+
+- obs space: &ObsSpace
+    name: Assign values produced by a datetime-valued ObsFunction to a datetime variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: datetime@MetaData
+      function:
+        name: Conditional@DateTimeObsFunction
+        options:
+          cases:
+          - where:
+            - variable:
+                # [1, 2, 3, 4, 5]
+                name: int_variable_1@MetaData
+              is_in: 2-4
+            value: 2000-01-02T03:04:05Z
+  compareVariables:
+  - test:
+      name: datetime@MetaData
+    reference:
+      name: assigned_datetime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
 
 ## Tests on the obsspace with multiple channels
 
@@ -559,13 +753,85 @@ observations:
           x1: [10]
           err0: [0.25]
           err1: [5]
-  expectExceptionWithMessage: ObsFunction values cannot be assigned to non-numeric variables
+  expectExceptionWithMessage: ObsErrorModelRamp@ObsFunction is not a function producing values of type std::string
 
 - obs space: &ObsSpace
-    name: Try to assign values to an existing variable from the ObsValue group
+    name: Try to assign values produced by a string-valued ObsFunction to a floating-point variable
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: float_variable_1@MetaData
+      function:
+        name: Conditional@StringObsFunction
+        options:
+          cases:
+          - where:
+            - variable:
+                # [1, 2, 3, 4, 5]
+                name: int_variable_1@MetaData
+              is_in: 2-4
+            value: XYZ
+  expectExceptionWithMessage: Conditional@StringObsFunction is not a function producing numeric values
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
+    name: Try to copy a string variable into a float variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: float_variable_1@MetaData
+      source variable:
+        name: string_variable_1@MetaData
+  expectExceptionWithMessage: string_variable_1@MetaData is not a numeric variable
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
+    name: Try to copy a string variable into an int variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: int_variable_1@MetaData
+      source variable:
+        name: string_variable_1@MetaData
+  expectExceptionWithMessage: string_variable_1@MetaData is not a numeric variable
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
+    name: Try to copy a float variable into a string variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: string_variable_1@MetaData
+      source variable:
+        name: float_variable_1@MetaData
+  # Unfortunately in this case ioda throws a nested exception; the message attached to the
+  # innermost exception is fairly clear (Requested data type not equal to storage datatype),
+  # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
+  # rather generic and only includes the code location where the exception was thrown.
+  expectExceptionWithMessage: ::read
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
+    name: Try to copy a float variable into a datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: datetime@MetaData
+      source variable:
+        name: float_variable_1@MetaData
+  # Unfortunately in this case ioda throws a nested exception; the message attached to the
+  # innermost exception is fairly clear (Requested data type not equal to storage datatype),
+  # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
+  # rather generic and only includes the code location where the exception was thrown.
+  expectExceptionWithMessage: ::read
+
+- obs space:
+    <<: *ObsSpace
+    name: Try to assign values to an existing variable from the ObsValue group
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -573,11 +839,9 @@ observations:
       value: 75.5
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
 
-- obs space: &ObsSpace
+- obs space:
+    <<: *ObsSpace
     name: Try to assign values to a new variable from the ObsValue group
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -586,14 +850,23 @@ observations:
       type: float
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
 
-- obs space: &ObsSpace
+- obs space:
+    <<: *ObsSpace
     name: Try to assign values to a new variable without specifying its type
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
     - name: new_variable@MetaData
       value: ABCDEF
   expectExceptionWithMessage: You need to specify the type of the variable to be created
+
+- obs space:
+    <<: *ObsSpace
+    name: Try to assign out-of-range floating-point values to an int variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: new_variable@MetaData
+      type: int
+      source variable: float_variable_3@MetaData  # contains 1e20
+  expectExceptionWithMessage: Value 1.00000002e+20 can not be represented in the target integer type

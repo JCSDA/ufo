@@ -35,24 +35,26 @@ class SatwindIndivErrorsParameters : public oops::Parameters {
   oops::RequiredParameter<float> eu_add{"verror add", this};
   /// Vector error estimate multiply
   oops::RequiredParameter<float> eu_mult{"verror mult", this};
-  /// Profile we are calculating error for
+  /// String containing the name of the wind component we are calculating the error for
   oops::RequiredParameter<std::string> profile{"wind component", this};
-  /// vertical coordinate to use
+  /// String containing the vertical coordinate to use for the wind component
   oops::RequiredParameter<std::string> vcoord{"vertical coordinate", this};
-  /// default pressure error (Pa)
-  oops::RequiredParameter<float> default_err_p{"default pressure error", this};
-  /// ignore contribution above height of minimum pressure (Pa)
-  oops::OptionalParameter<float> min_press{"minimum pressure", this};
+  /// Ignore contribution above height of minimum pressure (Pa)
+  oops::Parameter<float> min_press{"minimum pressure", 10000.0, this};
+  /// Name of the variable containing the input height error estimates (Pa)
+  oops::RequiredParameter<Variable> pressure_error{"pressure error", this};
+  /// Name of the variable containing quality index values for use in the vector error calculation
+  oops::RequiredParameter<Variable> quality_index{"quality index", this};
 };
 
 // -----------------------------------------------------------------------------
 
 ///
 /// \brief Function calculates individual observation errors for Satwind u and v winds
-///  dependent on an input height (pressure) error estimate and the wind shear.
+///  dependent on an input pressure error estimate and the model wind shear.
 ///
 
-class SatwindIndivErrors : public ObsFunctionBase {
+class SatwindIndivErrors : public ObsFunctionBase<float> {
  public:
   explicit SatwindIndivErrors(const eckit::LocalConfiguration &);
   ~SatwindIndivErrors();

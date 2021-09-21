@@ -102,9 +102,9 @@ contains
     ind = ind + 1
     self%varin(ind) = var_sfc_tskin
     ind = ind + 1
-    self%varin(ind) = var_u
+    self%varin(ind) = var_sfc_u10
     ind = ind + 1
-    self%varin(ind) = var_v
+    self%varin(ind) = var_sfc_v10
 
     ! save channels
     allocate(self%channels(size(channels)))
@@ -242,22 +242,28 @@ contains
 
       ! Build the list of profile/channel indices in chanprof
       do iprof_rttov = 1, nprof_sim
+        errorstatus = errorstatus_success
 
         ! iprof is the index for the full set of RTTOV profiles
         iprof = prof_start + iprof_rttov - 1
 
-        do ichan = 1, nchan_inst
-          ichan_sim = ichan_sim + 1_jpim
-          chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
-          chanprof(ichan_sim) % chan = self % channels(ichan)
-          self % RTprof_K % chanprof(nchan_total + ichan_sim) % prof = iprof
-          self % RTprof_K % chanprof(nchan_total + ichan_sim) % chan = self % channels(ichan)
-        end do
-        nchan_sim = ichan_sim
-
-        if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check(self % conf, iprof, i_inst)
+        ! print profile information if requested
         if(any(self % conf % inspect == iprof)) call self % RTprof_K % print(self % conf, iprof, i_inst)
-            
+
+        ! check RTTOV profile and flag it if it fails the check
+        if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check(self % conf, iprof, i_inst, errorstatus)
+
+        if (errorstatus == errorstatus_success) then 
+          do ichan = 1, nchan_inst
+            ichan_sim = ichan_sim + 1_jpim
+            chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
+            chanprof(ichan_sim) % chan = self % channels(ichan)
+            self % RTprof_K % chanprof(nchan_total + ichan_sim) % prof = iprof ! this refers to the index of the profile from the geoval
+            self % RTprof_K % chanprof(nchan_total + ichan_sim) % chan = self % channels(ichan)
+          end do
+          nchan_sim = ichan_sim
+        endif
+                  
       end do
 
       ! Set surface emissivity
@@ -283,14 +289,15 @@ contains
         emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))!,           &! inout input/output emissivities per channel      
       
       if ( errorstatus /= errorstatus_success ) then
-        write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst
-        call abor1_ftn(message)
+        write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst, &
+                                     ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
+        call fckit_log%info(message)
+      else
+        ! Put simulated diagnostics into hofxdiags
+        ! ----------------------------------------------
+        if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
       end if
       
-      ! Put simulated diagnostics into hofxdiags
-      ! ----------------------------------------------
-      if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, chanprof, self % conf, hofxdiags)
-
       ! increment profile and channel counters
       nchan_total = nchan_total + nchan_sim
       prof_start = prof_start + nprof_sim
@@ -435,8 +442,8 @@ end subroutine ufo_radiancerttov_tlad_settraj
     end do
 
     !windspeed
-    call ufo_geovals_get_var(geovals, var_u, geoval_d)
-    call ufo_geovals_get_var(geovals, var_v, geoval_d2)
+    call ufo_geovals_get_var(geovals, var_sfc_u10, geoval_d)
+    call ufo_geovals_get_var(geovals, var_sfc_v10, geoval_d2)
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
@@ -502,14 +509,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
     ! -----------
     call ufo_geovals_get_var(geovals, var_ts, geoval_d) ! var_ts = air_temperature
 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
-      geoval_d % vals = zero
-    end if
-
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
       do jchan = 1, size(self%channels)
@@ -526,14 +525,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     do jspec = 1, self%conf%ngas
       call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
-
-      ! allocate if not yet allocated
-      if (.not. allocated(geoval_d % vals)) then
-        geoval_d % nlocs = self % nprofiles
-        geoval_d % nval = self % nlevels
-        allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
-        geoval_d % vals = zero
-      end if
 
       do ichan = 1, self % nchan_total, size(self%channels)
         prof = self % RTprof_K % chanprof(ichan) % prof
@@ -570,14 +561,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval_d) 
 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
-
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
       do jchan = 1, size(self%channels)
@@ -590,13 +573,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     !q2m
     call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval_d) 
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
@@ -610,20 +586,8 @@ end subroutine ufo_radiancerttov_tlad_settraj
     end do
       
     !windspeed
-    call ufo_geovals_get_var(geovals, var_u, geoval_d)
-    call ufo_geovals_get_var(geovals, var_v, geoval_d2)
-
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      geoval_d2 % nlocs = self % nprofiles
-      geoval_d2 % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs), &
-        geoval_d2 % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-      geoval_d2 % vals = zero
-    end if
+    call ufo_geovals_get_var(geovals, var_sfc_u10, geoval_d)
+    call ufo_geovals_get_var(geovals, var_sfc_v10, geoval_d2)
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof
@@ -640,14 +604,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     !Tskin
     call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval_d)
-
-    ! allocate if not yet allocated
-    if (.not. allocated(geoval_d % vals)) then
-      geoval_d % nlocs = self % nprofiles
-      geoval_d % nval = self % nlevels
-      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
-      geoval_d % vals = zero
-    end if
 
     do ichan = 1, self % nchan_total, size(self%channels)
       prof = self % RTprof_K % chanprof(ichan) % prof

@@ -16,7 +16,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -42,8 +41,7 @@ ObsAvgKernelTLAD::~ObsAvgKernelTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAvgKernelTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                         ObsDiagnostics &) {
+void ObsAvgKernelTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
   oops::Log::trace() << "ObsAvgKernelTLAD::setTrajectory entering" << std::endl;
 
   ufo_avgkernel_tlad_settraj_f90(keyOperAvgKernel_, geovals.toFortran(), obsspace());

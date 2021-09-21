@@ -33,14 +33,14 @@ class VariableTransformsParameters;
 
 namespace ufo {
 
-/// \brief Main filter to apply some variable convertion.
+/// \brief Main filter to apply some variable conversion.
 ///
-/// See variabletransformsParameters for the documentation of the available
+/// See VariableTransformsParameters for the documentation of the available
 /// parameters and options.
 ///
 /// \par Important:
 /// Any new variable created is assigned to the observation space with the
-/// "@DerivedValue" tag.
+/// "@DerivedObsValue" tag.
 ///
 class VariableTransforms : public FilterBase,
                            private util::ObjectCounter<VariableTransforms> {

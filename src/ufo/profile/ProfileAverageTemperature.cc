@@ -23,7 +23,7 @@ namespace ufo {
   makerProfileAverageTemperature_("AverageTemperature");
 
   ProfileAverageTemperature::ProfileAverageTemperature
-  (const ProfileConsistencyCheckParameters &options)
+  (const ConventionalProfileProcessingParameters &options)
     : ProfileCheckBase(options)
   {}
 

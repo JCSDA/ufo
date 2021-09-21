@@ -20,8 +20,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
+LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
+  : oper_(LinearObsOperatorFactory::create(os, params.operatorParameters)), odb_(os)
 {
   // We use += rather than = to make sure the Variables objects contain no duplicate entries
   // and the variables are sorted alphabetically.
@@ -47,7 +47,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   odb_.get_db("MetaData", "longitude", lons);
   odb_.get_db("MetaData", "datetime", times);
   ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
-  oper_->setTrajectory(gvals, bias, ydiags);
+  oper_->setTrajectory(gvals, ydiags);
   if (bias) {
     biasoper_.reset(new LinearObsBiasOperator(odb_));
     biasoper_->setTrajectory(gvals, bias, ydiags);

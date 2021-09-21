@@ -17,8 +17,8 @@ static PredictorMaker<Constant> makerFuncConstant_("constant");
 
 // -----------------------------------------------------------------------------
 
-Constant::Constant(const eckit::Configuration & conf, const oops::Variables & vars)
-  : PredictorBase(conf, vars) {
+Constant::Constant(const Parameters_ & parameters, const oops::Variables & vars)
+  : PredictorBase(parameters, vars) {
 }
 
 // -----------------------------------------------------------------------------

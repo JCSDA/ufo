@@ -27,13 +27,11 @@ namespace ufo {
 static ObsOperatorMaker<ObsBackgroundErrorVertInterp> maker("BackgroundErrorVertInterp");
 
 ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace & odb,
-                                                           const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config),
-    odb_(odb)
+                                                           const Parameters_ & parameters)
+  : ObsOperatorBase(odb),
+    odb_(odb), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBackgroundErrorVertInterp constructor entered" << std::endl;
-
-  parameters_.validateAndDeserialize(config);
 
   requiredVars_.push_back(parameters_.verticalCoordinate);
   // simulateObs() may be asked to interpolate the background errors of any simulated variables.

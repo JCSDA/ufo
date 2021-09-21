@@ -20,7 +20,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class ProfileConsistencyCheckParameters;
+  class ConventionalProfileProcessingParameters;
 }
 
 namespace ufo {
@@ -28,7 +28,7 @@ namespace ufo {
   /// \brief Profile QC: reject observations which are flagged to be permanently rejected.
   class ProfileCheckPermanentReject : public ProfileCheckBase {
    public:
-    explicit ProfileCheckPermanentReject(const ProfileConsistencyCheckParameters &options);
+    explicit ProfileCheckPermanentReject(const ConventionalProfileProcessingParameters &options);
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;

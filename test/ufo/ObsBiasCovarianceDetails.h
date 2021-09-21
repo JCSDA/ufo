@@ -40,8 +40,9 @@ void testObsBiasCovarianceDetails() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
-    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::world(),
-                       bgn, end, oops::mpi::myself());
+    ioda::ObsTopLevelParameters obsparams;
+    obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
+    ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
     // Setup ObsBias
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
@@ -80,7 +81,7 @@ void testObsBiasCovarianceDetails() {
     // mimic effective errors
     const std::vector<float> errs(odb.nlocs(), 1.0);
     for ( const auto & var : vars)
-     odb.put_db("EffectiveError", var , errs);
+     odb.put_db("EffectiveError0", var , errs);
 
     // mimic predictors
     ioda::ObsVector predx(odb);

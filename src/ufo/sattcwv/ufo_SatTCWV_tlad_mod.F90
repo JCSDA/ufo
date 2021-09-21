@@ -293,14 +293,6 @@ subroutine ufo_sattcwv_simobs_ad(self, geovals, hofx, obss)
   nlev =  self % nlevq  ! Number of layers
   nlocs = self % nlocs  ! Number of observations
 
-! Allocate the output for the specific humidity perturbations
-  if (.not. allocated(q_d%vals)) then
-      q_d % nlocs = self % nlocs
-      q_d % nval = self % nlevq
-      allocate(q_d % vals(q_d % nval, q_d % nlocs))
-      q_d % vals = zero
-  endif
-!
   missing = missing_value(missing)
 ! Allocate state vector x_d
   allocate(x_d(1:nlev))

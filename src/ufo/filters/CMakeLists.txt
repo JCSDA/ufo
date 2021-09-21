@@ -12,11 +12,16 @@ set ( filters_files
       BayesianBackgroundCheck.h
       BlackList.cc
       BlackList.h
+      ConventionalProfileProcessing.cc
+      ConventionalProfileProcessing.h
+      ConventionalProfileProcessingParameters.h
       DifferenceCheck.cc
       DifferenceCheck.h
       FilterBase.cc
       FilterBase.h
       FilterParametersBase.h
+      FinalCheck.cc
+      FinalCheck.h
       GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
@@ -41,6 +46,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      ModelBestFitPressure.cc
+      ModelBestFitPressure.h
       ModelObThreshold.cc
       ModelObThreshold.h
       MWCLWCheck.cc
@@ -57,6 +64,10 @@ set ( filters_files
       ObsFilterData.h
       PreQC.cc
       PreQC.h
+      ProbabilityGrossErrorWholeReport.cc
+      ProbabilityGrossErrorWholeReport.h
+      ProcessAMVQI.cc
+      ProcessAMVQI.h
       QCflags.h
       QCmanager.cc
       QCmanager.h
@@ -64,13 +75,12 @@ set ( filters_files
       PerformAction.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
-      ProfileConsistencyChecks.cc
-      ProfileConsistencyChecks.h
-      ProfileConsistencyCheckParameters.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
       SatName.h
       SatName.cc
+      SatwindInversionCorrection.cc
+      SatwindInversionCorrection.h
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
@@ -127,6 +137,8 @@ set ( filters_files
       actions/FilterActionBase.h
       actions/InflateError.cc
       actions/InflateError.h
+      actions/PassivateObs.cc
+      actions/PassivateObs.h
       actions/RejectObs.cc
       actions/RejectObs.h
       obsfunctions/BennartzScatIndex.cc
@@ -145,6 +157,8 @@ set ( filters_files
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/Conditional.cc
       obsfunctions/Conditional.h
+      obsfunctions/SetSurfaceType.cc
+      obsfunctions/SetSurfaceType.h
       obsfunctions/SIRetMW.cc
       obsfunctions/SIRetMW.h
       obsfunctions/SIRetSymmetricMW.cc
@@ -175,6 +189,14 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
+      obsfunctions/ModelHeightAdjustedWindVectorComponent.cc
+      obsfunctions/ModelHeightAdjustedWindVectorComponent.h
+      obsfunctions/ModelHeightAdjustedAirTemperature.cc
+      obsfunctions/ModelHeightAdjustedAirTemperature.h
+      obsfunctions/ModelHeightAdjustedRelativeHumidity.cc
+      obsfunctions/ModelHeightAdjustedRelativeHumidity.h
+      obsfunctions/ModelHeightAdjustedMarineWind.cc
+      obsfunctions/ModelHeightAdjustedMarineWind.h
       obsfunctions/ObsErrorBoundIR.cc
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
@@ -215,6 +237,8 @@ set ( filters_files
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      obsfunctions/SolarZenith.cc
+      obsfunctions/SolarZenith.h
       obsfunctions/SunGlintAngle.cc
       obsfunctions/SunGlintAngle.h
       obsfunctions/TropopauseEstimate.cc

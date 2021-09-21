@@ -28,9 +28,12 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/filters/VariableTransformsParameters.h"
 #include "ufo/variabletransforms/Formulas.h"
+
 
 namespace ioda {
 template <typename DATATYPE>
@@ -41,6 +44,7 @@ class ObsVector;
 
 namespace ufo {
 class VariableTransformsParameters;
+class Variables;
 }
 
 namespace ufo {
@@ -49,41 +53,108 @@ namespace ufo {
 class TransformBase {
  public:
   TransformBase(const VariableTransformsParameters &options,
-                ioda::ObsSpace &os,
+                const ObsFilterData& data,
                 const std::shared_ptr<ioda::ObsDataVector<int>>& flags);
   /// Destructor
   virtual ~TransformBase() {}
   /// Run variable conversion
-  virtual void runTransform() = 0;
+  virtual void runTransform(const std::vector<bool> &apply) = 0;
+  /// Return list of required geovals
+  virtual Variables requiredVariables() const { return Variables(); }
 
  private:
-  void filterObservation(const std::string &variable, std::vector<float> &obsVector) const;
+  /// templated function for float, int data types
+  template <typename T>
+  void filterObservation(const std::string &variableName,
+                         std::vector<T> &obsVector) const {
+    if (flags_.has(variableName)) {
+      const T missing = util::missingValue(T());
+      const std::vector<int> *varFlags = &flags_[variableName];
+
+      std::transform(obsVector.begin(), obsVector.end(),  // Input range 1
+                     varFlags->begin(),  // 1st element of input range vector 2 (must be same size)
+                     obsVector.begin(),  // 1st element of output range (must be same size)
+                     [missing](T obsvalue, int flag)
+                     { return flag == QCflags::missing || flag == QCflags::bounds
+                       ? missing : obsvalue; });
+    }
+  }
+
   /// Method used for the calculation
   formulas::MethodFormulation method_;
   formulas::MethodFormulation formulation_;
   bool UseValidDataOnly_;
+  bool AllowSuperSaturation_;
   /// The observation name
   std::string obsName_;
 
- protected:  // variables
+ protected:
+  /// templated function for float, int data types
+  template <typename T>
   void getObservation(const std::string &originalTag, const std::string &varName,
-                      std::vector<float> &obsVector, bool require = false) const;
+                      std::vector<T> &obsVector, bool require = false) const {
+    if (!obsdb_.has(originalTag, varName)) {
+      if (require)
+        throw eckit::BadValue("The parameter `" + varName + "@" + originalTag +
+                              "` does not exist in the ObsSpace ", Here());
+      else
+        return;
+    }
+
+    obsVector.resize(obsdb_.nlocs());
+    obsdb_.get_db(originalTag, varName, obsVector);
+    // Set obsValue to missingValue if flag is equal to QCflags::missing or QCflags::bounds
+    if (UseValidDataOnly()) filterObservation(varName, obsVector);
+  }
+
+  /// \brief Save a transformed variable to the `DerivedObsValue` group of the obs space.
+  ///
+  /// If the saved variable is a simulated variable, QC flags previously set to `missing` are reset
+  /// to `pass` at locations where a valid obs value has been assigned. Conversely, QC flags
+  /// previously set to `pass` are reset to `missing` at locations where the variable is set to a
+  /// missing value.
+  ///
+  /// \param varName Variable name.
+  /// \param obsVactor Variable values.
+  template <typename T>
+  void putObservation(const std::string &varName, const std::vector<T> &obsVector) {
+    obsdb_.put_db(outputTag, varName, obsVector);
+    if (flags_.has(varName)) {
+      std::vector<int> &varFlags = flags_[varName];
+      ASSERT(varFlags.size() == obsVector.size());
+
+      const T missing = util::missingValue(T());
+      for (size_t iloc = 0; iloc < obsVector.size(); ++iloc) {
+        if (varFlags[iloc] == QCflags::missing && obsVector[iloc] != missing)
+          varFlags[iloc] = QCflags::pass;
+        else if (varFlags[iloc] == QCflags::pass && obsVector[iloc] == missing)
+          varFlags[iloc] = QCflags::missing;
+      }
+    }
+  }
+
   /// subclasses to access Method and formualtion used for the calculation
   formulas::MethodFormulation method() const { return method_; }
   formulas::MethodFormulation formulation() const { return formulation_; }
   bool UseValidDataOnly() const { return UseValidDataOnly_; }
+  bool AllowSuperSaturation() const { return AllowSuperSaturation_; }
   void SetUseValidDataOnly(bool t) {UseValidDataOnly_ = t; }
   /// subclasses to access the observation name
   std::string obsName() const { return obsName_; }
   /// Configurable parameters
   const VariableTransformsParameters &options_;
+
+  /// Observation and geoval data
+  ObsFilterData data_;
   /// Observation space
-  ioda::ObsSpace &obsdb_;
-  const ioda::ObsDataVector<int> &flags_;
+  ioda::ObsSpace &obsdb_ = data_.obsspace();
+  ioda::ObsDataVector<int> &flags_;
+  /// Missing value (int)
+  const int missingValueInt = util::missingValue(1);
   /// Missing value (float)
   const float missingValueFloat = util::missingValue(1.0f);
   /// output tag for derived parameters
-  const std::string outputTag = "DerivedValue";
+  const std::string outputTag = "DerivedObsValue";
 };
 
 /// \brief Transform factory
@@ -91,7 +162,8 @@ class TransformFactory {
  public:
   static std::unique_ptr<TransformBase> create(
       const std::string &, const VariableTransformsParameters &,
-      ioda::ObsSpace &, const std::shared_ptr<ioda::ObsDataVector<int>> &);
+      const ObsFilterData &,
+      const std::shared_ptr<ioda::ObsDataVector<int>> &);
   virtual ~TransformFactory() = default;
 
  protected:
@@ -99,7 +171,8 @@ class TransformFactory {
 
  private:
   virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &, ioda::ObsSpace &,
+      const VariableTransformsParameters &,
+      const ObsFilterData &,
       const std::shared_ptr<ioda::ObsDataVector<int>> &) = 0;
   static std::map<std::string, TransformFactory *> &getMakers() {
     static std::map<std::string, TransformFactory *> makers_;
@@ -111,9 +184,10 @@ class TransformFactory {
 template <class T>
 class TransformMaker : public TransformFactory {
   virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &options, ioda::ObsSpace &os,
+      const VariableTransformsParameters &options,
+      const ObsFilterData& data,
       const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
-    return std::unique_ptr<TransformBase>(new T(options, os, flags));
+    return std::unique_ptr<TransformBase>(new T(options, data, flags));
   }
 
  public:
