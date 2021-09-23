@@ -5,8 +5,11 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use obsspace_mod
-use gnssro_mod_constants
+use ufo_constants_mod, only: mean_earth_rad
+use gnssro_mod_constants, only: MAXVARLEN
+
 implicit none
+
 private
 public   :: gnssro_conf
 public   :: gnssro_conf_setup

@@ -36,8 +36,10 @@ struct DataExtractorInputBase {
   /// Coordinates indexing the payload array
   Coordinates coordsVals;
 
-  /// Maps coordinate names to dimensions (0 or 1) of the payload array
-  std::unordered_map<std::string, int> coord2DimMapping;
+  /// Maps coordinate names to dimensions (0 or 1) of the payload array.
+  std::unordered_map<std::string, std::vector<int>> coord2DimMapping;
+  /// Maps coordinate names to their dimensionality.
+  std::unordered_map<std::string, size_t> coordNDims;
   /// Maps dimensions of the payload array (0 or 1) to coordinate names
   std::vector<std::vector<std::string>> dim2CoordMapping;
 };

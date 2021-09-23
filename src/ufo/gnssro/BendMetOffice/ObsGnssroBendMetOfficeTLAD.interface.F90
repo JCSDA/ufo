@@ -7,7 +7,8 @@
 
 module ufo_gnssro_bendmetoffice_tlad_mod_c
   
-  use fckit_configuration_module, only: fckit_configuration 
+  use fckit_configuration_module, only: fckit_configuration
+  use iso_c_binding, only: c_int, c_bool, c_float, c_double, c_ptr
   use ufo_gnssro_bendmetoffice_tlad_mod
   implicit none
   private

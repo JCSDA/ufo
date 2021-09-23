@@ -34,16 +34,11 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
 {
   oops::Log::debug() << "GNSSROOneDVarCheck contructor starting" << std::endl;
 
-  // convert from std::string to char pointer to pass to Fortran routine
-  // pass each variable as a char pointer + corresponding variable length
-  char * filename = new char[parameters_.bmatrix_filename.value().size()+1];
-  strcpy(filename, parameters_.bmatrix_filename.value().c_str());
-
   // Setup fortran object
   ufo_gnssroonedvarcheck_create_f90(key_,
                                     obsdb,
                                     parameters_.bmatrix_filename.value().size(),
-                                    filename,
+                                    parameters_.bmatrix_filename.value().c_str(),
                                     parameters_.capsupersat.value(),
                                     parameters_.cost_funct_test.value(),
                                     parameters_.Delta_ct2.value(),
@@ -55,8 +50,6 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                     parameters_.vert_interp_ops.value(),
                                     parameters_.y_test.value(),
                                     GNSSROOneDVarCheck::qcFlag());
-
-  delete[] filename;
 
   oops::Log::debug() << "GNSSROOneDVarCheck contructor complete. " << std::endl;
 }

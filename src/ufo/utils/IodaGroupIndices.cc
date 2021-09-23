@@ -17,12 +17,13 @@ namespace ufo {
 /// Returns indices of all elements in the range
 /// [\p elements_to_look_for_begin, \p elements_to_look_for_end) in the \p all_elements vector,
 /// in the same order that the former are in.
-/// Throws an exception if at least one of elements looked for is missing
-/// from \p all_elements.
+/// If \p throwexception is set, throws an exception if at least one of the elements looked for is
+/// missing. Otherwise sets index as -1 for the missing elements.
 template<typename T>
 std::vector<int> getAllIndices(const std::vector<T> & all_elements,
                                typename std::vector<T>::const_iterator elements_to_look_for_begin,
-                               typename std::vector<T>::const_iterator elements_to_look_for_end) {
+                               typename std::vector<T>::const_iterator elements_to_look_for_end,
+                               bool throwexception) {
   std::vector<int> result;
   for (typename std::vector<T>::const_iterator sought_it = elements_to_look_for_begin;
        sought_it != elements_to_look_for_end; ++sought_it) {
@@ -31,8 +32,12 @@ std::vector<int> getAllIndices(const std::vector<T> & all_elements,
     if (found_it != all_elements.end()) {
       result.push_back(std::distance(all_elements.begin(), found_it));
     } else {
-      const std::string errormsg = "getAllIndices: Can't find element in the vector";
-      throw eckit::BadParameter(errormsg, Here());
+      if (throwexception) {
+        const std::string errormsg = "getAllIndices: Can't find element in the vector";
+        throw eckit::BadParameter(errormsg, Here());
+      } else {
+        result.push_back(-1);
+      }
     }
   }
   return result;
@@ -41,29 +46,34 @@ std::vector<int> getAllIndices(const std::vector<T> & all_elements,
 // -----------------------------------------------------------------------------
 /// Returns indices of all elements in \p elements_to_look_for in the \p all_elements vector,
 /// in the same order that \p elements_to_look_for are in.
-/// Throws an exception if at least one of elements looked for is missing
-/// from \p all_elements.
+/// If \p throwexception is set, throws an exception if at least one of the elements looked for is
+/// missing. Otherwise sets index as -1 for the missing elements.
 template<typename T>
 std::vector<int> getAllIndices(const std::vector<T> & all_elements,
-                               const std::vector<T> & elements_to_look_for) {
-  return getAllIndices(all_elements, elements_to_look_for.begin(), elements_to_look_for.end());
+                               const std::vector<T> & elements_to_look_for,
+                               bool throwexception) {
+  return getAllIndices(all_elements, elements_to_look_for.begin(), elements_to_look_for.end(),
+                       throwexception);
 }
 
 // -----------------------------------------------------------------------------
 std::vector<int> getRequiredVariableIndices(const ioda::ObsGroup &obsgroup,
                  const std::string &varname,
                  typename std::vector<std::string>::const_iterator elements_to_look_for_begin,
-                 typename std::vector<std::string>::const_iterator elements_to_look_for_end) {
+                 typename std::vector<std::string>::const_iterator elements_to_look_for_end,
+                 bool throwexception) {
   ioda::Variable var = obsgroup.vars.open(varname);
   std::vector<std::string> elements_in_group;
   var.read<std::string>(elements_in_group);
-  return getAllIndices(elements_in_group, elements_to_look_for_begin, elements_to_look_for_end);
+  return getAllIndices(elements_in_group, elements_to_look_for_begin, elements_to_look_for_end,
+                       throwexception);
 }
 
 // -----------------------------------------------------------------------------
 
 std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
-                                                const oops::Variables &vars_to_look_for) {
+                                                const oops::Variables &vars_to_look_for,
+                                                bool throwexception) {
   if (vars_to_look_for.channels().empty()) {
     // Read all variables from the file into std vector
     ioda::Variable variablesvar = obsgroup.vars.open("variables");
@@ -71,7 +81,7 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
     variablesvar.read<std::string>(variables);
 
     // Find the indices of the ones we need
-    return getAllIndices(variables, vars_to_look_for.variables());
+    return getAllIndices(variables, vars_to_look_for.variables(), throwexception);
   } else {
     // At present this function can search either for channel numbers or variable names,
     // but not both. So make sure there's only one multi-channel variable.
@@ -83,7 +93,7 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
     channelsvar.read<int>(channels);
 
     // Find the indices of the ones we need
-    return getAllIndices(channels, vars_to_look_for.channels());
+    return getAllIndices(channels, vars_to_look_for.channels(), throwexception);
   }
 }
 

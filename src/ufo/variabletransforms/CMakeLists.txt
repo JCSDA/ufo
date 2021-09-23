@@ -16,6 +16,8 @@ set ( variabletransforms_files
       Cal_Wind.cc
       Cal_ProfileHorizontalDrift.h
       Cal_ProfileHorizontalDrift.cc
+      Cal_PStar.h
+      Cal_PStar.cc
       LookupTable.h
       TransformBase.cc
       TransformBase.h

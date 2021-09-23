@@ -17,6 +17,8 @@ module ufo_gnssro_ref_tlad_mod
   use gnssro_mod_constants
   use gnssro_mod_conf
   use missing_values_mod
+  use ufo_constants_mod
+  use iso_c_binding
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis_tlad) :: ufo_gnssro_Ref_tlad

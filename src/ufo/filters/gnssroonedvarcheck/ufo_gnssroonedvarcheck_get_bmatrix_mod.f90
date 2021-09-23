@@ -13,6 +13,9 @@ use kinds, only: kind_real
 use fckit_log_module, only : fckit_log
 use ufo_utils_mod, only: ufo_utils_iogetfreeunit
 
+private
+public :: Bmatrix_type
+
 type Bmatrix_type
   INTEGER       :: nlevp
   INTEGER       :: nlevq
@@ -22,25 +25,24 @@ type Bmatrix_type
   REAL(kind_real), POINTER :: band_up_lim(:)      ! band_up_lim(nband)
   REAL(kind_real), POINTER :: sigma(:,:,:)        ! sigma(nseason,nband,nstate)
   REAL(kind_real), POINTER :: inverse(:,:,:,:)    ! inverse(nseason,nband,nstate,nstate)
+  CONTAINS
+    procedure :: get => Ops_GPSRO_GetBmatrix
 end type
-
-private
-public :: Ops_GPSRO_GetBmatrix, Bmatrix_type
 
 contains
 
-SUBROUTINE Ops_GPSRO_GetBmatrix (filename, &
+SUBROUTINE Ops_GPSRO_GetBmatrix (Bmatrix, &
+                                 filename, &
                                  cx_nlevp, &
-                                 cx_nlevq, &
-                                 Bmatrix)
+                                 cx_nlevq)
 
 IMPLICIT NONE
 
 ! Subroutine arguments:
-CHARACTER(LEN=*)                 :: filename
-INTEGER, INTENT(IN)              :: cx_nlevp
-INTEGER, INTENT(IN)              :: cx_nlevq
-TYPE (Bmatrix_type), INTENT(OUT) :: Bmatrix
+CLASS(Bmatrix_type), INTENT(OUT) :: Bmatrix    !< The background errors read in
+CHARACTER(LEN=*)                 :: filename   !< The name of the file to be read in
+INTEGER, INTENT(IN)              :: cx_nlevp   !< The number of pressure levels in the model
+INTEGER, INTENT(IN)              :: cx_nlevq   !< The number of temperature levels in the model
 
 ! Local declarations:
 CHARACTER(len=*), PARAMETER      :: RoutineName = "Ops_GPSRO_GetBmatrix"

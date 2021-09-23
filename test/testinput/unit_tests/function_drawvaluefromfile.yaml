@@ -291,7 +291,7 @@ observations:
   obs function:
     name: DrawValueFromFile@IntObsFunction
     options:
-      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced2.nc
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
       group: IntResult2D
       interpolation:
       - name: longitude@MetaData
@@ -314,6 +314,7 @@ observations:
       interpolation:
       - name: longitude@MetaData
         method: nearest
+        extrapolation mode: nearest
       - name: latitude@MetaData
         method: nearest
     variables: [assigned_int_variable_3]
@@ -411,7 +412,7 @@ observations:
   obs function:
     name: DrawValueFromFile@StringObsFunction
     options:
-      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced3.nc
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced.nc
       group: StringResult2D
       interpolation:
       - name: longitude@MetaData
@@ -611,4 +612,392 @@ observations:
       - name: longitude@MetaData
         method: bilinear
     variables: [assigned_float_variable_bilin_1]
+    tolerance: 1.0e-6
+
+# 6. Tests of DrawValueFromFile@ObsFunction out-of-bounds
+
+- obs space: &ObsSpace
+    name: "'exact' method with default extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: exact
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'float_variable_2@MetaData'"
+
+- obs space: &ObsSpace
+    name: "'exact' method with 'error' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: exact
+        extrapolation mode: error
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'float_variable_2@MetaData'"
+
+- obs space: &ObsSpace
+    name: "Unrecognised extrapolation mode"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: exact
+        extrapolation mode: dummy
+    variables: [assigned_float_variable_exact]
+  expect constructor to throw exception with message: "The string 'dummy' cannot be converted to ExtrapolationMethod"
+
+- obs space: &ObsSpace
+    name: "'exact' method with 'nearest' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: exact
+        extrapolation mode: nearest
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "Only 'error' extrapolation mode supported for 'exact' method extract."
+
+- obs space: &ObsSpace
+    name: "'exact' method with 'missing' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: exact
+        extrapolation mode: missing
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "Only 'error' extrapolation mode supported for 'exact' method extract."
+
+- obs space: &ObsSpace
+    name: "'nearest' method with default extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: nearest
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'nearest' method with 'error' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: nearest
+        extrapolation mode: error
+    variables: [assigned_float_variable_nearest]
+  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'nearest' method with 'nearest' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: nearest
+        extrapolation mode: nearest
+    # Variable from the TestReference group storing the reference result,
+    # [3, 4.5, 6, 7.5, 9 ]
+    variables: [assigned_float_variable_outofbounds_nearest]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'nearest' method with 'missing' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: nearest
+        extrapolation mode: missing
+    # Variable from the TestReference group storing the reference result,
+    # [_, _, _, _, _]
+    variables: [assigned_float_variable_outofbounds_missing]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'linear' method with default extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: linear
+    variables: [assigned_float_variable_exact]
+    tolerance: 1.0e-6
+  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'linear' method with 'error' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: linear
+        extrapolation mode: error
+    variables: [assigned_float_variable_nearest]
+    tolerance: 1.0e-6
+  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'linear' method with 'nearest' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: linear
+        extrapolation mode: nearest
+    # Variable from the TestReference group storing the reference result,
+    # [3, 4.5, 6, 7.5, 9 ]
+    variables: [assigned_float_variable_outofbounds_nearest]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'linear' method with 'missing' extrapolation"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_extrap.nc
+      group: FloatResult
+      interpolation:
+      # [3, 4.5, 6, 7.5, 9 ]
+      - name: float_variable_2@MetaData
+        method: linear
+        extrapolation mode: missing
+    # Variable from the TestReference group storing the reference result,
+    # [_, _, _, _, _]
+    variables: [assigned_float_variable_outofbounds_missing]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with default extrapolation, first var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: float_variable_1@MetaData
+        method: bilinear
+      - name: longitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'float_variable_1@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with 'error' extrapolation, first var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: float_variable_1@MetaData
+        method: bilinear
+        extrapolation mode: error
+      - name: longitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'float_variable_1@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with default extrapolation, second var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: bilinear
+      - name: float_variable_2@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_exact]
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with 'nearest' extrapolation second var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: bilinear
+      - name: float_variable_2@MetaData
+        method: bilinear
+        extrapolation mode: nearest
+    variables: [assigned_float_variable_outofbounds_nearest_2d]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with 'missing' extrapolation second var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: latitude@MetaData
+        method: bilinear
+      - name: float_variable_2@MetaData
+        method: bilinear
+        extrapolation mode: missing
+    variables: [assigned_float_variable_outofbounds_missing]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: "'bilinear' method with 'missing' extrapolation, first var"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: float_variable_1@MetaData
+        method: bilinear
+        extrapolation mode: missing
+      - name: longitude@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_outofbounds_missing]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: match based approach, early return of missing (extrapolation missing).
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: nearest
+      - name: float_variable_1@MetaData
+        method: nearest
+        extrapolation mode: missing
+      - name: longitude@MetaData
+        method: nearest
+    variables: [assigned_float_variable_outofbounds_missing]
     tolerance: 1.0e-6

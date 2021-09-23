@@ -14,14 +14,14 @@ MODULE ufo_aodluts_mod
 
   USE ufo_geovals_mod, ONLY: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   USE ufo_vars_mod
-  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names, max_string
+  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names, max_string, upper2lower
   USE ufo_luts_utils_mod, ONLY: luts_conf, luts_conf_setup, &
        &luts_conf_delete, calculate_aero_layers
   USE crtm_module
   USE crtm_spccoeff, ONLY: sc
   USE obsspace_mod
 
-  USE cf_mieobs_mod, ONLY: get_cf_aod
+  USE cf_mieobs_mod, ONLY: get_cf_aod,get_rc_wavelengths
 
   IMPLICIT NONE
   PRIVATE
@@ -31,7 +31,6 @@ MODULE ufo_aodluts_mod
      PRIVATE
      CHARACTER(len=maxvarlen), PUBLIC, ALLOCATABLE :: varin(:)  ! variablesrequested from the model
      INTEGER, ALLOCATABLE                          :: channels(:)
-     REAL(kind_real), ALLOCATABLE                  :: wavelengths(:)
      INTEGER :: n_aerosols
      TYPE(luts_conf) :: conf
    CONTAINS
@@ -75,7 +74,7 @@ CONTAINS
     self%varin(SIZE(varin_default)+1:) = var_aerosols
 
     ALLOCATE(self%channels(SIZE(channels)))
-    ALLOCATE(self%wavelengths(SIZE(channels)))
+    ALLOCATE(self%conf%wavelengths(SIZE(channels)))
 
     self%channels(:) = channels(:)
 
@@ -94,7 +93,7 @@ CONTAINS
 
     IF (ALLOCATED(self%varin)) DEALLOCATE(self%varin)
     IF (ALLOCATED(self%channels)) DEALLOCATE(self%channels)
-    IF (ALLOCATED(self%wavelengths)) DEALLOCATE(self%wavelengths)
+    IF (ALLOCATED(self%conf%wavelengths)) DEALLOCATE(self%conf%wavelengths)
 
   END SUBROUTINE ufo_aodluts_delete
 
@@ -144,34 +143,50 @@ CONTAINS
     ALLOCATE(aero_layers(n_aerosols,n_layers,n_profiles),&
          &rh(n_layers,n_profiles))
     
-    err_stat = crtm_init( self%conf%sensor_id, &
-         chinfo, &
-         file_path=TRIM(self%conf%coefficient_path), &
-         quiet=.TRUE.)
-    
-    IF ( err_stat /= success ) THEN
-       message = 'error initializing crtm'
-       CALL display_message( program_name, message, failure )
-       STOP
-    END IF
-    
-    sensor_loop:DO n = 1, self%conf%n_sensors
+    IF (self%conf%use_crtm) THEN
+       err_stat = crtm_init( self%conf%sensor_id, &
+            chinfo, &
+            file_path=TRIM(self%conf%coefficient_path), &
+            quiet=.TRUE.)
        
-       n_channels = crtm_channelinfo_n_channels(chinfo(n))
-       
-       IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
-       
-       ALLOCATE(wavelengths_all(n_channels), stat = alloc_stat)
-       
-       IF ( alloc_stat /= 0 ) THEN
-          message = 'error allocating wavelengths_all'
+       IF ( err_stat /= success ) THEN
+          message = 'error initializing crtm'
           CALL display_message( program_name, message, failure )
           STOP
        END IF
+    ENDIF
+
+    sensor_loop:DO n = 1, self%conf%n_sensors
+
+       IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
        
-       wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
+       IF (self%conf%use_crtm) THEN
+
+          n_channels = crtm_channelinfo_n_channels(chinfo(n))
+         
+          ALLOCATE(wavelengths_all(n_channels), stat = alloc_stat)
           
-       self%wavelengths=wavelengths_all(self%channels)
+          IF ( alloc_stat /= 0 ) THEN
+             message = 'error allocating wavelengths_all'
+             CALL display_message( program_name, message, failure )
+             STOP
+          END IF
+          
+          wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
+
+       ELSE
+
+          CALL get_rc_wavelengths(self%conf%rcfile,wavelengths_all,rc)
+
+          IF ( rc /= 0 ) THEN
+             message = 'error getting wavelengths from rcfile'
+             CALL display_message( program_name, message, failure )
+             STOP
+          END IF
+          
+       ENDIF
+
+       self%conf%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf%aerosol_option,&
             &n_aerosols, n_profiles, n_layers,&
@@ -179,9 +194,8 @@ CONTAINS
  
        CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
             &self%conf%rcfile,  &
-            &self%wavelengths, var_aerosols, aero_layers, rh,       &
+            &self%conf%wavelengths, var_aerosols, aero_layers, rh,       &
             &aod_tot = hofx, rc = rc)  
-       
 
        DEALLOCATE(aero_layers,rh,wavelengths_all)
        
@@ -193,13 +207,15 @@ CONTAINS
           
     END DO sensor_loop
     
-    err_stat = crtm_destroy( chinfo )
-    IF ( err_stat /= success ) THEN
-       message = 'error destroying crtm (settraj)'
-       CALL display_message( program_name, message, failure )
-       STOP
-    END IF
-    
+    IF (self%conf%use_crtm) THEN
+       err_stat = crtm_destroy( chinfo )
+       IF ( err_stat /= success ) THEN
+          message = 'error destroying crtm (settraj)'
+          CALL display_message( program_name, message, failure )
+          STOP
+       END IF
+    ENDIF
+
   END SUBROUTINE ufo_aodluts_simobs
 
 ! ------------------------------------------------------------------------------

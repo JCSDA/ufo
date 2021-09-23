@@ -59,10 +59,11 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
     }
   }
 
-  // Populate variables list - which makes sure this is not run as a pre-process filter
-  // because model data is needed
+  // Populate variables list - which makes sure this is run as a post filter
+  // because the obs bias value is needed.
   Variables model_vars(retrieved_vars_);
   allvars_ += Variables(model_vars, "GeoVaLs");
+  allvars_ += Variables(filtervars_, "ObsBiasData");
 
   oops::Log::trace() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
 }
@@ -96,6 +97,16 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
   flags_->save("FortranQC");    // temporary measure as per ROobserror qc
+
+// Read in ObsBias for all channels in the database and save to db for access in Fortran
+// there is currently no mechanism for passing ioda::ObsDataVectors to Fortran.
+// This is saved to ObsBias rather than ObsBiasData to avoid replication of datasets because
+// the oops::Observer saves to ObsBias.
+  Variable obsbiasvar("brightness_temperature@ObsBiasData",
+                      obsdb_.obsvariables().channels());
+  ioda::ObsDataVector<float> obsbias(obsdb_, obsbiasvar.toOopsVariables());
+  data_.get(obsbiasvar, obsbias);
+  obsbias.save("ObsBias");
 
 // Pass it all to fortran
   ufo_rttovonedvarcheck_apply_f90(keyRTTOVOneDVarCheck_, parameters_.ModOptions.value(),

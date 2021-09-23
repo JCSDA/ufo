@@ -39,6 +39,23 @@ template <typename T>
 using DataExtractorPayload = boost::multi_array<T, 3>;
 
 
+/// \brief Determine whether the value provided is out-of-bounds for the given vector and
+/// associated range (constraint).
+///
+/// \param[in] obVal
+///   Interpolation location.
+/// \param[in] varValues
+///   Vector of values (coordinate).
+/// \param[in] range
+///   Defines how to constrain (slice) `varValues`.
+template <typename T>
+bool isOutOfBounds(const T obVal, const std::vector<T> &varValues, const ConstrainedRange &range) {
+  if ((obVal > varValues[range.end()-1]) || (obVal < varValues[range.begin()]))
+    return true;
+  return false;
+}
+
+
 /// \brief Fetch a 1D sliced view of a boost multi_array object.
 ///
 /// \details Given a set of constraints (ranges), return a 1D sliced view of the array.
@@ -212,6 +229,21 @@ float bilinearInterpolation(
     const R &obVal1,
     const ConstrainedRange &range1,
     const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
+  if (isOutOfBounds(obVal0, varValues0, range0)) {
+      std::stringstream msg;
+      msg << "No match found for 'bilinear' interpolation of value '" << obVal0
+          << "' of the variable '" << varName0 << "'.  Value is out of bounds.  Consider using "
+          << "extrapolation.";
+      throw eckit::Exception(msg.str(), Here());
+  }
+  if (isOutOfBounds(obVal1, varValues1, range1)) {
+      std::stringstream msg;
+      msg << "No match found for 'bilinear' interpolation of value '" << obVal1
+          << "' of the variable '" << varName1 << "'.  Value is out of bounds.  Consider using "
+          << "extrapolation.";
+      throw eckit::Exception(msg.str(), Here());
+  }
+
   const float missing = util::missingValue(missing);
 
   const int nnIndex0 = std::lower_bound(varValues0.begin() + range0.begin(),
@@ -237,12 +269,6 @@ float bilinearInterpolation(
   // Coord locations
   const T x1 = varValues0[ix1], x2 = varValues0[ix2];
   const R y1 = varValues1[iy1], y2 = varValues1[iy2];
-
-  // Out of bounds check
-  if ((obVal0 > varValues0[range0.end()-1]) || (obVal0 < varValues0[range0.begin()]))
-    return missing;
-  if ((obVal1 > varValues1[range1.end()-1]) || (obVal1 < varValues1[range1.begin()]))
-    return missing;
 
   // Z values at these locations
   const float q11 = interpolatedArray[ix1][iy1], q12 = interpolatedArray[ix1][iy2],
@@ -383,6 +409,22 @@ enum class InterpMethod {
 };
 
 
+/// \brief Extrapolation method used by the DataExtractor interpolation method for a given
+/// variable-interpmethod pair.
+///
+/// Extrapolation is where the value to be extracted/interpolated is out-of-bounds.
+enum class ExtrapolationMode {
+  /// \brief Pick nearest index when out-of-bounds.
+  NEAREST,
+
+  /// \brief Throw an exception when out-of-bounds.
+  ERROR,
+
+  /// \brief Return 'missing', meaning that any subsequent extraction stages are then ignored.
+  MISSING
+};
+
+
 /// \brief This class makes it possible to extract and interpolate data loaded from a file.
 ///
 /// \tparam ExtractedValue
@@ -442,10 +484,13 @@ class DataExtractor
   /// type variables, where this is used to sort each of the sub-groups.
   /// \param[in] varName is the name of the coordinate axis to sort.
   /// \param[in] method is the interpolation/extraction method to use for this coordinate.
+  /// \param[in] extrapMode is the extrapolation mode which applies when the value to be
+  /// extracted is out-of-bounds.
   /// \internal This member function call corresponds to a RecursiveSplitter.groupBy call, useful
   /// to sort according to nearesr/exact match variables.  In the special case of float type,
   /// RecursiveSplitter.sortGroupsBy is used.
-  void scheduleSort(const std::string &varName, const InterpMethod &method);
+  void scheduleSort(const std::string &varName, const InterpMethod &method,
+                    const ExtrapolationMode &extrapMode);
 
   /// \brief Finalise the sort, sorting each of the coordinates indexing the axes of the array to
   /// be interpolated, as well as that array itself.
@@ -502,6 +547,50 @@ class DataExtractor
   template <typename T>
   void extractImpl(const T &obVal);
 
+  /// \brief Apply extrapolation stage.
+  ///
+  /// Return a new obVal after applying the relevant extrapolation mode for the given value.
+  /// It can also populate `result_` (as indicated by `resultSet_`), the final interpolation
+  /// result where applicable (where out-of-bounds should return missing).  Where `result_`
+  /// is populated, all subsequent extraction stages are then ignored.
+  template <typename T>
+  T applyExtrapolation(const T &obVal) {
+    if (resultSet_)
+      return obVal;
+
+    const InterpMethod &method = nextCoordToExtractBy_->method;
+    const std::vector<T> varValues = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
+    const ExtrapolationMode &extrapMode = nextCoordToExtractBy_->extrapMode;
+    ConstrainedRange &range = constrainedRanges_[nextCoordToExtractBy_->payloadDim];
+    const std::string &varName = nextCoordToExtractBy_->name;
+
+    // Handle extrapolation mode
+    T obValN = obVal;
+    if ((method == InterpMethod::EXACT) && (extrapMode != ExtrapolationMode::ERROR))
+      throw eckit::BadParameter("Only 'error' extrapolation mode supported for 'exact' method "
+                                "extract.", Here());
+    switch (extrapMode) {
+      case ExtrapolationMode::ERROR:
+        // Error (no extrapolation) is the default behaviour of all methods so no action required.
+        break;
+      case ExtrapolationMode::NEAREST:
+        if (obVal > varValues[range.end()-1]) {
+          obValN = varValues[range.end()-1];
+        } else if (obVal < varValues[range.begin()]) {
+          obValN = varValues[range.begin()];
+        }
+        break;
+      case ExtrapolationMode::MISSING:
+        resultSet_ = true;
+        result_ = util::missingValue(result_);
+        return obValN;
+      default:
+        throw eckit::Exception("Unrecognised extrapolation mode for '" + varName + "', please "
+                               "choose either 'missing', 'nearest' or 'error'.", Here());
+    }
+    return obValN;
+  }
+
   /// \brief Perform extraction using piecewise linear interpolation, if it's compatible with the
   /// ExtractedValue type in use; otherwise throw an exception.
   template <typename T>
@@ -548,17 +637,20 @@ class DataExtractor
   std::unordered_map<std::string, CoordinateValues> coordsVals_;
   // The array to be interpolated (the payload array).
   DataExtractorPayload<ExtractedValue> interpolatedArray_;
-  // Linear interpolation result. Only used when ExtractedValue = float. interpolation.
-  float result_;
+  // Interpolation result.  Used when utilising linear/bilinear interpolation and also with
+  // extrapolation (where applicable).
+  ExtractedValue result_;
   // Set to true if result_ is a valid value.
   bool resultSet_;
   // Container for re-ordering our data
   std::vector<ufo::RecursiveSplitter> splitter_;
 
   /// Maps coordinate names to dimensions (0 or 1) of the payload array
-  std::unordered_map<std::string, int> coord2DimMapping_;
+  std::unordered_map<std::string, std::vector<int>> coord2DimMapping_;
   /// Maps dimensions of the payload array (0 or 1) to coordinate names
   std::vector<std::vector<std::string>> dim2CoordMapping_;
+  /// Maps coordinate names to their dimensionality.
+  std::unordered_map<std::string, size_t> coordNDims_;
 
   /// Coordinate used for data extraction from the payload array.
   struct Coordinate {
@@ -568,6 +660,8 @@ class DataExtractor
     const CoordinateValues &values;
     /// Extraction method to use
     InterpMethod method;
+    /// Extrapolation mode to use
+    ExtrapolationMode extrapMode;
     /// Axis of the payload array indexed by the coordinate (0 or 1)
     int payloadDim;
   };
@@ -584,6 +678,10 @@ template <typename T, typename R>
 void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
     const T &obValDim0, const R &obValDim1) {
   auto &ranges = constrainedRanges_;
+
+  T obValDim0N = applyExtrapolation(obValDim0);
+  if (resultSet_)
+    return;
   const size_t dimIndex0 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName0 = nextCoordToExtractBy_->name;
   const std::vector<T> &varValues0 = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
@@ -592,6 +690,9 @@ void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
   if (nextCoordToExtractBy_->method != InterpMethod::BILINEAR)
     throw eckit::BadParameter("Second parameter provided to the Bilinear interpolator is not of "
                               "method 'bilinear'.", Here());
+  R obValDim1N = applyExtrapolation(obValDim1);
+  if (resultSet_)
+    return;
   const size_t dimIndex1 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName1 = nextCoordToExtractBy_->name;
   const std::vector<R> &varValues1 = boost::get<std::vector<R>>(nextCoordToExtractBy_->values);
@@ -599,12 +700,12 @@ void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
   auto interpolatedArray = get2DSlice(interpolatedArray_, dimIndex0, dimIndex1,
                                       ranges);
   if (dimIndex1 > dimIndex0) {
-    result_ = bilinearInterpolation(varName0, varValues0, obValDim0, ranges[dimIndex0],
-                                    varName1, varValues1, obValDim1, ranges[dimIndex1],
+    result_ = bilinearInterpolation(varName0, varValues0, obValDim0N, ranges[dimIndex0],
+                                    varName1, varValues1, obValDim1N, ranges[dimIndex1],
                                     interpolatedArray);
   } else {
-    result_ = bilinearInterpolation(varName1, varValues1, obValDim1, ranges[dimIndex1],
-                                    varName0, varValues0, obValDim0, ranges[dimIndex0],
+    result_ = bilinearInterpolation(varName1, varValues1, obValDim1N, ranges[dimIndex1],
+                                    varName0, varValues0, obValDim0N, ranges[dimIndex0],
                                     interpolatedArray);
   }
   resultSet_ = true;

@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsSpace.h"
 
 #include "oops/util/Logger.h"
@@ -87,6 +88,10 @@ void ProcessAMVQI::doFilter() const {
   std::vector<std::vector<float>> new_percent_confidence(total_variables,
                                                          std::vector<float>(nlocs, missing));
 
+  // diagnostic variables to be summed over all processors
+  std::unique_ptr<ioda::Accumulator<size_t>> count_bad_app_accumulator =
+    obsdb_.distribution()->createAccumulator<size_t>();
+
   // Get BUFR data
   for (size_t iapp = 0; iapp < number_of_apps; ++iapp) {
     // names of variables
@@ -103,10 +108,23 @@ void ProcessAMVQI::doFilter() const {
 
     for (size_t idata = 0; idata < nlocs; ++idata) {
       if (wind_generating_application[idata] != int_missing) {
-        new_percent_confidence[wind_generating_application[idata] - 1][idata] =
-            percent_confidence[idata];
+        // check index is in range before filling new percent confidence values
+        if (wind_generating_application[idata] >= 1 &&
+            wind_generating_application[idata] <= total_variables) {
+          new_percent_confidence[wind_generating_application[idata] - 1][idata] =
+              percent_confidence[idata];
+        } else {
+          count_bad_app_accumulator->addTerm(idata, 1);
+        }
       }
     }
+  }
+
+  // sum number of generating application values that are out of range
+  const std::size_t count_bad_app = count_bad_app_accumulator->computeResult();
+  if (count_bad_app > 0) {
+    oops::Log::warning() << "Process AMV QI: " << count_bad_app
+      << " instances of generating application out of range" << std::endl;
   }
 
   // Need to check database for the named variables and add to them if they exist.

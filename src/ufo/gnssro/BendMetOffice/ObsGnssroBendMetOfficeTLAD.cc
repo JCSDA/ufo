@@ -32,7 +32,7 @@ ObsGnssroBendMetOfficeTLAD::ObsGnssroBendMetOfficeTLAD(const ioda::ObsSpace & od
   : LinearObsOperatorBase(odb), keyOperGnssroBendMetOffice_(0), varin_()
 {
   parameters_.validateAndDeserialize(config);
-  ObsGnssroBendMetOfficeOptions obsOptions = parameters_.obsOptions.value();
+  const ObsGnssroBendMetOfficeOptions & obsOptions = parameters_.obsOptions.value();
 
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};

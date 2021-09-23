@@ -55,6 +55,82 @@ void testHasDtypeAndGet(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
 
 // -----------------------------------------------------------------------------
 
+void compareMissingValues(const std::vector<float> & float_ref,
+                          const std::vector<double> & double_ref) {
+  EXPECT(float_ref.size() == double_ref.size());
+///  Get the data in float and double types, and check the missing data values
+///  match
+  float missingFloat = util::missingValue(float());
+  float missingDouble = util::missingValue(double());
+  for (int ivar=0; ivar < float_ref.size(); ivar++) {
+    if ((float_ref[ivar] == missingFloat) != (double_ref[ivar] == missingDouble)) {
+      std::cout << "Missings not equal: " << ivar << "  " << float_ref[ivar] <<
+        "  " << double_ref[ivar] << std::endl;
+      throw std::runtime_error("Missing data does not match between precisions");
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Check the different methods to read in geovals, and check that they have
+// missing data in the same locations
+
+void checkGeoVaLsGet(const ufo::ObsFilterData& data,
+                     const GeoVaLs & gval,
+                     ufo::Variable variable,
+                     int vectorLength,
+                     int nlevs) {
+  std::vector<float> vec;
+  std::vector<float> ref(vectorLength);
+  std::vector<double> ref2(vectorLength);
+///  nlevs == 1: 2D geovals, could be retrieved with get(var)
+  if (nlevs == 1) {
+    data.get(variable, vec);
+    gval.get(ref, variable.variable());
+    EXPECT(vec == ref);
+    gval.get(ref2, variable.variable());
+    compareMissingValues(ref, ref2);
+///  otherwise need get(var, level) to retrieve
+  } else {
+    data.get(variable, nlevs - 1, vec);
+    gval.getAtLevel(ref, variable.variable(), nlevs - 1);
+    EXPECT(vec == ref);
+    gval.getAtLevel(ref2, variable.variable(), nlevs - 1);
+    compareMissingValues(ref, ref2);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Check the different methods to read in obs diagnostics, and check that they
+// contain missing data at the same locations
+
+void checkObsDiagsGet(const ufo::ObsFilterData & data,
+                      const ObsDiagnostics & obsDiags,
+                      ufo::Variable variable,
+                      int vectorLength,
+                      int nlevs) {
+  std::vector<float> vec;
+  std::vector<float> ref(vectorLength);
+  std::vector<double> ref2(vectorLength);
+///  nlevs == 1: 2D obsdiags, could be retrieved with get(var)
+  if (nlevs == 1) {
+    data.get(variable, vec);
+    obsDiags.get(ref, variable.variable());
+    EXPECT(vec == ref);
+    obsDiags.get(ref2, variable.variable());
+    compareMissingValues(ref, ref2);
+///  otherwise need get(var, level) to retrieve
+  } else {
+    data.get(variable, nlevs - 1, vec);
+    obsDiags.get(ref, variable.variable(), nlevs - 1);
+    EXPECT(vec == ref);
+    obsDiags.get(ref2, variable.variable(), nlevs - 1);
+    compareMissingValues(ref, ref2);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 void testObsFilterData() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   util::DateTime bgn(conf.getString("window begin"));
@@ -122,6 +198,15 @@ void testObsFilterData() {
       ospace.get_db(var.group(), var.variable(), ref);
 
       testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref);
+    }
+
+    for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
+      const ufo::Variable &var = obsvars.variable(jvar);
+      std::vector<float> float_ref(ospace.nlocs());
+      ospace.get_db(var.group(), var.variable(), float_ref);
+
+      std::vector<double> double_ref(ospace.nlocs());
+      ospace.get_db(var.group(), var.variable(), double_ref);
     }
 
 ///  Check that has(), get() and dtype() work on integer variables in ObsSpace:
@@ -226,21 +311,7 @@ void testObsFilterData() {
       int nlevs = data.nlevs(geovars.variable(jvar));
       int nlevs_ref = gval.nlevs(geovars.variable(jvar).variable());
       EXPECT(nlevs == nlevs_ref);
-///  nlevs == 1: 2D geovals, could be retrieved with get(var)
-      if (nlevs == 1) {
-        std::vector<float> vec;
-        data.get(geovars.variable(jvar), vec);
-        std::vector<float> ref(ospace.nlocs());
-        gval.get(ref, geovars.variable(jvar).variable());
-        EXPECT(vec == ref);
-///  otherwise need get(var, level) to retrieve
-      } else {
-        std::vector<float> vec;
-        data.get(geovars.variable(jvar), nlevs - 1, vec);
-        std::vector<float> ref(ospace.nlocs());
-        gval.getAtLevel(ref, geovars.variable(jvar).variable(), nlevs - 1);
-        EXPECT(vec == ref);
-      }
+      checkGeoVaLsGet(data, gval, geovars.variable(jvar), ospace.nlocs(), nlevs);
     }
 
 ///  Check that associate(), has() and get() work on ObsDiags:
@@ -255,21 +326,7 @@ void testObsFilterData() {
       int nlevs = data.nlevs(diagvars.variable(jvar));
       int nlevs_ref = obsdiags.nlevs(diagvars.variable(jvar).variable());
       EXPECT(nlevs == nlevs_ref);
-///  nlevs == 1: 2D obsdiags, could be retrieved with get(var)
-      if (nlevs == 1) {
-        std::vector<float> vec;
-        data.get(diagvars.variable(jvar), vec);
-        std::vector<float> ref(ospace.nlocs());
-        obsdiags.get(ref, diagvars.variable(jvar).variable());
-        EXPECT(vec == ref);
-///  otherwise need get(var, level) to retrieve
-      } else {
-        std::vector<float> vec;
-        data.get(diagvars.variable(jvar), nlevs - 1, vec);
-        std::vector<float> ref(ospace.nlocs());
-        obsdiags.get(ref, diagvars.variable(jvar).variable(), nlevs - 1);
-        EXPECT(vec == ref);
-      }
+      checkObsDiagsGet(data, obsdiags, diagvars.variable(jvar), ospace.nlocs(), nlevs);
     }
   }
 }

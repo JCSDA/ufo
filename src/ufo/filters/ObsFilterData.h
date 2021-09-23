@@ -85,6 +85,9 @@ class ObsFilterData : public util::Printable,
   //! the groups listed above.
   void get(const Variable & varname, const int level,
            std::vector<float> & values) const;
+  //! \overload
+  void get(const Variable & varname, const int level,
+           std::vector<double> & values) const;
 
   //! brief Fills a `ioda::ObsDataVector` with values of the specified variable.
   //!

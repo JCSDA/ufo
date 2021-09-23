@@ -16,6 +16,7 @@ module ufo_gnssro_ref_mod
   use obsspace_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
+  use ufo_constants_mod
 
   implicit none
   public             :: ufo_gnssro_Ref

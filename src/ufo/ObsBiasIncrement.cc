@@ -123,17 +123,20 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::serialize(std::vector<double> & vect) const {
-  if (this->serialSize() > 0) {
-    throw eckit::NotImplemented("ufo::ObsBiasIncrement::serialize not implemented", Here());
-  }
+  std::vector<double> vec_obs(biascoeffsinc_.data(),
+                              biascoeffsinc_.data() + biascoeffsinc_.size());
+  vect.insert(vect.end(), vec_obs.begin(), vec_obs.end());
+  oops::Log::trace() << "ObsBiasIncrement::serialize done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::deserialize(const std::vector<double> & vect, std::size_t & index) {
-  if (this->serialSize() > 0) {
-    throw eckit::NotImplemented("ufo::ObsBiasIncrement::deserialize not implemented", Here());
+  for (unsigned int jj = 0; jj < biascoeffsinc_.size(); ++jj) {
+    biascoeffsinc_[jj] = vect[index];
+    ++index;
   }
+  oops::Log::trace() << "ObsBiasIncrement::deserialize done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

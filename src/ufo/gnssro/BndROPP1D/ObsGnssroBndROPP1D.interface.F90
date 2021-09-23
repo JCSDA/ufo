@@ -8,7 +8,7 @@
 module ufo_gnssro_bndropp1d_mod_c
   
   use fckit_configuration_module, only: fckit_configuration 
-  use iso_c_binding
+  use iso_c_binding, only: c_ptr, c_int, c_double
   use ufo_gnssro_bndropp1d_mod
 
   implicit none

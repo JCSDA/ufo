@@ -323,6 +323,20 @@ void horizontalDrift
  std::vector<util::DateTime> & time_out,
  MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
 
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Get background pressure at specified height (station, standard, pmsl).
+*
+* \param PSurfParamA
+*     surf_param_a GeoVaL.
+* \param PSurfParamB
+*     surf_param_b GeoVaL
+* \param height
+*     Height of the surface observation for which equivalent background pressure
+*     is required.
+* \return BkP
+*/
+float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height);
 }  // namespace formulas
 }  // namespace ufo
 

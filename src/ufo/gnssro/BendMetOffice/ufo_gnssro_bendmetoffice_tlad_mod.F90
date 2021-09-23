@@ -25,16 +25,26 @@ use ufo_gnssro_ukmo1d_utils_mod, only: Ops_GPSROcalc_nr
 use ufo_utils_refractivity_calculator, only: &
     ufo_calculate_refractivity, ufo_refractivity_kmat
 
+private
+public :: ufo_gnssro_bendmetoffice_tlad
+public :: ufo_gnssro_bendmetoffice_setup
+public :: ufo_gnssro_bendmetoffice_tlad_settraj
+public :: ufo_gnssro_bendmetoffice_simobs_tl
+public :: ufo_gnssro_bendmetoffice_simobs_ad
+public :: ufo_gnssro_bendmetoffice_tlad_delete
 
 integer, parameter         :: max_string=800
 
 !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   private
-  logical :: vert_interp_ops
-  logical :: pseudo_ops
-  real(kind_real) :: min_temp_grad
-  integer                       :: nlevp, nlevq, nlocs, iflip
+  logical                       :: vert_interp_ops
+  logical                       :: pseudo_ops
+  real(kind_real)               :: min_temp_grad
+  integer                       :: nlevp
+  integer                       :: nlevq
+  integer                       :: nlocs
+  logical                       :: flip_it
   real(kind_real), allocatable  :: K(:,:)
   contains
     procedure :: setup      => ufo_gnssro_bendmetoffice_setup
@@ -46,18 +56,23 @@ end type ufo_gnssro_bendmetoffice_tlad
 
 contains
 
-! ------------------------------------------------------------------------------
-! Get the optional settings for the forward model, and save them in the object
-! so that they can be used in the code.
-! ------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!> \brief Get the optional settings for the forward model, and save them in the
+!         object so that they can be used in the code.
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
 
 implicit none
 
-class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self
-logical(c_bool), intent(in) :: vert_interp_ops
-logical(c_bool), intent(in) :: pseudo_ops
-real(c_float), intent(in) :: min_temp_grad
+class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self             !< The object in which to save the variables
+logical(c_bool),                         intent(in) :: vert_interp_ops  !< Whether to vertically interpolate using ln(p)
+logical(c_bool),                         intent(in) :: pseudo_ops       !< Whether to use pseudo-levels in the calculation
+real(c_float),                           intent(in) :: min_temp_grad    !< The minimum temperature gradient in the vertical
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
@@ -66,17 +81,27 @@ self % min_temp_grad = min_temp_grad
 end subroutine ufo_gnssro_bendmetoffice_setup
 
 
-! ------------------------------------------------------------------------------
-! Calculate the K-matrix (Jacobian) for the observation.  It is necessary to run
-! this routine before calling the TL or AD routines.
-! ------------------------------------------------------------------------------    
+!-------------------------------------------------------------------------------
+!> \brief Calculate the K-matrix (Jacobian) for the observation.
+!!
+!! \details **ufo_gnssro_bendmetoffice_tlad_settraj**
+!! * It is necessary to run this routine before calling the TL or AD routines.
+!! * Get the geovals specifying the state around which to linearise, flipping
+!!   the vertical order if required.
+!! * Call the helper function to calculate the K-matrix for each observation.
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
        
   implicit none
 ! Subroutine arguments
-  class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self  ! The object that we use to save data in
-  type(ufo_geovals),                intent(in)    :: geovals   ! The input geovals
-  type(c_ptr), value,               intent(in)    :: obss      ! The input observations
+  class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self  !< The object that we use to save data in
+  type(ufo_geovals),                intent(in)    :: geovals   !< The input geovals
+  type(c_ptr), value,               intent(in)    :: obss      !< The input observations
 
 ! Local parameters
   character(len=*), parameter :: myname_="ufo_gnssro_bendmetoffice_tlad_settraj"
@@ -93,6 +118,9 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable       :: impact_param(:)        ! Impact parameter of the observation
   real(kind_real), allocatable       :: obsLocR(:)             ! Earth's radius of curvature at the observation tangent point
   real(kind_real), allocatable       :: obsGeoid(:)            ! Undulation - height of the geoid above the ellipsoid
+  type(ufo_geovals)                  :: geovals_local          ! The model values, interpolated to the observation locations
+                                                               ! and flipped in the vertical (if required)
+  type(ufo_geoval), pointer          :: p_temp                 ! The model geovals - atmospheric pressure before flipping
 
   write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_tlad_settraj: begin"
   call fckit_log%info(err_msg)
@@ -100,27 +128,27 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
 
+! make sure that the geovals are in the correct vertical order (surface first)
+  call ufo_geovals_copy(geovals, geovals_local)  ! dont want to change geovals input
+  call ufo_geovals_get_var(geovals_local, var_prsi, p_temp)
+  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then 
+    self%flip_it = .true.
+  else
+    self%flip_it = .false.
+  endif
+  call ufo_geovals_reorderzdir(geovals_local, var_prsi, "bottom2top")
+
 ! get model state variables from geovals
-  call ufo_geovals_get_var(geovals, var_q,    q)             ! specific humidity
-  call ufo_geovals_get_var(geovals, var_prsi, prs)           ! pressure
-  call ufo_geovals_get_var(geovals, var_z,    theta_heights) ! Geopotential height of the normal model levels
-  call ufo_geovals_get_var(geovals, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
+  call ufo_geovals_get_var(geovals_local, var_q,    q)             ! specific humidity
+  call ufo_geovals_get_var(geovals_local, var_prsi, prs)           ! pressure
+  call ufo_geovals_get_var(geovals_local, var_z,    theta_heights) ! Geopotential height of the normal model levels
+  call ufo_geovals_get_var(geovals_local, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
 
 ! Keep copy of dimensions
   self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
   
-! Check that the pressure values are decreasing (highest pressure at level 1)
-  self%iflip = 0
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-    self%iflip = 1
-    write(err_msg,'(a)') '  ufo_gnssro_bendmetoffice_tlad_settraj:'//new_line('a')//                   &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  The data will be flipped for processing'
-    call fckit_log%info(err_msg)
-  end if
-
 ! Get the meta-data from the observations
   allocate(obsLat(self%nlocs))
   allocate(impact_param(self%nlocs))
@@ -134,39 +162,21 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
-    if (self%iflip == 1) then
-      CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
-                              q % nval, &                            ! Number of specific humidity levels
-                              rho_heights % vals(rho_heights%nval:1:-1, iobs), &     ! Heights of the pressure levels
-                              theta_heights % vals(theta_heights%nval:1:-1, iobs), & ! Heights of the specific humidity levels
-                              q % vals(q%nval:1:-1, iobs), &                         ! Values of the specific humidity
-                              prs % vals(prs%nval:1:-1, iobs), &                     ! Values of the pressure
-                              self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
-                              self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
-                              self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
-                              obsLocR(iobs), &                       ! Local radius of curvature of the earth
-                              obsLat(iobs), &                        ! Latitude of the observation
-                              obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
-                              1, &                                   ! Number of observations in the profile
-                              impact_param(iobs:iobs), &             ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
-    else
-      CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
-                              q % nval, &                            ! Number of specific humidity levels
-                              rho_heights % vals(:,iobs), &          ! Heights of the pressure levels
-                              theta_heights % vals(:,iobs), &        ! Heights of the specific humidity levels
-                              q % vals(:,iobs), &                    ! Values of the specific humidity
-                              prs % vals(:,iobs), &                  ! Values of the pressure
-                              self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
-                              self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
-                              self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
-                              obsLocR(iobs), &                       ! Local radius of curvature of the earth
-                              obsLat(iobs), &                        ! Latitude of the observation
-                              obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
-                              1, &                                   ! Number of observations in the profile
-                              impact_param(iobs:iobs), &             ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
-    end if
+    CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
+                            q % nval, &                            ! Number of specific humidity levels
+                            rho_heights % vals(:,iobs), &          ! Heights of the pressure levels
+                            theta_heights % vals(:,iobs), &        ! Heights of the specific humidity levels
+                            q % vals(:,iobs), &                    ! Values of the specific humidity
+                            prs % vals(:,iobs), &                  ! Values of the pressure
+                            self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
+                            self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
+                            self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
+                            obsLocR(iobs), &                       ! Local radius of curvature of the earth
+                            obsLat(iobs), &                        ! Latitude of the observation
+                            obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
+                            1, &                                   ! Number of observations in the profile
+                            impact_param(iobs:iobs), &             ! Impact parameter for this observation
+                            self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
   end do obs_loop
 
 ! Note that this routine has been run.
@@ -178,20 +188,30 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   deallocate(obsGeoid)
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_settraj
-    
-! ------------------------------------------------------------------------------
-! Given and increment to the model state, calculate an increment to the
-! observation
-! ------------------------------------------------------------------------------    
+
+
+!-------------------------------------------------------------------------------
+!> \brief Given an increment to the model state, calculate an increment to the
+!         observation
+!!
+!! \details **ufo_gnssro_bendmetoffice_simobs_tl**
+!! * Get the values from the geovals
+!! * Multiply increments by K matrix
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
 
   implicit none
 
 ! Subroutine arguments
-  class(ufo_gnssro_bendmetoffice_tlad), intent(in) :: self      ! Object which is being used to transfer information
-  type(ufo_geovals),                intent(in)     :: geovals   ! Model perturbations
-  real(kind_real),                  intent(inout)  :: hofx(:)   ! Increment to the observations
-  type(c_ptr),   value,             intent(in)     :: obss      ! Input - the observations
+  class(ufo_gnssro_bendmetoffice_tlad), intent(in) :: self      !< Object which is being used to transfer information
+  type(ufo_geovals),                intent(in)     :: geovals   !< Model perturbations
+  real(kind_real),                  intent(inout)  :: hofx(:)   !< Increment to the observations
+  type(c_ptr),   value,             intent(in)     :: obss      !< Input - the observations
 
 ! Local parameters
   character(len=*), parameter  :: myname_="ufo_gnssro_bendmetoffice_simobs_tl"
@@ -244,10 +264,20 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
     
 end subroutine ufo_gnssro_bendmetoffice_simobs_tl
  
-! ------------------------------------------------------------------------------
-! Given an increment to the observation, find the equivalent increment to the
-! model state
-! ------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+!> \brief Given an increment to the observation, find the equivalent increment
+!         to the model state
+!!
+!! \details **ufo_gnssro_bendmetoffice_simobs_ad**
+!! * Get the geovals to be returning the information in
+!! * Multiply observation increments by K
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 
   use typesizes,     only: wp => EightByteReal
@@ -255,10 +285,10 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
   implicit none
 
 ! Subroutine arguments
-  class(ufo_gnssro_bendmetoffice_tlad), intent(in) :: self      ! Object which is being used to transfer information
-  type(ufo_geovals),                intent(inout)  :: geovals   ! Calculated perturbations to model state
-  real(kind_real),                  intent(in)     :: hofx(:)   ! Increment to the observations
-  type(c_ptr),  value,              intent(in)     :: obss      ! Input - the observations
+  class(ufo_gnssro_bendmetoffice_tlad), intent(in) :: self      !< Object which is being used to transfer information
+  type(ufo_geovals),                intent(inout)  :: geovals   !< Calculated perturbations to model state
+  real(kind_real),                  intent(in)     :: hofx(:)   !< Increment to the observations
+  type(c_ptr),  value,              intent(in)     :: obss      !< Input - the observations
 
 ! Local parameters
   character(len=*), parameter     :: myname_="ufo_gnssro_bendmetoffice_simobs_ad"
@@ -298,8 +328,13 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 
     if (hofx(iobs) /= missing) then
         x_d = self % K(iobs,:) * hofx(iobs)
-        prs_d % vals(:,iobs) = x_d(1:prs_d%nval)
-        q_d % vals(:,iobs) = x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+        if (self%flip_it) then
+            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(prs_d%nval:1:-1)
+            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+q_d%nval:prs_d%nval+1:-1)
+        else
+            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+        end if
     end if
 
   end do obs_loop
@@ -312,14 +347,20 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
   return
 
 end subroutine ufo_gnssro_bendmetoffice_simobs_ad
-    
-!-------------------------------------------------------------------------
-! Tidy up the variables that are used for passing information
-!-------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+!> \brief Tidy up the variables that are used for passing information
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_tlad_delete(self)
 
   implicit none
-  class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self
+  class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self  !< The object being tidied up
   character(len=*), parameter :: myname_="ufo_gnssro_bendmetoffice_tlad_delete"
       
   self%nlocs = 0
@@ -330,9 +371,19 @@ subroutine ufo_gnssro_bendmetoffice_tlad_delete(self)
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_delete
 
-!-------------------------------------------------------------------------
-! Interface for calculating the K-matrix for calculating TL/AD
-!-------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+!> \brief Interface for calculating the K-matrix for calculating TL/AD
+!!
+!! \details **jacobian_interface**
+!! * Calculate refractivity and impact parameter (nr)
+!! * Call routine to calculate K-matrix
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 SUBROUTINE jacobian_interface(nlevp, &
                               nlevq, &
                               za, &
@@ -351,21 +402,21 @@ SUBROUTINE jacobian_interface(nlevp, &
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevp            ! The number of model pressure levels
-INTEGER, INTENT(IN)            :: nlevq            ! The number of model theta levels
-REAL(kind_real), INTENT(IN)    :: za(:)            ! The geometric height of the model pressure levels
-REAL(kind_real), INTENT(IN)    :: zb(:)            ! The geometric height of the model theta levels
-REAL(kind_real), INTENT(IN)    :: q(1:nlevq)       ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     ! The model values that are being perturbed
-LOGICAL, INTENT(IN)            :: pseudo_ops       ! Whether to use pseudo levels in the calculation
-LOGICAL, INTENT(IN)            :: vert_interp_ops  ! Whether to use exner for the vertical interpolation
-REAL(kind_real), INTENT(IN)    :: min_temp_grad    ! The minimum allowed vertical temperature gradient
-REAL(kind_real), INTENT(IN)    :: ro_rad_curv      ! The earth's radius of curvature at the ob location
-REAL(kind_real), INTENT(IN)    :: latitude         ! The latitude of the ob location
-REAL(kind_real), INTENT(IN)    :: ro_geoid_und     ! The geoid undulation at the ob location
-INTEGER, INTENT(IN)            :: nobs             ! The number of observations in this column
-REAL(kind_real), INTENT(IN)    :: zobs(:)          ! The impact parameters of the column of observations
-REAL(kind_real), INTENT(INOUT) :: K(:,:)           ! The calculated K matrix
+INTEGER, INTENT(IN)            :: nlevp            !< The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevq            !< The number of model theta levels
+REAL(kind_real), INTENT(IN)    :: za(:)            !< The geometric height of the model pressure levels
+REAL(kind_real), INTENT(IN)    :: zb(:)            !< The geometric height of the model theta levels
+REAL(kind_real), INTENT(IN)    :: q(1:nlevq)       !< The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     !< The model values that are being perturbed
+LOGICAL, INTENT(IN)            :: pseudo_ops       !< Whether to use pseudo levels in the calculation
+LOGICAL, INTENT(IN)            :: vert_interp_ops  !< Whether to use exner for the vertical interpolation
+REAL(kind_real), INTENT(IN)    :: min_temp_grad    !< The minimum allowed vertical temperature gradient
+REAL(kind_real), INTENT(IN)    :: ro_rad_curv      !< The earth's radius of curvature at the ob location
+REAL(kind_real), INTENT(IN)    :: latitude         !< The latitude of the ob location
+REAL(kind_real), INTENT(IN)    :: ro_geoid_und     !< The geoid undulation at the ob location
+INTEGER, INTENT(IN)            :: nobs             !< The number of observations in this column
+REAL(kind_real), INTENT(IN)    :: zobs(:)          !< The impact parameters of the column of observations
+REAL(kind_real), INTENT(INOUT) :: K(:,:)           !< The calculated K matrix
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 !
@@ -447,9 +498,20 @@ DEALLOCATE(model_heights)
 END SUBROUTINE jacobian_interface
 
 
-!-------------------------------------------------------------------------
-! Calculate the K-matrix (Jacobian)
-!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!> \brief Calculate the K-matrix (Jacobian)
+!!
+!! \details **Ops_GPSRO_GetK**
+!! * Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
+!! * Calculate the gradient of nr wrt ref
+!! * Calculate the gradient of bending angle wrt ref and nr
+!! * Calculate overall gradient of bending angle wrt p and q
+!!
+!! \author Neill Bowler (Met Office)
+!!
+!! \date 26 Aug 2021
+!!
+!-------------------------------------------------------------------------------
 SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                           nRefLevels, &
                           nlevq, &
@@ -474,25 +536,25 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
 !
     IMPLICIT NONE
 
-    INTEGER, INTENT(IN)          :: nlevp                 ! The number of model pressure levels
-    INTEGER, INTENT(IN)          :: nRefLevels            ! Number of refractivity levels
-    INTEGER, INTENT(IN)          :: nlevq                 ! The number of model theta levels
-    REAL(kind_real), INTENT(IN)  :: za(:)                 ! The geometric height of the model pressure levels
-    REAL(kind_real), INTENT(IN)  :: zb(:)                 ! The geometric height of the model theta levels
-    REAL(kind_real), INTENT(IN)  :: model_heights(:)      ! The geometric height of the refractivity levels
-    LOGICAL, INTENT(IN)          :: pseudo_ops            ! Whether to use pseudo levels in the calculation
-    LOGICAL, INTENT(IN)          :: vert_interp_ops       ! Whether to use exner for the vertical interpolation
-    REAL(kind_real), INTENT(IN)  :: min_temp_grad         ! Minimum allowed vertical temperature gradient
-    REAL(kind_real), INTENT(IN)  :: pressure(nlevp)       ! Model pressure
-    REAL(kind_real), INTENT(IN)  :: humidity(nlevq)       ! Model specific humidity
-    REAL(kind_real), INTENT(IN)  :: ro_rad_curv           ! The earth's radius of curvature at the ob location
-    REAL(kind_real), INTENT(IN)  :: latitude              ! The latitude of the ob location
-    REAL(kind_real), INTENT(IN)  :: ro_geoid_und          ! The geoid undulation at the ob location
-    REAL(kind_real), INTENT(IN)  :: ref_model(nRefLevels) ! Model refractivity on theta levels - returned from forward model
-    INTEGER, INTENT(IN)          :: nobs                  ! The number of observations in this column
-    REAL(kind_real), INTENT(IN)  :: zobs(:)               ! The impact parameters of the column of observations
-    REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)        ! The impact parameters of the model data
-    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   ! The calculated K matrix
+    INTEGER, INTENT(IN)          :: nlevp                 !< The number of model pressure levels
+    INTEGER, INTENT(IN)          :: nRefLevels            !< Number of refractivity levels
+    INTEGER, INTENT(IN)          :: nlevq                 !< The number of model theta levels
+    REAL(kind_real), INTENT(IN)  :: za(:)                 !< The geometric height of the model pressure levels
+    REAL(kind_real), INTENT(IN)  :: zb(:)                 !< The geometric height of the model theta levels
+    REAL(kind_real), INTENT(IN)  :: model_heights(:)      !< The geometric height of the refractivity levels
+    LOGICAL, INTENT(IN)          :: pseudo_ops            !< Whether to use pseudo levels in the calculation
+    LOGICAL, INTENT(IN)          :: vert_interp_ops       !< Whether to use exner for the vertical interpolation
+    REAL(kind_real), INTENT(IN)  :: min_temp_grad         !< Minimum allowed vertical temperature gradient
+    REAL(kind_real), INTENT(IN)  :: pressure(nlevp)       !< Model pressure
+    REAL(kind_real), INTENT(IN)  :: humidity(nlevq)       !< Model specific humidity
+    REAL(kind_real), INTENT(IN)  :: ro_rad_curv           !< The earth's radius of curvature at the ob location
+    REAL(kind_real), INTENT(IN)  :: latitude              !< The latitude of the ob location
+    REAL(kind_real), INTENT(IN)  :: ro_geoid_und          !< The geoid undulation at the ob location
+    REAL(kind_real), INTENT(IN)  :: ref_model(nRefLevels) !< Model refractivity on theta levels - returned from forward model
+    INTEGER, INTENT(IN)          :: nobs                  !< The number of observations in this column
+    REAL(kind_real), INTENT(IN)  :: zobs(:)               !< The impact parameters of the column of observations
+    REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)        !< The impact parameters of the model data
+    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   !< The calculated K matrix
 
     REAL(kind_real)              :: m1(nobs, nRefLevels)             ! Intermediate term in the K-matrix calculation
     REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)                    ! Partial derivative of refractivity wrt. pressure

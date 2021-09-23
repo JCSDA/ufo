@@ -8,12 +8,14 @@
 #ifndef UFO_GEOVALS_H_
 #define UFO_GEOVALS_H_
 
+#include <algorithm>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "oops/base/Variables.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -131,6 +133,21 @@ class GeoVaLs : public util::Printable,
 
  private:
   void print(std::ostream &) const;
+  // -----------------------------------------------------------------------------
+  /*! \brief Take the input vector and recast to type<T> whilst respecting
+             missing values */
+  template <typename T>
+  void cast(const std::vector<double> & doubleVals,
+            std::vector<T> & vals) const {
+    const T missing = util::missingValue(T());
+    const double missingDouble = util::missingValue(double());
+    std::transform(doubleVals.begin(),
+                   doubleVals.end(),
+                   vals.begin(),
+                   [missing, missingDouble](double val){
+                     return val == missingDouble ? missing : static_cast<T>(val);
+                   });
+  }
 
   F90goms keyGVL_;
   oops::Variables vars_;

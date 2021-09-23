@@ -65,27 +65,48 @@ class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase 
 /// the (i, j)th element of the GeoVaL specified in the `interpolation level` option of the
 /// ObsOperator.
 ///
-/// If the `variables` option is present, the operator does not calculate the background errors
-/// of all simulated variables in the ObsSpace, but only those listed in the `variables` option.
+/// By default this operator calculates the background errors of all simulated variables in the
+/// ObsSpace. However, if the `variables` option is present, the operator only calculates background
+/// errors for the variables listed in that option.
 ///
 /// See ObsBackgroundErrorVertInterpParameters for the description of YAML configuration options
 /// accepted by this operator.
 ///
-/// Example configuration:
+/// Example configuration which uses the default behaviour:
 ///
 ///     obs operator:
 ///       name: Composite
 ///       components:
 ///       # operator used to evaluate H(x)
 ///       - name: VertInterp
-///         vertical coordinate: geopotential_height  # coordinate used for obs value interpolation
+///         vertical coordinate: air_pressure  # coordinate used for obs value interpolation
 ///       # operator used to evaluate background errors
 ///       - name: BackgroundErrorVertInterp
 ///         # vertical coordinate of observation locations
-///         observation vertical coordinate: geopotential_height
+///         observation vertical coordinate: air_pressure
 ///         # GeoVaL storing interpolation levels of background errors
-///         vertical coordinate: background_error_geopotential_height
+///         vertical coordinate: background_error_air_pressure
 ///
+/// Example configuration using the `variables` option to specify which errors are computed:
+///
+///     obs operator:
+///       name: Composite
+///       components:
+///       # operator used to evaluate H(x)
+///       - name: VertInterp
+///         vertical coordinate: air_pressure  # coordinate used for obs value interpolation
+///       # operator used to evaluate background errors
+///       - name: BackgroundErrorVertInterp
+///         variables:
+///         - name: air_temperature
+///         - name: northward_wind
+///         - name: eastward_wind
+///         - name: relative_humidity
+///         # vertical coordinate of observation locations
+///         observation vertical coordinate: air_pressure
+///         # GeoVaL storing interpolation levels of background errors
+///         vertical coordinate: background_error_air_pressure
+
 class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
                                      private util::ObjectCounter<ObsBackgroundErrorVertInterp> {
  public:

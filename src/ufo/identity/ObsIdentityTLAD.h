@@ -61,6 +61,9 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
 
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
+
+  /// Level index 0 is closest to surface.
+  bool levelIndexZeroAtSurface_;
 };
 
 // -----------------------------------------------------------------------------

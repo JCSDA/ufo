@@ -475,7 +475,7 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
       obs errors: [1.0]
-  air_pressure: [ 300, 300, 10000, 301, 301, 301]
+  air_pressure: [-99999, 300, 99999, 301, 301, 301]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
@@ -491,7 +491,7 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
             method: least upper bound
           - name: station_id@MetaData
             method: exact
-  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '10000' of the variable 'air_pressure@MetaData'
+  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'air_pressure@MetaData'
 Assign observation error from NetCDF variance; no match found for a 'greatest lower bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -505,7 +505,7 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
       obs errors: [1.0]
-  air_pressure: [ 599, 599, 100, 600, 600, 600]
+  air_pressure: [99999, 599, -99999, 600, 600, 600]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
@@ -521,7 +521,7 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
             method: greatest lower bound
           - name: station_id@MetaData
             method: exact
-  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '100' of the variable 'air_pressure@MetaData'
+  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'air_pressure@MetaData'
 Assign observation error from NetCDF variance; attempt to use the 'least upper bound' mode for a string variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z

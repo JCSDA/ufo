@@ -102,29 +102,37 @@ CASE("ufo/DataExtractor/bilinearinterp/float_blinear") {
 
 CASE("ufo/DataExtractor/bilinearinterp/extrapolation_lower_bound_dim0") {
   // Lower bound extrapolation dim0
-  const float res = run_basic(0, 4.2);
-  EXPECT_EQUAL(res, missing);
+  const std::string msg = "No match found for 'bilinear' interpolation of value '0' of the "
+                          "variable 'var0'.  Value is out of bounds.  Consider using "
+                          "extrapolation.";
+  EXPECT_THROWS_MSG(run_basic(0, 4.2), msg.c_str());
 }
 
 
 CASE("ufo/DataExtractor/bilinearinterp/extrapolation_lower_bound_dim1") {
   // Lower bound extrapolation dim1
-  const float res = run_basic(4.2, 0.0);
-  EXPECT_EQUAL(res, missing);
+  const std::string msg = "No match found for 'bilinear' interpolation of value '0' of the "
+                          "variable 'var1'.  Value is out of bounds.  Consider using "
+                          "extrapolation.";
+  EXPECT_THROWS_MSG(run_basic(4.2, 0.0), msg.c_str());
 }
 
 
 CASE("ufo/DataExtractor/bilinearinterp/extrapolation_upper_bound_dim0") {
   // Upper bound extrapolation dim0
-  const float res = run_basic(20.0, 4.2);
-  EXPECT_EQUAL(res, missing);
+  const std::string msg = "No match found for 'bilinear' interpolation of value '20' of the "
+                          "variable 'var0'.  Value is out of bounds.  Consider using "
+                          "extrapolation.";
+  EXPECT_THROWS_MSG(run_basic(20.0, 4.2), msg.c_str());
 }
 
 
 CASE("ufo/DataExtractor/bilinearinterp/extrapolation_upper_bound_dim1") {
   // Upper bound extrapolation dim1
-  const float res = run_basic(4.2, 20);
-  EXPECT_EQUAL(res, missing);
+  const std::string msg = "No match found for 'bilinear' interpolation of value '20' of the "
+                          "variable 'var1'.  Value is out of bounds.  Consider using "
+                          "extrapolation.";
+  EXPECT_THROWS_MSG(run_basic(4.2, 20), msg.c_str());
 }
 
 
@@ -266,8 +274,7 @@ CASE("ufo/DataExtractor/bilinearinterp/range_constrain") {
 
 
 CASE("ufo/DataExtractor/bilinearinterp/range_constrain_extrapolation") {
-  // Constraining the range, such that, what would otherwise be within bounds is now out of bounds
-  // so returns missing.
+  // Constraining the range, such that our extract is now out of bounds.
   const float obVal0 = 5.0, obVal1 = 3.0;
 
   ConstrainedRange con0 = ConstrainedRange(5);
@@ -277,8 +284,11 @@ CASE("ufo/DataExtractor/bilinearinterp/range_constrain_extrapolation") {
   ConstrainedRange con2 = ConstrainedRange(1);
   const std::array<ConstrainedRange, 3> ranges {con1, con0, con2};
 
-  const float res = run_range_constrained(obVal0, obVal1, ranges);
-  EXPECT_EQUAL(res, missing);
+  const std::string msg = "No match found for 'bilinear' interpolation of value '5' of the "
+                          "variable 'var0'.  Value is out of bounds.  Consider using "
+                          "extrapolation.";
+  EXPECT_THROWS_MSG(run_range_constrained(obVal0, obVal1, ranges),
+                    msg.c_str());
 }
 
 

@@ -2,10 +2,16 @@
 module gnssro_mod_obserror
 !==========================================================================
 
+use iso_c_binding
 use kinds
 use gnssro_mod_constants
 use ufo_roobserror_utils_mod
 use fckit_log_module, only: fckit_log
+
+private
+public :: bending_angle_obserr_ECMWF, bending_angle_obserr_NRL
+public :: bending_angle_obserr_NBAM, refractivity_obserr_NBAM
+public :: gnssro_obserr_avtemp, gnssro_obserr_latitude
 
 contains
 subroutine bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
@@ -41,6 +47,7 @@ end subroutine bending_angle_obserr_ECMWF
 !----------------------------------------
 
 subroutine bending_angle_obserr_NRL(obsLat, obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+use ufo_constants_mod, only: deg2rad
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue, obsLat

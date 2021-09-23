@@ -52,6 +52,11 @@ constexpr util::NamedEnumerator<InterpMethod>
   InterpMethodParameterTraitsHelper::namedValues[];
 
 // -----------------------------------------------------------------------------
+constexpr char ExtrapolationModeParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<ExtrapolationMode>
+  ExtrapolationModeParameterTraitsHelper::namedValues[];
+
+// -----------------------------------------------------------------------------
 static ObsFunctionMaker<DrawValueFromFile<float>> floatMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<int>> intMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<std::string>> stringMaker("DrawValueFromFile");
@@ -83,6 +88,7 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
       }
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[intParam->name.value()] = method;
+      extrapMode_[intParam->name.value()] = intParam->extrapMode.value();
     }
     if (nlin > 0 && nlin != 2) {
       throw eckit::UserError("Bilinear interpolation requires two variables.", Here());
@@ -129,7 +135,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
 
   // Channel number handling
   if (options_.chlist.value() != boost::none)
-    interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT);
+    interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT,
+                              ExtrapolationMode::ERROR);
 
   ObData obData;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
@@ -137,8 +144,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
       " from the obsSpace" << std::endl;
 
     const std::string varName = allvars_[ind].fullName();
-    const InterpMethod &interpolationMethod = interpMethod_.at(varName);
-    interpolator.scheduleSort(varName, interpolationMethod);
+    interpolator.scheduleSort(varName, interpMethod_.at(varName), extrapMode_.at(varName));
     switch (in.dtype(allvars_[ind])) {
       case ioda::ObsDtype::Integer:
         updateObData<int>(in, allvars_[ind], obData);

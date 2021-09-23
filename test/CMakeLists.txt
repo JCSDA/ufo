@@ -30,6 +30,7 @@ list( APPEND ufo_test_input
   testinput/amsua_seaice_qc.yaml
   testinput/aod_crtm.yaml
   testinput/aod_luts.yaml
+  testinput/aod_metoffice.yaml
   testinput/atms_crtm.yaml
   testinput/atms_qc_filters.yaml
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
@@ -310,6 +311,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/variabletransforms_windcomponents.yaml
   testinput/unit_tests/variabletransforms_windspeedanddirection.yaml
   testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml
+  testinput/unit_tests/variabletransforms_pstar.yaml
 )
 
 
@@ -2602,6 +2604,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_profilehorizontaldrift
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_pstar
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_pstar.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_solarzenith_skiprejected
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/function_solarzenith_skiprejected.yaml"
@@ -3327,6 +3336,13 @@ ecbuild_add_test( TARGET  test_ufo_bias_lin_op
                   ARGS    "testinput/bias_linear_op.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET test_ufo_opr_aod_metoffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS "testinput/aod_metoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET test_ufo_opr_groundgnssMetOffice

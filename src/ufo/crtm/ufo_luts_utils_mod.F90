@@ -39,6 +39,8 @@ MODULE ufo_luts_utils_mod
      CHARACTER(len=max_string) :: rcfile
      CHARACTER(len=255), ALLOCATABLE :: sensor_id(:)
      INTEGER :: n_sensors
+     REAL(kind_real), ALLOCATABLE :: wavelengths(:)
+     LOGICAL :: use_crtm
      CHARACTER(len=255) :: endian_type
      CHARACTER(len=255) :: coefficient_path
   END TYPE luts_conf
@@ -65,10 +67,16 @@ CONTAINS
     ALLOCATE(conf%sensor_id(conf%n_sensors))
     CALL f_confopts%get_or_die("Sensor_ID",str)
     conf%sensor_id(conf%n_sensors) = str
-    CALL f_confopts%get_or_die("EndianType",str)
-    conf%endian_type = str
-    CALL f_confopts%get_or_die("CoefficientPath",str)
-    conf%coefficient_path = str
+
+    IF (f_confOpts%has("CoefficientPath")) THEN
+       CALL f_confopts%get_or_die("CoefficientPath",str)
+       conf%coefficient_path = str
+       CALL f_confopts%get_or_die("EndianType",str)
+       conf%endian_type = str
+       conf%use_crtm=.TRUE.
+    ELSE
+       conf%use_crtm=.FALSE.
+    ENDIF
 
     DEALLOCATE(str)
 

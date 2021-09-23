@@ -485,5 +485,16 @@ void horizontalDrift
   }
   }
 }
+
+/* -------------------------------------------------------------------------------------*/
+
+float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
+  float BkP = util::missingValue(1.0f);
+  double ToRaise =  (PSurfParamA - height)/PSurfParamB;
+  if (ToRaise > 0.0) {
+    BkP = pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
+  }
+  return BkP;
+}
 }  // namespace formulas
 }  // namespace ufo

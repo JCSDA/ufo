@@ -143,12 +143,7 @@ do jvar = 1, config % nchans
   var = vars % variable(jvar)
   call obsspace_get_db(config % obsdb, "FortranQC", trim(var), self % QCflags(jvar,:))
   call obsspace_get_db(config % obsdb, "ObsValue",  trim(var), self % yobs(jvar,:))
-
-  ! Optionally get the observation bias
-  variable_present = obsspace_has(config % obsdb, "ObsBias", trim(var))
-  if (variable_present) then
-    call obsspace_get_db(config % obsdb, "ObsBias",   trim(var), self % ybias(jvar,:))
-  end if
+  call obsspace_get_db(config % obsdb, "ObsBias",   trim(var), self % ybias(jvar,:))
 
 end do
 
@@ -162,8 +157,6 @@ do jobs = 1, self % iloc
     endif
   enddo
 enddo
-
-if (.not. variable_present) write(*,*) "Using uncorrected brightness temperature"
 
 ! Subtract bias from the observations (apply bias correction)
 self % yobs = self % yobs - self % ybias

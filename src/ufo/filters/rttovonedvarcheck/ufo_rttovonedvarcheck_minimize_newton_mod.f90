@@ -533,10 +533,11 @@ integer, intent(out)              :: Status          !< check if Cholesky decomp
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_NewtonFewChans"
 integer                     :: Element
 integer                     :: i
-real(kind_real)             :: HB(nChans,nprofelements) ! Scratch vector
-real(kind_real)             :: Q(nChans)                ! Q = U^-1.V
-real(kind_real)             :: U(nChans,nChans)         ! U = H.B.H^T + R
-real(kind_real)             :: V(nChans)                ! V = (y-y(x_n))-H^T(xb-x_n)
+real(kind_real)             :: HB(nChans, nprofelements)  ! Scratch matrix
+real(kind_real)             :: HBT(nprofelements, nChans) ! Transpose of scratch matrix
+real(kind_real)             :: Q(nChans)                  ! Q = U^-1.V
+real(kind_real)             :: U(nChans, nChans)          ! U = H.B.H^T + R
+real(kind_real)             :: V(nChans)                  ! V = (y-y(x_n))-H^T(xb-x_n)
 
 Status = 0
 
@@ -566,14 +567,14 @@ call Ops_Cholesky (U,      &
                    nChans, &
                    Q,      &
                    Status)
-if (Status /= 0) goto 9999
 
 ! Delta profile is (HB)^T.Q
 !------
+if (Status == 0) then
+  HBT = transpose(HB)
+  DeltaProfile = matmul(HBT, Q)
+end if
 
-DeltaProfile = matmul(transpose(HB), Q)
-
-9999 continue
 end subroutine ufo_rttovonedvarcheck_NewtonFewChans
 
 !------------------------------------------------------------------------------
