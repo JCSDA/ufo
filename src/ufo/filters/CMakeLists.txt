@@ -108,7 +108,7 @@ set ( filters_files
       Variable.h
       VariableTransforms.cc
       VariableTransforms.h
-      VariableTransformsParameters.h
+      VariableTransformParametersBase.h
       Variables.cc
       Variables.h
       VariableAssignment.cc

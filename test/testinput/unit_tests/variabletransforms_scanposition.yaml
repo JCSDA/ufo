@@ -25,7 +25,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
     - filter: Variable Transforms
-      Transform: ["RemapScanPosition"]
+      Transform: RemapScanPosition
       UseValidDataOnly: false
   compareVariables:
     - reference:

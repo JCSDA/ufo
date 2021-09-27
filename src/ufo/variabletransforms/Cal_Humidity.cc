@@ -17,10 +17,11 @@ static TransformMaker<Cal_RelativeHumidity>
     makerCal_RelativeHumidity_("RelativeHumidity");
 
 Cal_RelativeHumidity::Cal_RelativeHumidity(
-    const VariableTransformsParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    : TransformBase(options, data, flags),
+      allowSuperSaturation_(options.AllowSuperSaturation.value()) {}
 
 /**************************************************************************************************/
 
@@ -194,7 +195,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         // calculate relative humidity
         if (Q_sub_s_w > 0 && Q_sub_s_ice > 0) {
           relativeHumidity[iloc] = (Q_sub_s_w / Q_sub_s_ice) * 100.0;
-          if (!AllowSuperSaturation())
+          if (!allowSuperSaturation_)
             relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
           hasBeenUpdated = true;
         }
@@ -206,7 +207,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         evaluateSatSpecHumidity(temperature, temperature);
         // update from Rh wrt water to Rh wrt ice for temperatures below freezing
         relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
-        if (!AllowSuperSaturation())
+        if (!allowSuperSaturation_)
           relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
 
         hasBeenUpdated = true;
@@ -292,7 +293,7 @@ static TransformMaker<Cal_SpecificHumidity>
     makerCal_SpecificHumidity_("SpecificHumidity");
 
 Cal_SpecificHumidity::Cal_SpecificHumidity(
-    const VariableTransformsParameters &options,
+    const GenericVariableTransformParameters &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {}
@@ -318,7 +319,7 @@ void Cal_SpecificHumidity::runTransform(const std::vector<bool> &apply) {
 }
 /************************************************************************************/
 
-void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &apply) {
+void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &) {
   const size_t nlocs = obsdb_.nlocs();
   float esat, qvs, qv, satVaporPres;
   std::vector<float> relativeHumidity;

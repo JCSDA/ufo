@@ -8,7 +8,7 @@
 #include "ufo/variabletransforms/Cal_Wind.h"
 #include "ufo/utils/Constants.h"
 
-#include "ufo/filters/VariableTransformsParameters.h"
+#include "ufo/filters/VariableTransformParametersBase.h"
 
 
 namespace ufo {
@@ -21,7 +21,7 @@ static TransformMaker<Cal_WindSpeedAndDirection>
     makerCal_WindSpeedAndDirection_("WindSpeedAndDirection");
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
-    const VariableTransformsParameters &options, const ObsFilterData &data,
+    const GenericVariableTransformParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {
 }
@@ -77,7 +77,7 @@ static TransformMaker<Cal_WindComponents>
     makerCal_WindComponents_("WindComponents");
 
 Cal_WindComponents::Cal_WindComponents(
-    const VariableTransformsParameters &options,
+    const GenericVariableTransformParameters &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {}

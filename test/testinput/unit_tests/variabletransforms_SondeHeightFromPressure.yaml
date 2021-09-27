@@ -18,7 +18,7 @@ observations:
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["HeightFromPressure"]
+    Transform: HeightFromPressure
     Method: UKMO
   compareVariables:
   - test:
@@ -39,7 +39,7 @@ observations:
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["HeightFromPressure"]
+    Transform: HeightFromPressure
     Method: NCAR
   compareVariables:
   - test:
@@ -60,7 +60,7 @@ observations:
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["HeightFromPressure"]
+    Transform: HeightFromPressure
     Method: UKMO
   compareVariables:
   - test:

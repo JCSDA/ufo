@@ -14,10 +14,22 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
+#include "ufo/filters/VariableTransformParametersBase.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
+
+/// Configuration parameters for the variable transformation of specific humidity to
+/// relative humidity
+class Cal_RelativeHumidityParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_RelativeHumidityParameters, VariableTransformParametersBase);
+
+ public:
+  /// Should we allow super-saturated relative humidity? [Optional]:
+  /// By default \e AllowSuperSaturation is set to \e false.
+  /// See ReadTheDoc for more details
+  oops::Parameter<bool> AllowSuperSaturation{"AllowSuperSaturation", false, this};
+};
 
 /*!
 * \brief Relative Humidity filter
@@ -35,17 +47,20 @@ namespace ufo {
 *   Formulation: Sonntag    # Using Sonntag formulation
 * \endcode
 *
-* See VariableTransformsParameters for filter setup.
+* See Cal_RelativeHumidityParameters for filter setup.
 */
 class Cal_RelativeHumidity : public TransformBase {
  public:
-  Cal_RelativeHumidity(const VariableTransformsParameters &options,
+  typedef Cal_RelativeHumidityParameters Parameters_;
+
+  Cal_RelativeHumidity(const Parameters_ &options,
                        const ObsFilterData &data,
                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  bool allowSuperSaturation_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
   void methodUKMO(const std::vector<bool> &apply);
@@ -69,11 +84,11 @@ class Cal_RelativeHumidity : public TransformBase {
 *   Formulation: Sonntag    # Using Sonntag formulation
 * \endcode
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_SpecificHumidity : public TransformBase {
  public:
-  Cal_SpecificHumidity(const VariableTransformsParameters &options,
+  Cal_SpecificHumidity(const GenericVariableTransformParameters &options,
                        const ObsFilterData &data,
                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check

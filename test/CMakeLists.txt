@@ -308,6 +308,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeightICAO.yaml
   testinput/unit_tests/variabletransforms_SondeHeightFromPressure.yaml
+  testinput/unit_tests/variabletransforms_szacorrection.yaml
   testinput/unit_tests/variabletransforms_windcomponents.yaml
   testinput/unit_tests/variabletransforms_windspeedanddirection.yaml
   testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml
@@ -2054,6 +2055,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondePressureFromHeightICA
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_SondeHeightFromPressure
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/variabletransforms_SondeHeightFromPressure.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_satelliteZenithAngleCorrection
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_szacorrection.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

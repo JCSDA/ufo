@@ -13,7 +13,7 @@ observations:
     simulated variables: [dew_point_temperature_surface, air_temperature_surface, pressure_surface]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["RelativeHumidity"]
+    Transform: RelativeHumidity
     Method: UKMO 
     AllowSuperSaturation: true
   compareVariables:                 

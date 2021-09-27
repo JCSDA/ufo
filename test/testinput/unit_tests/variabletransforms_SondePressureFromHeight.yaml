@@ -17,7 +17,7 @@ observations:
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["PressureFromHeightForProfile"]
+    Transform: PressureFromHeightForProfile
     Method: UKMO
   compareVariables:
   - test:

@@ -22,7 +22,7 @@ static TransformMaker<Cal_PStar>
     makerCal_PStar_("PStar");
 
 Cal_PStar::Cal_PStar(
-    const VariableTransformsParameters &options,
+    const GenericVariableTransformParameters &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags), gvals_() {
@@ -167,10 +167,5 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   obsdb_.put_db("DerivedObsError", "PStar", PStar_error);
   obsdb_.put_db("DerivedGrossErrorProbability", "PStar", PStar_PGE);
 }
-
-Variables Cal_PStar::requiredVariables() const {
-  return gvals_;
-}
-
 }  // namespace ufo
 

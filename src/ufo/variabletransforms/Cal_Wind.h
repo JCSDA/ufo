@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -26,11 +25,11 @@ namespace ufo {
 *  are included in the same obs space. The filter does not have any configuration options.
 ///
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_WindSpeedAndDirection : public TransformBase {
  public:
-  Cal_WindSpeedAndDirection(const VariableTransformsParameters &options,
+  Cal_WindSpeedAndDirection(const GenericVariableTransformParameters &options,
                             const ObsFilterData &data,
                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
@@ -44,11 +43,11 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 *  the wind components, eastward_wind and northward_wind. The newly calculated variables
 *  are included in the same obs space.
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_WindComponents : public TransformBase {
  public:
-  Cal_WindComponents(const VariableTransformsParameters &options,
+  Cal_WindComponents(const GenericVariableTransformParameters &options,
                      const ObsFilterData &data,
                      const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check

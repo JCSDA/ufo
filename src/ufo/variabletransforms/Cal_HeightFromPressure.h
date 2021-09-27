@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -21,11 +20,11 @@ namespace ufo {
 /*!
 * \brief Converts pressures to heights.
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_HeightFromPressure : public TransformBase {
  public:
-  Cal_HeightFromPressure(const VariableTransformsParameters &options,
+  Cal_HeightFromPressure(const GenericVariableTransformParameters &options,
                          const ObsFilterData &data,
                          const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check

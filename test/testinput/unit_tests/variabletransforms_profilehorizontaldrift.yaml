@@ -13,7 +13,7 @@ observations:
     simulated variables: [geopotential_height, wind_speed, wind_from_direction]
   obs filters:
     - filter: Variable Transforms
-      Transform: ["ProfileHorizontalDrift"]
+      Transform: ProfileHorizontalDrift
       # Exclude BUFR sondes, whose position has already been measured.
       where:
       - variable:
@@ -46,7 +46,7 @@ observations:
     simulated variables: [geopotential_height, wind_speed, wind_from_direction]
   obs filters:
     - filter: Variable Transforms
-      Transform: ["ProfileHorizontalDrift"]
+      Transform: ProfileHorizontalDrift
   expectExceptionWithMessage: Group variables configuration is empty
 
 # The profiles are not sorted by air pressure, throwing an exception.
@@ -60,7 +60,7 @@ observations:
     simulated variables: [geopotential_height, wind_speed, wind_from_direction]
   obs filters:
     - filter: Variable Transforms
-      Transform: ["ProfileHorizontalDrift"]
+      Transform: ProfileHorizontalDrift
   expectExceptionWithMessage: Sort variable must be air_pressure
 
 # The profiles are not sorted in descending order, throwing an exception.
@@ -75,5 +75,5 @@ observations:
     simulated variables: [geopotential_height, wind_speed, wind_from_direction]
   obs filters:
     - filter: Variable Transforms
-      Transform: ["ProfileHorizontalDrift"]
+      Transform: ProfileHorizontalDrift
   expectExceptionWithMessage: Profiles must be sorted in descending order

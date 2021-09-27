@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -35,11 +34,11 @@ namespace ufo {
 *   Transform: ["ProfileHorizontalDrift"]
 * \endcode
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_ProfileHorizontalDrift : public TransformBase {
  public:
-  Cal_ProfileHorizontalDrift(const VariableTransformsParameters &options,
+  Cal_ProfileHorizontalDrift(const GenericVariableTransformParameters &options,
                              const ObsFilterData &data,
                              const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion

@@ -18,7 +18,7 @@ static TransformMaker<Cal_ProfileHorizontalDrift>
 makerCal_ProfileHorizontalDrift_("ProfileHorizontalDrift");
 
 Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
-(const VariableTransformsParameters &options,
+(const GenericVariableTransformParameters &options,
  const ObsFilterData &data,
  const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
   : TransformBase(options, data, flags) {}

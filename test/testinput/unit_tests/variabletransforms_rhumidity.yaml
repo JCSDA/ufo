@@ -9,9 +9,9 @@ observations:
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["RelativeHumidity"] # calculate relative humidity from specific humidity (also T, P)
-                                    # using Default method and default Formulation (Roger 1989)
-  compareVariables:                 # test output matches precalculated values
+    Transform: RelativeHumidity # calculate relative humidity from specific humidity (also T, P)
+                                # using Default method and default Formulation (Roger 1989)
+  compareVariables:             # test output matches precalculated values
     - reference:
         name: relative_humidity_NOAA@TestReference
       test:
@@ -27,7 +27,7 @@ observations:
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["RelativeHumidity"]
+    Transform: RelativeHumidity
     Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
   compareVariables:                # test output matches precalculated values
     - reference:
@@ -45,7 +45,7 @@ observations:
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["RelativeHumidity"]
+    Transform: RelativeHumidity
     Formulation: Walko
   compareVariables:                # test output matches precalculated values
     - reference:
@@ -63,7 +63,7 @@ observations:
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["RelativeHumidity"]
+    Transform: RelativeHumidity
     Formulation: Murphy
   compareVariables:                # test output matches precalculated values
     - reference:
