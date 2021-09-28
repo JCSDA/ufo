@@ -13,13 +13,14 @@
 
 #include "ufo/errors/ObsErrorCrossVarCov.h"
 #include "ufo/errors/ObsErrorDiagonal.h"
+#include "ufo/ObsTraits.h"
 
 namespace ufo {
-template<typename OBS> void instantiateObsErrorFactory() {
-  oops::instantiateObsErrorFactory<OBS>();
-  static oops::interface::ObsErrorMaker<OBS, ufo::ObsErrorDiagonal>
+void instantiateObsErrorFactory() {
+  oops::instantiateObsErrorFactory<ObsTraits>();
+  static oops::interface::ObsErrorMaker<ObsTraits, ObsErrorDiagonal>
               makerDiagUFO("diagonal ufo");
-  static oops::interface::ObsErrorMaker<OBS, ufo::ObsErrorCrossVarCov>
+  static oops::interface::ObsErrorMaker<ObsTraits, ObsErrorCrossVarCov>
               makerCrossVarCov("cross variable covariances");
 }
 
