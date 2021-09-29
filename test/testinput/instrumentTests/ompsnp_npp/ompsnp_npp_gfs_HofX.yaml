@@ -1,0 +1,24 @@
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
+
+observations:
+- obs space:
+    name: OzoneLayer
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_obs_2020121500.nc
+      obsgrouping:
+        group variables: ["latitude"]
+        sort variable: "air_pressure"
+        sort order: "ascending"
+    obsdataout:
+      obsfile: Data/ompsnp_npp_hofx_2020121500.nc
+    simulated variables: [integrated_layer_ozone_in_air]
+  obs operator:
+    name: AtmVertInterpLay
+    geovals: [mole_fraction_of_ozone_in_air]
+    coefficients: [0.007886131] # convert from ppmv to DU
+    nlevels: [22]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_geoval_2020121500.nc
+  vector ref: GsiHofX
+  tolerance: 1.0e-5
