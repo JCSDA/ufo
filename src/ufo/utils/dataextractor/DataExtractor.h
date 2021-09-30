@@ -558,29 +558,28 @@ class DataExtractor
     if (resultSet_)
       return obVal;
 
-    const InterpMethod &method = nextCoordToExtractBy_->method;
     const std::vector<T> varValues = boost::get<std::vector<T>>(nextCoordToExtractBy_->values);
-    const ExtrapolationMode &extrapMode = nextCoordToExtractBy_->extrapMode;
     ConstrainedRange &range = constrainedRanges_[nextCoordToExtractBy_->payloadDim];
     const std::string &varName = nextCoordToExtractBy_->name;
 
     // Handle extrapolation mode
     T obValN = obVal;
-    if ((method == InterpMethod::EXACT) && (extrapMode != ExtrapolationMode::ERROR))
+    if ((nextCoordToExtractBy_->method == ufo::InterpMethod::EXACT) &&
+        (nextCoordToExtractBy_->extrapMode != ufo::ExtrapolationMode::ERROR))
       throw eckit::BadParameter("Only 'error' extrapolation mode supported for 'exact' method "
                                 "extract.", Here());
-    switch (extrapMode) {
-      case ExtrapolationMode::ERROR:
+    switch (nextCoordToExtractBy_->extrapMode) {
+      case ufo::ExtrapolationMode::ERROR:
         // Error (no extrapolation) is the default behaviour of all methods so no action required.
         break;
-      case ExtrapolationMode::NEAREST:
+      case ufo::ExtrapolationMode::NEAREST:
         if (obVal > varValues[range.end()-1]) {
           obValN = varValues[range.end()-1];
         } else if (obVal < varValues[range.begin()]) {
           obValN = varValues[range.begin()];
         }
         break;
-      case ExtrapolationMode::MISSING:
+      case ufo::ExtrapolationMode::MISSING:
         resultSet_ = true;
         result_ = util::missingValue(result_);
         return obValN;
