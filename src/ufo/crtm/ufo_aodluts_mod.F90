@@ -192,10 +192,45 @@ CONTAINS
             &n_aerosols, n_profiles, n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh)
  
-       CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
-            &self%conf%rcfile,  &
-            &self%conf%wavelengths, var_aerosols, aero_layers, rh,       &
-            &aod_tot = hofx, rc = rc)  
+!note the difference in the "if" construct:
+!a) aaod_tot denotes Absorption AOD 
+!b) aod_tot denotes AOD
+!that are alternatively output from 
+!subroutine get_cf_aod in geos-aero/src/CF_MieObs.F90 
+
+!aaod_tot option is chosen with the following configuration   
+
+!- obs space:
+!    name: Aod
+!..........
+!     channels: 3,5,6,7
+!  obs operator:
+!    name: AodLUTs
+!    obs options:
+!      Sensor_ID: aeronet
+!      AerosolOption: aerosols_gocart_merra_2
+!      RCFile: [geosaod_aeronet.rc]
+!      AbsorptionAod: true
+
+!It can only exist for AERONET observations
+!see 
+!https://amt.copernicus.org/articles/13/3375/2020/#section4
+!for details (note that only available for "channels": 3,5,6,7)
+!i.e. 440,675,870,1020nm
+!An illustrative example is given in
+!fv3-jedi/test/testinput/hofx_gfs_aero.yaml
+
+       IF (self%conf%aaod) THEN
+          CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
+               &self%conf%rcfile,  &
+               &self%conf%wavelengths, var_aerosols, aero_layers, rh,&
+               &aaod_tot = hofx, rc = rc)  
+       ELSE
+          CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
+               &self%conf%rcfile,  &
+               &self%conf%wavelengths, var_aerosols, aero_layers, rh,&
+               &aod_tot = hofx, rc = rc)  
+       ENDIF
 
        DEALLOCATE(aero_layers,rh,wavelengths_all)
        
