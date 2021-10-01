@@ -194,7 +194,7 @@ class TransformMaker : public TransformFactory {
   std::unique_ptr<TransformBase> make(
       const VariableTransformParametersBase &options,
       const ObsFilterData& data,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
+      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) override {
     const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(options);
     return std::unique_ptr<TransformBase>(new T(stronglyTypedParams, data, flags));
   }
