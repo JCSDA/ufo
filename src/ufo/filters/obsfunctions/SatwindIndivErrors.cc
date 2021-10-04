@@ -35,10 +35,11 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
 
   // Get parameters from options.
   std::string const profile = options_.profile.value();
+  std::string const obs_vcoord = options_.obs_vcoord.value();
   std::string const vcoord = options_.vcoord.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable(vcoord+"@MetaData");
+  invars_ += Variable(obs_vcoord+"@MetaData");
   invars_ += Variable(profile+"@hofx");
   invars_ += options_.pressure_error;
   invars_ += options_.quality_index;
@@ -114,10 +115,12 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   float const eu_mult = options_.eu_mult.value();
   float const min_press = options_.min_press.value();  // Pa
   std::string const profile = options_.profile.value();
+  std::string const obs_vcoord = options_.obs_vcoord.value();
   std::string const vcoord = options_.vcoord.value();
   oops::Log::debug() << "Wind profile for calculating observation errors is "
                      << profile << std::endl;
-  oops::Log::debug() << "Vertical coordinate is " << vcoord << std::endl;
+  oops::Log::debug() << "Observation vertical coordinate is " << obs_vcoord << std::endl;
+  oops::Log::debug() << "Model vertical coordinate is " << vcoord << std::endl;
 
   std::ostringstream errString;
 
@@ -145,7 +148,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::vector<float> bg_windcomponent;
   std::vector<float> pressure_error;
   std::vector<float> ob_qi;
-  in.get(Variable(vcoord+"@MetaData"), ob_p);
+  in.get(Variable(obs_vcoord+"@MetaData"), ob_p);
   in.get(Variable(profile+"@hofx"), bg_windcomponent);
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);

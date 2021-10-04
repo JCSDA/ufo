@@ -75,7 +75,7 @@ ModelObThreshold::~ModelObThreshold() {
  *    model vertical coordinate:
  *      name: air_pressure@GeoVaLs
  *    observation height:
- *      name: air_pressure_levels@MetaData
+ *      name: air_pressure@MetaData
  *    thresholds: [50,50,40,30]
  *    coordinate values: [100000,80000,50000,20000]
  *    threshold type: min

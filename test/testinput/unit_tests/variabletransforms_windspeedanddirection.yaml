@@ -11,7 +11,7 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
     - filter: Variable Transforms
-      Transform: ["WindSpeedAndDirection"]
+      Transform: WindSpeedAndDirection
       UseValidDataOnly: false
   # how many data points will pass the filter? Should pass for all present obs
   passedBenchmark: 148
@@ -37,7 +37,7 @@ observations:
     derived simulated variables: [wind_speed, wind_from_direction]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["WindSpeedAndDirection"]
+    Transform: WindSpeedAndDirection
   - filter: Perform Action
     action:
       name: assign error

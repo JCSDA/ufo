@@ -25,13 +25,13 @@
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/HasParameters_.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/filters/VariableTransformsParameters.h"
+#include "ufo/filters/VariableTransformParametersBase.h"
 #include "ufo/variabletransforms/Formulas.h"
 
 
@@ -43,7 +43,7 @@ class ObsVector;
 }
 
 namespace ufo {
-class VariableTransformsParameters;
+class VariableTransformParametersBase;
 class Variables;
 }
 
@@ -52,7 +52,7 @@ namespace ufo {
 /// \brief Base class for variable conversion
 class TransformBase {
  public:
-  TransformBase(const VariableTransformsParameters &options,
+  TransformBase(const VariableTransformParametersBase &options,
                 const ObsFilterData& data,
                 const std::shared_ptr<ioda::ObsDataVector<int>>& flags);
   /// Destructor
@@ -84,7 +84,6 @@ class TransformBase {
   formulas::MethodFormulation method_;
   formulas::MethodFormulation formulation_;
   bool UseValidDataOnly_;
-  bool AllowSuperSaturation_;
   /// The observation name
   std::string obsName_;
 
@@ -137,12 +136,11 @@ class TransformBase {
   formulas::MethodFormulation method() const { return method_; }
   formulas::MethodFormulation formulation() const { return formulation_; }
   bool UseValidDataOnly() const { return UseValidDataOnly_; }
-  bool AllowSuperSaturation() const { return AllowSuperSaturation_; }
   void SetUseValidDataOnly(bool t) {UseValidDataOnly_ = t; }
   /// subclasses to access the observation name
   std::string obsName() const { return obsName_; }
   /// Configurable parameters
-  const VariableTransformsParameters &options_;
+  const VariableTransformParametersBase &options_;
 
   /// Observation and geoval data
   ObsFilterData data_;
@@ -161,9 +159,11 @@ class TransformBase {
 class TransformFactory {
  public:
   static std::unique_ptr<TransformBase> create(
-      const std::string &, const VariableTransformsParameters &,
+      const std::string &, const VariableTransformParametersBase &,
       const ObsFilterData &,
       const std::shared_ptr<ioda::ObsDataVector<int>> &);
+  static std::unique_ptr<VariableTransformParametersBase> createParameters(
+      const std::string &);
   virtual ~TransformFactory() = default;
 
  protected:
@@ -171,9 +171,10 @@ class TransformFactory {
 
  private:
   virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &,
+      const VariableTransformParametersBase &,
       const ObsFilterData &,
       const std::shared_ptr<ioda::ObsDataVector<int>> &) = 0;
+  virtual std::unique_ptr<VariableTransformParametersBase> makeParameters() const = 0;
   static std::map<std::string, TransformFactory *> &getMakers() {
     static std::map<std::string, TransformFactory *> makers_;
     return makers_;
@@ -183,15 +184,24 @@ class TransformFactory {
 /// \brief Transform maker
 template <class T>
 class TransformMaker : public TransformFactory {
-  virtual std::unique_ptr<TransformBase> make(
-      const VariableTransformsParameters &options,
-      const ObsFilterData& data,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
-    return std::unique_ptr<TransformBase>(new T(options, data, flags));
-  }
+ private:
+  typedef oops::TParameters_IfAvailableElseFallbackType_t<T, GenericVariableTransformParameters>
+    Parameters_;
 
  public:
   explicit TransformMaker(const std::string &name) : TransformFactory(name) {}
+
+  std::unique_ptr<TransformBase> make(
+      const VariableTransformParametersBase &options,
+      const ObsFilterData& data,
+      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) override {
+    const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(options);
+    return std::unique_ptr<TransformBase>(new T(stronglyTypedParams, data, flags));
+  }
+
+  std::unique_ptr<VariableTransformParametersBase> makeParameters() const override {
+    return std::make_unique<Parameters_>();
+  }
 };
 
 }  // namespace ufo

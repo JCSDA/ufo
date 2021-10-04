@@ -43,10 +43,14 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
   Eigen::ArrayXXf allvarcorrelations;
   corrvar.readWithEigenRegular(allvarcorrelations);
 
+  oops::Log::debug() << "Computing correlations from covariances: " << options.computeCorr.value()
+                     << std::endl;
+
   // Get channel/variables indices in the allvarcorrelations; index == -1 means that correlations
   // don't exist in the file for this channel/variable, and we'll keep them at 0.
   const std::vector<int> var_idx =
          getRequiredVarOrChannelIndices(obsgroup, vars_, false);
+
   for (size_t ivar = 0; ivar < var_idx.size(); ++ivar) {
     if (var_idx[ivar] < 0) {
       oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
@@ -55,16 +59,24 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                            << std::endl;
     } else {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
-        if (var_idx[jvar] >= 0)
+        if (var_idx[jvar] >= 0) {
           varcorrelations_(ivar, jvar) = allvarcorrelations(var_idx[ivar], var_idx[jvar]);
+          if (options.computeCorr.value()) {
+            varcorrelations_(ivar, jvar) = varcorrelations_(ivar, jvar) /
+                 sqrt(allvarcorrelations(var_idx[ivar], var_idx[ivar])
+                      * allvarcorrelations(var_idx[jvar], var_idx[jvar]));
+          }
+        }
       }
     }
   }
 
   // Issue a warning if it's not a correlation matrix
   if (!varcorrelations_.diagonal().isOnes()) {
-    oops::Log::warning() << "ObsErrorCrossVarCov: matrix read from file is not correlation "
-                         << "matrix (values different from one found on a diagonal)" << std::endl;
+    throw std::runtime_error("ObsErrorCrossVarCov: matrix read or computed from file is not "
+                             "a correlation matrix (values different from one found on a "
+                             "diagonal). Is 'obs error.compute correlations from covariances' "
+                             "set to 'true'?");
   }
 }
 

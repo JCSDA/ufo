@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_VARIABLETRANSFORMSPARAMETERS_H_
-#define UFO_FILTERS_VARIABLETRANSFORMSPARAMETERS_H_
+#ifndef UFO_FILTERS_VARIABLETRANSFORMPARAMETERSBASE_H_
+#define UFO_FILTERS_VARIABLETRANSFORMPARAMETERSBASE_H_
 
 #include <string>
 #include <vector>
@@ -18,6 +18,7 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -27,9 +28,9 @@ class Configuration;
 
 namespace ufo {
 
-/// \brief Options controlling the operation of the variablestansform filter.
-class VariableTransformsParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(VariableTransformsParameters, Parameters)
+/// \brief Abstract base class options controlling the operation of the variablestansform filter.
+class VariableTransformParametersBase : public FilterParametersBase {
+  OOPS_ABSTRACT_PARAMETERS(VariableTransformParametersBase, FilterParametersBase)
 
  public:  // variables
   //=== Generic parameters ===//
@@ -53,8 +54,8 @@ class VariableTransformsParameters : public oops::Parameters {
   ///          Retrieve the specific humidity from relative humidity
   ///        - \e "RelativeHumidity": \n
   ///          Retrieve the relative humidity from specific humidity
-  oops::RequiredParameter<std::vector<std::string>> Transform{"Transform",
-                                                              this};
+  oops::RequiredParameter<std::string> Transform{"Transform",
+                                                 this};
 
   /// Method used for calculation [Optional]:
   /// Related to Met Center - See ReadTheDoc for more details.
@@ -69,13 +70,14 @@ class VariableTransformsParameters : public oops::Parameters {
   /// By default \e UseValidDataOnly is set to \e true.
   /// See ReadTheDoc for more details
   oops::Parameter<bool> UseValidDataOnly{"UseValidDataOnly", true, this};
-
-  /// Should we allow super-saturated relative humidity? [Optional]:
-  /// By default \e AllowSuperSaturation is set to \e false.
-  /// See ReadTheDoc for more details
-  oops::Parameter<bool> AllowSuperSaturation{"AllowSuperSaturation", false, this};
 };
+
+/// \brief Concrete class containing the options specified by the VariableTransformParametersBase.
+class GenericVariableTransformParameters : public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GenericVariableTransformParameters, VariableTransformParametersBase)
+};
+
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_VARIABLETRANSFORMSPARAMETERS_H_
+#endif  // UFO_FILTERS_VARIABLETRANSFORMPARAMETERSBASE_H_
 

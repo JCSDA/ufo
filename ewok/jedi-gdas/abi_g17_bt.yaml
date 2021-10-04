@@ -11,6 +11,6 @@ obs operator:
    Absorbers: [H2O,O3,CO2]
    obs options:
      inspectProfile: 1
-     Sensor_ID: abi_g17
+     Sensor_ID: abi_gr # For now, using GOES-R coefficients instead of G17.
      EndianType: little_endian
      CoefficientPath: $(jedi_build)/ufo/test/Data/

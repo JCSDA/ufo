@@ -11,11 +11,11 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/sattcwv/SatTCWVTLAD.interface.h"
 
 // Forward declarations
 namespace eckit {
@@ -34,7 +34,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /// Precipitable water observation operator
 class SatTCWVTLAD : public LinearObsOperatorBase,
-                          private util::ObjectCounter<SatTCWVTLAD> {
+                      private util::ObjectCounter<SatTCWVTLAD> {
  public:
   static const std::string classname() {return "ufo::SatTCWVTLAD";}
 
@@ -42,20 +42,53 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   virtual ~SatTCWVTLAD();
 
   // Obs Operators
+  // -----------------------------------------------------------------------------
+  /*! \brief Compute Jacobian matrix d(TCWV)/d(q).
+  *
+  * \details This is based on Roger Saunders' Fortran original "sattcwv" 
+  * observation operator code. This method must be called before calling the TL/AD
+  * methods.
+  *
+  * \date Sept. 2021: Created by J. Hocking (Met Office)
+  */
+  // -----------------------------------------------------------------------------
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
+
+  // -----------------------------------------------------------------------------
+  /*! \brief Given an increment to the model state, calculate an increment to the
+  *   observation.
+  *
+  * \details This is based on Roger Saunders' Fortran original "sattcwv" 
+  * observation operator code.
+  *
+  * \date Sept. 2021: Created by J. Hocking (Met Office)
+  */
+  // -----------------------------------------------------------------------------
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+
+  // -----------------------------------------------------------------------------
+  /*! \brief Given an increment to the observation, calculate the equivalent
+  *   increment to the model state.
+  *
+  * \details This is based on Roger Saunders' Fortran original "sattcwv" 
+  * observation operator code.
+  *
+  * \date Sept. 2021: Created by J. Hocking (Met Office)
+  */
+  // -----------------------------------------------------------------------------
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOperSatTCWV_;}
-  const int & toFortran() const {return keyOperSatTCWV_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperSatTCWV_;
   std::unique_ptr<const oops::Variables> varin_;
+
+  std::vector<std::vector<double>> k_matrix;
+  bool traj_init;
+  size_t nlevels;
+  size_t nprofiles;
 };
 
 // -----------------------------------------------------------------------------

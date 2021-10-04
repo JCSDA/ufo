@@ -36,6 +36,7 @@ MODULE ufo_luts_utils_mod
 !type for general config
   TYPE luts_conf
      CHARACTER(len=maxvarlen) :: aerosol_option
+     LOGICAL :: aaod
      CHARACTER(len=max_string) :: rcfile
      CHARACTER(len=255), ALLOCATABLE :: sensor_id(:)
      INTEGER :: n_sensors
@@ -76,6 +77,12 @@ CONTAINS
        conf%use_crtm=.TRUE.
     ELSE
        conf%use_crtm=.FALSE.
+    ENDIF
+
+    IF (f_confOpts%has("AbsorptionAod")) THEN
+       conf%aaod=.TRUE.
+    ELSE
+       conf%aaod=.FALSE.
     ENDIF
 
     DEALLOCATE(str)

@@ -12,6 +12,8 @@ set ( variabletransforms_files
       Cal_Humidity.cc
       Cal_RemapScanPosition.h
       Cal_RemapScanPosition.cc
+      Cal_SatZenithAngleCorrection.h
+      Cal_SatZenithAngleCorrection.cc
       Cal_Wind.h
       Cal_Wind.cc
       Cal_ProfileHorizontalDrift.h

@@ -10,6 +10,7 @@
 #include <cstring>
 #include <iomanip>
 #include <limits>
+#include <utility>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -20,8 +21,8 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/VariableTransformParametersBase.h"
 #include "ufo/filters/VariableTransforms.h"
-#include "ufo/filters/VariableTransformsParameters.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -32,21 +33,21 @@ VariableTransforms::VariableTransforms(
     ioda::ObsSpace& obsdb, const eckit::Configuration& config,
     std::shared_ptr<ioda::ObsDataVector<int>> flags,
     std::shared_ptr<ioda::ObsDataVector<float>> obserr)
-    : FilterBase(obsdb, config, flags, obserr)
+    : FilterBase(obsdb, config, flags, obserr), parameters_()
 {
-  options_.reset(new VariableTransformsParameters());
-  options_->deserialize(config);
+  // Create parameters for this transformation
+  parameters_ = TransformFactory::createParameters(config.getString("Transform"));
+  parameters_->validateAndDeserialize(config);
+
+  // Create the transform
+  std::unique_ptr<TransformBase> transform = TransformFactory::create(
+          parameters_->Transform.value(), *parameters_, data_, flags_);
+
+  // Add any required transform variables to allvars_
   allvars_ += Variables(filtervars_);
+  allvars_ += transform->requiredVariables();
 
-  // Add any required geovals to allvars_
-  for (const auto& cal_ : options_->Transform.value()) {
-    std::unique_ptr<TransformBase> Transform =
-        TransformFactory::create(cal_, *options_, data_, flags_);
-     Variables gvars = Transform->requiredVariables();
-     allvars_ += Variables(gvars);
-  }
-
-  oops::Log::debug() << "VariableTransforms: config = " << config << std::endl;
+  oops::Log::debug() << this << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,25 +57,26 @@ VariableTransforms::~VariableTransforms() {}
 // -----------------------------------------------------------------------------
 
 void VariableTransforms::applyFilter(
-    const std::vector<bool>& apply, const Variables& filtervars,
-    std::vector<std::vector<bool>>& flagged) const {
+    const std::vector<bool>& apply, const Variables&,
+    std::vector<std::vector<bool>>&) const {
   print(oops::Log::trace());
   std::cout << " --> In variabletransforms::applyFilter" << std::endl;
   std::cout << "     --> set Transform object" << std::endl;
 
+  // Create the transform again.  This is because data_ is updated by the filter
+  // but not by the copy held by the variable transform.
+  std::unique_ptr<TransformBase> transform = TransformFactory::create(
+          parameters_->Transform.value(), *parameters_, data_, flags_);
+
   // Run all calculations requested
-  for (const auto& cal_ : options_->Transform.value()) {
-    oops::Log::debug() << "         estimate: " << cal_ << std::endl;
-    std::unique_ptr<TransformBase> Transform =
-        TransformFactory::create(cal_, *options_, data_, flags_);
-    Transform->runTransform(apply);
-  }
+  oops::Log::debug() << "         estimate: " << parameters_->Transform.value() << std::endl;
+  transform->runTransform(apply);
 }
 
 // -----------------------------------------------------------------------------
 
 void VariableTransforms::print(std::ostream& os) const {
-  os << "VariableTransforms: config = " << config_ << std::endl;
+  os << "VariableTransforms: config = " << *parameters_ << std::endl;
 }
 // -----------------------------------------------------------------------------
 

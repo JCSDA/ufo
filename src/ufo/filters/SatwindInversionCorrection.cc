@@ -76,7 +76,7 @@ SatwindInversionCorrection::~SatwindInversionCorrection() {
  *  obs filters:
  *  - filter: Satwind Inversion Correction
  *    observation pressure:
- *      name: air_pressure_levels@MetaData
+ *      name: air_pressure@MetaData
  *    RH threshold: 50
  *    maximum pressure: 96000
  * \endcode
@@ -213,7 +213,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     }  // apply
   }  // location loop
   //  write back corrected pressure, updated flags and original pressure
-  obsdb_.put_db("MetaData", "air_pressure_levels", obs_pressure);
+  obsdb_.put_db("MetaData", "air_pressure", obs_pressure);
   obsdb_.put_db("QCFlags", "eastward_wind", u_flags);
   obsdb_.put_db("QCFlags", "northward_wind", v_flags);
   obsdb_.put_db("MetaData", "air_pressure_original", original_pressure);

@@ -307,7 +307,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                              y,y_tl)
 
 !     TL 
-      call ropp_fm_bangle_1d_tl(x1d,x1d_tl,y,y_tl%bangle(nvprof))
+      call ropp_fm_bangle_1d_tl(x1d,x1d_tl,y,y_tl%bangle(nvprof:nvprof))
       hofx(iobs) = y_tl%bangle(nvprof)
 
 !     tidy up 
@@ -339,6 +339,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   use ropp_fm_types, only: Obs1dBangle
   use typesizes,     only: wp => EightByteReal
   use datetimetypes, only: dp
+  use ropp_fm, only: ropp_fm_bangle_1d_ad
 
   implicit none
   class(ufo_gnssro_BndROPP2D_tlad), intent(in)    :: self
@@ -519,7 +520,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 !       now call AD of forward model
         y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
-        call ropp_fm_bangle_1d_ad(x1d,x1d_ad,y,y_ad)
+        call ropp_fm_bangle_1d_ad(x1d,x1d_ad,y,y_ad%bangle(nvprof:nvprof))
         call init_ropp_1d_statevec_ad(           &
                           t_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
                           q_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &

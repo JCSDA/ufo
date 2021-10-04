@@ -12,7 +12,7 @@ observations:
 
   obs filters:
   - filter: Variable Transforms
-    Transform: ["PStar"]
+    Transform: PStar
 
   compareVariables:                 # test output matches precalculated values
     - reference:

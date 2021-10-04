@@ -12,7 +12,7 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
   - filter: Variable Transforms
-    Transform: ["WindComponents"]
+    Transform: WindComponents
   passedBenchmark: 148
   compareVariables:                #  test output matches precalculated values
     - reference:

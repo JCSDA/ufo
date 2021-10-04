@@ -42,12 +42,12 @@ namespace ufo {
 */
 class Cal_PStar : public TransformBase {
  public:
-  Cal_PStar(const VariableTransformsParameters &options,
+  Cal_PStar(const GenericVariableTransformParameters &options,
             const ObsFilterData &data,
             const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
-  Variables requiredVariables() const override;
+  Variables requiredVariables() const override { return gvals_; }
 
  private:
   Variables gvals_;

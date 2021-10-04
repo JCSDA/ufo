@@ -17,7 +17,7 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
     makerCal_PressureFromHeightForProfile_("PressureFromHeightForProfile");
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
-    const VariableTransformsParameters &options, const ObsFilterData &data,
+    const GenericVariableTransformParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {}
 
@@ -244,7 +244,7 @@ static TransformMaker<Cal_PressureFromHeightForICAO>
     makerCal_PressureFromHeightForICAO_("PressureFromHeightForICAO");
 
 Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
-    const VariableTransformsParameters &options, const ObsFilterData &data,
+    const GenericVariableTransformParameters &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {}
 

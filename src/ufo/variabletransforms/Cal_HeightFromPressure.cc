@@ -16,7 +16,7 @@ static TransformMaker<Cal_HeightFromPressure>
     makerCal_HeightFromPressure_("HeightFromPressure");
 
 Cal_HeightFromPressure::Cal_HeightFromPressure(
-    const VariableTransformsParameters &options,
+    const GenericVariableTransformParameters &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags) {}

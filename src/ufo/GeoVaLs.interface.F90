@@ -165,7 +165,7 @@ type(fckit_configuration) :: f_conf
 call ufo_geovals_registry%get(c_key_self, self)
 
 f_conf = fckit_configuration(c_conf)
-call f_conf%get_or_die("analytic_init",str)
+call f_conf%get_or_die("method",str)
 ic = str
 locs = ufo_locations(c_locs)
 call ufo_geovals_analytic_init(self,locs,ic)

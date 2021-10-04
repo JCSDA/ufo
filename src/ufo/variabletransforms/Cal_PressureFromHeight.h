@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -25,11 +24,11 @@ namespace ufo {
 * template.
 * To date there is only the UKMO formulation available.
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_PressureFromHeightForProfile : public TransformBase {
  public:
-  Cal_PressureFromHeightForProfile(const VariableTransformsParameters &options,
+  Cal_PressureFromHeightForProfile(const GenericVariableTransformParameters &options,
                                    const ObsFilterData &data,
                                    const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
@@ -45,11 +44,11 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 *
 * \details To date there is only the UKMO formulation available.
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_PressureFromHeightForICAO : public TransformBase {
  public:
-  Cal_PressureFromHeightForICAO(const VariableTransformsParameters &options,
+  Cal_PressureFromHeightForICAO(const GenericVariableTransformParameters &options,
                                 const ObsFilterData &data,
                                 const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check

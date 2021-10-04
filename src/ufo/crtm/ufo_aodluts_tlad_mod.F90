@@ -136,6 +136,17 @@ CONTAINS
        STOP
     END IF
 
+!since Absorption AOD are very sparse the benefits of
+!assimilating AAOD are limited. Instead
+!their value is for evaluation of represenation of aerosols in the model
+!over extended periods
+    IF (self%conf%aaod) THEN
+       message = 'TLAD not available for Absorption AOD'
+       CALL display_message( program_name, message, failure )
+       STOP
+    END IF
+
+
 ! get number of profile and layers from geovals
 
     CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
