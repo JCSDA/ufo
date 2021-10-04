@@ -154,6 +154,7 @@ list( APPEND ufo_test_input
   testinput/obserror_assign_unittests.yaml
   testinput/obserrordiagonal.yaml
   testinput/obserrorcrossvarcorr.yaml
+  testinput/obserrorcrossvarcov.yaml
   testinput/obsfilterdata.yaml
   testinput/omi_aura.yaml
   testinput/omi_aura_flipz.yaml
@@ -571,6 +572,14 @@ ecbuild_add_test( TARGET  test_ufo_obserrordiagonal
 ecbuild_add_test( TARGET  test_ufo_obserrorcrossvarcorr
                   SOURCES mains/TestObsErrorCovariance.cc
                   ARGS    "testinput/obserrorcrossvarcorr.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  MPI     4
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obserrorcrossvarcov
+                  SOURCES mains/TestObsErrorCovariance.cc
+                  ARGS    "testinput/obserrorcrossvarcov.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   MPI     4
                   LIBS    ufo
