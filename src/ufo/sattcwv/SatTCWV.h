@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/sattcwv/SatTCWV.interface.h"
 
 namespace eckit {
   class Configuration;
@@ -31,11 +30,26 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-// -----------------------------------------------------------------------------
-
-/// SatTCWV observation operator
+  // -----------------------------------------------------------------------------
+  /*! \brief Precipitable water observation operator
+  *
+  * \details This is based on Roger Saunders' Fortran original "sattcwv" 
+  * observation operator and also derives from Heather Lawrence's MetOffice AOD
+  * forward operator code. 
+  *
+  * The TCWV (total column water vapour) is calculated as:
+  * \f[ TCWV = \sum_{k=1}^{Nlevels}(1/g) q(k) |\Delta P(k)| \f],
+  *
+  * where: \f$g\f$ is the gravity constant and \f$q(k)\f$ is the specific humidity
+  * per atmospheric level. All inputs are taken from the geovals. Note that the 
+  * geoval input of pressure needs to be on staggered levels relative to specific
+  * humidity so that \f$\|\Delta P|\f$ is at the same height as specific humidity.
+  *
+  * \date Sept. 2021: Created by J. Hocking (Met Office)
+  */
+  // -----------------------------------------------------------------------------
 class SatTCWV : public ObsOperatorBase,
-                private util::ObjectCounter<SatTCWV> {
+                  private util::ObjectCounter<SatTCWV> {
  public:
   static const std::string classname() {return "ufo::SatTCWV";}
 
@@ -48,14 +62,9 @@ class SatTCWV : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOperSatTCWV_;}
-  const int & toFortran() const {return keyOperSatTCWV_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperSatTCWV_;
-  const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> varin_;  // list of the required geovals
 };
 
 // -----------------------------------------------------------------------------
