@@ -37,7 +37,7 @@ ModelBestFitPressure::ModelBestFitPressure(ioda::ObsSpace & obsdb, const Paramet
   // Get parameters from options
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVals
-  allvars_ += Variable("air_pressure_levels@GeoVaLs");
+  allvars_ += parameters_.model_pressure;
   allvars_ += Variable("eastward_wind@GeoVaLs");
   allvars_ += Variable("northward_wind@GeoVaLs");
 }
@@ -58,7 +58,9 @@ ModelBestFitPressure::~ModelBestFitPressure() {
  *  obs filter:
  *  - filter: Model Best Fit Pressure
  *    observation pressure:
- *      name: air_pressure_levels@MetaData
+ *      name: air_pressure@MetaData
+ *    model pressure:
+ *      name: air_pressure_levels@GeoVaLs
  *    top pressure: 10000
  *    pressure band half-width: 10000
  *    upper vector diff: 4
@@ -89,7 +91,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   const float tolerance_pressure = parameters_.tolerance_pressure.value();
   const bool calculate_best_fit_winds = parameters_.calculate_best_fit_winds.value();
   // get names of GeoVal variables
-  const std::string model_pressure_name = parameters_.obs_pressure.value().variable();
+  const std::string model_pressure_name = parameters_.model_pressure.value().variable();
   const std::string model_eastvec_name = "eastward_wind";
   const std::string model_northvec_name = "northward_wind";
 

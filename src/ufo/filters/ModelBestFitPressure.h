@@ -36,8 +36,10 @@ class ModelBestFitPressureParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(ModelBestFitPressureParameters, FilterParametersBase)
 
  public:
-  /// Name of the observation pressure variable to correct.
+  /// Name of the observation pressure variable.
   oops::RequiredParameter<Variable> obs_pressure{"observation pressure", this};
+  /// Name of the model pressure variable.
+  oops::RequiredParameter<Variable> model_pressure{"model pressure", this};
   /// Minimum allowed pressure region. Model levels will not be considered if their
   /// pressure is below this value.
   oops::Parameter<float> top_pressure{"top pressure", 10000, this};

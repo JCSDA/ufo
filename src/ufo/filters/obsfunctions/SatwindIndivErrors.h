@@ -37,7 +37,9 @@ class SatwindIndivErrorsParameters : public oops::Parameters {
   oops::RequiredParameter<float> eu_mult{"verror mult", this};
   /// String containing the name of the wind component we are calculating the error for
   oops::RequiredParameter<std::string> profile{"wind component", this};
-  /// String containing the vertical coordinate to use for the wind component
+  /// String containing the observation vertical coordinate
+  oops::RequiredParameter<std::string> obs_vcoord{"observation vertical coordinate", this};
+  /// String containing the vertical coordinate to use for the model wind component
   oops::RequiredParameter<std::string> vcoord{"vertical coordinate", this};
   /// Ignore contribution above height of minimum pressure (Pa)
   oops::Parameter<float> min_press{"minimum pressure", 10000.0, this};

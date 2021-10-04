@@ -8,7 +8,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
-    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z_noinv.nc4
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -23,7 +23,9 @@ observations:
       value: -99999.0
   - filter: Model Best Fit Pressure
     observation pressure:
-      name: air_pressure_levels@MetaData
+      name: air_pressure@MetaData
+    model pressure:
+      name: air_pressure_levels@GeoVaLs
     top pressure: 10000
     pressure band half-width: 10000
     upper vector diff: 4

@@ -4,6 +4,7 @@ window end: 2020-10-01T09:00:00Z
 observations:
 - obs operator:
     name: VertInterp
+    observation vertical coordinate: air_pressure
     vertical coordinate: air_pressure_levels
   obs space:
     name: Satwind
@@ -11,7 +12,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
-    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z_noinv.nc4
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   obs filters:
   # Create MetaData/satwind_id string variable containing channel information
   #--------------------------------------------------------------------------
@@ -31,14 +32,17 @@ observations:
       Satellite_id:
       - Sat ID: 270
         Sat name: GOES16
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
   # Assign estimated pressure errors for each satellite and channel combination
   # Errors are defined as a function of:
-  #     air_pressure_levels@MetaData
+  #     air_pressure@MetaData
   #     satwind_id@MetaData
   #--------------------------------------------------------------------------
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure_levels@MetaDataError
+    - name: air_pressure@MetaDataError
       type: float
       function:
         name: DrawValueFromFile@ObsFunction
@@ -48,7 +52,7 @@ observations:
           interpolation:
           - name: satwind_id@MetaData
             method: exact
-          - name: air_pressure_levels@MetaData
+          - name: air_pressure@MetaData
             method: linear
   # Post filter - Assign individual observation errors
   #---------------------------------------------------
@@ -64,11 +68,12 @@ observations:
           verror add: 7.5
           verror mult: -5.0
           wind component: eastward_wind
+          observation vertical coordinate: air_pressure
           vertical coordinate: air_pressure_levels
           pressure error:
-            name: air_pressure_levels@MetaDataError
+            name: air_pressure@MetaDataError
           quality index:
-            name: percent_confidence_2@MetaData
+            name: QI_without_forecast@MetaData
   - filter: Perform Action
     defer to post: true
     filter variables:
@@ -81,11 +86,12 @@ observations:
           verror add: 7.5
           verror mult: -5.0
           wind component: northward_wind
+          observation vertical coordinate: air_pressure
           vertical coordinate: air_pressure_levels
           pressure error:
-            name: air_pressure_levels@MetaDataError
+            name: air_pressure@MetaDataError
           quality index:
-            name: percent_confidence_2@MetaData
+            name: QI_without_forecast@MetaData
   compareVariables:            #  test output matches precalculated values
     - reference:
         name: eastward_wind@TestReference
