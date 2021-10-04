@@ -221,6 +221,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorConventional.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
+      obsfunctions/ObsFunctionExponential.cc
+      obsfunctions/ObsFunctionExponential.h
       obsfunctions/ObsFunctionLinearCombination.cc
       obsfunctions/ObsFunctionLinearCombination.h
       obsfunctions/ObsFunctionScattering.cc

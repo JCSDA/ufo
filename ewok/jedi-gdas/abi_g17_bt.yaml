@@ -9,6 +9,8 @@ obs space:
 obs operator:
    name: CRTM
    Absorbers: [H2O,O3,CO2]
+   Clouds: [Water, Ice]
+   Cloud_Fraction: 1.0
    obs options:
      inspectProfile: 1
      Sensor_ID: abi_gr # For now, using GOES-R coefficients instead of G17.
