@@ -185,6 +185,7 @@ list( APPEND ufo_test_input
   testinput/qc_finalcheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_ops.yaml
+  testinput/qc_gauss_thinning_satrad.yaml
   testinput/qc_gauss_thinning_unittests.yaml
   testinput/qc_grosserrorwholereport.yaml
   testinput/qc_historycheck_unittests.yaml
@@ -2256,6 +2257,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_bayesianbackgroundqcflags
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
                   SOURCES mains/TestGaussianThinning.cc
                   ARGS    "testinput/qc_gauss_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_gauss_thinning_satrad
+                  SOURCES mains/TestGaussianThinning.cc
+                  ARGS    "testinput/qc_gauss_thinning_satrad.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )

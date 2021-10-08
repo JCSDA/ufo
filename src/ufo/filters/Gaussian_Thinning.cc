@@ -171,6 +171,8 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
   bool roundHorizontalBinCountToNearest =
       options.roundHorizontalBinCountToNearest.value().value_or(false);
+  bool partitionLongitudeBinsUsingMesh =
+      options.partitionLongitudeBinsUsingMesh.value();
   if (options.opsCompatibilityMode)
     roundHorizontalBinCountToNearest = true;
   SpatialBinCountRoundingMode roundingMode = roundHorizontalBinCountToNearest ?
@@ -183,7 +185,9 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
   if (options.useReducedHorizontalGrid) {
     // Use fewer bins at high latitudes
-    return SpatialBinSelector(numLatBins, roundingMode, options.opsCompatibilityMode);
+    return SpatialBinSelector(numLatBins, roundingMode, options.horizontalMesh,
+                              options.opsCompatibilityMode,
+                              partitionLongitudeBinsUsingMesh);
   } else {
     // Use the same number of bins at all latitudes
     const int equatorToMeridianLengthRatio = 2;

@@ -17,7 +17,9 @@ namespace ufo {
 
 SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
                                        SpatialBinCountRoundingMode roundingMode,
-                                       bool metOfficeOpsCompatibilityMode)
+                                       float horizontalMesh,
+                                       bool metOfficeOpsCompatibilityMode,
+                                       bool partitionLongitudeBinsUsingMesh)
   : metOfficeOpsCompatibilityMode_(metOfficeOpsCompatibilityMode),
     latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins) {
   longitudeBinSelectors_.reserve(numLatitudeBins);
@@ -25,9 +27,17 @@ SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
     ValueType latBinCenter = latitudeBinCenter(latBin);
 
     const int equatorToMeridianLengthRatio = 2;
-    const float tentativeNumLongitudeBins =
-        equatorToMeridianLengthRatio * numLatitudeBins *
-        std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
+    float tentativeNumLongitudeBins;
+    if (partitionLongitudeBinsUsingMesh) {
+      const float meridianLength = M_PI * Constants::mean_earth_rad;
+      tentativeNumLongitudeBins =
+            equatorToMeridianLengthRatio * (meridianLength/horizontalMesh) *
+            std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
+    } else {
+      tentativeNumLongitudeBins =
+            equatorToMeridianLengthRatio * numLatitudeBins *
+            std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
+    }
     const IndexType numLonBins = roundNumBins(tentativeNumLongitudeBins, roundingMode);
 
     if (metOfficeOpsCompatibilityMode)

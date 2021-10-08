@@ -82,6 +82,14 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// it's set to \c true.
   oops::OptionalParameter<bool> roundHorizontalBinCountToNearest{
     "round_horizontal_bin_count_to_nearest", this};
+  /// Set this option to \c true to calculate partioning of longitude bins explicitly using
+  /// horizontal mesh distance. By default, with this option set to \c false, calculating the number
+  /// of longitude bins per latitude bin index involves the integer number of latitude
+  /// bins. Setting this option to \c true adopts the Met Office OPS method whereby the
+  /// integer number of latitude bins is replaced, in the calculation of longitude bins, by the
+  /// Earth half-circumference divided by the horizontal mesh distance.
+  oops::Parameter<bool> partitionLongitudeBinsUsingMesh{
+    "partition_longitude_bins_using_mesh", false, this};
 
   // Vertical grid
 
