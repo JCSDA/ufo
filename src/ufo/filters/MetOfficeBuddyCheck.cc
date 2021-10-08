@@ -19,7 +19,6 @@
 
 #include <boost/format.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"

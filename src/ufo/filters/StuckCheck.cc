@@ -14,7 +14,6 @@
 #include <vector>
 
 #include <boost/none.hpp>
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"

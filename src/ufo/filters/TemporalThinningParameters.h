@@ -18,10 +18,6 @@
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
 /// \brief Options controlling the operation of the TemporalThinning filter.

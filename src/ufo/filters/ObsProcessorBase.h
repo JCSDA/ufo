@@ -17,10 +17,6 @@
 #include "ufo/filters/Variables.h"
 #include "ufo/ObsTraits.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;

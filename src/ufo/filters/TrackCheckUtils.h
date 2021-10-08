@@ -14,14 +14,9 @@
 
 #include <boost/optional.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "ufo/filters/Variable.h"
-
-namespace eckit {
-class Configuration;
-}
 
 namespace ioda {
 template <typename DATATYPE> class ObsDataVector;

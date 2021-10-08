@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"

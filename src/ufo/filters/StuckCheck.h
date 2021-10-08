@@ -23,10 +23,6 @@
 #include "ufo/filters/StuckCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 
-namespace eckit {
-class Configuration;
-}
-
 namespace ioda {
 template <typename DATATYPE> class ObsDataVector;
 class ObsSpace;

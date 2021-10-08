@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
 #include "eckit/types/FloatCompare.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"

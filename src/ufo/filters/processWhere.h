@@ -22,8 +22,6 @@
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {class Configuration;}
-
 namespace ufo {
   class ObsFilterData;
   class Variables;

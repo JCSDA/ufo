@@ -7,8 +7,6 @@
 
 #include "ufo/filters/ModelObThreshold.h"
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 

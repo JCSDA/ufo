@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "eckit/container/KDTree.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"

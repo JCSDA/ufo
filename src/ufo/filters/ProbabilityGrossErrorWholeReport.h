@@ -19,10 +19,6 @@
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;

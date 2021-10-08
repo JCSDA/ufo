@@ -26,10 +26,6 @@
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
   /// \brief Options controlling the operation of the ConventionalProfileProcessing filter.
