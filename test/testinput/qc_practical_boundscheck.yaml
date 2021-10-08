@@ -1,0 +1,40 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Practical Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 13
+
+  - obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Practical Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable2
+    - name: variable3
+    minvalue: 15.0
+    maxvalue: 20.0
+# Compare variables with minvalue/maxvalue
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 18

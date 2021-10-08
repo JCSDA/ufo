@@ -62,6 +62,8 @@ set ( filters_files
       QCmanager.h
       PerformAction.cc
       PerformAction.h
+      PracticalBoundsCheck.cc
+      PracticalBoundsCheck.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
       ProfileConsistencyChecks.cc
