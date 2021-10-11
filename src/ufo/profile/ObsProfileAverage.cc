@@ -46,8 +46,12 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                     ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "ObsProfileAverage: simulateObs started" << std::endl;
 
-  // Cache the GeoVaLs the first time this function is called.
+  // Cache the input GeoVaLs for use in the slant path location algorithm.
   data_.cacheGeoVaLs(gv);
+
+  // Copy and reverse the GeoVaLs for use in the operator..
+  GeoVaLs gv_copy(gv);
+  gv_copy.reorderzdir(data_.getModelVerticalCoord(), "bottom2top");
 
   // Get correspondence between record numbers and indices in the total sample.
   const std::vector<std::size_t> &recnums = odb_.recidx_all_recnums();
@@ -85,7 +89,7 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
       // - fill H(x) with the relevant level in the GeoVaL.
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
         const std::size_t jloc = slant_path_location[mlev];
-        gv.getAtLocation(var_gv, variable, jloc);
+        gv_copy.getAtLocation(var_gv, variable, jloc);
         ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[mlev];
       }
     }

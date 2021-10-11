@@ -50,6 +50,9 @@ namespace ufo {
       for (int iter = 0; iter <= itermax; ++iter) {
         // Get the GeoVaL that corresponds to the current slanted profile location.
         gv.getAtLocation(pressure_gv, modelVerticalCoord, jlocslant);
+        // The GeoVaLs must be ordered from bottom to top for this algorithm to work.
+        if (pressure_gv.front() < pressure_gv.back())
+          throw eckit::BadValue("Pressure GeoVaLs are in the wrong order.", Here());
         // Define an iteration-specific location that is initialised to the
         // current slanted profile location.
         std::size_t jlociter = jlocslant;

@@ -451,6 +451,8 @@ Background manual QC flags:
   ManualFlagModification: true
 
 #Do not run profile pressure routine before temperature averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
 Profile pressure not run before temperature averaging:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -465,7 +467,7 @@ Profile pressure not run before temperature averaging:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
   obs diagnostics:
   Conventional Profile Processing:
-    Checks: ["Basic", "AverageTemperature"]
+    Checks: ["Basic", "Sign", "AverageTemperature"]
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true
@@ -498,6 +500,8 @@ Missing GeoVaLs for temperature averaging:
   ExpectThrowDuringOperation: true
 
 #Do not run profile pressure routine before wind speed averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
 Profile pressure not run before wind speed averaging:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -512,7 +516,7 @@ Profile pressure not run before wind speed averaging:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
   obs diagnostics:
   Conventional Profile Processing:
-    Checks: ["Basic", "AverageWindSpeed"]
+    Checks: ["Basic", "Sign", "AverageWindSpeed"]
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true
@@ -545,7 +549,33 @@ Missing GeoVaLs for wind speed averaging:
   ExpectThrowDuringOperation: true
 
 #Do not run profile pressure routine before relative humidity averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
 Profile pressure not run before relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  obs diagnostics:
+  Conventional Profile Processing:
+    Checks: ["Basic", "Sign", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
+
+#Do not run profile pressure routine before relative humidity averaging
+#This triggers the exception related to reorderzdir in ProfileDataHandled.
+Exception in ProfileDataHandler due to reorderzdir:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:

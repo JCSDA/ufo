@@ -285,6 +285,9 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
         geovals->getAtLevel(pressureGeoVaLs, ufo::VariableNames::geovals_pressure, jlev);
         pressureGeoVaLs_column.push_back(pressureGeoVaLs[0]);
       }
+      // Ensure order of GeoVaLs is correct.
+      if (pressureGeoVaLs_column.front() < pressureGeoVaLs_column.back())
+        std::reverse(pressureGeoVaLs_column.begin(), pressureGeoVaLs_column.end());
 
       // Get observed geopotential height and (empty) pressure vector.
       const auto &zObs = profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);

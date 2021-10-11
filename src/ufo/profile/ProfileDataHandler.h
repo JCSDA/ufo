@@ -221,8 +221,8 @@ namespace ufo {
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
-    /// GeoVaLs loaded by the filter.
-    const GeoVaLs* const geovals_;
+    /// GeoVaLs.
+    std::unique_ptr<GeoVaLs> geovals_;
 
     /// ObsDiags loaded by the filter.
     const ObsDiagnostics* const obsdiags_;

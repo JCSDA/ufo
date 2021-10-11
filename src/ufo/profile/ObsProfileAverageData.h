@@ -26,6 +26,8 @@ namespace eckit {
 
 namespace ufo {
 
+  enum class GeoVaLsDirection{BottomToTop, TopToBottom};
+
   /// \brief Data handling class for the ProfileAverage observation operator and TL/AD code.
   class ObsProfileAverageData {
    public:
@@ -52,6 +54,12 @@ namespace ufo {
 
     /// Print operator configuration options.
     void print(std::ostream & os) const;
+
+    /// Get the name of the model vertical coordinate.
+    std::string getModelVerticalCoord() const {return modelVerticalCoord_;}
+
+    /// Get GeoVaLs direction.
+    GeoVaLsDirection getGeoVaLsDirection() const {return GeoVaLsDirection_;}
 
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.
@@ -92,6 +100,9 @@ namespace ufo {
 
     /// Reference values of slant path pressures.
     std::vector<float> slant_pressure_ref_;
+
+    /// Direction of GeoVaLs.
+    mutable GeoVaLsDirection GeoVaLsDirection_;
   };
 }  // namespace ufo
 

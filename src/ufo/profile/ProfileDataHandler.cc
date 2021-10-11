@@ -23,12 +23,20 @@ namespace ufo {
                                          const Variables &filtervars,
                                          std::vector<std::vector<bool>> &flagged)
     : obsdb_(data.obsspace()),
-      geovals_(data.getGeoVaLs()),
       obsdiags_(data.getObsDiags()),
       options_(options),
       filtervars_(filtervars),
       flagged_(flagged)
   {
+    if (data.getGeoVaLs() && data.getGeoVaLs()->nlocs() > 0) {
+      geovals_.reset(new GeoVaLs(*(data.getGeoVaLs())));
+      if (geovals_->has(ufo::VariableNames::geovals_pressure))
+        geovals_->reorderzdir(ufo::VariableNames::geovals_pressure, "bottom2top");
+      else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho))
+        geovals_->reorderzdir(ufo::VariableNames::geovals_pressure_rho, "bottom2top");
+      else
+        throw eckit::BadValue("GeoVaLs must contain a pressure coordinate");
+    }
     profileIndices_.reset(new ProfileIndices(obsdb_, options, apply));
     entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb_, options));
   }

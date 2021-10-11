@@ -16,7 +16,8 @@ namespace ufo {
 
   ObsProfileAverageData::ObsProfileAverageData(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-    : odb_(odb)
+    : odb_(odb),
+      GeoVaLsDirection_(GeoVaLsDirection::TopToBottom)
   {
     // Ensure observations have been grouped into profiles.
     if (odb_.obs_group_vars().empty())
@@ -70,7 +71,18 @@ namespace ufo {
 
   void ObsProfileAverageData::cacheGeoVaLs(const GeoVaLs & gv) const {
     // Only perform the caching once.
-    if (!cachedGeoVaLs_) cachedGeoVaLs_.reset(new GeoVaLs(gv));
+    if (!cachedGeoVaLs_) {
+      cachedGeoVaLs_.reset(new GeoVaLs(gv));
+      // Determine the direction of the input GeoVaLs.
+      std::vector<float> pressure(gv.nlevs(modelVerticalCoord_));
+      gv.getAtLocation(pressure, modelVerticalCoord_, 0);
+      if (pressure.front() > pressure.back()) {
+        GeoVaLsDirection_ = GeoVaLsDirection::BottomToTop;
+      } else {
+        // Reorder the cached GeoVaLs.
+        cachedGeoVaLs_->reorderzdir(modelVerticalCoord_, "bottom2top");
+      }
+    }
   }
 
   std::vector<std::size_t> ObsProfileAverageData::getSlantPathLocations
