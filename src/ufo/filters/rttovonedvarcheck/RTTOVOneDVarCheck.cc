@@ -82,8 +82,15 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                std::vector<std::vector<bool>> &) const {
   oops::Log::trace() << "RTTOVOneDVarCheck Filter starting" << std::endl;
 
-// Get GeoVaLs
+// Get GeoVaLs - the copy is needed to check the z-direction orientation.
+// this is a temporary measure until the filter is updated to deal with toptobottom.
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
+  ufo::GeoVaLs geoVaLsCopy = *gvals;
+  if (geoVaLsCopy.has("air_pressure")) {
+    geoVaLsCopy.reorderzdir("air_pressure", "bottom2top");
+  } else {
+    throw eckit::BadValue("GeoVaLs must contain air_pressure");
+  }
 
 // Create oops variable with the list of channels
   oops::Variables variables = filtervars.toOopsVariables();
@@ -111,7 +118,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // Pass it all to fortran
   ufo_rttovonedvarcheck_apply_f90(keyRTTOVOneDVarCheck_, parameters_.ModOptions.value(),
                                   variables, hoxdiags_retrieved_vars_,
-                                  gvals->toFortran(),
+                                  geoVaLsCopy.toFortran(),
                                   apply_char.size(), apply_char[0]);
 
 // Read qc flags from database

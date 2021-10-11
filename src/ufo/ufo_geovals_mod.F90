@@ -411,18 +411,23 @@ if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_reorderzdir: geovals not allocated")
 endif
 
+if (trim(zdir) /= "bottom2top" .and. trim(zdir) /= "top2bottom") then
+  write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined. ', &
+                    'use either bottom2top or top2bottom'
+  call abor1_ftn(err_msg)
+end if
+
 ! Get vertical coordinate variable
 call ufo_geovals_get_var(self, varname, geoval)
 if (.not. associated(geoval)) then
   write(err_msg, *) 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), ' doesnt exist'
+  call abor1_ftn(err_msg)
 endif
 
 ! Check if reorder variables is necessary based on the direction defined by zdir
-if ((zdir == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
-    (zdir == "top2bottom" .and. geoval%vals(1,1) > geoval%vals(geoval%nval,1))) then
+if ((trim(zdir) == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
+    (trim(zdir) == "top2bottom" .and. geoval%vals(1,1) > geoval%vals(geoval%nval,1))) then
    do_flip = .true.
-else if (zdir /= "bottom2top" .or. zdir /= "top2bottom") then
-  write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined'
 else
    return
 endif
