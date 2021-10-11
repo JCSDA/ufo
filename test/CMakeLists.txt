@@ -83,6 +83,7 @@ list( APPEND ufo_test_input
   testinput/function_obserrmean_abi.yaml
   testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
+  testinput/function_orbitangle_ssmis.yaml
   testinput/function_reperr.yaml
   testinput/function_setsurfacetype.yaml
   testinput/function_setsurfacetype_ssmis.yaml
@@ -2958,6 +2959,13 @@ ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype
 ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype_ssmis
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_setsurfacetype_ssmis.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  
+ecbuild_add_test( TARGET  test_ufo_function_orbitangle_ssmis
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_orbitangle_ssmis.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

@@ -229,6 +229,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/OrbitAngle.cc
+      obsfunctions/OrbitAngle.h
       obsfunctions/SatwindIndivErrors.cc
       obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc

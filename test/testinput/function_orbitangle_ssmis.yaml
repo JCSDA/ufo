@@ -1,0 +1,14 @@
+window begin: 1948-05-21T08:59:59Z
+window end: 2021-05-21T15:00:00Z
+
+observations:
+- obs space:
+    name: ssmis_f17
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/ssmis_f17_20210521T1200Z_obfn_orbit_angle_ref.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-24
+  obs function:
+    name: OrbitAngle@ObsFunction
+    variables: [orbit_angle]
+    tolerance: 1.0e-7
