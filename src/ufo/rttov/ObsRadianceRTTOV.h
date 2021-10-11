@@ -16,7 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/rttov/ObsRadianceRTTOV.interface.h"
-
+#include "ufo/rttov/ObsRadianceRTTOVParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -56,6 +56,7 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
   F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  ObsRadianceRTTOVParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

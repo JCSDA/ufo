@@ -3,12 +3,11 @@ window end: 2019-12-30T03:00:00Z
 
 observations:
 # Test Newton minimizer
-- obs operator:
+- obs operator: &ObsOperator
     name: RTTOV
     GeoVal_type: MetO
     Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear obs operator:
-      Absorbers: [Water_vapour]
+    linear model absorbers: [Water_vapour]
     obs options:
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
@@ -17,13 +16,13 @@ observations:
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default
       Sensor_ID: &sensor_id gcom-w_1_amsr2
       CoefficientPath: Data/
-  obs space:
-    name: amsr2
+  obs space: &ObsSpace
+    name: Test RTTOVOneDVarCheck for AMSR-2
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
     simulated variables: [brightness_temperature]
     channels: &ops_channels 7-12
-  geovals:
+  geovals: &GeoVaLs
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
   obs bias: &ObsBias
     static bc:
@@ -89,3 +88,45 @@ observations:
       maxvalue: 1.0e-1
     defer to post: true
   passedBenchmark: 300      # number of passed obs
+
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the RTTOVOneDVarCheck throwns an error if SatRad compatibility is true
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS44
+        SatRad_compatibility: true # should draw a failure
+        RTTOV_GasUnitConv: true
+        UseRHwaterForQC: *UseRHwaterForQC
+        UseColdSurfaceCheck: *UseColdSurfaceCheck
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/amsr_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables: # Variables needed in the geovals
+    - air_temperature # 1
+    - specific_humidity  # 10
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer # required for qtotal
+    - mass_content_of_cloud_ice_in_atmosphere_layer # required for qtotal
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - air_pressure_at_two_meters_above_surface # 6
+    - uwind_at_10m # 11 - required for windspeed retrieval
+    - vwind_at_10m # 11 - required for windspeed retrieval
+    nlevels: 70
+  expectExceptionWithMessage: SatRad compatibility for RTTOV should always be false with
+                              RTTOVOneDVarCheck => update yaml and try again

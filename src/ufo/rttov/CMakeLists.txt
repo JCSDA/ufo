@@ -12,6 +12,7 @@ set ( rttov_files
     ObsRadianceRTTOV.interface.h
     ObsRadianceRTTOVTLAD.interface.F90
     ObsRadianceRTTOVTLAD.interface.h
+    ObsRadianceRTTOVParameters.h
     ufo_radiancerttov_mod.F90
     ufo_radiancerttov_tlad_mod.F90
     ufo_radiancerttov_utils_mod.F90

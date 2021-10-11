@@ -14,6 +14,7 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterParametersBase.h"
+#include "ufo/rttov/ObsRadianceRTTOVParameters.h"
 
 namespace ufo {
 
@@ -36,7 +37,7 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
                                  RetrievalVariables{"retrieval variables", this};
 
   /// Options required for the forward model - RTTOV
-  oops::RequiredParameter<eckit::LocalConfiguration> ModOptions{"ModOptions", this};
+  oops::RequiredParameter<ObsRadianceRTTOVParameters> ModOptions{"ModOptions", this};
 
   /// Specify the forward model to use - currently only RTTOV
   /// is available

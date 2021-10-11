@@ -66,17 +66,15 @@ contains
     type(fckit_configuration)                    :: f_confLinOper
     integer                                      :: nvars_in
     integer                                      :: ind, jspec
+    logical                                      :: setup_linear_model = .true.
 
     call f_confOper % get_or_die("obs options",f_confOpts)
 
-    call rttov_conf_setup(self % conf_traj, f_confOpts,f_confOper)
+    ! Last argument is false because its setting up the forward model configuration
+    ! This is not used at the moment so I have removed the setup.
+    ! call rttov_conf_setup(self % conf_traj, f_confOpts, f_confOper, .false.)
 
-    if ( f_confOper%has("linear obs operator") ) then
-      call f_confOper%get_or_die("linear obs operator",f_confLinOper)
-      call rttov_conf_setup(self%conf, f_confOpts, f_confLinOper)
-    else
-      call rttov_conf_setup(self%conf, f_confOpts, f_confOper)
-    end if
+    call rttov_conf_setup(self%conf, f_confOpts, f_confOper, setup_linear_model)
 
     !DAR what is the RTTOV equivalant of making sure that humidity and ozone data are present
     if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 .and. &
@@ -122,7 +120,7 @@ contains
     self % ltraj = .false.
 
     call rttov_conf_delete(self % conf)
-    call rttov_conf_delete(self % conf_traj)
+    !call rttov_conf_delete(self % conf_traj)
 
   end subroutine ufo_radiancerttov_tlad_delete
 

@@ -7,8 +7,7 @@ observations:
     name: RTTOV
     GeoVal_type: MetO
     Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear obs operator:
-      Absorbers: [Water_vapour]
+    linear model absorbers: [Water_vapour]
     obs options:
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
@@ -86,8 +85,7 @@ observations:
     name: RTTOV
     GeoVal_type: MetO
     Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear obs operator:
-      Absorbers: [Water_vapour]
+    linear model absorbers: [Water_vapour]
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true

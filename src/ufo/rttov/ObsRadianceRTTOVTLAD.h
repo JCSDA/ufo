@@ -15,6 +15,7 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/rttov/ObsRadianceRTTOVParameters.h"
 #include "ufo/rttov/ObsRadianceRTTOVTLAD.interface.h"
 
 // Forward declarations
@@ -57,6 +58,7 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperRadianceRTTOV_;
   oops::Variables varin_;
+  ObsRadianceRTTOVParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

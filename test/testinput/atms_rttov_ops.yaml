@@ -1,25 +1,78 @@
 window begin: 2019-12-29T21:00:00Z
 window end: 2019-12-30T03:00:00Z
 
+# All the rttov defaults are used in this yaml to test the code.
+# For operational use these should all be removed and only the 
+# non-default and required parameters should be kept.
+
 observations:
 - obs operator:
      name: RTTOV
      GeoVal_type: MetO # default
      Debug: false # default
      Absorbers: [Water_vapour]
-     linear obs operator:
-       Absorbers: [Water_vapour]
+     linear model absorbers: [Water_vapour]
      obs options:
-       RTTOV_default_opts: UKMO_PS43 # non-default
-       RTTOV_apply_reg_limits: true # for compatibility with previous
-                                    # version of this test
-       SatRad_compatibility: true # default
-       InspectProfileNumber: 1
        Sensor_ID: noaa_20_atms
        CoefficientPath: Data/
+       RTTOV_GasUnitConv: false # default
+       RTTOV_default_opts: UKMO_PS43 # non-default
+       SatRad_compatibility: true # default
        UseRHwaterForQC: true # default
-       UseColdSurfaceCheck: true # default
+       UseColdSurfaceCheck: true # non-default
        prof_by_prof: false # default
+       max_channels_per_batch: 10000 # default
+       QtSplitRain: true # optional parameter
+       RTTOV_profile_checkinput: false # default
+       InspectProfileNumber: [1, 2] # optional parameter
+       RTTOV_addrefrac: false # default
+       RTTOV_switchrad: true # non-default PS43 setting
+       RTTOV_use_q2m: false # non-default PS43 setting
+       RTTOV_do_lambertian: false # default
+       RTTOV_lambertian_fixed_angle: true # default
+       RTTOV_plane_parallel: false # default
+       RTTOV_rad_down_lin_tau: true # default
+       RTTOV_dtau_test: true # default
+       RTTOV_fastem_version: 2 # non-default PS43 setting
+       RTTOV_supply_foam_fraction: false # default
+       RTTOV_clw_data: true # non-default PS43 setting
+       RTTOV_clw_scheme: 1 # default
+       RTTOV_clw_calc_on_coef_lev: true # default
+       RTTOV_clw_cloud_top: 322.0 # default
+       RTTOV_apply_band_correction: true # default
+       RTTOV_addinterp: true # non-default PS43 setting
+       RTTOV_interp_mode: 4 # non-default PS43 setting
+       RTTOV_lgradp: false # default
+       RTTOV_spacetop: false # non-default PS43 setting
+       RTTOV_reg_limit_extrap: false # default
+       RTTOV_apply_reg_limits: true # non-default for compatibility with previous version of this test
+       RTTOV_verbose: true # default
+       RTTOV_do_checkinput: true # default
+       RTTOV_fix_hgpl: false # default
+       RTTOV_solar_sea_brdf_model: 1 # default
+       RTTOV_ir_sea_emis_model: 2 # default
+       RTTOV_addsolar: false # default
+       RTTOV_rayleigh_single_scatt: true # default
+       RTTOV_do_nlte_correction: false # default
+       RTTOV_addaerosl: false # default
+       RTTOV_user_aer_opt_param: false # default
+       RTTOV_addclouds: false # default
+       RTTOV_user_cld_opt_param: false # default
+       RTTOV_grid_box_avg_cloud: false # default
+       RTTOV_cldstr_threshold: -1.0 # default
+       RTTOV_cldstr_simple: false # default
+       RTTOV_cldstr_low_cloud_top: 750.0 # default
+       RTTOV_ir_scatt_model: 2 # default
+       RTTOV_vis_scatt_model: 1 # default
+       RTTOV_dom_nstreams: 8 # default
+       RTTOV_dom_accuracy: 0.0 # default
+       RTTOV_dom_opdep_threshold: 0.0 # default
+       RTTOV_ozone_data: false # default
+       RTTOV_co2_data: false # default
+       RTTOV_n2o_data: false # default
+       RTTOV_co_data: false # default
+       RTTOV_ch4_data: false # default
+       RTTOV_so2_data: false # default
   obs space:
     name: atms_n20
     obsdatain:
@@ -41,8 +94,7 @@ observations:
      GeoVal_type: MetO # default
      Debug: false # default
      Absorbers: [Water_vapour]
-     linear obs operator:
-       Absorbers: [Water_vapour]
+     linear model absorbers: [Water_vapour]
      obs options:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility

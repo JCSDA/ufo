@@ -164,18 +164,18 @@ module ufo_radiancerttov_utils_mod
     character(len=255)                    :: COEFFICIENT_PATH
 
     type(rttov_coefs), allocatable        :: rttov_coef_array(:)
-    character(len=10)                     :: RTTOV_default_opts = 'RTTOV'
+    character(len=10)                     :: RTTOV_default_opts
     type(rttov_options)                   :: rttov_opts
     logical                               :: rttov_is_setup = .false.
 
-    logical                               :: SatRad_compatibility = .true.
-    logical                               :: UseRHwaterForQC = .true. ! only used with SatRad compatibility
-    logical                               :: UseColdSurfaceCheck = .false. ! to replicate pre-PS45 results
+    logical                               :: SatRad_compatibility
+    logical                               :: UseRHwaterForQC  ! only used with SatRad compatibility
+    logical                               :: UseColdSurfaceCheck  ! to replicate pre-PS45 results
     logical                               :: SplitQtotal = .false. ! true for SatRad compatibility with MW
     logical                               :: UseQtsplitRain = .false.
-    logical                               :: RTTOV_profile_checkinput = .false.
+    logical                               :: RTTOV_profile_checkinput
 
-    logical                               :: prof_by_prof = .true.
+    logical                               :: prof_by_prof
 
     integer, allocatable                  :: inspect(:)
     integer                               :: nchan_max_sim
@@ -192,17 +192,19 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine rttov_conf_setup(conf, f_confOpts, f_confOper)
+  subroutine rttov_conf_setup(conf, f_confOpts, f_confOper, linear_model)
     implicit none
 
     type(rttov_conf), intent(inout)       :: conf
-    type(fckit_configuration), intent(in) :: f_confOpts ! RTcontrol
-    type(fckit_configuration), intent(in) :: f_confOper ! what is this
+    type(fckit_configuration), intent(in) :: f_confOpts   ! RTcontrol
+    type(fckit_configuration), intent(in) :: f_confOper   ! what is this
+    logical, intent(in)                   :: linear_model ! Flag to indicate if this is setting up the linear model
 
     character(*), parameter               :: routine_name = 'rttov_conf_setup'
     integer                               :: ivar, jspec
     character(len=:), allocatable         :: str
     character(len=:), allocatable         :: str_array(:)
+    character(len=30)                     :: absorber_name
     logical                               :: varin_satrad = .false.
 
     integer                               :: i,k,n, i_inst
@@ -213,11 +215,7 @@ contains
     !type (zenith/scan angle will be different)
     conf % nSensors = 1
 
-    if (f_confOper%has("Debug")) then
-      call f_confOper % get_or_die("Debug",debug)
-    else
-      debug = .false. ! default
-    endif
+    call f_confOper % get_or_die("Debug",debug)
 
     if (f_confOper%has("GeoVal_type")) then
       call f_confOper%get_or_die("GeoVal_type",str)
@@ -237,15 +235,21 @@ contains
 
     ! Absorbers
     !----------
+    if (linear_model) then
+      absorber_name = "linear model absorbers"
+    else
+      absorber_name = "Absorbers"
+    end if
+
     conf%ngas = 0
-    if (f_confOper%has("Absorbers")) &
-      conf%ngas = conf%ngas + f_confOper%get_size("Absorbers")
+    if (f_confOper%has(trim(absorber_name))) &
+      conf%ngas = conf%ngas + f_confOper%get_size(trim(absorber_name))
 
     allocate(conf%Absorbers( conf%ngas ), &
              conf%Absorber_Id( conf%ngas ))
 
     if (conf%ngas > 0) then
-      call f_confOper%get_or_die("Absorbers",str_array)
+      call f_confOper%get_or_die(trim(absorber_name), str_array)
       conf%Absorbers(1:conf%ngas) = str_array
 
     end if
@@ -277,11 +281,7 @@ contains
       conf%Absorber_Id(jspec) = RTTOV_Absorber_Id(ivar)
     end do
 
-    if(f_confOpts % has("RTTOV_GasUnitConv")) then
-      call f_confOpts % get_or_die("RTTOV_GasUnitConv",conf % RTTOV_GasUnitConv) !test, OPS, RTTOV
-    else
-      conf % RTTOV_GasUnitConv = .false. ! no unit conversion done for RTTOV by default
-    endif
+    call f_confOpts % get_or_die("RTTOV_GasUnitConv",conf % RTTOV_GasUnitConv)
 
 ! set scalar mixing ratio conversion if converting units prior to use in RTTOV
     if(conf%RTTOV_GasUnitConv) then 
@@ -301,34 +301,14 @@ contains
     call f_confOpts % get_or_die("CoefficientPath",str)
     conf % COEFFICIENT_PATH = str
 
-    if(f_confOpts % has("RTTOV_default_opts")) then
-      call f_confOpts % get_or_die("RTTOV_default_opts",str) !test, OPS, RTTOV
-      conf % RTTOV_default_opts = str
-    endif
+    call f_confOpts % get_or_die("RTTOV_default_opts",str)
+    conf % RTTOV_default_opts = str
 
-    if(f_confOpts % has("SatRad_compatibility")) then
-      call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
-    endif
-
-    if(f_confOpts % has("UseRHwaterForQC")) then
-      call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC)
-    endif
-
-    if(f_confOpts % has("UseColdSurfaceCheck")) then
-      call f_confOpts % get_or_die("UseColdSurfaceCheck",conf % UseColdSurfaceCheck)
-    endif
-
-    if(f_confOpts % has("prof_by_prof")) then
-      call f_confOpts % get_or_die("prof_by_prof",conf % prof_by_prof)
-    else
-      conf % prof_by_prof = .false.
-    endif
-
-    if(f_confOpts % has("max_channels_per_batch")) then
-      call f_confOpts % get_or_die("max_channels_per_batch",conf % nchan_max_sim)
-    else
-      conf % nchan_max_sim = 10000
-    endif
+    call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
+    call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC)
+    call f_confOpts % get_or_die("UseColdSurfaceCheck",conf % UseColdSurfaceCheck)
+    call f_confOpts % get_or_die("prof_by_prof",conf % prof_by_prof)
+    call f_confOpts % get_or_die("max_channels_per_batch",conf % nchan_max_sim)
 
     if( .not. conf % rttov_is_setup) then
       call conf % setup(f_confOpts)
@@ -364,23 +344,10 @@ contains
       call f_confOpts % get_or_die("QtSplitRain", conf % UseQtsplitRain)
     endif
 
-    if(f_confOpts % has("RTTOV_profile_checkinput")) then
-      call f_confOpts % get_or_die("RTTOV_profile_checkinput",conf % RTTOV_profile_checkinput)
-    endif
+    call f_confOpts % get_or_die("RTTOV_profile_checkinput",conf % RTTOV_profile_checkinput)
 
     if (f_confOpts%has("InspectProfileNumber")) then
-      call f_confOpts % get_or_die("InspectProfileNumber",str)
-      
-      n=0; k=1
-      do
-        i = index(str(k:),',')
-        if (i==0) exit
-        n = n + 1
-        k = k + i
-      end do
-
-      allocate(conf % inspect(n+1))
-      read(str, *) conf % inspect
+      call f_confOpts % get_or_die("InspectProfileNumber", conf % inspect)
     else
       allocate(conf % inspect(0))
     endif

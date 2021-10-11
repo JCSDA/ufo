@@ -65,6 +65,15 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   allvars_ += Variables(model_vars, "GeoVaLs");
   allvars_ += Variables(filtervars_, "ObsBiasData");
 
+  // Check that SatRad compatibility is false.  Any profile manipulations are done in
+  // this filter rather than the RTTOV interface because the update GeoVaLs are needed
+  // for the minimization.
+  if (parameters_.ModOptions.value().obsOptions.value().satRadCompatibility.value()) {
+    std::stringstream msg;
+    msg << "SatRad compatibility for RTTOV should always be false with RTTOVOneDVarCheck "
+        << "=> update yaml and try again";
+    throw eckit::UserError(msg.str(), Here());
+  }
   oops::Log::trace() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
 }
 
@@ -116,7 +125,8 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   obsbias.save("ObsBias");
 
 // Pass it all to fortran
-  ufo_rttovonedvarcheck_apply_f90(keyRTTOVOneDVarCheck_, parameters_.ModOptions.value(),
+  ufo_rttovonedvarcheck_apply_f90(keyRTTOVOneDVarCheck_,
+                                  parameters_.ModOptions.value().toConfiguration(),
                                   variables, hoxdiags_retrieved_vars_,
                                   geoVaLsCopy.toFortran(),
                                   apply_char.size(), apply_char[0]);

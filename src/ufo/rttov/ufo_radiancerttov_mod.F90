@@ -51,10 +51,11 @@ contains
 
     type(fckit_configuration)               :: f_confOpts ! RTcontrol
     integer                                 :: ind, jspec
+    logical                                 :: setup_linear_model = .false.
 
     call f_confOper % get_or_die("obs options",f_confOpts)
 
-    call rttov_conf_setup(self % conf,f_confOpts,f_confOper)
+    call rttov_conf_setup(self % conf, f_confOpts, f_confOper, setup_linear_model)
 
     if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 .and. &
       ufo_vars_getindex(self%conf%Absorbers, var_q)    < 1 ) then
@@ -273,7 +274,7 @@ contains
           emissivity_k = self % RTProf % emissivity_k(1:nchan_sim))!,     &! inout input/output emissivities per channel
         
         if ( errorstatus /= errorstatus_success ) then
-          write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst, &
+          write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst, &
                                        ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
           call fckit_log%info(message)
         end if
@@ -291,7 +292,7 @@ contains
           emissivity  = self % RTProf % emissivity(1:nchan_sim))!,        &! inout input/output emissivities per channel
         
         if ( errorstatus /= errorstatus_success ) then
-          write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, i_inst, &
+          write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, i_inst, &
                                        ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
           call fckit_log%info(message)
         end if
