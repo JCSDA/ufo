@@ -213,7 +213,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   // Map obsIdentifierData for every assimilation window observation to its index within the
   // window's full observation accessor.
   std::map<obsIdentifierData, const size_t> locationIdToIndex;
-  for (size_t i = 0; i < windowObsAccessor.totalNumObservations(); i++) {
+  for (size_t i = 0; i < windowDts.size(); i++) {
     // Set up all observation labels with differentiator counter initially set to 0
     obsIdentifierData obsLabel = {windowDts.at(i), windowLats.at(i), windowLons.at(i),
                                   windowStationIds.at(i), 0};
@@ -237,14 +237,23 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
     }
   };
 
+  // Determine vector of locations at which this filter should be applied.
+  // If each independent group of observations is stored entirely on a single MPI rank
+  // then this vector will be determined separately for each rank.
+  // Otherwise, this vector will be concatenated across all ranks.
+  const std::vector <bool> globalApply = windowObsAccessor.getGlobalApply(apply);
+
   // Iterate through flagged observations in the historical obs space,
   // finding the observations which are also in the assimilation obs space, and
-  // marking the associated indices to flag using the ObsAccessor flagRejectedObservations method
+  // marking the associated indices to flag using the ObsAccessor flagRejectedObservations method.
+  // The globalApply vector is used to determine which locations should be flagged
+  // based on the where clause.
   std::vector<bool> globalObsToFlag(windowObsAccessor.totalNumObservations(), false);
   for (const obsIdentifierData &id : wideFlaggedLocationIds) {
     if (locationIdToIndex.find(id) != locationIdToIndex.end()) {
-      size_t locToFlag = locationIdToIndex.at(id);
-      globalObsToFlag.at(locToFlag) = true;
+      const size_t locToFlag = locationIdToIndex.at(id);
+      if (globalApply[locToFlag])
+        globalObsToFlag.at(locToFlag) = true;
     }
   }
   windowObsAccessor.flagRejectedObservations(globalObsToFlag, flagged);

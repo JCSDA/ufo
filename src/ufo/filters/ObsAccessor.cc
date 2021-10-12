@@ -96,6 +96,13 @@ ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
   return ObsAccessor(obsdb, GroupBy::VARIABLE, variable);
 }
 
+std::vector<bool> ObsAccessor::getGlobalApply(
+    const std::vector<bool> &apply) const {
+  std::vector<int> globalApply(apply.begin(), apply.end());
+  obsDistribution_->allGatherv(globalApply);
+  return std::vector<bool>(globalApply.begin(), globalApply.end());
+}
+
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
         const ufo::Variables &filtervars, bool validIfAnyFilterVariablePassedQC) const {

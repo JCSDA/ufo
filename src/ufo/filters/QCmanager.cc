@@ -149,7 +149,8 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::buddy,         "removed by buddy check"},
     {QCflags::onedvar,       "removed by 1D Var check"},
     {QCflags::bayesianQC,    "removed by Bayesian background check"},
-    {QCflags::modelobthresh, "removed by ModelOb threshold"}
+    {QCflags::modelobthresh, "removed by ModelOb threshold"},
+    {QCflags::history,       "removed by history check"}
   };
   const size_t numSpecialCases = 3;
 

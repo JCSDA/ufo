@@ -134,6 +134,17 @@ class ObsAccessor {
   /// denotes the number of locations held on ith rank.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
 
+  /// \brief Return a boolean vector indicating whether each location was selected by the
+  /// \c where clause in the filter's configuration.
+  /// If each independent group of observations is stored entirely on a single MPI rank
+  /// then this vector will be determined separately for each rank.
+  /// Otherwise, this vector will be concatenated across all ranks.
+  ///
+  /// \param apply
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  std::vector<bool> getGlobalApply(const std::vector<bool> &apply) const;
+
   /// \brief Return the values of the specified variable at successive observation locations.
   ///
   /// If each independent group of observations is stored entirely on a single MPI rank, the
