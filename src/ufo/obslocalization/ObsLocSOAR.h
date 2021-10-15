@@ -27,14 +27,18 @@ namespace ufo {
 template<class MODEL>
 class ObsLocSOAR: public ufo::ObsLocalization<MODEL> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
+  typedef typename ObsLocalization<MODEL>::LocalObs LocalObs_;
 
  public:
   ObsLocSOAR(const eckit::Configuration &, const ioda::ObsSpace &);
 
-  /// compute localization and save localization values in \p locvector
+ protected:
+  /// Compute SOAR localization using the set of \p localobs and save localization
+  /// values in \p locvector.
   /// (missing values indicate that observation is outside of localization)
-  void computeLocalization(const GeometryIterator_ &,
-                           ioda::ObsVector & locvector) const override;
+  void localizeLocalObs(const GeometryIterator_ &,
+                        ioda::ObsVector & locvector,
+                        const LocalObs_ & localobs) const override;
 
  private:
   void print(std::ostream &) const override;
@@ -51,26 +55,24 @@ ObsLocSOAR<MODEL>::ObsLocSOAR(const eckit::Configuration & config,
   oops::Log::debug()<< "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }
+
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocSOAR<MODEL>::computeLocalization(const GeometryIterator_ & i,
-                                            ioda::ObsVector & locvector) const {
-  oops::Log::trace() << "ObsLocSOAR::computeLocalization" << std::endl;
-  // do distance search and compute box-car locvector
-  ObsLocalization<MODEL>::computeLocalization(i, locvector);
+void ObsLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+                                        ioda::ObsVector & locvector,
+                                        const LocalObs_ & localobs) const {
+  // Apply box car localization
+  ObsLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
 
-  // return refs to internals of ObsLocalization
-  const std::vector<int> & localobs = ObsLocalization<MODEL>::localobs();
-  const std::vector<double> & horizontalObsdist = ObsLocalization<MODEL>::horizontalObsdist();
-
+  // Apply SOAR localization
   const double SOARexpDecayH = options_.SOARexpDecayH;
   const size_t nvars = locvector.nvars();
-  for (size_t jlocal = 0; jlocal < localobs.size(); ++jlocal) {
-    double locFactor = oops::soar(horizontalObsdist[jlocal]*SOARexpDecayH);
+  for (size_t jlocal = 0; jlocal < localobs.index.size(); ++jlocal) {
+    double locFactor = oops::soar(localobs.distance[jlocal]*SOARexpDecayH);
     // obsdist is calculated at each location; need to update R for each variable
     for (size_t jvar = 0; jvar < nvars; ++jvar) {
-      locvector[jvar + localobs[jlocal] * nvars] *= locFactor;
+      locvector[jvar + localobs.index[jlocal] * nvars] = locFactor;
     }
   }
 }

@@ -40,32 +40,53 @@ class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
+  ObsLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
+
+  /// Compute localization and save localization values in \p locvector.
+  /// Missing values indicate that observation is outside of localization.
+  /// The lengthscale from ObsLocParameters is used.
+  void computeLocalization(const GeometryIterator_ &,
+                           ioda::ObsVector & locvector) const override;
+
+ protected:
+  struct LocalObs {
+    /// The list of indexes for ObsVector pointing to the valid local obs.
+    std::vector<int> index;
+
+    /// The horizontal distance of each local ob from the search point.
+    std::vector<double> distance;
+
+    /// The maximum search distance that was used for this local obs search.
+    double lengthscale;
+  };
+
+  /// For a given distance, returns the local observations and their distances.
+  /// Intended to be called by \c computeLocalization() .
+  const LocalObs getLocalObs(const GeometryIterator_ &, double lengthscale) const;
+
+  /// Compute box car localization using the set of \p localobs and save
+  /// localization values in \p locvector. Mmissing values are set for obs
+  /// outside of localization.
+  /// Intended to be called by \c computeLocalization() .
+  virtual void localizeLocalObs(const GeometryIterator_ &,
+                                ioda::ObsVector & locvector,
+                                const LocalObs & localobs) const;
+
+  /// Get the lengthscale specified in the parameters.
+  const double lengthscale() const {return options_.lengthscale;}
+
+ private:
+  ObsLocParameters options_;
+
+  void print(std::ostream &) const override;
+
+  /// KD-tree for searching for local obs
   struct TreeTrait {
     typedef eckit::geometry::Point3 Point;
     typedef double                  Payload;
   };
   typedef eckit::KDTreeMemory<TreeTrait> KDTree;
-  ObsLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
-
-  /// compute localization and save localization values in \p locvector
-  /// (missing values indicate that observation is outside of localization)
-  void computeLocalization(const GeometryIterator_ &,
-                           ioda::ObsVector & locvector) const override;
-
-  const std::vector<int> & localobs() const {return localobs_;}
-  const std::vector<double> & horizontalObsdist() const {return obsdist_;}
-  const ObsLocParameters & localizationOptions() const {return options_;}
-
- private:
-  ObsLocParameters options_;
-  mutable std::vector<double> obsdist_;
-  mutable std::vector<int> localobs_;
-
-  void print(std::ostream &) const override;
-
-  /// KD-tree for searching for local obs
   std::unique_ptr<KDTree> kd_;
-
   std::vector<float> lats_;
   std::vector<float> lons_;
 
@@ -120,6 +141,51 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
                                                  ioda::ObsVector & locvector) const {
   oops::Log::trace() << "ObsLocalization::computeLocalization" << std::endl;
 
+  // get the set of local observations using the lengthscale given in the
+  // config file options.
+  const LocalObs & localobs = getLocalObs(i, options_.lengthscale);
+
+  // compute localization of those local obs. Note that since this is
+  // a virtual method, it could be overriden by dervied classes
+  localizeLocalObs(i, locvector, localobs);
+}
+
+// -----------------------------------------------------------------------------
+
+template<typename MODEL>
+void ObsLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+                                              ioda::ObsVector & locvector,
+                                              const LocalObs & localobs) const {
+  oops::Log::trace() << "ObsLocalization::computeLocalization(lengthscale)" << std::endl;
+
+  // set all to missing (outside of localization distance)
+  const double missing = util::missingValue(double());
+  for (size_t jj = 0; jj < locvector.size(); ++jj) {
+    locvector[jj] = missing;
+  }
+
+  // set localization for the obs inside localization distance to 1.0
+  const size_t nvars = locvector.nvars();
+  const size_t nlocal = localobs.index.size();
+  for (size_t jlocal = 0; jlocal < nlocal; ++jlocal) {
+    // obsdist is calculated at each location; need to update R for each variable
+    for (size_t jvar = 0; jvar < nvars; ++jvar) {
+      locvector[jvar + localobs.index[jlocal] * nvars] = 1.0;
+    }
+  }
+}
+
+
+template<typename MODEL>
+const typename ObsLocalization<MODEL>::LocalObs
+ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
+                                    double lengthscale) const {
+  oops::Log::trace() << "ObsLocalization::getLocalObs" << std::endl;
+
+  if ( lengthscale <= 0.0 ) {
+    throw eckit::BadParameter("lengthscale parameter should be >= 0.0");
+  }
+
   // check that this distribution supports local obs space
   // TODO(travis) this should be in the constructor, but currently
   //  breaks LETKF when using a split observer/solver
@@ -128,10 +194,8 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
     throw eckit::BadParameter(message);
   }
 
-  // clear arrays before proceeding
-  localobs_.clear();
-  obsdist_.clear();
-
+  LocalObs localobs;
+  localobs.lengthscale = lengthscale;
   eckit::geometry::Point2 refPoint = *i;
   size_t nlocs = lons_.size();
   if ( options_.searchMethod == SearchMethod::BRUTEFORCE ) {
@@ -140,21 +204,21 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
     for (unsigned int jj = 0; jj < nlocs; ++jj) {
       eckit::geometry::Point2 searchPoint(lons_[jj], lats_[jj]);
       double localDist = options_.distance(refPoint, searchPoint);
-      if ( localDist < options_.lengthscale ) {
-        localobs_.push_back(jj);
-        obsdist_.push_back(localDist);
+      if ( localDist < lengthscale ) {
+        localobs.index.push_back(jj);
+        localobs.distance.push_back(localDist);
       }
     }
     const boost::optional<int> & maxnobs = options_.maxnobs;
-    if ( (maxnobs != boost::none) && (localobs_.size() > *maxnobs ) ) {
-      for (unsigned int jj = 0; jj < localobs_.size(); ++jj) {
-          oops::Log::debug() << "Before sort [i, d]: " << localobs_[jj]
-              << " , " << obsdist_[jj] << std::endl;
+    if ( (maxnobs != boost::none) && (localobs.index.size() > *maxnobs ) ) {
+      for (unsigned int jj = 0; jj < localobs.index.size(); ++jj) {
+          oops::Log::debug() << "Before sort [i, d]: " << localobs.index[jj]
+              << " , " << localobs.distance[jj] << std::endl;
       }
       // Construct a temporary paired vector to do the sorting
       std::vector<std::pair<std::size_t, double>> localObsIndDistPair;
-      for (unsigned int jj = 0; jj < obsdist_.size(); ++jj) {
-        localObsIndDistPair.push_back(std::make_pair(localobs_[jj], obsdist_[jj]));
+      for (unsigned int jj = 0; jj < localobs.distance.size(); ++jj) {
+        localObsIndDistPair.push_back(std::make_pair(localobs.index[jj], localobs.distance[jj]));
       }
 
       // Use a lambda function to implement an ascending sort.
@@ -165,14 +229,14 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
               });
 
       // Unpair the sorted pair vector
-      for (unsigned int jj = 0; jj < obsdist_.size(); ++jj) {
-        localobs_[jj] = localObsIndDistPair[jj].first;
-        obsdist_[jj] = localObsIndDistPair[jj].second;
+      for (unsigned int jj = 0; jj < localobs.distance.size(); ++jj) {
+        localobs.index[jj] = localObsIndDistPair[jj].first;
+        localobs.distance[jj] = localObsIndDistPair[jj].second;
       }
 
       // Truncate to maxNobs length
-      localobs_.resize(*maxnobs);
-      obsdist_.resize(*maxnobs);
+      localobs.index.resize(*maxnobs);
+      localobs.distance.resize(*maxnobs);
     }
   } else if (nlocs > 0) {
     // Check (nlocs > 0) is needed,
@@ -181,46 +245,35 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
     oops::Log::trace() << "Local obs searching via KDTree" << std::endl;
 
     if ( options_.distanceType == DistanceType::CARTESIAN)
-     ABORT("ObsLocalization:: search method must be 'brute_force' when using 'cartesian' distance");
+      ABORT("ObsLocalization:: search method must be 'brute_force' when using"
+            " 'cartesian' distance");
 
     // Using the radius of the earth
     eckit::geometry::Point3 refPoint3D;
     atlas::util::Earth::convertSphericalToCartesian(refPoint, refPoint3D);
-    double alpha =  (options_.lengthscale / options_.radius_earth)/ 2.0;  // angle in radians
+    double alpha =  (lengthscale / options_.radius_earth)/ 2.0;  // angle in radians
     double chordLength = 2.0*options_.radius_earth * sin(alpha);  // search radius in 3D space
 
     auto closePoints = kd_->findInSphere(refPoint3D, chordLength);
 
-    // put closePoints back into localobs_ and obsdist
+    // put closePoints back into localobs and obsdist
+    localobs.index.reserve(closePoints.size());
+    localobs.distance.reserve(closePoints.size());
     for (unsigned int jloc = 0; jloc < closePoints.size(); ++jloc) {
-       localobs_.push_back(closePoints[jloc].payload());  // observation
-       obsdist_.push_back(closePoints[jloc].distance());  // distance
+       localobs.index.push_back(closePoints[jloc].payload());  // observation
+       localobs.distance.push_back(closePoints[jloc].distance());  // distance
     }
 
     // The obs are sorted in the kdtree call
     const boost::optional<int> & maxnobs = options_.maxnobs;
-    if ( (maxnobs != boost::none) && (localobs_.size() > *maxnobs ) ) {
+    if ( (maxnobs != boost::none) && (localobs.index.size() > *maxnobs ) ) {
       // Truncate to maxNobs length
-      localobs_.resize(*maxnobs);
-      obsdist_.resize(*maxnobs);
+      localobs.index.resize(*maxnobs);
+      localobs.distance.resize(*maxnobs);
     }
   }
 
-  // set all to missing (outside of localization distance)
-  const double missing = util::missingValue(double());
-  for (size_t jj = 0; jj < locvector.size(); ++jj) {
-    locvector[jj] = missing;
-  }
-
-  // set localization for the obs inside localization distance to 1.0
-  const size_t nvars = locvector.nvars();
-  const size_t nlocal = localobs_.size();
-  for (size_t jlocal = 0; jlocal < nlocal; ++jlocal) {
-    // obsdist is calculated at each location; need to update R for each variable
-    for (size_t jvar = 0; jvar < nvars; ++jvar) {
-      locvector[jvar + localobs_[jlocal] * nvars] = 1.0;
-    }
-  }
+  return localobs;
 }
 
 // -----------------------------------------------------------------------------

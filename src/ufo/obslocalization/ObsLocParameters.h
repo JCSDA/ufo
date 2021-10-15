@@ -80,7 +80,7 @@ class ObsLocParameters : public oops::Parameters {
 
  public:
   /// Localization lengthscale (find all obs within the distance from reference point)
-  oops::RequiredParameter<double> lengthscale{"lengthscale", this};
+  oops::Parameter<double> lengthscale{"lengthscale", 0.0, this};
 
   /// Method for searching for nearest points: brute force or KD-tree
   oops::Parameter<SearchMethod> searchMethod{"search method", SearchMethod::BRUTEFORCE, this};
