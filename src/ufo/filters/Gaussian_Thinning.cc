@@ -172,20 +172,30 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
   bool roundHorizontalBinCountToNearest =
       options.roundHorizontalBinCountToNearest.value().value_or(false);
   bool partitionLongitudeBinsUsingMesh =
-      options.partitionLongitudeBinsUsingMesh.value();
-  if (options.opsCompatibilityMode)
+      options.partitionLongitudeBinsUsingMesh.value().value_or(false);
+  bool defineMeridian20000km =
+      options.defineMeridian20000km.value().value_or(false);
+  float horizontalMesh = options.horizontalMesh;
+  if (options.opsCompatibilityMode) {
     roundHorizontalBinCountToNearest = true;
+    partitionLongitudeBinsUsingMesh = true;
+    defineMeridian20000km = true;
+  }
   SpatialBinCountRoundingMode roundingMode = roundHorizontalBinCountToNearest ?
         SpatialBinCountRoundingMode::NEAREST : SpatialBinCountRoundingMode::DOWN;
 
   const float earthRadius = Constants::mean_earth_rad;  // km
   const float meridianLength = M_PI * earthRadius;
-  const float tentativeNumLatBins = meridianLength / options.horizontalMesh;
+  if (defineMeridian20000km)
+    // Distance horizontalMesh is defined with respect to a meridian of exactly 20000.0 km;
+    // scale horizontalMesh to be consistent with meridian defined using Constants::mean_earth_rad
+    horizontalMesh *= meridianLength/20000.0;
+  const float tentativeNumLatBins = meridianLength / horizontalMesh;
   const int numLatBins = SpatialBinSelector::roundNumBins(tentativeNumLatBins, roundingMode);
 
   if (options.useReducedHorizontalGrid) {
     // Use fewer bins at high latitudes
-    return SpatialBinSelector(numLatBins, roundingMode, options.horizontalMesh,
+    return SpatialBinSelector(numLatBins, roundingMode, horizontalMesh,
                               options.opsCompatibilityMode,
                               partitionLongitudeBinsUsingMesh);
   } else {

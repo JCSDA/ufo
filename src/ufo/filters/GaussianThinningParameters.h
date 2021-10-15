@@ -88,8 +88,19 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// bins. Setting this option to \c true adopts the Met Office OPS method whereby the
   /// integer number of latitude bins is replaced, in the calculation of longitude bins, by the
   /// Earth half-circumference divided by the horizontal mesh distance.
-  oops::Parameter<bool> partitionLongitudeBinsUsingMesh{
-    "partition_longitude_bins_using_mesh", false, this};
+  ///
+  /// Defaults to \c false unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c true.
+  oops::OptionalParameter<bool> partitionLongitudeBinsUsingMesh{
+    "partition_longitude_bins_using_mesh", this};
+  /// Set this option to \c true to define horizontalMesh with respect to a value for the Earth's
+  /// meridian distance (half Earth circumference) of exactly 20000.0 km.
+  /// By default, with this option set to \c false, the Earth's meridian is defined for the purposes
+  /// of calculating thinning boxes as pi*Constants::mean_earth_rad ~ 20015.087 km.
+  ///
+  /// Defaults to \c false unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c true.
+  oops::OptionalParameter<bool> defineMeridian20000km{"define_meridian_20000_km", this};
 
   // Vertical grid
 

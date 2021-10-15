@@ -9,10 +9,12 @@ Met Office OPS SatRad 10 km thinning of near-duplicate obs:
     channels: &all_channels 1-22
   GaussianThinning:
     distance_norm: maximum
-    horizontal_mesh: 10.0075  # 10*(JEDI meridian 20015.087 km / OPS 20000.0 km)
+    horizontal_mesh: 10.0  # with define_meridian_20000_km option equivalent to a
+                           # mesh of 10.0075 km with Earth meridian of 20015.087 km
     use_reduced_horizontal_grid: true
-    round_horizontal_bin_count_to_nearest: true
-    partition_longitude_bins_using_mesh: true
+    round_horizontal_bin_count_to_nearest: true  # ops_compatibility_mode sets true
+    partition_longitude_bins_using_mesh: true    # ops_compatibility_mode sets true
+    define_meridian_20000_km: true               # ops_compatibility_mode sets true
     ops_compatibility_mode: true
     time_mesh: PT01H
     time_min: 2020-03-31T20:30:00Z  # half time_mesh before window begin
@@ -37,10 +39,12 @@ Met Office OPS SatRad thinning for 154 km mesh:
     channels: &all_channels 1-22
   GaussianThinning:
     distance_norm: maximum
-    horizontal_mesh: 154.116  # 154*(JEDI meridian 20015.087 km / OPS 20000.0 km)
+    horizontal_mesh: 154.0  # with define_meridian_20000_km option equivalent to a
+                            # mesh of 154.116 km with Earth meridian of 20015.087 km
     use_reduced_horizontal_grid: true
-    round_horizontal_bin_count_to_nearest: true
-    partition_longitude_bins_using_mesh: true
+    round_horizontal_bin_count_to_nearest: true  # ops_compatibility_mode sets true
+    partition_longitude_bins_using_mesh: true    # ops_compatibility_mode sets true
+    define_meridian_20000_km: true               # ops_compatibility_mode sets true
     ops_compatibility_mode: true
     time_mesh: PT03H
     time_min: 2020-03-31T19:30:00Z  # half time_mesh before window begin
