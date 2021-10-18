@@ -17,7 +17,9 @@ set ( variabletransforms_files
       Cal_Wind.h
       Cal_Wind.cc
       Cal_ProfileHorizontalDrift.h
-      Cal_ProfileHorizontalDrift.cc
+      Cal_ProfileHorizontalDrift.cc 
+      Cal_QNHtoQFEpressure.h
+      Cal_QNHtoQFEpressure.cc
       Cal_PStar.h
       Cal_PStar.cc
       LookupTable.h

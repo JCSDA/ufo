@@ -45,7 +45,7 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
 
   // Get all required obs, metadata and geovals
   // Obs
-  std::vector<float> PStn, PStd, Pmsl, ZStn, ZStd, PStarOPS;
+  std::vector<float> PStn, PStd, Pmsl, ZStn, ZStd;
   getObservation("ObsValue", "station_pressure",
                  PStn, true);
   getObservation("ObsValue", "air_pressure",
@@ -90,9 +90,9 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   data_.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
   data_.get(Variable("air_pressure_at_two_meters_above_surface@GeoVaLs"), BkPStar);
 
-  if (!oops::allVectorsSameNonZeroSize(PStn, PStd, PStn)) {
+  if (!oops::allVectorsSameNonZeroSize(PStn, PStd, Pmsl)) {
     oops::Log::warning() << "Vector sizes: "
-                         << oops::listOfVectorSizes(PStn, PStd, PStn)
+                         << oops::listOfVectorSizes(PStn, PStd, Pmsl)
                          << std::endl;
     throw eckit::BadValue("At least one vector is the wrong size or empty out of "
                           "Station pressure, Standard pressure and PMSL", Here());
