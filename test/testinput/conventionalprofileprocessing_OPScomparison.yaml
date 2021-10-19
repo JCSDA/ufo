@@ -12,7 +12,7 @@ Sondes:
       obsgrouping:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
   obs diagnostics:

@@ -13,7 +13,7 @@ Sondes:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: ["air_temperature", "relative_humidity", "eastward_wind", "northward_wind", "geopotential_height"]
+    simulated variables: ["air_temperature", "relative_humidity", "eastward_wind", "northward_wind", "height"]
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_repobs.nc4
     variables:
@@ -21,7 +21,7 @@ Sondes:
     - name: relative_humidity_background_error@ObsDiag
     - name: eastward_wind_background_error@ObsDiag
     - name: northward_wind_background_error@ObsDiag
-    - name: geopotential_height_background_error@ObsDiag
+    - name: height_background_error@ObsDiag
   Conventional Profile Processing:
     Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: true

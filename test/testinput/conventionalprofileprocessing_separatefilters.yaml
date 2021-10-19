@@ -14,41 +14,41 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     flagBasicChecksFail: true
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["SamePDiffT"]
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Sign"]
     SCheck_CorrectT: true
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["UnstableLayer"]
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Interpolation"]
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Hydrostatic"]
     HCheck_CorrectZ: true
     HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]

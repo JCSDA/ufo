@@ -14,7 +14,7 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -22,7 +22,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "Time"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -35,7 +35,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "PermanentReject"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -48,7 +48,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "BackgroundTemperature"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -61,7 +61,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "BackgroundRelativeHumidity"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -74,7 +74,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "BackgroundWindSpeed"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -87,7 +87,7 @@ observations:
     - name: relative_humidity
     - name: eastward_wind
     - name: northward_wind
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "BackgroundGeopotentialHeight"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -102,7 +102,7 @@ observations:
     - name: relative_humidity_background_error@ObsDiag
     - name: eastward_wind_background_error@ObsDiag
     - name: northward_wind_background_error@ObsDiag
-    - name: geopotential_height_background_error@ObsDiag
+    - name: height_background_error@ObsDiag
   passedBenchmark: 328
   benchmarkFlag: 24
   flaggedBenchmark: 24

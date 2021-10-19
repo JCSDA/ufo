@@ -28,12 +28,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -53,12 +53,12 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -80,12 +80,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: []
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -107,12 +107,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -136,12 +136,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: false
@@ -163,12 +163,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -191,12 +191,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -218,12 +218,12 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -243,12 +243,12 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -268,12 +268,12 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -295,12 +295,12 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -321,14 +321,14 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, geopotential_height]
+    simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
-    - name: geopotential_height
+    - name: height
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     compareWithOPS: false
     flagBasicChecksFail: true

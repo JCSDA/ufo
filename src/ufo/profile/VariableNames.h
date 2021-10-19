@@ -20,7 +20,7 @@ struct VariableNames
   static constexpr const char* const obs_relative_humidity = "relative_humidity@ObsValue";
   static constexpr const char* const obs_eastward_wind = "eastward_wind@ObsValue";
   static constexpr const char* const obs_northward_wind = "northward_wind@ObsValue";
-  static constexpr const char* const obs_geopotential_height = "geopotential_height@ObsValue";
+  static constexpr const char* const obs_geopotential_height = "height@ObsValue";
   static constexpr const char* const obs_dew_point_temperature = "dew_point_temperature@ObsValue";
 
   // Observation errors
@@ -29,14 +29,14 @@ struct VariableNames
   static constexpr const char* const obserr_relative_humidity = "relative_humidity@ObsError";
   static constexpr const char* const obserr_eastward_wind = "eastward_wind@ObsError";
   static constexpr const char* const obserr_northward_wind = "northward_wind@ObsError";
-  static constexpr const char* const obserr_geopotential_height = "geopotential_height@ObsError";
+  static constexpr const char* const obserr_geopotential_height = "height@ObsError";
   static constexpr const char* const obserr_dew_point_temperature =
     "dew_point_temperature@ObsError";
 
   // HofX
 
   static constexpr const char* const hofx_air_temperature = "air_temperature@HofX";
-  static constexpr const char* const hofx_geopotential_height = "geopotential_height@HofX";
+  static constexpr const char* const hofx_geopotential_height = "height@HofX";
   static constexpr const char* const hofx_relative_humidity = "relative_humidity@HofX";
   static constexpr const char* const hofx_eastward_wind = "eastward_wind@HofX";
   static constexpr const char* const hofx_northward_wind = "northward_wind@HofX";
@@ -53,7 +53,7 @@ struct VariableNames
   static constexpr const char* const bkgerr_northward_wind =
     "northward_wind_background_error@ObsDiag";
   static constexpr const char* const bkgerr_geopotential_height =
-    "geopotential_height_background_error@ObsDiag";
+    "height_background_error@ObsDiag";
   static constexpr const char* const bkgerr_dew_point_temperature =
     "dew_point_temperature_background_error@ObsDiag";
 
@@ -65,7 +65,7 @@ struct VariableNames
   static constexpr const char* const pge_eastward_wind = "eastward_wind@GrossErrorProbability";
   static constexpr const char* const pge_northward_wind = "northward_wind@GrossErrorProbability";
   static constexpr const char* const pge_geopotential_height =
-    "geopotential_height@GrossErrorProbability";
+    "height@GrossErrorProbability";
 
   // Probability of gross error used in buddy check
 
@@ -78,7 +78,7 @@ struct VariableNames
   static constexpr const char* const pgebd_northward_wind =
     "northward_wind@GrossErrorProbabilityBuddyCheck";
   static constexpr const char* const pgebd_geopotential_height =
-    "geopotential_height@GrossErrorProbabilityBuddyCheck";
+    "height@GrossErrorProbabilityBuddyCheck";
 
   // MetaData
 
@@ -88,7 +88,7 @@ struct VariableNames
   static constexpr const char* const Latitude = "latitude@MetaData";
   static constexpr const char* const Longitude = "longitude@MetaData";
   static constexpr const char* const Time = "time@MetaData";
-  static constexpr const char* const Zstation = "Zstation@MetaData";
+  static constexpr const char* const Zstation = "station_altitude@MetaData";
   static constexpr const char* const LevelType = "LevelType@MetaData";
   static constexpr const char* const InstrType = "InstrType@MetaData";
   static constexpr const char* const extended_obs_space = "extended_obs_space@MetaData";
@@ -98,7 +98,7 @@ struct VariableNames
   static constexpr const char* const qcflags_observation_report = "observation_report@QCFlags";
   static constexpr const char* const qcflags_air_temperature = "air_temperature@QCFlags";
   static constexpr const char* const qcflags_relative_humidity = "relative_humidity@QCFlags";
-  static constexpr const char* const qcflags_geopotential_height = "geopotential_height@QCFlags";
+  static constexpr const char* const qcflags_geopotential_height = "height@QCFlags";
   static constexpr const char* const qcflags_eastward_wind = "eastward_wind@QCFlags";
   static constexpr const char* const qcflags_northward_wind = "northward_wind@QCFlags";
   static constexpr const char* const qcflags_time = "time@QCFlags";
@@ -131,7 +131,7 @@ struct VariableNames
 
   static constexpr const char* const obscorrection_air_temperature = "air_temperature@Corrections";
   static constexpr const char* const obscorrection_geopotential_height =
-    "geopotential_height@Corrections";
+    "height@Corrections";
 
   // Intermediate values
 
