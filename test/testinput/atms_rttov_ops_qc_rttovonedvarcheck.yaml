@@ -3,7 +3,7 @@ window end: 2019-12-30T03:00:00Z
 
 observations:
 # Test Newton minimizer
-- obs operator:
+- obs operator: &ObsOperator
     name: RTTOV
     GeoVal_type: MetO
     Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
@@ -16,13 +16,13 @@ observations:
       UseColdSurfaceCheck: &UseColdSurfaceCheck1 true # default
       Sensor_ID: &sensor_id noaa_20_atms
       CoefficientPath: Data/
-  obs space:
-    name: atms_n20
+  obs space: &ObsSpace
+    name: Test 1D-Var Newton Minimizer for ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: &ops_channels 1-22
-  geovals:
+  geovals: &GeoVaLs
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs bias: &ObsBias
     static bc:
@@ -96,13 +96,10 @@ observations:
       CoefficientPath: Data/
       QtSplitRain: false
   obs space:
-    name: atms_n20
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
-    simulated variables: [brightness_temperature]
-    channels: &ops_channels 1-22
+    <<: *ObsSpace
+    name:  Test 1D-Var Marquardt-Levenberg Minimizer for ATMS
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+    <<: *GeoVaLs
   obs bias: 
     <<: *ObsBias
   obs filters:
@@ -151,3 +148,85 @@ observations:
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
   passedBenchmark: 1380      # number of passed obs
+- obs operator: 
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the 1D-Var produces output when two calls to filter
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 60.0
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - air_pressure_at_two_meters_above_surface
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  - filter: RTTOV OneDVar Check
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: 60.0
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - air_pressure_at_two_meters_above_surface
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  compareVariables:
+    - reference:
+        name: final_cost_onedvar@TestReference
+      test:
+        name: FinalCost@OneDVar
+      absTol: 1.0e-4

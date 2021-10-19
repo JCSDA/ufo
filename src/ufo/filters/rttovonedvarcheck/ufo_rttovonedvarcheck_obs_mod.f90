@@ -47,6 +47,7 @@ real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
+logical, allocatable         :: output_to_db(:)   ! flag to output data for this profile
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_obs_setup
@@ -54,6 +55,11 @@ contains
   procedure :: output => ufo_rttovonedvarcheck_obs_output
 
 end type
+
+interface put_1d_indb
+  module procedure put_1dint_indb
+  module procedure put_1dfloat_indb
+end interface
 
 contains
 
@@ -114,6 +120,7 @@ allocate(self % output_profile(nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
+allocate(self % output_to_db(self % iloc))
 
 ! initialize arrays
 self % yobs(:,:) = missing
@@ -136,6 +143,7 @@ self % output_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
+self % output_to_db(:) = .false.
 
 ! read in observations and associated errors / biases for full ObsSpace
 do jvar = 1, config % nchans
@@ -419,18 +427,18 @@ missing = missing_value(missing)
 ! Put QC flags and retrieved BT's back in database
 do jvar = 1, nchans
   var = vars % variable(jvar)
-  call obsspace_put_db(obsdb, "FortranQC", trim(var), self % QCflags(jvar,:))
-  call obsspace_put_db(obsdb, "OneDVar", trim(var), self % output_BT(jvar,:))
-  call obsspace_put_db(obsdb, "OneDVarBack", trim(var), self % background_BT(jvar,:))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
 end do
 
 ! Output Diagnostics
-call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
+call put_1d_indb(self % output_to_db(:), obsdb, "FinalCost", "OneDVar", self % final_cost(:))
 nobs = size(self % final_cost(:))
-call obsspace_put_db(obsdb, "OneDVar", "n_iterations", self % niter(:))
+call put_1d_indb(self % output_to_db(:), obsdb, "n_iterations", "OneDVar", self % niter(:))
 
 if (self % Store1DVarLWP) then
-  call obsspace_put_db(obsdb, "OneDVar", "LWP", self % LWP(:))
+  call put_1d_indb(self % output_to_db(:), obsdb, "LWP", "OneDVar", self % LWP(:))
 end if
 
 !--
@@ -451,7 +459,9 @@ if (prof_index % pstar > 0) THEN
   where (surface_pressure /= missing)
     surface_pressure = surface_pressure / Pa_to_hPa ! hPa to Pa
   end where
-  call obsspace_put_db(obsdb, "OneDVar", trim(var_ps), surface_pressure)
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_ps), "OneDVar", &
+                   surface_pressure(:))
+
   deallocate(surface_pressure)
 end if
 
@@ -459,8 +469,8 @@ end if
 ! 6) Surface temperature
 !--
 if (prof_index % t2 > 0) THEN
-  call obsspace_put_db(obsdb, "OneDVar", trim(var_sfc_t2m), &
-                       self % output_profile(prof_index % t2, :))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_t2m), "OneDVar", &
+                   self % output_profile(prof_index % t2, :))
 end if
 
 !--
@@ -473,16 +483,16 @@ end if
 ! Windspeed retrieval is directionless, i.e., there are no separate u and v
 ! components.
 if (prof_index % windspeed > 0) then
-  call obsspace_put_db(obsdb, "OneDVar", "surface_wind_speed", &
-                       self % output_profile(prof_index % windspeed, :))
+  call put_1d_indb(self % output_to_db(:), obsdb, "surface_wind_speed", "OneDVar", &
+                   self % output_profile(prof_index % windspeed, :))
 end if
 
 !--
 ! 9) Skin temperature
 !--
 if (prof_index % tstar > 0) then
-  call obsspace_put_db(obsdb, "OneDVar", trim(var_sfc_tskin), &
-                       self % output_profile(prof_index % tstar, :))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_tskin), "OneDVar", &
+                   self % output_profile(prof_index % tstar, :))
 end if
 
 !--
@@ -498,6 +508,88 @@ end if
 ! 21) IR cloud profiles
 
 end subroutine
+
+!-------------------------------------------------------------------------------
+
+subroutine put_1dfloat_indb(apply, obsdb, variable, group, outputdata)
+implicit none
+logical, intent(in)             :: apply(:)  !< apply
+type(c_ptr), value, intent(in)  :: obsdb !< pointer to the observation space
+character(len=*), intent(in)    :: variable
+character(len=*), intent(in)    :: group
+real(kind_real), intent(in)     :: outputdata(:)
+
+real(kind_real), allocatable :: tmp(:)
+real(kind_real) :: missing
+logical :: array_present
+integer :: iprof, nobs
+
+missing = missing_value(missing)
+nobs = size(outputdata)
+
+allocate(tmp(nobs))
+tmp(:) = missing
+
+! Get array from db if present
+array_present = obsspace_has(obsdb, group, variable)
+if (array_present) then
+  call obsspace_get_db(obsdb, group, variable, tmp(:))
+end if
+
+! Update the tmp array with new data
+do iprof = 1, nobs
+  if (apply(iprof)) then
+    tmp(iprof) = outputdata(iprof)
+  end if
+end do
+
+! Write data to db
+call obsspace_put_db(obsdb, group, variable, tmp)
+
+deallocate(tmp)
+
+end subroutine put_1dfloat_indb
+
+!-------------------------------------------------------------------------------
+
+subroutine put_1dint_indb(apply, obsdb, variable, group, outputdata)
+implicit none
+logical, intent(in)             :: apply(:)  !< apply
+type(c_ptr), value, intent(in)  :: obsdb     !< pointer to the observation space
+character(len=*), intent(in)    :: variable
+character(len=*), intent(in)    :: group
+integer, intent(in)             :: outputdata(:)
+
+integer, allocatable :: tmp(:)
+integer :: missing
+logical :: array_present
+integer :: iprof, nobs
+
+missing = missing_value(missing)
+nobs = size(outputdata)
+
+allocate(tmp(nobs))
+tmp(:) = missing
+
+! Get array from db if present
+array_present = obsspace_has(obsdb, group, variable)
+if (array_present) then
+  call obsspace_get_db(obsdb, group, variable, tmp(:))
+end if
+
+! Update the tmp array with new data
+do iprof = 1, nobs
+  if (apply(iprof)) then
+    tmp(iprof) = outputdata(iprof)
+  end if
+end do
+
+! Write data to db
+call obsspace_put_db(obsdb, group, variable, tmp)
+
+deallocate(tmp)
+
+end subroutine put_1dint_indb
 
 !-------------------------------------------------------------------------------
 

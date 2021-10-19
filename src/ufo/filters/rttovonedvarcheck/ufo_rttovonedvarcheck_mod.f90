@@ -202,6 +202,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   obs_loop: do jobs = self % StartOb, self % FinishOb
     if (apply(jobs)) then
 
+      obs % output_to_db(jobs) = .true.
       apply_count = apply_count + 1
       write(message, *) "starting obs number    ",jobs
       call fckit_log % debug(message)
