@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIASCOVARIANCE_H_
@@ -55,7 +55,7 @@ class ObsBiasCovariance : public util::Printable,
 
 // Utilities
   void read(const ObsBiasCovariancePriorParameters &);
-  void write(const eckit::Configuration &);
+  void write(const Parameters_ &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
 
  private:
@@ -97,6 +97,9 @@ class ObsBiasCovariance : public util::Printable,
 
   /// variables for which bias correction coefficients will be updated
   oops::Variables vars_;
+
+  /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
+  size_t rank_;
 };
 
 // -----------------------------------------------------------------------------

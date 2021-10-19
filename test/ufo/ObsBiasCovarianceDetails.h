@@ -40,6 +40,8 @@ void testObsBiasCovarianceDetails() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
+    const double tolerance = oconf.getDouble("tolerance");
+
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
     ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
@@ -53,16 +55,15 @@ void testObsBiasCovarianceDetails() {
     // Setup ObsBiasIncrements
     eckit::LocalConfiguration biaserrconf = biasconf.getSubConfiguration("covariance");
     ObsBiasIncrement ybias_inc(odb, biasparams);
-    ObsBiasIncrement ybias_inc_2(ybias_inc);
-    ObsBiasIncrement ybias_inc_3(ybias_inc);
-    ybias_inc_2.zero();
-    ybias_inc_3.zero();
 
     // Setup ObsBiasCovariance (include reading from file)
     ObsBiasCovariance ybias_cov(odb, biasparams);
 
     // Randomize increments
     ybias_cov.randomize(ybias_inc);
+
+    ObsBiasIncrement ybias_inc_2(ybias_inc);
+    ObsBiasIncrement ybias_inc_3(ybias_inc);
 
     // linearize for first outer loop
     biaserrconf.set("iteration", 0);
@@ -91,6 +92,23 @@ void testObsBiasCovarianceDetails() {
       predx.save(pred + "Predictor");
     }
 
+    if (biasconf.has("covariance.output file")) {
+      std::string output_file = biasconf.getString("covariance.output file");
+      ybias_cov.write(biasparams);
+
+      biasconf.set("covariance.prior.input file", output_file);
+      biasparams.validateAndDeserialize(biasconf);
+      ObsBiasCovariance ybias_cov2(odb, biasparams);
+      ybias_cov.multiply(ybias_inc, ybias_inc_2);
+      ybias_cov2.multiply(ybias_inc, ybias_inc_3);
+      EXPECT(ybias_inc_2.norm() - ybias_inc_3.norm() < tolerance);
+      oops::Log::test() << "ufo::testObsBiasCovarianceDetails read / write is verified"
+                        << std::endl;
+    }
+
+    ybias_inc_2.zero();
+    ybias_inc_3.zero();
+
     // Randomize increments again
     ybias_cov.randomize(ybias_inc);
 
@@ -107,7 +125,6 @@ void testObsBiasCovarianceDetails() {
     ybias_cov.inverseMultiply(ybias_inc_2, ybias_inc_3);
 
     // Verifing the reading is right
-    const double tolerance = oconf.getDouble("tolerance");
     EXPECT(ybias_inc.norm() - ybias_inc_3.norm() < tolerance);
     oops::Log::test() << "ufo::testObsBiasCovarianceDetails inverseMultiply is verified"
                       << std::endl;

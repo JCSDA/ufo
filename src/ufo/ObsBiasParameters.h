@@ -1,8 +1,8 @@
 /*
  * (C) Crown copyright 2021, Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIASPARAMETERS_H_
@@ -81,6 +81,8 @@ class ObsBiasCovarianceParameters : public oops::Parameters {
 
   oops::OptionalParameter<ObsBiasCovariancePriorParameters> prior{
     "prior", this};
+
+  oops::OptionalParameter<std::string> outputFile{"output file", this};
 };
 
 /// Parameters influencing the bias correction process.
