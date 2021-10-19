@@ -17,6 +17,15 @@
 
 namespace ufo {
 
+/// Configuration parameters for the profile horizontal drift calculation.
+class Cal_ProfileHorizontalDriftParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_ProfileHorizontalDriftParameters, VariableTransformParametersBase);
+
+ public:
+  /// Height coordinate name.
+  oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
+};
+
 /*!
 * \brief Profile horizontal drift calculation.
 *
@@ -38,11 +47,17 @@ namespace ufo {
 */
 class Cal_ProfileHorizontalDrift : public TransformBase {
  public:
-  Cal_ProfileHorizontalDrift(const GenericVariableTransformParameters &options,
+  typedef Cal_ProfileHorizontalDriftParameters Parameters_;
+
+  Cal_ProfileHorizontalDrift(const Parameters_ &options,
                              const ObsFilterData &data,
                              const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Height coordinate name.
+  std::string heightCoord_;
 };
 }  // namespace ufo
 

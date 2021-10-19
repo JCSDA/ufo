@@ -33,8 +33,6 @@ namespace ufo {
        profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
-    std::vector <float> &zBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_geopotential_height);
     std::vector <float> &zPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
     std::vector <float> &zPGEBd =
@@ -68,9 +66,8 @@ namespace ufo {
 
     // Probability density of 'bad' observations.
     std::vector <float> PdBad(numProfileLevels, 0);
-    // The z background error may not have been set before this point.
-    if (zBkgErr.empty())
-      zBkgErr.assign(numProfileLevels, missingValueFloat);
+    // The z background error has not been set before this point.
+    std::vector <float> zBkgErr(numProfileLevels, missingValueFloat);
     // Background error estimates are taken from ECMWF Research Manual 1
     // (ECMWF Data Assimilation Scientific Documentation, 3/92, 3rd edition), table 2.1.
     // They are then multiplied by 1.2.

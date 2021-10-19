@@ -12,7 +12,7 @@ Sondes:
       obsgrouping:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "RH"]

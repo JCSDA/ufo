@@ -18,10 +18,12 @@ static TransformMaker<Cal_ProfileHorizontalDrift>
 makerCal_ProfileHorizontalDrift_("ProfileHorizontalDrift");
 
 Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
-(const GenericVariableTransformParameters &options,
+(const Parameters_ &options,
  const ObsFilterData &data,
  const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-  : TransformBase(options, data, flags) {}
+  : TransformBase(options, data, flags),
+    heightCoord_(options.HeightCoord)
+{}
 
 /************************************************************************************/
 
@@ -45,7 +47,7 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   getObservation("MetaData", "latitude", latitude_in, true);
   getObservation("MetaData", "longitude", longitude_in, true);
   getObservation("MetaData", "datetime", datetime_in, true);
-  getObservation("ObsValue", "geopotential_height", height, true);
+  getObservation("ObsValue", heightCoord_, height, true);
   getObservation("ObsValue", "wind_speed", wind_speed, true);
   getObservation("ObsValue", "wind_from_direction", wind_from_direction, true);
 

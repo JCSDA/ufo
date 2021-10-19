@@ -14,6 +14,42 @@ observations:
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
+      height coordinate: height
+      # Exclude BUFR sondes, whose position has already been measured.
+      where:
+      - variable:
+          name: ObsType@MetaData
+        is_not_in: 50500
+  compareVariables:
+    - reference:
+        name: latitude@TestReference
+      test:
+        name: latitude@DerivedMetaData
+      absTol: 1.0e-4
+    - reference:
+        name: longitude@TestReference
+      test:
+        name: longitude@DerivedMetaData
+      absTol: 1.0e-4
+    - reference:
+        name: datetime@TestReference
+      test:
+        name: datetime@DerivedMetaData
+
+# The same test using 'height' as the vertical coordinate.
+- obs space:
+    name: Radiosonde, height as vertical coordinate
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [height, wind_speed, wind_from_direction]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: ProfileHorizontalDrift
+      height coordinate: height
       # Exclude BUFR sondes, whose position has already been measured.
       where:
       - variable:
@@ -37,7 +73,7 @@ observations:
 
 # The sample is not grouped into profiles, throwing an exception.
 - obs space:
-    name: Radiosonde
+    name: Sample not grouped into profiles
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
@@ -47,11 +83,12 @@ observations:
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
+      height coordinate: height
   expectExceptionWithMessage: Group variables configuration is empty
 
 # The profiles are not sorted by air pressure, throwing an exception.
 - obs space:
-    name: Radiosonde
+    name: Profiles not sorted by air pressure
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
@@ -61,11 +98,12 @@ observations:
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
+      height coordinate: height
   expectExceptionWithMessage: Sort variable must be air_pressure
 
 # The profiles are not sorted in descending order, throwing an exception.
 - obs space:
-    name: Radiosonde
+    name: Profiles not sorted in descending order
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
@@ -76,4 +114,5 @@ observations:
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
+      height coordinate: height
   expectExceptionWithMessage: Profiles must be sorted in descending order

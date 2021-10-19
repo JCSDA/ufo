@@ -17,6 +17,19 @@
 
 namespace ufo {
 
+/// Configuration parameters for the height to pressure conversion.
+class Cal_PressureFromHeightParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_PressureFromHeightParameters, VariableTransformParametersBase);
+
+ public:
+  /// Height coordinate name.
+  oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
+
+  /// Pressure coordinate name.
+  oops::RequiredParameter<std::string> PressureCoord{"pressure coordinate", this};
+};
+
+
 /*!
 * \brief Derive Pressure from height for vertical profile (e.g. sonde report)
 *
@@ -28,7 +41,9 @@ namespace ufo {
 */
 class Cal_PressureFromHeightForProfile : public TransformBase {
  public:
-  Cal_PressureFromHeightForProfile(const GenericVariableTransformParameters &options,
+  typedef Cal_PressureFromHeightParameters Parameters_;
+
+  Cal_PressureFromHeightForProfile(const Parameters_ &options,
                                    const ObsFilterData &data,
                                    const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run variable conversion
@@ -37,6 +52,12 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
  private:
   // list of specific implementation(s) - This is controlled by "method"
   void methodUKMO(const std::vector<bool> &apply);
+
+  /// Height coordinate name.
+  std::string heightCoord_;
+
+  /// Pressure coordinate name.
+  std::string pressureCoord_;
 };
 
 /*!
@@ -48,15 +69,23 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 */
 class Cal_PressureFromHeightForICAO : public TransformBase {
  public:
-  Cal_PressureFromHeightForICAO(const GenericVariableTransformParameters &options,
+  typedef Cal_PressureFromHeightParameters Parameters_;
+
+  Cal_PressureFromHeightForICAO(const Parameters_ &options,
                                 const ObsFilterData &data,
                                 const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
-  // list of specific implementation(s) - This is controled by "method"
+  // list of specific implementation(s) - This is controlled by "method"
   void methodUKMO(const std::vector<bool> &apply);
+
+  /// Height coordinate name.
+  std::string heightCoord_;
+
+  /// Pressure coordinate name.
+  std::string pressureCoord_;
 };
 }  // namespace ufo
 

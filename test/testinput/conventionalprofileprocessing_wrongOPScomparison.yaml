@@ -17,7 +17,7 @@ Incorrect and missing values, RH:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh_wrong.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
@@ -145,7 +145,7 @@ Wrong number of entries per profile, RH:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
@@ -283,7 +283,7 @@ No group variable chosen:
     name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
@@ -306,7 +306,7 @@ Ascending sort order:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "ascending"
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
@@ -327,7 +327,7 @@ Invalid check requested:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+    simulated variables: [air_temperature, relative_humidity]
   obs diagnostics:
   Conventional Profile Processing:
     Checks: ["WrongCheck"]
@@ -474,6 +474,28 @@ Profile pressure not run before temperature averaging:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
+
+#GeoVaLs missing for pressure calculation (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for pressure calculation:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
+  obs diagnostics:
+  Conventional Profile Processing:
+    Checks: ["Basic", "Pressure"]
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
 
 #GeoVaLs missing for temperature averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for temperature averaging:

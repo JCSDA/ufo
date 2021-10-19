@@ -17,18 +17,37 @@
 
 namespace ufo {
 
+/// Configuration parameters for the pressure to height conversion.
+class Cal_HeightFromPressureParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_HeightFromPressureParameters, VariableTransformParametersBase);
+
+ public:
+  /// Height coordinate name.
+  oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
+
+  /// Pressure coordinate name.
+  oops::RequiredParameter<std::string> PressureCoord{"pressure coordinate", this};
+};
+
 /*!
 * \brief Converts pressures to heights.
-*
-* See VariableTransformParametersBase for filter setup.
 */
 class Cal_HeightFromPressure : public TransformBase {
  public:
-  Cal_HeightFromPressure(const GenericVariableTransformParameters &options,
+  typedef Cal_HeightFromPressureParameters Parameters_;
+
+  Cal_HeightFromPressure(const Parameters_ &options,
                          const ObsFilterData &data,
                          const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Height coordinate name.
+  std::string heightCoord_;
+
+  /// Pressure coordinate name.
+  std::string pressureCoord_;
 };
 }  // namespace ufo
 

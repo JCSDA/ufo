@@ -17,9 +17,12 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
     makerCal_PressureFromHeightForProfile_("PressureFromHeightForProfile");
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
-    const GenericVariableTransformParameters &options, const ObsFilterData &data,
+    const Parameters_ &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    : TransformBase(options, data, flags),
+      heightCoord_(options.HeightCoord),
+      pressureCoord_(options.PressureCoord)
+{}
 
 /************************************************************************************/
 
@@ -79,7 +82,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
 
   // 0. Innitialise the ouput array
   // -------------------------------------------------------------------------------
-  getObservation("MetaData", "air_pressure",
+  getObservation("MetaData", pressureCoord_,
                  airPressure);
   if (airPressure.empty()) {
     airPressure = std::vector<float>(nlocs_);
@@ -98,7 +101,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
                  airTemperatureSurface, true);
 
   // Compulsory upper air observation
-  getObservation("ObsValue", "geopotential_height",
+  getObservation("ObsValue", heightCoord_,
                  geopotentialHeight, true);
   getObservation("ObsValue", "air_temperature",
                  airTemperature, true);
@@ -233,7 +236,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
   if (hasBeenUpdated) {
     // if updated the airPressure
     // assign the derived air pressure as DerivedObsValue
-    putObservation("air_pressure", airPressure);
+    putObservation(pressureCoord_, airPressure);
   }
 }
 
@@ -244,9 +247,12 @@ static TransformMaker<Cal_PressureFromHeightForICAO>
     makerCal_PressureFromHeightForICAO_("PressureFromHeightForICAO");
 
 Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
-    const GenericVariableTransformParameters &options, const ObsFilterData &data,
+    const Parameters_ &options, const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    : TransformBase(options, data, flags),
+      heightCoord_(options.HeightCoord),
+      pressureCoord_(options.PressureCoord)
+{}
 
 /************************************************************************************/
 
@@ -281,7 +287,7 @@ void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
 
   // 0. Initialise the ouput array
   // -------------------------------------------------------------------------------
-  getObservation("MetaData", "air_pressure",
+  getObservation("MetaData", pressureCoord_,
                  airPressure);
   if (airPressure.empty()) {
     airPressure = std::vector<float>(nlocs_);
@@ -290,7 +296,7 @@ void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
 
   // 1. get the right variables
   // -------------------------------------------------------------------------------
-  getObservation("ObsValue", "geopotential_height",
+  getObservation("ObsValue", heightCoord_,
                  geopotentialHeight);
 
   // 2. making sure what we need is here
@@ -325,7 +331,7 @@ void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
   if (hasBeenUpdated) {
     // if updated the airPressure
     // assign the derived air pressure as DerivedObsValue
-    putObservation("air_pressure", airPressure);
+    putObservation(pressureCoord_, airPressure);
   }
 }
 }  // namespace ufo

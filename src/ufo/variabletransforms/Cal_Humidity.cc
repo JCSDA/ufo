@@ -106,7 +106,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
     getObservation("ObsValue", "relative_humidity_surface",
                    relativeHumidity);
   } else {
-    getObservation("ObsValue", "air_pressure",
+    getObservation("MetaData", "air_pressure",
                    airPressure, true);
     getObservation("ObsValue", "air_temperature",
                    airTemperature, true);
