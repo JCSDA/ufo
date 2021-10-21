@@ -101,8 +101,7 @@ namespace ufo {
           ufo::VariableNames::extended_obs_space},
         variableNamesFloat,
         {},
-        variableNamesGeoVaLs,
-        {});
+        variableNamesGeoVaLs);
 
     // Run pressure transformation on each profile in the original ObsSpace,
     // saving transformed output to the equivalent extended profile.

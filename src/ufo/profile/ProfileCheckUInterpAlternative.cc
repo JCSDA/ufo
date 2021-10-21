@@ -54,7 +54,6 @@ namespace ufo {
       (variableNamesInt,
        variableNamesFloat,
        {},
-       {},
        {});
 
     // Run alternative U interpolation check on each profile.

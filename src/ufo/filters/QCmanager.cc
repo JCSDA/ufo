@@ -141,7 +141,7 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::thinned,       "removed by thinning"},
     {QCflags::derivative,    "dy/dx out of valid range"},
     {QCflags::clw,           "removed by cloud liquid water check"},
-    {QCflags::profile,       "removed by profile consistency check"},
+    {QCflags::profile,       "removed by conventional profile processing"},
     {QCflags::fguess,        "rejected by first-guess check"},
     {QCflags::diffref,       "rejected by difference check"},
     {QCflags::seaice,        "removed by sea ice check"},

@@ -24,13 +24,13 @@ namespace ufo {
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &uObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &uObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_eastward_wind);
     const std::vector <float> &uBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_eastward_wind);
     const std::vector <float> &uBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
     std::vector <float> &uPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_eastward_wind);
     std::vector <float> &uPGEBd =
@@ -38,13 +38,13 @@ namespace ufo {
     std::vector <int> &uFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     const std::vector <float> &vObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
     const std::vector <float> &vObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_northward_wind);
     const std::vector <float> &vBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_northward_wind);
     const std::vector <float> &vBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_northward_wind);
     std::vector <float> &vPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
     std::vector <float> &vPGEBd =

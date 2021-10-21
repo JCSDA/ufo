@@ -38,7 +38,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsDiagnostics;
   class ProfileDataHolder;
 }
 
@@ -153,9 +152,6 @@ namespace ufo {
     /// Get GeoVaLs for a particular profile.
     std::vector <float>& getGeoVaLVector(const std::string &variableName);
 
-    /// Get ObsDiags for a particular profile.
-    std::vector <float>& getObsDiag(const std::string &variableName);
-
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
     void resetProfileIndices() {profileIndices_->reset();}
@@ -165,8 +161,7 @@ namespace ufo {
       (const std::vector <std::string> &variableNamesInt,
        const std::vector <std::string> &variableNamesFloat,
        const std::vector <std::string> &variableNamesString,
-       const std::vector <std::string> &variableNamesGeoVaLs,
-       const std::vector <std::string> &variableNamesObsDiags);
+       const std::vector <std::string> &variableNamesGeoVaLs);
 
     /// Read values from a collection of profiles and update information related to each one.
     void updateAllProfiles(std::vector <ProfileDataHolder> &profiles);
@@ -215,17 +210,11 @@ namespace ufo {
     /// Container of GeoVaLs in the current profile.
     std::unordered_map <std::string, std::vector <float>> GeoVaLData_;
 
-    /// Container of ObsDiags in the current profile.
-    std::unordered_map <std::string, std::vector <float>> obsDiagData_;
-
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
     /// GeoVaLs.
     std::unique_ptr<GeoVaLs> geovals_;
-
-    /// ObsDiags loaded by the filter.
-    const ObsDiagnostics* const obsdiags_;
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;

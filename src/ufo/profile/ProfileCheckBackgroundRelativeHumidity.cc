@@ -24,13 +24,13 @@ namespace ufo {
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &rhObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_relative_humidity);
     const std::vector <float> &rhObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_relative_humidity);
     const std::vector <float> &rhBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_relative_humidity);
     const std::vector <float> &rhBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_relative_humidity);
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_relative_humidity);
     std::vector <float> &rhPGEBd =

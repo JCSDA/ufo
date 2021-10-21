@@ -40,8 +40,7 @@ namespace ufo {
     void fill(const std::vector <std::string> &variableNamesInt,
               const std::vector <std::string> &variableNamesFloat,
               const std::vector <std::string> &variableNamesString,
-              const std::vector <std::string> &variableNamesGeoVaLs,
-              const std::vector <std::string> &variableNamesObsDiags);
+              const std::vector <std::string> &variableNamesGeoVaLs);
 
     /// Retrieve a vector if it is present. If not, throw an exception.
     template <typename T>
@@ -66,9 +65,6 @@ namespace ufo {
 
     /// Retrieve a GeoVaL vector if it is present. If not, throw an exception.
     std::vector <float>& getGeoVaLVector(const std::string& fullname);
-
-    /// Retrieve an ObsDiag vector if it is present. If not, throw an exception.
-    std::vector <float>& getObsDiagVector(const std::string& fullname);
 
     /// Set values in a vector.
     template <typename T>
@@ -105,9 +101,6 @@ namespace ufo {
     /// Container of GeoVaLs in the current profile.
     std::unordered_map <std::string, std::vector <float>> profileGeoVaLs_;
 
-    /// Container of ObsDiags in the current profile.
-    std::unordered_map <std::string, std::vector <float>> profileObsDiags_;
-
     /// Profile data handler
     ProfileDataHandler &profileDataHandler_;
 
@@ -122,9 +115,6 @@ namespace ufo {
 
     /// Names of GeoVaLs
     std::vector <std::string> variableNamesGeoVaLs_;
-
-    /// Names of ObsDiags
-    std::vector <std::string> variableNamesObsDiags_;
   };
 }  // namespace ufo
 

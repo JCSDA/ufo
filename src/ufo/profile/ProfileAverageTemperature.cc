@@ -74,8 +74,7 @@ namespace ufo {
       (variableNamesInt,
        variableNamesFloat,
        {},
-       variableNamesGeoVaLs,
-       {});
+       variableNamesGeoVaLs);
 
     // Run temperature averaging on each profile in the original ObsSpace,
     // saving averaged output to the equivalent extended profile.

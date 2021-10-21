@@ -26,15 +26,15 @@ namespace ufo {
     const std::vector <float> &Latitude =
       profileDataHandler.get<float>(ufo::VariableNames::Latitude);
     const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_air_temperature);
     const std::vector <float> &tBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &tBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_air_temperature);
     std::vector <float> &tPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_air_temperature);
     std::vector <float> &tPGEBd =

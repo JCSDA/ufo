@@ -26,11 +26,11 @@ namespace ufo {
     const std::vector <float> &Zstation =
       profileDataHandler.get<float>(ufo::VariableNames::Zstation);
     const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &zObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <float> &zObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <float> &zPGE =

@@ -233,8 +233,6 @@ namespace ufo {
   void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler,
                                        size_t commSize)
   {
-    oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
-
     // Reset number of mismatches for this profile
     nMismatches_ = 0;
 
@@ -242,6 +240,7 @@ namespace ufo {
 
     // Compare integer values obtained in this code and OPS
     for (const auto& valueToCompare_int : valuesToCompare_int_) {
+      oops::Log::debug() << "  " << valueToCompare_int << std::endl;
       std::string varname;
       std::string groupname;
       ufo::splitVarGroup(valueToCompare_int, varname, groupname);
@@ -301,6 +300,7 @@ namespace ufo {
 
     // Compare float values obtained in this code and OPS
     for (const auto& valueToCompare_float : valuesToCompare_float_) {
+      oops::Log::debug() << "  " << valueToCompare_float << std::endl;
       const std::vector <float> &values_thiscode =
         profileDataHandler.get<float>(valueToCompare_float);
       const std::vector <float> &values_OPS =

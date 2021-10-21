@@ -69,7 +69,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
   ObsFilterData filterdata(obsspace);
 
-  ioda::ObsVector hofx(obsspace);
+  ioda::ObsVector hofx(obsspace, "HofX");
 
   ioda::ObsVector bias(obsspace);
   bias.zero();
@@ -150,7 +150,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   if (getWrongType) {
     ConventionalProfileProcessingParameters options;
     options.deserialize(conf);
-    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+    EntireSampleDataHandler entireSampleDataHandler(filterdata,
                                                     options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -174,7 +174,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   if (ManualFlagModification) {
     ConventionalProfileProcessingParameters options;
     options.deserialize(conf);
-    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+    EntireSampleDataHandler entireSampleDataHandler(filterdata,
                                                     options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -343,13 +343,14 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
       const auto &flagsIn = profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
       const auto &valuesIn = profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
-      const auto &coordIn = profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
-      const auto &bigGap = profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
+      const auto &coordIn = profileDataHandler.get<float>("logP@DerivedValue");
+      const auto &bigGap = profileDataHandler.get<float>("bigPgaps@DerivedValue");
       const auto &coordOut = profileDataHandler.get<float>
-        (ufo::VariableNames::modellevels_logPWB_rho_derived);
+        ("LogPWB@ModelRhoLevelsDerivedValue");
       const float DZFrac = 0.5;
       const ProfileAveraging::Method method =
         ProfileAveraging::Method::Averaging;
+
 
       std::vector <int> flagsOut;
       std::vector <float> valuesOut;
@@ -370,8 +371,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
                                     &ZMin);
 
       // Compare output values with OPS equivalents.
-      // The name of the OPS variables are hardcoded because they are purely used for testing.
-      // todo(ctgh): check whether any hardcoded names can be substituted.
       const auto &expected_flagsOut =
         profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsQCFlags");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
@@ -413,8 +412,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     profileDataHolder.fill({ufo::VariableNames::extended_obs_space},
                            {ufo::VariableNames::obs_air_pressure},
                            {ufo::VariableNames::station_ID},
-                           {ufo::VariableNames::geovals_pressure},
-                           {ufo::VariableNames::bkgerr_air_temperature});
+                           {ufo::VariableNames::geovals_pressure});
 
     // Get GeoVaLs
     profileDataHolder.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
@@ -425,7 +423,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     // Attempt to access nonexistent data.
     EXPECT_THROWS(profileDataHolder.get<int>("wrong@MetaData"));
     EXPECT_THROWS(profileDataHolder.getGeoVaLVector("wrong@MetaData"));
-    EXPECT_THROWS(profileDataHolder.getObsDiagVector("wrong@MetaData"));
 
     // Check this profile has been marked as being in the correct section of the ObsSpace.
     profileDataHolder.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
@@ -434,7 +431,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     // Advance to the profile in the extended section and perform the same check.
     profileDataHandler.initialiseNextProfile();
     ProfileDataHolder profileDataHolderExt(profileDataHandler);
-    profileDataHolderExt.fill({ufo::VariableNames::extended_obs_space}, {}, {}, {}, {});
+    profileDataHolderExt.fill({ufo::VariableNames::extended_obs_space}, {}, {}, {});
     EXPECT_THROWS(profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Original));
     profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
 

@@ -485,7 +485,7 @@ Missing GeoVaLs for pressure calculation:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+    simulated variables: [height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
   obs diagnostics:

@@ -25,13 +25,13 @@ struct VariableNames
 
   // Observation errors
 
-  static constexpr const char* const obserr_air_temperature = "air_temperature@ObsError";
-  static constexpr const char* const obserr_relative_humidity = "relative_humidity@ObsError";
-  static constexpr const char* const obserr_eastward_wind = "eastward_wind@ObsError";
-  static constexpr const char* const obserr_northward_wind = "northward_wind@ObsError";
-  static constexpr const char* const obserr_geopotential_height = "height@ObsError";
+  static constexpr const char* const obserr_air_temperature = "air_temperature@ObsErrorData";
+  static constexpr const char* const obserr_relative_humidity = "relative_humidity@ObsErrorData";
+  static constexpr const char* const obserr_eastward_wind = "eastward_wind@ObsErrorData";
+  static constexpr const char* const obserr_northward_wind = "northward_wind@ObsErrorData";
+  static constexpr const char* const obserr_geopotential_height = "height@ObsErrorData";
   static constexpr const char* const obserr_dew_point_temperature =
-    "dew_point_temperature@ObsError";
+    "dew_point_temperature@ObsErrorData";
 
   // HofX
 
