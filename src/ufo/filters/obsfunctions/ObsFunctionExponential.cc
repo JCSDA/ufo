@@ -30,9 +30,6 @@ Exponential::Exponential(const eckit::LocalConfiguration & conf)
   // Check options
   options_.validateAndDeserialize(conf);
 
-  const std::vector<float> coefs = options_.coefs.value();
-  ASSERT(coefs.size() == 3 || coefs.size() == 4);
-
   // Create variable and add to invars_
   for (const Variable & var : options_.variables.value()) {
     invars_ += var;
@@ -56,7 +53,10 @@ void Exponential::compute(const ObsFilterData & in,
   const size_t nv = invars_.size();
 
   // get coefficients for exponential function
-  const std::vector<float> coefs = options_.coefs.value();
+  const float coeffA = options_.coeffA.value();
+  const float coeffB = options_.coeffB.value();
+  const float coeffC = options_.coeffC.value();
+  const float coeffD = options_.coeffD.value();
 
   // sanity checks / initialize
   out.zero();
@@ -68,20 +68,19 @@ void Exponential::compute(const ObsFilterData & in,
   // compute exponential function of input variable
   ASSERT(nv == 1);  // currently only works with one (possibly multi-channel) x variable
   const float missing = util::missingValue(missing);
-  const float missingVal = (coefs.size() == 3) ? missing : coefs[3];
   for (size_t ivar = 0; ivar < nv; ++ivar) {
     ioda::ObsDataVector<float> varin(in.obsspace(), invars_[ivar].toOopsVariables());
     in.get(invars_[ivar], varin);
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if ( varin[ichan][iloc] == missing || out[ichan][iloc] == missing ) {
-          out[ichan][iloc] = missingVal;
+          out[ichan][iloc] = coeffD;
         } else {
-          if (coefs[1] * varin[ichan][iloc] > 40.0) {  // avoid float overflow in arg of exp()
-            out[ichan][iloc] = missingVal;
+          if (coeffB * varin[ichan][iloc] > 40.0) {  // avoid float overflow in arg of exp()
+            out[ichan][iloc] = coeffD;
             count_exparg_toobig_accumulator->addTerm(iloc+ichan*nchans, 1);
           } else {
-            out[ichan][iloc] = coefs[0] * exp(coefs[1] * varin[ichan][iloc]) + coefs[2];
+            out[ichan][iloc] = coeffA * exp(coeffB * varin[ichan][iloc]) + coeffC;
           }
         }
       }  // ichan

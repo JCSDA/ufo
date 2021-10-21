@@ -16,7 +16,9 @@ observations:
       variables:
       - name: fake_x_data@MetaData
         channels: 1
-      coefs: [1.0, 0.1, -1.0, 0.2]
+      coeffB: 0.1
+      coeffC: -1.0
+      coeffD: 0.2
     variables: [fake_y1_data]
     tolerance: 1.0e-8
     expect missing value locations to match: true
@@ -35,7 +37,9 @@ observations:
       variables:
       - name: fake_x_data@MetaData
         channels: 1-3
-      coefs: [-1.0, -0.1, 1.0]
+      coeffA: -1.0
+      coeffB: -0.1
+      coeffC: 1.0
     variables: [fake_y_data]
     channels: 1-3
     tolerance: 1.0e-8

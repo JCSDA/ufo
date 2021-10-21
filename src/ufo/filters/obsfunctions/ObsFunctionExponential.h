@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include "oops/util/missingValues.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/ObsFilterData.h"
@@ -27,26 +29,31 @@ class ExponentialParameters : public oops::Parameters {
  public:
   /// Input variable of the exponential function
   oops::RequiredParameter<std::vector<Variable>> variables{"variables", this};
-  /// coefficients associated with the above variable
-  oops::RequiredParameter<std::vector<float>> coefs{"coefs", this};
+  /// coefficients associated with the above variable (x), such that
+  /// y(x) = A*exp(B*x)+C, or y(x) = D if x missing
+  oops::Parameter<float> coeffA{"coeffA", 1.0, this};
+  oops::Parameter<float> coeffB{"coeffB", 1.0, this};
+  oops::Parameter<float> coeffC{"coeffC", 0.0, this};
+  oops::Parameter<float> coeffD{"coeffD", util::missingValue(0.0f), this};
 };
 
 // -----------------------------------------------------------------------------
 
-/// \brief Outputs an exponential function y(x) = A*exp(B*x)+C, or y(x) = D if x missing
+/// \brief Outputs an exponential function y(x) = A*exp(B*x)+C, or y(x) = D if x missing,
+///   where default values are A = 1.0, B = 1.0; C = 0.0; D = missing.
 /// \details Example 1
 ///
 ///  obs function:
 ///    name: Exponential@ObsFunction
 ///    options:
 ///      variables: [wind_speed@ObsValue]
-///      coefs: [0.1,-0.3,0.2,0.12]
+///      coeffA: 0.1
+///      coeffB: -0.3
+///      coeffC: 0.2
+///      coeffD: 0.12
 ///
 /// will return 0.1 * exp(-0.3 * wind_speed@ObsValue) + 0.2
 /// or if wind_speed@ObsValue is missing, 0.12 in that location.
-/// Whereas with only 3 coefficients,
-///      coefs: [0.1,-0.3,0.2]
-/// a missing value indicator is returned at locations where wind_speed@ObsValue is missing.
 ///
 /// Example 2 - multi-channel (not sure who might need this, but...)
 ///
@@ -57,10 +64,12 @@ class ExponentialParameters : public oops::Parameters {
 ///      variables:
 ///      - name: brightness_temperature@ObsValue
 ///        channels: *select_chans
-///      coefs: [1.0,0.5,-1.0]
+///      coeffB: 0.5
+///      coeffC: -1.0
 ///
 /// will return 1.0 * exp(0.5 * brightness_temperature_<channel>@ObsValue) -1.0,
-/// or missing at locations where brightness_temperature_<channel>@ObsValue is missing.
+/// or missing at locations where brightness_temperature_<channel>@ObsValue is missing,
+/// since default values are coeffA: 1.0, coeffB = 1.0; coeffC = 0.0; coeffD = missing.
 
 class Exponential : public ObsFunctionBase<float> {
  public:
