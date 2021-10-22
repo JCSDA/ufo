@@ -25,8 +25,8 @@ static ObsOperatorMaker<ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction"
 // -----------------------------------------------------------------------------
 
 ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
-                                     const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), varin_()
+                                     const ObsSeaIceFractionParameters & params)
+  : ObsOperatorBase(odb), varin_()
 {
   const std::vector<std::string> vvin{"sea_ice_category_area_fraction"};
   varin_.reset(new oops::Variables(vvin));

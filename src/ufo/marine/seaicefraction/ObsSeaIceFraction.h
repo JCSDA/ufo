@@ -14,6 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/ObsOperatorBase.h"
 
@@ -32,13 +33,20 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+class ObsSeaIceFractionParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsSeaIceFractionParameters, ObsOperatorParametersBase )
+  // NO extra parameters needed
+};
+
 /// Total ice concentration observation operator class
 class ObsSeaIceFraction : public ObsOperatorBase,
                           private util::ObjectCounter<ObsSeaIceFraction> {
  public:
+  typedef ObsSeaIceFractionParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsSeaIceFraction";}
 
-  ObsSeaIceFraction(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsSeaIceFraction(const ioda::ObsSpace &, const ObsSeaIceFractionParameters &);
   virtual ~ObsSeaIceFraction();
 
 // Obs Operator
