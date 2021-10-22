@@ -83,7 +83,7 @@ class ObsLocParameters : public oops::Parameters {
   oops::Parameter<double> lengthscale{"lengthscale", 0.0, this};
 
   /// Method for searching for nearest points: brute force or KD-tree
-  oops::Parameter<SearchMethod> searchMethod{"search method", SearchMethod::BRUTEFORCE, this};
+  oops::Parameter<SearchMethod> searchMethod{"search method", SearchMethod::KDTREE, this};
 
   /// Maximum number of obs
   oops::OptionalParameter<int> maxnobs{"max nobs", this};
