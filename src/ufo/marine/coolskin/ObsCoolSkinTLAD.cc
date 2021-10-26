@@ -23,7 +23,7 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsCoolSkinTLAD> makerCoolSkinTL_("CoolSkin");
 // -----------------------------------------------------------------------------
 
-ObsCoolSkinTLAD::ObsCoolSkinTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsCoolSkinTLAD::ObsCoolSkinTLAD(const ioda::ObsSpace & odb, const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_temperature",
@@ -33,7 +33,7 @@ ObsCoolSkinTLAD::ObsCoolSkinTLAD(const ioda::ObsSpace & odb, const eckit::Config
                                     "net_downwelling_longwave_radiation",
                                     "friction_velocity_over_water"};
   varin_.reset(new oops::Variables(vv));
-  ufo_CoolSkin_tlad_setup_f90(keyOper_, config);
+  ufo_CoolSkin_tlad_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsCoolSkinTLAD created" << std::endl;
 }
 

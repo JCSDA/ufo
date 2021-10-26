@@ -23,10 +23,10 @@ static ObsOperatorMaker<ObsExample> makerExample_("Example");
 // -----------------------------------------------------------------------------
 
 ObsExample::ObsExample(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                       const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_example_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_example_setup_f90(keyOper_, parameters.toConfiguration(), odb.obsvariables(), varin_);
   oops::Log::trace() << "ObsExample created." << std::endl;
 }
 

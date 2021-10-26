@@ -27,8 +27,8 @@ static LinearObsOperatorMaker<ObsProfileAverageTLAD> obsProfileAverageMaker_("Pr
 // -----------------------------------------------------------------------------
 
 ObsProfileAverageTLAD::ObsProfileAverageTLAD(const ioda::ObsSpace & odb,
-                                             const eckit::Configuration & config)
-  : LinearObsOperatorBase(odb), odb_(odb), data_(odb, config)
+                                             const Parameters_ & parameters)
+  : LinearObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
 {
   oops::Log::trace() << "ObsProfileAverageTLAD constructed" << std::endl;
 }

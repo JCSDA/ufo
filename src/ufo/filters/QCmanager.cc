@@ -12,8 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -47,7 +45,7 @@ void updateQCFlags(const std::vector<float> *obsValues, std::vector<int>& qcflag
 
 // -----------------------------------------------------------------------------
 
-QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*config*/,
+QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
                      std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
                      std::shared_ptr<ioda::ObsDataVector<float> > /*obserr*/)
   : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(qcflags)

@@ -15,7 +15,6 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
-
 namespace ufo {
 
 // -----------------------------------------------------------------------------
@@ -23,10 +22,10 @@ static ObsOperatorMaker<ObsMarineVertInterp> makerMarineVertInterp_("MarineVertI
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterp::ObsMarineVertInterp(const ioda::ObsSpace & odb,
-                                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                                         const ObsMarineVertInterpParameters & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_marinevertinterp_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_marinevertinterp_setup_f90(keyOper_, params.toConfiguration(), odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsMarineVertInterp created." << std::endl;
 }

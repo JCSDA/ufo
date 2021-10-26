@@ -4,7 +4,7 @@ window end: 2019-10-17T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
-    vertical coordinate: ["air_pressure"]
+    vertical coordinate: "air_pressure"
   obs space:
     name: OzoneLevel
     obsdatain:

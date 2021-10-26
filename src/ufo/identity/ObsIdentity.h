@@ -15,13 +15,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/identity/ObsIdentityParameters.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -43,20 +40,14 @@ namespace ufo {
 ///     obs operator:
 ///      name: Identity
 ///
-/// This operator also accepts an optional `variables` parameter, which controls which ObsSpace
-/// variables will be simulated. This option should only be set if this operator is used as a
-/// component of the Composite operator. If `variables` is not set, the operator will simulate
-/// all ObsSpace variables. Please see the documentation of the Composite operator for further
-/// details.
-///
-/// The boolean parameter `level index 0 is closest to surface` can be set to `false`
-/// for models whose level index 0 is furthest from the Earth's surface.
+/// The associated parameters class has details of all available options.
 class ObsIdentity : public ObsOperatorBase,
   private util::ObjectCounter<ObsIdentity> {
  public:
   static const std::string classname() {return "ufo::ObsIdentity";}
+  typedef ObsIdentityParameters Parameters_;
 
-  ObsIdentity(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsIdentity(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsIdentity() override;
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;

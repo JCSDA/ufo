@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2021 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/aerosols/AOP/ObsAodExt.h"
@@ -23,10 +23,11 @@ static ObsOperatorMaker<ObsAodExt> makerAodExt_("AodExt");
 // -----------------------------------------------------------------------------
 
 ObsAodExt::ObsAodExt(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                       const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_aodext_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_aodext_setup_f90(keyOper_, params.toConfiguration(),
+                       odb.obsvariables(), varin_);
   oops::Log::trace() << "ObsAodExt created." << std::endl;
 }
 

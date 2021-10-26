@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 namespace eckit {
   class Configuration;
@@ -48,12 +49,18 @@ namespace ufo {
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
+class SatTCWVParameters : public ObsOperatorParametersBase {
+        OOPS_CONCRETE_PARAMETERS(SatTCWVParameters, ObsOperatorParametersBase)
+        // No additional option defined in YAML
+};
 class SatTCWV : public ObsOperatorBase,
                   private util::ObjectCounter<SatTCWV> {
  public:
+  typedef SatTCWVParameters Parameters_;
+
   static const std::string classname() {return "ufo::SatTCWV";}
 
-  SatTCWV(const ioda::ObsSpace &, const eckit::Configuration &);
+  SatTCWV(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~SatTCWV();
 
 // Obs Operator

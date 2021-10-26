@@ -4,7 +4,7 @@ window end: 2018-04-15T03:30:00Z
 observations:
   - obs operator:
       name: GSISfcModel 
-      use_fact10: 0
+      use_fact10: false
     obs space:
       name: GSISfcModel
       obsdatain:
@@ -18,7 +18,7 @@ observations:
     tolerance: 1.0e-05
   - obs operator:
       name: GSISfcModel 
-      use_fact10: 0
+      use_fact10: false
     obs space:
       name: GSISfcModel
       obsdatain:
@@ -32,7 +32,7 @@ observations:
     tolerance: 1.0e-03
   - obs operator:
       name: GSISfcModel 
-      use_fact10: 1
+      use_fact10: true
     obs space:
       name: GSISfcModel
       obsdatain:

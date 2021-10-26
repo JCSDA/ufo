@@ -16,10 +16,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/scatwind/NeutralMetOffice/ObsScatwindNeutralMetOffice.interface.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -29,15 +25,24 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+/// Configuration options recognized by the ObsScatwindNeutralMetOffice operator.
+class ObsScatwindNeutralMetOfficeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsScatwindNeutralMetOfficeParameters, ObsOperatorParametersBase)
+};
+
 // -----------------------------------------------------------------------------
 
 /// ScatwindNeutralMetOffice observation operator
 class ObsScatwindNeutralMetOffice : public ObsOperatorBase,
                       private util::ObjectCounter<ObsScatwindNeutralMetOffice> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsScatwindNeutralMetOfficeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsScatwindNeutralMetOffice";}
 
-  ObsScatwindNeutralMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsScatwindNeutralMetOffice(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsScatwindNeutralMetOffice();
 
 // Obs Operator

@@ -15,10 +15,6 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
   /// \brief Options related to GeoVaLs used in the profile QC code.

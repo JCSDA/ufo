@@ -26,16 +26,14 @@ static ObsOperatorMaker<ObsGroundgnssMetOffice> makerGroundgnssMetOffice_("Groun
 // -----------------------------------------------------------------------------
 
 ObsGroundgnssMetOffice::ObsGroundgnssMetOffice(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGroundgnssMetOffice_(0), odb_(odb), varin_()
+                                       const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperGroundgnssMetOffice_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-  const eckit::Configuration *configc = &obsOptions;
-  ufo_groundgnss_metoffice_setup_f90(keyOperGroundgnssMetOffice_, &configc);
+  ufo_groundgnss_metoffice_setup_f90(keyOperGroundgnssMetOffice_, parameters.toConfiguration());
 
   oops::Log::trace() << "ObsGroundgnssMetOffice created." << std::endl;
 }

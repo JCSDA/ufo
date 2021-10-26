@@ -16,13 +16,10 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/marine/coolskin/ObsCoolSkinParameters.h"
 #include "ufo/marine/coolskin/ObsCoolSkinTLAD.interface.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -38,8 +35,8 @@ class ObsCoolSkinTLAD : public LinearObsOperatorBase,
                    private util::ObjectCounter<ObsCoolSkinTLAD> {
  public:
   static const std::string classname() {return "ufo::ObsCoolSkinTLAD";}
-
-  ObsCoolSkinTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  typedef ObsCoolSkinParameters Parameters_;
+  ObsCoolSkinTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsCoolSkinTLAD();
 
   // Obs Operators

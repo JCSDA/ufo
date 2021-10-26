@@ -25,14 +25,15 @@ static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
 // -----------------------------------------------------------------------------
 
 ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
-                                                   const eckit::Configuration & config)
+                                                   const ObsInsituTemperatureTLADParameters &
+                                                   params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_water_potential_temperature",
                                     "sea_water_salinity",
                                     "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vv));
-  ufo_insitutemperature_tlad_setup_f90(keyOper_, config);
+  ufo_insitutemperature_tlad_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;
 }
 

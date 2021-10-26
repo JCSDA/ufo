@@ -28,8 +28,8 @@ static ObsOperatorMaker<ObsProfileAverage> obsProfileAverageMaker_("ProfileAvera
 // -----------------------------------------------------------------------------
 
 ObsProfileAverage::ObsProfileAverage(const ioda::ObsSpace & odb,
-                                     const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), odb_(odb), data_(odb, config)
+                                     const Parameters_ & parameters)
+  : ObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
 {
   oops::Log::trace() << "ObsProfileAverage constructed" << std::endl;
 }
@@ -43,7 +43,7 @@ ObsProfileAverage::~ObsProfileAverage() {
 // -----------------------------------------------------------------------------
 
 void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                    ObsDiagnostics & ydiags) const {
+                                    ObsDiagnostics &) const {
   oops::Log::trace() << "ObsProfileAverage: simulateObs started" << std::endl;
 
   // Cache the input GeoVaLs for use in the slant path location algorithm.

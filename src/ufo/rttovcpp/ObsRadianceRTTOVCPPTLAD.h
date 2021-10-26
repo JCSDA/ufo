@@ -16,13 +16,9 @@
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/rttovcpp/ObsRadianceRTTOVCPPParameters.h"
 
 #include "rttov/wrapper/RttovSafe.h"
-
-namespace eckit {
-  class Configuration;
-  class LocalConfiguration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -38,9 +34,13 @@ namespace ufo {
 class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
                    private util::ObjectCounter<ObsRadianceRTTOVCPPTLAD> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsRadianceRTTOVCPPParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsRadianceRTTOVCPPTLAD";}
 
-  ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsRadianceRTTOVCPPTLAD();
 
   // Calculate Jacobian H(x_g) of obs operator

@@ -14,6 +14,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/ObsOperatorParametersBase.h"
+
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/marinevertinterp/ObsMarineVertInterpTLAD.interface.h"
 
@@ -32,13 +34,20 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+
+class ObsMarineVertInterpTLADParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsMarineVertInterpTLADParameters, ObsOperatorParametersBase )
+  // NO extra parameters needed
+};
+
 /// Marinevertinterp for observation operator TL and AD class
 class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
                                  private util::ObjectCounter<ObsMarineVertInterpTLAD> {
  public:
+  typedef ObsMarineVertInterpTLADParameters Parameters_;
   static const std::string classname() {return "ufo::ObsMarineVertInterpTLAD";}
 
-  ObsMarineVertInterpTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsMarineVertInterpTLAD(const ioda::ObsSpace &, const ObsMarineVertInterpTLADParameters &);
   virtual ~ObsMarineVertInterpTLAD();
 
   // Obs Operators

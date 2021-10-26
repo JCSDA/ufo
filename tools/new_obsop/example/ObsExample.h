@@ -15,13 +15,10 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/example/ObsExample.interface.h"
+#include "ufo/example/ObsExampleParameters.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -36,9 +33,13 @@ namespace ufo {
 class ObsExample : public ObsOperatorBase,
                    private util::ObjectCounter<ObsExample> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsExampleParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsExample";}
 
-  ObsExample(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsExample(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsExample();
 
 // Obs Operator

@@ -29,13 +29,13 @@ static LinearObsOperatorMaker<ObsTimeOperTLAD> makerTimeOperTL_("TimeOperLinInte
 // -----------------------------------------------------------------------------
 
 ObsTimeOperTLAD::ObsTimeOperTLAD(const ioda::ObsSpace & odb,
-                                 const eckit::Configuration & config)
+                                 const Parameters_ & parameters)
   : LinearObsOperatorBase(odb),
     actualoperator_(LinearObsOperatorFactory::create(
                       odb,
                       oops::validateAndDeserialize<LinearObsOperatorParametersWrapper>(
-                        eckit::LocalConfiguration(config, "obs operator")).operatorParameters)),
-    timeWeights_(timeWeightCreate(odb, config))
+                        parameters.obsOperator.value()).operatorParameters)),
+    timeWeights_(timeWeightCreate(odb, parameters))
 {
   oops::Log::trace() << "ObsTimeOperTLAD created" << std::endl;
 }

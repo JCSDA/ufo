@@ -43,14 +43,10 @@ character(kind=c_char,len=:), allocatable :: coord_name
 
   call self%geovars%push_back(geovars_default)
 
-  if( yaml_conf%has("VertCoord") ) then
-      call yaml_conf%get_or_die("VertCoord",coord_name)
-      self%v_coord = coord_name
-      if( trim(self%v_coord) .ne. var_z ) then
-        call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
-      endif
-  else  ! default
-      self%v_coord = var_zm
+  call yaml_conf%get_or_die("VertCoord",coord_name)
+  self%v_coord = coord_name
+  if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_zm ) then
+      call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
   endif
 
   call self%geovars%push_back(self%v_coord)

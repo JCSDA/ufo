@@ -6,6 +6,7 @@
 set ( rttovcpp_files
     ObsRadianceRTTOVCPP.h
     ObsRadianceRTTOVCPP.cc
+    ObsRadianceRTTOVCPPParameters.h
     ObsRadianceRTTOVCPPTLAD.h
     ObsRadianceRTTOVCPPTLAD.cc
     rttovcpp_interface.h

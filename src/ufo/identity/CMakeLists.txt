@@ -6,6 +6,7 @@
 set ( identity_files
     ObsIdentity.h
     ObsIdentity.cc
+    ObsIdentityParameters.h
     ObsIdentityTLAD.h
     ObsIdentityTLAD.cc
 )

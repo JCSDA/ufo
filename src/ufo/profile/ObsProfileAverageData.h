@@ -20,10 +20,6 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/ObsProfileAverageParameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
   enum class GeoVaLsDirection{BottomToTop, TopToBottom};
@@ -32,7 +28,7 @@ namespace ufo {
   class ObsProfileAverageData {
    public:
     ObsProfileAverageData(const ioda::ObsSpace & odb,
-                          const eckit::Configuration & config);
+                          const ObsProfileAverageParameters & parameters);
 
     /// Return required variables for the operator.
     const oops::Variables & requiredVars() const;

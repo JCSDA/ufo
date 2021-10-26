@@ -4,7 +4,6 @@ window end: 2019-10-17T03:30:00Z
 observations:
 - obs operator:
     name: AtmVertInterpLay
-    vertcoord: TotalColumn
     geovals: [mole_fraction_of_ozone_in_air]
     coefficients: [0.007886131] # convert from ppmv to DU
     nlevels: [1]

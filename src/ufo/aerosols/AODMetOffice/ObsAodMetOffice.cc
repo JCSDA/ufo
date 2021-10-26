@@ -26,13 +26,12 @@ namespace ufo {
 static ObsOperatorMaker<ObsAodMetOffice> makerAodMetOffice_("AodMetOffice");
 // -----------------------------------------------------------------------------
 
-ObsAodMetOffice::ObsAodMetOffice(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), odb_(odb), varin_()
+ObsAodMetOffice::ObsAodMetOffice(const ioda::ObsSpace & odb, const Parameters_ &params)
+  : ObsOperatorBase(odb), odb_(odb), varin_()
 {
   // 1. Read in number of dust bins and extinction coefficients from yaml file.
-  NDustBins_ = config.getInt("NDustBins");  // number of dust bins
-  AodKExt_ = config.getDoubleVector("AodKExt");  // Extinction coefficient for each dust bin
+  NDustBins_ = params.NDustBins;  // number of dust bins
+  AodKExt_ = params.AodKExt;  // Extinction coefficient for each dust bin
 
   // check the size of AodKExt_ is consistent with NDustBins_
   ASSERT(AodKExt_.size() == NDustBins_);

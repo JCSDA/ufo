@@ -22,11 +22,11 @@ static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_(
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
-                                                 const eckit::Configuration & config)
+                                                 const ObsMarineVertInterpTLADParameters & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  ufo_marinevertinterp_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
-
+  ufo_marinevertinterp_tlad_setup_f90(keyOper_, params.toConfiguration(),
+                                      odb.obsvariables(), varin_);
   oops::Log::trace() << "ObsMarineVertInterpTLAD created" << std::endl;
 }
 

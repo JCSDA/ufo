@@ -15,13 +15,10 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/avgkernel/ObsAvgKernel.interface.h"
+#include "ufo/avgkernel/ObsAvgKernelParameters.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -36,9 +33,13 @@ namespace ufo {
 class ObsAvgKernel : public ObsOperatorBase,
                    private util::ObjectCounter<ObsAvgKernel> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsAvgKernelParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsAvgKernel";}
 
-  ObsAvgKernel(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAvgKernel(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAvgKernel();
 
 // Obs Operator

@@ -21,8 +21,10 @@
 
 namespace ufo {
 
+class ObsTimeOperParameters;
+
 std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
-                                                 const eckit::Configuration & config);
+                                                 const ObsTimeOperParameters & parameters);
 
 // -----------------------------------------------------------------------------
 

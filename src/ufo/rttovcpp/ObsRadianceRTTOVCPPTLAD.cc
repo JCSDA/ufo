@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsRadianceRTTOVCPPTLAD> makerRTTOVCPPTL_("RTTOVCP
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                           const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), varin_()
 {
   // Increment fields to be requested from getvalues and stored in geovals
@@ -47,8 +47,8 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
   channels_ = observed.channels();  // set private data member channels_
 
   // get optical depth coef file name from yaml
-  std::string CoefPath = config.getString("CoefPath");
-  std::string SensorID = config.getString("SensorID");
+  const std::string CoefPath = parameters.CoefPath;
+  const std::string SensorID = parameters.SensorID;
   CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD created." << std::endl;

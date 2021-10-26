@@ -58,11 +58,9 @@ character(len=maxvarlen), dimension(7), parameter :: geovars_default = (/ &
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_scatwind_neutralmetoffice_setup(self, f_conf)
-  use fckit_configuration_module, only: fckit_configuration
+subroutine ufo_scatwind_neutralmetoffice_setup(self)
   implicit none
   class(ufo_scatwind_neutralmetoffice), intent(inout) :: self
-  type(fckit_configuration), intent(in)   :: f_conf
 
   call self%geovars%push_back(geovars_default)
 

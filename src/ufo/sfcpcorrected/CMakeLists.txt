@@ -6,6 +6,8 @@
 set ( sfcpcorrected_files
     ObsSfcPCorrected.h
     ObsSfcPCorrected.cc
+    ObsSfcPCorrectedParameters.cc
+    ObsSfcPCorrectedParameters.h
     ObsSfcPCorrected.interface.F90
     ObsSfcPCorrected.interface.h
     ufo_sfcpcorrected_mod.F90

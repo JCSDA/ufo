@@ -23,10 +23,10 @@ static LinearObsOperatorMaker<ObsExampleTLAD> makerExampleTL_("Example");
 // -----------------------------------------------------------------------------
 
 ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
-                               const eckit::Configuration & config)
+                               const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  ufo_example_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_example_tlad_setup_f90(keyOper_, parameters.toConfiguration(), odb.obsvariables(), varin_);
   oops::Log::trace() << "ObsExampleTLAD created" << std::endl;
 }
 

@@ -7,7 +7,7 @@ module ufo_atmvertinterplay_tlad_mod
 
   use oops_variables_mod
   use ufo_vars_mod
-  use ufo_geovals_mod 
+  use ufo_geovals_mod
   use vert_interp_lay_mod
   use missing_values_mod
   use, intrinsic :: iso_c_binding
@@ -67,19 +67,16 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
       self%coefficients(ivar) = 1.0
     enddo
   endif
-  if (grid_conf%has("coefficients")) then
-    ncoefs = grid_conf%get_size("coefficients")
-    call grid_conf%get_or_die("coefficients", coefficients)
-    allocate(self%coefficients(ncoefs))
-    self%coefficients(1:ncoefs) = coefficients(1:ncoefs)
-  endif
-  if (grid_conf%has("nlevels")) then
-    nlevs = grid_conf%get_size("nlevels")
-    call grid_conf%get_or_die("nlevels", nlevels)
-    allocate(self%nlevels(nlevs))
-    self%nlevels(1:nlevs) = nlevels(1:nlevs)
-  endif
 
+  ncoefs = grid_conf%get_size("coefficients")
+  call grid_conf%get_or_die("coefficients", coefficients)
+  allocate(self%coefficients(ncoefs))
+  self%coefficients(1:ncoefs) = coefficients(1:ncoefs)
+
+  nlevs = grid_conf%get_size("nlevels")
+  call grid_conf%get_or_die("nlevels", nlevels)
+  allocate(self%nlevels(nlevs))
+  self%nlevels(1:nlevs) = nlevels(1:nlevs)
 
 end subroutine atmvertinterplay_tlad_setup_
 
@@ -113,7 +110,7 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
   call ufo_geovals_get_var(geovals, var_prsi, p_temp)
   var_zdir = var_prsi                         ! vertical coordinate variable
   !if profile direction is top2bottom flip geovals, and make sure tlm and adj follow suit with self%flip_it
-  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then 
+  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then
     call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
     self%flip_it = .true.
   else
@@ -125,11 +122,11 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
   nlevs = self%nlevels(1)
   nsig = modelpres%nval - 1
   self%nval = modelpres%nval
-  call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)  
+  call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)
 
   allocate(self%modelpressures(modelpres%nval,self%nlocs))
   self%modelpressures(1:nsig+1,1:self%nlocs) = modelpres%vals(1:nsig+1,1:self%nlocs)
-  call get_integral_limits(airpressure(:), self%botpressure(:), self%toppressure(:), self%modelpressures(:,:), nlevs, self%nlocs, nsig) 
+  call get_integral_limits(airpressure(:), self%botpressure(:), self%toppressure(:), self%modelpressures(:,:), nlevs, self%nlocs, nsig)
 
 
   ! Cleanup memory

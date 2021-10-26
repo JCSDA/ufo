@@ -8,6 +8,7 @@ set (  bendmetoffice_src_files
        ObsGnssroBendMetOffice.cc
        ObsGnssroBendMetOffice.interface.h
        ObsGnssroBendMetOffice.interface.F90
+       ObsGnssroBendMetOfficeParameters.h
        ObsGnssroBendMetOfficeTLAD.h
        ObsGnssroBendMetOfficeTLAD.cc
        ObsGnssroBendMetOfficeTLAD.interface.h

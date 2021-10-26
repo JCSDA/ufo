@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2021 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_AEROSOLS_AOP_OBSAODEXT_H_
@@ -15,13 +15,10 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/aerosols/AOP/ObsAodExt.interface.h"
+#include "ufo/aerosols/AOP/ObsAodExtParameters.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -38,7 +35,9 @@ class ObsAodExt : public ObsOperatorBase,
  public:
   static const std::string classname() {return "ufo::ObsAodExt";}
 
-  ObsAodExt(const ioda::ObsSpace &, const eckit::Configuration &);
+  typedef ObsAodExtParameters Parameters_;
+
+  ObsAodExt(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodExt();
 
 // Obs Operator

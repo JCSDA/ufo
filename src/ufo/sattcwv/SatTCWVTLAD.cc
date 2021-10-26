@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<SatTCWVTLAD> makerSatTCWVTL_("SatTCWV");
 // -----------------------------------------------------------------------------
 
 SatTCWVTLAD::SatTCWVTLAD(const ioda::ObsSpace & odb,
-                         const eckit::Configuration & config)
+                         const Parameters_ & params)
   : LinearObsOperatorBase(odb), varin_(), k_matrix(), traj_init(false)
 {
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",

@@ -18,11 +18,6 @@
 #include "ufo/rttov/ObsRadianceRTTOV.interface.h"
 #include "ufo/rttov/ObsRadianceRTTOVParameters.h"
 
-namespace eckit {
-  class Configuration;
-  class LocalConfiguration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -38,8 +33,9 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
                     private util::ObjectCounter<ObsRadianceRTTOV> {
  public:
   static const std::string classname() {return "ufo::ObsRadianceRTTOV";}
+  typedef ObsRadianceRTTOVParameters Parameters_;
 
-  ObsRadianceRTTOV(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsRadianceRTTOV(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsRadianceRTTOV();
 
 // Obs Operator
@@ -56,7 +52,6 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
   F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
-  ObsRadianceRTTOVParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

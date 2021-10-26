@@ -14,6 +14,7 @@ set ( atmvertinterp_files
   ObsAtmVertInterpTLAD.interface.h
   ufo_atmvertinterp_mod.F90
   ufo_atmvertinterp_tlad_mod.F90
+  ObsAtmVertInterpParameters.h
 )
 
 PREPEND( _p_atmvertinterp_files       "atmvertinterp"       ${atmvertinterp_files} )
@@ -22,4 +23,3 @@ set ( atmvertinterp_src_files
       ${_p_atmvertinterp_files}
       PARENT_SCOPE
 )
-

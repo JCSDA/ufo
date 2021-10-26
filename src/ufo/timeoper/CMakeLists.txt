@@ -10,6 +10,7 @@ set ( timeoper_files
     ObsTimeOperUtil.cc
     ObsTimeOper.cc
     ObsTimeOperTLAD.cc
+    ObsTimeOperParameters.h
 )
 PREPEND( _p_timeoper_files     "timeoper"     ${timeoper_files} )
 

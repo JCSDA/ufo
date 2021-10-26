@@ -22,12 +22,11 @@ static LinearObsOperatorMaker<ObsAodExtTLAD> makerAodExtTL_("AodExt");
 // -----------------------------------------------------------------------------
 
 ObsAodExtTLAD::ObsAodExtTLAD(const ioda::ObsSpace & odb,
-                               const eckit::Configuration & config)
+                               const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  const eckit::Configuration * configc = &config;
-
-  ufo_aodext_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_aodext_tlad_setup_f90(keyOper_, params.toConfiguration(),
+                            odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAodExtTLAD created" << std::endl;
 }

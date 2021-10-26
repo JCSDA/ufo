@@ -22,10 +22,6 @@
 #include "ufo/profile/ObsProfileAverageParameters.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -86,8 +82,9 @@ class ObsProfileAverage : public ObsOperatorBase,
   private util::ObjectCounter<ObsProfileAverage> {
  public:
   static const std::string classname() {return "ufo::ObsProfileAverage";}
+  typedef ObsProfileAverageParameters Parameters_;
 
-  ObsProfileAverage(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsProfileAverage(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsProfileAverage() override;
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;

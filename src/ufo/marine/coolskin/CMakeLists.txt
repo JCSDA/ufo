@@ -6,6 +6,7 @@
 set ( coolskin_files
     ObsCoolSkin.h
     ObsCoolSkin.cc
+    ObsCoolSkinParameters.h
     ObsCoolSkinTLAD.h
     ObsCoolSkinTLAD.cc
     ObsCoolSkin.interface.F90

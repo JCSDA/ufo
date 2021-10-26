@@ -36,15 +36,10 @@ subroutine atmsfcinterp_setup_(self, f_conf)
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(fckit_configuration), intent(in)  :: f_conf
-  integer :: nvars, ivar, fact10tmp
+  integer :: nvars, ivar
 
-  ! check for if we need to look for wind reduction factor
-  self%use_fact10 = .false.
-  fact10tmp = 0
-  if (f_conf%has("use_fact10")) call f_conf%get_or_die("use_fact10",fact10tmp)
-  if (fact10tmp /= 0) then
-    self%use_fact10 = .true.
-  end if
+  ! if true use the wind reduction factor
+  call f_conf%get_or_die("use_fact10", self%use_fact10)
 
   nvars = self%obsvars%nvars()
   do ivar = 1, nvars

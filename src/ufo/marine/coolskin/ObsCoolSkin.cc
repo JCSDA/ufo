@@ -24,8 +24,8 @@ namespace ufo {
 static ObsOperatorMaker<ObsCoolSkin> makerCoolSkin_("CoolSkin");
 // -----------------------------------------------------------------------------
 
-ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vvin{"sea_surface_temperature",
                                       "net_downwelling_shortwave_radiation",
@@ -35,7 +35,7 @@ ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const eckit::Configuration 
                                       "friction_velocity_over_water"};
   varin_.reset(new oops::Variables(vvin));
 
-  ufo_CoolSkin_setup_f90(keyOper_, config);
+  ufo_CoolSkin_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsCoolSkin created." << std::endl;
 }
 

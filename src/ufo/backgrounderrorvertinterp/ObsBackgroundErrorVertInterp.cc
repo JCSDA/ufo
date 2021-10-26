@@ -44,7 +44,7 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   // variables are calculated.
   std::vector<int> operatorVarIndices;
   oops::Variables operatorVars;
-  getOperatorVariables(parameters.toConfiguration(), obsVars,
+  getOperatorVariables(parameters.variables.value(), obsVars,
                        operatorVars, operatorVarIndices);
   for (auto ivar : operatorVarIndices)
     requiredVars_.push_back(obsVars[ivar] + "_background_error");

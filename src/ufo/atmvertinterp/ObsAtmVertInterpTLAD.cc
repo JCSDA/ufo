@@ -26,13 +26,14 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerVertInterpTL_("VertInte
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                           const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperAtmVertInterp_(0), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+  getOperatorVariables(params.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices);
 
-  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, config,
+  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),
                                    operatorVars_,
                                    operatorVarIndices.data(), operatorVarIndices.size(),
                                    varin_);

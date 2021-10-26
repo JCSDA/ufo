@@ -19,13 +19,10 @@
 
 #include "ufo/Locations.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/timeoper/ObsTimeOperParameters.h"
 #include "ufo/timeoper/ObsTimeOperUtil.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -42,9 +39,11 @@ namespace ufo {
 class ObsTimeOper : public ObsOperatorBase,
                     private util::ObjectCounter<ObsTimeOper> {
  public:
+  typedef ObsTimeOperParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsTimeOper";}
 
-  ObsTimeOper(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsTimeOper(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsTimeOper();
 
 // Obs Operator

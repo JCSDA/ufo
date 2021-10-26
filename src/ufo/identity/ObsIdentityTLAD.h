@@ -15,13 +15,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/identity/ObsIdentityParameters.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -37,8 +34,9 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
   private util::ObjectCounter<ObsIdentityTLAD> {
  public:
   static const std::string classname() {return "ufo::ObsIdentityTLAD";}
+  typedef ObsIdentityParameters Parameters_;
 
-  ObsIdentityTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsIdentityTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsIdentityTLAD();
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;

@@ -20,12 +20,42 @@
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/OperatorUtils.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 namespace test {
+
+// -----------------------------------------------------------------------------
+
+/// \brief Options used to configure the testing of code in OperatorUtils.h
+class testOperatorUtilsParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(testOperatorUtilsParameters, Parameters)
+
+ public:
+  oops::RequiredParameter<std::vector<Variable>> expectedOperatorVariables{
+    "expected operator variables",
+    "List of expected operator variables from test.",
+    this};
+
+  oops::RequiredParameter<std::vector<int>> expectedOperatorVariableIndices{
+    "expected indices",
+    "List of expected indices from test.",
+    this};
+
+  oops::OptionalParameter<std::vector<Variable>> optionalVariables{
+    "variables",
+    "An optional list of variables.  If this is not used the variables in the ObsSpace "
+    "are used.",
+    this};
+};
+
+// -----------------------------------------------------------------------------
 
 /// Code shared by all tests
 class TestFixture : private boost::noncopyable {
@@ -55,15 +85,17 @@ class TestFixture : private boost::noncopyable {
   eckit::LocalConfiguration config_;
 };
 
-void testOperatorUtils(const eckit::LocalConfiguration &conf) {
+void testOperatorUtils(const testOperatorUtilsParameters &parameters) {
   oops::Variables expectedOperatorVariables =
-      ufo::Variables(conf.getSubConfigurations("expected operator variables")).toOopsVariables();
+    ufo::Variables(parameters.expectedOperatorVariables.value()).toOopsVariables();
+
   std::vector<int> expectedOperatorVariableIndices =
-      conf.getIntVector("expected indices");
+    parameters.expectedOperatorVariableIndices.value();
 
   oops::Variables operatorVariables;
   std::vector<int> operatorVariableIndices;
-  ufo::getOperatorVariables(conf, TestFixture::obsspace().obsvariables(),
+  ufo::getOperatorVariables(parameters.optionalVariables.value(),
+                            TestFixture::obsspace().obsvariables(),
                             operatorVariables, operatorVariableIndices);
 
   EXPECT_EQUAL(operatorVariables, expectedOperatorVariables);
@@ -71,11 +103,17 @@ void testOperatorUtils(const eckit::LocalConfiguration &conf) {
 }
 
 CASE("ufo/OperatorUtils/Without 'variables' option") {
-  testOperatorUtils(TestFixture::config().getSubConfiguration("without variables"));
+  testOperatorUtilsParameters parameters;
+  parameters.validateAndDeserialize(
+    TestFixture::config().getSubConfiguration("without variables"));
+  testOperatorUtils(parameters);
 }
 
 CASE("ufo/OperatorUtils/With 'variables' option") {
-  testOperatorUtils(TestFixture::config().getSubConfiguration("with variables"));
+  testOperatorUtilsParameters parameters;
+  parameters.validateAndDeserialize(
+    TestFixture::config().getSubConfiguration("with variables"));
+  testOperatorUtils(parameters);
 }
 
 class OperatorUtils : public oops::Test {

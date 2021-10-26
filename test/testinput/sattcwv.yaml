@@ -4,7 +4,6 @@ window end: 2020-12-30T09:00:00Z
 observations: 
 - obs operator: 
     name: SatTCWV
-    obs options:
   obs space: 
     name: SatTCWV
     obsdatain: 

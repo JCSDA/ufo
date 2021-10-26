@@ -28,8 +28,8 @@ static ObsOperatorMaker<ObsRadianceRTTOVCPP> makerRTTOVCPP_("RTTOVCPP");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
-                                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), odb_(odb), varin_()
+                                         const Parameters_ & parameters)
+  : ObsOperatorBase(odb), odb_(odb), varin_()
 {
   // Fields to be requested from getvalues and stored in geovals
   // need to be consistent with those defined in ufo_variables_mod.F90
@@ -58,8 +58,8 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   channels_ = observed.channels();  // set private data member channels_
 
   // get optical depth coef file name from yaml
-  std::string CoefPath = config.getString("CoefPath");
-  std::string SensorID = config.getString("SensorID");
+  const std::string CoefPath = parameters.CoefPath;
+  const std::string SensorID = parameters.SensorID;
   CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
   oops::Log::info() << CoefFileName << std::endl;
 

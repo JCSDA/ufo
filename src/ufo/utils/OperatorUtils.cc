@@ -9,18 +9,19 @@
 #include <string>
 
 #include "ioda/ObsSpace.h"
+#include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/OperatorUtils.h"
 
 namespace ufo {
 
-void getOperatorVariables(const eckit::Configuration &conf,
+void getOperatorVariables(const boost::optional<std::vector<ufo::Variable>> &listofvariables,
                           const oops::Variables &simulatedVariables,
                           oops::Variables &operatorVariables,
                           std::vector<int> &operatorVariableIndices) {
-  if (conf.has("variables")) {
-    operatorVariables =
-        ufo::Variables(conf.getSubConfigurations("variables")).toOopsVariables();
+  if (listofvariables.is_initialized() && (listofvariables.value().size() > 0)) {
+    Variables optionalvariables(listofvariables.get());
+    operatorVariables = optionalvariables.toOopsVariables();
 
     std::map<std::string, int> simulatedVariableIndices;
     for (int i = 0; i < simulatedVariables.size(); ++i)

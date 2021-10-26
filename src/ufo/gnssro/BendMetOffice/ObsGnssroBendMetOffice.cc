@@ -16,7 +16,6 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOffice.h"
-#include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOfficeParameters.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
@@ -26,20 +25,17 @@ static ObsOperatorMaker<ObsGnssroBendMetOffice> makerGnssroBendMetOffice_("Gnssr
 // -----------------------------------------------------------------------------
 
 ObsGnssroBendMetOffice::ObsGnssroBendMetOffice(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBendMetOffice_(0), odb_(odb), varin_()
+                                       const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperGnssroBendMetOffice_(0), odb_(odb), varin_()
 {
-  parameters_.validateAndDeserialize(config);
-  const ObsGnssroBendMetOfficeOptions & obsOptions = parameters_.obsOptions.value();
-
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
   ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_,
-                                     obsOptions.vertInterpOPS,
-                                     obsOptions.pseudoLevels,
-                                     obsOptions.minTempGrad);
+                                     parameters.vertInterpOPS,
+                                     parameters.pseudoLevels,
+                                     parameters.minTempGrad);
 
   oops::Log::trace() << "ObsGnssroBendMetOffice created." << std::endl;
 }

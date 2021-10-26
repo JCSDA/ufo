@@ -15,8 +15,11 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 /// Forward declarations
 namespace eckit {
@@ -32,9 +35,26 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+
+/// Configuration options recognized by the AodMetOffice operator.
+class ObsAodMetOfficeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsAodMetOfficeParameters, ObsOperatorParametersBase)
+
+ public:
+  oops::RequiredParameter<int> NDustBins{
+    "NDustBins", "Number of dust bins", this};
+  oops::RequiredParameter<std::vector<double>> AodKExt{
+    "AodKExt", "Extinction coefficient for each dust bin", this};
+};
+
+
 class ObsAodMetOffice : public ObsOperatorBase,
                    private util::ObjectCounter<ObsAodMetOffice> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsAodMetOfficeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsAodMetOffice";}
 
   // -----------------------------------------------------------------------------
@@ -56,7 +76,7 @@ class ObsAodMetOffice : public ObsOperatorBase,
   *
   */
   // -----------------------------------------------------------------------------
-  ObsAodMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAodMetOffice(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodMetOffice();
 
 // Obs Operator

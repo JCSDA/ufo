@@ -8,6 +8,7 @@ set (  groundgnssmetoffice_src_files
        ObsGroundgnssMetOffice.cc
        ObsGroundgnssMetOffice.interface.h
        ObsGroundgnssMetOffice.interface.F90
+       ObsGroundgnssMetOfficeParameters.h
        ObsGroundgnssMetOfficeTLAD.h
        ObsGroundgnssMetOfficeTLAD.cc
        ObsGroundgnssMetOfficeTLAD.interface.h

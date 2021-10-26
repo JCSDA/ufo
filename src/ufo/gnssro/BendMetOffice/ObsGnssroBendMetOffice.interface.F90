@@ -7,7 +7,6 @@
 
 module ufo_gnssro_bendmetoffice_mod_c
   
-  use fckit_configuration_module, only: fckit_configuration 
   use fckit_log_module,  only : fckit_log
   use iso_c_binding
   use ufo_gnssro_bendmetoffice_mod

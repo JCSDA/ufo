@@ -1,17 +1,16 @@
 /*
- * (C) Copyright 2017-2018 UCAR
- * 
+ * (C) Copyright 2017-2021 UCAR
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-
-#include "ufo/atmvertinterplay/ObsAtmVertInterpLay.h"
 
 #include <ostream>
 
 #include "ioda/ObsVector.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/atmvertinterplay/ObsAtmVertInterpLay.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
@@ -22,10 +21,11 @@ static ObsOperatorMaker<ObsAtmVertInterpLay> makerAtmVertInterpLay_("AtmVertInte
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpLay::ObsAtmVertInterpLay(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAtmVertInterpLay_(0), odb_(odb), varin_()
+                       const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperAtmVertInterpLay_(0), odb_(odb), varin_()
 {
-  ufo_atmvertinterplay_setup_f90(keyOperAtmVertInterpLay_, config, odb.obsvariables(), varin_);
+  ufo_atmvertinterplay_setup_f90(keyOperAtmVertInterpLay_, params.toConfiguration(),
+                                 odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpLay created." << std::endl;
 }

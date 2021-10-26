@@ -11,38 +11,36 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 namespace ufo {
 
 /// Configuration options recognized by the bending angle operator.
-class ObsGnssroBendMetOfficeOptions : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsGnssroBendMetOfficeOptions, Parameters)
+class ObsGnssroBendMetOfficeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsGnssroBendMetOfficeParameters, ObsOperatorParametersBase)
 
  public:
-  /// If true assume that pressure varies exponentially with height when
-  /// interpolating.  Otherwise assume that exner varies linearly with height,
-  /// and derive pressure from this.
-  oops::Parameter<bool> vertInterpOPS{"vert_interp_ops", true, this};
-  /// Whether to use pseudo-levels in the calculation.
-  oops::Parameter<bool> pseudoLevels{"pseudo_ops", true, this};
-  /// The minimum temperature gradient permitted before a profile is considered
-  /// isothermal.  Only used if pseudo-levels are also used.
-  oops::Parameter<float> minTempGrad{"min_temp_grad", 1.0e-6, this};
-};
+  oops::Parameter<bool> vertInterpOPS
+    {"vert_interp_ops",
+     "If true assume that pressure varies exponentially with height when "
+     "interpolating.  Otherwise assume that exner varies linearly with height, "
+     "and derive pressure from this.",
+     true,
+     this};
 
-/// Configuration options recognized by the bending angle operator.
-class ObsGnssroBendMetOfficeParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsGnssroBendMetOfficeParameters, Parameters)
+  oops::Parameter<bool> pseudoLevels
+    {"pseudo_ops",
+     "Whether to use pseudo-levels in the calculation.",
+     true,
+     this};
 
- public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
-  /// Obs Options - settings for the observation operator
-  oops::Parameter<ObsGnssroBendMetOfficeOptions> obsOptions{"obs options",
-    ObsGnssroBendMetOfficeOptions(), this};
+  oops::Parameter<float> minTempGrad
+    {"min_temp_grad",
+     "The minimum temperature gradient permitted before a profile is considered "
+     "isothermal. Used if pseudo-levels are used, otherwise ignored.",
+     1.0e-6,
+     this};
 };
 
 }  // namespace ufo

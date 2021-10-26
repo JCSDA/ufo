@@ -26,8 +26,8 @@ static ObsOperatorMaker<ObsChlEuzIntegr> makerChlEuzIntegr_("Chlorophyll Ocean C
 // -----------------------------------------------------------------------------
 
 ObsChlEuzIntegr::ObsChlEuzIntegr(const ioda::ObsSpace & odb,
-                                 const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), varin_()
+                                 const Parameters_ & params)
+  : ObsOperatorBase(odb), varin_()
 {
   const std::vector<std::string> vvin{"mass_concentration_of_chlorophyll_in_sea_water",
                                       "sea_water_cell_thickness"};

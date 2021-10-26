@@ -15,11 +15,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/groundgnss/ZenithTotalDelayMetOffice/ObsGroundgnssMetOffice.interface.h"
+#include "ufo/groundgnss/ZenithTotalDelayMetOffice/ObsGroundgnssMetOfficeParameters.h"
 #include "ufo/ObsOperatorBase.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -36,9 +33,13 @@ namespace ufo {
 class ObsGroundgnssMetOffice : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGroundgnssMetOffice> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsGroundgnssMetOfficeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGroundgnssMetOffice";}
 
-  ObsGroundgnssMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGroundgnssMetOffice(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGroundgnssMetOffice();
 
 // Obs Operator

@@ -24,12 +24,12 @@ namespace ufo {
 static ObsOperatorMaker<ObsADT> makerADT_("ADT");
 // -----------------------------------------------------------------------------
 
-ObsADT::ObsADT(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+ObsADT::ObsADT(const ioda::ObsSpace & odb, const ObsADTParameters & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vvin{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vvin));
-  ufo_adt_setup_f90(keyOper_, config);
+  ufo_adt_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsADT created." << std::endl;
 }
 

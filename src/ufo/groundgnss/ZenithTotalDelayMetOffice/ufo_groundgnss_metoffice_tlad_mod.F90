@@ -60,7 +60,10 @@ subroutine ufo_groundgnss_metoffice_setup(self, f_conf)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_metoffice_tlad), intent(inout) :: self
-type(fckit_configuration),            intent(in)    :: f_conf
+type(fckit_configuration), intent(in)               :: f_conf
+
+call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
+call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
 call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_groundgnss_metoffice_setup
@@ -164,6 +167,8 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
                                          pressure(1:self%nlevp),       &   ! Values of the pressure
                                          zStation(iobs),               &   ! Station height
                                          iobs,                         &   ! Ob number
+                                         self % vert_interp_ops,       &   ! Pressure varies exponentially with height?
+                                         self % pseudo_ops,            &   ! Use pseudo-levels in calculation?
                                          self % min_temp_grad,         &   ! Minimum temperature gradient allowed
                                          self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
 
@@ -382,14 +387,16 @@ end subroutine ufo_groundgnss_metoffice_tlad_delete
 !-------------------------------------------------------------------------
 ! Interface for calculating the K-matrix for calculating TL/AD
 !-------------------------------------------------------------------------
-SUBROUTINE groundgnss_jacobian_interface(nlevp, &
-                              nlevq,            &
-                              za,               &
-                              zb,               &
-                              q,                &
-                              prs,              &
-                              zStation,         &
-                              iobs,             &
+SUBROUTINE groundgnss_jacobian_interface(nlevp,     &
+                              nlevq,                &
+                              za,                   &
+                              zb,                   &
+                              q,                    &
+                              prs,                  &
+                              zStation,             &
+                              iobs,                 &
+                              vert_interp_ops,      &
+                              pseudo_ops,           &
                               gbgnss_min_temp_grad, &
                               K)
 
@@ -402,6 +409,8 @@ REAL(kind_real), INTENT(IN)    :: zb(:)                 ! The geometric height o
 REAL(kind_real), INTENT(IN)    :: q(1:nlevq)            ! The model values that are being perturbed
 REAL(kind_real), INTENT(IN)    :: prs(1:nlevP)          ! The model values that are being perturbed
 REAL(kind_real), INTENT(IN)    :: zStation              ! Station height
+LOGICAL, INTENT(IN)            :: vert_interp_ops       ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)            :: pseudo_ops            ! Use pseudo-levels in calculation?
 REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad  ! The minimum temperature gradient which is used
 INTEGER, INTENT(IN)            :: iobs                  ! Ob number
 
@@ -437,8 +446,8 @@ CALL ufo_calculate_refractivity(nlevp,                &
                                 zb,                   &
                                 prs,                  &
                                 q,                    &
-                                .TRUE.,               & ! vert_interp_ops
-                                .FALSE.,              & ! pseudo_ops
+                                vert_interp_ops,      &
+                                pseudo_ops,           &
                                 gbgnss_min_temp_grad, &
                                 refracerr,            &
                                 nRefLevels,           &
@@ -456,6 +465,8 @@ IF (.NOT. refracerr) THEN
                          q,                    &
                          zStation,             &
                          iobs,                 &
+                         vert_interp_ops,      &
+                         pseudo_ops,           &
                          gbgnss_min_temp_grad, &
                          refracerr,            &
                          refrac,               &
@@ -483,6 +494,8 @@ SUBROUTINE Groundgnss_GetK(nstate,              &
                           q,                    &
                           zStation,             &
                           iobs,                 &
+                          vert_interp_ops,      &
+                          pseudo_ops,           &
                           gbgnss_min_temp_grad, &
                           refracerr,            &
                           refrac,               &
@@ -502,6 +515,8 @@ REAL(kind_real), INTENT(IN)     :: P(:)                   ! The model pressure v
 REAL(kind_real), INTENT(IN)     :: q(:)                   ! The model humidity values
 REAL(kind_real), INTENT(IN)     :: zStation               ! Station height
 INTEGER, INTENT(IN)             :: iobs                   ! Ob number
+LOGICAL, INTENT(IN)             :: vert_interp_ops        ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)             :: pseudo_ops             ! Use pseudo-levels in calculation?
 REAL(kind_real), INTENT(IN)     :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
 LOGICAL, INTENT(INOUT)          :: refracerr              ! Whether we encountered an error in calculating the refractivity
 REAL(kind_real), INTENT(IN)     :: refrac(:)              ! Model refractivity on theta levels - returned from forward model
@@ -634,8 +649,8 @@ CALL ufo_refractivity_kmat (nlevP,                &
                             zb,                   &
                             P,                    &
                             q,                    &
-                            .False.,              & !pseudo_ops
-                            .TRUE.,               & ! vert_interp_ops
+                            pseudo_ops,           &
+                            vert_interp_ops,      &
                             gbgnss_min_temp_grad, &
                             dref_dP,              &
                             dref_dq,              &

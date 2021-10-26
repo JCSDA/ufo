@@ -1,11 +1,9 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-
-#include "ufo/atmvertinterplay/ObsAtmVertInterpLayTLAD.h"
 
 #include <ostream>
 
@@ -15,6 +13,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/atmvertinterplay/ObsAtmVertInterpLayTLAD.h"
 #include "ufo/GeoVaLs.h"
 
 namespace ufo {
@@ -24,10 +23,11 @@ static LinearObsOperatorMaker<ObsAtmVertInterpLayTLAD> makerVertInterpLayTL_("At
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpLayTLAD::ObsAtmVertInterpLayTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                           const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperAtmVertInterpLay_(0), varin_()
 {
-  ufo_atmvertinterplay_tlad_setup_f90(keyOperAtmVertInterpLay_, config, odb.obsvariables(), varin_);
+  ufo_atmvertinterplay_tlad_setup_f90(keyOperAtmVertInterpLay_, params.toConfiguration(),
+                                      odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpLayTLAD created" << std::endl;
 }

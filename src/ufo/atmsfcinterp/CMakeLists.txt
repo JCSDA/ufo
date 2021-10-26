@@ -6,6 +6,7 @@
 set ( atmsfcinterp_files
     ObsAtmSfcInterp.h
     ObsAtmSfcInterp.cc
+    ObsAtmSfcInterpParameters.h
     ObsAtmSfcInterp.interface.F90
     ObsAtmSfcInterp.interface.h
     ufo_atmsfcinterp_mod.F90

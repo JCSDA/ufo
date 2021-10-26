@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_ATMVERTINTERP_OBSATMVERTINTERP_H_
@@ -14,11 +14,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/atmvertinterp/ObsAtmVertInterp.interface.h"
+#include "ufo/atmvertinterp/ObsAtmVertInterpParameters.h"
 #include "ufo/ObsOperatorBase.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -37,7 +34,9 @@ class ObsAtmVertInterp : public ObsOperatorBase,
  public:
   static const std::string classname() {return "ufo::ObsAtmVertInterp";}
 
-  ObsAtmVertInterp(const ioda::ObsSpace &, const eckit::Configuration &);
+  typedef ObsAtmVertInterpParameters Parameters_;
+
+  ObsAtmVertInterp(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAtmVertInterp();
 
 // Obs Operator

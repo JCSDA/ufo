@@ -29,6 +29,7 @@ class Variables: public util::Printable {
   explicit Variables(const std::vector<eckit::LocalConfiguration> &);
   explicit Variables(const oops::Variables &);
   Variables(const ufo::Variables &, const std::string &);
+  explicit Variables(const std::vector<Variable> &);
   ~Variables();
 
   Variables & operator+=(const Variables &);

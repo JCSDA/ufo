@@ -27,16 +27,17 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 // -----------------------------------------------------------------------------
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
-                                 const eckit::Configuration & config)
+                                 const Parameters_ & parameters)
   : LinearObsOperatorBase(odb)
 {
   oops::Log::trace() << "ObsIdentityTLAD constructor starting" << std::endl;
 
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices_);
+  getOperatorVariables(parameters.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices_);
   requiredVars_ += operatorVars_;
 
   // Check whether level index 0 is closest to the Earth's surface.
-  levelIndexZeroAtSurface_  = config.getBool("level index 0 is closest to surface", true);
+  levelIndexZeroAtSurface_  = parameters.levelIndex0IsClosestToSurface.value();
 
   oops::Log::trace() << "ObsIdentityTLAD constructor finished" << std::endl;
 }
@@ -49,7 +50,7 @@ ObsIdentityTLAD::~ObsIdentityTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsIdentityTLAD::setTrajectory(const GeoVaLs &, ObsDiagnostics &) {
   // The trajectory is not needed because the observation operator is linear.
   oops::Log::trace() << "ObsIdentityTLAD: trajectory set" << std::endl;
 }

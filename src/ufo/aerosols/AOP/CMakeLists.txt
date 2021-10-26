@@ -10,10 +10,10 @@ set ( aodext_src_files
     ObsAodExtTLAD.cc
     ObsAodExt.interface.F90
     ObsAodExt.interface.h
+    ObsAodExtParameters.h
     ObsAodExtTLAD.interface.F90
     ObsAodExtTLAD.interface.h
     ufo_aodext_mod.F90
     ufo_aodext_tlad_mod.F90
 PARENT_SCOPE
 )
-

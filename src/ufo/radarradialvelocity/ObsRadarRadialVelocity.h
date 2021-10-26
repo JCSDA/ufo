@@ -13,6 +13,10 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/radarradialvelocity/ObsRadarRadialVelocity.interface.h"
@@ -32,13 +36,21 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+class ObsRadarRadialVelocityParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsRadarRadialVelocityParameters, ObsOperatorParametersBase )
+ public:
+  /// Vertical Coordinate
+  oops::Parameter<std::string> VertCoord{"VertCoord", "geometric_height", this};
+};
+
 /// RadarRadialVelocity observation operator class
 class ObsRadarRadialVelocity : public ObsOperatorBase,
                    private util::ObjectCounter<ObsRadarRadialVelocity> {
  public:
+  typedef ObsRadarRadialVelocityParameters Parameters_;
   static const std::string classname() {return "ufo::ObsRadarRadialVelocity";}
 
-  ObsRadarRadialVelocity(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsRadarRadialVelocity(const ioda::ObsSpace &, const ObsRadarRadialVelocityParameters &);
   virtual ~ObsRadarRadialVelocity();
 
 // Obs Operator

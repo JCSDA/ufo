@@ -31,21 +31,20 @@ static ObsOperatorMaker<ObsTimeOper> makerTimeOper_("TimeOperLinInterp");
 // -----------------------------------------------------------------------------
 
 ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
-                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config),
+                         const Parameters_ & parameters)
+  : ObsOperatorBase(odb),
     actualoperator_(ObsOperatorFactory::create(
                       odb,
                       oops::validateAndDeserialize<ObsOperatorParametersWrapper>(
-                        eckit::LocalConfiguration(config, "obs operator")).operatorParameters)),
-    odb_(odb), timeWeights_(timeWeightCreate(odb, config))
+                        parameters.obsOperator.value()).operatorParameters)),
+    odb_(odb), timeWeights_(timeWeightCreate(odb, parameters))
 {
   oops::Log::trace() << "ObsTimeOper creating" << std::endl;
 
   util::DateTime windowBegin(odb_.windowStart());
   util::DateTime windowEnd(odb_.windowEnd());
 
-  util::Duration windowSub;
-  windowSub = util::Duration(config.getString("windowSub"));
+  const util::Duration windowSub = parameters.windowSub.value();
   util::Duration window = windowEnd - windowBegin;
 
   if (window == windowSub) {

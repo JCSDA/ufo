@@ -15,8 +15,9 @@
 namespace ufo {
 
   ObsProfileAverageData::ObsProfileAverageData(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
+                                               const ObsProfileAverageParameters & parameters)
     : odb_(odb),
+      options_(parameters),
       GeoVaLsDirection_(GeoVaLsDirection::TopToBottom)
   {
     // Ensure observations have been grouped into profiles.
@@ -40,16 +41,14 @@ namespace ufo {
     if (!odb_.has("MetaData", "air_pressure"))
       throw eckit::UserError("air_pressure@MetaData not present", Here());
 
-    // Set up configuration options.
-    options_.validateAndDeserialize(config);
-
     // Add model air pressure to the list of variables used in this operator.
     // This GeoVaL is used to determine the slant path locations.
     modelVerticalCoord_ = options_.modelVerticalCoordinate;
     requiredVars_ += oops::Variables({modelVerticalCoord_});
 
     // Add any simulated variables to the list of variables used in this operator.
-    getOperatorVariables(config, odb_.obsvariables(), operatorVars_, operatorVarIndices_);
+    getOperatorVariables(parameters.variables.value(), odb_.obsvariables(),
+                         operatorVars_, operatorVarIndices_);
     requiredVars_ += operatorVars_;
 
     // If required, set up vectors for OPS comparison.

@@ -28,13 +28,11 @@ static LinearObsOperatorMaker<ObsGroundgnssMetOfficeTLAD>
 // -----------------------------------------------------------------------------
 
 ObsGroundgnssMetOfficeTLAD::ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
+                                               const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), keyOperGroundgnssMetOffice_(0), varin_()
 {
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-  const eckit::Configuration * configc = &obsOptions;
-
-  ufo_groundgnss_metoffice_tlad_setup_f90(keyOperGroundgnssMetOffice_, &configc);
+  ufo_groundgnss_metoffice_tlad_setup_f90(keyOperGroundgnssMetOffice_,
+                                          parameters.toConfiguration());
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
 

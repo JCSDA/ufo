@@ -70,6 +70,13 @@ Variables::Variables(const ufo::Variables & vars, const std::string & group)
 
 // -----------------------------------------------------------------------------
 
+Variables::Variables(const std::vector<ufo::Variable> & vars)
+  : vars_(vars) {
+  oops::Log::trace() << "ufo::Variables(std::vector<ufo::Variable>) start " << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
 Variables::~Variables() {
 }
 

@@ -10,6 +10,7 @@ set ( avgkernel_files
     ObsAvgKernel.interface.h
     ufo_avgkernel_mod.F90
     ufo_satcolumn_mod.F90
+    ObsAvgKernelParameters.h
     ObsAvgKernelTLAD.h
     ObsAvgKernelTLAD.cc
     ObsAvgKernelTLAD.interface.F90

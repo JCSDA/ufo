@@ -14,6 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/marine/seaicethickness/ObsSeaIceThickness.interface.h"
 #include "ufo/ObsOperatorBase.h"
@@ -33,13 +34,17 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+class ObsSeaIceThicknessParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsSeaIceThicknessParameters, ObsOperatorParametersBase )
+};
 /// Sea ice thickness observation operator class
 class ObsSeaIceThickness : public ObsOperatorBase,
                            private util::ObjectCounter<ObsSeaIceThickness> {
  public:
+  typedef ObsSeaIceThicknessParameters Parameters_;
   static const std::string classname() {return "ufo::ObsSeaIceThickness";}
 
-  ObsSeaIceThickness(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsSeaIceThickness(const ioda::ObsSpace &, const ObsSeaIceThicknessParameters &);
   virtual ~ObsSeaIceThickness();
 
 // Obs Operator

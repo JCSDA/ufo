@@ -60,19 +60,15 @@ if (ngvars == 0 .and. nvars > 0) then
   enddo
 endif
 
-if (conf%has("coefficients")) then
-  ncoefs = conf%get_size("coefficients")
-  call conf%get_or_die("coefficients", coefficients)
-  allocate(self%coefficients(ncoefs))
-  self%coefficients(1:ncoefs) = coefficients(1:ncoefs)
-endif
+ncoefs = conf%get_size("coefficients")
+call conf%get_or_die("coefficients", coefficients)
+allocate(self%coefficients(ncoefs))
+self%coefficients(1:ncoefs) = coefficients(1:ncoefs)
 
-if (conf%has("nlevels")) then
-   nlevs = conf%get_size("nlevels")
-   call conf%get_or_die("nlevels", nlevels)
-   allocate(self%nlevels(nlevs))
-   self%nlevels(1:nlevs) = nlevels(1:nlevs)
-endif
+nlevs = conf%get_size("nlevels")
+call conf%get_or_die("nlevels", nlevels)
+allocate(self%nlevels(nlevs))
+self%nlevels(1:nlevs) = nlevels(1:nlevs)
 
 ! Put pressure to the geovars (vars from the model) list
 call self%geovars%push_back(var_prsi)
@@ -94,7 +90,7 @@ real(c_double),     intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
-integer :: iobs, ivar 
+integer :: iobs, ivar
 integer :: nsig, nlevs
 real(kind_real), dimension(:), allocatable :: toppressure,botpressure,airpressure
 type(ufo_geovals) :: geovals
@@ -123,12 +119,12 @@ real(kind_real) :: layer_oz
   allocate(toppressure(nlocs))
   allocate(botpressure(nlocs))
   allocate(airpressure(nlocs))
-  call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)  
+  call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)
 
   do ivar = 1, nvars
     write(6,*) 'ufo_atmvertinterplay_simobs: self%nlevels = ', self%nlevels
-    nlevs = self%nlevels(ivar) 
-    call get_integral_limits(airpressure, botpressure, toppressure, modelpressures%vals(:,:), nlevs, nlocs, nsig) 
+    nlevs = self%nlevels(ivar)
+    call get_integral_limits(airpressure, botpressure, toppressure, modelpressures%vals(:,:), nlevs, nlocs, nsig)
 
     !Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)

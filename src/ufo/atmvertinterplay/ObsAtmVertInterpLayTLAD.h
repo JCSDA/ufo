@@ -13,14 +13,11 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/atmvertinterplay/ObsAtmVertInterpLayParameters.h"
 #include "ufo/atmvertinterplay/ObsAtmVertInterpLayTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -37,7 +34,9 @@ class ObsAtmVertInterpLayTLAD : public LinearObsOperatorBase,
  public:
   static const std::string classname() {return "ufo::ObsAtmVertInterpLayTLAD";}
 
-  ObsAtmVertInterpLayTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  typedef ObsAtmVertInterpLayParameters Parameters_;
+
+  ObsAtmVertInterpLayTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAtmVertInterpLayTLAD();
 
   // Obs Operators

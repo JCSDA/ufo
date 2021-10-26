@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 // Forward declarations
 namespace eckit {
@@ -33,14 +34,18 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Precipitable water observation operator
+class SatTCWVTLADParameters : public ObsOperatorParametersBase {
+        OOPS_CONCRETE_PARAMETERS(SatTCWVTLADParameters, ObsOperatorParametersBase)
+        // No additional option defined in YAML
+};
 class SatTCWVTLAD : public LinearObsOperatorBase,
                       private util::ObjectCounter<SatTCWVTLAD> {
  public:
   static const std::string classname() {return "ufo::SatTCWVTLAD";}
 
-  SatTCWVTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  typedef SatTCWVTLADParameters Parameters_;
+  SatTCWVTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~SatTCWVTLAD();
-
   // Obs Operators
   // -----------------------------------------------------------------------------
   /*! \brief Compute Jacobian matrix d(TCWV)/d(q).

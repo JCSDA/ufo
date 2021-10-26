@@ -10,7 +10,7 @@ use ufo_vars_mod
 ! ------------------------------------------------------------------------------
 
   type, public :: ufo_atmvertinterp
-     type(oops_variables), public :: geovars 
+     type(oops_variables), public :: geovars
      type(oops_variables), public :: obsvars ! Variables to be simulated
      integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                       ! simulated variables in the ObsSpace
@@ -45,30 +45,25 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   enddo
   !> grab what vertical coordinate/variable to use from the config
   self%use_ln = .false.
-  if( grid_conf%has("vertical coordinate") ) then
-      call grid_conf%get_or_die("vertical coordinate",coord_name)
-      self%v_coord = coord_name
-      if( (trim(self%v_coord) .eq. var_prs) .or. &
-          (trim(self%v_coord) .eq. var_prsi) ) then 
-        self%use_ln = .true.
-      endif
-  else  ! default
-      self%v_coord = var_prs
-      self%use_ln  = .true.
+  call grid_conf%get_or_die("vertical coordinate",coord_name)
+  self%v_coord = coord_name
+  if( (trim(self%v_coord) .eq. var_prs) .or. &
+    (trim(self%v_coord) .eq. var_prsi) ) then
+      self%use_ln = .true.
   endif
 
   !> Determine observation vertical coordinate.
   !  Use the model vertical coordinate unless the option
   !  'observation vertical coordinate' is specified.
   if ( grid_conf%has("observation vertical coordinate") ) then
-     call grid_conf%get_or_die("observation vertical coordinate",coord_name)
-     self%o_v_coord = coord_name
+    call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+    self%o_v_coord = coord_name
   else
-     self%o_v_coord = self%v_coord
+    self%o_v_coord = self%v_coord
   endif
 
   call self%geovars%push_back(self%v_coord)
- 
+
 end subroutine atmvertinterp_setup_
 
 ! ------------------------------------------------------------------------------

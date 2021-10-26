@@ -16,6 +16,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
+#include "ufo/timeoper/ObsTimeOperParameters.h"
 #include "ufo/timeoper/ObsTimeOperUtil.h"
 
 namespace ufo {
@@ -23,10 +24,9 @@ namespace ufo {
 
 //--------------------------------------------------------------------------------------------------
 std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
-                                    const eckit::Configuration & config) {
+                                    const ObsTimeOperParameters & parameters) {
   util::DateTime windowBegin(odb_.windowStart());
-  util::Duration windowSub;
-  windowSub = util::Duration(config.getString("windowSub"));
+  const util::Duration windowSub = parameters.windowSub.value();
   int64_t windowSubSec = windowSub.toSeconds();
 
   std::size_t nlocs = odb_.nlocs();

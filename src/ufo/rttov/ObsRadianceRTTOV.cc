@@ -29,19 +29,15 @@ static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
-                                   const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0),
-    odb_(odb), varin_(), parameters_()
+                                   const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
-  // deserialize configuration into parameters
-  parameters_.validateAndDeserialize(config);
-
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
-  ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, parameters_.toConfiguration(),
+  ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, parameters.toConfiguration(),
                              channels_list.size(), channels_list[0], varin_);
 
   oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_list << std::endl;

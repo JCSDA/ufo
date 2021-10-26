@@ -7,7 +7,7 @@
 
 module ufo_groundgnss_metoffice_mod_c
   
-  use fckit_configuration_module, only: fckit_configuration 
+  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
   use ufo_groundgnss_metoffice_mod
 
@@ -32,11 +32,11 @@ contains
   
 subroutine ufo_groundgnss_metoffice_setup_c(c_key_self, c_conf) bind(c,name='ufo_groundgnss_metoffice_setup_f90')
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_conf
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), value, intent(in) :: c_conf
     
 type(ufo_groundgnss_MetOffice), pointer :: self
-type(fckit_configuration) :: f_conf
+type(fckit_configuration)               :: f_conf
 
 call ufo_groundgnss_MetOffice_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)

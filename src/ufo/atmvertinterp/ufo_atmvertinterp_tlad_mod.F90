@@ -56,15 +56,10 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   !> grab what vertical coordinate/variable to use from the config
   self%use_ln = .false.
 
-  if( grid_conf%has("vertical coordinate") ) then
-    call grid_conf%get_or_die("vertical coordinate",coord_name)
-    self%v_coord = coord_name
-    if( (self%v_coord .eq. var_prs) .or. (self%v_coord .eq. var_prsi) ) then
-      self%use_ln = .true.
-    endif
-  else  ! default
-    self%v_coord = var_prs
-    self%use_ln  = .true.
+  call grid_conf%get_or_die("vertical coordinate",coord_name)
+  self%v_coord = coord_name
+  if( (self%v_coord .eq. var_prs) .or. (self%v_coord .eq. var_prsi) ) then
+    self%use_ln = .true.
   endif
 
   !> Determine observation vertical coordinate.

@@ -9,6 +9,7 @@ set ( atmvertinterplay_files
     ObsAtmVertInterpLay.interface.F90
     ObsAtmVertInterpLay.interface.h
     ufo_atmvertinterplay_mod.F90
+    ObsAtmVertInterpLayParameters.h
     ObsAtmVertInterpLayTLAD.h
     ObsAtmVertInterpLayTLAD.cc
     ObsAtmVertInterpLayTLAD.interface.F90

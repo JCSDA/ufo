@@ -15,12 +15,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOffice.interface.h"
+#include "ufo/gnssro/BendMetOffice/ObsGnssroBendMetOfficeParameters.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ObsGnssroBendMetOfficeParameters.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -37,9 +33,13 @@ namespace ufo {
 class ObsGnssroBendMetOffice : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGnssroBendMetOffice> {
  public:
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsGnssroBendMetOfficeParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroBendMetOffice";}
 
-  ObsGnssroBendMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroBendMetOffice(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroBendMetOffice();
 
 // Obs Operator
@@ -56,7 +56,6 @@ class ObsGnssroBendMetOffice : public ObsOperatorBase,
   F90hop keyOperGnssroBendMetOffice_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  ObsGnssroBendMetOfficeParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

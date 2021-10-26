@@ -24,12 +24,12 @@ static ObsOperatorMaker<ObsScatwindNeutralMetOffice>
 // -----------------------------------------------------------------------------
 
 ObsScatwindNeutralMetOffice::ObsScatwindNeutralMetOffice(const ioda::ObsSpace & odb,
-                                                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperScatwindNeutralMetOffice_(0),
+                                                         const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperScatwindNeutralMetOffice_(0),
     odb_(odb), varin_()
 {
   ufo_scatwind_neutralmetoffice_setup_f90(keyOperScatwindNeutralMetOffice_,
-                                          config, odb.obsvariables(), varin_);
+                                          odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsScatwindNeutralMetOffice created." << std::endl;
 }

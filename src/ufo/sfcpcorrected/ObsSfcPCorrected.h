@@ -13,15 +13,11 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/sfcpcorrected/ObsSfcPCorrected.interface.h"
+#include "ufo/sfcpcorrected/ObsSfcPCorrectedParameters.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -36,9 +32,11 @@ namespace ufo {
 class ObsSfcPCorrected : public ObsOperatorBase,
                    private util::ObjectCounter<ObsSfcPCorrected> {
  public:
+  typedef ObsSfcPCorrectedParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsSfcPCorrected";}
 
-  ObsSfcPCorrected(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsSfcPCorrected(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsSfcPCorrected();
 
 // Obs Operator

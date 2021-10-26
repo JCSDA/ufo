@@ -25,16 +25,17 @@ static ObsOperatorMaker<ObsIdentity> obsIdentityMaker_("Identity");
 // -----------------------------------------------------------------------------
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
-                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config)
+                         const Parameters_ & parameters)
+  : ObsOperatorBase(odb)
 {
   oops::Log::trace() << "ObsIdentity constructor starting" << std::endl;
 
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices_);
+  getOperatorVariables(parameters.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices_);
   requiredVars_ += operatorVars_;
 
   // Check whether level index 0 is closest to the Earth's surface.
-  levelIndexZeroAtSurface_  = config.getBool("level index 0 is closest to surface", true);
+  levelIndexZeroAtSurface_  = parameters.levelIndex0IsClosestToSurface.value();
 
   oops::Log::trace() << "ObsIdentity constructor finished" << std::endl;
 }
@@ -48,7 +49,7 @@ ObsIdentity::~ObsIdentity() {
 // -----------------------------------------------------------------------------
 
 void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics & ydiags) const {
+                              ObsDiagnostics &) const {
   oops::Log::trace() << "ObsIdentity: simulateObs starting" << std::endl;
 
   std::vector<double> vec(ovec.nlocs());

@@ -46,7 +46,10 @@ subroutine ufo_groundgnss_metoffice_setup(self, f_conf)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_MetOffice), intent(inout) :: self
-type(fckit_configuration), intent(in)   :: f_conf
+type(fckit_configuration), intent(in)          :: f_conf
+
+call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
+call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
 call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
 
 end subroutine ufo_groundgnss_metoffice_setup
@@ -145,15 +148,17 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
       zb = theta_heights % vals(:,iobs)
     END IF
 
-    call Ops_Groundgnss_ForwardModel(nlevp,                &
-                                     nlevq,                &
-                                     za(1:nlevp),          &
-                                     zb(1:nlevq),          &
-                                     pressure(1:nlevp),    &
-                                     humidity(1:nlevq),    &
-                                     self % min_temp_grad, &
-                                     1,                    &
-                                     zStation(iobs),       &
+    call Ops_Groundgnss_ForwardModel(nlevp,                  &
+                                     nlevq,                  &
+                                     za(1:nlevp),            &
+                                     zb(1:nlevq),            &
+                                     pressure(1:nlevp  ),    &
+                                     humidity(1:nlevq),      &
+                                     self % vert_interp_ops, &
+                                     self % pseudo_ops,      &
+                                     self % min_temp_grad,   &
+                                     1,                      &
+                                     zStation(iobs),         &
                                      hofx(iobs))
 
     write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
@@ -181,6 +186,8 @@ SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                &
                                        zb,                   &
                                        pressure,             &
                                        humidity,             &
+                                       vert_interp_ops,      &
+                                       pseudo_ops,           &
                                        gbgnss_min_temp_grad, &
                                        nobs,                 &
                                        zStation,             &
@@ -192,6 +199,8 @@ REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
 REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
 REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
 REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
+LOGICAL, INTENT(IN)            :: vert_interp_ops        ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)            :: pseudo_ops             ! Use pseudo-levels in calculation?
 REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations
 
@@ -230,18 +239,18 @@ IF (nlevp /= nlevq + 1) THEN
     call abor1_ftn(err_msg)
 END IF
 
-CALL ufo_calculate_refractivity(nlevp,                &
-                                nlevq,                &
-                                za,                   &
-                                zb,                   &
-                                pressure,             &
-                                humidity,             &
-                                .TRUE.,               & ! vert_interp_ops
-                                .FALSE.,              & ! pseudo_ops
-                                gbgnss_min_temp_grad, &
-                                refracerr,            &
-                                nRefLevels,           &
-                                refrac,               &
+CALL ufo_calculate_refractivity(nlevp,                  &
+                                nlevq,                  &
+                                za,                     &
+                                zb,                     &
+                                pressure,               &
+                                humidity,               &
+                                vert_interp_ops,        &
+                                pseudo_ops,             &
+                                gbgnss_min_temp_grad,   &
+                                refracerr,              &
+                                nRefLevels,             &
+                                refrac,                 &
                                 model_heights)
 
 CALL Ops_groundgnss_TopCorrection(pressure,    &

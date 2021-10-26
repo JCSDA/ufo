@@ -4,7 +4,7 @@ window end: 2018-04-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
-    VertCoord: air_pressure
+    vertical coordinate: air_pressure
   obs space:
     name: Radiosonde
     distribution: Halo

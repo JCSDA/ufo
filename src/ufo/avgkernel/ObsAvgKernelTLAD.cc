@@ -24,10 +24,11 @@ static LinearObsOperatorMaker<ObsAvgKernelTLAD> makerAvgKernelTL_("AvgKernel");
 // -----------------------------------------------------------------------------
 
 ObsAvgKernelTLAD::ObsAvgKernelTLAD(const ioda::ObsSpace & odb,
-                               const eckit::Configuration & config)
+                               const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), keyOperAvgKernel_(0), varin_()
 {
-  ufo_avgkernel_tlad_setup_f90(keyOperAvgKernel_, config, odb.obsvariables(), varin_);
+  ufo_avgkernel_tlad_setup_f90(keyOperAvgKernel_, parameters.toConfiguration(),
+                               odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAvgKernelTLAD created" << std::endl;
 }

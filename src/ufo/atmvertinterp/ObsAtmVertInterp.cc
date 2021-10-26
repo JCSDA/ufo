@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/atmvertinterp/ObsAtmVertInterp.h"
@@ -26,14 +26,15 @@ static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
-                                   const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAtmVertInterp_(0),
+                                   const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperAtmVertInterp_(0),
     odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+  getOperatorVariables(params.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices);
 
-  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, config,
+  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),
                               operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
                               varin_);
 

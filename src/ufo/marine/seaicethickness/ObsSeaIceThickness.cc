@@ -25,8 +25,8 @@ static ObsOperatorMaker<ObsSeaIceThickness> makerSeaIceThickness_("SeaIceThickne
 // -----------------------------------------------------------------------------
 
 ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                                       const ObsSeaIceThicknessParameters & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vvin{"sea_ice_category_area_fraction",
                                 "sea_ice_category_thickness"};
@@ -34,7 +34,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
     vvin.push_back("sea_ice_category_snow_thickness");
   }
   varin_.reset(new oops::Variables(vvin));
-  ufo_seaicethickness_setup_f90(keyOper_, config, odb.obsvariables());
+  ufo_seaicethickness_setup_f90(keyOper_, params.toConfiguration(), odb.obsvariables());
   oops::Log::trace() << "ObsSeaIceThickness created." << std::endl;
 }
 

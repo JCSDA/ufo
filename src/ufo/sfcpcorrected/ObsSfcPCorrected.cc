@@ -26,13 +26,14 @@ static ObsOperatorMaker<ObsSfcPCorrected> makerSfcPCorrected_("SfcPCorrected");
 // -----------------------------------------------------------------------------
 
 ObsSfcPCorrected::ObsSfcPCorrected(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                                   const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+  getOperatorVariables(params.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices);
 
-  ufo_sfcpcorrected_setup_f90(keyOper_, config,
+  ufo_sfcpcorrected_setup_f90(keyOper_, params.toConfiguration(),
                               operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
                               varin_);
   oops::Log::trace() << "ObsSfcPCorrected created." << std::endl;

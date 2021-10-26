@@ -7,7 +7,7 @@
 
 module ufo_aodext_mod
 
- use iso_c_binding 
+ use iso_c_binding
  use kinds
  use oops_variables_mod
  use fckit_log_module, only : fckit_log
@@ -40,20 +40,20 @@ contains
 !----------------
 integer function b_channel( bracket, nprofiles, bkg_wavelengths, obs_wavelength ) ! given a wavelength, return the index of bracket wavelengths
 implicit none
-integer, intent(in)                   :: bracket         ! bracket index (1 or 2) 
+integer, intent(in)                   :: bracket         ! bracket index (1 or 2)
 integer, intent(in)                   :: nprofiles       ! number of bkg profiles
 real(kind_real), dimension(nprofiles) :: bkg_wavelengths ! array of bkg wavelengths
 real(kind_real)                       :: obs_wavelength  ! observed wavelength
 
 character(len=maxvarlen) :: err_msg
 integer :: j
-   j = 1 
-   do while(j < nprofiles) 
+   j = 1
+   do while(j < nprofiles)
        if(obs_wavelength >= bkg_wavelengths(j) .and.&
           obs_wavelength < bkg_wavelengths(j+1)) then
           if (bracket == 1) then
               b_channel = j
-          else if (bracket == 2) then  
+          else if (bracket == 2) then
               b_channel = j + 1
           else
               write(err_msg,*) "ufo_aodext_mod: function b_channel: bracket index should be 1 (lower) or 2 (upper)"
@@ -64,7 +64,7 @@ integer :: j
             obs_wavelength <= bkg_wavelengths(j+1)) then
           if (bracket == 1) then
               b_channel = j
-          else if (bracket == 2) then  
+          else if (bracket == 2) then
               b_channel = j + 1
           else
               write(err_msg,*) "ufo_aodext_mod: function b_channel: bracket index should be 1 (lower) or 2 (upper)"
@@ -75,7 +75,7 @@ integer :: j
        j = j + 1
    enddo
    return
-end function b_channel 
+end function b_channel
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_aodext_setup(self, f_conf)
@@ -89,14 +89,9 @@ integer n
 character(len=maxvarlen) :: err_msg
 
   ! Fill in geovars: input variables requested from the model
-  ! Need slots for airdens and delp 
+  ! Need slots for airdens and delp
 
    call f_conf%get_or_die("nprofiles", self%nprofiles)
-   
-   if (self%nprofiles < 2 .or. self%nprofiles > 3) then
-      write(err_msg,*) 'ufo_aodext_setup: number of extinction profiles must be 2 or 3'
-      call abor1_ftn(err_msg)
-   endif
 
    do n = 1, self%nprofiles
       call self%geovars%push_back(extdefault(n))
@@ -115,7 +110,7 @@ character(len=maxvarlen) :: err_msg
       endif
       n = n + 1
    enddo
-       
+
 end subroutine ufo_aodext_setup
 
 ! ------------------------------------------------------------------------------
@@ -124,7 +119,7 @@ implicit none
 type(ufo_aodext), intent(inout) :: self
 
  if (allocated(self%wavelength)) deallocate(self%wavelength)
- 
+
 end subroutine destructor
 ! ------------------------------------------------------------------------------
 subroutine ufo_aodext_simobs(self, geovals, obss, nvars, nlocs, hofx)
@@ -169,11 +164,11 @@ integer :: km, nobs, nch, ic, i, j, k
  call ufo_geovals_get_var(geovals, var_delp, delp_profile)
  nlayers = delp_profile%nval   ! number of model layers
 
- allocate(delp(nlayers,nlocs)) 
+ allocate(delp(nlayers,nlocs))
  delp = delp_profile%vals
 
  call ufo_geovals_get_var(geovals, var_airdens, airdens_profile)
- allocate(airdens(nlayers,nlocs)) 
+ allocate(airdens(nlayers,nlocs))
  airdens = airdens_profile%vals
 
  ! Get extinction profiles from geovals
@@ -183,37 +178,37 @@ integer :: km, nobs, nch, ic, i, j, k
     geovar = self%geovars%variable(nch)
     call ufo_geovals_get_var(geovals, geovar, ext_profile)
     ext(:,:,nch) = ext_profile%vals
- enddo    
+ enddo
 
  ! Get some metadata from obsspace, observed AOD wavelengths
  ! -----------------------
- allocate(obss_wavelength(nvars))  
+ allocate(obss_wavelength(nvars))
  call obsspace_get_db(obss,"VarMetaData", "obs_wavelength", obss_wavelength)
 
  ! Check if observed wavelength AOD is within the range of bkg wavelength to apply angstrom law
- ! else hofx set to missing value 
+ ! else hofx set to missing value
  do ic = 1, nvars
     if(obss_wavelength(ic) < self%wavelength(1) .or. obss_wavelength(ic) > self%wavelength(self%nprofiles)) then
        write(message,*) 'ufo_aodext_simobs: observed wavelength outside of bkg wavelengths range', obss_wavelength(ic)
-       call fckit_log%info(message) 
+       call fckit_log%info(message)
     endif
- enddo 
+ enddo
  ! Observation operator
  ! ------------------
 
  ! Calculation of AOD from extinction profiles
  ! ------------------
- allocate(aod_bkg(nlocs, self%nprofiles)) 
+ allocate(aod_bkg(nlocs, self%nprofiles))
  aod_bkg = zero
  do nch = 1, self%nprofiles
     do nobs = 1, nlocs
        do k =1, nlayers
         aod_bkg(nobs,nch) = aod_bkg(nobs, nch) + (ext(k,nobs,nch) * delp(k,nobs)/(airdens(k,nobs))/(grav*1000.0_kind_real))
-       enddo 
-    enddo 
- enddo   
- 
- ! hofx: angstrom law 
+       enddo
+    enddo
+ enddo
+
+ ! hofx: angstrom law
  ! ------------------
  missing =missing_value(missing)
  hofx = zero
@@ -230,7 +225,7 @@ integer :: km, nobs, nch, ic, i, j, k
        endif
     enddo
  enddo
- deallocate(ext, airdens, delp, aod_bkg, obss_wavelength)  
+ deallocate(ext, airdens, delp, aod_bkg, obss_wavelength)
 
 end subroutine ufo_aodext_simobs
 ! ------------------------------------------------------------------------------

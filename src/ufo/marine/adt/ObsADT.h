@@ -14,6 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/marine/adt/ObsADT.interface.h"
 #include "ufo/ObsOperatorBase.h"
@@ -33,13 +34,19 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+class ObsADTParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsADTParameters, ObsOperatorParametersBase )
+  // NO extra parameters needed
+};
+
 /// ADT observation operator class
 class ObsADT : public ObsOperatorBase,
                    private util::ObjectCounter<ObsADT> {
  public:
+  typedef ObsADTParameters Parameters_;
   static const std::string classname() {return "ufo::ObsADT";}
 
-  ObsADT(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsADT(const ioda::ObsSpace &, const ObsADTParameters &);
   virtual ~ObsADT();
 
 // Obs Operator

@@ -28,8 +28,8 @@ static ObsOperatorMaker<SatTCWV> makerSatTCWV_("SatTCWV");
 // -----------------------------------------------------------------------------
 
 SatTCWV::SatTCWV(const ioda::ObsSpace & odb,
-                 const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), varin_()
+                 const Parameters_ & params)
+        : ObsOperatorBase(odb), varin_()
 {
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "surface_pressure"};

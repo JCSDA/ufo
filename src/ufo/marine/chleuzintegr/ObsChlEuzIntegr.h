@@ -16,6 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsOperatorParametersBase.h"
 
 /// Forward declarations
 namespace eckit {
@@ -37,12 +38,18 @@ namespace ufo {
 // satellite sensors can see through
 // euz is estimated based on surface chlorophyll concentration
 
+class ObsChlEuzIntegrParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsChlEuzIntegrParameters, ObsOperatorParametersBase)
+  // No additional options in YAML
+};
+
 class ObsChlEuzIntegr : public ObsOperatorBase,
                    private util::ObjectCounter<ObsChlEuzIntegr> {
  public:
   static const std::string classname() {return "ufo::ObsChlEuzIntegr";}
+  typedef ObsChlEuzIntegrParameters Parameters_;
 
-  ObsChlEuzIntegr(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsChlEuzIntegr(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsChlEuzIntegr();
 
 // Obs Operator

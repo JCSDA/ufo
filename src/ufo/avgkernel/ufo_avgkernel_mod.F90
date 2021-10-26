@@ -42,22 +42,19 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   implicit none
   class(ufo_avgkernel), intent(inout)     :: self
   type(fckit_configuration), intent(in) :: f_conf
-  type(fckit_configuration) :: f_confOpts
   integer :: nlevs_yaml
   integer :: ivar, nvars
   character(len=max_string) :: err_msg
   character(len=:), allocatable :: str_array(:)
 
   ! get configuration for the averaging kernel operator
-  call f_conf%get_or_die("obs options",f_confOpts)
-
-  call f_confOpts%get_or_die("nlayers_kernel", self%nlayers_kernel)
-  nlevs_yaml = f_confOpts%get_size("ak")
+  call f_conf%get_or_die("nlayers_kernel", self%nlayers_kernel)
+  nlevs_yaml = f_conf%get_size("ak")
   if (nlevs_yaml /= self%nlayers_kernel+1) then
     write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of ak array"
     call abor1_ftn(err_msg)
   end if
-  nlevs_yaml = f_confOpts%get_size("bk")
+  nlevs_yaml = f_conf%get_size("bk")
   if (nlevs_yaml /= self%nlayers_kernel+1) then
     write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of bk array"
     call abor1_ftn(err_msg)
@@ -66,22 +63,20 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   ! allocate and read ak/bk for the averaging kernel
   allocate(self%ak_kernel(nlevs_yaml))
   allocate(self%bk_kernel(nlevs_yaml))
-  call f_confOpts%get_or_die("ak", self%ak_kernel)
-  call f_confOpts%get_or_die("bk", self%bk_kernel)
+  call f_conf%get_or_die("ak", self%ak_kernel)
+  call f_conf%get_or_die("bk", self%bk_kernel)
 
   ! get variable name from IODA for observation averaging kernel
-  if (.not. f_confOpts%get("AvgKernelVar", self%obskernelvar)) then
-    self%obskernelvar = "averaging_kernel" ! default option
-  end if
+  call f_conf%get_or_die("AvgKernelVar", self%obskernelvar)
 
   ! get name of geoval/tracer to use from the model
   nvars = self%obsvars%nvars()
-  call f_confOpts%get_or_die("tracer variables", str_array)
+  call f_conf%get_or_die("tracer variables", str_array)
   self%tracervars = str_array
 
   ! determine if this is a total column or troposphere calculation
-  if (.not. f_confOpts%get("tropospheric column", self%troposphere)) self%troposphere = .false.
-  if (.not. f_confOpts%get("total column", self%totalcolumn)) self%totalcolumn = .false.
+  call f_conf%get_or_die("tropospheric column", self%troposphere)
+  call f_conf%get_or_die("total column", self%totalcolumn)
 
   ! both of these cannot be true
   if (self%troposphere .and. self%totalcolumn) then
@@ -90,8 +85,8 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   end if
 
   ! do we need a conversion factor, say between ppmv and unity?
-  if (.not. f_confOpts%get("model units coeff", self%convert_factor_model)) self%convert_factor_model = one
-  if (.not. f_confOpts%get("hofx units coeff", self%convert_factor_hofx)) self%convert_factor_hofx = one
+  call f_conf%get_or_die("model units coeff", self%convert_factor_model)
+  call f_conf%get_or_die("hofx units coeff", self%convert_factor_hofx)
 
   ! add variables to geovars that are needed
   ! specified tracers

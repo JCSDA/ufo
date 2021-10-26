@@ -15,6 +15,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/ObsOperatorParametersBase.h"
+
 #include "ufo/marine/insitutemperature/ObsInsituTemperature.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -33,13 +35,20 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
+
+class ObsInsituTemperatureParameters : public ObsOperatorParametersBase  {
+  OOPS_CONCRETE_PARAMETERS(ObsInsituTemperatureParameters, ObsOperatorParametersBase )
+  // NO extra parameters needed
+};
+
 /// InsituTemperature observation operator class
 class ObsInsituTemperature : public ObsOperatorBase,
                    private util::ObjectCounter<ObsInsituTemperature> {
  public:
+  typedef ObsInsituTemperatureParameters Parameters_;
   static const std::string classname() {return "ufo::ObsInsituTemperature";}
 
-  ObsInsituTemperature(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsInsituTemperature(const ioda::ObsSpace &, const ObsInsituTemperatureParameters &);
   virtual ~ObsInsituTemperature();
 
 // Obs Operator

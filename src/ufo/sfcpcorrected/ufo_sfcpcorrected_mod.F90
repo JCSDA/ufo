@@ -50,26 +50,20 @@ character(max_string)             :: debug_msg
 !> height of vertical levels and/or the surface height.  Example: MPAS is height
 !> but FV-3 uses geopotential_height.
 
-if (f_conf%has("geovar_geomz")) then
-   call f_conf%get_or_die("geovar_geomz", str_var_geomz)
-   write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: overriding default var_geomz with ", trim(str_var_geomz)
-   call fckit_log%debug(debug_msg)
-   geovars_list(2) = trim(str_var_geomz)
-end if
-if (f_conf%has("geovar_sfc_geomz")) then
-   call f_conf%get_or_die("geovar_sfc_geomz", str_var_sfc_geomz)
-   write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: overriding default var_sfc_geomz with ", trim(str_var_sfc_geomz)
-   call fckit_log%debug(debug_msg)
-   geovars_list(3) = trim(str_var_sfc_geomz)
-end if
+call f_conf%get_or_die("geovar_geomz", str_var_geomz)
+write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: var_geomz is", trim(str_var_geomz)
+call fckit_log%debug(debug_msg)
+geovars_list(2) = trim(str_var_geomz)
+
+call f_conf%get_or_die("geovar_sfc_geomz", str_var_sfc_geomz)
+write(debug_msg,*) "ufo_sfcpcorrected_mod.F90: var_sfc_geomz is ", trim(str_var_sfc_geomz)
+call fckit_log%debug(debug_msg)
+geovars_list(3) = trim(str_var_sfc_geomz)
 
 call self%geovars%push_back(geovars_list)
 
-self%da_psfc_scheme = "UKMO"
-if (f_conf%has("da_psfc_scheme")) then
-   call f_conf%get_or_die("da_psfc_scheme",str_psfc_scheme)
-   self%da_psfc_scheme = str_psfc_scheme
-end if
+call f_conf%get_or_die("da_psfc_scheme",str_psfc_scheme)
+self%da_psfc_scheme = str_psfc_scheme
 
 end subroutine ufo_sfcpcorrected_setup
 

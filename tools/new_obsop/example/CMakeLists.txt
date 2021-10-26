@@ -10,6 +10,7 @@ set ( example_files
     ObsExampleTLAD.cc
     ObsExample.interface.F90
     ObsExample.interface.h
+    ObsExampleParameters.h
     ObsExampleTLAD.interface.F90
     ObsExampleTLAD.interface.h
     ufo_example_mod.F90

@@ -25,14 +25,15 @@ namespace ufo {
 static ObsOperatorMaker<ObsAtmSfcInterp> makerGSISfcModel_("GSISfcModel");
 // -----------------------------------------------------------------------------
 
-ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
+ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperAtmSfcInterp_(0),
     odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(config, odb.obsvariables(), operatorVars_, operatorVarIndices);
+  getOperatorVariables(parameters.variables.value(), odb.obsvariables(),
+                       operatorVars_, operatorVarIndices);
 
-  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, config,
+  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, parameters.toConfiguration(),
                              operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
                              varin_);
 

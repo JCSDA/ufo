@@ -24,7 +24,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Scatwind neutral wind observation operator - (Met Office)
 // -----------------------------------------------------------------------------
-  void ufo_scatwind_neutralmetoffice_setup_f90(F90hop &, const eckit::Configuration &,
+  void ufo_scatwind_neutralmetoffice_setup_f90(F90hop &,
                                                const oops::Variables &, oops::Variables &);
   void ufo_scatwind_neutralmetoffice_delete_f90(F90hop &);
   void ufo_scatwind_neutralmetoffice_simobs_f90(const F90hop &, const F90goms &,
