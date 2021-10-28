@@ -70,6 +70,7 @@ end subroutine atmvertinterp_setup_
 
 subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use kinds
+  use missing_values_mod
   use obsspace_mod
   use vert_interp_mod
   use ufo_geovals_mod
@@ -89,6 +90,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
+  real(kind_real) :: missing
 
   ! Get pressure profiles from geovals
   call ufo_geovals_get_var(geovals, self%v_coord, vcoordprofile)
@@ -96,6 +98,11 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   ! Get the observation vertical coordinates
   allocate(obsvcoord(nlocs))
   call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
+
+  ! Set missing value
+  if (nlocs > 0) then
+     missing = missing_value(obsvcoord(1))
+  end if
 
   ! Allocate arrays for interpolation weights
   allocate(wi(nlocs))
@@ -106,7 +113,11 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   do iobs = 1, nlocs
     if (self%use_ln) then
       tmp = log(vcoordprofile%vals(:,iobs))
-      tmp2 = log(obsvcoord(iobs))
+      if (obsvcoord(iobs) /= missing) then
+         tmp2 = log(obsvcoord(iobs))
+      else
+         tmp2 = missing
+      end if
     else
       tmp = vcoordprofile%vals(:,iobs)
       tmp2 = obsvcoord(iobs)

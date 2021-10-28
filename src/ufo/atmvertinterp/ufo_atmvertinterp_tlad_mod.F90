@@ -77,6 +77,7 @@ end subroutine atmvertinterp_tlad_setup_
 ! ------------------------------------------------------------------------------
 
 subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
+  use missing_values_mod
   use obsspace_mod
   implicit none
   class(ufo_atmvertinterp_tlad), intent(inout) :: self
@@ -88,6 +89,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   integer :: iobs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
+  real(kind_real) :: missing
 
   ! Make sure nothing already allocated
   call self%cleanup()
@@ -101,6 +103,11 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   allocate(obsvcoord(self%nlocs))
   call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
 
+  ! Set missing value
+  if (self%nlocs > 0) then
+     missing = missing_value(obsvcoord(1))
+  end if
+
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))
   allocate(self%wf(self%nlocs))
@@ -110,7 +117,11 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   do iobs = 1, self%nlocs
     if (self%use_ln) then
       tmp = log(vcoordprofile%vals(:,iobs))
-      tmp2 = log(obsvcoord(iobs))
+      if (obsvcoord(iobs) /= missing) then
+         tmp2 = log(obsvcoord(iobs))
+      else
+         tmp2 = missing
+      end if
     else
       tmp = vcoordprofile%vals(:,iobs)
       tmp2 = obsvcoord(iobs)

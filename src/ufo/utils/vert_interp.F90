@@ -27,7 +27,17 @@ real(kind_real), intent(in ) :: vec(nlev)  !Structured vector of grid points
 integer,         intent(out) :: wi         !Index for interpolation
 real(kind_real), intent(out) :: wf         !Weight for interpolation
 
-integer :: k
+integer         :: k
+real(kind_real) :: missing
+
+missing = missing_value(obl)
+
+! If the observation is missing then set both the index and weight to missing.
+if (obl == missing) then
+   wi = missing_value(nlev)
+   wf = missing
+   return
+end if
 
 if (vec(1) < vec(nlev)) then !Pressure increases with index
 
@@ -78,7 +88,9 @@ integer,         intent(in ) :: wi          !Index for interpolation
 real(kind_real), intent(in ) :: wf          !Weight for interpolation
 real(kind_real), intent(out) :: f           !Output at obs location using linear interp
 
-if (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
+if (wi == missing_value(nlev)) then
+  f = missing_value(f)
+elseif (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
   f = missing_value(f)
 else
   f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
@@ -97,7 +109,9 @@ integer,         intent(in)  :: wi
 real(kind_real), intent(in)  :: wf
 real(kind_real), intent(out) :: f_tl
 
-if (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
+if (wi == missing_value(nlev)) then
+  f_tl = missing_value(f_tl)
+elseif (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
   f_tl = missing_value(f_tl)
 else
   f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
@@ -118,6 +132,10 @@ real(kind_real), intent(in)    :: f_ad
 real(kind_real) :: missing
 
 missing = missing_value(missing)
+
+! Do not modify the adjoint if the weight index is missing.
+! This occurs when the observed vertical coordinate is missing.
+if (wi == missing_value(nlev)) return
 
 if (fvec_ad(wi) == missing .or. f_ad == missing) then
   fvec_ad(wi  ) = 0.0_kind_real

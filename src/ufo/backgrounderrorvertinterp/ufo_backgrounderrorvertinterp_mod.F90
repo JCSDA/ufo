@@ -16,11 +16,12 @@ contains
 !> at observation locations.
 subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_name, &
                                                       geovals, obsspace, nlocs, obsvars, obsdiags)
-  use kinds,           only: kind_real
-  use obsspace_mod,    only: obsspace_get_db
-  use ufo_vars_mod,    only: MAXVARLEN, var_prs, var_prsi
-  use ufo_geovals_mod, only: ufo_geoval, ufo_geovals, ufo_geovals_get_var
-  use vert_interp_mod, only: vert_interp_weights, vert_interp_apply
+  use kinds,              only: kind_real
+  use missing_values_mod, only: missing_value
+  use obsspace_mod,       only: obsspace_get_db
+  use ufo_vars_mod,       only: MAXVARLEN, var_prs, var_prsi
+  use ufo_geovals_mod,    only: ufo_geoval, ufo_geovals, ufo_geovals_get_var
+  use vert_interp_mod,    only: vert_interp_weights, vert_interp_apply
   implicit none
 
   ! Name of the variable with vertical coordinates of observations
@@ -44,6 +45,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_na
   integer                          :: lenvarstr
   real(kind_real), allocatable     :: interp_nodes(:)
   real(kind_real)                  :: interp_point
+  real(kind_real)                  :: missing
 
   character(len=*), parameter      :: suffix = "_background_error"
 
@@ -52,6 +54,11 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_na
 
   ! Get the observation vertical coordinates
   call obsspace_get_db(obsspace, "MetaData", obs_vcoord_name, obs_vcoord)
+
+  ! Set missing value
+  if (nlocs > 0) then
+     missing = missing_value(obs_vcoord(1))
+  end if
 
   ! Use logarithmic interpolation if the vertical coordinate is air_pressure
   ! or air_pressure_levels
@@ -62,7 +69,11 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_na
   do iobs = 1, nlocs
     if (use_ln) then
       interp_nodes = log(vcoord_profile%vals(:,iobs))
-      interp_point = log(obs_vcoord(iobs))
+      if (obs_vcoord(iobs) /= missing) then
+         interp_point = log(obs_vcoord(iobs))
+      else
+         interp_point = missing
+      end if
     else
       interp_nodes = vcoord_profile%vals(:,iobs)
       interp_point = obs_vcoord(iobs)

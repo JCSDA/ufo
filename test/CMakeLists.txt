@@ -39,6 +39,7 @@ list( APPEND ufo_test_input
   testinput/amsua_rttovcpp.yaml
   testinput/background_error_vert_interp.yaml
   testinput/background_error_identity.yaml
+  testinput/background_error_vert_interp_pmissing.yaml
   testinput/bias_coeff.yaml
   testinput/bias_coeff_cov.yaml
   testinput/bias_linear_op.yaml
@@ -284,6 +285,7 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
+  testinput/vert_interp_pmissing.yaml
   testinput/windprof.yaml
   testinput/unit_tests/composite_GsiSfcModel_SfcPCorrected.yaml
   testinput/unit_tests/composite_vertInterp_SfcPCorrected.yaml
@@ -1661,6 +1663,28 @@ ecbuild_add_test( TARGET  test_ufo_linopr_identity
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_vert_interp_pmissing
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/vert_interp_pmissing.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_linopr_vert_interp_pmissing
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/vert_interp_pmissing.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_background_error_vert_interp_pmissing
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/background_error_vert_interp_pmissing.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
 
 # Test UFO ObsFilters (generic)
 
