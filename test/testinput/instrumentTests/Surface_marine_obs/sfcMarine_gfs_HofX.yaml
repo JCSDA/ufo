@@ -16,6 +16,7 @@ observations:
     name: Composite
     components:
      - name: GSISfcModel
+       use_fact10: true
        variables:
        - name: air_temperature
        - name: specific_humidity
@@ -25,10 +26,11 @@ observations:
        variables:
        - name: surface_pressure
        da_psfc_scheme: UKMO
+       # Remove the next two lines when using geoval from JEDI, not GSI.
        geovar_geomz: geopotential_height
        geovar_sfc_geomz: surface_geopotential_height
   # The reference value is calculated as
   #     sqrt( (rms(air_temperature)^2 + rms(specific_humidity)^2 + rms(eastward_wind)^2
   #            rms(northward_wind)^2 + rms(surface_pressure)^2) / 5)
-  rms ref: 44886.998247
+  rms ref: 44841.287058
   tolerance: 1.0e-06

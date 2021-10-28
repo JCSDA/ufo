@@ -3,22 +3,21 @@ window end: 2020-12-15T03:30:00Z
 
 observations:
 - obs space:
-    name: vadwinds_QC
+    name: VADwinds_QC
     obsdatain: 
       obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
       obsgrouping:
         group variables: ["station_id", "datetime"]
         sort variable: "air_pressure"
-        sort order: "descending"  
-#   obsdataout:
-#     obsfile: Data/vadwind_obs-output_2020120112.nc4
+        sort order: "descending"
+#   obsdataout: 
+#     obsfile: Data/vadwind_obs_2020121500_out.nc
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_geoval_2020121500.nc
-
   obs operator:
     name: VertInterp
-
+  #
   obs filters:
   # Reject all obs with PreQC mark already set above 3
   # - filter: PreQC

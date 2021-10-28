@@ -1,5 +1,5 @@
-window begin: 2020-11-01T09:00:00Z
-window end: 2020-11-01T15:00:00Z
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
 
 observations:
 - obs operator:
@@ -7,9 +7,9 @@ observations:
   obs space:
     name: RASS-tv
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_obs_2020110112_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
     simulated variables: [virtual_temperature]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_geoval_2020110112_m.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   vector ref: GsiHofX
   tolerance: 1.0e-06

@@ -1,19 +1,24 @@
-obs space:
-  name: rass_tv
-  obsdatain:
-    obsfile: $(experiment_dir)/{{current_cycle}}/rass_tv.{{window_begin}}.nc4
-    obsgrouping:
-      group variables: ["station_id", "datetime"]
-      sort variable: "air_pressure"
-      sort order: "descending"
-  obsdataout:
-    obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).rass_tv.{{window_begin}}.nc4
-  simulated variables: [virtual_temperature]
-#
-obs operator:
-  name: VertInterp
-#
-obs filters:
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
+
+observations:
+- obs space:
+    name: rass_tv_QC
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
+      obsgrouping:
+        group variables: ["station_id", "datetime"]
+        sort variable: "air_pressure"
+        sort order: "descending"
+#   obsdataout: 
+#     obsfile: Data/rass_tv_obs_2020121500_out.nc
+    simulated variables: [virtual_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
+  obs operator:
+    name: VertInterp
+
+  obs filters:
   #
   # Reject all obs with PreQC mark already set above 3
   # - filter: PreQC
@@ -70,3 +75,5 @@ obs filters:
     absolute threshold: 9.0
     action:
       name: reject
+
+  passedBenchmark: 2270
