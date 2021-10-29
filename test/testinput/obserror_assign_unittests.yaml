@@ -371,7 +371,7 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
             method: exact
           - name: StringVar@MetaData
             method: linear
-  expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as StringVar@MetaData
+  expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as MetaData/StringVar
 Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -461,7 +461,7 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
             method: exact
           - name: air_pressure@MetaData
             method: linear
-  expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'observation_type@MetaData'
+  expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'MetaData/observation_type'
 Assign observation error from NetCDF variance; no match found for a 'least upper bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -491,7 +491,7 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
             method: least upper bound
           - name: station_id@MetaData
             method: exact
-  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'air_pressure@MetaData'
+  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'MetaData/air_pressure'
 Assign observation error from NetCDF variance; no match found for a 'greatest lower bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -521,7 +521,7 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
             method: greatest lower bound
           - name: station_id@MetaData
             method: exact
-  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'air_pressure@MetaData'
+  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'MetaData/air_pressure'
 Assign observation error from NetCDF variance; attempt to use the 'least upper bound' mode for a string variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z

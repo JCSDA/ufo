@@ -631,7 +631,7 @@ observations:
       - name: float_variable_2@MetaData
         method: exact
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'float_variable_2@MetaData'"
+  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'MetaData/float_variable_2'"
 
 - obs space: &ObsSpace
     name: "'exact' method with 'error' extrapolation"
@@ -649,7 +649,7 @@ observations:
         method: exact
         extrapolation mode: error
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'float_variable_2@MetaData'"
+  expect compute to throw exception with message: "No match found for exact match extraction of value '-10' of the variable 'MetaData/float_variable_2'"
 
 - obs space: &ObsSpace
     name: "Unrecognised extrapolation mode"
@@ -720,7 +720,7 @@ observations:
       - name: float_variable_2@MetaData
         method: nearest
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'MetaData/float_variable_2'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'nearest' method with 'error' extrapolation"
@@ -738,7 +738,7 @@ observations:
         method: nearest
         extrapolation mode: error
     variables: [assigned_float_variable_nearest]
-  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'nearest' extraction of value '-10' of the variable 'MetaData/float_variable_2'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'nearest' method with 'nearest' extrapolation"
@@ -796,7 +796,7 @@ observations:
         method: linear
     variables: [assigned_float_variable_exact]
     tolerance: 1.0e-6
-  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'MetaData/float_variable_2'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'linear' method with 'error' extrapolation"
@@ -815,7 +815,7 @@ observations:
         extrapolation mode: error
     variables: [assigned_float_variable_nearest]
     tolerance: 1.0e-6
-  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'linear' interpolation of value '-10' of the variable 'MetaData/float_variable_2'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'linear' method with 'nearest' extrapolation"
@@ -875,7 +875,7 @@ observations:
       - name: longitude@MetaData
         method: bilinear
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'float_variable_1@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'MetaData/float_variable_1'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'bilinear' method with 'error' extrapolation, first var"
@@ -896,7 +896,7 @@ observations:
       - name: longitude@MetaData
         method: bilinear
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'float_variable_1@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '3' of the variable 'MetaData/float_variable_1'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'bilinear' method with default extrapolation, second var"
@@ -916,7 +916,7 @@ observations:
       - name: float_variable_2@MetaData
         method: bilinear
     variables: [assigned_float_variable_exact]
-  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '-10' of the variable 'float_variable_2@MetaData'.  Value is out of bounds.  Consider using extrapolation."
+  expect compute to throw exception with message: "No match found for 'bilinear' interpolation of value '-10' of the variable 'MetaData/float_variable_2'.  Value is out of bounds.  Consider using extrapolation."
 
 - obs space: &ObsSpace
     name: "'bilinear' method with 'nearest' extrapolation second var"

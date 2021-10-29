@@ -4,9 +4,10 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-#include "eckit/exception/Exceptions.h"
-#include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 
+#include "eckit/exception/Exceptions.h"
+#include "ioda/Misc/StringFuncs.h"  // for convertV1PathToV2Path
+#include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 
 namespace ufo {
 
@@ -86,9 +87,10 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
         throw eckit::UserError("Linear interpolation can only be supplied as the very last "
                                "argument.", Here());
       }
+      const std::string varName = ioda::convertV1PathToV2Path(intParam->name.value());
       interpSubConfs.push_back(intParam->toConfiguration());
-      interpMethod_[intParam->name.value()] = method;
-      extrapMode_[intParam->name.value()] = intParam->extrapMode.value();
+      interpMethod_[varName] = method;
+      extrapMode_[varName] = intParam->extrapMode.value();
     }
     if (nlin > 0 && nlin != 2) {
       throw eckit::UserError("Bilinear interpolation requires two variables.", Here());

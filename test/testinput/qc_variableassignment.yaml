@@ -753,7 +753,7 @@ observations:
           x1: [10]
           err0: [0.25]
           err1: [5]
-  expectExceptionWithMessage: ObsErrorModelRamp@ObsFunction is not a function producing values of type std::string
+  expectExceptionWithMessage: ObsFunction/ObsErrorModelRamp is not a function producing values of type std::string
 
 - obs space: &ObsSpace
     name: Try to assign values produced by a string-valued ObsFunction to a floating-point variable
@@ -775,7 +775,7 @@ observations:
                 name: int_variable_1@MetaData
               is_in: 2-4
             value: XYZ
-  expectExceptionWithMessage: Conditional@StringObsFunction is not a function producing numeric values
+  expectExceptionWithMessage: StringObsFunction/Conditional is not a function producing numeric values
 
 - obs space: &ObsSpace
     <<: *ObsSpace
@@ -786,7 +786,7 @@ observations:
     - name: float_variable_1@MetaData
       source variable:
         name: string_variable_1@MetaData
-  expectExceptionWithMessage: string_variable_1@MetaData is not a numeric variable
+  expectExceptionWithMessage: MetaData/string_variable_1 is not a numeric variable
 
 - obs space: &ObsSpace
     <<: *ObsSpace
@@ -797,7 +797,7 @@ observations:
     - name: int_variable_1@MetaData
       source variable:
         name: string_variable_1@MetaData
-  expectExceptionWithMessage: string_variable_1@MetaData is not a numeric variable
+  expectExceptionWithMessage: MetaData/string_variable_1 is not a numeric variable
 
 - obs space: &ObsSpace
     <<: *ObsSpace

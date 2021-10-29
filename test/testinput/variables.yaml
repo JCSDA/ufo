@@ -1,19 +1,44 @@
 ---
 test variables:
+  # ioda-v1-style variable names
   - name: brightness_temperature@ObsValue
     channels: 1, 4-5
     reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
     reference group: ObsValue
-    reference full name: brightness_temperature@ObsValue
+    reference full name: ObsValue/brightness_temperature
   - name: latitude@MetaData
     reference names: [latitude]
     reference group: MetaData
-    reference full name: latitude@MetaData
+    reference full name: MetaData/latitude
   - name: optical_thickness_of_atmosphere_layer@ObsDiag
     channels: 23-25
     reference names: [optical_thickness_of_atmosphere_layer_23, optical_thickness_of_atmosphere_layer_24, optical_thickness_of_atmosphere_layer_25]
     reference group: ObsDiag
-    reference full name: optical_thickness_of_atmosphere_layer@ObsDiag
+    reference full name: ObsDiag/optical_thickness_of_atmosphere_layer
+  # ioda-v2-style variable names
+  - name: ObsValue/brightness_temperature
+    channels: 1, 4-5
+    reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
+    reference group: ObsValue
+    reference full name: ObsValue/brightness_temperature
+  - name: MetaData/latitude
+    reference names: [latitude]
+    reference group: MetaData
+    reference full name: MetaData/latitude
+  - name: ObsDiag/optical_thickness_of_atmosphere_layer
+    channels: 23-25
+    reference names: [optical_thickness_of_atmosphere_layer_23, optical_thickness_of_atmosphere_layer_24, optical_thickness_of_atmosphere_layer_25]
+    reference group: ObsDiag
+    reference full name: ObsDiag/optical_thickness_of_atmosphere_layer
+  - name: DiagnosticFlags/Unfolded/eastward_wind
+    reference names: [eastward_wind]
+    reference group: DiagnosticFlags/Unfolded
+    reference full name: DiagnosticFlags/Unfolded/eastward_wind
+  - name: DiagnosticFlags/ExtremeValue/brightness_temperature
+    channels: 1, 4-5
+    reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
+    reference group: DiagnosticFlags/ExtremeValue
+    reference full name: DiagnosticFlags/ExtremeValue/brightness_temperature
 oops variables:
   - variables: ['var1', 'var2', 'var3']
     reference names: ['var1', 'var2', 'var3']
