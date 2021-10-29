@@ -96,7 +96,10 @@ namespace ufo {
 
     /// Container of each variable in the current profile.
     std::unordered_map <std::string, boost::variant
-      <std::vector <int>, std::vector <float>, std::vector <std::string>>> profileData_;
+                        <std::vector <int>,
+                         std::vector <float>,
+                         std::vector <std::string>,
+                         std::vector <bool>>> profileData_;
 
     /// Container of GeoVaLs in the current profile.
     std::unordered_map <std::string, std::vector <float>> profileGeoVaLs_;

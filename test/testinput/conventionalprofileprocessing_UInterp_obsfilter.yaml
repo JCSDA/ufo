@@ -29,3 +29,8 @@ observations:
   passedBenchmark: 5549
   benchmarkFlag: 24
   flaggedBenchmark: 93
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/Profile/Interpolation/eastward_wind
+    reference:
+      name: DiagnosticFlagsReference/Profile/Interpolation/eastward_wind

@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include "eckit/utils/StringTools.h"
+
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/VariableNames.h"
 
@@ -31,6 +33,8 @@ namespace ufo {
 
       if (groupname == "QCFlags") {
         putDataVector(fullname, get<int>(fullname));
+      } else if (eckit::StringTools::startsWith(groupname, "DiagnosticFlags")) {
+        putDataVector(fullname, get<bool>(fullname));
       } else if (groupname == "Corrections" ||
                  groupname == "DerivedObsValue" ||
                  groupname == "GrossErrorProbabilityBuddyCheck") {
@@ -67,5 +71,11 @@ namespace ufo {
                                                     const std::string &groupname)
   {
     return missingValueString;
+  }
+
+  bool EntireSampleDataHandler::defaultValue(const std::vector <bool> &vec,
+                                             const std::string &groupname)
+  {
+    return false;
   }
 }  // namespace ufo

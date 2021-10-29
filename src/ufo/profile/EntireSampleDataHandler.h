@@ -163,9 +163,15 @@ namespace ufo {
     /// Default value used to fill vector of strings.
     std::string defaultValue(const std::vector <std::string> &vec, const std::string &groupname);
 
+    /// Default value used to fill vector of booleans.
+    bool defaultValue(const std::vector <bool> &vec, const std::string &groupname);
+
     /// Container of each variable in the entire data set.
     std::unordered_map <std::string, boost::variant
-      <std::vector <int>, std::vector <float>, std::vector <std::string>>> entireSampleData_;
+                        <std::vector <int>,
+                         std::vector <float>,
+                         std::vector <std::string>,
+                         std::vector <bool>>> entireSampleData_;
 
     /// Missing value (int)
     const int missingValueInt = util::missingValue(missingValueInt);

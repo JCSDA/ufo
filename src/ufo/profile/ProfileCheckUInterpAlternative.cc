@@ -97,7 +97,14 @@ namespace ufo {
       return;
     }
 
-    calcStdLevelsUV(numProfileLevels, pressures, uObs, vObs, uFlags);
+    // Populate the standard level diagnostic flags from the OPS-style QC flags.
+    // todo(ctgh): modify this when the ProfileDataHolder class can accept a vector of bools.
+    std::vector <bool> uDiagFlagsProfileStdLev;
+    std::transform(uFlags.begin(), uFlags.end(),
+                   std::back_inserter(uDiagFlagsProfileStdLev),
+                   [](int flag){return flag & ufo::MetOfficeQCFlags::Profile::StandardLevelFlag;});
+
+    calcStdLevelsUV(numProfileLevels, pressures, uObs, vObs, uDiagFlagsProfileStdLev);
 
     LevErrors_.assign(numProfileLevels, -1);
     uInterp_.assign(numProfileLevels, 0.0);

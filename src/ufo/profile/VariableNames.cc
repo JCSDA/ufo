@@ -84,6 +84,11 @@ constexpr const char* const ufo::VariableNames::qcflags_northward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_time;
 constexpr const char* const ufo::VariableNames::qcflags_wind_profiler;
 
+// Diagnostic flags
+
+constexpr const char* const ufo::VariableNames::diagflags_profile_interpolation_eastward_wind;
+constexpr const char* const ufo::VariableNames::diagflags_profile_standard_level_eastward_wind;
+
 // Counters
 
 constexpr const char* const ufo::VariableNames::counter_NumAnyErrors;

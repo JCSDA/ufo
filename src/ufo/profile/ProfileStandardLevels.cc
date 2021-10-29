@@ -99,7 +99,7 @@ namespace ufo {
                                               const std::vector <float> &pressures,
                                               const std::vector <float> &uObs,
                                               const std::vector <float> &vObs,
-                                              const std::vector <int> &uFlags)
+                                              const std::vector <bool> &uDiagFlagsProfileStdLev)
   {
     oops::Log::debug() << " Finding standard levels for U and V data" << std::endl;
 
@@ -120,7 +120,7 @@ namespace ufo {
     for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uObs[jlev] != missingValueFloat && vObs[jlev] != missingValueFloat) {
         LogP_[jlev] = std::log(pressures[jlev]);
-        if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::StandardLevelFlag) {  // Standard level
+        if (uDiagFlagsProfileStdLev[jlev]) {  // Standard level
           NumStd_++;
           StdLev_[NumStd_ - 1] = jlev;
           SigBelow_[NumStd_ - 1] = SigPrev;

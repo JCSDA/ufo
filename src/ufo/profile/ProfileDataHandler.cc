@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "eckit/utils/StringTools.h"
+
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
@@ -113,6 +115,15 @@ namespace ufo {
         const std::vector <float>& profileData = get<float>(fullname);
         getProfileIndicesInEntireSample(groupname);
         std::vector <float>& entireSampleData = entireSampleDataHandler_->get<float>(fullname);
+        size_t idx = 0;
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
+          updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
+          idx++;
+        }
+      } else if (eckit::StringTools::startsWith(groupname, "DiagnosticFlags")) {
+        const std::vector <bool>& profileData = get<bool>(fullname);
+        getProfileIndicesInEntireSample(groupname);
+        std::vector <bool>& entireSampleData = entireSampleDataHandler_->get<bool>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);

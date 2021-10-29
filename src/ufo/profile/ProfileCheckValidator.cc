@@ -89,7 +89,6 @@ namespace ufo {
         valuesToCompare_int_.insert({
             ufo::VariableNames::counter_NumSamePErrObs,
             ufo::VariableNames::counter_NumInterpErrObs,
-            ufo::VariableNames::qcflags_eastward_wind,
             ufo::VariableNames::NumStd,
             ufo::VariableNames::NumSig,
             ufo::VariableNames::StdLev,

@@ -104,6 +104,13 @@ struct VariableNames
   static constexpr const char* const qcflags_time = "time@QCFlags";
   static constexpr const char* const qcflags_wind_profiler = "wind_profiler@QCFlags";
 
+  // Diagnostic flags
+
+  static constexpr const char* const diagflags_profile_interpolation_eastward_wind =
+    "DiagnosticFlags/Profile/Interpolation/eastward_wind";
+  static constexpr const char* const diagflags_profile_standard_level_eastward_wind =
+    "DiagnosticFlags/Profile/StandardLevel/eastward_wind";
+
   // Counters
 
   static constexpr const char* const counter_NumAnyErrors = "NumAnyErrors@Counters";

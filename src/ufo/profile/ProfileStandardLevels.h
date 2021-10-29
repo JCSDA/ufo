@@ -48,7 +48,7 @@ namespace ufo {
                          const std::vector <float> &pressures,
                          const std::vector <float> &uObs,
                          const std::vector <float> &vObs,
-                         const std::vector <int> &uFlags);
+                         const std::vector <bool> &uDiagFlagsProfileStdLev);
 
    protected:  // variables
     /// Standard levels (hPa)
