@@ -8,8 +8,6 @@ set ( profile_files
       DataHandlerParameters.h
       EntireSampleDataHandler.cc
       EntireSampleDataHandler.h
-      ModelHeightCalculator.cc
-      ModelHeightCalculator.h
       ModelParameters.h
       ObsProfileAverage.cc
       ObsProfileAverage.h

@@ -35,7 +35,6 @@
 #include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/EntireSampleDataHandler.h"
-#include "ufo/profile/ModelHeightCalculator.h"
 #include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
 #include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
 #include "ufo/profile/ProfileCheckBackgroundTemperature.h"
@@ -240,6 +239,8 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   const bool testProfileVerticalInterpolation =
     conf.getBool("testProfileVerticalInterpolation", false);
   if (testProfileVerticalInterpolation) {
+    geovals->reorderzdir("air_pressure_levels", "bottom2top");
+
     ConventionalProfileProcessingParameters options;
     options.deserialize(conf);
 
@@ -263,31 +264,15 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
       const std::string coordOrderName = coordOrderNames[jprof];
       const std::string outOfBoundsName = outOfBoundsNames[jprof];
 
-      // Calculate level heights for GeoVaLs.
-      std::vector <float> orogGeoVaLs(obsspace.nlocs(), 0.0);
-      geovals->getAtLevel(orogGeoVaLs, ufo::VariableNames::geovals_orog, 0);
-      std::vector <float> zRhoGeoVaLs;
-      std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options.DHParameters.ModParameters,
-                                orogGeoVaLs[0],
-                                zRhoGeoVaLs,
-                                zThetaGeoVaLs);
+      std::vector <float> zRhoGeoVaLs(geovals->nlevs(ufo::VariableNames::geovals_height_rho));
+      geovals->getAtLocation(zRhoGeoVaLs, ufo::VariableNames::geovals_height_rho, 0);
 
       // Reverse coordinate order if required.
       if (coordOrderName == "Descending")
         std::reverse(zRhoGeoVaLs.begin(), zRhoGeoVaLs.end());
 
-      // Create column of pressure GeoVaLs.
-      std::vector <float> pressureGeoVaLs(obsspace.nlocs(), 0.0);
-      const size_t gvnlevs = geovals->nlevs(ufo::VariableNames::geovals_pressure);
-      std::vector <float> pressureGeoVaLs_column;
-      for (int jlev = 0; jlev < gvnlevs; ++jlev) {
-        geovals->getAtLevel(pressureGeoVaLs, ufo::VariableNames::geovals_pressure, jlev);
-        pressureGeoVaLs_column.push_back(pressureGeoVaLs[0]);
-      }
-      // Ensure order of GeoVaLs is correct.
-      if (pressureGeoVaLs_column.front() < pressureGeoVaLs_column.back())
-        std::reverse(pressureGeoVaLs_column.begin(), pressureGeoVaLs_column.end());
+      std::vector <float> pressureGeoVaLs(geovals->nlevs(ufo::VariableNames::geovals_pressure_rho));
+      geovals->getAtLocation(pressureGeoVaLs, ufo::VariableNames::geovals_pressure_rho, 0);
 
       // Get observed geopotential height and (empty) pressure vector.
       const auto &zObs = profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
@@ -307,7 +292,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
       // Interpolate to determine pressure.
       profileVerticalInterpolation(zRhoGeoVaLs,
-                                   pressureGeoVaLs_column,
+                                   pressureGeoVaLs,
                                    zObs,
                                    pressures,
                                    interpMethod,

@@ -44,13 +44,19 @@ namespace ufo {
     const std::vector <float> &orogGeoVaLs =
       profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_orog);
     const std::vector <float> &pressureGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
+    const std::vector <float> &heightGeoVaLs =
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho);
 
-    if (orogGeoVaLs.empty() || pressureGeoVaLs.empty()) {
+    if (!oops::allVectorsSameNonZeroSize(orogGeoVaLs,
+                                         pressureGeoVaLs,
+                                         heightGeoVaLs)) {
       oops::Log::warning() << "At least one GeoVaLs vector is the wrong size. "
                            << "Profile pressure routine will not run." << std::endl;
       oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(orogGeoVaLs, pressureGeoVaLs)
+                           << oops::listOfVectorSizes(orogGeoVaLs,
+                                                      pressureGeoVaLs,
+                                                      heightGeoVaLs)
                            << std::endl;
       return;
     }
@@ -112,17 +118,8 @@ namespace ufo {
     // In all other cases assume pressure is already fine.
     if (ObsHasNoPressureSensor &&
         !AllLevelsHaveValidP) {
-      // Compute model heights on rho and theta levels.
-      // todo(ctgh): This could be performed when retrieving the GeoVaLs.
-      // zThetaGeoVaLs are not used further in this routine but do appear elsewhere in the code.
-      std::vector <float> zRhoGeoVaLs;
-      std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options_.DHParameters.ModParameters,
-                                orogGeoVaLs[0],
-                                zRhoGeoVaLs,
-                                zThetaGeoVaLs);
       // Compute observation pressures based on vertical interpolation from model heights.
-      ufo::profileVerticalInterpolation(zRhoGeoVaLs,
+      ufo::profileVerticalInterpolation(heightGeoVaLs,
                                         pressureGeoVaLs,
                                         zObs,
                                         pressures);

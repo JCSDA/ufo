@@ -75,7 +75,7 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
         const std::size_t jloc = slant_path_location[mlev];
         dx.getAtLocation(var_gv, variable, jloc);
         // Reverse dx if the GeoVaLs were initially ordered from top to bottom.
-        if (data_.getGeoVaLsDirection() == GeoVaLsDirection::TopToBottom)
+        if (data_.GeoVaLsAreTopToBottom())
           std::reverse(var_gv.begin(), var_gv.end());
         dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[mlev];
       }
@@ -116,13 +116,13 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
         // Get the current value of dx.
         dx.getAtLocation(var_gv, variable, jloc);
         // Reverse dx if the GeoVaLs were initially ordered from top to bottom.
-        if (data_.getGeoVaLsDirection() == GeoVaLsDirection::TopToBottom)
+        if (data_.GeoVaLsAreTopToBottom())
           std::reverse(var_gv.begin(), var_gv.end());
         const std::size_t idx = locsExtended[mlev] * dy.nvars() + jvar;
         if (dy[idx] != missing)
           var_gv[mlev] += dy[idx];
         // If dx was reversed, undo the reversal prior to updating it.
-        if (data_.getGeoVaLsDirection() == GeoVaLsDirection::TopToBottom)
+        if (data_.GeoVaLsAreTopToBottom())
           std::reverse(var_gv.begin(), var_gv.end());
         // Store the new value of dx.
         dx.putAtLocation(var_gv, variable, jloc);

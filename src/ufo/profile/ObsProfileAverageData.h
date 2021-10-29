@@ -22,8 +22,6 @@
 
 namespace ufo {
 
-  enum class GeoVaLsDirection{BottomToTop, TopToBottom};
-
   /// \brief Data handling class for the ProfileAverage observation operator and TL/AD code.
   class ObsProfileAverageData {
    public:
@@ -55,7 +53,7 @@ namespace ufo {
     std::string getModelVerticalCoord() const {return modelVerticalCoord_;}
 
     /// Get GeoVaLs direction.
-    GeoVaLsDirection getGeoVaLsDirection() const {return GeoVaLsDirection_;}
+    bool GeoVaLsAreTopToBottom() const {return GeoVaLsAreTopToBottom_;}
 
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.
@@ -98,7 +96,7 @@ namespace ufo {
     std::vector<float> slant_pressure_ref_;
 
     /// Direction of GeoVaLs.
-    mutable GeoVaLsDirection GeoVaLsDirection_;
+    mutable bool GeoVaLsAreTopToBottom_;
   };
 }  // namespace ufo
 

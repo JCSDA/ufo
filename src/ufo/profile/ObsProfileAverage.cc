@@ -49,7 +49,7 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   // Cache the input GeoVaLs for use in the slant path location algorithm.
   data_.cacheGeoVaLs(gv);
 
-  // Copy and reverse the GeoVaLs for use in the operator..
+  // Copy and reverse the GeoVaLs for use in the operator.
   GeoVaLs gv_copy(gv);
   gv_copy.reorderzdir(data_.getModelVerticalCoord(), "bottom2top");
 

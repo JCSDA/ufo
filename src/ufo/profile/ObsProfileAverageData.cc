@@ -18,7 +18,7 @@ namespace ufo {
                                                const ObsProfileAverageParameters & parameters)
     : odb_(odb),
       options_(parameters),
-      GeoVaLsDirection_(GeoVaLsDirection::TopToBottom)
+      GeoVaLsAreTopToBottom_(true)
   {
     // Ensure observations have been grouped into profiles.
     if (odb_.obs_group_vars().empty())
@@ -76,7 +76,7 @@ namespace ufo {
       std::vector<float> pressure(gv.nlevs(modelVerticalCoord_));
       gv.getAtLocation(pressure, modelVerticalCoord_, 0);
       if (pressure.front() > pressure.back()) {
-        GeoVaLsDirection_ = GeoVaLsDirection::BottomToTop;
+        GeoVaLsAreTopToBottom_ = false;
       } else {
         // Reorder the cached GeoVaLs.
         cachedGeoVaLs_->reorderzdir(modelVerticalCoord_, "bottom2top");
