@@ -15,6 +15,9 @@ set ( filters_files
       ConventionalProfileProcessing.cc
       ConventionalProfileProcessing.h
       ConventionalProfileProcessingParameters.h
+      CreateDiagnosticFlags.cc
+      CreateDiagnosticFlags.h
+      DiagnosticFlag.h
       DifferenceCheck.cc
       DifferenceCheck.h
       FilterBase.cc
@@ -141,6 +144,8 @@ set ( filters_files
       actions/PassivateObs.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      actions/SetFlag.cc
+      actions/SetFlag.h
       obsfunctions/BennartzScatIndex.cc
       obsfunctions/BennartzScatIndex.h
       obsfunctions/ChannelUseflagCheckRad.cc

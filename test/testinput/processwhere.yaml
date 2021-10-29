@@ -456,6 +456,16 @@ successful:
           name:  intvar1@MetaData
         matches_any_wildcard: []
       size where true: 0
+    - where:                       # test is_true
+      - variable:
+          name:  boolvar1@MetaData     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
+        is_true:
+      size where true: 6
+    - where:                       # test is_false
+      - variable:
+          name:  boolvar1@MetaData     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
+        is_false:
+      size where true: 4
 
 user_error_type_handling_is_in:
   window begin: 2018-01-01T00:00:00Z

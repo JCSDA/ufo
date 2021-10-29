@@ -88,6 +88,12 @@ class WhereParameters : public oops::Parameters {
   /// Select locations at which the condition variable is set to to the missing value indicator.
   oops::OptionalParameter<void> isNotDefined{"is_not_defined", this};
 
+  /// Select locations at which the condition variable (typically a diagnostic flag) is true.
+  oops::OptionalParameter<void> isTrue{"is_true", this};
+
+  /// Select locations at which the condition variable (typically a diagnostic flag) is false.
+  oops::OptionalParameter<void> isFalse{"is_false", this};
+
   /// Select locations at which any of the specified bits in the condition variable is set.
   oops::OptionalParameter<std::set<int>> anyBitSetOf{"any_bit_set_of", this};
 

@@ -180,6 +180,7 @@ list( APPEND ufo_test_input
   testinput/qc_bayesian_background_check.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_velocitycheck.yaml
+  testinput/qc_creatediagnosticflags.yaml
   testinput/qc_defer_to_post.yaml
   testinput/qc_derivative_dpdt.yaml
   testinput/qc_derivative_dxdt.yaml
@@ -2077,6 +2078,13 @@ ecbuild_add_test( TARGET  test_ufo_function_satwindsSPDBcheck
 ecbuild_add_test( TARGET  test_ufo_qc_variableassignment
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_variableassignment.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_creatediagnosticflags
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_creatediagnosticflags.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

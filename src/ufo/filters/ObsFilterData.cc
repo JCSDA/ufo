@@ -155,6 +155,11 @@ void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & 
 }
 
 // -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, std::vector<DiagnosticFlag> & values) const {
+  getVector(varname, values);
+}
+
+// -----------------------------------------------------------------------------
 template <typename T>
 void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values) const {
   const std::string var = varname.variable(0);
@@ -302,6 +307,25 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<std::strin
 void ObsFilterData::get(const Variable & varname,
                         ioda::ObsDataVector<util::DateTime> & values) const {
   getNonNumeric(varname, values);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname,
+                        ioda::ObsDataVector<DiagnosticFlag> & values) const {
+  const std::string &grp = varname.group();
+  // There are no ObsFunctions producing flags yet
+  if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
+    throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
+                              " does not produce values of type DiagnosticFlag", Here());
+  // Certain other groups can't contain diagnostic flags either
+  } else if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
+                              " are not of type DiagnosticFlag", Here());
+  } else {
+    // Try to retrieve the requested diagnostic flag from the ObsSpace. read() will throw an
+    // exception if that flag is not found.
+    values.read(grp);
+  }
 }
 
 // -----------------------------------------------------------------------------

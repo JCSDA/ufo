@@ -18,6 +18,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/wildcard.h"
+#include "ufo/filters/DiagnosticFlag.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
@@ -166,6 +167,24 @@ void processWhereIsNotClose(const std::vector<float> & data,
       }
     }  // testvalue
   }  // jj
+}
+
+// -----------------------------------------------------------------------------
+/// Clear the `mask` wherever `data` is `false`.
+void processWhereIsTrue(const std::vector<DiagnosticFlag> & data,
+                        std::vector<bool> & mask) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (!data[jj]) mask[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+/// Clear the `mask` wherever `data` is `true`.
+void processWhereIsFalse(const std::vector<DiagnosticFlag> & data,
+                         std::vector<bool> & mask) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (data[jj]) mask[jj] = false;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -491,6 +510,24 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
               "Only float variables may be used for processWhere 'is_not_close'",
               Here());
           }
+        }
+
+//      Apply mask is_set
+        if (currentParams.isTrue.value()) {
+          if (filterdata.has(varname)) {
+            std::vector<DiagnosticFlag> data;
+            filterdata.get(varname, data);
+            processWhereIsTrue(data, where);
+          } else {
+            std::fill(where.begin(), where.end(), false);
+          }
+        }
+
+//      Apply mask is_not_set
+        if (currentParams.isFalse.value()) {
+          std::vector<DiagnosticFlag> data;
+          filterdata.get(varname, data);
+          processWhereIsFalse(data, where);
         }
 
 //      Apply mask any_bit_set_of

@@ -152,6 +152,10 @@ class ObsTypeParameters : public oops::Parameters {
   oops::OptionalParameter<std::vector<CompareVariablesParameters>> compareVariables{
     "compareVariables", this};
 
+  /// A list of names of variables expected not to exist after all filters finish operation.
+  oops::OptionalParameter<std::vector<Variable>> expectVariablesNotToExist{
+    "expectVariablesNotToExist", this};
+
   /// If set to a string, the test will pass only if the filters produce an exception whose message
   /// contains that string.
   oops::OptionalParameter<std::string> expectExceptionWithMessage{
@@ -557,6 +561,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       case ioda::ObsDtype::DateTime:
         expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
         break;
+      case ioda::ObsDtype::Bool:
+        expectVariablesEqual<bool>(ufoObsSpace, referenceVariable, testVariable);
+        break;
       case ioda::ObsDtype::Float:
         if (compareVariablesParams.absTol.value() == boost::none &&
             compareVariablesParams.relTol.value() == boost::none) {
@@ -574,6 +581,13 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       case ioda::ObsDtype::None:
         ASSERT_MSG(false, "Reference variable not found in observation space");
       }
+    }
+  }
+
+  if (params.expectVariablesNotToExist.value() != boost::none) {
+    for (const Variable &var : *params.expectVariablesNotToExist.value()) {
+      atLeastOneBenchmarkFound = true;
+      EXPECT_NOT(ufoObsSpace.has(var.group(), var.variable()));
     }
   }
 

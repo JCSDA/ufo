@@ -44,7 +44,7 @@ obs filter data:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_with_diag_flags.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
   test data:
@@ -55,6 +55,9 @@ obs filter data:
     - name: longitude@MetaData
     integer variables:
     - name: brightness_temperature_12@PreQC
+    bool variables:
+    - name: DiagnosticFlags/FlagA/brightness_temperature_5
+    - name: DiagnosticFlags/FlagB/brightness_temperature_8
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
     state variables:

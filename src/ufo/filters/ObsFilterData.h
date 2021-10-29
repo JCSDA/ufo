@@ -16,6 +16,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/DiagnosticFlag.h"
 #include "ufo/filters/Variable.h"
 
 namespace ioda {
@@ -70,6 +71,8 @@ class ObsFilterData : public util::Printable,
   void get(const Variable &varname, std::vector<std::string> &values) const;
   //! \overload
   void get(const Variable &varname, std::vector<util::DateTime> &values) const;
+  //! \overload
+  void get(const Variable &varname, std::vector<DiagnosticFlag> &values) const;
 
   //! \brief Fills a `std::vector` with values of the specified variable at a single level.
   //!
@@ -105,6 +108,8 @@ class ObsFilterData : public util::Printable,
   void get(const Variable &varname, ioda::ObsDataVector<std::string> &values) const;
   //! \overload
   void get(const Variable &varname, ioda::ObsDataVector<util::DateTime> &values) const;
+  //! \overload
+  void get(const Variable &varname, ioda::ObsDataVector<DiagnosticFlag> &values) const;
 
   //! Returns true if variable `varname` is known to ObsFilterData, false otherwise.
   bool has(const Variable &varname) const;

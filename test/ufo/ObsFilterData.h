@@ -248,6 +248,19 @@ void testObsFilterData() {
       testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::DateTime, ref);
     }
 
+///  Check that has(), get() and dtype() work on bool variables in ObsSpace:
+    varconfs.clear();
+    dataconf.get("bool variables", varconfs);
+    ufo::Variables boolvars(varconfs);
+    for (size_t jvar = 0; jvar < boolvars.nvars(); ++jvar) {
+      const ufo::Variable &var = boolvars.variable(jvar);
+
+      std::vector<bool> ref(ospace.nlocs());
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Bool, ref);
+    }
+
 ///  Check that associate(), has(), get() and dtype() work on ObsVector:
 ///  H(x) not associated yet
 ///  The important aspect of dtype handling here is it not being in ObsSpace so we
