@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -388,25 +389,58 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     const ObsAccessor &obsAccessor) const
 {
   if (options_.priorityVariable.value() == boost::none) {
+    if (options_.tiebreakerPickLatest) {
+      // if tiebreakerPickLatest has been set then if distance to the bin center
+      // is equal it chooses the latest observation
+      std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+           "MetaData", "datetime");
+      return [times, &validObsIds, &distancesToBinCenter](
+               size_t validObsIndexA, size_t validObsIndexB){
+          const size_t obsIdA = validObsIds[validObsIndexA];
+          const size_t obsIdB = validObsIds[validObsIndexB];
+          return std::make_pair(-distancesToBinCenter[validObsIndexA],
+                                times[obsIdA]) >
+                 std::make_pair(-distancesToBinCenter[validObsIndexB],
+                                 times[obsIdB]);
+      };
+    }
     return [&distancesToBinCenter](size_t validObsIndexA, size_t validObsIndexB) {
       return distancesToBinCenter[validObsIndexA] < distancesToBinCenter[validObsIndexB];
     };
   }
 
   const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
-
   std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
         priorityVariable.group(), priorityVariable.variable());
 
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
+  if (options_.tiebreakerPickLatest) {
+    std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+          "MetaData", "datetime");
+    return [priorities, times, &validObsIds, &distancesToBinCenter](
+              size_t validObsIndexA, size_t validObsIndexB){
+        // Prefer observations with large priorities, small distance and later time if tied.
+        const size_t obsIdA = validObsIds[validObsIndexA];
+        const size_t obsIdB = validObsIds[validObsIndexB];
+        return std::make_tuple(priorities[obsIdA],
+                               -distancesToBinCenter[validObsIndexA],
+                               times[obsIdA]) >
+               std::make_tuple(priorities[obsIdB],
+                               -distancesToBinCenter[validObsIndexB],
+                               times[obsIdB]);
+    };
+  } else {
   return [priorities, &validObsIds, &distancesToBinCenter]
          (size_t validObsIndexA, size_t validObsIndexB) {
       // Prefer observations with large priorities and small distances
-      return std::make_pair(-priorities[validObsIds[validObsIndexA]],
+      const size_t obsIdA = validObsIds[validObsIndexA];
+      const size_t obsIdB = validObsIds[validObsIndexB];
+      return std::make_pair(-priorities[obsIdA],
                             distancesToBinCenter[validObsIndexA]) <
-             std::make_pair(-priorities[validObsIds[validObsIndexB]],
+             std::make_pair(-priorities[obsIdB],
                             distancesToBinCenter[validObsIndexB]);
     };
+  }
 }
 
 // -----------------------------------------------------------------------------

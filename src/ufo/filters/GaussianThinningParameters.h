@@ -164,6 +164,10 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// it's set to \c maximum.
   oops::OptionalParameter<DistanceNorm> distanceNorm{"distance_norm", this};
 
+  /// Break ties between candidates for retaining by picking the one with
+  /// the latest acquisition time.
+  oops::Parameter<bool> tiebreakerPickLatest{"tiebreaker_pick_latest", false, this};
+
   /// Set this option to \c true to make the filter produce identical results as the Ops_Thinning
   /// subroutine from the Met Office OPS system when both are run serially (on a single process).
   ///

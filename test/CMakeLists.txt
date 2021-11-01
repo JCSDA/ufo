@@ -3456,7 +3456,6 @@ ecbuild_add_test( TARGET test_ufo_opr_groundgnssMetOffice
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
 
-
 ecbuild_add_test( TARGET test_ufo_opr_groundgnssROPP
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS "testinput/groundgnssropp.yaml"
