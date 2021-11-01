@@ -83,7 +83,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nvars, c_nlocs
+integer(c_size_t), intent(inout) :: c_nvars, c_nlocs
 real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 integer(c_int), intent(in) :: c_key_hofxdiags
 

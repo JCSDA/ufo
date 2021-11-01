@@ -152,7 +152,7 @@ implicit none
 
 class(ufo_radiancecrtm),  intent(in) :: self         !Radiance object
 type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
-integer,                  intent(in) :: nvars, nlocs
+integer(c_size_t),        intent(in) :: nvars, nlocs
 real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(ufo_geovals),     intent(inout) :: hofxdiags    !non-h(x) diagnostics
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace

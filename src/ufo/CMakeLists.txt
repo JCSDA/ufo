@@ -141,6 +141,8 @@ target_link_libraries(ufo PUBLIC fckit)
 target_link_libraries(ufo PUBLIC ioda)
 target_link_libraries(ufo PUBLIC oops)
 
+target_compile_options( ufo PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,PGI,NVHPC>:-Wc,--pending_instantiations=128> )
+
 # Optional dependencies
 if(crtm_FOUND)
     target_link_libraries(ufo PUBLIC crtm)

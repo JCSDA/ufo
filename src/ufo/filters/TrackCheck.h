@@ -115,10 +115,11 @@ class TrackCheck : public FilterBase,
     ///   Pressure at which the maximum speed should be evaluated.
     ///
     /// \returns An object enapsulating the check results.
-    CheckResults checkAgainstBuddy(const TrackObservation &buddyObs,
-                                   const TrackCheckParameters &options,
-                                   const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-                                   float referencePressure) const;
+    void checkAgainstBuddy(const TrackObservation &buddyObs,
+                           const TrackCheckParameters &options,
+                           const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+                           float referencePressure,
+                           CheckResults &results) const;
     void registerCheckResults(const CheckResults &result);
     void unregisterCheckResults(const CheckResults &result);
     void registerSweepOutcome(bool rejectedInSweep);
