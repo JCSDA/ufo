@@ -18,6 +18,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/CLWRetMW.h"
 #include "ufo/filters/obsfunctions/ObsErrorModelRamp.h"
 #include "ufo/filters/Variable.h"
@@ -168,28 +169,6 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
       affected_channels[ich][iloc] = 0;
     }
 
-    // Calculate cloud effect
-    float cldeff_obs536 = 0.0;
-    if (water_frac[iloc] > 0.99) {
-      cldeff_obs536 = btobs[ich536][iloc] - hofxclr536[iloc] - bias[ich536][iloc];
-    }
-
-    // Calculate scattering effect
-    std::vector<float> factch4(nlocs);
-    std::vector<float> factch6(nlocs);
-    float btobsbc238 = btobs[ich238][iloc] - bias_const238[iloc]
-                                           - bias_scanang238[iloc];
-    float clwx = 0.6;
-    float dsval = 0.8;
-    if (water_frac[iloc] > 0.99) {
-      clwx = 0.0;
-      dsval = ((2.410 - 0.0098 * btobsbc238) * innov[ich238][iloc] +
-                0.454 * innov[ich314][iloc] - innov[ich890][iloc]) * w1f6;
-      dsval = std::max(static_cast<float>(0.0), dsval);
-    }
-    factch4[iloc] = pow(clwx, 2) + pow(innov[ich528][iloc] * w2f4, 2);
-    factch6[iloc] = pow(dsval, 2) + pow(innov[ich544][iloc] * w2f6, 2);
-
     // Window channel sanity check
     // If any of the window channels is bad, skip all window channels
     // List of surface sensitivity channels
@@ -198,7 +177,8 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
                             std::abs(innov[ich536][iloc]), std::abs(innov[ich544][iloc]),
                             std::abs(innov[ich890][iloc])};
     bool result = false;
-    result = any_of(OmFs.begin(), OmFs.end(), [](float x){return x > 200.0;});
+    result = any_of(OmFs.begin(), OmFs.end(), [](float x){
+               return (x > 200.0 || x == util::missingValue(1.0f));});
 
     if (result) {
       for (size_t ich = ich238; ich <= ich544; ++ich) {
@@ -206,8 +186,25 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
       }
       affected_channels[ich890][iloc] = 1;
     } else {
+      // Calculate scattering effect
+      float clwx = 0.6;
+      float dsval = 0.8;
+      if (water_frac[iloc] > 0.99) {
+        clwx = 0.0;
+        float btobsbc238 = btobs[ich238][iloc] - bias_const238[iloc]
+                                               - bias_scanang238[iloc];
+        dsval = ((2.410 - 0.0098 * btobsbc238) * innov[ich238][iloc] +
+                  0.454 * innov[ich314][iloc] - innov[ich890][iloc]) * w1f6;
+        dsval = std::max(static_cast<float>(0.0), dsval);
+      }
+      float factch4 = pow(clwx, 2) + pow(innov[ich528][iloc] * w2f4, 2);
+      float factch6 = pow(dsval, 2) + pow(innov[ich544][iloc] * w2f6, 2);
+
       // Hydrometeor check over water surface
       if (water_frac[iloc] > 0.99) {
+        // Calculate cloud effect from 53.6 GHz (Channel 4)
+        float cldeff_obs536 = btobs[ich536][iloc] - hofxclr536[iloc] - bias[ich536][iloc];
+
         // Cloud water retrieval sanity check
         if (clwobs[0][iloc] > 999.0) {
           for (size_t ich = ich238; ich <= ich544; ++ich) {
@@ -217,7 +214,7 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
         }
 
         // Precipitation check (factch6)
-        if (factch6[iloc] >= 1.0) {
+        if (factch6 >= 1.0) {
           for (size_t ich = ich238; ich <= ich544; ++ich) {
             affected_channels[ich][iloc] = 1;
           }
@@ -260,13 +257,13 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
       } else {
         // Hydrometeor check over non-water (land/sea ice/snow) surface
         // Precipitation check (factch6)
-        if (factch6[iloc] >= 1.0) {
+        if (factch6 >= 1.0) {
           for (size_t ich = ich238; ich <= ich544; ++ich) {
             affected_channels[ich][iloc] = 1;
           }
           affected_channels[ich890][iloc] = 1;
         // Thick cloud check (factch4)
-        } else if (factch4[iloc] > 0.5) {
+        } else if (factch4 > 0.5) {
           for (size_t ich = ich238; ich <= ich536; ++ich) {
             affected_channels[ich][iloc] = 1;
           }

@@ -17,6 +17,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
@@ -126,6 +127,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
 
     // Calculate retrieved cloud liquid water
     std::vector<float> bt238(nlocs), bt314(nlocs);
+    const float missing = util::missingValue(missing);
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
       in.get(Variable("brightness_temperature@" + vargrp[igrp], channels)[0], bt238);
@@ -146,8 +148,10 @@ void CLWRetMW::compute(const ObsFilterData & in,
         // correction
         if (options_.addBias.value() == "ObsValue") {
           for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-            bt238[iloc] = bt238[iloc] - bias238[iloc];
-            bt314[iloc] = bt314[iloc] - bias314[iloc];
+            if (bt238[iloc] != missing && bt314[iloc] != missing) {
+              bt238[iloc] = bt238[iloc] - bias238[iloc];
+              bt314[iloc] = bt314[iloc] - bias314[iloc];
+            }
           }
         }
       }
