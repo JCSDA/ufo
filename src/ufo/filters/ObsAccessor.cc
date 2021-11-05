@@ -105,7 +105,8 @@ std::vector<bool> ObsAccessor::getGlobalApply(
 
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
-        const ufo::Variables &filtervars, bool validIfAnyFilterVariablePassedQC) const {
+    const ufo::Variables &filtervars, bool candidateForRetentionIfAnyFilterVariablesPassedQC)
+    const {
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
   std::vector<int> globalApply(apply.size());
   std::vector<ioda::ObsDataRow<int>> filterVariableFlags;
@@ -118,7 +119,8 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
   }
   for (size_t obsId = 0; obsId < apply.size(); ++obsId)
     globalApply[obsId] = apply[obsId]
-                           && isValid(filterVariableFlags, obsId, validIfAnyFilterVariablePassedQC);
+                     && isCandidateForRetention(filterVariableFlags, obsId,
+                                                candidateForRetentionIfAnyFilterVariablesPassedQC);
   obsDistribution_->allGatherv(globalApply);
 
   std::vector<size_t> validObsIds;
@@ -178,10 +180,10 @@ size_t ObsAccessor::totalNumObservations() const {
   return obsdb_->globalNumLocs();
 }
 
-bool ObsAccessor::isValid(const std::vector<ioda::ObsDataRow<int>> &flags, size_t obsId,
-                          bool validIfAnyFilterVariablePassedQC) const {
+bool ObsAccessor::isCandidateForRetention(const std::vector<ioda::ObsDataRow<int>> &flags,
+                       size_t obsId, bool candidateForRetentionIfAnyFilterVariablesPassedQC) const {
   bool obIsNotFlagged;
-  if (validIfAnyFilterVariablePassedQC) {
+  if (candidateForRetentionIfAnyFilterVariablesPassedQC) {
     obIsNotFlagged = false;
     for (size_t irow = 0; irow < flags.size(); ++irow) {
       if (flags[irow][obsId] == QCflags::pass) {
@@ -259,6 +261,31 @@ void ObsAccessor::flagRejectedObservations(
     if (isRejected[globalObsId]) {
       for (std::vector<bool> & variableFlagged : flagged)
         variableFlagged[localObsId] = true;
+    }
+  }
+}
+
+void ObsAccessor::flagObservationsForAnyFilterVariableFailingQC(
+    const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
+    const ufo::Variables &filtervars, std::vector<std::vector<bool> > &flagged) const {
+  std::vector<size_t> indexOfFilterVariableInFlags;
+  for (size_t ivar = 0; ivar < flagged.size(); ++ivar) {
+    std::string filterVariableName = filtervars.variable(ivar).variable();
+    indexOfFilterVariableInFlags.push_back(flags.varnames().find(filterVariableName));
+  }
+  for (size_t iloc = 0; iloc < obsdb_->nlocs(); ++iloc) {
+    if (apply[iloc]) {
+      bool atLeastOneFilterVariableFailsQC = false;
+      for (size_t ivar = 0; ivar < flagged.size(); ++ivar) {
+        if (flags[indexOfFilterVariableInFlags[ivar]][iloc] != QCflags::pass) {
+          atLeastOneFilterVariableFailsQC = true;
+          break;
+        }
+      }
+      if (atLeastOneFilterVariableFailsQC) {
+        for (size_t ivar = 0; ivar < flagged.size(); ++ivar)
+          flagged[ivar][iloc] = true;
+      }
     }
   }
 }

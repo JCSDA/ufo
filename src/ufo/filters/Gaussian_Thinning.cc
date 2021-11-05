@@ -53,8 +53,10 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
+  bool retainOnlyIfAllFilterVariablesAreValid =
+          options_.retainOnlyIfAllFilterVariablesAreValid.value();
   std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_,
-                                     filtervars, options_.thinIfAnyFilterVariablesAreValid.value());
+                                               filtervars, !retainOnlyIfAllFilterVariablesAreValid);
 
   if (options_.opsCompatibilityMode) {
     // Sort observations by latitude
@@ -77,6 +79,10 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   const std::vector<bool> isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
   obsAccessor.flagRejectedObservations(isThinned, flagged);
+
+  // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
+  if (retainOnlyIfAllFilterVariablesAreValid)
+    obsAccessor.flagObservationsForAnyFilterVariableFailingQC(apply, *flags_, filtervars, flagged);
 }
 
 // -----------------------------------------------------------------------------
