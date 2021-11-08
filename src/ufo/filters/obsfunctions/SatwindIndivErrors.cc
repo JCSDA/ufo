@@ -40,7 +40,7 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
 
   // Include list of required data from ObsSpace
   invars_ += Variable(obs_vcoord+"@MetaData");
-  invars_ += Variable(profile+"@hofx");
+  invars_ += Variable(profile+"@HofX");
   invars_ += options_.pressure_error;
   invars_ += options_.quality_index;
 
@@ -149,7 +149,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::vector<float> pressure_error;
   std::vector<float> ob_qi;
   in.get(Variable(obs_vcoord+"@MetaData"), ob_p);
-  in.get(Variable(profile+"@hofx"), bg_windcomponent);
+  in.get(Variable(profile+"@HofX"), bg_windcomponent);
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);
 

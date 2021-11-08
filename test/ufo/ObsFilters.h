@@ -460,8 +460,8 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
     hop.simulateObs(gval, hofx, ybias, bias, diags);
-    hofx.save("hofx");
     filters.postFilter(hofx, bias, diags);
+    hofx.save("hofx");
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
     if (params.geovals.value() == boost::none)
