@@ -12,7 +12,6 @@ obs operator:
    Clouds: [Water, Ice]
    Cloud_Fraction: 1.0
    obs options:
-     inspectProfile: 1
      Sensor_ID: abi_g16
      EndianType: little_endian
      CoefficientPath: $(jedi_build)/ufo/test/Data/

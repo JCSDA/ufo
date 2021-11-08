@@ -14,7 +14,6 @@ observations:
       Clouds: [Water, Ice]
       Surfaces: [Water_Temperature, Salinity]
     obs options:
-      inspectProfile: 1
       Sensor_ID: radiometer_smap
       EndianType: little_endian
       CoefficientPath: Data/

@@ -12,7 +12,6 @@ observations:
       Absorbers: [H2O,O3,CO2]
       Clouds: [Water, Ice]
     obs options:
-      inspectProfile: 1
       Sensor_ID: amsua_n19
       EndianType: little_endian
       CoefficientPath: Data/
