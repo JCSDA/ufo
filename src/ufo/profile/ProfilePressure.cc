@@ -48,8 +48,8 @@ namespace ufo {
     const std::vector <float> &heightGeoVaLs =
       profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho);
 
-    if (!oops::allVectorsSameNonZeroSize(orogGeoVaLs,
-                                         pressureGeoVaLs,
+    if (orogGeoVaLs.empty() ||
+        !oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
                                          heightGeoVaLs)) {
       oops::Log::warning() << "At least one GeoVaLs vector is the wrong size. "
                            << "Profile pressure routine will not run." << std::endl;

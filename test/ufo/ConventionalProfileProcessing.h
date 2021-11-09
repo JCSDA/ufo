@@ -158,6 +158,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -181,6 +182,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -247,6 +249,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -318,6 +321,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -385,6 +389,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,

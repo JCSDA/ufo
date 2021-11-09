@@ -153,6 +153,7 @@ namespace ufo {
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(data_,
+                                          *flags_,
                                           options_.DHParameters,
                                           apply,
                                           filtervars,

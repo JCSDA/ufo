@@ -28,7 +28,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: true
   HofX: HofX
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_modobs.nc4

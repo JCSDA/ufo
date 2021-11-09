@@ -42,9 +42,6 @@ namespace ufo {
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
 
-    /// Have the observation and model values been averaged onto model levels?
-    oops::Parameter<bool> modellevels {"ModelLevels", false, this};
-
     /// @}
 
     /// @name Standard level-related parameters

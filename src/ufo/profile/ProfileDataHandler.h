@@ -49,6 +49,7 @@ namespace ufo {
   class ProfileDataHandler {
    public:
     ProfileDataHandler(const ObsFilterData &data,
+                       ioda::ObsDataVector<int> &flags,
                        const DataHandlerParameters &options,
                        const std::vector <bool> &apply,
                        const Variables &filtervars,
@@ -152,6 +153,9 @@ namespace ufo {
     /// Get GeoVaLs for a particular profile.
     std::vector <float>& getGeoVaLVector(const std::string &variableName);
 
+    /// Get filter flags
+    ioda::ObsDataVector<int>& getFilterFlags() const {return flags_;}
+
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
     void resetProfileIndices() {profileIndices_->reset();}
@@ -218,6 +222,9 @@ namespace ufo {
 
     /// GeoVaLs.
     std::unique_ptr<GeoVaLs> geovals_;
+
+    /// Filter flags
+    ioda::ObsDataVector<int> &flags_;
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;

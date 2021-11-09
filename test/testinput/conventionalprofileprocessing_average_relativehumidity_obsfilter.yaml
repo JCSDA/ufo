@@ -14,7 +14,7 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
-    simulated variables: [relative_humidity]
+    simulated variables: [air_temperature, relative_humidity]
     extension:
       average profiles onto model levels: 71
   geovals:
@@ -22,6 +22,7 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
+    - name: air_temperature
     - name: relative_humidity
     Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
     compareWithOPS: false
@@ -29,6 +30,6 @@ observations:
     PrintStationID: true
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 1574
+  passedBenchmark: 3179
   benchmarkFlag: 24
-  flaggedBenchmark: 33
+  flaggedBenchmark: 213

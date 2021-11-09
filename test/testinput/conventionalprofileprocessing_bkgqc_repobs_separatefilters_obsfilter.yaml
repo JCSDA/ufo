@@ -28,7 +28,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
@@ -41,7 +40,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
@@ -54,7 +52,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
@@ -67,7 +64,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
@@ -80,7 +76,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   - filter: Conventional Profile Processing
     filter variables:
     - name: air_temperature
@@ -93,7 +88,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
   HofX: HofX
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_repobs.nc4

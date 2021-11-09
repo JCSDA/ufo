@@ -19,11 +19,13 @@
 
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(const ObsFilterData &data,
+                                         ioda::ObsDataVector<int> &flags,
                                          const DataHandlerParameters &options,
                                          const std::vector <bool> &apply,
                                          const Variables &filtervars,
                                          std::vector<std::vector<bool>> &flagged)
     : obsdb_(data.obsspace()),
+      flags_(flags),
       options_(options),
       filtervars_(filtervars),
       flagged_(flagged)
@@ -109,6 +111,8 @@ namespace ufo {
         }
       } else if (groupname == "Corrections" ||
                  groupname == "DerivedObsValue" ||
+                 groupname == "DerivedMetaData" ||
+                 groupname == "DerivedModelValue" ||
                  groupname == "GrossErrorProbability" ||
                  groupname == "GrossErrorProbabilityBuddyCheck" ||
                  fullname == ufo::VariableNames::obs_air_pressure) {

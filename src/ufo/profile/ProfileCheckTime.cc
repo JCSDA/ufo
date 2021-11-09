@@ -25,7 +25,6 @@ namespace ufo {
     oops::Log::debug() << " Time check" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <int> &ObsType =
       profileDataHandler.get<int>(ufo::VariableNames::ObsType);
     const std::vector <float> &level_time =
@@ -36,6 +35,10 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(ObsType, pressures, uFlags, vFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "

@@ -168,11 +168,6 @@ struct VariableNames
   static constexpr const char* const FlagH = "FlagH@MetaData";
   static constexpr const char* const Indx = "Indx@MetaData";
 
-  // Derived values
-
-  static constexpr const char* const LogP_derived = "logP@DerivedValue";
-  static constexpr const char* const bigPgaps_derived = "bigPgaps@DerivedValue";
-
   // GeoVaLs
 
   static constexpr const char* const geovals_orog = "surface_altitude";
@@ -181,64 +176,64 @@ struct VariableNames
   static constexpr const char* const geovals_height = "height";
   static constexpr const char* const geovals_height_rho = "height_levels";
   static constexpr const char* const geovals_potential_temperature = "theta";
+  static constexpr const char* const geovals_air_temperature = "air_temperature";
   static constexpr const char* const geovals_surface_pressure = "surface_pressure";
   static constexpr const char* const geovals_relative_humidity = "relative_humidity";
 
   // GeoVaLs used in validation
 
-  static constexpr const char* const geovals_logP = "LogPB";
-  static constexpr const char* const geovals_ExnerP = "ExnerPB";
-  static constexpr const char* const geovals_logP_rho = "LogPA";
-  static constexpr const char* const geovals_ExnerP_rho = "ExnerPA";
-  static constexpr const char* const geovals_air_temperature = "air_temperature";
-  static constexpr const char* const geovals_average_air_temperature = "average_air_temperature";
-  static constexpr const char* const geovals_average_eastward_wind = "average_eastward_wind";
-  static constexpr const char* const geovals_average_northward_wind = "average_northward_wind";
-  static constexpr const char* const geovals_average_relative_humidity =
+  static constexpr const char* const geovals_testreference_logP = "LogPB";
+  static constexpr const char* const geovals_testreference_ExnerP = "ExnerPB";
+  static constexpr const char* const geovals_testreference_logP_rho = "LogPA";
+  static constexpr const char* const geovals_testreference_ExnerP_rho = "ExnerPA";
+  static constexpr const char* const geovals_testreference_air_temperature =
+    "average_air_temperature";
+  static constexpr const char* const geovals_testreference_eastward_wind =
+    "average_eastward_wind";
+  static constexpr const char* const geovals_testreference_northward_wind =
+    "average_northward_wind";
+  static constexpr const char* const geovals_testreference_relative_humidity =
     "average_relative_humidity";
-  static constexpr const char* const geovals_average_air_temperature_qcflags =
+  static constexpr const char* const geovals_testreference_air_temperature_qcflags =
     "average_air_temperature_flags";
-  static constexpr const char* const geovals_average_eastward_wind_qcflags =
+  static constexpr const char* const geovals_testreference_eastward_wind_qcflags =
     "average_eastward_wind_flags";
-  static constexpr const char* const geovals_average_northward_wind_qcflags =
+  static constexpr const char* const geovals_testreference_northward_wind_qcflags =
     "average_northward_wind_flags";
-  static constexpr const char* const geovals_average_relative_humidity_qcflags =
+  static constexpr const char* const geovals_testreference_relative_humidity_qcflags =
     "average_relative_humidity_flags";
-
-  // Derived values on model levels
-
-  static constexpr const char* const modellevels_logP_derived = "LogPB@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_ExnerP_derived = "ExnerPB@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_air_temperature_derived =
-    "air_temperature@ModelLevelsDerivedValue";
 
   // Averaged values on model levels
 
-  static constexpr const char* const modellevels_average_air_temperature_derived =
-    "average_air_temperature@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_average_eastward_wind_derived =
-    "average_eastward_wind@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_average_northward_wind_derived =
-    "average_northward_wind@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_average_relative_humidity_derived =
-    "average_relative_humidity@ModelLevelsDerivedValue";
-  static constexpr const char* const modellevels_average_air_temperature_qcflags =
-    "average_air_temperature@ModelLevelsQCFlags";
-  static constexpr const char* const modellevels_average_eastward_wind_qcflags =
-    "average_eastward_wind@ModelLevelsQCFlags";
-  static constexpr const char* const modellevels_average_northward_wind_qcflags =
-    "average_northward_wind@ModelLevelsQCFlags";
-  static constexpr const char* const modellevels_average_relative_humidity_qcflags =
-    "average_relative_humidity@ModelLevelsQCFlags";
+  static constexpr const char* const air_temperature_derived =
+    "air_temperature@DerivedObsValue";
+  static constexpr const char* const eastward_wind_derived =
+    "eastward_wind@DerivedObsValue";
+  static constexpr const char* const northward_wind_derived =
+    "northward_wind@DerivedObsValue";
+  static constexpr const char* const relative_humidity_derived =
+    "relative_humidity@DerivedObsValue";
 
-  // Derived values on model rho levels
+  // Derived observation values (used in averaging)
+
+  static constexpr const char* const LogP_derived = "logP@DerivedMetaData";
+  static constexpr const char* const bigPgaps_derived = "bigPgaps@DerivedMetaData";
+
+  // Derived model values (used in averaging)
+
+  static constexpr const char* const modellevels_logP_derived = "LogPB@DerivedModelValue";
+  static constexpr const char* const modellevels_ExnerP_derived = "ExnerPB@DerivedModelValue";
+  static constexpr const char* const modellevels_air_temperature_derived =
+    "air_temperature@DerivedModelValue";
+
+  // Derived model values on rho levels (used in averaging)
 
   static constexpr const char* const modellevels_logP_rho_derived =
-    "LogPA@ModelRhoLevelsDerivedValue";
+    "LogPA@DerivedModelValue";
   static constexpr const char* const modellevels_logPWB_rho_derived =
-    "LogPWB@ModelRhoLevelsDerivedValue";
+    "LogPWB@DerivedModelValue";
   static constexpr const char* const modellevels_ExnerP_rho_derived =
-    "ExnerPA@ModelRhoLevelsDerivedValue";
+    "ExnerPA@DerivedModelValue";
 };
 
 }  // namespace ufo

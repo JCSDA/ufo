@@ -31,7 +31,7 @@ observations:
   obs diagnostics:
   passedBenchmark: 1605
   benchmarkFlag: 24
-  flaggedBenchmark: 2
+  flaggedBenchmark: 108
 # The same test wtih GeoVaLs ordered from bottom to top.
 - obs space:
     name: Radiosonde, GeoVaLs reversed
@@ -58,4 +58,5 @@ observations:
   obs diagnostics:
   passedBenchmark: 1605
   benchmarkFlag: 24
-  flaggedBenchmark: 2
+  flaggedBenchmark: 108
+

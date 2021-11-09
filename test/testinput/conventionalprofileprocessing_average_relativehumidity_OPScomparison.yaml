@@ -12,7 +12,7 @@ Sondes:
       obsgrouping:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulated variables: [relative_humidity]
+    simulated variables: [air_temperature, relative_humidity]
     extension:
       average profiles onto model levels: 71
   geovals:

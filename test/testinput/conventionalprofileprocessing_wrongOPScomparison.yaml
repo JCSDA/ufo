@@ -41,13 +41,35 @@ Incorrect and missing values:
     simulated variables: [air_temperature, height]
   obs diagnostics:
   Conventional Profile Processing:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure", "AverageTemperature", "AverageWindSpeed", "AverageRelativeHumidity"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
+
+#One of the variables is missing in a different sample (for completeness). Expect an exception to be thrown during the averaging.
+Incorrect and missing values, averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_wrong.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  obs diagnostics:
+  Conventional Profile Processing:
+    Checks: ["AverageTemperature", "AverageWindSpeed", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringOperation: true
 
 #One of the variables is missing, basic check is run.
 Incorrect and missing values, Basic:
@@ -226,6 +248,7 @@ Wrong number of entries per profile, temperature averaging:
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
 
 #Wind speed averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
@@ -250,10 +273,11 @@ Wrong number of entries per profile, wind speed averaging:
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
 
 #Relative humidity averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
-Wrong number of entries per profile, wind speed averaging:
+Wrong number of entries per profile, relative humidity averaging:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -274,6 +298,7 @@ Wrong number of entries per profile, wind speed averaging:
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  ExpectThrowDuringOperation: true
 
 #A group variable is not chosen, throwing an exception
 No group variable chosen:

@@ -22,7 +22,6 @@ namespace ufo {
     oops::Log::debug() << " Background check for temperature" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Latitude =
       profileDataHandler.get<float>(ufo::VariableNames::Latitude);
     const std::vector <float> &pressures =
@@ -45,6 +44,10 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
     const std::vector <float> &tObsCorrection =
        profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(Latitude, pressures,
                                          tObs, tObsErr, tBkg, tBkgErr,

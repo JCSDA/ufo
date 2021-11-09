@@ -22,7 +22,6 @@ namespace ufo {
     oops::Log::debug() << " Background check for wind velocity" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &uObs =
       profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &uObsErr =
@@ -53,6 +52,10 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &timeFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(uObs, uObsErr, uBkg, uBkgErr,
                                          uPGE, uFlags,

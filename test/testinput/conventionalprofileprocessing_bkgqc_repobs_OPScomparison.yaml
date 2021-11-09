@@ -28,5 +28,4 @@ Sondes:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
-    ModelLevels: false
     Comparison_Tol: 0.001

@@ -37,7 +37,9 @@ namespace ufo {
         putDataVector(fullname, get<bool>(fullname));
       } else if (groupname == "Corrections" ||
                  groupname == "DerivedObsValue" ||
-                 groupname == "GrossErrorProbabilityBuddyCheck") {
+                 groupname == "GrossErrorProbabilityBuddyCheck" ||
+                 groupname == "DerivedMetaData" ||
+                 groupname == "DerivedModelValue") {
         oops::Log::debug() << " writing out " << fullname << std::endl;
         putDataVector(fullname, get<float>(fullname));
       }
