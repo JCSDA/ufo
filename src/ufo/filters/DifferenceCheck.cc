@@ -51,8 +51,8 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
   float vmax = parameters_.maxvalue.value().value_or(missing);
 
 // check for threshold and if exists, set vmin and vmax appropriately
-  const float thresh = config_.getFloat("threshold", missing);
-  if (thresh != missing) {
+  if (parameters_.threshold.value() != boost::none) {
+    const float thresh = *parameters_.threshold.value();
     vmin = -thresh;
     vmax = thresh;
   }

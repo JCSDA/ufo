@@ -115,7 +115,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
 }
 
 void StuckCheck::print(std::ostream & os) const {
-  os << "StuckCheck: config = " << config_ << '\n';
+  os << "StuckCheck: config = " << options_ << '\n';
 }
 
 /// \returns a vector containing all of the necessary data to run this filter for each observation,

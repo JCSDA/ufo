@@ -300,6 +300,6 @@ std::vector<int> HistoryCheck::getStationIds(const std::map<std::string, int> &s
 }
 
 void HistoryCheck::print(std::ostream & os) const {
-  os << "HistoryCheck: config = " << config_ << '\n';
+  os << "HistoryCheck: config = " << options_ << '\n';
 }
 }  // namespace ufo

@@ -74,10 +74,6 @@ class FilterBase : public ObsProcessorBase {
   ~FilterBase();
 
  protected:
-  /// For backward compatibility, the full set of filter options (including those required only by
-  /// the concrete subclass, not by FilterBase) is stored in this LocalConfiguration object.
-  /// It will be removed once all filters have been converted to use Parameters.
-  const eckit::LocalConfiguration config_;
   ufo::Variables filtervars_;
 
  private:

@@ -33,7 +33,7 @@ ObsDerivativeCheck::ObsDerivativeCheck(ioda::ObsSpace & obsdb, const Parameters_
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
-  oops::Log::debug() << "ObsDerivativeCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDerivativeCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -240,7 +240,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void ObsDerivativeCheck::print(std::ostream & os) const {
-  os << "ObsDerivativeCheck: config = " << config_ << std::endl;
+  os << "ObsDerivativeCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

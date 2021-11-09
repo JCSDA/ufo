@@ -37,7 +37,7 @@ ROobserror::ROobserror(ioda::ObsSpace & obsdb,
 
   // Get the number of horizontal geovals (used by ROPP-2D)
   // Default to 1
-  n_horiz = config_.getInt("n_horiz", 1);
+  n_horiz = config.getInt("n_horiz", 1);
   oops::Log::debug() << "constructor: n_horiz = " << n_horiz << std::endl;
 }
 

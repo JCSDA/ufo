@@ -33,7 +33,6 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
-    config_(parameters.toConfiguration()),
     filtervars_(),
     whereParameters_(parameters.where),
     actionParameters_(parameters.action().clone())
