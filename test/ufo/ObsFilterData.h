@@ -341,6 +341,58 @@ void testObsFilterData() {
       EXPECT(nlevs == nlevs_ref);
       checkObsDiagsGet(data, obsdiags, diagvars.variable(jvar), ospace.nlocs(), nlevs);
     }
+
+///  Check that has(), get() and dtype() work on obs functions returning floats:
+    if (confs[jconf].has("float obs functions")) {
+      for (const eckit::LocalConfiguration &funcconf :
+           confs[jconf].getSubConfigurations("float obs functions")) {
+        const eckit::LocalConfiguration varconf(funcconf, "variable");
+        const ufo::Variable var(varconf);
+        const float expectedValue = funcconf.getFloat("expected value");
+        const std::vector<float> ref(ospace.nlocs(), expectedValue);
+
+        testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref);
+      }
+    }
+
+///  Check that has(), get() and dtype() work on obs functions returning ints:
+    if (confs[jconf].has("int obs functions")) {
+      for (const eckit::LocalConfiguration &funcconf :
+           confs[jconf].getSubConfigurations("int obs functions")) {
+        const eckit::LocalConfiguration varconf(funcconf, "variable");
+        const ufo::Variable var(varconf);
+        const int expectedValue = funcconf.getInt("expected value");
+        const std::vector<int> ref(ospace.nlocs(), expectedValue);
+
+        testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Integer, ref);
+      }
+    }
+
+///  Check that has(), get() and dtype() work on obs functions returning strings:
+    if (confs[jconf].has("string obs functions")) {
+      for (const eckit::LocalConfiguration &funcconf :
+           confs[jconf].getSubConfigurations("string obs functions")) {
+        const eckit::LocalConfiguration varconf(funcconf, "variable");
+        const ufo::Variable var(varconf);
+        const std::string expectedValue = funcconf.getString("expected value");
+        const std::vector<std::string> ref(ospace.nlocs(), expectedValue);
+
+        testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::String, ref);
+      }
+    }
+
+///  Check that has(), get() and dtype() work on obs functions returning datetimes:
+    if (confs[jconf].has("datetime obs functions")) {
+      for (const eckit::LocalConfiguration &funcconf :
+           confs[jconf].getSubConfigurations("datetime obs functions")) {
+        const eckit::LocalConfiguration varconf(funcconf, "variable");
+        const ufo::Variable var(varconf);
+        const util::DateTime expectedValue(funcconf.getString("expected value"));
+        const std::vector<util::DateTime> ref(ospace.nlocs(), expectedValue);
+
+        testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::DateTime, ref);
+      }
+    }
   }
 }
 

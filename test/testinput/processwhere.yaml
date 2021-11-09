@@ -466,6 +466,58 @@ successful:
           name:  boolvar1@MetaData     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
         is_false:
       size where true: 4
+    - where:                       # test use of a float-valued obs function as a variable
+      - variable:
+          name:  Conditional@ObsFunction
+          options:
+            cases:
+            - where:
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                minvalue: 3
+              value: 0.6
+            defaultvalue: 0.4
+        minvalue: 0.5
+      size where true: 8
+    - where:                       # test use of an int-valued obs function as a variable
+      - variable:
+          name:  Conditional@IntObsFunction
+          options:
+            cases:
+            - where:
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                minvalue: 3
+              value: 6
+            defaultvalue: 4
+        minvalue: 5
+      size where true: 8
+    - where:                       # test use of an string-valued obs function as a variable
+      - variable:
+          name:  Conditional@StringObsFunction
+          options:
+            cases:
+            - where:
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                minvalue: 3
+              value: xyz
+            defaultvalue: abc
+        is_in: [xyz]
+      size where true: 8
+    - where:                       # test use of a datetime-valued obs function as a variable
+      - variable:
+          name:  Conditional@DateTimeObsFunction
+          options:
+            cases:
+            - where:
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                minvalue: 3
+              value: 2000-02-01T00:00:00Z
+            defaultvalue: 1999-12-01T00:00:00Z
+        minvalue: 2000-01-01T00:00:00Z
+      size where true: 8
 
 user_error_type_handling_is_in:
   window begin: 2018-01-01T00:00:00Z

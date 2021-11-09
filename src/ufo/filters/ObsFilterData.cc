@@ -407,6 +407,15 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
     res = obsdb_.dtype(grp, var);
   } else if (hasDataVectorInt(varname.group(), varname.variable())) {
     res = ioda::ObsDtype::Integer;
+  } else if (grp == ObsFunctionTraits<int>::groupName &&
+             ObsFunctionFactory<int>::functionExists(var)) {
+    res = ioda::ObsDtype::Integer;
+  } else if (grp == ObsFunctionTraits<std::string>::groupName &&
+             ObsFunctionFactory<std::string>::functionExists(var)) {
+    res = ioda::ObsDtype::String;
+  } else if (grp == ObsFunctionTraits<util::DateTime>::groupName &&
+             ObsFunctionFactory<util::DateTime>::functionExists(var)) {
+    res = ioda::ObsDtype::DateTime;
   } else if (!this->has(varname)) {
     oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
                        << std::endl;

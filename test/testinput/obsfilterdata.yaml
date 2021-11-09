@@ -41,6 +41,34 @@ obs filter data:
     variables:
     - name: eastward_wind@QCFlagsData
     - name: northward_wind@QCFlagsData
+  float obs functions:
+  - variable:
+      name: Conditional@ObsFunction
+      options:
+        cases: []
+        defaultvalue: 1.0
+    expected value: 1.0
+  int obs functions:
+  - variable:
+      name: Conditional@IntObsFunction
+      options:
+        cases: []
+        defaultvalue: 1
+    expected value: 1
+  string obs functions:
+  - variable:
+      name: Conditional@StringObsFunction
+      options:
+        cases: []
+        defaultvalue: abc
+    expected value: abc
+  datetime obs functions:
+  - variable:
+      name: Conditional@DateTimeObsFunction
+      options:
+        cases: []
+        defaultvalue: 2000-01-02T03:04:05Z
+    expected value: 2000-01-02T03:04:05Z
 - obs space:
     name: amsua_n19
     obsdatain:
