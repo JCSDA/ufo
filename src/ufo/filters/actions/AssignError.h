@@ -50,6 +50,8 @@ class AssignError : public FilterActionBase {
              const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+  bool modifiesQCFlags() const override { return false; }
+
  private:
   Variables allvars_;
   const Parameters_ parameters_;

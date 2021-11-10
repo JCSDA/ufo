@@ -60,6 +60,8 @@ class InflateError : public FilterActionBase {
 
   const ufo::Variables & requiredVariables() const override {return allvars_;}
 
+  bool modifiesQCFlags() const override { return false; }
+
  private:
   Variables allvars_;            /// variables required to compute inflation
   Parameters_ parameters_;

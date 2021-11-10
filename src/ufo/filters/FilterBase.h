@@ -65,7 +65,7 @@ namespace ufo {
 ///
 class FilterBase : public ObsProcessorBase {
  public:
-  FilterBase(ioda::ObsSpace &, const FilterParametersBaseWithAbstractAction &parameters,
+  FilterBase(ioda::ObsSpace &, const FilterParametersBaseWithAbstractActions &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> >,
              std::shared_ptr<ioda::ObsDataVector<float> >);
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,
@@ -84,7 +84,7 @@ class FilterBase : public ObsProcessorBase {
   virtual int qcFlag() const = 0;
 
   std::vector<WhereParameters> whereParameters_;
-  std::unique_ptr<FilterActionParametersBase> actionParameters_;
+  std::vector<std::unique_ptr<FilterActionParametersBase>> actionsParameters_;
 };
 
 }  // namespace ufo

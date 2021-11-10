@@ -42,4 +42,10 @@ const ufo::Variables & FilterAction::requiredVariables() const {
 
 // -----------------------------------------------------------------------------
 
+bool FilterAction::modifiesQCFlags() const {
+  return action_->modifiesQCFlags();
+}
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo

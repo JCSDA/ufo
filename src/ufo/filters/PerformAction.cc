@@ -20,6 +20,35 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
+void PerformActionParameters::deserialize(util::CompositePath &path,
+                                          const eckit::Configuration &config) {
+  FilterParametersBaseWithAbstractActions::deserialize(path, config);
+
+  if (action_.value() != boost::none && actions_.value() != boost::none)
+    throw eckit::UserError(path.path() +
+                           ": The 'action' and 'actions' options are mutually exclusive");
+  if (action_.value() == boost::none && actions_.value() == boost::none)
+    throw eckit::UserError(path.path() +
+                           ": Either the 'action' or 'actions' option must be set");
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<std::unique_ptr<FilterActionParametersBase>> PerformActionParameters::actions() const {
+  std::vector<std::unique_ptr<FilterActionParametersBase>> result;
+  if (action_.value() != boost::none) {
+    ASSERT(actions_.value() == boost::none);
+    result.push_back(action_.value()->actionParameters.value().clone());
+  } else {
+    ASSERT(actions_.value() != boost::none);
+    for (const FilterActionParameters &action : *actions_.value())
+      result.push_back(action.actionParameters.value().clone());
+  }
+  return result;
+}
+
+// -----------------------------------------------------------------------------
+
 PerformAction::PerformAction(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                              std::shared_ptr<ioda::ObsDataVector<int> > flags,
                              std::shared_ptr<ioda::ObsDataVector<float> > obserr)

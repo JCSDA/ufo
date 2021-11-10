@@ -22,6 +22,7 @@ set ( filters_files
       DifferenceCheck.h
       FilterBase.cc
       FilterBase.h
+      FilterParametersBase.cc
       FilterParametersBase.h
       FinalCheck.cc
       FinalCheck.h

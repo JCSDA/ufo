@@ -201,6 +201,8 @@ list( APPEND ufo_test_input
   testinput/qc_multichannel_thinning.yaml
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_performaction.yaml
+  testinput/qc_performaction_neither_action_nor_actions.yaml
+  testinput/qc_performaction_both_action_and_actions.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_poisson_disk_thinning_parallel.yaml
@@ -209,6 +211,7 @@ list( APPEND ufo_test_input
   testinput/qc_processamvqi.yaml
   testinput/qc_profile_background_check.yaml
   testinput/qc_profile_fewobs_check.yaml
+  testinput/qc_rejectlist_both_action_and_actions.yaml
   testinput/qc_stuckcheck.yaml
   testinput/qc_stuckcheck_unittests.yaml
   testinput/qc_thinning.yaml
@@ -2294,6 +2297,36 @@ ecbuild_add_test( TARGET  test_ufo_qc_performaction
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_performaction_neither_action_nor_actions
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_performaction_neither_action_nor_actions.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+set_tests_properties(test_ufo_qc_performaction_neither_action_nor_actions
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*Either the 'action' or 'actions' option must be set.*")
+
+ecbuild_add_test( TARGET  test_ufo_qc_performaction_both_action_and_actions
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_performaction_both_action_and_actions.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+set_tests_properties(test_ufo_qc_performaction_both_action_and_actions
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*The 'action' and 'actions' options are mutually exclusive.*")
+
+ecbuild_add_test( TARGET  test_ufo_qc_rejectlist_both_action_and_actions
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_rejectlist_both_action_and_actions.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+set_tests_properties(test_ufo_qc_rejectlist_both_action_and_actions
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*The 'action' and 'actions' options are mutually exclusive.*")
 
 ecbuild_add_test( TARGET  test_ufo_qc_bayesianbackgroundqcflags
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

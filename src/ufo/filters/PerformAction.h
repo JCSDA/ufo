@@ -27,34 +27,27 @@ namespace ioda {
 
 namespace ufo {
 
-/// \brief Parameters controlling the action performed on observations flagged by a filter.
-///
-/// The action must be specified explicitly (there is no default action).
-class RequiredFilterActionParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(RequiredFilterActionParameters, Parameters)
-
- public:
-  /// After deserialization, holds an instance of a subclass of FilterActionParametersBase
-  /// controlling the behavior of a filter action. The type of the subclass is determined
-  /// by the value of the `name` key in the Configuration object from which this object
-  /// is deserialized.
-  oops::RequiredPolymorphicParameter<FilterActionParametersBase, FilterActionFactory>
-    actionParameters{"name", this};
-};
-
 /// \brief Parameters controlling the Perform Action filter.
-class PerformActionParameters : public FilterParametersBaseWithAbstractAction {
-  OOPS_CONCRETE_PARAMETERS(PerformActionParameters, FilterParametersBaseWithAbstractAction)
+class PerformActionParameters : public FilterParametersBaseWithAbstractActions {
+  OOPS_CONCRETE_PARAMETERS(PerformActionParameters, FilterParametersBaseWithAbstractActions)
 
  public:
-  /// Parameters controlling the action performed on observations flagged by the filter.
-  const FilterActionParametersBase &action() const override {
-    return action_.value().actionParameters.value();
-  }
+  // Import both overloads of deserialize() from the base class. We will override one of them.
+  using FilterParametersBaseWithAbstractActions::deserialize;
 
- private:
-  /// Parameters controlling the action performed on observations flagged by the filter.
-  oops::RequiredParameter<RequiredFilterActionParameters> action_{"action", this};
+  /// \brief Load the values of all previously registered parameters from the (not necessarily
+  /// top-level) configuration \p config.
+  ///
+  /// The base class implementation is overridden to throw an exception unless exactly one of the
+  /// `action` and `actions` keys is present in the input configuration `config`.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+
+  /// \brief Return parameters specifying the actions to be performed on observations flagged by the
+  /// filter.
+  ///
+  /// This implementation returns the actions specified in the `action` or `actions` option,
+  /// depending on which is present.
+  std::vector<std::unique_ptr<FilterActionParametersBase>> actions() const override;
 };
 
 /// \brief Perform the action specified in the `action` YAML section on each observation selected by

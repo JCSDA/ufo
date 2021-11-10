@@ -167,13 +167,15 @@ observations:
   flaggedBenchmark: 12  # expect 12 observations to be assigned the "passive" flag
   passedBenchmark: 8    # expect 8 observations to be assigned the "passed" flag
 
-# Test "set"
+# Test "set" with the "ignore" option left at its default value "none"
 - obs space:
-    name: Test data for 'set'
+    name: "Test data for 'set' with 'ignore: none'"
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
+  # reject all observations (this should have no effect on the behaviour of subsequent filters)
+  - filter: RejectList
   # set the diagnostic flag FlagA for observations of all simulated variables taken at latitude >= 0
   - filter: Perform Action
     where:
@@ -205,9 +207,62 @@ observations:
     reference:
       name: TestReference/bool_variable_11111  # = 1, 1, 1, 1, 1
 
+# Test "set" with the "ignore" option set to "rejected observations"
+- obs space:
+    name: "Test data for 'set' with 'ignore: rejected observations'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature, relative_humidity]
+  obs filters:
+  # reject observations taken at latitude <= -1
+  - filter: RejectList
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      maxvalue: -1
+  # set the diagnostic flag FlagA for non-rejected observations taken at latitude >= -2
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: -2
+    action:
+      name: set
+      flag: FlagA
+      ignore: rejected observations
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/air_temperature
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+  - test:
+      name: DiagnosticFlags/FlagA/relative_humidity
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
+# Test "set" with the "ignore" option set to "defective observations"
+- obs space:
+    name: "Test data for 'set' with 'ignore: defective observations'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
+  obs filters:
+  # set the diagnostic flag FlagA for all non-defective observations (in this case, those with
+  # non-missing ObsValues)
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      ignore: defective observations
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/surface_pressure
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
 # Try to set a non-existing diagnostic flag
 - obs space:
-    name: Test data for 'set'
+    name: "Test data for 'set' of a non-existing flag"
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
@@ -216,15 +271,17 @@ observations:
     action:
       name: set
       flag: NonexistingFlag
-  expectExceptionWithMessage: Diagnostic flag 'NonexistingFlag' does not exist yet
+  expectExceptionWithMessage: Variable 'DiagnosticFlags/NonexistingFlag/air_temperature' does not exist yet
 
-# Test "unset"
+# Test "unset" with the "ignore" option left at its default value "none"
 - obs space:
-    name: Test data for 'unset'
+    name:  "Test data for 'unset' with 'ignore: none'"
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
+  # reject all observations (this should have no effect on the behaviour of subsequent filters)
+  - filter: RejectList
   # set the diagnostic flag FlagA everywhere
   - filter: Perform Action
     action:
@@ -261,9 +318,72 @@ observations:
     reference:
       name: TestReference/bool_variable_00000  # = 0, 0, 0, 0, 0
 
+# Test "unset" with the "ignore" option set to "rejected observations"
+- obs space:
+    name:  "Test data for 'unset' with 'ignore: rejected observations'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature, relative_humidity]
+  obs filters:
+  # set the diagnostic flag FlagA everywhere
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+  # reject observations taken at latitude <= -1
+  - filter: RejectList
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      maxvalue: -1
+  # unset the diagnostic flag FlagA for non-rejected observations taken at latitude >= -2
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: -2
+    action:
+      name: unset
+      flag: FlagA
+      ignore: rejected observations
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/air_temperature
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+  - test:
+      name: DiagnosticFlags/FlagA/relative_humidity
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+
+# Test "unset" with the "ignore" option set to "defective observations"
+- obs space:
+    name:  "Test data for 'unset' with 'ignore: defective observations'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
+  obs filters:
+  # set the diagnostic flag FlagA everywhere
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+  # unset the diagnostic flag FlagA for all non-defective observations (in this case, those with
+  # non-missing ObsValues)
+  - filter: Perform Action
+    action:
+      name: unset
+      flag: FlagA
+      ignore: defective observations
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/surface_pressure
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+
 # Try to unset a non-existing diagnostic flag
 - obs space:
-    name: Test data for 'unset'
+    name: "Test data for 'unset' of a non-existing flag"
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
@@ -272,4 +392,123 @@ observations:
     action:
       name: unset
       flag: NonexistingFlag
-  expectExceptionWithMessage: Diagnostic flag 'NonexistingFlag' does not exist yet
+  expectExceptionWithMessage: Variable 'DiagnosticFlags/NonexistingFlag/air_temperature' does not exist yet
+
+# Test multiple actions: 'set' followed by 'reject'
+- obs space:
+    name: "Test data for 'set' followed by 'reject'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  # reject observations with temperatures below 303 K
+  - filter: Bounds Check
+    filter variables: [air_temperature]  # = 300, 302.5, 305, 307.5, 310 ;
+    minvalue: 303
+  # reject observations taken at latitude >= -2 (and not rejected previously) and mark them with the
+  # diagnostic flag FlagA
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: -2
+    actions:
+    - name: set
+      flag: FlagA
+      ignore: rejected observations
+    - name: reject
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/air_temperature
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
+# Same as above, but using the RejectList filter instead of Perform Action
+- obs space:
+    name: "Test data for 'set' followed by 'reject'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  # reject observations with temperatures below 303 K
+  - filter: Bounds Check
+    filter variables: [air_temperature]  # = 300, 302.5, 305, 307.5, 310 ;
+    minvalue: 303
+  # reject observations taken at latitude >= -2 (and not rejected previously) and mark them with the
+  # diagnostic flag FlagA
+  - filter: RejectList
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: -2
+    actions:
+    - name: set
+      flag: FlagA
+      ignore: rejected observations
+    - name: reject
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/air_temperature
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
+# Try to perform first the 'reject' action and then 'set'
+- obs space:
+    name: "Test data for 'reject' followed by 'set'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Perform Action
+    actions:
+    # Incorrect order
+    - name: reject
+    - name: set
+      flag: FlagA
+      ignore: rejected observations
+  expectExceptionWithMessage: Actions modifying QC flags, such as 'reject', must not be followed by any other actions performed by the same filter
+
+# Test multiple actions: 'set' followed by 'accept'
+- obs space:
+    name: "Test data for 'set' followed by 'accept'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
+  obs filters:
+  # initially reject all observations
+  - filter: RejectList
+  # accept observations taken at latitude >= -2 (and not missing) and mark them with the
+  # diagnostic flag FlagA
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: -2
+    actions:
+    - name: set
+      flag: FlagA
+      ignore: defective observations
+    - name: accept
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/surface_pressure
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
+# Try to perform first the 'accept' action and then 'set'
+- obs space:
+    name: "Test data for 'accept' followed by 'set'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  # initially reject all observations
+  - filter: RejectList
+  - filter: Perform Action
+    actions:
+    # Incorrect order
+    - name: accept
+    - name: set
+      flag: FlagA
+      ignore: defective observations
+  expectExceptionWithMessage: Actions modifying QC flags, such as 'accept', must not be followed by any other actions performed by the same filter

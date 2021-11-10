@@ -36,6 +36,21 @@ namespace QCflags {
   constexpr int bayesianQC = 26;  // observation failed due to Bayesian background check
   constexpr int modelobthresh = 27;  // observation failed modelob threshold check
   constexpr int history = 28;  // observation failed when compared with historical data
+
+  /// \brief Return true if the QC flag \p qcflag indicates that an observation has been rejected,
+  /// false otherwise.
+  inline bool isRejected(int qcflag) {
+    // TODO(wsmigaj): don't treat passive observations as rejected
+    return qcflag != pass;
+  }
+
+  /// \brief Return true if the QC flag \p qcflag indicates that an observation is defective.
+  ///
+  /// This means that the observed value is missing, the observation has been rejected by
+  /// pre-processing or its model equivalent cannot be computed.
+  inline bool isDefective(int qcflag) {
+    return qcflag == missing || qcflag == preQC || qcflag == Hfailed;
+  }
 };  // namespace QCflags
 
 }  // namespace ufo

@@ -48,7 +48,12 @@ class FilterAction : private boost::noncopyable {
   void apply(const ufo::Variables &vars, const std::vector<std::vector<bool>> &flagged,
              const ObsFilterData &data, int filterQCflag,
              ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const;
-  virtual const ufo::Variables & requiredVariables() const;
+  const ufo::Variables & requiredVariables() const;
+
+  /// \brief Return true if this action modifies QC flags.
+  ///
+  /// When a filter executes multiple actions, only the last is allowed to modify QC flags.
+  bool modifiesQCFlags() const;
 
  private:
   std::unique_ptr<FilterActionBase> action_;

@@ -1,0 +1,17 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Perform Action
+    # Error: Both the 'action' and 'actions' keys are present
+    action:
+      name: inflate error
+      inflation factor: 2.0
+    actions:
+    - name: reject

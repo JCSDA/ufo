@@ -29,17 +29,17 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 FilterBase::FilterBase(ioda::ObsSpace & os,
-                       const FilterParametersBaseWithAbstractAction & parameters,
+                       const FilterParametersBaseWithAbstractActions & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     filtervars_(),
     whereParameters_(parameters.where),
-    actionParameters_(parameters.action().clone())
+    actionsParameters_(parameters.actions())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
-  allvars_ += getAllWhereVariables(parameters.where);
 
+  // Identify filter variables
   if (parameters.filterVariables.value() != boost::none) {
   // read filter variables
     for (const Variable &var : *parameters.filterVariables.value())
@@ -49,8 +49,21 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
     filtervars_ += Variables(obsdb_.obsvariables());
   }
 
-  FilterAction action(*actionParameters_);
-  allvars_ += action.requiredVariables();
+  // Identify input variables required by the filter and notify user if any action except the last
+  // modifies QC flags
+  allvars_ += getAllWhereVariables(whereParameters_);
+
+  const size_t numActions = actionsParameters_.size();
+  for (size_t i = 0; i < numActions; ++i) {
+    const std::unique_ptr<FilterActionParametersBase> &actionParameters = actionsParameters_[i];
+    FilterAction action(*actionParameters);
+    if (i < numActions - 1 && action.modifiesQCFlags()) {
+      throw eckit::UserError("Actions modifying QC flags, such as '" +
+                             actionParameters->name.value().value() + "', must not be followed by "
+                             "any other actions performed by the same filter", Here());
+    }
+    allvars_ += action.requiredVariables();
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -86,9 +99,11 @@ void FilterBase::doFilter() const {
 // Apply filter
   this->applyFilter(apply, filtervars_, flagged);
 
-// Take action
-  FilterAction action(*actionParameters_);
-  action.apply(filtervars_, flagged, data_, this->qcFlag(), *flags_, *obserr_);
+// Take actions
+  for (const std::unique_ptr<FilterActionParametersBase> &actionParameters : actionsParameters_) {
+    FilterAction action(*actionParameters);
+    action.apply(filtervars_, flagged, data_, this->qcFlag(), *flags_, *obserr_);
+  }
 
 // Done
   oops::Log::trace() << "FilterBase doFilter end" << std::endl;
