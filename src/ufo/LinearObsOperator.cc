@@ -23,12 +23,13 @@ namespace ufo {
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
   : oper_(LinearObsOperatorFactory::create(os, params.operatorParameters)), odb_(os)
 {
-  // We use += rather than = to make sure the Variables objects contain no duplicate entries
-  // and the variables are sorted alphabetically.
+  // We use += rather than = to make sure the Variables objects contain no duplicate entries.
   oops::Variables operatorVars;
   operatorVars += oper_->simulatedVars();
+  operatorVars.sort();
   oops::Variables obsSpaceVars;
   obsSpaceVars += os.obsvariables();
+  obsSpaceVars.sort();
   if (!(operatorVars == obsSpaceVars))
     throw eckit::UserError("The list of variables simulated by the obs operator differs from "
                            "the list of simulated variables in the obs space",
