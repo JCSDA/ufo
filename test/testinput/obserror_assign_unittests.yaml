@@ -1176,7 +1176,7 @@ Assign observation error from CSV file; unsupported data type:
           - name: StringVar@MetaData
             method: exact
   expectExceptionWithMessage: Unsupported data type 'color'
-Assign observation error from CSV file; criteria insufficient to identify a single matching row:
+Assign observation error from CSV file; criteria insufficient to identify a unique matching row:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -1202,7 +1202,7 @@ Assign observation error from CSV file; criteria insufficient to identify a sing
           interpolation:
           - name: StringVar@MetaData
             method: exact
-  expectExceptionWithMessage: Previous calls to extract() have failed to identify a single value to return
+  expectExceptionWithMessage: Extraction criteria were not sufficient to identify a unique match in the interpolation array
 Assign observation error from CSV file; data types float, int and string; missing values:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z

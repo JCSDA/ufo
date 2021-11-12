@@ -643,10 +643,13 @@ ExtractedValue DataExtractor<ExtractedValue>::getUniqueMatch() const {
   // extraction process.
   ASSERT(!resultSet_);
 
-  for (size_t dim=0; dim < constrainedRanges_.size(); dim++)
-    if (constrainedRanges_[dim].size() != 1)
-      throw eckit::Exception("Previous calls to extract() have failed to identify "
-                             "a single value to return.", Here());
+  for (size_t dim=0; dim < constrainedRanges_.size(); dim++) {
+    if (constrainedRanges_[dim].size() == 0)
+      throw eckit::Exception("No match found in the interpolation array.", Here());
+    else if (constrainedRanges_[dim].size() > 1)
+      throw eckit::Exception("Extraction criteria were not sufficient to identify a unique match "
+                             "in the interpolation array.", Here());
+  }
   return interpolatedArray_[constrainedRanges_[0].begin()]
                            [constrainedRanges_[1].begin()]
                            [constrainedRanges_[2].begin()];

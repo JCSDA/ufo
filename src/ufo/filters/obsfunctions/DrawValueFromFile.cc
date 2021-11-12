@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <ostream>
+
 #include "eckit/exception/Exceptions.h"
 #include "ioda/Misc/StringFuncs.h"  // for convertV1PathToV2Path
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
@@ -18,6 +20,25 @@ typedef std::vector<std::pair<std::string, boost::variant<std::vector<int>,
                                                           std::vector<float>,
                                                           std::vector<std::string>>
                    >> ObData;
+
+
+// -----------------------------------------------------------------------------
+/// A boost::variant visitor whose function call operator prints the value of the specified element
+/// of a vector to the specified output stream.
+class PrintVisitor : public boost::static_visitor<void> {
+ public:
+  PrintVisitor(std::ostream &os, size_t iloc) :
+    os_(os), iloc_(iloc) {}
+
+  template <typename T>
+  void operator()(const std::vector<T> &obData) {
+    os_ << obData[iloc_];
+  }
+
+ private:
+  std::ostream &os_;
+  size_t iloc_;
+};
 
 
 // -----------------------------------------------------------------------------
@@ -110,8 +131,7 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
 template <typename ExtractedValue>
 class ExtractVisitor : public boost::static_visitor<void> {
  public:
-  ExtractVisitor(DataExtractor<ExtractedValue> &interpolator,
-                 const size_t &iloc) :
+  ExtractVisitor(DataExtractor<ExtractedValue> &interpolator, size_t iloc) :
     interpolator(interpolator), iloc(iloc) {}
 
   template <typename T>
@@ -125,7 +145,7 @@ class ExtractVisitor : public boost::static_visitor<void> {
   }
 
   DataExtractor<ExtractedValue> &interpolator;
-  const size_t &iloc;
+  size_t iloc;
 };
 
 
@@ -169,23 +189,42 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
 
   for (size_t jvar = 0; jvar < out.nvars(); ++jvar) {
     for (size_t iloc = 0; iloc < in.nlocs(); ++iloc) {
-      if (options_.chlist.value() != boost::none)
-        interpolator.extract(channels_[jvar]);
+      try {
+        if (options_.chlist.value() != boost::none)
+          interpolator.extract(channels_[jvar]);
 
-      // Perform any extraction methods.
-      ExtractVisitor<T> visitor(interpolator, iloc);
-      for (size_t ind=0; ind < obData.size(); ind++) {
-        // 'interpolationMethod' is a copy to avoid a MetOffice CRAY icpc compile failure.
-        // See https://github.com/JCSDA-internal/ufo/pull/1419
-        ufo::InterpMethod interpolationMethod = interpMethod_.at(obData[ind].first);
-        if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
-          boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
-          break;
-        } else {
-          boost::apply_visitor(visitor, obData[ind].second);
+        // Perform any extraction methods.
+        ExtractVisitor<T> visitor(interpolator, iloc);
+        for (size_t ind=0; ind < obData.size(); ind++) {
+          // 'interpolationMethod' is a copy to avoid a MetOffice CRAY icpc compile failure.
+          // See https://github.com/JCSDA-internal/ufo/pull/1419
+          ufo::InterpMethod interpolationMethod = interpMethod_.at(obData[ind].first);
+          if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
+            boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
+            break;
+          } else {
+            boost::apply_visitor(visitor, obData[ind].second);
+          }
         }
+        out[jvar][iloc] = interpolator.getResult();
+      } catch (const std::exception &ex) {
+        // Print extra information that should help the user debug the problem.
+        oops::Log::error() << "ERROR: Value extraction failed.\n";
+        oops::Log::error() << "  ObsSpace location: " << iloc << "\n";
+        oops::Log::error() << "  Interpolation variables:\n";
+        // Print values of the interpolation variables at this location
+        PrintVisitor visitor(oops::Log::error(), iloc);
+        for (size_t ind = 0; ind < obData.size(); ++ind) {
+          // Variable name
+          oops::Log::error() << "    - " << obData[ind].first << ": ";
+          // Variable value
+          boost::apply_visitor(visitor, obData[ind].second);
+          oops::Log::error() << '\n';
+        }
+        oops::Log::error() << "  Error message: " << ex.what() << std::endl;
+        // Rethrow the original exception
+        throw;
       }
-      out[jvar][iloc] = interpolator.getResult();
     }
   }
 }
