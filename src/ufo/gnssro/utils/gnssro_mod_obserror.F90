@@ -197,6 +197,7 @@ real(kind_real), intent(in)  :: missing                  ! Missing value indicat
 
 ! Local parameters
 integer, parameter :: Rmax_num = 1000                    ! Max number of R matrices to be read in
+logical, parameter :: verboseOutput = .FALSE.            ! Whether to output extra debugging information
 
 ! Local variables
 type(rmatrix_type), allocatable :: Rmatrix_list(:) ! List of all the R matrices to use
@@ -271,14 +272,20 @@ do iob = 1, nobs
     end do
 
     ! Fractional error
-    frac_err = Rmatrix % frac_err(iheight) + &
-               (Rmatrix % frac_err(iheight + 1) - Rmatrix % frac_err(iheight)) * &
-               (obsZ(iob) - Rmatrix % height(iheight)) / &
-               (Rmatrix % height(iheight + 1) - Rmatrix % height(iheight))
+    if (iheight > Rmatrix % num_heights - 1) then
+      frac_err = Rmatrix % frac_err(Rmatrix % num_heights)
+    else
+      frac_err = Rmatrix % frac_err(iheight) + &
+                 (Rmatrix % frac_err(iheight + 1) - Rmatrix % frac_err(iheight)) * &
+                 (obsZ(iob) - Rmatrix % height(iheight)) / &
+                 (Rmatrix % height(iheight + 1) - Rmatrix % height(iheight))
+    end if
 
-    WRITE(Message,'(A,I8,2F16.4,2E26.8)') 'Result', iob, obsZ(iob), frac_err, &
-        ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error)
-    CALL fckit_log % debug(Message)
+    if (verboseOutput) then
+      WRITE(Message,'(A,I8,2F16.4,2E26.8)') 'Result', iob, obsZ(iob), frac_err, &
+          ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error)
+      CALL fckit_log % debug(Message)
+    end if
 
     ! Standard deviation
     ObsErr(iob) = MAX(frac_err * obsValue(iob), Rmatrix % min_error)
@@ -309,6 +316,7 @@ real(kind_real), intent(in)  :: missing           ! Missing value indicator
 
 ! Local parameters
 integer, parameter :: Rmax_num = 1000             ! Max number of R matrices to be read in
+logical, parameter :: verboseOutput = .FALSE.     ! Whether to output extra debugging information
 
 ! Local variables
 type(rmatrix_type), allocatable :: Rmatrix_list(:) ! List of all the R matrices to use
@@ -363,10 +371,12 @@ do iob = 1, nobs
                  (Rmatrix % height(iheight) - Rmatrix % height(iheight - 1))
     end if
 
-    WRITE(Message,'(A,I8,2F16.4,2E21.8,F12.4)') 'Result', iob, obsZ(iob), &
-        frac_err, ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), &
-        obsLat(iob)
-    CALL fckit_log % debug(Message)
+    if (verboseOutput) then
+      WRITE(Message,'(A,I8,2F16.4,2E21.8,F12.4)') 'Result', iob, obsZ(iob), &
+          frac_err, ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), &
+          obsLat(iob)
+      CALL fckit_log % debug(Message)
+    end if
 
     ! Standard deviation
     ObsErr(iob) = MAX (frac_err * obsValue(iob), Rmatrix % min_error)

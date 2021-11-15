@@ -247,6 +247,9 @@ INTEGER, INTENT(IN)              :: R_num_sats                ! The number of ma
 TYPE (Rmatrix_type), INTENT(IN)  :: RMatrix_list(R_num_sats)  ! The list of R matrices to select from
 TYPE (Rmatrix_type), INTENT(OUT) :: out_matrix                ! Output R matrix
 
+! Local parameters
+logical, parameter               :: verboseOutput = .FALSE.   ! Whether to output extra debugging information
+
 ! Local declarations:
 CHARACTER(len=*), PARAMETER      :: RoutineName = "ufo_roobserror_interpolate_rmatrix"
 INTEGER                          :: i                         ! Loop variable
@@ -281,10 +284,12 @@ END DO
 
 IF (upper_match > 0) THEN
   IF (lower_match > 0) THEN
-    WRITE (ErrorMessage, '(A,3F10.2)') "Interpolating between locations.. ", &
-                                       RMatrix_list(lower_match) % av_temp, &
-                                       av_temp, RMatrix_list(upper_match) % av_temp
-    call fckit_log % debug(ErrorMessage)
+    if (verboseOutput) then
+      WRITE (ErrorMessage, '(A,3F10.2)') "Interpolating between locations.. ", &
+                                         RMatrix_list(lower_match) % av_temp, &
+                                         av_temp, RMatrix_list(upper_match) % av_temp
+      call fckit_log % debug(ErrorMessage)
+    end if
     weight = (av_temp - RMatrix_list(lower_match) % av_temp) / &
       (RMatrix_list(upper_match) % av_temp - RMatrix_list(lower_match) % av_temp)
     
