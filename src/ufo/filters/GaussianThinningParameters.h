@@ -26,7 +26,7 @@ namespace eckit {
 namespace ufo {
 
 enum class DistanceNorm {
-  GEODESIC, MAXIMUM
+  GEODESIC, MAXIMUM, NULLNORM
 };
 
 struct DistanceNormParameterTraitsHelper {
@@ -34,7 +34,8 @@ struct DistanceNormParameterTraitsHelper {
   static constexpr char enumTypeName[] = "DistanceNorm";
   static constexpr util::NamedEnumerator<DistanceNorm> namedValues[] = {
     { DistanceNorm::GEODESIC, "geodesic" },
-    { DistanceNorm::MAXIMUM, "maximum" }
+    { DistanceNorm::MAXIMUM, "maximum" },
+    { DistanceNorm::NULLNORM, "null"}
   };
 };
 
@@ -149,6 +150,18 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// the highest priority are considered as candidates for retaining. If not specified, all
   /// observations are assumed to have equal priority.
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
+
+  /// True to accept the observation whose value is closest to the median in each bin,
+  /// and reject all others.
+  /// If false or unspecified, will use distance_norm as described below.
+  oops::Parameter<bool> selectMedian{"select_median", false, this};
+
+  /// If selectMedian=true, then minNumObsPerBin is the minimum number of observations there must
+  /// be in each bin for the median-valued obs to be accepted, otherwise all obs in that bin are
+  /// rejected. E.g. if minNumObsPerBin=5, then all obs in any bin with 4 or fewer obs are rejected
+  /// on the basis that the statistics are too poor to generate a reliable median. This parameter
+  /// does nothing if selectMedian=false.
+  oops::Parameter<int> minNumObsPerBin{"min_num_obs_per_bin", 5, this};
 
   /// Determines which of the highest-priority observations lying in a cell is retained.
   ///

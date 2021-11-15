@@ -28,6 +28,7 @@
 #include "ufo/utils/GeodesicDistanceCalculator.h"
 #include "ufo/utils/MaxNormDistanceCalculator.h"
 #include "ufo/utils/metoffice/MetOfficeSort.h"
+#include "ufo/utils/NullDistanceCalculator.h"
 #include "ufo/utils/RecursiveSplitter.h"
 #include "ufo/utils/RoundingEquispacedBinSelector.h"
 #include "ufo/utils/SpatialBinSelector.h"
@@ -76,8 +77,22 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsAccessor,
                                      splitter, distancesToBinCenter);
 
-  const std::vector<bool> isThinned = identifyThinnedObservations(
+  std::vector<bool> isThinned;
+
+  if (options_.selectMedian) {
+    ASSERT(filtervars.size() == 1);  // only works on one variable at a time
+    const size_t filterVarIndex = 0;
+    std::vector<float> obs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
+                              filtervars.variable(filterVarIndex).variable());
+    // Different version of identifyThinnedObservations(), which takes additional inputs:
+    //  @ObsValue of the filter variable, and option specifying minimum number of obs there
+    //  must be in a bin to accept a super-ob (the median-valued observation)
+    isThinned = identifyThinnedObservationsMedian(
+                              validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
+  } else {  // default function, thinning obs according to distance_norm:
+    isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
+  }
   obsAccessor.flagRejectedObservations(isThinned, flagged);
 
   // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
@@ -103,11 +118,16 @@ std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
   DistanceNorm distanceNorm = options.distanceNorm.value().value_or(DistanceNorm::GEODESIC);
   if (options.opsCompatibilityMode)
     distanceNorm = DistanceNorm::MAXIMUM;
+  if (options.selectMedian) {
+    distanceNorm = DistanceNorm::NULLNORM;
+    }
   switch (distanceNorm) {
   case DistanceNorm::GEODESIC:
     return std::unique_ptr<DistanceCalculator>(new GeodesicDistanceCalculator());
   case DistanceNorm::MAXIMUM:
     return std::unique_ptr<DistanceCalculator>(new MaxNormDistanceCalculator());
+  case DistanceNorm::NULLNORM:
+    return std::unique_ptr<DistanceCalculator>(new NullDistanceCalculator());
   }
   throw eckit::BadParameter("Unrecognized distance norm", Here());
 }
@@ -385,6 +405,59 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservations(
         isThinned[validObsIds[validObsIndex]] = true;
   }
 
+  return isThinned;
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
+    const std::vector<size_t> &validObsIds,
+    const ObsAccessor &obsAccessor,
+    const RecursiveSplitter &splitter,
+    const std::vector<float> &obsval,
+    const float &minNumObsPerBin) const {
+
+  const size_t totalNumObs = obsAccessor.totalNumObservations();
+
+  std::vector<bool> isThinned(totalNumObs, true);
+  if (minNumObsPerBin < 2) {
+    // bins with 1 obs are not counted as a group of splitter - so if accepting single-obs,
+    // they must be accepted (isThinned=false) by default; otherwise if minNumObsPerBin >= 2,
+    // single-obs in bins must be rejected by default.
+    isThinned.assign(totalNumObs, false);
+  }
+
+  for (ufo::RecursiveSplitter::Group group : splitter.multiElementGroups()) {
+    // observation values in this bin:
+    std::vector<float> obsgroup;
+    for (size_t validObsIndex : group) {
+      if (obsval[validObsIds[validObsIndex]] !=
+          util::missingValue(obsval[validObsIds[validObsIndex]])) {
+        obsgroup.push_back(obsval[validObsIds[validObsIndex]]);
+      }
+    }
+    const size_t groupSize = obsgroup.size();
+    if (groupSize >= minNumObsPerBin) {
+      // find median obs value in bin:
+      std::vector<float> obsgroupSorted(obsgroup);
+      std::stable_sort(obsgroupSorted.begin(), obsgroupSorted.end());
+      const float obsMedian = 0.5*(obsgroupSorted[floor(0.5*(groupSize-1))]
+                            + obsgroupSorted[ceil(0.5*(groupSize-1))]);
+      auto i = std::min_element(obsgroup.begin(), obsgroup.end(), [=] (float x, float y)
+      {
+          return abs(x - obsMedian) < abs(y - obsMedian);
+      });
+      const size_t bestValidObsIndex = std::distance(obsgroup.begin(), i);
+
+      for (size_t validObsIndex : group) {
+        if (validObsIds[validObsIndex] == validObsIds[*(group.begin()+bestValidObsIndex)]) {
+          isThinned[validObsIds[validObsIndex]] = false;
+        } else {
+          isThinned[validObsIds[validObsIndex]] = true;
+        }
+      }
+    }
+  }
   return isThinned;
 }
 

@@ -1,0 +1,131 @@
+
+window begin: 2020-05-11T02:59:59Z  # Shifted back by 1 s to include obs taken at 03:00:00
+window end: 2020-05-11T09:00:00Z
+
+# These tests check the functionality of the 'select_median' option of Gaussian Thinning.
+# The first test operates on some (40) randomly generated sea surface temperature observations,
+# checking that the locations accepted match those calculated by a python script to do the same.
+# The second includes other_variable as one of the simulated variables, which would result in
+# different locations being accepted if the filter acted on it - but the test checks that the
+# filter is only applied to sea_surface_temperature (as above) and ignores other_variable, not
+# rejecting any locations in the latter.
+# While the first 2 tests have 'min_num_obs_per_bin' set, the third doesn't - it tests that the
+# default value of 5 is used (note the spatial bins are the same as for the first 2 tests, but
+# there is only 1 time bin instead of 2).
+# The fourth test checks that the filter acts on the latest valid type - in this case, a
+# derived obs value rather than obs value. Using the same spatial and temporal bins as the 3rd
+# test, and default 5 min_num_obs_per_bin as well - the obs accepted are different, showing that
+# the filter is indeed acting on a different (derived) variable.
+
+observations:
+- obs space:
+    name: Median super-obbing for Satellite SST only
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+    obsdataout:
+      obsfile: Data/superob_testout1.nc4
+    simulated variables: [sea_surface_temperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: sea_surface_temperature
+    select_median: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 6000  # km
+    time_mesh: PT3H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedObservationsBenchmark:
+  - 0
+  - 4
+  - 5
+  - 8
+  - 14
+  - 17
+  - 19
+  - 20
+  - 24
+  - 28
+  - 33
+  - 37
+  - 38
+  - 39
+  passedBenchmark: 14
+
+observations:
+- obs space:
+    name: Median super-obbing for Satellite SST with extra variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+    obsdataout:
+      obsfile: Data/superob_testout2.nc4
+    simulated variables: [sea_surface_temperature, other_variable]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: sea_surface_temperature
+    select_median: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 6000  # km
+    time_mesh: PT3H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedBenchmark: 51  # When >1 simulated variable (but only 1 filter variable allowed),
+                       # the filter variable is filtered as normal (14 accepted, as above) and the
+                       # other variable is not filtered at all (37 accepted, since 3 are missing),
+                       # to a total 14 + 37 = 51
+
+- obs space:
+    name: Median super-obbing for Satellite SST only
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+    obsdataout:
+      obsfile: Data/superob_testout3.nc4
+    simulated variables: [sea_surface_temperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: sea_surface_temperature
+    select_median: true
+    horizontal_mesh: 6000  # km
+    time_mesh: PT6H00M00S  # so only 1 time bin, not 2
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedObservationsBenchmark:
+  - 14
+  - 24
+  - 37
+  - 38
+  passedBenchmark: 4
+
+- obs space:
+    name: Median super-obbing for Satellite SST, default min 5 obs per bin, derived obs value
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+    obsdataout:
+      obsfile: Data/superob_testout4.nc4
+    simulated variables: []
+    derived simulated variables: [sea_surface_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: sea_surface_temperature@DerivedObsValue
+      type: float
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables: [sea_surface_temperature@ObsValue, time@MetaData]
+          coefs: [1.0, 2.0]  # meaningless quantity, just for testing
+  - filter: Gaussian Thinning
+    select_median: true
+    horizontal_mesh: 6000  # km
+    time_mesh: PT6H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedObservationsBenchmark:
+  - 8
+  - 15
+  - 21
+  - 34
+  passedBenchmark: 4  # passing obs [8,15,21,34] are not simply a subset of the previous test
+                      # showing that the filter is acting on the derived obs value, not obs value
