@@ -50,7 +50,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables: # Variables needed in the geovals
+    retrieval variables from geovals: # Variables needed in the geovals
     - air_temperature # 1
     - specific_humidity  # 10
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer # required for qtotal
@@ -73,8 +73,6 @@ observations:
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-    EmissLandDefault: 0.95
-    EmissSeaIceDefault: 0.92
     Store1DVarLWP: true
     defer to post: true
   # Reject channels when highretlwp
@@ -116,7 +114,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables: # Variables needed in the geovals
+    retrieval variables from geovals: # Variables needed in the geovals
     - air_temperature # 1
     - specific_humidity  # 10
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer # required for qtotal

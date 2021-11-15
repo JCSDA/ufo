@@ -11,7 +11,7 @@ use oops_variables_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use ufo_rttovonedvarcheck_mod
-use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
+use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 
 implicit none
 private

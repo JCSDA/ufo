@@ -12,7 +12,7 @@ use missing_values_mod
 use ufo_constants_mod, only: zero
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_setup_mod
 use ufo_rttovonedvarcheck_pcemis_mod
 
 implicit none
@@ -102,7 +102,7 @@ allocate(self % calc_emiss(nchans_all))
 
 self % yobs(:) = missing
 self % final_bt_diff(:) = missing
-self % emiss(:) = zero
+self % emiss(:) = missing
 self % background_T(:) = missing
 self % output_profile(:) = missing
 self % output_BT(:) = missing
@@ -196,6 +196,8 @@ write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
 write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
+write(*,"(A)") "Emissivity: "
+write(*,"(10F8.2)") self % emiss(:)
 
 end subroutine
 

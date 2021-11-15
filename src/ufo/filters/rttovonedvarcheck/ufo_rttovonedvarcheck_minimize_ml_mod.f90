@@ -18,7 +18,7 @@ use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_ob_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_setup_mod
 use ufo_utils_mod, only: Ops_Cholesky
 
 implicit none
@@ -79,7 +79,7 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
+subroutine ufo_rttovonedvarcheck_minimize_ml(config,    &
                                          ob,            &
                                          r_matrix,      &
                                          b_matrix,      &
@@ -93,7 +93,7 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
 
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(inout) :: self   !< structure containing settings
+type(ufo_rttovonedvarcheck), intent(inout) :: config !< structure containing settings
 type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob  !< satellite metadata
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
@@ -165,9 +165,9 @@ geovals = local_geovals
 call fckit_log % debug("Using ML solver")
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
-call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, ob, GuessProfile(:))
+call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, config, profile_index, ob, GuessProfile(:))
 
-Iterations: do iter = 1, self % max1DVarIterations
+Iterations: do iter = 1, config % max1DVarIterations
 
   !-------------------------
   ! 1. Generate new profile
@@ -177,7 +177,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and new hofx
-  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_used, &
+  call ufo_rttovonedvarcheck_get_jacobian(config, geovals, ob, ob % channels_used, &
                                        profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, Y(:), H_matrix)
 
@@ -209,7 +209,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   !     and determine convergence using change in cost fn
   !-----------------------------------------------------
 
-  if (self % UseJForConvergence) then
+  if (config % UseJForConvergence) then
 
     ! exit on error
     !if (inversionStatus /= 0) exit Iterations
@@ -217,7 +217,7 @@ Iterations: do iter = 1, self % max1DVarIterations
     ! check for convergence
     if (iter > 1) then
 
-      if (self % JConvergenceOption == 1) then
+      if (config % JConvergenceOption == 1) then
 
         ! percentage change tested between iterations
         DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (zero)))
@@ -235,7 +235,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
       end if
 
-      if (DeltaJ < self % cost_convergencefactor .and. &
+      if (DeltaJ < config % cost_convergencefactor .and. &
           DeltaJo < zero)  then ! overall is cost getting smaller?
         converged = .true.
         exit iterations
@@ -249,7 +249,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   JcostOld = Jcost
 
   ! Iterate (Guess) profile vector
-  call ufo_rttovonedvarcheck_ML_RTTOV12 ( self,            &
+  call ufo_rttovonedvarcheck_ML_RTTOV12 ( config,          &
                                       Ydiff,               &
                                       nChans,              &
                                       ob,                  &
@@ -280,26 +280,26 @@ Iterations: do iter = 1, self % max1DVarIterations
   !---------------------------------------------------------
 
   ! Check profile and constrain humidity variables
-  call ufo_rttovonedvarcheck_CheckIteration (self, & ! in
-                                  geovals,         & ! in
-                                  profile_index,   & ! in
-                                  GuessProfile(:), & ! inout
-                                  outOfRange)        ! out
+  call ufo_rttovonedvarcheck_CheckIteration (config, & ! in
+                                  geovals,           & ! in
+                                  profile_index,     & ! in
+                                  GuessProfile(:),   & ! inout
+                                  outOfRange)          ! out
 
   ! Update geovals to be the same as guess profile
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, &
-                                             GuessProfile, self % UseQtSplitRain)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, config, profile_index, &
+                                             ob, GuessProfile)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
 
   if ((.not. outofRange) .and. profile_index % qt(1) > 0) then
 
-    if (iter >= self % IterNumForLWPCheck) then
+    if (iter >= config % IterNumForLWPCheck) then
 
         call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
                                               profile_index,      & ! in
-                                              self % nlevels,     & ! in
+                                              config % nlevels,   & ! in
                                               OutOfRange )          ! out
 
     end if                                                                                  
@@ -313,9 +313,9 @@ Iterations: do iter = 1, self % max1DVarIterations
 
   absDiffprofile(:) = zero
 
-  if ((.not. outOfRange) .and. (.not. self % UseJForConvergence)) then
+  if ((.not. outOfRange) .and. (.not. config % UseJForConvergence)) then
     absDiffProfile(:) = abs(GuessProfile(:) - OldProfile(:))
-    if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
+    if (ALL (absDiffProfile(:) <= B_sigma(:) * config % ConvergenceFactor)) then
       write(*,*) "Profile used for convergence"
       Converged = .true.
     end if
@@ -325,13 +325,14 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! 4. output diagnostics
   !---------------------
 
-  if (self % FullDiagnostics) then
+  if (config % FullDiagnostics) then
     write (*, '(A,I0)') 'Iteration', iter
     write (*, '(A)') '------------'
     write (*, '(A,L1)') 'Status: converged = ', Converged
     if (outOfRange) write (*, '(A)') 'exiting with bad increments'
     write (*, '(A)') 'New profile:'
     call ufo_geovals_print(geovals, 1)
+    call ob % info()
     write (*, '(A)')
   end if
 
@@ -355,10 +356,10 @@ if (converged) then
   ob % output_profile(:) = GuessProfile(:)
 
   ! If lwp output required then recalculate
-  if (self % Store1DVarLWP) then
+  if (config % Store1DVarLWP) then
     call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
                                             profile_index,    & ! in
-                                            self % nlevels,   & ! in
+                                            config % nlevels, & ! in
                                             OutOfRange,       & ! out
                                             OutLWP = ob % LWP ) ! out
   end if
@@ -366,7 +367,7 @@ if (converged) then
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))
-  call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_all, &
+  call ufo_rttovonedvarcheck_get_jacobian(config, geovals, ob, ob % channels_all, &
                                           profile_index, GuessProfile(:), &
                                           hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
@@ -378,7 +379,7 @@ end if
 ! 4. output diagnostics
 !----------------------
 
-if (self % UseJForConvergence .and. self % FullDiagnostics) then
+if (config % UseJForConvergence .and. config % FullDiagnostics) then
   write(*,'(A45,3F10.3,I5,L5)') "ML J initial, final, lowest, iter, converged = ", &
                                  JCostorig, Jcost,  Jcost, iter, onedvar_success
 end if
@@ -449,30 +450,30 @@ end subroutine ufo_rttovonedvarcheck_minimize_ml
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self,  &
-                                      DeltaBT,       &
-                                      nChans,        &
-                                      ob,            &
-                                      H_Matrix,      &
-                                      H_Matrix_T,    &
-                                      nprofelements, &
-                                      profile_index, &
-                                      DeltaProfile,  &
-                                      GuessProfile,  &
-                                      BackProfile,   &
-                                      b_inv,         &
-                                      r_matrix,      &
-                                      geovals,       &
-                                      hofxdiags,     &
-                                      rttov_simobs,  &
-                                      gamma,         &
-                                      Jold,          &
-                                      Status)
+subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( config,  &
+                                        DeltaBT,       &
+                                        nChans,        &
+                                        ob,            &
+                                        H_Matrix,      &
+                                        H_Matrix_T,    &
+                                        nprofelements, &
+                                        profile_index, &
+                                        DeltaProfile,  &
+                                        GuessProfile,  &
+                                        BackProfile,   &
+                                        b_inv,         &
+                                        r_matrix,      &
+                                        geovals,       &
+                                        hofxdiags,     &
+                                        rttov_simobs,  &
+                                        gamma,         &
+                                        Jold,          &
+                                        Status)
 
 implicit none
 
 ! subroutine arguments:
-type(ufo_rttovonedvarcheck), intent(in) :: self            !< structure containing settings
+type(ufo_rttovonedvarcheck), intent(in) :: config          !< structure containing settings
 real(kind_real), intent(in)             :: DeltaBT(:)      !< y-y(x)
 integer, intent(in)                     :: nChans          !< number of channels
 type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob        !< satellite metadata
@@ -550,8 +551,8 @@ USave = U
 VSave = V
 Iter_ML = 0
 
-DescentLoop : do while (JCost > JOld .and.              &
-                        Iter_ML < self % MaxMLIterations .and. &
+DescentLoop : do while (JCost > JOld .and.                       &
+                        Iter_ML < config % MaxMLIterations .and. &
                         Gamma <= 1.0e25_kind_real)
 
   Iter_ML = Iter_ML + 1
@@ -586,21 +587,21 @@ DescentLoop : do while (JCost > JOld .and.              &
 
   GuessProfile(:) = BackProfile(:) + New_DeltaProfile(:)
 
-  call ufo_rttovonedvarcheck_CheckIteration (self, & ! in
-                                  geovals,         & ! in
-                                  profile_index,   & ! in
-                                  GuessProfile(:), & ! inout
-                                  outOfRange)        ! out
+  call ufo_rttovonedvarcheck_CheckIteration (config, & ! in
+                                  geovals,           & ! in
+                                  profile_index,     & ! in
+                                  GuessProfile(:),   & ! inout
+                                  outOfRange)          ! out
 
   if (.not. OutOfRange) then
-    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, &
-                                               GuessProfile, self % UseQtSplitRain)
+    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, config, profile_index, &
+                                               ob, GuessProfile)
 
     !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
 
    ! Get Jabobian and new hofx
-   call ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, ob % channels_used, &
+   call ufo_rttovonedvarcheck_get_jacobian(config, geovals, ob, ob % channels_used, &
                                            profile_index, GuessProfile(:), &
                                            hofxdiags, rttov_simobs, BriTemp(:), H_matrix_tmp)
 

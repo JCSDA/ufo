@@ -13,6 +13,7 @@ module ufo_rttovonedvarcheck_pcemis_mod
 
 use fckit_log_module, only : fckit_log
 use kinds
+use ufo_constants_mod, only: half, one, two
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_utils_mod, only : ufo_utils_iogetfreeunit
 
@@ -335,7 +336,7 @@ npc = size(PC)
 if (associated(self % emis_eigen % EV_Inverse)) then
 
   ! Convert from emissivity to sine transform
-  Temp_Emissivity(:) = asin( 2.0_kind_real * Emissivity(:) - 1.0_kind_real )
+  Temp_Emissivity(:) = asin( two * Emissivity(:) - one )
 
   ! Subtract means from transformed emissivities
   Temp_Emissivity(:) = Temp_Emissivity(:) - self % emis_eigen % Mean(Channels(:))
@@ -399,7 +400,7 @@ Emissivity = matmul(BigPC, BigEOF)
 Emissivity(:) = Emissivity(:) + self % emis_eigen % Mean(Channels)
 
 ! Convert from sine transform to physical emissivity
-Emissivity(1:NumChans) = 0.5_kind_real * (sin(Emissivity(1:NumChans)) + 1.0_kind_real)
+Emissivity(1:NumChans) = half * (sin(Emissivity(1:NumChans)) + one)
 
 end subroutine ufo_rttovonedvarcheck_PCToEmis
 
@@ -440,8 +441,8 @@ do ichan = 1, NumChans
   ! Calculate diagonal matrix elements of emissivity Jacobians
   ! Convert Emissivity_K to sine transform
   ! cos(asin(2x-1)) === sqrt(1-(1-2x)^2)
-  JEMatrix_element = Emissivity_K(ichan) * 0.5_kind_real* &
-                     sqrt (1.0_kind_real - (1.0_kind_real - 2.0_kind_real * Emissivity(ichan)) ** 2)
+  JEMatrix_element = Emissivity_K(ichan) * half * &
+                     sqrt (one - (one - two * Emissivity(ichan)) ** 2)
 
 ! EOF array === EmisEigenvec % EV for the appropriate channel selection
 ! N.B. Note 'manual' transposition of matrix here

@@ -15,7 +15,7 @@ use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
-use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
+use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
 use ufo_utils_mod, only: Ops_SatRad_Qsplit
 
@@ -33,7 +33,7 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, channels, &
+subroutine ufo_rttovonedvarcheck_get_jacobian(config, geovals, ob, channels, &
                                               profindex, &
                                               prof_x, hofxdiags, rttov_simobs, &
                                               hofx, H_matrix)
@@ -41,7 +41,7 @@ subroutine ufo_rttovonedvarcheck_get_jacobian(self, geovals, ob, channels, &
 implicit none
 
 ! subroutine arguments
-type(ufo_rttovonedvarcheck), intent(in)           :: self          !< Main 1D-Var object
+type(ufo_rttovonedvarcheck), intent(in)           :: config        !< configuration from main 1D-Var object
 type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob            !< satellite metadata
 integer, intent(in)                               :: channels(:)   !< channels used for this calculation
@@ -54,10 +54,9 @@ real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
 
 select case (trim(ob % forward_mod_name))
   case ("RTTOV")
-    call ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, self % obsdb, &
+    call ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, config, ob, &
                                               rttov_simobs, channels, &
                                               profindex, hofxdiags, &
-                                              self % UseQtsplitRain, self % FullDiagnostics, &
                                               hofx(:), H_matrix) ! out
 
   case default
@@ -78,23 +77,20 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, ob, obsdb, &
+subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOVsimobs(geovals, config, ob, &
                                        rttov_data, channels, profindex, &
-                                       hofxdiags, UseQtsplitRain, FullDiagnostics, &
-                                       hofx, H_matrix)
+                                       hofxdiags, hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
 type(ufo_geovals), intent(in)                     :: geovals        !< model data at obs location
+type(ufo_rttovonedvarcheck), intent(in)           :: config         !< configuration information
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob             !< satellite metadata
-type(c_ptr), value, intent(in)                    :: obsdb          !< observation database
 type(ufo_radiancerttov), intent(inout)            :: rttov_data     !< structure for running rttov_k
 integer, intent(in)                               :: channels(:)    !< channels used for this calculation
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex      !< index array for x vector
 type(ufo_geovals), intent(inout)                  :: hofxdiags      !< model data to pass the jacobian
-logical, intent(in)                               :: UseQtsplitRain !< flag to make qtsplit use rain
-logical, intent(in)                               :: FullDiagnostics
 real(kind_real), intent(out)                      :: hofx(:)        !< BT's
 real(kind_real), intent(out)                      :: H_matrix(:,:)  !< Jacobian
 
@@ -116,9 +112,11 @@ character(len=max_string)    :: varname
 real(c_double)               :: BT(size(ob % channels_all))
 real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
 
+! Setup varibales
 nchans = size(channels)
+H_matrix(:,:) = zero
 
-call rttov_data % simobs(geovals, obsdb, size(ob % channels_all), 1, BT, hofxdiags, ob_info=ob)
+call rttov_data % simobs(geovals, config % obsdb, size(ob % channels_all), 1, BT, hofxdiags, ob_info=ob)
 
 ! --------------------
 !Get hofx for just channels used
@@ -218,7 +216,7 @@ if (profindex % qt(1) > 0) then
                     dq_dqt(:),     & ! out
                     dql_dqt(:),    & ! out
                     dqi_dqt(:),    & ! out
-                    UseQtsplitRain)
+                    config % UseQtsplitRain)
 
   ! Calculate jacobian wrt humidity and clw
   do i = 1, nchans
@@ -353,26 +351,26 @@ end if
 !----
 
 ! 3.1 Microwave Emissivity - var_sfc_emiss = "surface_emissivity"
-
-!if (profindex % mwemiss(1) > 0) then
-!  ! The emissivity matrix needs to be "unpacked" as it is only one
-!  ! dimensional over channels - implying you want to retrieve a
-!  ! single emissivity value. It is unpacked here so that each emissivity
-!  ! has a corresponding entry for the relevant channel. Note that this is
-!  ! a bit physically dubious as several channels have the same frequency, etc.
-!  ! This complexity is dealt with in the B Matrix.
-!  ! Check that we want only the diagonal elements to be non-zero
-!  do j = 1, size(EmissMap)
-!      chan = EmissMap(j)
-!    do i = 1, nchans
-!      if (channels(i) == chan) then
-!        write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
-!        call ufo_geovals_get_var(hofxdiags, varname, geoval)
-!        H_matrix(i,profindex % mwemiss(1) + j - 1) = geoval % vals(1,1)
-!      end if
-!    end do
-!  end do
-!end if
+if (profindex % mwemiss(1) > 0) then
+  ! The emissivity matrix needs to be "unpacked" as it is only one
+  ! dimensional over channels - implying you want to retrieve a
+  ! single emissivity value. It is unpacked here so that each emissivity
+  ! has a corresponding entry for the relevant channel. Note that this is
+  ! a bit physically dubious as several channels have the same frequency, etc.
+  ! This complexity is dealt with in the B Matrix.
+  ! Check that we want only the diagonal elements to be non-zero
+  do j = 1, size(config % EmissToChannelMap)
+      chan = config % EmissToChannelMap(j)
+    do i = 1, nchans
+      if (channels(i) == chan) then
+        write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
+        call ufo_geovals_get_var(hofxdiags, varname, geoval)
+        H_matrix(i,profindex % mwemiss(1) + j - 1) = geoval % vals(1,1)
+        cycle
+      end if
+    end do
+  end do
+end if
 
 !! 3.2. Infrared Emissivity - work in progress
 !
@@ -392,11 +390,11 @@ end if
 !
 ! Here for diagnostics
 
-if (FullDiagnostics) then
+if (config % FullDiagnostics) then
   call ufo_rttovonedvarcheck_PrintHmatrix( &
     nchans,   &                  ! in
     profindex % nprofelements, & ! in
-    ob % channels_used, &        ! in
+    channels, &                  ! in
     H_matrix, &                  ! in
     profindex )                  ! in
 end if

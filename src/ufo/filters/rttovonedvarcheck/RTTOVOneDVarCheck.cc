@@ -37,14 +37,20 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   // Check only one variable has been defined - BT
   // Get channels from filter variables
   if (filtervars_.size() != 1) {
-     throw eckit::UserError("RTTOVOneDVarCheck contructor:"
-                            " only one variable allowed, aborting.");
+    throw eckit::UserError("RTTOVOneDVarCheck contructor:"
+                           " only one variable allowed, aborting.");
   }
   channels_ = filtervars_[0].channels();
 
   // Check at least one channel has been defined
   if (channels_.empty()) {
-     throw eckit::UserError("RTTOVOneDVarCheck contructor: no channels defined, aborting.");
+    throw eckit::UserError("RTTOVOneDVarCheck contructor: no channels defined, aborting.");
+  }
+
+  // Check the size of the channel to emiss map if mwemiss is requested
+  if (parameters_.SurfaceEmissivity.value().mwEmissRetrieval) {
+    ASSERT(parameters_.SurfaceEmissivity.value().ChannelToEmissMap.value().size() ==
+           channels_.size() );
   }
 
   // Setup Fortran object
@@ -61,7 +67,11 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
 
   // Populate variables list - which makes sure this is run as a post filter
   // because the obs bias value is needed.
-  Variables model_vars(retrieved_vars_);
+  oops::Variables variables_from_geovals;
+  for (const std::string& value : parameters_.RetrievalVariablesGeoVaLs.value()) {
+    variables_from_geovals.push_back(value);
+  }
+  Variables model_vars(variables_from_geovals);
   allvars_ += Variables(model_vars, "GeoVaLs");
   allvars_ += Variables(filtervars_, "ObsBiasData");
 

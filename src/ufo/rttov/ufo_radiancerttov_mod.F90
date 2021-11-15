@@ -246,11 +246,22 @@ contains
           end do
           nchan_sim = ichan_sim
         endif
-                  
+
       end do
 
       ! Set surface emissivity
-      call self % RTProf % init_emissivity(self % conf, prof_start)
+      if (present(ob_info)) then
+        self % RTprof % calcemis(1:nchan_sim) = ob_info % calc_emiss(:)
+        self % RTprof % emissivity(1:nchan_sim) % emis_in = ob_info % emiss(:)
+      else
+        call self % RTProf % init_emissivity(self % conf, prof_start)
+      end if
+      
+      ! Write out emissivity if checking profile
+      if(any(self % conf % inspect == iprof)) then
+        write(*,*) "calcemiss = ",self % RTprof % calcemis(:)
+        write(*,*) "emissivity in = ",self % RTprof % emissivity(:) % emis_in
+      end if
 
       ! --------------------------------------------------------------------------
       ! Call RTTOV model

@@ -17,7 +17,7 @@ use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
-use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
+use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
 use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
 
@@ -27,7 +27,6 @@ private
 ! subroutines - public
 public ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 public ufo_rttovonedvarcheck_ProfVec2GeoVaLs
-public ufo_rttovonedvarcheck_check_geovals
 public ufo_rttovonedvarcheck_CostFunction
 public ufo_rttovonedvarcheck_CheckIteration
 public ufo_rttovonedvarcheck_CheckCloudyIteration
@@ -51,15 +50,17 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals, & ! in
-                                             profindex,    & ! in
-                                             ob,           & ! in
-                                             prof_x )        ! out
+subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,   & ! in
+                                                  config,    & ! in
+                                                  profindex, & ! in
+                                                  ob,        & ! in
+                                                  prof_x )     ! out
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(in)    :: geovals   !< model data at obs location
+type(ufo_rttovonedvarcheck), intent(in) :: config !< object with configuration values
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
 type(ufo_rttovonedvarcheck_ob), intent(in) :: ob   !< satellite metadata
 real(kind_real), intent(out)     :: prof_x(:) !< x vector
@@ -70,7 +71,7 @@ character(len=max_string)   :: varname
 
 type(ufo_geoval), pointer    :: geoval
 integer                      :: nlevels
-integer                      :: ii
+integer                      :: ii, jj, ind
 real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: emiss_pc(:)
 real(kind_real)              :: u, v               ! components for windspeed calculation
@@ -184,14 +185,22 @@ end if
 !----------------------------
 
 ! Microwave Emissivity
-!if (profindex % mwemiss(1) > 0) then
-!  ! Check that emissivity map is the correct size for the profile
-!  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap)) then
-!    call abor1_ftn("mwemiss size differs from emissivity map")
-!  end if
-!  ! Copy microwave emissivity to profile
-!    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob % emiss(EmissMap)
-!end if
+if (profindex % mwemiss(1) > 0) then
+  ! Check that emissivity map is the correct size for the profile
+  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(config % EmissToChannelMap)) then
+    call abor1_ftn("mwemiss size differs from emissivity map")
+  end if
+  ! Copy microwave emissivity to profile
+  do ii = 1, size(config % EmissToChannelMap)
+    ind = ii - 1 + profindex % mwemiss(1)
+    do jj = 1, size(ob % channels_all)
+      if (config % EmissToChannelMap(ii) == ob % channels_all(jj)) then
+        prof_x(ind) = ob % emiss(jj)
+        cycle
+      end if
+    end do
+  end do
+end if
 
 ! Retrieval of emissivity principal components
 !if (profindex % emisspc(1) > 0) THEN
@@ -216,20 +225,20 @@ end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, & ! inout
-                                            profindex,    & ! in
-                                            ob,           & ! inout
-                                            prof_x,       & ! in
-                                            UseQtsplitRain) ! in
+subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,      & ! inout
+                                                 config,       & ! in
+                                                 profindex,    & ! in
+                                                 ob,           & ! inout
+                                                 prof_x        ) ! in
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
+type(ufo_rttovonedvarcheck), intent(in) :: config !< object with configuration information
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
 type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob   !< satellite metadata
 real(kind_real), intent(in)      :: prof_x(:) !< x vector
-logical, intent(in) :: UseQtsplitRain !< flag to choose whether to split rain in qt
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
@@ -308,7 +317,7 @@ if (profindex % qt(1) > 0) then
                     q(:),                 &
                     ql(:),                &
                     qi(:),                &
-                    UseQtsplitRain)
+                    config % UseQtsplitRain)
 
   ! Assign values to geovals
   gv_index = 0
@@ -425,16 +434,15 @@ end if
 
 !----------------------------
 ! 4. Emissivities
-! This has been left in for future development
 !------------------------
 
 ! Retrieval of microwave emissivity directly
-!if (profindex % mwemiss(1) > 0) THEN
-!  do ii = 1, size(ob % channels_used)
-!    EmissElement = EmissElements(ob % channels_used(ii))
-!    ob % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
-!  end do
-!end if
+if (profindex % mwemiss(1) > 0) THEN
+  do ii = 1, size(ob % channels_all)
+    EmissElement = config % ChannelToEmissMap(ii)
+    ob % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
+  end do
+end if
 
 ! Retrieval of emissivity principal components
 !if (profindex % emisspc(1) > 0) THEN
@@ -447,280 +455,6 @@ end if
 !end if
 
 end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
-
-!-------------------------------------------------------------------------------
-!> Check the geovals are ready for the first iteration
-!!
-!! \details Heritage: Ops_SatRad_SetUpRTprofBg_RTTOV12.f90
-!!
-!! Check the geovals profile is ready for the first iteration.  The
-!! only check included at the moment if the first calculation for 
-!! q total.
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine ufo_rttovonedvarcheck_check_geovals(self, geovals, profindex, surface_type)
-
-implicit none
-
-! subroutine arguments:
-type(ufo_rttovonedvarcheck), intent(in) :: self
-type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
-type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
-integer, intent(in) :: surface_type  !< surface type for cold surface check
-
-character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
-character(len=max_string)    :: varname
-type(ufo_geoval), pointer    :: geoval
-integer                      :: gv_index, i     ! counters
-integer                      :: nlevels
-real(kind_real), allocatable :: temperature(:)  ! temperature (K)
-real(kind_real), allocatable :: pressure(:)     ! pressure (Pa)
-real(kind_real), allocatable :: qsaturated(:)
-real(kind_real), allocatable :: humidity_total(:)
-real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
-real(kind_real), allocatable :: ql(:)
-real(kind_real), allocatable :: qi(:)
-real(kind_real)              :: skin_t, pressure_2m, temperature_2m, NewT
-integer                      :: level_1000hpa, level_950hpa
-
-write(message, *) routinename, " : started"
-call fckit_log % debug(message)
-
-! -------------------------------------------
-! Load variables needed by multiple routines
-! -------------------------------------------
-
-nlevels = profindex % nlevels
-allocate(temperature(nlevels))
-allocate(pressure(nlevels))
-call ufo_geovals_get_var(geovals, trim(var_ts), geoval)
-temperature(:) = geoval%vals(:, 1) ! K
-call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
-pressure(:) = geoval%vals(:, 1)    ! Pa
-
-!---------------------------------------------------
-! 1. Make sure q and q2m does not exceed saturation
-!---------------------------------------------------
-if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
-  allocate(q(nlevels))
-  allocate(qsaturated(nlevels))
-
-  ! Get humidity - kg/kg
-  varname = trim(var_q)
-  call ufo_geovals_get_var(geovals, varname, geoval)
-  q(:) = geoval%vals(:, 1)
-
-  ! Calculated saturation humidity
-  if (self % UseRHwaterForQC) then
-    call Ops_QsatWat (qsaturated(:),   & ! out
-                      temperature(:),  & ! in
-                      pressure(:),     & ! in
-                      nlevels)           ! in
-  else
-    call Ops_Qsat (qsaturated(:),   & ! out
-                   temperature(:),  & ! in
-                   pressure(:),     & ! in
-                   nlevels)           ! in  
-  end if
-
-  ! Limit q
-  where (q > qsaturated)
-    q = qsaturated
-  end where
-  where (q < min_q)
-    q = min_q
-  end where
-
-  ! Assign values to geovals q
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index) % vals(:,1) = q(:)
-
-  deallocate(q)
-  deallocate(qsaturated)
-end if
-
-if (profindex % q2 > 0) then
-  allocate(q(1))
-  allocate(qsaturated(1))
-
-  ! Get humidity - kg/kg
-  varname = trim(var_sfc_q2m)
-  call ufo_geovals_get_var(geovals, varname, geoval)
-  q(1) = geoval%vals(1, 1)
-
-  ! Calculated saturation humidity
-  if (self % UseRHwaterForQC) then
-    call Ops_QsatWat (qsaturated(1:1),   & ! out
-                      temperature(1:1),  & ! in
-                      pressure(1:1),     & ! in
-                      1)                   ! in
-  else
-    call Ops_Qsat (qsaturated(1:1),   & ! out
-                   temperature(1:1),  & ! in
-                   pressure(1:1),     & ! in
-                   1)                   ! in
-  end if
-
-  ! Limit q
-  if (q(1) > qsaturated(1)) q(1) = qsaturated(1)
-  if (q(1) < min_q) q(1) = min_q
-
-  ! Assign values to geovals q
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index) % vals(1,1) = q(1)
-
-  deallocate(q)
-  deallocate(qsaturated)
-end if
-
-!-------------------------
-! 2. Specific humidity total
-!-------------------------
-
-if (profindex % qt(1) > 0) then
-
-  allocate(humidity_total(nlevels))
-  allocate(q(nlevels))
-  allocate(ql(nlevels))
-  allocate(qi(nlevels))
-
-  humidity_total(:) = 0.0
-  ! Water vapour
-  call ufo_geovals_get_var(geovals, trim(var_q), geoval)
-  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-
-  ! Cloud liquid water
-  call ufo_geovals_get_var(geovals, trim(var_clw), geoval)
-  where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
-  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-
-  ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  call Ops_SatRad_Qsplit ( 1,       &
-                    pressure(:),    &
-                    temperature(:), &
-                    humidity_total, &
-                    q(:),           &
-                    ql(:),          &
-                    qi(:),          &
-                    self % UseQtsplitRain)
-
-  ! Assign values to geovals q
-  varname = trim(var_q)  ! kg/kg
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index) % vals(:,1) = q(:)
-
-  ! Assign values to geovals q clw
-  varname = trim(var_clw)  ! kg/kg
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index) % vals(:,1) = ql(:)
-
-  ! Assign values to geovals ciw
-  varname = trim(var_cli)  ! kg/kg
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index)%vals(:,1) = qi(:)
-
-  deallocate(humidity_total)
-  deallocate(q)
-  deallocate(ql)
-  deallocate(qi)
-
-end if
-
-!----
-! Legacy Ops_SatRad_SetUpRTprofBg_RTTOV12.f90 - done here to make sure geovals are updated
-! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
-! N.B. I think this should be flagged so it's clear that the background has been modified
-!----
-if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
-
-  ! Get skin temperature
-  call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval)
-  skin_t = geoval%vals(1, 1)
-
-  ! Get 2m pressure
-  call ufo_geovals_get_var(geovals, var_sfc_p2m, geoval)
-  pressure_2m = geoval%vals(1, 1)
-
-  ! Get 2m temperature
-  call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval)
-  temperature_2m = geoval%vals(1, 1)
-
-  if(skin_t < 271.4_kind_real .and. &
-     pressure_2m  > 95000.0_kind_real) then
-
-     level_1000hpa = minloc(abs(pressure - 100000.0_kind_real),DIM=1)
-     level_950hpa = minloc(abs(pressure - 95000.0_kind_real),DIM=1)
-
-     NewT = temperature(level_950hpa)
-     if(pressure_2m > 100000.0_kind_real) then
-       NewT = max(NewT, temperature(level_1000hPa))
-     end if
-     NewT = min(NewT, 271.4_kind_real)
-
-     temperature(level_1000hPa) = max(temperature(level_1000hPa), NewT)
-     temperature_2m = max(temperature_2m, NewT)
-     skin_t = max(skin_t, NewT)
-
-     ! Put updated values back into geovals
-     ! Temperature
-     gv_index = 0
-     varname = trim(var_ts)
-     do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-     end do
-     geovals%geovals(gv_index) % vals(level_1000hPa,1) = temperature(level_1000hPa)
-
-     ! 2m Temperature
-     gv_index = 0
-     varname = trim(var_sfc_t2m)
-     do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-     end do
-     geovals%geovals(gv_index) % vals(1,1) = temperature_2m
-
-     ! Skin Temperature
-     gv_index = 0
-     varname = trim(var_sfc_tskin)
-     do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
-     end do
-     geovals%geovals(gv_index) % vals(1,1) = skin_t
-
-   endif
-
-endif
-
-! Tidy up
-if (allocated(temperature))    deallocate(temperature)
-if (allocated(pressure))       deallocate(pressure)
-if (allocated(qsaturated))     deallocate(qsaturated)
-if (allocated(humidity_total)) deallocate(humidity_total)
-if (allocated(q))              deallocate(q)
-if (allocated(ql))             deallocate(ql)
-if (allocated(qi))             deallocate(qi)
-
-write(message, *) routinename, " : ended"
-call fckit_log % debug(message)
-
-end subroutine ufo_rttovonedvarcheck_check_geovals
 
 !-------------------------------------------------------------------------------
 !> Calculate the cost function.
@@ -1025,6 +759,13 @@ Constrain: if (.not. OutOfRange) then
 !    end where
 !  end if
 
+! Check microwave emissivity is between 0 and 1
+if (profindex % mwemiss(1) > 0) then
+  do ii = profindex % mwemiss(1), profindex % mwemiss(2)
+    profile(ii) = max (min(profile(ii), 1.0), 0.0)
+  end do
+end if
+
 end if Constrain
 
 ! --------
@@ -1266,7 +1007,8 @@ do i = 1, size(varlist)
            trim(varname) == trim(var_sfc_p2m) .or. &
            trim(varname) == trim(var_sfc_tskin) .or. &
            trim(varname) == trim(var_sfc_u10) .or. &
-           trim(varname) == trim(var_sfc_v10)) then
+           trim(varname) == trim(var_sfc_v10) .or. &
+           index(trim(varname), trim(var_sfc_emiss)) > 0) then
     ret_nlevs(i) = 1
   else
     write(message, *) trim(varlist(i)), " not setup for retrieval yet: aborting"

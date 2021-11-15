@@ -564,42 +564,6 @@ b_matrix(:,:) = self % store(:,:,band)
 b_inverse(:,:) = self % inverse(:,:,band)
 b_sigma(:) = self % sigma(:,band)
 
-! This has been left in for future development
-!! Use errors associated with microwave emissivity atlas
-!if (profindex % mwemiss(1) > 0) then
-!
-!  ! Atlas uncertainty stored in Ob % MwEmErrAtlas, use this to scale each
-!  ! row/column of the B matrix block.
-!  ! The default B matrix, see e.g. file ATOVS_Bmatrix_43, contains error
-!  ! covariances representing a global average. Here, those elements are scaled
-!  ! by a factor MwEmissError/SQRT(diag(B_matrix)) for each channel.
-!
-!  do i = profindex % mwemiss(1), profindex % mwemiss(2)
-!    MwEmissError = Ob % MwEmErrAtlas(i - profindex % mwemiss(1) + 1)
-!    if (MwEmissError > 1.0E-4 .and. MwEmissError < 1.0) then
-!      bscale = MwEmissError / sqrt (B_matrix(i,i))
-!      B_matrix(:,i) = B_matrix(:,i) * bscale
-!      B_matrix(i,:) = B_matrix(i,:) * bscale
-!      B_inverse(:,i) = B_inverse(:,i) / bscale
-!      B_inverse(i,:) = B_inverse(i,:) / bscale
-!      B_sigma(i) = B_sigma(i) * bscale
-!    end if
-!  end do
-!
-!end if
-!
-!! Scale the background skin temperature error covariances over land
-!if (Ob % Surface == RTland .and. SkinTempErrorLand >= 0.0) then
-!
-!  bscale = SkinTempErrorLand / sqrt (B_matrix(profindex % tstar,profindex % tstar))
-!  B_matrix(:,profindex % tstar) = B_matrix(:,profindex % tstar) * bscale
-!  B_matrix(profindex % tstar,:) = B_matrix(profindex % tstar,:) * bscale
-!  B_inverse(:,profindex % tstar) = B_inverse(:,profindex % tstar) / bscale
-!  B_inverse(profindex % tstar,:) = B_inverse(profindex % tstar,:) / bscale
-!  B_sigma(profindex % tstar) = B_sigma(profindex % tstar) * bscale
-!
-!end if
-
 end subroutine ufo_metoffice_bmatrixstatic_reset
 
 ! ------------------------------------------------------------------------------------------------
@@ -640,26 +604,26 @@ do jvar = 1, nmvars
   select case (trim(varname))
 
     case (var_ts)
-      fields_in(counter) = 1 ! air_temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_t ! air_temperature
 
     case (var_q)
       if (qtotal_flag) then
-        fields_in(counter) = 10 ! total water profile
+        fields_in(counter) = ufo_metoffice_fieldtype_qt ! total water profile
       else
-        fields_in(counter) = 2 ! water profile
+        fields_in(counter) = ufo_metoffice_fieldtype_q ! water profile
       end if
 
     case(var_sfc_t2m)
-      fields_in(counter) = 3 ! 2m air_temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_t2 ! 2m air_temperature
 
     case(var_sfc_q2m)
-      fields_in(counter) = 4 ! 2m specific_humidity
+      fields_in(counter) = ufo_metoffice_fieldtype_q2 ! 2m specific_humidity
 
     case(var_sfc_tskin)
-      fields_in(counter) = 5 ! surface skin temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_tstar ! surface skin temperature
 
     case(var_sfc_p2m)
-      fields_in(counter) = 6 ! surface air pressure
+      fields_in(counter) = ufo_metoffice_fieldtype_pstar ! surface air pressure
 
     ! 7 - o3total is not implmented yet
     ! 8 - not used is not implmented yet
@@ -671,13 +635,13 @@ do jvar = 1, nmvars
       end if
 
     case (var_sfc_u10, var_sfc_v10)
-      fields_in(counter) = 11 ! surface wind speed
+      fields_in(counter) = ufo_metoffice_fieldtype_windspeed ! surface wind speed
 
     ! 12 - o3profile is not implmented yet
     ! 13 - lwp (liquid water path) is not implmented yet
 
-    case ("surface_emissivity") ! microwave emissivity
-      call abor1_ftn("rttovonedvarcheck not setup for surface surface_emissivity yet")
+    case (var_sfc_emiss) ! microwave emissivity
+      fields_in(counter) = ufo_metoffice_fieldtype_mwemiss
 
     case (var_cli)
       ciw_present = .true.

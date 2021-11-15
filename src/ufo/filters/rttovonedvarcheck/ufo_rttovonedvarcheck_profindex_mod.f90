@@ -55,6 +55,7 @@ type, public :: ufo_rttovonedvarcheck_profindex
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_profindex_setup
+  procedure :: copy  => ufo_rttovonedvarcheck_profindex_copy
   procedure :: delete => ufo_rttovonedvarcheck_profindex_delete
 
 end type
@@ -157,7 +158,8 @@ do j = 1, bmatrix % nfields
       self % windspeed  = firstelement
 
     case( ufo_metoffice_fieldtype_mwemiss )
-      call abor1_ftn("ufo_metoffice_fieldtype_mwemiss: Not currently implemented aborting")
+      self % mwemiss(1) = firstelement
+      self % mwemiss(2) = lastelement
 
     case( ufo_metoffice_fieldtype_emisspc )
       call abor1_ftn("ufo_metoffice_fieldtype_emisspc: Not currently implemented aborting")
@@ -190,6 +192,51 @@ self % nprofelements = nelements
 end subroutine ufo_rttovonedvarcheck_profindex_setup
 
 !-------------------------------------------------------------------------------
+!> Profile index copy
+!!
+!! Copy one profile index to another.
+!!
+!! \author Met Office
+!!
+!! \date 19/05/2021: Created
+!!
+subroutine ufo_rttovonedvarcheck_profindex_copy(self, other)
+
+implicit none
+
+class(ufo_rttovonedvarcheck_profindex), intent(out) :: self   !< profindex structure
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: other    !< profindex structure
+
+self % nprofelements = other % nprofelements
+self % nlevels = other % nlevels
+self % t = other % t
+self % q = other % q
+self % ql = other % ql
+self % qt = other % qt
+self % qi = other % qi
+self % cf = other % cf
+self % o3total = other % o3total
+self % o3profile = other % o3profile
+self % t2 = other % t2
+self % q2 = other % q2
+self % rh2 = other % rh2
+self % tstar = other % tstar
+self % pstar = other % pstar
+self % windspeed = other % windspeed
+self % t70hpa = other % t70hpa
+self % t700hpa = other % t700hpa
+self % t950hpa = other % t950hpa
+self % t1000hpa = other % t1000hpa
+self % qsurf = other % qsurf
+self % lwp = other % lwp
+self % mwemiss = other % mwemiss
+self % cloudtopp = other % cloudtopp
+self % cloudfrac = other % cloudfrac
+self % emisspc = other % emisspc
+
+end subroutine ufo_rttovonedvarcheck_profindex_copy
+
+!-------------------------------------------------------------------------------
 !> Delete profile index
 !!
 !! \details Heritage: Ops_SatRad_InitProfInfo.f90
@@ -207,6 +254,7 @@ class(ufo_rttovonedvarcheck_profindex), intent(inout) :: self !< profile index s
 
 ! Zero all values
 self % nprofelements = 0
+self % nlevels = 0
 self % t = 0
 self % q = 0
 self % ql = 0

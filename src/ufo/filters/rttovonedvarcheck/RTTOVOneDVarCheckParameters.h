@@ -12,13 +12,77 @@
 #include <vector>
 
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterParametersBase.h"
 #include "ufo/rttov/ObsRadianceRTTOVParameters.h"
 
 namespace ufo {
 
-/// Parameters controlling the operation of the ObsBoundsCheck filter.
+/// Parameters class for the surface emissivity variables
+class SurfaceEmissivityParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SurfaceEmissivityParameters, Parameters)
+
+ public:
+  /// How to initialise the surface emissivity
+  /// rttovtocalculate - rttov will calculate over all surfaces
+  /// fixed - values of EmissSeaDefault, EmissLandDefault, EmissSeaIceDefault
+  /// readfromdb - read values from the db that have previously been read in
+  ///              and set calc_emiss to true where zero.
+  /// readfromdbwitherror - read values from the db that have previously
+  ///              been read in and set calc_emiss to true where zero.
+  ///              Read in the emissivity error as well.
+  /// principalcomponent - net ready yet
+  oops::Parameter<std::string> type{"type", "fixed", this};
+
+  /// Default emissivity value to use over land - zero means RTTOV will calculate
+  /// used for type = fixed
+  oops::Parameter<double> EmissSeaDefault{"EmissSeaDefault", 0.00, this};
+
+  /// Default emissivity value to use over land - zero means RTTOV will calculate
+  /// used for type = fixed
+  oops::Parameter<double> EmissLandDefault{"EmissLandDefault", 0.95, this};
+
+  /// Default emissivity value to use over seaice - zero means RTTOV will calculate
+  /// used for type = fixed
+  oops::Parameter<double> EmissSeaIceDefault{"EmissSeaIceDefault", 0.92, this};
+
+  /// Location of emissivity values to be read from the database e.g.
+  /// default is surface_emissivity_<chan>@DerivedObsValue
+  oops::Parameter<std::string> groupInObsSpace{"group in obs space", "DerivedObsValue", this};
+
+  /// Default eigen value path is blank but needs to be present if using PC emiss
+  /// not currently used to be implemented
+  /// used for type = hyperspectralpc
+  oops::Parameter<std::string> EmisEigVecPath{"EmisEigVecPath", "", this};
+
+  /// Default emis atlas path is blank - not currently used to be implemented
+  /// used for type = hyperspectralpc
+  oops::Parameter<std::string> EmisAtlas{"EmisAtlas", "", this};
+
+  /// Flag to decide if mwemiss retrieval needed
+  oops::Parameter<bool> mwEmissRetrieval{"retrieve mw emissivity", false, this};
+
+  /// Number of surface emissivity elements to be retrieved.  This will be checked
+  /// against the number in the b-matrix.
+  /// used when surface_emissivity is retrieved unless pcemiss is specified
+  oops::Parameter<int> NumEmissElements{
+      "number of surface emissivity retrieval elements", 5, this};
+
+  /// Maps the correct emissivity element to the correct instrument channel.
+  /// Must be of size NumEmissElements.
+  /// used when surface_emissivity is retrieved unless pcemiss is specified
+  oops::Parameter<std::vector<int>> EmissToChannelMap{
+      "emissivity to channel mapping", {1, 2, 3, 16, 17}, this};
+
+  /// Maps the instrument channels to the correct emissivity element used in the retrieval.
+  /// used when surface_emissivity is retrieved unless pcemiss is specified
+  oops::Parameter<std::vector<int>> ChannelToEmissMap{
+      "channel to emissivity mapping", {1, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+                                        3, 3, 3, 3, 4, 4, 5, 5, 5, 5}, this};
+};
+
+/// Parameters controlling the operation of the RTTOVOneDVarCheck filter.
 class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(RTTOVOneDVarCheckParameters, FilterParametersBase)
 
@@ -32,9 +96,15 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Specify the number of levels in the profiles
   oops::RequiredParameter<int> NLevels{"nlevels", this};
 
-  /// List of the retrieval variables these will need to match the b-matrix file
-  oops::RequiredParameter<std::vector<std::string>>
-                                 RetrievalVariables{"retrieval variables", this};
+  /// List of the retrieval variables that are in the GeoVaLs
+  /// these will need to match the b-matrix file
+  oops::RequiredParameter<std::vector<std::string>> RetrievalVariablesGeoVaLs{
+      "retrieval variables from geovals", this};
+
+  /// List of the retrieval variables that are not in the GeoVaLs
+  /// these will need to match the b-matrix file
+  oops::Parameter<std::vector<std::string>> RetrievalVariablesNotGeoVaLs{
+      "retrieval variables not from geovals", {}, this};
 
   /// Options required for the forward model - RTTOV
   oops::RequiredParameter<ObsRadianceRTTOVParameters> ModOptions{"ModOptions", this};
@@ -42,6 +112,11 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Specify the forward model to use - currently only RTTOV
   /// is available
   oops::Parameter<std::string> ModName{"ModName", "RTTOV", this};
+
+  /// Get the settings for the surface emissivity.  This specifies where
+  /// the initial values come from and details about the retrieval.
+  oops::Parameter<SurfaceEmissivityParameters> SurfaceEmissivity{
+      "surface emissivity", SurfaceEmissivityParameters(), this};
 
   /// Is qtotal being used instead of separate q, clw, ciw
   oops::Parameter<bool> QTotal{"qtotal", false, this};
@@ -106,17 +181,9 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Cost threshold for convergence check when cost function value is used for convergence
   oops::Parameter<double> CostConvergenceFactor{"CostConvergenceFactor", 0.01, this};
 
-  /// Default emissivity value to use over land
-  oops::Parameter<double> EmissLandDefault{"EmissLandDefault", 0.95, this};
-
-  /// Default emissivity value to use over seaice
-  oops::Parameter<double> EmissSeaIceDefault{"EmissSeaIceDefault", 0.92, this};
-
-  /// Default eigen value path is blank but needs to be present if using PC emiss
-  oops::Parameter<std::string> EmisEigVecPath{"EmisEigVecPath", "", this};
-
-  /// Default emis atlas path is blank
-  oops::Parameter<std::string> EmisAtlas{"EmisAtlas", "", this};
+  /// Value to scale the skin temperature error over land.  If less than zero
+  /// no scaling is done hence the default value of -1.0.
+  oops::Parameter<double> SkinTempErrorLand{"SkinTempErrorLand", -1.0, this};
 };
 
 }  // namespace ufo

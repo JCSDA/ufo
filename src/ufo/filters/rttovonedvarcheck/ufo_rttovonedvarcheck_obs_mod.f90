@@ -17,7 +17,7 @@ use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_pcemis_mod
 use ufo_rttovonedvarcheck_profindex_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_setup_mod
 use ufo_vars_mod
 
 implicit none
@@ -39,14 +39,17 @@ real(kind_real), allocatable :: sol_zen(:)      ! observation solar zenith angle
 real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angle
 integer, allocatable         :: surface_type(:) ! surface type
 integer, allocatable         :: niter(:)        ! number of iterations
+integer, allocatable         :: channels(:)     ! channel numbers
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
-real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
-logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
+real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
+logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
+real(kind_real), allocatable :: mwemisserr(:,:) ! surface emissivity error from atlas
+type(ufo_rttovonedvarcheck_pcemis), pointer :: ir_pcemis ! Infrared principal components object
 logical, allocatable         :: output_to_db(:)   ! flag to output data for this profile
 
 contains
@@ -74,8 +77,7 @@ subroutine ufo_rttovonedvarcheck_obs_setup(self,     & ! out
                                            config,   & ! in
                                            nprofelements, & ! in
                                            geovals,  & ! in
-                                           vars,     & ! in
-                                           ir_pcemis )
+                                           vars)       ! in
 
 implicit none
 
@@ -85,14 +87,13 @@ type(ufo_rttovonedvarcheck), intent(in)       :: config !< observation metadata 
 integer, intent(in)                           :: nprofelements !< number of profile elements
 type(ufo_geovals), intent(in)                 :: geovals  !< model data at obs location
 type(oops_variables), intent(in)              :: vars     !< channels for 1D-Var
-type(ufo_rttovonedvarcheck_pcemis)            :: ir_pcemis  !< Infrared principal components object
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_init"
 real(kind_real)             :: missing
-integer                     :: jvar    !< counters
-integer                     :: jobs    !< counters
+integer                     :: jvar, iloc , jobs   !< counters
 character(len=max_string)   :: var
 character(len=max_string)   :: varname
+character(len=200)          :: message
 logical                     :: variable_present = .false.
 logical                     :: model_surface_present = .false.
 type(ufo_geoval), pointer   :: geoval
@@ -113,13 +114,15 @@ allocate(self % sol_zen(self % iloc))
 allocate(self % sol_azi(self % iloc))
 allocate(self % surface_type(self % iloc))
 allocate(self % niter(self % iloc))
+allocate(self % channels(config % nchans))
 allocate(self % final_cost(self % iloc))
 allocate(self % LWP(self % iloc))
-allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % output_profile(nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
+allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
+allocate(self % mwemisserr(config % nchans, self % iloc))
 allocate(self % output_to_db(self % iloc))
 
 ! initialize arrays
@@ -135,14 +138,17 @@ self % sol_zen(:) = zero
 self % sol_azi(:) = zero
 self % surface_type(:) = RTSea
 self % niter(:) = 0
+self % channels(:) = 0
 self % final_cost(:) = missing
 self % LWP(:) = missing
-self % emiss(:,:) = zero
+self % emiss(:,:) = missing
+self % mwemisserr(:,:) = missing
 self % output_profile(:,:) = missing
 self % output_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
+self % ir_pcemis => null()
 self % output_to_db(:) = .false.
 
 ! read in observations and associated errors / biases for full ObsSpace
@@ -199,10 +205,13 @@ else if (obsspace_has(config % obsdb, "MetaData", "model_orography")) then
   call obsspace_get_db(config % obsdb, "MetaData", "model_orography", self % elevation(:))
 else if (ufo_vars_getindex(geovals % variables, 'surface_altitude') > 0) then
   call ufo_geovals_get_var(geovals, 'surface_altitude', geoval)
-  self % elevation(:) = geoval%vals(1, 1)
+  self % elevation(:) = geoval%vals(1, :)
 else
   self % elevation(:) = zero
 endif
+
+! Copy channels from config
+self % channels(:) = config % channels(:)
 
 ! Read in surface type from ObsSpace or model data (deprecated)
 if (obsspace_has(config % obsdb, "MetaData", "surface_type")) then
@@ -212,14 +221,43 @@ else
   self % surface_type(:) = geoval%vals(1, :)
 endif
 
-! Setup emissivity
-if (config % pcemiss) then
-  write(*,*) "PC emissivity being used"
-  call ufo_rttovonedvarcheck_obs_InitIREmiss(self, config % nchans, ir_pcemis)
-else
-  write(*,*) "Conventional emissivity being used"
-  call ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
-end if
+! Setup surface emissivity
+! default self % emiss = zero
+! default self % calc_emiss = true
+select case (trim(config % EmissivityType))
+
+  case("rttovtocalculate")
+    write(*,*) "RTTOV will calculate emissivity first guess for sea, seaice and land"
+
+  case("fixed")
+    do iloc = 1, self % iloc
+      self % calc_emiss(iloc) = .false.
+      if(self % surface_type(iloc) == RTSea) then
+        self % emiss(:,iloc) = config % EmissSeaDefault
+      else if(self % surface_type(iloc) == RTLand) then
+        self % emiss(:,iloc) = config % EmissLandDefault
+      else if(self % surface_type(iloc) == RTIce) then
+        self % emiss(:,iloc) = config % EmissSeaIceDefault
+      end if
+      if (self % emiss(1,iloc) == zero) self % calc_emiss(iloc) = .true.
+    end do
+
+  case("readfromdb")
+    call ufo_rttovonedvarcheck_obs_ReadFromDB(self, config, vars, .false.)
+
+  case("readfromdbwitherror")
+    call ufo_rttovonedvarcheck_obs_ReadFromDB(self, config, vars, .true.)
+
+  case("principalcomponent")
+    call ufo_rttovonedvarcheck_obs_InitIRPCEmiss(self, config)
+
+  case default
+    write(message,*) "Land emissivity type not correctly defined it should be either ", &
+                     "rttovtocalculate, fixed, readfromdb, readfromdbwitherror, or ", &
+                     "princialcomponent"
+    call abor1_ftn(message)
+
+end select
 
 end subroutine ufo_rttovonedvarcheck_obs_setup
 
@@ -255,10 +293,12 @@ if (allocated(self % niter))          deallocate(self % niter)
 if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
 if (allocated(self % emiss))          deallocate(self % emiss)
+if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
+if (associated(self % ir_pcemis))     call self % ir_pcemis % delete()
 
 end subroutine ufo_rttovonedvarcheck_obs_delete
 
@@ -271,42 +311,37 @@ end subroutine ufo_rttovonedvarcheck_obs_delete
 !!
 !! \date 06/08/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
+subroutine ufo_rttovonedvarcheck_obs_ReadFromDB(self, config, vars, readerror)
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
 type(ufo_rttovonedvarcheck), intent(in) :: config !< main rttovonedvarcheck type
+type(oops_variables), intent(in) :: vars     !< channels for 1D-Var
+logical, intent(in) :: readerror
 
-integer :: i
+integer :: jvar, iloc
+character(len=max_string)   :: var
 
-!-------------
-! 2.1 Defaults
-!-------------
-
-do i = 1, self % iloc
-
-  ! Only calculate in RTTOV over sea
-  if (self % surface_type(i) == RTSea) then
-    self % calc_emiss(i) = .true.
-  else
-    self % calc_emiss(i) = .false.
+! Read in the initial values from the db
+do jvar = 1, size(self % channels)
+  ! Read in from the db
+  write(var,"(A19,I0)") "surface_emissivity_", self % channels(jvar)
+  call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % emiss(jvar,:))
+  if (readerror) then
+    write(var,"(A25,I0)") "surface_emissivity_error_", self % channels(jvar)
+    call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % mwemisserr(jvar,:))
   end if
 
-  ! The default emissivity for land is a very crude estimate - the same
-  ! for all surface types and all frequencies. However, we do not use
-  ! channels which see the surface over land where we rely on this default.
-  self % emiss(:,i) = zero
-  if (self % surface_type(i) == RTLand) then
-    self % emiss(:,i) = config % EmissLandDefault
-  else if (self % surface_type(i) == RTIce) then
-    self % emiss(:,i) = config % EmissSeaIceDefault
-  end if
-
+  ! Set calc emiss to true if emissivity is zero for any channel
+  do iloc = 1, self % iloc
+    self % calc_emiss(iloc) = .false.
+    if(self % emiss(jvar,iloc) == zero) self % calc_emiss(iloc) = .true.
+  end do
 end do
 
-end subroutine
+end subroutine ufo_rttovonedvarcheck_obs_ReadFromDB
 
 !------------------------------------------------------------------------------
 !> Initialize the infrared emissivity array
@@ -317,14 +352,13 @@ end subroutine
 !!
 !! \date 06/08/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_obs_InitIREmiss(self, nchans, ir_pcemis)
+subroutine ufo_rttovonedvarcheck_obs_InitIRPCEmiss(self, config)
 
 implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
-integer, intent(in) :: nchans   !< total number of channels
-type(ufo_rttovonedvarcheck_pcemis) :: ir_pcemis  !< Infrared principal components object
+type(ufo_rttovonedvarcheck) :: config  !< main object containing configuration
 
 ! local variables
 real(kind_real), allocatable :: EmissPC(:,:)
@@ -336,20 +370,26 @@ integer :: emis_y
 ! Allocate and setup defaults - get RTTOV to calculate
 self % emiss(:,:) = zero
 self % calc_emiss(:) = .true.
+allocate(EmissPC(self % iloc, nemisspc))
 
-allocate(EmissPC(self % iloc,nemisspc))
+! Setup pc emissivity object and initialise atlas (if needed)
+if (len(trim(config % EmisAtlas)) > 0) then
+  call self % ir_pcemis % setup(config % EmisEigVecPath, config % EmisAtlas)
+else
+  call self % ir_pcemis % setup(config % EmisEigVecPath)
+end if
 
 !-------------------------
 ! 1.2 Principal components
 !-------------------------
 
 ! Initialise emissivity using principal components
-if (ir_pcemis % initialised) then
+if (self % ir_pcemis % initialised) then
 
   ! Don't do this if the RTTOV CAMEL atlas is being used.
   ! Defaults above will let the RTTOV camel atlas be used.
   !if (associated (ir_pcemiss % emis_eigen % PCGuess) .and. (.not. RTTOV_UseAtlas)) then
-  if (associated (ir_pcemis % emis_eigen % PCGuess)) then
+  if (associated (self % ir_pcemis % emis_eigen % PCGuess)) then
 
     do i = 1, self % iloc
 
@@ -357,24 +397,24 @@ if (ir_pcemis % initialised) then
       !IF (BTEST (Obs % QCflags(i), QC_ModelDomain)) CYCLE
 
       ! If there's an atlas available, try to use it.
-      if (associated (ir_pcemis % emis_atlas % EmisPC)) then
+      if (associated (self % ir_pcemis % emis_atlas % EmisPC)) then
 
         ! Find the nearest lat/lon
         emis_y = nint((self % lat(i) + 90.0_kind_real) / &
-                   ir_pcemis % emis_atlas % gridstep + 1)
+                   self % ir_pcemis % emis_atlas % gridstep + 1)
         emis_x = nint((self % lon(i) + 180.0_kind_real) / &
-                   ir_pcemis % emis_atlas % gridstep + 1)
-        if (emis_x > ir_pcemis % emis_atlas % nlon) then
-          emis_x = emis_x - ir_pcemis % emis_atlas % nlon
+                   self % ir_pcemis % emis_atlas % gridstep + 1)
+        if (emis_x > self % ir_pcemis % emis_atlas % nlon) then
+          emis_x = emis_x - self % ir_pcemis % emis_atlas % nlon
         end if
 
         ! If the atlas is valid at this point, then use it,
         ! otherwise use PCGuess. NB: missing or sea points are
         ! flagged as -9.99 in the atlas.
-        if (any (ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,:) > -9.99_kind_real)) then
-          EmissPC(i,:) = ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,1:nemisspc)
+        if (any (self % ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,:) > -9.99_kind_real)) then
+          EmissPC(i,:) = self % ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,1:nemisspc)
         else
-          EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
+          EmissPC(i,:) = self % ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
           !! Flag invalid atlas points over land as bad surface
           !IF (Obs % surface(i) == RTland) THEN
           !  Obs % QCflags(i) = IBSET (Obs % QCflags(i), QC_BadSurface)
@@ -382,7 +422,7 @@ if (ir_pcemis % initialised) then
         END IF
 
       ELSE ! If no atlas present, use PCGuess.
-        EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
+        EmissPC(i,:) = self % ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
       END IF
 
     end do
@@ -393,7 +433,7 @@ end if
 
 if (allocated(EmissPC)) deallocate(EmissPC)
 
-end subroutine
+end subroutine ufo_rttovonedvarcheck_obs_InitIRPCEmiss
 
 !------------------------------------------------------------------------------
 !> Store the 1D-Var analysis variables in obsspace for future assessment
@@ -430,6 +470,8 @@ do jvar = 1, nchans
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
+  write(var,"(A19,I0)") "surface_emissivity_",self % channels(jvar)
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
 end do
 
 ! Output Diagnostics
@@ -507,7 +549,7 @@ end if
 ! 20) RTTOVSCATT cloud profiles
 ! 21) IR cloud profiles
 
-end subroutine
+end subroutine ufo_rttovonedvarcheck_obs_output
 
 !-------------------------------------------------------------------------------
 

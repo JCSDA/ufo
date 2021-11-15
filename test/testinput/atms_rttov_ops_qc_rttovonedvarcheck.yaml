@@ -46,7 +46,6 @@ observations:
       obs options: 
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
-#        RTTOV_GasUnitConv: false
         RTTOV_GasUnitConv: true
         Sensor_ID: *sensor_id
         CoefficientPath: Data/
@@ -55,7 +54,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables:
+    retrieval variables from geovals:
     - air_temperature
     - specific_humidity
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -64,6 +63,11 @@ observations:
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
     - air_pressure_at_two_meters_above_surface
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
     nlevels: 70
     qtotal: true
     UseQtSplitRain: true
@@ -77,8 +81,6 @@ observations:
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-    EmissLandDefault: 0.95
-    EmissSeaIceDefault: 0.92
   passedBenchmark: 1380      # number of passed obs
 ## Test ML minimizer
 - obs operator:
@@ -123,7 +125,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables:
+    retrieval variables from geovals:
     - air_temperature
     - specific_humidity
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -145,8 +147,6 @@ observations:
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-    EmissLandDefault: 0.95
-    EmissSeaIceDefault: 0.92
   passedBenchmark: 1380      # number of passed obs
 - obs operator: 
     <<: *ObsOperator
@@ -182,7 +182,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables:
+    retrieval variables from geovals:
     - air_temperature
     - specific_humidity
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -212,7 +212,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
-    retrieval variables:
+    retrieval variables from geovals:
     - air_temperature
     - specific_humidity
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -230,3 +230,96 @@ observations:
       test:
         name: FinalCost@OneDVar
       absTol: 1.0e-4
+- obs operator: 
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the 1D-Var surface emissivity retrieval works
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 4-5, 16-17
+  # Setup surface emissivity for test
+  # To be replaced with DrawFromFile
+  - filter: Variable Assignment
+    assignments:
+    - name: surface_emissivity@VarMetaData
+      channels: *ops_channels
+      type: float
+      function:
+        name: Conditional@ObsFunction
+        options:
+          firstmatchingcase: false
+          defaultvalue: 0.0
+          cases:
+          - where:
+            - variable:
+                name: surface_type@MetaData
+              is_in: 0 # land
+            value: 0.95
+          - where:
+            - variable:
+                name: surface_type@MetaData
+              is_in: 2 # seaice
+            value: 0.92
+  # Setup surface emissivity error for test
+  - filter: Variable Assignment
+    assignments:
+    - name: surface_emissivity_error@VarMetaData
+      channels: *ops_channels
+      type: float
+      function:
+        name: Conditional@ObsFunction
+        options:
+          firstmatchingcase: false
+          defaultvalue: 0.0
+          cases:
+          - where:
+            - variable:
+                name: surface_type@MetaData
+              is_in: 0 # land
+            value: 0.8
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atovs_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - air_pressure_at_two_meters_above_surface
+    retrieval variables not from geovals:
+    - surface_emissivity
+    surface emissivity:
+      type: readfromdbwitherror # initialize values
+      retrieve mw emissivity: true
+      number of surface emissivity retrieval elements: 5
+      emissivity to channel mapping: [1,2,3,16,17]
+      channel to emissivity mapping: [1,2,3,3,3,3,3,3,3,3,3,
+                                      3,3,3,3,4,5,5,5,5,5,5]
+      group in obs space: VarMetaData
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  passedBenchmark: 774      # number of passed obs
