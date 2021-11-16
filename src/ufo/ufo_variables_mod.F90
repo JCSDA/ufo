@@ -1,5 +1,5 @@
 !
-!  (C) Copyright 2017-2019 UCAR
+!  (C) Copyright 2021.
 !
 !  This software is licensed under the terms of the Apache Licence Version 2.0
 !  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -141,6 +141,11 @@ character(len=MAXVARLEN), public, parameter :: var_ext1 = "volume_extinction_in_
 character(len=MAXVARLEN), public, parameter :: var_ext2 = "volume_extinction_in_air_due_to_aerosol_particles_lambda2"
 character(len=MAXVARLEN), public, parameter :: var_ext3 = "volume_extinction_in_air_due_to_aerosol_particles_lambda3"
 character(len=MAXVARLEN), public, parameter :: var_airdens = "moist_air_density"
+
+! Scaling factors for deriving PM2.5 from CMAQ aerosols in the Aitken (at), accumulation (ac) and coarse (co) modes
+character(len=MAXVARLEN), public, parameter :: var_pm25at = "pm25at"
+character(len=MAXVARLEN), public, parameter :: var_pm25ac = "pm25ac"
+character(len=MAXVARLEN), public, parameter :: var_pm25co = "pm25co"
 
 character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
      &var_aerosols_gocart_default = [&

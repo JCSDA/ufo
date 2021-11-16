@@ -77,6 +77,7 @@ if( rttov_FOUND )
     add_subdirectory( rttovcpp )
 endif()
 add_subdirectory( gnssro )
+add_subdirectory( insitupm )
 add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
 add_subdirectory( aerosols )
@@ -107,6 +108,7 @@ list( APPEND ufo_src_files
     ${rttov_src_files}
     ${rttovcpp_src_files}
     ${gnssro_src_files}
+    ${insitupm_src_files}
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
     ${radarradialvelocity_src_files}

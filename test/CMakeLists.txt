@@ -134,6 +134,7 @@ list( APPEND ufo_test_input
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
   testinput/identity.yaml
+  testinput/insitupm.yaml
   testinput/interpolate_data_from_file_predictor.yaml
   testinput/legendre_predictor.yaml
   testinput/locations.yaml
@@ -990,6 +991,19 @@ if( ${rttov_FOUND} )
 
 endif( ${rttov_FOUND} )
 
+ecbuild_add_test( TARGET  test_ufo_opr_insitupm
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/insitupm.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_insitupm
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/insitupm.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_gome_metop-a
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
