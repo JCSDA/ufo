@@ -237,14 +237,8 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
   ///  For HofX get from ObsVector H(x) (should be available)
   } else if (this->hasVector(grp, var)) {
     std::map<std::string, const ioda::ObsVector *>::const_iterator jv = ovecs_.find(grp);
-    size_t hofxnvars = jv->second->nvars();
-    for (size_t ivar = 0; ivar < varname.size(); ++ivar) {
-      const std::string currvar = varname.variable(ivar);
-      size_t iv = jv->second->varnames().find(currvar);
-      for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
-        values[currvar][jj] = (*jv->second)[iv + (jj * hofxnvars)];
-      }
-    }
+    // copy H(x) ObsVector to 'values', converting missing vals from double to float:
+    values.assignToExistingVariables(*jv->second);
 ///  For ObsDiag or ObsBiasTerm,  get it from ObsDiagnostics
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
