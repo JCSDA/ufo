@@ -5,6 +5,7 @@
 
 set ( crtm_files
   crtmParameters/ObsRadianceCRTMParameters.h
+  crtmParameters/ObsAodCRTMParameters.h
   ObsRadianceCRTM.h
   ObsRadianceCRTM.cc
   ObsRadianceCRTMTLAD.h

@@ -29,15 +29,17 @@ static ObsOperatorMaker<ObsAodCRTM> makerAOD_("AodCRTM");
 // -----------------------------------------------------------------------------
 
 ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAodCRTM_(0), odb_(odb), varin_()
+                       const Parameters_ & parameters)
+  : ObsOperatorBase(odb), keyOperAodCRTM_(0), odb_(odb), varin_(),
+    parameters_(parameters)
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
-  ufo_aodcrtm_setup_f90(keyOperAodCRTM_, config, channels_list.size(), channels_list[0], varin_);
+  ufo_aodcrtm_setup_f90(keyOperAodCRTM_, parameters_.toConfiguration(),
+                        channels_list.size(), channels_list[0], varin_);
   oops::Log::info() << "ObsAodCRTM variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodCRTM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsAodCRTM created." << std::endl;

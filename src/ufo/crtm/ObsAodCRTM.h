@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/crtm/crtmParameters/ObsAodCRTMParameters.h"
 #include "ufo/crtm/ObsAodCRTM.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -39,8 +40,9 @@ class ObsAodCRTM : public ObsOperatorBase,
                     private util::ObjectCounter<ObsAodCRTM> {
  public:
   static const std::string classname() {return "ufo::ObsAodCRTM";}
+  typedef ObsAodCRTMParameters Parameters_;
 
-  ObsAodCRTM(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAodCRTM(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodCRTM();
 
 // Obs Operator
@@ -57,6 +59,7 @@ class ObsAodCRTM : public ObsOperatorBase,
   F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  ObsAodCRTMParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

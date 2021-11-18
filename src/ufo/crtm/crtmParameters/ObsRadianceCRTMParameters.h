@@ -32,6 +32,8 @@ namespace ufo
     oops::RequiredParameter<std::string> EndianType{"EndianType", this};
     /// CoefficientPath
     oops::RequiredParameter<std::string> CoefficientPath{"CoefficientPath", this};
+    /// AerosolOption
+    oops::OptionalParameter<std::string> AerosolOption{"AerosolOption", this};
     /// Surfaces
     oops::OptionalParameter<std::vector<std::string> > Surfaces{"Surfaces", this};
     /// IR Water coefficient
@@ -78,8 +80,6 @@ namespace ufo
     oops::OptionalParameter<float> Cloud_Fraction{"Cloud_Fraction", this};
     /// Salinity
     oops::OptionalParameter<bool> Salinity{"Salinity", this};
-    /// AerosolOption
-    oops::OptionalParameter<std::string> AerosolOption{"AerosolOption", this};
     /// Obs Options
     oops::RequiredParameter<CRTMObsOptionsParameters> obsOptions{"obs options", this};
     /// Linear Obs Operator
