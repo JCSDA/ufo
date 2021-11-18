@@ -78,14 +78,15 @@ class MetOfficeBuddyPair;
 class MetOfficeBuddyCheck : public FilterBase,
                             private util::ObjectCounter<MetOfficeBuddyCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
   typedef MetOfficeBuddyCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::MetOfficeBuddyCheck";}
 
   MetOfficeBuddyCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
                       std::shared_ptr<ioda::ObsDataVector<float> > obserr);
-
-  ~MetOfficeBuddyCheck() override;
 
  private:
   struct MetaData;
@@ -110,6 +111,25 @@ class MetOfficeBuddyCheck : public FilterBase,
   /// \brief Returns a vector of integer-valued station IDs, obtained from the source indicated by
   /// the filter parameters.
   std::vector<int> getStationIds() const;
+
+  /// \brief Returns the values of the given ObsSpace variable at all unique locations held on any
+  /// MPI rank.
+  template <typename T>
+  std::vector<T> getGlobalObsSpaceVariable(const std::string &group,
+                                           const std::string &variable) const;
+
+  /// \brief Returns the values of the given variable at all unique locations held on any MPI rank.
+  ///
+  /// Any variable accessible via the ObsFilterData object may be specified.
+  template <typename T>
+  std::vector<T> getGlobalVariable(const std::string &group,
+                                   const std::string &variable) const;
+
+  /// \brief Returns the values of the given variable at all unique locations held on any MPI rank.
+  ///
+  /// Any variable accessible via the ObsFilterData object may be specified.
+  template <typename T>
+  std::vector<T> getGlobalVariable(const ufo::Variable &var) const;
 
   /// \brief Calculates and returns background error correlation scales at observation locations.
   ///

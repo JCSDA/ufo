@@ -24,6 +24,8 @@ set ( filters_files
       FilterBase.h
       FilterParametersBase.cc
       FilterParametersBase.h
+      FilterUtils.cc
+      FilterUtils.h
       FinalCheck.cc
       FinalCheck.h
       GenericFilterParameters.h

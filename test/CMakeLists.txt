@@ -1885,6 +1885,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning_ops
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_met_office_buddy_check.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1

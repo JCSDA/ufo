@@ -46,8 +46,6 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// \name Parameters controlling buddy pair identification
   /// @{
 
-  oops::OptionalParameter<int> numLevels{"num_levels", this};
-
   /// Maximum distance between two observations that may be classified as buddies, in km.
   oops::Parameter<float> searchRadius{"search_radius", 100, this};
 
@@ -144,6 +142,16 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// @}
   /// \name Miscellaneous parameters
   /// @{
+
+  /// If the filter should operate on whole profiles (e.g. radiosonde soundings) rather than
+  /// individual locations, this option should be set to the number of levels in each
+  /// buddy-checked profile. An exception will be thrown if any of these profiles is found to have
+  /// a different number of levels.
+  ///
+  /// If the ObsSpace contains a variable called MetaData/extended_obs_space, only profiles made up
+  /// of locations at which this variable is set to 1 will be buddy-checked; otherwise all profiles
+  /// will be buddy-checked.
+  oops::OptionalParameter<int> numLevels{"num_levels", this};
 
   /// Observations will be rejected if the gross error probability lies at or above this threshold.
   oops::Parameter<float> rejectionThreshold{"rejection_threshold", 0.5, this};

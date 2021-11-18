@@ -13,6 +13,7 @@
 
 #include "ioda/distribution/InefficientDistribution.h"
 #include "ioda/ObsSpace.h"
+#include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
@@ -107,25 +108,19 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
     const ufo::Variables &filtervars, bool candidateForRetentionIfAnyFilterVariablesPassedQC)
     const {
+  std::vector<bool> isValid = apply;
+  const UnselectLocationIf mode = candidateForRetentionIfAnyFilterVariablesPassedQC ?
+        UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED :
+        UnselectLocationIf::ANY_FILTER_VARIABLE_REJECTED;
+  unselectRejectedLocations(isValid, filtervars, flags, mode);
+
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
-  std::vector<int> globalApply(apply.size());
-  std::vector<ioda::ObsDataRow<int>> filterVariableFlags;
-  // Select flags for respective filtervars
-  for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
-    std::string filterVariableName = filtervars.variable(ivar).variable();
-    auto it = std::find(flags.varnames().variables().begin(), flags.varnames().variables().end(),
-                        filterVariableName);
-    filterVariableFlags.push_back(flags[*it]);
-  }
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    globalApply[obsId] = apply[obsId]
-                     && isCandidateForRetention(filterVariableFlags, obsId,
-                                                candidateForRetentionIfAnyFilterVariablesPassedQC);
-  obsDistribution_->allGatherv(globalApply);
+  std::vector<int> globalIsValid(isValid.begin(), isValid.end());
+  obsDistribution_->allGatherv(globalIsValid);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
-    if (globalApply[obsId])
+  for (size_t obsId = 0; obsId < globalIsValid.size(); ++obsId)
+    if (globalIsValid[obsId])
       validObsIds.push_back(obsId);
 
   return validObsIds;
@@ -134,12 +129,12 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply) const {
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
-  std::vector<int> globalApply(apply.begin(), apply.end());
-  obsDistribution_->allGatherv(globalApply);
+  std::vector<int> globalIsValid(apply.begin(), apply.end());
+  obsDistribution_->allGatherv(globalIsValid);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
-    if (globalApply[obsId])
+  for (size_t obsId = 0; obsId < globalIsValid.size(); ++obsId)
+    if (globalIsValid[obsId])
       validObsIds.push_back(obsId);
 
   return validObsIds;
@@ -178,29 +173,6 @@ std::vector<size_t> ObsAccessor::getRecordIds() const {
 
 size_t ObsAccessor::totalNumObservations() const {
   return obsdb_->globalNumLocs();
-}
-
-bool ObsAccessor::isCandidateForRetention(const std::vector<ioda::ObsDataRow<int>> &flags,
-                       size_t obsId, bool candidateForRetentionIfAnyFilterVariablesPassedQC) const {
-  bool obIsNotFlagged;
-  if (candidateForRetentionIfAnyFilterVariablesPassedQC) {
-    obIsNotFlagged = false;
-    for (size_t irow = 0; irow < flags.size(); ++irow) {
-      if (flags[irow][obsId] == QCflags::pass) {
-        obIsNotFlagged = true;
-        break;
-      }
-    }
-  } else {
-    obIsNotFlagged = true;
-    for (size_t irow = 0; irow < flags.size(); ++irow) {
-      if (flags[irow][obsId] != QCflags::pass) {
-        obIsNotFlagged = false;
-        break;
-      }
-    }
-  }
-  return obIsNotFlagged;
 }
 
 RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
@@ -277,7 +249,7 @@ void ObsAccessor::flagObservationsForAnyFilterVariableFailingQC(
     if (apply[iloc]) {
       bool atLeastOneFilterVariableFailsQC = false;
       for (size_t ivar = 0; ivar < flagged.size(); ++ivar) {
-        if (flags[indexOfFilterVariableInFlags[ivar]][iloc] != QCflags::pass) {
+        if (QCflags::isRejected(flags[indexOfFilterVariableInFlags[ivar]][iloc])) {
           atLeastOneFilterVariableFailsQC = true;
           break;
         }

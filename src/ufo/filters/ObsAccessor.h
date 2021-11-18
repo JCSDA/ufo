@@ -238,23 +238,6 @@ class ObsAccessor {
   void groupObservationsByCategoryVariable(const std::vector<size_t> &validObsIds,
                                            RecursiveSplitter &splitter) const;
 
-  /// \brief Return true if filtered variable(s) have passed QC, otherwise false.
-  ///
-  /// \param flags
-  ///   A vector of type ObsDataRow holding the QC flags for the subset of simulated variables
-  ///   present in the list of filtered variables.
-  ///
-  /// \param ObsId
-  ///   Index of observation location.
-  ///
-  /// \param candidateForRetentionIfAnyFilterVariablePassedQC
-  ///   Boolean variable to decide how to treat observation locations where QC flags of filtered
-  ///   variables differ.
-  ///   If true, consider that observation has passed QC if any filtered variable has passed QC.
-  ///   If false, consider that observation has passed QC only if all filtered variables passed QC.
-  bool isCandidateForRetention(const std::vector<ioda::ObsDataRow<int>> &flags, size_t ObsId,
-                               bool candidateForRetentionIfAnyFilterVariablePassedQC) const;
-
  private:
   const ioda::ObsSpace *obsdb_;
   std::shared_ptr<const ioda::Distribution> obsDistribution_;

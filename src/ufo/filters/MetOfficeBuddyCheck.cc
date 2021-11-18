@@ -26,6 +26,7 @@
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 #include "oops/util/sqr.h"
+#include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/MetOfficeBuddyCheckParameters.h"
 #include "ufo/filters/MetOfficeBuddyPair.h"
 #include "ufo/filters/MetOfficeBuddyPairFinder.h"
@@ -85,6 +86,64 @@ void updateFlatData(std::vector<float> & flatArray, const Eigen::ArrayXXf &array
   }
 }
 
+/// \brief Given a vector of values associated with all unique locations held by all processes,
+/// return a vector of values associated only with the locations held by the calling process.
+///
+/// \param globalValues
+///   A vector of values associated with all unique locations held by all processes.
+/// \param nlocs
+///   Number of locations held by the calling process.
+/// \param dist
+///   An object managing the distribution of locations across processes.
+std::vector<float> localValues(const std::vector<float> & globalValues,
+                               size_t nlocs, const ioda::Distribution &dist) {
+  std::vector<float> result(nlocs);
+  for (size_t localObsId = 0; localObsId < nlocs; ++localObsId) {
+    const size_t globalObsId = dist.globalUniqueConsecutiveLocationIndex(localObsId);
+    result[localObsId] = globalValues[globalObsId];
+  }
+  return result;
+}
+
+/// Return a map mapping indices of records held on all MPI ranks to the vectors of global indices
+/// of locations belonging to these records (sorted according to the criteria specified during
+/// ObsSpace construction).
+ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb) {
+  const size_t nlocs = obsdb.nlocs();
+
+  // Identify the index of each location within the record it belongs to
+  std::vector<size_t> locationIndexWithinItsRecord(nlocs);
+  for (ioda::ObsSpace::RecIdxIter irec = obsdb.recidx_begin(); irec != obsdb.recidx_end(); ++irec) {
+    size_t index = 0;
+    for (size_t loc : obsdb.recidx_vector(irec))
+      locationIndexWithinItsRecord[loc] = index++;
+  }
+
+  // Identify the record containing each location
+  std::vector<size_t> recordIds = obsdb.recnum();
+
+  // Collect data from all MPI ranks
+  obsdb.distribution()->allGatherv(locationIndexWithinItsRecord);
+  obsdb.distribution()->allGatherv(recordIds);
+
+  // Count the number of locations in each record
+  std::map<size_t, size_t> numLocsPerRecord;
+  for (size_t recordId : recordIds)
+    ++numLocsPerRecord[recordId];
+
+  // Map each record ID to the (ordered) indices of locations belonging to it
+  ioda::ObsSpace::RecIdxMap result;
+  for (const auto &kv : numLocsPerRecord) {
+    const size_t recordId = kv.first;
+    const size_t numLocsInRecord = kv.second;
+    result[recordId].resize(numLocsInRecord);
+  }
+  for (size_t gloc = 0; gloc != recordIds.size(); ++gloc)
+    result[recordIds[gloc]][locationIndexWithinItsRecord[gloc]] = gloc;
+
+  return result;
+}
+
 /// Return an array whose rows store the indices of locations belonging to successive profiles
 /// that should be buddy-checked.
 ///
@@ -100,17 +159,20 @@ Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
   if (obsdb.has("MetaData", "extended_obs_space")) {
     extended_obs_space = std::vector<int>(obsdb.nlocs());
     obsdb.get_db("MetaData", "extended_obs_space", *extended_obs_space);
+    obsdb.distribution()->allGatherv(*extended_obs_space);
   }
-  Eigen::ArrayXXi profileIndex {obsdb.nrecs(), numLevels};
+
+  ioda::ObsSpace::RecIdxMap locationsPerRecord = mapRecordIdsToLocations(obsdb);
+  Eigen::ArrayXXi profileIndex{locationsPerRecord.size(), numLevels};
 
   int recnum = 0;
-  for (ioda::ObsSpace::RecIdxIter irec = obsdb.recidx_begin(); irec != obsdb.recidx_end(); ++irec) {
+  for (const auto &recordIndexAndLocations : locationsPerRecord) {
+    const std::vector<size_t> &locations = recordIndexAndLocations.second;
     int levnum = 0;
-    const std::vector<std::size_t> &rSort = obsdb.recidx_vector(irec);
-    for (size_t ilocs = 0; ilocs < rSort.size(); ++ilocs) {
-      if (extended_obs_space && ((*extended_obs_space)[rSort[ilocs]] != 1))
+    for (size_t loc : locations) {
+      if (extended_obs_space && ((*extended_obs_space)[loc] != 1))
         continue;
-      profileIndex(recnum, levnum) = rSort[ilocs];
+      profileIndex(recnum, levnum) = loc;
       levnum++;
     }
     if (levnum == numLevels) {
@@ -164,16 +226,27 @@ std::vector<int> mapDistinctValuesToDistinctInts(const std::vector<T> &values)
   return ints;
 }
 
-
+/// Data associated with a single filter variable.
 struct ScalarVariableData {
-  std::vector<int> varFlags;
+  // If the buddy check operates on individual locations, the following arrays have dimensions
+  // (`gnlocs`, 1), where `gnlocs` is the total number of unique locations held by all processes.
+  // If the buddy check operates on profiles (e.g. radiosonde soundings), the arrays have
+  // dimensions (`gnprofs`, `nlevels`), where `gnprofs` is the total number of buddy-checked
+  // profiles held by all processes and `nlevels` is the number of levels per profile (taken from
+  // the YAML option `num_levels`).
   Eigen::ArrayXXf obsValues;
-  Eigen::ArrayXXf obsBiases;
   Eigen::ArrayXXf obsErrors;
   Eigen::ArrayXXf bgValues;
   Eigen::ArrayXXf bgErrors;
-  std::vector<float> flatGrossErrorProbabilities;
   Eigen::ArrayXXf grossErrorProbabilities;
+
+  // If the buddy check operates on individual locations, this vector has length `gnlocs` and
+  // stores the QC flags at all locations. Otherwise it has length `gnprofs` and stores the
+  // QC flags at the first location in each profile.
+  std::vector<int> varFlags;
+
+  // Gross error probabilities at all unique locations held by any process.
+  std::vector<float> flatGrossErrorProbabilities;
 };
 
 
@@ -199,12 +272,6 @@ MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters
   for (size_t i = 0; i < filtervars_.size(); ++i)
     allvars_ += backgroundErrorVariable(filtervars_[i]);
 }
-
-// Required for the correct destruction of options_.
-MetOfficeBuddyCheck::~MetOfficeBuddyCheck()
-{}
-
-
 
 void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
@@ -235,35 +302,48 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                            obsData.stationIds);
   const std::vector<MetOfficeBuddyPair> buddyPairs = buddyPairFinder.findBuddyPairs(validObsIds);
 
+  std::shared_ptr<const ioda::Distribution> distribution = obsdb_.distribution();
+
   // Fetch data/metadata required for buddy-check calculation.
-  const oops::Variables &observedVars = obsdb_.obsvariables();
-  ioda::ObsDataVector<float> obsValues(obsdb_, filtervars.toOopsVariables(), "ObsValue");
 
   auto getFilterVariableName = [&] (size_t filterVarIndex) {
     return filtervars.variable(filterVarIndex).variable();
   };
 
+  // Return a ScalarVariableData object containing the data (observed and background values, errors
+  // etc.) corresponding to a specific filter variable.
   auto getScalarVariableData = [&] (size_t filterVarIndex) {
-    // Fetch raw data corresponding this the specific variable of interest.
-    const size_t observedVarIndex = observedVars.find(getFilterVariableName(filterVarIndex));
+    // Get the name of the filter variable.
+    const std::string filterVar = getFilterVariableName(filterVarIndex);
 
-    std::vector<float> bgValues;
-    data_.get(ufo::Variable(filtervars[filterVarIndex], "HofX"), bgValues);
-    std::vector<float> bgErrors;
-    data_.get(backgroundErrorVariable(filtervars[filterVarIndex]), bgErrors);
+    // Retrieve data.
+    const std::vector<float> obsValues =
+        getGlobalVariable<float>("ObsValue", filterVar);
+    const std::vector<float> obsErrors =
+        getGlobalVariable<float>("ObsErrorData", filterVar);
+    const std::vector<float> bgValues =
+        getGlobalVariable<float>("HofX", filterVar);
+    const std::vector<float> bgErrors =
+        getGlobalVariable<float>(backgroundErrorVariable(filtervars[filterVarIndex]));
+    const std::vector<int> flags =
+        getGlobalVariable<int>("QCflagsData", filterVar);
+    const std::vector<float> grossErrorProbabilities =
+        getGlobalVariable<float>("GrossErrorProbability", filterVar);
 
-    // Store data for usage.
+    // Store data in a ScalarVariableData object.
     ScalarVariableData data;
-    data_.get(ufo::Variable(filtervars[filterVarIndex], "GrossErrorProbability"),
-              data.flatGrossErrorProbabilities);
 
-    // Unravel these flattened vectors.
-    data.varFlags = extract1stLev((*flags_)[observedVarIndex], profileIndex);
-    data.obsValues = unravel(obsValues[filterVarIndex], profileIndex);
-    data.obsErrors = unravel((*obserr_)[observedVarIndex], profileIndex);
+    // If we're buddy-checking profiles, unravel vectors into 2D arrays indexed by profile.
+    data.obsValues = unravel(obsValues, profileIndex);
+    data.obsErrors = unravel(obsErrors, profileIndex);
     data.bgValues = unravel(bgValues, profileIndex);
     data.bgErrors = unravel(bgErrors, profileIndex);
-    data.grossErrorProbabilities = unravel(data.flatGrossErrorProbabilities, profileIndex);
+    data.grossErrorProbabilities = unravel(grossErrorProbabilities, profileIndex);
+
+    data.varFlags = extract1stLev(flags, profileIndex);
+
+    data.flatGrossErrorProbabilities = std::move(grossErrorProbabilities);
+
     return data;
   };
 
@@ -302,13 +382,16 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
       // The implementation of checkVectorSurfaceData() still assumes that the *input* gross error
       // probabilities, flags and background error estimates are the same for both components.
 
-      // Update the flat GPE values.
+      // Update the flat PGEs and extract those associated with locations held by this process.
       updateFlatData(firstComponentData.flatGrossErrorProbabilities,
                      firstComponentData.grossErrorProbabilities, profileIndex);
+      std::vector<float> localFlatGrossErrorProbabilities = localValues(
+            firstComponentData.flatGrossErrorProbabilities, obsdb_.nlocs(), *distribution);
       calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex - 1)] =
-          firstComponentData.flatGrossErrorProbabilities;
+          localFlatGrossErrorProbabilities;
       calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-          std::move(firstComponentData.flatGrossErrorProbabilities);
+          std::move(localFlatGrossErrorProbabilities);
+
       previousVariableWasFirstComponentOfTwo = false;
     } else {
       if (filtervars[filterVarIndex].options().getBool("first_component_of_two", false)) {
@@ -323,11 +406,13 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                         data.bgValues, data.bgErrors,
                         data.grossErrorProbabilities);
 
-        // Update the flat GPE values.
-        updateFlatData(data.flatGrossErrorProbabilities, data.grossErrorProbabilities,
-                       profileIndex);
+        // Update the flat PGEs and extract those associated with locations held by this process.
+        updateFlatData(data.flatGrossErrorProbabilities,
+                       data.grossErrorProbabilities, profileIndex);
+        std::vector<float> localFlatGrossErrorProbabilities = localValues(
+              data.flatGrossErrorProbabilities, obsdb_.nlocs(), *distribution);
         calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-            std::move(data.flatGrossErrorProbabilities);
+            std::move(localFlatGrossErrorProbabilities);
       }
     }
   }
@@ -349,18 +434,14 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
     const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
   MetaData obsData;
 
-  obsData.latitudes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "latitude", obsData.latitudes);
+  std::shared_ptr<const ioda::Distribution> distribution = obsdb_.distribution();
 
-  obsData.longitudes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "longitude", obsData.longitudes);
-
-  obsData.datetimes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "datetime", obsData.datetimes);
+  obsData.latitudes = getGlobalObsSpaceVariable<float>("MetaData", "latitude");
+  obsData.longitudes = getGlobalObsSpaceVariable<float>("MetaData", "longitude");
+  obsData.datetimes = getGlobalObsSpaceVariable<util::DateTime>("MetaData", "datetime");
 
   if (obsdb_.has("MetaData", "air_pressure")) {
-    obsData.pressures = std::vector<float>(obsdb_.nlocs());
-    obsdb_.get_db("MetaData", "air_pressure", *obsData.pressures);
+    obsData.pressures = getGlobalObsSpaceVariable<float>("MetaData", "air_pressure");
     obsData.pressuresML = unravel(*obsData.pressures, profileIndex);
   }
   obsData.stationIds = getStationIds();
@@ -380,27 +461,26 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
 std::vector<int> MetOfficeBuddyCheck::getStationIds() const {
   const boost::optional<Variable> &stationIdVariable = options_.stationIdVariable.value();
   if (stationIdVariable == boost::none) {
+    std::vector<int> stationIds;
     if (obsdb_.obs_group_vars().empty()) {
       // Observations were not grouped into records.
       // Assume all observations were taken by the same station.
-      return std::vector<int>(obsdb_.nlocs(), 0);
+      stationIds.assign(obsdb_.nlocs(), 0);
     } else {
       const std::vector<size_t> &recordNumbers = obsdb_.recnum();
-      return std::vector<int>(recordNumbers.begin(), recordNumbers.end());
+      stationIds.assign(recordNumbers.begin(), recordNumbers.end());
     }
+    obsdb_.distribution()->allGatherv(stationIds);
+    return stationIds;
   } else {
     switch (obsdb_.dtype(stationIdVariable->group(), stationIdVariable->variable())) {
     case ioda::ObsDtype::Integer:
-      {
-        std::vector<int> stationIds(obsdb_.nlocs());
-        obsdb_.get_db(stationIdVariable->group(), stationIdVariable->variable(), stationIds);
-        return stationIds;
-      }
+      return getGlobalVariable<int>(stationIdVariable->group(), stationIdVariable->variable());
 
     case ioda::ObsDtype::String:
       {
-        std::vector<std::string> stringIds(obsdb_.nlocs());
-        obsdb_.get_db(stationIdVariable->group(), stationIdVariable->variable(), stringIds);
+        std::vector<std::string> stringIds = getGlobalVariable<std::string>(
+              stationIdVariable->group(), stationIdVariable->variable());
         return mapDistinctValuesToDistinctInts(stringIds);
       }
 
@@ -409,6 +489,29 @@ std::vector<int> MetOfficeBuddyCheck::getStationIds() const {
                              Here());
     }
   }
+}
+
+template <typename T>
+std::vector<T> MetOfficeBuddyCheck::getGlobalObsSpaceVariable(const std::string &group,
+                                                              const std::string &variable) const {
+  std::vector<T> values(obsdb_.nlocs());
+  obsdb_.get_db(group, variable, values);
+  obsdb_.distribution()->allGatherv(values);
+  return values;
+}
+
+template <typename T>
+std::vector<T> MetOfficeBuddyCheck::getGlobalVariable(const std::string &group,
+                                                      const std::string &variable) const {
+  return getGlobalVariable<T>(Variable(group + "/" + variable));
+}
+
+template <typename T>
+std::vector<T> MetOfficeBuddyCheck::getGlobalVariable(const Variable &var) const {
+  std::vector<T> values;
+  data_.get(var, values);
+  obsdb_.distribution()->allGatherv(values);
+  return values;
 }
 
 std::vector<float> MetOfficeBuddyCheck::calcBackgroundErrorHorizontalCorrelationScales(
@@ -698,18 +801,22 @@ void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> 
   }
 }
 
-
 std::vector<size_t> MetOfficeBuddyCheck::getValidObservationIds(
-    const std::vector<bool> & apply, const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
+    const std::vector<bool> & apply,
+    const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
+  std::vector<bool> isValid = apply;
+  unselectRejectedLocations(isValid, filtervars_, *flags_,
+                            UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED);
+
+  std::vector<int> isValidAsInt(apply.begin(), apply.end());
+  obsdb_.distribution()->allGatherv(isValidAsInt);
+  isValid.assign(isValidAsInt.begin(), isValidAsInt.end());
+
   std::vector<size_t> validObsIds;
 
-  const auto lev1flags = extract1stLev((*flags_)[0], profileIndex);
-  const std::vector<bool> lev1apply = extract1stLev(apply, profileIndex);
-  for (size_t obsId = 0; obsId < lev1flags.size(); ++obsId)
-    // TODO(wsmigaj): The condition below may need reviewing.
-    // Perhaps we should process only observations marked as passed in all filter variables?
-    // Or those marked as passed in at least one filter variable?
-    if (lev1apply[obsId] && lev1flags[obsId] == QCflags::pass)
+  const std::vector<int> isLevel1Valid = extract1stLev(isValidAsInt, profileIndex);
+  for (size_t obsId = 0; obsId < isLevel1Valid.size(); ++obsId)
+    if (isLevel1Valid[obsId])
       validObsIds.push_back(obsId);
   return validObsIds;
 }
