@@ -28,6 +28,7 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsBiasPreconditioner.h"
 #include "ufo/predictors/PredictorBase.h"
 #include "ufo/utils/IodaGroupIndices.h"
 
@@ -378,6 +379,12 @@ void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;
 }
+// -----------------------------------------------------------------------------
+
+std::unique_ptr<ObsBiasPreconditioner> ObsBiasCovariance::preconditioner() const {
+    return std::make_unique<ObsBiasPreconditioner> (preconditioner_);
+}
+
 
 // -----------------------------------------------------------------------------
 

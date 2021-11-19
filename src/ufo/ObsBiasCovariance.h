@@ -9,6 +9,7 @@
 #define UFO_OBSBIASCOVARIANCE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <boost/noncopyable.hpp>
@@ -32,6 +33,7 @@ namespace ioda {
 namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
+  class ObsBiasPreconditioner;
 
 // -----------------------------------------------------------------------------
 
@@ -57,6 +59,7 @@ class ObsBiasCovariance : public util::Printable,
   void read(const ObsBiasCovariancePriorParameters &);
   void write(const Parameters_ &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
+  std::unique_ptr<ObsBiasPreconditioner> preconditioner() const;
 
  private:
   void print(std::ostream &) const {}

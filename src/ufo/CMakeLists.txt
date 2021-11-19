@@ -31,6 +31,8 @@ list( APPEND ufo_src_files
     ObsBiasOperator.cc
     ObsBiasOperator.h
     ObsBiasParameters.h
+    ObsBiasPreconditioner.cc
+    ObsBiasPreconditioner.h
     ObsDiagnostics.cc
     ObsDiagnostics.h
     ObsOperator.cc
