@@ -72,7 +72,7 @@ namespace ufo
     /// Absorbers
     oops::RequiredParameter<std::vector<std::string> > Absorbers{"Absorbers", this};
     /// SurfaceWindGeoVars
-    oops::Parameter<std::string> SurfaceWindGeoVars{"SurfaceWindGeoVars", \
+    oops::Parameter<std::string> SurfaceWindGeoVars{"SurfaceWindGeoVars",
           "vector", this};
     /// Clouds
     oops::OptionalParameter<std::vector<std::string> > Clouds{"Clouds", this};
@@ -83,7 +83,7 @@ namespace ufo
     /// Obs Options
     oops::RequiredParameter<CRTMObsOptionsParameters> obsOptions{"obs options", this};
     /// Linear Obs Operator
-    oops::OptionalParameter<CRTMLinearObsOperatorParameters> \
+    oops::OptionalParameter<CRTMLinearObsOperatorParameters>
           LinearObsOperator{"linear obs operator", this};
   };  // end class ObsRadianceCRTMParameters
 

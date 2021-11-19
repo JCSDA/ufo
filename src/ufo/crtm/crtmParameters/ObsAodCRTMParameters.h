@@ -20,15 +20,16 @@
 namespace ufo
 {
 
-  /// \brief Parameters controlling the CRTM Radiance Forward Operator
+  /// \brief Parameters controlling the CRTM AOD Forward Operator
   class ObsAodCRTMParameters : public ObsRadianceCRTMParameters
   {
-    ///
-    ///  Empty class for now. The yaml parameters for ObsAodCRTM are
-    ///  the same at the moment. Additional parameters that are
-    ///  specific to the AOD operator can be added below.
-    ///
-  };  //  end class ObsRadianceCRTMParameters
+    OOPS_CONCRETE_PARAMETERS(ObsAodCRTMParameters, ObsRadianceCRTMParameters)
+    //
+    //  Empty class for now. The yaml parameters for ObsAodCRTM are the same
+    //  as for ObsRadianceCRTM at the moment. Additional parameters that are
+    //  specific to the AOD operator can be added below.
+    //
+  };  // end class ObsAodCRTMParameters
 
 }  // namespace ufo
 
