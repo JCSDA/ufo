@@ -30,15 +30,15 @@ obs filters:
     action:
       name: reject
   #
-  - filter: Bounds Check
-    filter variables:
-    - name: eastward_wind
-    - name: northward_wind
-    test variables:
-    - name: MetaData/satwind_quality_ind_no_fc
-    minvalue: 80.0
-    action:
-      name: reject
+# - filter: Bounds Check
+#   filter variables:
+#   - name: eastward_wind
+#   - name: northward_wind
+#   test variables:
+#   - name: MetaData/satwind_quality_ind_no_fc
+#   minvalue: 80.0
+#   action:
+#     name: reject
   # GOES IR (245), EUMET IR (253), JMA IR (252) reject when pressure between 400 and 800 mb.
   - filter: Bounds Check
     filter variables:

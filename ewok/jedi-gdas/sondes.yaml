@@ -8,14 +8,14 @@ obs space:
       sort order: "descending"
   obsdataout:
     obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).sondes.{{window_begin}}.nc4
-  simulated variables: [eastward_wind, northward_wind, air_temperature, virtual_temperature, specific_humidity, surface_pressure]
+  simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
 obs operator:
   name: Composite
   components:
    - name: VertInterp
      variables:
      - name: air_temperature
-     - name: virtual_temperature
+#    - name: virtual_temperature
      - name: specific_humidity
      - name: eastward_wind
      - name: northward_wind
@@ -41,13 +41,13 @@ obs filters:
     action:
       name: reject
   #
-  - filter: Bounds Check
-    filter variables:
-    - name: virtual_temperature
-    minvalue: 195
-    maxvalue: 327
-    action:
-      name: reject
+# - filter: Bounds Check
+#   filter variables:
+#   - name: virtual_temperature
+#   minvalue: 195
+#   maxvalue: 327
+#   action:
+#     name: reject
   #
   - filter: Bounds Check
     filter variables:
@@ -92,13 +92,13 @@ obs filters:
       name: assign error
       error parameter: 1.4
   #
-  - filter: Perform Action
-    filter variables:
-    - name: air_temperature
-    - name: virtual_temperature
-    action:
-      name: assign error
-      error parameter: 1.3
+# - filter: Perform Action
+#   filter variables:
+#   - name: air_temperature
+#   - name: virtual_temperature
+#   action:
+#     name: assign error
+#     error parameter: 1.3
   #
   - filter: Perform Action
     filter variables:
@@ -128,18 +128,18 @@ obs filters:
           xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
           errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
   #
-  - filter: Perform Action
-    filter variables:
-    - name: virtual_temperature
-    action:
-      name: assign error
-      error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
-        options:
-          xvar:
-            name: MetaData/air_pressure
-          xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
-          errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
+# - filter: Perform Action
+#   filter variables:
+#   - name: virtual_temperature
+#   action:
+#     name: assign error
+#     error function:
+#       name: ObsErrorModelStepwiseLinear@ObsFunction
+#       options:
+#         xvar:
+#           name: MetaData/air_pressure
+#         xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
+#         errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
   #
   - filter: Perform Action
     filter variables:
@@ -219,17 +219,17 @@ obs filters:
           inflate variables: [air_temperature]
     defer to post: true
   #
-  - filter: Perform Action
-    filter variables:
-    - name: virtual_temperature
-    action:
-      name: inflate error
-      inflation variable:
-        name: ObsErrorFactorConventional@ObsFunction
-        options:
-          test QCflag: PreQC
-          inflate variables: [virtual_temperature]
-    defer to post: true
+# - filter: Perform Action
+#   filter variables:
+#   - name: virtual_temperature
+#   action:
+#     name: inflate error
+#     inflation variable:
+#       name: ObsErrorFactorConventional@ObsFunction
+#       options:
+#         test QCflag: PreQC
+#         inflate variables: [virtual_temperature]
+#   defer to post: true
   #
   - filter: Perform Action
     filter variables:
@@ -276,13 +276,13 @@ obs filters:
     action:
       name: reject
   #
-  - filter: Background Check
-    filter variables:
-    - name: virtual_temperature
-    threshold: 7.0
-    absolute threshold: 9.0
-    action:
-      name: reject
+# - filter: Background Check
+#   filter variables:
+#   - name: virtual_temperature
+#   threshold: 7.0
+#   absolute threshold: 9.0
+#   action:
+#     name: reject
   #
   - filter: Background Check
     filter variables:
