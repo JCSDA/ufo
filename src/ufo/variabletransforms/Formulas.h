@@ -25,6 +25,7 @@ namespace formulas {
 /*! Various Methods and Formulations available */
 enum MethodFormulation {
   // Methods: Met Center
+  UKMOmixingratio,  /*!< UKMO mixing ratio specfic formulation */
   UKMO,   /*!< UKMO specific formulation */
   NCAR,   /*!< NCAR specific formulation */
   NOAA,   /*!< NOAA specific formulation */
@@ -80,6 +81,7 @@ float SatVaporPres_fromTemp(const float temp_K,
 * \b Formulation \b available:
 *      - NCAR: as Sonntag 1997
 *      - NOAA: as Sonntag 1997
+*      - UKMOmixingratio:  as Landolt-Bornstein 1987
 *      - UKMO:  as Sonntag 1997
 *      - Sonntag:
 *        Correct the the saturation vapour pressure of pure water vapour
@@ -107,6 +109,7 @@ float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
 * \b Formulation \b available:
 *      - NCAR: as default
 *      - NOAA: as default
+*      - UKMOmixingratio: as default
 *      - UKMO: as default
 *      - DEFAULT:
 *        Calculation is using the Sonntag (1994) formula. (With fix at low
@@ -128,6 +131,7 @@ float Qsat_From_Psat(float Psat, float P,
 * \b Formulation \b available:
 *      - NCAR: as default
 *      - NOAA: as default
+*      - UKMOmixingratio: as default
 *      - UKMO: as default
 *      - DEFAULT: \f$ Tv = T * ((P + Psat / \epsilon) / (P + Psat)) \f$
 *

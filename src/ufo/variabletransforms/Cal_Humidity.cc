@@ -38,6 +38,10 @@ void Cal_RelativeHumidity::runTransform(const std::vector<bool> &apply) {
       methodUKMO(apply);
       break;
     }
+    case formulas::MethodFormulation::UKMOmixingratio: {
+      methodUKMOmixingratio(apply);
+      break;
+    }
     case formulas::MethodFormulation::NCAR:
     case formulas::MethodFormulation::NOAA:
     default: {
@@ -222,6 +226,116 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
     } else {
       putObservation("relative_humidity", relativeHumidity);
     }
+  }
+}
+
+/**************************************************************************************************/
+/*
+Calculates relative humidity (RH_ice) from mixing ratio
+
+Method: -
+  Saturated specific humidity (w.r.t ice) at the air temperature is obtained
+  above water for temperatures greater than 0 and above ice below zero.
+  Relative humidity is then calculated using :
+
+    RH = (Mixing_Ratio/QSAT(DRY BULB))*100
+
+  The option AllowSuperSaturation (false by default) controls whether upper air relative humidity
+  is capped at 100%.
+
+  Example:
+  \code{.unparsed}
+  obs filter:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMOmixingratio
+    AllowSuperSaturation: false
+  \endcode
+*/
+void Cal_RelativeHumidity::methodUKMOmixingratio(const std::vector<bool> &apply) {
+  const size_t nlocs_ = obsdb_.nlocs();
+  // Return if no data
+  if (obsdb_.nlocs() == 0) {
+    return;
+  }
+
+  std::vector<float> airTemperature;
+  std::vector<float> mixingRatio;
+  std::vector<float> relativeHumidity;
+  std::vector<float> airPressure;
+  bool hasBeenUpdated = false;
+
+  // Here we can only use data that has not been rejected by quality control
+  // so making sure UseValidDataOnly_ is set to True
+  SetUseValidDataOnly(true);
+
+  // Get variables
+  getObservation("ObsValue", "air_pressure",
+                 airPressure, true);
+  getObservation("ObsValue", "air_temperature",
+                 airTemperature, true);
+  getObservation("ObsValue", "humidity_mixing_ratio",
+                 mixingRatio, true);
+  getObservation("ObsValue", "relative_humidity",
+                 relativeHumidity);
+
+  if (relativeHumidity.empty()) {
+    relativeHumidity.assign(nlocs_, missingValueFloat);
+  }
+
+  if (!oops::allVectorsSameNonZeroSize(airPressure, airTemperature, mixingRatio)) {
+    oops::Log::warning() << "Vector sizes: "
+                         << oops::listOfVectorSizes(airPressure, airTemperature,
+                                                    mixingRatio)
+                         << std::endl;
+    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+                          "P, T and MixingRatio", Here());
+  }
+
+  for (ioda::ObsSpace::RecIdxIter irec = obsdb_.recidx_begin();
+       irec != obsdb_.recidx_end(); ++irec) {
+    const std::vector<std::size_t> &rSort = obsdb_.recidx_vector(irec);
+
+    // Loop over each record
+    for (size_t iloc : rSort) {
+      if (!apply[iloc]) continue;
+
+      // Store some variables
+      const float pressure = airPressure[iloc];
+      const float temperature = airTemperature[iloc];
+      const float mixRatio = mixingRatio[iloc];
+
+      if (pressure > 0  &&
+          pressure != missingValueFloat &&
+          temperature != missingValueFloat &&
+          mixRatio != missingValueFloat) {
+        // Sat. vapor pressure from Drybulb temperature  - wrt ice
+        float e_sub_s_ice = formulas::SatVaporPres_fromTemp(temperature,
+                                                            formulation());
+        e_sub_s_ice = formulas::SatVaporPres_correction(e_sub_s_ice,
+                                                        temperature,
+                                                        pressure,
+                                                        formulation());
+        // Convert sat. vapor pressure (wrt ice) to saturated specific humidity (ice)
+        const float Q_sub_s_ice = formulas::Qsat_From_Psat(e_sub_s_ice, pressure);
+
+        // Calculate RH
+        if (mixRatio >= 0 && Q_sub_s_ice > 0) {
+          relativeHumidity[iloc] = (mixRatio / Q_sub_s_ice) * 100.0f;
+        } else {
+          relativeHumidity[iloc] = missingValueFloat;
+        }
+        hasBeenUpdated = true;
+        if (relativeHumidity[iloc] != missingValueFloat &&
+            !allowSuperSaturation_) {
+          relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+        }
+      }
+    }
+  }
+  // Assign the derived relative humidity as DerivedObsValue
+  if (hasBeenUpdated) {
+    putObservation("relative_humidity", relativeHumidity);
   }
 }
 

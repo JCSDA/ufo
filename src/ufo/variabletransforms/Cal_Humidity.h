@@ -63,6 +63,7 @@ class Cal_RelativeHumidity : public TransformBase {
   bool allowSuperSaturation_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
+  void methodUKMOmixingratio(const std::vector<bool> &apply);
   void methodUKMO(const std::vector<bool> &apply);
 };
 

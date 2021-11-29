@@ -1,0 +1,58 @@
+window begin: 2021-07-01T08:59:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations:
+- obs space:
+    name: Relative humidity mixing ratio calculation, upper-air variables
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "datetime"
+        sort order: "descending"
+    simulated variables: [air_temperature, humidity_mixing_ratio]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: air_temperature
+    - name: humidity_mixing_ratio
+    action:
+      name: assign error
+      error parameter: 1.0
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMOmixingratio
+    AllowSuperSaturation: true
+  compareVariables:
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity@DerivedObsValue
+      relTol: 1.0e-5
+- obs space:
+    name: Relative humidity mixing ratio calculation, upper-air variables, no super saturation
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft_nosupersat.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "datetime"
+        sort order: "descending"
+    simulated variables: [air_temperature, humidity_mixing_ratio]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: air_temperature
+    - name: humidity_mixing_ratio
+    action:
+      name: assign error
+      error parameter: 1.0
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMOmixingratio
+    AllowSuperSaturation: false
+  compareVariables:
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity@DerivedObsValue
+      relTol: 1.0e-5

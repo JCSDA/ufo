@@ -316,6 +316,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/utils_metoffice_sort.yaml
   testinput/unit_tests/variabletransforms_rhumidity.yaml
   testinput/unit_tests/variabletransforms_rhumidity_part2.yaml
+  testinput/unit_tests/variabletransforms_rhumidity_part3.yaml
   testinput/unit_tests/variabletransforms_shumidity.yaml
   testinput/unit_tests/variabletransforms_scanposition.yaml
   testinput/unit_tests/variabletransforms_SondePressureFromHeight.yaml
@@ -2719,6 +2720,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative_part2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/variabletransforms_rhumidity_part2.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityrelative_part3
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_rhumidity_part3.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS )
