@@ -94,11 +94,11 @@ end subroutine ufo_aodcrtm_delete
 SUBROUTINE ufo_aodcrtm_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
-class(ufo_aodcrtm),      intent(in) :: self
-type(ufo_geovals),        intent(in) :: geovals
-integer,                  intent(in) :: nvars, nlocs
-real(c_double),        intent(inout) :: hofx(nvars, nlocs)
-type(c_ptr), value,       intent(in) :: obss
+class(ufo_aodcrtm),       intent(in)    :: self
+type(ufo_geovals),        intent(in)    :: geovals
+integer,                  intent(in)    :: nvars, nlocs
+real(c_double),           intent(inout) :: hofx(nvars, nlocs)
+type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
@@ -112,7 +112,9 @@ integer :: n_Profiles
 integer :: n_Layers
 integer :: n_Channels
 
-! Define the "non-demoninational" arguments
+logical :: jacobian_needed
+
+! Define the Channel Info and Geometry  arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
 type(CRTM_Geometry_type),   allocatable :: geo(:)
 
@@ -123,8 +125,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
 ! Define the K-MATRIX variables - necessary for AOD call
 ! ---------------------------------
-TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm_K(:,:)
-TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
+type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
+type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
@@ -186,60 +188,129 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
    call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
-   if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
+   if ( any(.not. CRTM_Atmosphere_Associated(atm)) ) then
       message = 'Error allocating CRTM Forward Atmosphere structure'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
-
-   ALLOCATE( atm_K( n_channels, N_PROFILES ), &
-        rts_K( n_channels, N_PROFILES ), &
-        STAT = alloc_stat )
-   IF ( alloc_stat /= 0 ) THEN
-      message = 'Error allocating structure arrays'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
-
-! The output K-MATRIX structure
-   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols)
-   IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
-      message = 'Error allocating CRTM K-matrix Atmosphere structure'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
-   
-   CALL CRTM_RTSolution_Create(rts, n_Layers )
-   CALL CRTM_RTSolution_Create(rts_k, n_Layers )
-
-   !Assign the data from the GeoVaLs
-   !--------------------------------
-   CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-
-   IF (TRIM(self%conf%aerosol_option) /= "") &
-        &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
-        &self%conf%aerosol_option,atm)
-
-   ! Call THE CRTM inspection
-   ! ------------------------
-   IF (self%conf%inspect > 0) THEN
-      CALL CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
-      CALL CRTM_ChannelInfo_Inspect(chinfo(n))
-   ENDIF
-
-! 8b.1 The K-matrix model for AOD
-! ----------------------
-   err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input
-        rts_K                   , &  ! K-MATRIX Input
-        chinfo(n:n)             , &  ! Input
-        rts                     , &  ! FORWARD  Output
-        atm_k        )               ! K-MATRIX Output
-
-   if ( err_stat /= SUCCESS ) THEN
-      message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
+
+   call CRTM_RTSolution_Create(rts, n_Layers )
+
+
+   !Assign the data from the GeoVaLs
+   !--------------------------------
+   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
+
+   if (trim(self%conf%aerosol_option) /= "") &
+       & call load_aerosol_data(n_profiles,n_layers,geovals, &
+       & self%conf%aerosol_option,atm)
+
+   ! Call THE CRTM inspection
+   ! ------------------------
+   if (self%conf%inspect > 0) then
+     call CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
+     call CRTM_ChannelInfo_Inspect(chinfo(n))
+   end if
+
+   ! Start processing the CRTM AOD 
+   ! |-> Jacobian K-Matrix .OR.
+   ! |-> Forward Operator
+   ! ------------------------------------------------
+   jacobian_needed = .false.
+   kmatrix : select case ( jacobian_needed )
+     
+     case(.true.)
+       !
+       ! Description:
+       ! ===========       
+       ! For the time being this branch is NEVER executed because
+       ! jacobian_needed = .false. . The Jacobian may be needed in the future
+       ! for QC and bias correction but running the Forward operator alone for
+       ! ufo simobs requires less resources. The CRTM AOD Jacobian code will
+       ! remain unexecuted until the necessary configuration code is added.
+       !
+
+       ! The output K-MATRIX structure:
+ 
+       ! Allocate the k-matrix arrays     
+       allocate( atm_K( n_channels, N_PROFILES ), &
+                 rts_K( n_channels, N_PROFILES ), &
+                 STAT = alloc_stat )
+       if ( alloc_stat /= 0 ) then
+         message = 'Error allocating structure arrays'
+         call Display_Message( PROGRAM_NAME, message, FAILURE )
+         stop
+       end if
+
+       ! Call the constructor for the k-matrix output structure
+       call CRTM_Atmosphere_Create( atm_K, n_layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols)
+       if ( any(.not. CRTM_Atmosphere_Associated(atm_K)) ) then
+         message = 'Error allocating CRTM K-matrix Atmosphere structure'
+         call Display_Message( PROGRAM_NAME, message, FAILURE )
+         stop
+       end if
+   
+       ! Call the constructor for the k-matrix input structure
+       call CRTM_RTSolution_Create(rts_k, n_Layers )
+
+       ! ============================================================================
+       !    **** INITIALIZE THE K-MATRIX ARGUMENTS ****
+       !
+       !     Zero the K-matrix OUTPUT structures
+       ! ---------------------------------------
+       call CRTM_Atmosphere_Zero( atm_k )
+
+       !     Initialize the K-matrix INPUT
+       ! ----------------------------------
+       do m = 1, n_profiles
+         do l = 1, SIZE(self%channels)
+           rts_K(self%channels(l),m)%Layer_Optical_Depth = ONE
+         end do
+       end do
+       ! ============================================================================
+
+
+       !     The K-matrix model y = K.x for AOD 
+       ! -----------------------------------------
+       err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input
+            rts_K                   , &  ! K-MATRIX Input
+            chinfo(n:n)             , &  ! Input
+            rts                     , &  ! FORWARD  Output
+            atm_k        )               ! K-MATRIX Output
+
+       if ( err_stat /= SUCCESS ) then
+         message = 'Error calling CRTM K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
+         call Display_Message( PROGRAM_NAME, message, FAILURE )
+         stop
+       end if
+
+        
+       call CRTM_Atmosphere_Destroy(atm_k)
+       call CRTM_RTSolution_Destroy(rts_k)
+        
+       deallocate( atm_K, rts_K )
+              
+       if ( alloc_stat /= 0 ) THEN
+         message = 'Error deallocating Jacobian structure arrays'
+         call Display_Message( PROGRAM_NAME, message, FAILURE )
+         stop
+       end if
+
+     case default
+ 
+       !     The Forward Operator y = H(x) for AOD
+       ! ------------------------------------------
+       err_stat = CRTM_AOD( atm          , &  ! FORWARD  Input
+                            chinfo(n:n)  , &  ! Input
+                            rts          )    ! FORWARD  Output
+
+       if ( err_stat /= SUCCESS ) then
+         message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
+         call Display_Message( PROGRAM_NAME, message, FAILURE )
+         stop
+       end if
+
+   end select kmatrix
 
 
    ! Put simulated brightness temperature into hofx
@@ -249,23 +320,20 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    missing = missing_value(missing)
    hofx = missing
 
-   DO m = 1, n_profiles
-       DO l = 1, size(self%channels)
-         hofx(l,m) = SUM(rts(self%channels(l),m)%layer_optical_depth)
-      END DO
-   END DO
+   do m = 1, n_profiles
+       do l = 1, size(self%channels)
+         hofx(l,m) = sum(rts(self%channels(l),m)%Layer_Optical_Depth)
+      end do
+   end do
 
    ! Deallocate the structures
    ! -------------------------
    call CRTM_Atmosphere_Destroy(atm)
    call CRTM_RTSolution_Destroy(rts)
 
-   call CRTM_Atmosphere_Destroy(atm_k)
-   call CRTM_RTSolution_Destroy(rts_k)
-
    ! Deallocate all arrays
    ! ---------------------
-   DEALLOCATE(geo, atm, sfc, rts, atm_k, rts_k, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
       message = 'Error deallocating structure arrays'
       call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -278,7 +346,7 @@ end do Sensor_Loop
  ! ---------------------
  ! write( *, '( /5x, "Destroying the CRTM..." )' )
  err_stat = CRTM_Destroy( chinfo )
- if ( err_stat /= SUCCESS ) THEN
+ if ( err_stat /= SUCCESS ) then
     message = 'Error destroying CRTM'
     call Display_Message( PROGRAM_NAME, message, FAILURE )
     stop
