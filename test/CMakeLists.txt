@@ -3033,7 +3033,7 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrorinflatesfcp
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_function_obserrorfactorconv.yaml
+ecbuild_add_test( TARGET  test_ufo_function_obserrorfactorconv
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_obserrorfactorconv.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
