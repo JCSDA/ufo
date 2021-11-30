@@ -237,7 +237,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
   skin_t = geoval%vals(1, 1)
 
   ! Get 2m pressure
-  call ufo_geovals_get_var(geovals, var_sfc_p2m, geoval)
+  call ufo_geovals_get_var(geovals, var_ps, geoval)
   pressure_2m = geoval%vals(1, 1)
 
   ! Get 2m temperature

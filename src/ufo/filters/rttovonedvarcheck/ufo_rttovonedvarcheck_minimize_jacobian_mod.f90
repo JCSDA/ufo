@@ -275,11 +275,11 @@ if (profindex % q2 > 0) then
   end do
 end if
 
-! 2.3) Surface pressure - var_sfc_p2m = "air_pressure_at_two_meters_above_surface" ! (Pa)
+! 2.3) Surface pressure - var_ps = "surface_pressure" ! (Pa)
 
 if (profindex % pstar > 0) then
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_p2m),"_",channels(i)
+    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_ps),"_",channels(i)
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
     H_matrix(i,profindex % pstar) = geoval % vals(1,1)
   end do

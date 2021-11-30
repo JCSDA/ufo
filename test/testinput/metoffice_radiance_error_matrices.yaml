@@ -8,7 +8,7 @@ MetOfficeRadianceErrorMatrices:
   - surface_temperature
   - specific_humidity_at_two_meters_above_surface
   - skin_temperature
-  - air_pressure_at_two_meters_above_surface
+  - surface_pressure
   qtotal: true
   RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
   channels: 18,20,21

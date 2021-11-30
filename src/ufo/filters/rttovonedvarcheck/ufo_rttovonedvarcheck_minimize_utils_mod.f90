@@ -144,9 +144,9 @@ if (profindex % q2 > 0) then
   prof_x(profindex % q2) = log (geoval%vals(1, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
-! var_sfc_p2m = "air_pressure_at_two_meters_above_surface" ! (Pa)
+! var_ps = "surface_pressure" ! (Pa)
 if (profindex % pstar > 0) then
-  call ufo_geovals_get_var(geovals, var_sfc_p2m, geoval)
+  call ufo_geovals_get_var(geovals, var_ps, geoval)
   prof_x(profindex % pstar) = geoval%vals(1, 1) / 100.0_kind_real  ! Pa to hPa
 end if
 
@@ -369,11 +369,11 @@ if (profindex % q2 > 0) then
   geovals%geovals(gv_index)%vals(1,1) = EXP (prof_x(profindex % q2)) / 1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
-! var_sfc_p2m = "air_pressure_at_two_meters_above_surface" ! (Pa)
+! var_ps = "surface_pressure" ! (Pa)
 if (profindex % pstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_sfc_p2m, geovals%variables(i))) gv_index = i
+    if (cmp_strings(var_ps, geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % pstar) * 100.0_kind_real
 end if
@@ -682,7 +682,7 @@ Constrain: if (.not. OutOfRange) then
   !----
 
   if (profindex % q2 > 0) then
-    varname = var_sfc_p2m
+    varname = var_ps
     call ufo_geovals_get_var(geovals, varname, geoval)
     Pstar_Pa(1) = geoval%vals(1, 1)
     if (self % useRHwaterForQC) then
@@ -1004,7 +1004,7 @@ do i = 1, size(varlist)
     ret_nlevs(i) = nlevels
   else if (trim(varname) == trim(var_sfc_t2m) .or. &
            trim(varname) == trim(var_sfc_q2m) .or. &
-           trim(varname) == trim(var_sfc_p2m) .or. &
+           trim(varname) == trim(var_ps) .or. &
            trim(varname) == trim(var_sfc_tskin) .or. &
            trim(varname) == trim(var_sfc_u10) .or. &
            trim(varname) == trim(var_sfc_v10) .or. &

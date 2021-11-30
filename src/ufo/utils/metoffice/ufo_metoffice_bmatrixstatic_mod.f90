@@ -77,7 +77,7 @@ character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_
      var_sfc_t2m,            &
      var_sfc_q2m,            &
      var_sfc_tskin,          &
-     var_sfc_p2m,            &
+     var_ps,                 &
      'ozone (total column)', &
      '[unused field type] ', &
      var_clw,                &
@@ -622,7 +622,7 @@ do jvar = 1, nmvars
     case(var_sfc_tskin)
       fields_in(counter) = ufo_metoffice_fieldtype_tstar ! surface skin temperature
 
-    case(var_sfc_p2m)
+    case(var_ps)
       fields_in(counter) = ufo_metoffice_fieldtype_pstar ! surface air pressure
 
     ! 7 - o3total is not implmented yet

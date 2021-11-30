@@ -26,6 +26,7 @@ character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
 character(len=MAXVARLEN), public, parameter :: var_delp = "air_pressure_thickness"
 character(len=MAXVARLEN), public, parameter :: var_ps   = "surface_pressure"
+character(len=MAXVARLEN), public, parameter :: var_pmsl = "surface_pressure_at_mean_sea_level"
 character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_zm   = "geometric_height"
 character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
@@ -45,7 +46,6 @@ character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac= "cloud_area_fraction_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_sfc_p2m = "air_pressure_at_two_meters_above_surface"      ! (Pa)
 character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
 character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)

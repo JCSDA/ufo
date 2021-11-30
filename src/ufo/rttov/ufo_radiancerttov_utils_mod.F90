@@ -70,7 +70,7 @@ module ufo_radiancerttov_utils_mod
 
   character(len=maxvarlen), dimension(9), target :: varin_default_satrad = &
     (/var_prs, var_ts, var_q, var_sfc_t2m, & 
-    var_sfc_u10, var_sfc_v10, var_sfc_p2m, var_sfc_q2m, &
+    var_sfc_u10, var_sfc_v10, var_ps, var_sfc_q2m, &
     var_sfc_tskin /)
 
   character(len=maxvarlen), pointer, public :: varin_default(:)
@@ -867,7 +867,7 @@ contains
 
 ! Get near-surface variables (s2m)
 
-    varname = var_sfc_p2m
+    varname = var_ps
     if (ufo_vars_getindex(geovals%variables, varname) > 0) then
       call ufo_geovals_get_var(geovals, varname, geoval)
 
@@ -1837,7 +1837,7 @@ contains
             endif
           enddo
 
-        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_sfc_p2m, var_sfc_u10, var_sfc_v10)
+        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_ps, var_sfc_u10, var_sfc_v10)
           hofxdiags%geovals(jvar)%nval = 1
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
@@ -1856,7 +1856,7 @@ contains
               else if (xstr_diags(jvar) == var_sfc_t2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % t
-              else if (xstr_diags(jvar) == var_sfc_p2m) then
+              else if (xstr_diags(jvar) == var_ps) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % p
               else if (xstr_diags(jvar) == var_sfc_q2m) then

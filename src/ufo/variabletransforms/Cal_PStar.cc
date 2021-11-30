@@ -29,7 +29,7 @@ Cal_PStar::Cal_PStar(
     gvals_ += Variable("surf_param_a@GeoVaLs");
     gvals_ += Variable("surf_param_b@GeoVaLs");
     gvals_ += Variable("surface_altitude@GeoVaLs");
-    gvals_ += Variable("air_pressure_at_two_meters_above_surface@GeoVaLs");
+    gvals_ += Variable("surface_pressure@GeoVaLs");
 }
 
 /************************************************************************************/
@@ -88,7 +88,7 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   data_.get(Variable("surf_param_a@GeoVaLs"), PSurfParamA);
   data_.get(Variable("surf_param_b@GeoVaLs"), PSurfParamB);
   data_.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
-  data_.get(Variable("air_pressure_at_two_meters_above_surface@GeoVaLs"), BkPStar);
+  data_.get(Variable("surface_pressure@GeoVaLs"), BkPStar);
 
   if (!oops::allVectorsSameNonZeroSize(PStn, PStd, Pmsl)) {
     oops::Log::warning() << "Vector sizes: "
