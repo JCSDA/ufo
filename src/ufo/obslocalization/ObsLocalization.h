@@ -73,7 +73,7 @@ class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
                                 const LocalObs & localobs) const;
 
   /// Get the lengthscale specified in the parameters.
-  const double lengthscale() const {return options_.lengthscale;}
+  double lengthscale() const {return options_.lengthscale;}
 
  private:
   ObsLocParameters options_;
@@ -196,13 +196,14 @@ ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
 
   LocalObs localobs;
   localobs.lengthscale = lengthscale;
-  eckit::geometry::Point2 refPoint = *i;
+  eckit::geometry::Point3 refPoint = *i;
+  eckit::geometry::Point2 refPoint2(refPoint[0], refPoint[1]);
   size_t nlocs = lons_.size();
   if ( options_.searchMethod == SearchMethod::BRUTEFORCE ) {
     oops::Log::trace() << "Local obs searching via brute force." << std::endl;
 
     for (unsigned int jj = 0; jj < nlocs; ++jj) {
-      eckit::geometry::Point2 searchPoint(lons_[jj], lats_[jj]);
+      eckit::geometry::Point3 searchPoint(lons_[jj], lats_[jj], 0.0);
       double localDist = options_.distance(refPoint, searchPoint);
       if ( localDist < lengthscale ) {
         localobs.index.push_back(jj);
@@ -249,12 +250,12 @@ ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
             " 'cartesian' distance");
 
     // Using the radius of the earth
-    eckit::geometry::Point3 refPoint3D;
-    atlas::util::Earth::convertSphericalToCartesian(refPoint, refPoint3D);
+    eckit::geometry::Point3 refPoint3DTemp;
+    atlas::util::Earth::convertSphericalToCartesian(refPoint2, refPoint3DTemp);
     double alpha =  (lengthscale / options_.radius_earth)/ 2.0;  // angle in radians
     double chordLength = 2.0*options_.radius_earth * sin(alpha);  // search radius in 3D space
 
-    auto closePoints = kd_->findInSphere(refPoint3D, chordLength);
+    auto closePoints = kd_->findInSphere(refPoint3DTemp, chordLength);
 
     // put closePoints back into localobs and obsdist
     localobs.index.reserve(closePoints.size());

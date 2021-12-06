@@ -14,6 +14,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/geometry/KPoint.h"
 #include "eckit/geometry/Point2.h"
+#include "eckit/geometry/Point3.h"
 #include "eckit/geometry/UnitSphere.h"
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -94,9 +95,11 @@ class ObsLocParameters : public oops::Parameters {
 
   /// returns distance between points \p p1 and \p p2, depending on the
   /// distance calculation type distanceType
-  double distance(const eckit::geometry::Point2 & p1, const eckit::geometry::Point2 & p2) const {
+  double distance(const eckit::geometry::Point3 & p1, const eckit::geometry::Point3 & p2) const {
     if (distanceType == DistanceType::GEODESIC) {
-      return eckit::geometry::Sphere::distance(radius_earth, p1, p2);
+      eckit::geometry::Point2 q1(p1[0], p1[1]);
+      eckit::geometry::Point2 q2(p1[0], p1[1]);
+      return eckit::geometry::Sphere::distance(radius_earth, q1, q2);
     } else {
       ASSERT(distanceType == DistanceType::CARTESIAN);
       return p1.distance(p2);
