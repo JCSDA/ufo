@@ -18,10 +18,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;

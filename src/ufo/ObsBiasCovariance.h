@@ -14,8 +14,6 @@
 #include <vector>
 #include <boost/noncopyable.hpp>
 
-#include "eckit/config/LocalConfiguration.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"

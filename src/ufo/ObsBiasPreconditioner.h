@@ -15,19 +15,9 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/ObsBiasIncrement.h"
 #include "ufo/ObsBiasParameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
-namespace ioda {
-  class ObsSpace;
-}
-
 namespace ufo {
-  class ObsBias;
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------

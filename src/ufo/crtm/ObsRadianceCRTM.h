@@ -12,16 +12,10 @@
 #include <string>
 
 #include "oops/base/Variables.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/crtm/crtmParameters/ObsRadianceCRTMParameters.h"
-#include "ufo/crtm/ObsRadianceCRTM.interface.h"
+#include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
-
-namespace eckit {
-  class Configuration;
-  class LocalConfiguration;
-}
 
 namespace ioda {
   class ObsSpace;

@@ -11,8 +11,6 @@
 #include <memory>
 #include <string>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsVector.h"
 
 #include "oops/interface/ObsErrorBase.h"
@@ -20,10 +18,6 @@
 #include "oops/util/parameters/Parameters.h"
 
 #include "ufo/ObsTraits.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;

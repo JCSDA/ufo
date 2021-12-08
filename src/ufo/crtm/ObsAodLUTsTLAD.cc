@@ -8,15 +8,13 @@
 #include "ufo/crtm/ObsAodLUTsTLAD.h"
 
 #include <ostream>
-#include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "ufo/crtm/ObsAodLUTsTLAD.interface.h"
 #include "ufo/GeoVaLs.h"
 
 namespace ufo {

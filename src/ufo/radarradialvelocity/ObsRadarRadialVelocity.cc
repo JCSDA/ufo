@@ -14,7 +14,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 

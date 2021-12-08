@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "ioda/ObsVector.h"
+#include "ufo/LinearObsBiasOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"

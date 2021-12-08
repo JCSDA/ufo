@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <memory>
 
-#include "eckit/mpi/Comm.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBias.h"

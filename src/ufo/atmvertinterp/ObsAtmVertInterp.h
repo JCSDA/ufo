@@ -13,8 +13,8 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmvertinterp/ObsAtmVertInterp.interface.h"
 #include "ufo/atmvertinterp/ObsAtmVertInterpParameters.h"
+#include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace ioda {

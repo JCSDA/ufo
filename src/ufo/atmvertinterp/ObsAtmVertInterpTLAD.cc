@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/atmvertinterp/ObsAtmVertInterpTLAD.interface.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 

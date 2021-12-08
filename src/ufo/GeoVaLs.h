@@ -19,7 +19,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/GeoVaLs.interface.h"
+#include "ufo/Fortran.h"
 
 namespace eckit {
   class Configuration;

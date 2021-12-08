@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -23,19 +21,12 @@
 #include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
-namespace oops {
-  class Variables;
-}
-
 namespace ioda {
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVals;
   class ObsBiasIncrement;
-  class ObsDiagnostics;
 
 /// Class to handle observation bias correction coefficients
 /// \details contains information on what predictors are used for bias

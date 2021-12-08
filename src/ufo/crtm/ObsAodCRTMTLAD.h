@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/crtm/ObsAodCRTMTLAD.interface.h"
+#include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations

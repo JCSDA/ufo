@@ -10,6 +10,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/GeoVaLs.interface.h"
 #include "ufo/Locations.h"
 
 namespace ufo {

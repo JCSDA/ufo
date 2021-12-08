@@ -25,7 +25,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------

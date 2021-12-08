@@ -7,19 +7,12 @@
 
 #include "ufo/crtm/ObsRadianceCRTM.h"
 
-#include <algorithm>
-#include <ostream>
-#include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
-
+#include "ufo/crtm/ObsRadianceCRTM.interface.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {

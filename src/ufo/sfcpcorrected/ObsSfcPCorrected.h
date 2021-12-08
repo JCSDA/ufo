@@ -13,8 +13,8 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/sfcpcorrected/ObsSfcPCorrected.interface.h"
 #include "ufo/sfcpcorrected/ObsSfcPCorrectedParameters.h"
 
 /// Forward declarations

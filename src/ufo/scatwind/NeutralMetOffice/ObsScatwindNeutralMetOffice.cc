@@ -14,7 +14,6 @@
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 

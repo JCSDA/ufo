@@ -8,9 +8,19 @@
 #ifndef UFO_CRTM_OBSAODLUTS_INTERFACE_H_
 #define UFO_CRTM_OBSAODLUTS_INTERFACE_H_
 
-#include "ioda/ObsSpace.h"
-
 #include "ufo/Fortran.h"
+
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+}
+
+namespace oops {
+  class Variables;
+}
 
 namespace ufo {
 

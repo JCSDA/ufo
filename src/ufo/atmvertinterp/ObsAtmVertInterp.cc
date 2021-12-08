@@ -14,9 +14,9 @@
 
 #include "ioda/ObsVector.h"
 
+#include "ufo/atmvertinterp/ObsAtmVertInterp.interface.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {

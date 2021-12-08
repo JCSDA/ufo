@@ -8,22 +8,14 @@
 #ifndef UFO_CRTM_OBSAODCRTM_H_
 #define UFO_CRTM_OBSAODCRTM_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "oops/base/Variables.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/crtm/crtmParameters/ObsAodCRTMParameters.h"
-#include "ufo/crtm/ObsAodCRTM.interface.h"
+#include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
-
-namespace eckit {
-  class Configuration;
-  class LocalConfiguration;
-}
 
 namespace ioda {
   class ObsSpace;

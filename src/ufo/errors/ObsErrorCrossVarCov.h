@@ -22,10 +22,6 @@
 
 #include "ufo/ObsTraits.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
 }

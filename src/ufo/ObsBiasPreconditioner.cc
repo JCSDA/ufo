@@ -5,9 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include <vector>
-
 #include "ufo/ObsBiasPreconditioner.h"
+
+#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 

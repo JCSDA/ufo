@@ -18,10 +18,6 @@
 #include "ufo/radarradialvelocity/ObsRadarRadialVelocityTLAD.interface.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;

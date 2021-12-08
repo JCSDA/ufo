@@ -13,13 +13,12 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/crtm/ObsRadianceCRTMTLAD.interface.h"
+#include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
 namespace eckit {
   class Configuration;
-  class LocalConfiguration;
 }
 
 namespace ioda {

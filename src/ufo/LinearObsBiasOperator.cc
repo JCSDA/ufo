@@ -14,7 +14,6 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"

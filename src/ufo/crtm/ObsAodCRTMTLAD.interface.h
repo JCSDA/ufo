@@ -8,8 +8,6 @@
 #ifndef UFO_CRTM_OBSAODCRTMTLAD_INTERFACE_H_
 #define UFO_CRTM_OBSAODCRTMTLAD_INTERFACE_H_
 
-#include "ioda/ObsSpace.h"
-
 #include "ufo/Fortran.h"
 
 namespace ufo {

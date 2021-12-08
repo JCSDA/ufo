@@ -9,7 +9,6 @@
 #define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLEPARAMETERS_H_
 
 #include <string>
-#include <vector>
 
 // TODO: modify the list of Parameter classes to include
 // depending on what is used below.

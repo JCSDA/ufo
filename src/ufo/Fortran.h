@@ -10,14 +10,10 @@
 
 namespace ufo {
 
-// Locations key type
-typedef int F90locs;
 // GeoVaLs key type
 typedef int F90goms;
 // Obs operator key type
 typedef int F90hop;
-// Observation bias key type
-typedef int F90obias;
 // Observation filter key type
 typedef int F90obfilter;
 

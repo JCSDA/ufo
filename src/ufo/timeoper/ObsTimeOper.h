@@ -13,16 +13,16 @@
 #include <string>
 #include <vector>
 
-#include "oops/base/Variables.h"
-#include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/Locations.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/timeoper/ObsTimeOperParameters.h"
-#include "ufo/timeoper/ObsTimeOperUtil.h"
 
 /// Forward declarations
+namespace oops {
+  class Variables;
+}
+
 namespace ioda {
   class ObsSpace;
   class ObsVector;

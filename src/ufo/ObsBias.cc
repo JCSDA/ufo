@@ -17,14 +17,13 @@
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
-#include "ioda/ObsVector.h"
+#include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {

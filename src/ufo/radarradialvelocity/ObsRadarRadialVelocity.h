@@ -14,18 +14,12 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/radarradialvelocity/ObsRadarRadialVelocity.interface.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;

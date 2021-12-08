@@ -20,10 +20,6 @@
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;

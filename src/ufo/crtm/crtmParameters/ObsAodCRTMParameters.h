@@ -8,13 +8,6 @@
 #ifndef UFO_CRTM_CRTMPARAMETERS_OBSAODCRTMPARAMETERS_H_
 #define UFO_CRTM_CRTMPARAMETERS_OBSAODCRTMPARAMETERS_H_
 
-#include <string>
-#include <vector>
-
-#include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/crtm/crtmParameters/ObsRadianceCRTMParameters.h"
 
 namespace ufo

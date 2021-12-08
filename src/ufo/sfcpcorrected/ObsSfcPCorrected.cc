@@ -16,7 +16,7 @@
 
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
+#include "ufo/sfcpcorrected/ObsSfcPCorrected.interface.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {

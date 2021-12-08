@@ -18,10 +18,6 @@
 #include "ufo/ObsOperatorBase.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace oops {
   class Variables;
 }

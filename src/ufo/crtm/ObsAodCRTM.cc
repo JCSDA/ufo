@@ -7,18 +7,12 @@
 
 #include "ufo/crtm/ObsAodCRTM.h"
 
-#include <ostream>
-#include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
-
+#include "ufo/crtm/ObsAodCRTM.interface.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
