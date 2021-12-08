@@ -43,6 +43,7 @@ contains
     use gsw_pot_to_insitu
     use vert_interp_mod
     use kinds
+    use ieee_arithmetic
     
     implicit none
 
@@ -60,7 +61,7 @@ contains
     ! Insitu temperature
     temp_i = t_from_pt(temp_p,salt_p,prso,lono,lato)
 
-    if (isnan(temp_i)) temp_i = 0.0
+    if (ieee_is_nan(temp_i)) temp_i = 0.0
     
   end subroutine insitu_t_nl
 
@@ -70,7 +71,8 @@ contains
     use gsw_pot_to_insitu
     use vert_interp_mod
     use kinds
-    
+    use ieee_arithmetic
+
     implicit none
 
     real(kind=kind_real), intent(in)    :: dtemp_p            !< Potential temperature at observation location [C]
@@ -96,7 +98,7 @@ contains
     ! Tangent of insitu temperature at (tp,sp)
     dtemp_i = jac(1)*dtemp_p + jac(2)*dsalt_p
 
-    if (isnan(dtemp_i)) dtemp_i = 0.0
+    if (ieee_is_nan(dtemp_i)) dtemp_i = 0.0
     
   end subroutine insitu_t_tl
 
@@ -106,7 +108,8 @@ contains
     use gsw_pot_to_insitu
     use vert_interp_mod
     use kinds
-    
+    use ieee_arithmetic
+
     implicit none
 
     real(kind=kind_real), intent(inout) :: dtemp_p            !< Potential temperature at observation location [C]
@@ -133,7 +136,7 @@ contains
     dtemp_p = dtemp_p + jac(1)*dtemp_i
     dsalt_p = dsalt_p + jac(2)*dtemp_i    
 
-    if (isnan(dtemp_p+dsalt_p)) then
+    if (ieee_is_nan(dtemp_p+dsalt_p)) then
        dtemp_p = 0.0
        dsalt_p = 0.0
     end if
@@ -147,7 +150,8 @@ contains
     use gsw_pot_to_insitu
     use vert_interp_mod
     use kinds
-    
+    use ieee_arithmetic
+
     implicit none
 
     real(kind=kind_real), intent(in)    :: temp_p             !< Potential temperature at observation location [C]
@@ -177,7 +181,7 @@ contains
     Jac(2) = ( t_from_pt(temp_p,salt_p+delta_sp,pressure,lono,lato) -&
               &t_from_pt(temp_p,salt_p,pressure,lono,lato) )/delta_tp       
 
-    !if (isnan(sum(Jac))) Jac = 0.0
+    !if (ieee_is_nan(sum(Jac))) Jac = 0.0
     
   end subroutine insitu_t_jac
 
