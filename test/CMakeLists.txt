@@ -286,6 +286,7 @@ list( APPEND ufo_test_input
   testinput/conventionalprofileprocessing_average_relativehumidity_obsfilter.yaml
   testinput/conventionalprofileprocessing_average_relativehumidity_OPScomparison.yaml
   testinput/conventionalprofileprocessing_opr_average.yaml
+  testinput/conventionalprofileprocessing_obsfunction_profileaverageobs.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml
   testinput/ssmis_f17_fov.yaml
@@ -2326,6 +2327,13 @@ ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_rel
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_obsfunction_profileaverageobs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/conventionalprofileprocessing_obsfunction_profileaverageobs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

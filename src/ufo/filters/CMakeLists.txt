@@ -262,6 +262,8 @@ set ( filters_files
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.F90
       obsfunctions/LAMDomainCheck/esg_grid_mod.F90
+      obsfunctions/ProfileAverageObsPressure.cc
+      obsfunctions/ProfileAverageObsPressure.h
 )
 
 if( ${rttov_FOUND} )
