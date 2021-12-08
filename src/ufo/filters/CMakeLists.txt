@@ -264,6 +264,8 @@ set ( filters_files
       obsfunctions/LAMDomainCheck/esg_grid_mod.F90
       obsfunctions/ProfileAverageObsPressure.cc
       obsfunctions/ProfileAverageObsPressure.h
+      obsfunctions/DateTimeOffset.cc
+      obsfunctions/DateTimeOffset.h
 )
 
 if( ${rttov_FOUND} )

@@ -69,6 +69,7 @@ list( APPEND ufo_test_input
   testinput/function_clwret_hofx_atms.yaml
   testinput/function_clwret_obsval.yaml
   testinput/function_clwret_obsval_atms.yaml
+  testinput/function_datetimeoffset.yaml
   testinput/function_errfgrosschk.yaml
   testinput/function_errfjsfc.yaml
   testinput/function_errflat.yaml
@@ -2334,6 +2335,13 @@ ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_rel
 ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_obsfunction_profileaverageobs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/conventionalprofileprocessing_obsfunction_profileaverageobs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_datetimeoffset
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/function_datetimeoffset.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
