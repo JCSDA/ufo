@@ -93,6 +93,7 @@ add_subdirectory( compositeoper )
 add_subdirectory( backgrounderrorvertinterp )
 add_subdirectory( backgrounderroridentity )
 add_subdirectory( categoricaloper )
+add_subdirectory( fov )
 
 list( APPEND ufo_src_files
     ${utils_src_files}
@@ -124,6 +125,7 @@ list( APPEND ufo_src_files
     ${backgrounderrorvertinterp_src_files}
     ${backgrounderroridentity_src_files}
     ${categoricaloper_src_files}
+    ${fov_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 

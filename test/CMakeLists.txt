@@ -22,6 +22,7 @@ list( APPEND ufo_test_input
   testinput/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
+  testinput/amsua_n19_fov.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_qc_clwretmw.yaml
   testinput/amsua_qc_filters.yaml
@@ -287,6 +288,7 @@ list( APPEND ufo_test_input
   testinput/conventionalprofileprocessing_opr_average.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_bc.yaml
   testinput/ssmis_f17_gfs_backgroundcheck_nbc.yaml
+  testinput/ssmis_f17_fov.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
@@ -539,7 +541,19 @@ set( UFO_TEST_TIER 1 CACHE STRING "UFO test tier. Run tests up to and including 
 message(STATUS "Running ufo tests for tiers up to and including tier " ${UFO_TEST_TIER})
 
 ####################################################################
-# Test Locations, GeoVaLs with oops tests:
+# Test FieldOfView, GeoVaLs, Locations with oops tests:
+
+ecbuild_add_test( TARGET  test_ufo_fov_amsua
+                  SOURCES mains/TestFieldOfView.cc ufo/FieldOfView.h
+                  ARGS    "testinput/amsua_n19_fov.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_fov_ssmis
+                  SOURCES mains/TestFieldOfView.cc ufo/FieldOfView.h
+                  ARGS    "testinput/ssmis_f17_fov.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc

@@ -16,6 +16,8 @@ typedef int F90goms;
 typedef int F90hop;
 // Observation filter key type
 typedef int F90obfilter;
+// Field of view key type
+typedef int F90fov;
 
 }  // namespace ufo
 #endif  // UFO_FORTRAN_H_
