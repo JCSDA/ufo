@@ -38,6 +38,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
+  real(kind_real), allocatable :: clw(:) !< cloud liquid water profile. Currently used in Var 
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: final_bt_diff(:) !< final bt difference if converged
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
@@ -71,7 +72,8 @@ subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
                                         nchans, &  ! in
                                         nlevels, & ! in
                                         nprofelements, & ! in
-                                        nchans_all ) ! in
+                                        nchans_all, & ! in
+                                        storeclw)
 
 implicit none
 
@@ -81,7 +83,7 @@ integer, intent(in) :: nchans !< number of channels used for this particular obs
 integer, intent(in) :: nlevels !< number of levels in the profile
 integer, intent(in) :: nprofelements !< number of profile elements used
 integer :: nchans_all !< Size of all channels in ObsSpace
-
+logical, intent(in) :: storeclw
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
 real(kind_real) :: missing
 
@@ -99,7 +101,10 @@ allocate(self % output_profile(nprofelements))
 allocate(self % output_BT(nchans_all))
 allocate(self % background_BT(nchans_all))
 allocate(self % calc_emiss(nchans_all))
-
+if (storeclw) then
+  allocate(self % clw(nlevels))
+  self % clw(:) = missing
+endif
 self % yobs(:) = missing
 self % final_bt_diff(:) = missing
 self % emiss(:) = missing
@@ -158,6 +163,7 @@ if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
+if (allocated(self % clw))            deallocate(self % clw)
 
 self % pcemis => null()
 
@@ -198,7 +204,6 @@ write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
 write(*,"(A)") "Emissivity: "
 write(*,"(10F8.2)") self % emiss(:)
-
 end subroutine
 
 !-------------------------------------------------------------------------------

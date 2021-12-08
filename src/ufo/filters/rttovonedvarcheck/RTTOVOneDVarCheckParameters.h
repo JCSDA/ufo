@@ -147,6 +147,9 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Output the LWP if the profile converges
   oops::Parameter<bool> Store1DVarLWP{"Store1DVarLWP", false, this};
 
+  /// Output the CLW if the profile converges
+  oops::Parameter<bool> Store1DVarCLW{"Store1DVarCLW", false, this};
+
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};
 

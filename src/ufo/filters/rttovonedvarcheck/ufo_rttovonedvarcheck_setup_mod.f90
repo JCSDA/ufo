@@ -52,6 +52,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
   logical                          :: Store1DVarLWP !< Output the LWP if the profile converges
+  logical                          :: Store1DVarCLW !< Output the CLW profile if 1dvar converrges for later use
   logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
   logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
@@ -153,6 +154,9 @@ call f_conf % get_or_die("UseColdSurfaceCheck", self % UseColdSurfaceCheck)
 
 ! Flag to output the LWP if the profile converges
 call f_conf % get_or_die("Store1DVarLWP", self % Store1DVarLWP)
+
+! Flag to output the CLW if the profile converges
+call f_conf % get_or_die("Store1DVarCLW", self % Store1DVarCLW)
 
 ! Flag to turn on full diagnostics
 call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
@@ -318,7 +322,8 @@ write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
 write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
 write(*,*) "CostConvergenceFactor = ",self % Cost_ConvergenceFactor
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
-
+write(*,*) "Store1DVarLWP = ",self % Store1DVarLWP
+write(*,*) "Store1DVarCLW = ",self % Store1DVarCLW
 write(*,*) "Emissivity variables:"
 write(*,*) "emissivity type = ",self % EmissivityType
 write(*,*) "EmissSeaDefault = ",self % EmissSeaDefault

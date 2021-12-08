@@ -20,6 +20,7 @@ use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_setup_mod
 use ufo_utils_mod, only: Ops_Cholesky
+use ufo_vars_mod
 
 implicit none
 private
@@ -137,6 +138,7 @@ real(kind_real), allocatable    :: out_H_matrix(:,:)
 real(kind_real), allocatable    :: out_Y(:)
 real(kind_real)                 :: Jout(3)
 type(ufo_geovals)               :: geovals
+type(ufo_geoval), pointer       :: geoval
 
 !------------
 ! Setup
@@ -364,6 +366,12 @@ if (converged) then
                                             OutLWP = ob % LWP ) ! out
   end if
 
+  ! store final clw if required
+  if (allocated(ob % clw)) then
+    call ufo_geovals_get_var(geovals, var_clw, geoval)
+    ob % clw = geoval%vals(:, 1)
+  end if
+  
   ! Recalculate final BTs for all channels
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))

@@ -11,8 +11,10 @@ list( APPEND ufo_resources
   bmatrix/rttov/amsr_bmatrix_70_test.dat
   bmatrix/rttov/atms_bmatrix_70_test.dat
   bmatrix/rttov/atovs_bmatrix_70_test.dat
+  bmatrix/rttov/ssmis_bmatrix_70_test.dat
   rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
   rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
+  rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4
   rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
   rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
   bmatrix/gnssro/gnssro_bmatrix.txt

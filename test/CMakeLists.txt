@@ -249,6 +249,7 @@ list( APPEND ufo_test_input
   testinput/smap_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
+  testinput/ssmis_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/thickness_predictor.yaml
   testinput/conventionalprofileprocessing_monolithicfilter.yaml
   testinput/conventionalprofileprocessing_OPScomparison.yaml
@@ -972,6 +973,12 @@ if( ${rttov_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     TEST_DEPENDS ufo_get_ufo_test_data )
 
+  ecbuild_add_test( TARGET  test_ufo_ssmis_ops_qc_rttovonedvarcheck
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/ssmis_rttov_ops_qc_rttovonedvarcheck.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+                    
   ecbuild_add_test( TARGET  test_ufo_qc_amsr2_rttov
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/amsr2_rttov_qc.yaml"

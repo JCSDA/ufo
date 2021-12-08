@@ -165,6 +165,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix, self % nlevels)
 
+  
+  ! sanity check on clw storage - only store to obs space
+  ! if qtotal or ql is present in retrieval vector
+  if (self % Store1DVarCLW) then
+    if ((prof_index % qt(1) == 0) .and. (prof_index % ql(1) == 0)) then
+      write(message,*) "Info: as qtotal or ql are not part of the state vector resetting Store1DVarCLW to false"
+      self % Store1DVarCLW = .false.
+    end if
+  end if
+  
   ! Read in observation data from obsspace
   ! geovals are only providing surface information
   call obs % setup(self, prof_index % nprofelements, geovals, vars)
@@ -238,7 +248,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans)
+      call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans, self % Store1DVarCLW)
+      
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -307,6 +318,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       obs % emiss(:, jobs) = ob % emiss(:)
       obs % final_cost(jobs) = ob % final_cost
       obs % LWP(jobs) = ob % LWP
+      if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
       obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization

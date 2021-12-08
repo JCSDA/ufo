@@ -42,10 +42,12 @@ integer, allocatable         :: niter(:)        ! number of iterations
 integer, allocatable         :: channels(:)     ! channel numbers
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
+real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile from final iteration
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
+logical                      :: Store1DVarCLW   ! flag to output the clw if the profile converges
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 logical, allocatable         :: calc_emiss(:)    ! flag to request RTTOV calculate first guess emissivity
 real(kind_real), allocatable :: mwemisserr(:,:) ! surface emissivity error from atlas
@@ -117,6 +119,7 @@ allocate(self % niter(self % iloc))
 allocate(self % channels(config % nchans))
 allocate(self % final_cost(self % iloc))
 allocate(self % LWP(self % iloc))
+if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
 allocate(self % output_profile(nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
@@ -141,6 +144,7 @@ self % niter(:) = 0
 self % channels(:) = 0
 self % final_cost(:) = missing
 self % LWP(:) = missing
+if (allocated(self % CLW)) self % CLW(:,:) = missing
 self % emiss(:,:) = missing
 self % mwemisserr(:,:) = missing
 self % output_profile(:,:) = missing
@@ -148,6 +152,7 @@ self % output_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
+self % Store1DVarCLW = config % Store1DVarCLW
 self % ir_pcemis => null()
 self % output_to_db(:) = .false.
 
@@ -292,6 +297,7 @@ if (allocated(self % surface_type))   deallocate(self % surface_type)
 if (allocated(self % niter))          deallocate(self % niter)
 if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
+if (allocated(self % CLW))            deallocate(self % CLW)
 if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
@@ -489,8 +495,18 @@ end if
 ! 1) Temperature levels
 ! 2) Humidity levels: convert q to rh (%)
 ! 3) Ozone levels - no planned implementation
-! 4) Cloud Liquid Water from qtotal
 ! 4b) Cloud Ice Water if rttovscat is activated from qtotal
+
+!--
+! 4) clw from qtotal
+!--
+
+if (self % Store1DVarCLW) then
+  do jvar = 1, size(self % CLW,1)
+    write(var,"(A,I0)") "lev",jvar
+    call put_1d_indb(self % output_to_db(:), obsdb, var, "OneDVar/cloud_liquid_water", self % CLW(jvar,:))
+  end do
+end if
 
 !--
 ! 5) Surface pressure
