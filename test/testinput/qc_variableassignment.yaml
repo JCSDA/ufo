@@ -122,13 +122,13 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: datetime@MetaData
+    - name: dateTime@MetaData
       value: 2000-01-02T03:04:05Z
   compareVariables:
   - test:
-      name: datetime@MetaData
+      name: dateTime@MetaData
     reference:
-      name: assigned_datetime_variable_1@TestReference
+      name: assigned_dateTime_variable_1@TestReference
 
 - obs space:
     <<: *ObsSpace
@@ -144,7 +144,7 @@ observations:
   - test:
       name: new_variable@MetaData
     reference:
-      name: assigned_datetime_variable_2@TestReference
+      name: assigned_dateTime_variable_2@TestReference
 
 - obs space:
     <<: *ObsSpace
@@ -368,14 +368,14 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: datetime@MetaData                            # ["2018-04-15T06:00:00Z", "2018-04-16T15:00:00Z", "2018-04-17T06:00:00Z", "2018-04-18T15:00:00Z", "2018-04-19T06:00:00Z"]
+    - name: dateTime@MetaData                            # ["2018-04-15T06:00:00Z", "2018-04-16T15:00:00Z", "2018-04-17T06:00:00Z", "2018-04-18T15:00:00Z", "2018-04-19T06:00:00Z"]
       source variable:
-        name: assigned_datetime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+        name: assigned_dateTime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
   compareVariables:
   - test:
-      name: datetime@MetaData
+      name: dateTime@MetaData
     reference:
-      name: assigned_datetime_variable_1@TestReference   # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+      name: assigned_dateTime_variable_1@TestReference   # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
 
 - obs space:
     <<: *ObsSpace
@@ -387,12 +387,12 @@ observations:
     - name: new_variable@MetaData
       type: datetime
       source variable:
-        name: assigned_datetime_variable_1@TestReference  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+        name: assigned_dateTime_variable_1@TestReference  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
   compareVariables:
   - test:
       name: new_variable@MetaData
     reference:
-      name: assigned_datetime_variable_2@TestReference    # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+      name: assigned_dateTime_variable_2@TestReference    # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
 
 - obs space:
     <<: *ObsSpace
@@ -509,7 +509,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: datetime@MetaData
+    - name: dateTime@MetaData
       function:
         name: Conditional@DateTimeObsFunction
         options:
@@ -522,9 +522,9 @@ observations:
             value: 2000-01-02T03:04:05Z
   compareVariables:
   - test:
-      name: datetime@MetaData
+      name: dateTime@MetaData
     reference:
-      name: assigned_datetime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+      name: assigned_dateTime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
 
 ## Tests on the obsspace with multiple channels
 
@@ -820,7 +820,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: datetime@MetaData
+    - name: dateTime@MetaData
       source variable:
         name: float_variable_1@MetaData
   # Unfortunately in this case ioda throws a nested exception; the message attached to the

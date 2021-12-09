@@ -8,12 +8,12 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "ascending"
     simulated variables: [virtual_temperature]
   obs filters:
   - filter: Derivative Check
-    independent: datetime
+    independent: dateTime
     dependent: air_pressure
     minvalue: -50. # Pa/s
     maxvalue: 0.

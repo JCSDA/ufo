@@ -206,7 +206,7 @@ observations:
     #  2000-01-02T03:04:05Z
     #  2000-01-02T03:04:05Z
     #  2018-04-19T06:00:00Z]
-    variables: [assigned_datetime_variable_1]
+    variables: [assigned_dateTime_variable_1]
 - obs space: &ObsSpace
     <<: *ObsSpace
     name: Datetime result, without default value
@@ -226,4 +226,4 @@ observations:
     #  2000-01-02T03:04:05Z,
     #  2000-01-02T03:04:05Z,
     #  missing]
-    variables: [assigned_datetime_variable_2]
+    variables: [assigned_dateTime_variable_2]

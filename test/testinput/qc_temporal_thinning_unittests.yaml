@@ -8,14 +8,15 @@ Min_spacing below observation spacing:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT9S
@@ -31,14 +32,15 @@ Min spacing equal to observation spacing:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT10S
@@ -54,14 +56,15 @@ Min spacing above observation spacing:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT11S
@@ -77,14 +80,15 @@ Int-valued categories:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   category: [0, 0, 0, 1, 1, 1, 1]
   TemporalThinning:
@@ -103,14 +107,15 @@ String-valued categories:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   string_category: [a, a, a, b, b, b, b]
   TemporalThinning:
@@ -129,14 +134,15 @@ Categories, observations sorted in descending order:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:05:00Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:00Z
+        dateTimes:
+          - 300
+          - 290
+          - 280
+          - 270
+          - 260
+          - 250
+          - 240
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
@@ -155,14 +161,15 @@ Categories, where clause:
       list:
         lats: [ 1, 0, 0, 0, 0, 0, 1 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:05:00Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:00Z
+        dateTimes:
+          - 300
+          - 290
+          - 280
+          - 270
+          - 260
+          - 250
+          - 240
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
@@ -191,28 +198,29 @@ Tolerance and priorities, first observation in each group to be retained:
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3
+          - 271
+          - 272
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   priority: [0, 0, 0,   0, 0, 0,
              0, 0, 0,   0, 0, 0,
@@ -244,28 +252,29 @@ Tolerance and priorities, second observation in each group to be retained:
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3
+          - 271
+          - 272
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   priority: [0, 1, 1,   0, 1, 1,
              0, 1, 1,   0, 1, 1,
@@ -297,28 +306,29 @@ Tolerance and priorities, third observation in each group to be retained:
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3
+          - 271
+          - 272
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -350,28 +360,29 @@ Tolerance but no priorities:
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3
+          - 271
+          - 272
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -391,14 +402,15 @@ Seed time inside observation time range (should pick preceding observation):
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z # should be picked as seed
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270 # should be picked as seed
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -415,14 +427,15 @@ Seed time inside observation time range (should pick following observation):
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z # should be picked as seed
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280 # should be picked as seed
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -439,14 +452,15 @@ Seed time midway between two observations (should pick following observation):
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z # should be picked as seed
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270 # should be picked as seed
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -463,14 +477,15 @@ Seed time at earliest observation:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -487,14 +502,15 @@ Seed time before earliest observation:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -511,14 +527,15 @@ Seed time at latest observation:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -535,14 +552,15 @@ Seed time after latest observation:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
-        datetimes:
-          - 2010-01-01T00:04:00Z
-          - 2010-01-01T00:04:10Z
-          - 2010-01-01T00:04:20Z
-          - 2010-01-01T00:04:30Z
-          - 2010-01-01T00:04:40Z
-          - 2010-01-01T00:04:50Z
-          - 2010-01-01T00:05:00Z
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
@@ -565,28 +583,29 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z # should be retained
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3; closest to seed time
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z # should be picked as seed because of higher priority
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z # should be retained
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252 # should be retained
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3; closest to seed time
+          - 271
+          - 272 # should be picked as seed because of higher priority
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292 # should be retained
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -619,28 +638,29 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0]
-        datetimes:
-          - 2010-01-01T00:04:00Z # group 0
-          - 2010-01-01T00:04:01Z
-          - 2010-01-01T00:04:02Z
-          - 2010-01-01T00:04:10Z # group 1
-          - 2010-01-01T00:04:11Z
-          - 2010-01-01T00:04:12Z
-          - 2010-01-01T00:04:20Z # group 2
-          - 2010-01-01T00:04:21Z
-          - 2010-01-01T00:04:22Z
-          - 2010-01-01T00:04:30Z # group 3
-          - 2010-01-01T00:04:31Z
-          - 2010-01-01T00:04:32Z
-          - 2010-01-01T00:04:40Z # group 4
-          - 2010-01-01T00:04:41Z
-          - 2010-01-01T00:04:44Z
-          - 2010-01-01T00:04:50Z # group 5
-          - 2010-01-01T00:04:51Z
-          - 2010-01-01T00:04:52Z
-          - 2010-01-01T00:05:00Z # group 6
-          - 2010-01-01T00:05:01Z
-          - 2010-01-01T00:05:02Z
+        dateTimes:
+          - 240 # group 0
+          - 241
+          - 242
+          - 250 # group 1
+          - 251
+          - 252
+          - 260 # group 2
+          - 261
+          - 262
+          - 270 # group 3
+          - 271
+          - 272
+          - 280 # group 4
+          - 281
+          - 284
+          - 290 # group 5
+          - 291
+          - 292
+          - 300 # group 6
+          - 301
+          - 302
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   priority: [1, 0, 0,   1, 0, 0,
              1, 0, 0,   1, 0, 0,

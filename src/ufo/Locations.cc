@@ -101,7 +101,7 @@ Locations::Locations(const eckit::Configuration & conf,
   og_.vars.createWithScales<float>("latitude", {nlocsVar}, float_params).write(buffer);
 
   times_.resize(nlocs);
-  obspace.get_db("MetaData", "datetime", times_);
+  obspace.get_db("MetaData", "dateTime", times_);
 }
 
 // -------------------------------------------------------------------------------------------------

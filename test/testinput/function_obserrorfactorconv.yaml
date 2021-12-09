@@ -9,7 +9,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
       obsgrouping:
-        group variables: ["station_id", "datetime"]
+        group variables: ["station_id", "dateTime"]
         sort variable: "air_pressure"
         sort order: "descending"  
     simulated variables: [eastward_wind]

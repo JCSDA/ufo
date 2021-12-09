@@ -52,7 +52,7 @@ ObsErrorFactorConventional::ObsErrorFactorConventional(const eckit::Configuratio
   // Include list of required data from MetaData
   invars_ += Variable("MetaData/air_pressure");   // observed obs pressure
   invars_ += Variable("MetaData/station_id");     // obs station ID
-  invars_ += Variable("MetaData/datetime");       // obs date and time
+  invars_ += Variable("MetaData/dateTime");       // obs date and time
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/air_pressure");  // need model pressure at half
@@ -105,7 +105,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
   std::vector<std::string> ob_stationID(nlocs);
   data.get(Variable("MetaData/station_id"), ob_stationID);
   std::vector<util::DateTime> ob_datetime(nlocs);
-  data.get(Variable("MetaData/datetime"), ob_datetime);
+  data.get(Variable("MetaData/dateTime"), ob_datetime);
 
   std::vector<float> ob_lat(nlocs);
   std::vector<float> ob_lon(nlocs);

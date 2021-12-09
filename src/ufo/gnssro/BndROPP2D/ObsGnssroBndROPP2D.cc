@@ -63,7 +63,7 @@ std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations() const {
   std::vector<util::DateTime> times(odb_.nlocs()*nhoriz_);
 
   std::vector<util::DateTime> times_notduplicated(odb_.nlocs());
-  odb_.get_db("MetaData", "datetime", times_notduplicated);
+  odb_.get_db("MetaData", "dateTime", times_notduplicated);
   for (size_t jloc = 0; jloc < odb_.nlocs(); ++jloc) {
     for (size_t jhoriz = 0; jhoriz < nhoriz_; ++jhoriz) {
       times[jloc*nhoriz_ + jhoriz] = times_notduplicated[jloc];

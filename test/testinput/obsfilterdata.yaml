@@ -8,7 +8,7 @@ obs filter data:
     simulated variables: [eastward_wind, northward_wind]
   test data:
     datetime variables:
-    - name: datetime@MetaData
+    - name: dateTime@MetaData
     float variables:
     - name: eastward_wind@ObsValue
     - name: northward_wind@ObsError
@@ -77,7 +77,7 @@ obs filter data:
     channels: 1-10,15
   test data:
     datetime variables:
-    - name: datetime@MetaData
+    - name: dateTime@MetaData
     float variables:
     - name: brightness_temperature_1@ObsValue
     - name: longitude@MetaData

@@ -46,7 +46,7 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   std::vector<util::DateTime> datetime_in;
   getObservation("MetaData", "latitude", latitude_in, true);
   getObservation("MetaData", "longitude", longitude_in, true);
-  getObservation("MetaData", "datetime", datetime_in, true);
+  getObservation("MetaData", "dateTime", datetime_in, true);
   getObservation("ObsValue", heightCoord_, height, true);
   getObservation("ObsValue", "wind_speed", wind_speed, true);
   getObservation("ObsValue", "wind_from_direction", wind_from_direction, true);
@@ -86,7 +86,7 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   // Save output values.
   obsdb_.put_db("DerivedMetaData", "latitude", latitude_out);
   obsdb_.put_db("DerivedMetaData", "longitude", longitude_out);
-  obsdb_.put_db("DerivedMetaData", "datetime", datetime_out);
+  obsdb_.put_db("DerivedMetaData", "dateTime", datetime_out);
 }
 }  // namespace ufo
 

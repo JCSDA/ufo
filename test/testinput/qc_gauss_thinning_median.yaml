@@ -114,8 +114,8 @@ observations:
       function:
         name: LinearCombination@ObsFunction
         options:
-          variables: [sea_surface_temperature@ObsValue, time@MetaData]
-          coefs: [1.0, 2.0]  # meaningless quantity, just for testing
+          variables: [sea_surface_temperature@ObsValue, latitude@MetaData]
+          coefs: [1.0, 0.05]  # meaningless quantity, just for testing
   - filter: Gaussian Thinning
     select_median: true
     horizontal_mesh: 6000  # km
@@ -123,9 +123,9 @@ observations:
     time_min: 2020-05-11T03:00:00Z
     time_max: 2020-05-11T09:00:00Z
   passedObservationsBenchmark:
-  - 8
-  - 15
+  - 2
   - 21
-  - 34
-  passedBenchmark: 4  # passing obs [8,15,21,34] are not simply a subset of the previous test
+  - 24
+  - 37
+  passedBenchmark: 4  # passing obs [2,21,24,37] are not simply a subset of the previous test
                       # showing that the filter is acting on the derived obs value, not obs value

@@ -88,40 +88,40 @@ successful:
       size where true: 0
     - where:                      # test min & max for datetime hours
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         minvalue: "****-**-**T14:00:00Z"
         maxvalue: "****-**-**T18:00:00Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test minvalue for datetime hours
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         minvalue: "****-**-**T14:00:00Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test minvalue for datetime hours unconstrained maxvalue
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         minvalue: "****-**-**T14:00:00Z"
         maxvalue: "****-**-**T**:**:**Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test maxvalue for datetime hours
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         maxvalue: "****-**-**T14:00:00Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test maxvalue for datetime hours with unconstrained minvalue
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         minvalue: "****-**-**T**:**:**Z"
         maxvalue: "****-**-**T14:00:00Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test unconstrained minvalue and maxvalue for datetime hours
       - variable:
-          name:  datetime@MetaData
+          name:  dateTime@MetaData
         minvalue: "****-**-**T**:**:**Z"
         maxvalue: "****-**-**T**:**:**Z"
   # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]

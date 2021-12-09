@@ -438,7 +438,7 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
 
   obsData.latitudes = getGlobalObsSpaceVariable<float>("MetaData", "latitude");
   obsData.longitudes = getGlobalObsSpaceVariable<float>("MetaData", "longitude");
-  obsData.datetimes = getGlobalObsSpaceVariable<util::DateTime>("MetaData", "datetime");
+  obsData.datetimes = getGlobalObsSpaceVariable<util::DateTime>("MetaData", "dateTime");
 
   if (obsdb_.has("MetaData", "air_pressure")) {
     obsData.pressures = getGlobalObsSpaceVariable<float>("MetaData", "air_pressure");

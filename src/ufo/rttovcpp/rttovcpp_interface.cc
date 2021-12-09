@@ -196,7 +196,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
       odb_.get_db("MetaData", "latitude",  lat);  // -90~90 in degree
       odb_.get_db("MetaData", "longitude", lon);  // 0~360 in degree
       odb_.get_db("MetaData", "height_above_mean_sea_level", elev);  // in m
-      odb_.get_db("MetaData", "datetime", times);
+      odb_.get_db("MetaData", "dateTime", times);
 
   // 4. Call rttov set functions
   //---------------------------------------------------------------------------------

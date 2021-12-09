@@ -29,7 +29,7 @@ DateTimeOffset::DateTimeOffset(const eckit::LocalConfiguration & conf)
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
-  invars_ += Variable("MetaData/datetime");
+  invars_ += Variable("MetaData/dateTime");
   invars_ += Variable(options_.offset_name.value());
 }
 

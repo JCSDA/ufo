@@ -13,7 +13,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
@@ -36,7 +36,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:
@@ -59,7 +59,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, height, dew_point_temperature]
   obs filters:
@@ -82,7 +82,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, geopotential_height_levels, dew_point_temperature]
   obs filters:
@@ -105,7 +105,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, height_levels, dew_point_temperature]
   obs filters:

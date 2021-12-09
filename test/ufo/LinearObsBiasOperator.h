@@ -71,7 +71,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     std::vector<util::DateTime> times(odb.nlocs());
     odb.get_db("MetaData", "latitude", lats);
     odb.get_db("MetaData", "longitude", lons);
-    odb.get_db("MetaData", "datetime", times);
+    odb.get_db("MetaData", "dateTime", times);
     ObsDiagnostics ydiags(odb, Locations(lons, lats, times, odb.distribution()),
                           requiredHdiagnostics);
 

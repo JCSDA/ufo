@@ -28,7 +28,7 @@ OrbitAngle::OrbitAngle(const eckit::LocalConfiguration & conf) {
   invars_ += Variable("ephemeris_longitude_2@MetaData");
   invars_ += Variable("latitude@MetaData");
   invars_ += Variable("longitude@MetaData");
-  invars_ += Variable("datetime@MetaData");
+  invars_ += Variable("dateTime@MetaData");
 }
 
 void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
@@ -58,7 +58,7 @@ void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & 
   in.get(Variable("ephemeris_longitude_2@MetaData"), ephem_lon2);
   in.get(Variable("latitude@MetaData"), view_lat);
   in.get(Variable("longitude@MetaData"), view_lon);
-  in.get(Variable("datetime@MetaData"), datetimes);
+  in.get(Variable("dateTime@MetaData"), datetimes);
 
   // Output
   std::vector<float> &orbit_angle = out[0];

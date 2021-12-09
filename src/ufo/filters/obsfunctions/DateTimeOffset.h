@@ -64,9 +64,9 @@ class DateTimeOffsetParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-/// \brief Add time offsets (in seconds, minutes or hours) to datetime@MetaData.
+/// \brief Add time offsets (in seconds, minutes or hours) to dateTime@MetaData.
 ///
-/// This function is used to add a location-dependent offset to datetime@MetaData.
+/// This function is used to add a location-dependent offset to dateTime@MetaData.
 /// If the offset at a particular location is missing then
 /// the corresponding datetime is not modified.
 class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
@@ -88,7 +88,7 @@ class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
 
     // Get datetime.
     std::vector <util::DateTime> datetimes(nlocs);
-    in.get(Variable("MetaData/datetime"), datetimes);
+    in.get(Variable("MetaData/dateTime"), datetimes);
 
     // Get offset variable.
     std::vector <T> offsets(nlocs);

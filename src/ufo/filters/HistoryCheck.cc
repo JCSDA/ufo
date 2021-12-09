@@ -141,7 +141,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
       TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
 
   std::vector<util::DateTime> wideDts = historicalObsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   std::vector<float> wideLats = historicalObsAccessor.getFloatVariableFromObsSpace(
         "MetaData", "latitude");
   std::vector<float> wideLons = historicalObsAccessor.getFloatVariableFromObsSpace(
@@ -201,7 +201,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   }
   // Retrieve relevant identifier information for all observations in assimilation window.
   std::vector<util::DateTime> windowDts = windowObsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   std::vector<float> windowLats = windowObsAccessor.getFloatVariableFromObsSpace(
         "MetaData", "latitude");
   std::vector<float> windowLons = windowObsAccessor.getFloatVariableFromObsSpace(

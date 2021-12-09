@@ -315,7 +315,7 @@ void Gaussian_Thinning::groupObservationsByTime(
                        << *binSelector->numBins() << std::endl;
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
@@ -472,7 +472,7 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
       // if tiebreakerPickLatest has been set then if distance to the bin center
       // is equal it chooses the latest observation
       std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-           "MetaData", "datetime");
+           "MetaData", "dateTime");
       return [times, &validObsIds, &distancesToBinCenter](
                size_t validObsIndexA, size_t validObsIndexB){
           const size_t obsIdA = validObsIds[validObsIndexA];
@@ -495,7 +495,7 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
   if (options_.tiebreakerPickLatest) {
     std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-          "MetaData", "datetime");
+          "MetaData", "dateTime");
     return [priorities, times, &validObsIds, &distancesToBinCenter](
               size_t validObsIndexA, size_t validObsIndexB){
         // Prefer observations with large priorities, small distance and later time if tied.

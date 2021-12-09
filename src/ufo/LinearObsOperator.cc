@@ -47,7 +47,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   std::vector<util::DateTime> times(odb_.nlocs());
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
-  odb_.get_db("MetaData", "datetime", times);
+  odb_.get_db("MetaData", "dateTime", times);
   ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
   oper_->setTrajectory(gvals, ydiags);
   if (bias) {

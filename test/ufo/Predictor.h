@@ -76,7 +76,7 @@ void testPredictor() {
     std::vector<util::DateTime> times(ospace.nlocs());
     ospace.get_db("MetaData", "latitude", lats);
     ospace.get_db("MetaData", "longitude", lons);
-    ospace.get_db("MetaData", "datetime", times);
+    ospace.get_db("MetaData", "dateTime", times);
     Locations locs(lons, lats, times, ospace.distribution());
     ObsDiagnostics ydiags(ospace, locs, diagvars);
 

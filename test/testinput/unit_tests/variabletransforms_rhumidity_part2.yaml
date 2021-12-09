@@ -8,7 +8,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [dew_point_temperature_surface, air_temperature_surface, pressure_surface]
   obs filters:
@@ -28,7 +28,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [dew_point_temperature, air_temperature]
   obs filters:
@@ -48,7 +48,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [dew_point_temperature, air_temperature]
   obs filters:

@@ -270,8 +270,9 @@ Priorities:
       list:
         lats: [ 0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures: [ 10000, 20000, 30000, 40000, 50000 ]
   priority: [0, 1, 1, 0, 0]
@@ -293,8 +294,9 @@ Int-valued categories:
       list:
         lats: [ 0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288, 300 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   category: [0, 1, 0, 1, 0, 1]
@@ -316,8 +318,9 @@ String-valued categories:
       list:
         lats: [ 0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288, 300 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   string_category: ["a", "b", "a", "b", "a", "b"]
@@ -339,10 +342,11 @@ Variable min spacings:
       list:
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z',
-                     '2010-01-01T00:05:12Z', '2010-01-01T00:05:24Z', '2010-01-01T00:05:36Z',
-                     '2010-01-01T00:05:48Z', '2010-01-01T00:06:00Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288, 300,
+                     312, 324, 336,
+                     348, 360 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
@@ -364,10 +368,11 @@ Variable min spacings, shuffling:
       list:
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z',
-                     '2010-01-01T00:05:12Z', '2010-01-01T00:05:24Z', '2010-01-01T00:05:36Z',
-                     '2010-01-01T00:05:48Z', '2010-01-01T00:06:00Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288, 300,
+                     312, 324, 336,
+                     348, 360 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
@@ -390,8 +395,9 @@ Cylindrical exclusion volumes:
       list:
         lats: [ 0,  1,  2,  3,  4 ]
         lons: [ 0,  1,  2,  3,  4 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
@@ -411,8 +417,9 @@ Ellipsoidal exclusion volumes:
       list:
         lats: [ 0,  1,  2,  3,  4 ]
         lons: [ 0,  1,  2,  3,  4 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
-                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
+        dateTimes: [ 240, 252, 264,
+                     276, 288 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
@@ -432,7 +439,8 @@ Incorrectly ordered min horizontal spacings:
       list:
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z' ]
+        dateTimes: [ 240, 252, 264 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
@@ -454,7 +462,8 @@ Incorrectly ordered min vertical spacings:
       list:
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z' ]
+        dateTimes: [ 240, 252, 264 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
@@ -476,7 +485,8 @@ Incorrectly ordered min time spacings:
       list:
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z' ]
+        dateTimes: [ 240, 252, 264 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]

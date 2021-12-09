@@ -8,8 +8,9 @@ All observations' number and time stuck tolerated:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z',
-                     '2010-01-01T05:00:00Z', '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z' ]
+        dateTimes: [ 0, 7200, 10800,
+                     18000, 21600, 28800 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 281.0, 281.0, 282.0, 282.0, 283.0, 283.0]
   Stuck Check: &referenceFilterArguments
@@ -28,8 +29,9 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:30:00Z', '2010-01-01T00:31:00Z',
-                     '2010-01-01T03:00:00Z', '2010-01-01T03:01:00Z', '2010-01-01T03:02:00Z' ]
+        dateTimes: [ 0, 1800, 1860,
+                     10800, 10860, 10920 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0]
   Stuck Check: *referenceFilterArguments
@@ -45,8 +47,9 @@ Time stuck tolerated, number stuck untolerated, 1 value:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
-                     '2010-01-01T00:00:03Z', '2010-01-01T00:00:04Z', '2010-01-01T00:00:05Z' ]
+        dateTimes: [ 0, 1, 2,
+                     3, 4, 5 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 282.0, 282.0 ]
   Stuck Check: *referenceFilterArguments
@@ -62,7 +65,8 @@ Time stuck tolerated, number stuck tolerated, 1 value:
       list:
         lats: [ 0, 1 ]
         lons: [ 0, 1 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z' ]
+        dateTimes: [ 0, 1 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0 ]
   Stuck Check: *referenceFilterArguments
@@ -78,8 +82,9 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
-                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+        dateTimes: [ 0, 7200, 14400,
+                     21600, 28800, 43200 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 283.0, 283.0 ]
   Stuck Check: *referenceFilterArguments
@@ -95,8 +100,9 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
-                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+        dateTimes: [ 0, 1, 2,
+                     21600, 28800, 43200 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0 ]
   Stuck Check: *referenceFilterArguments
@@ -112,8 +118,9 @@ All temperatures different:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
-                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+        dateTimes: [ 0, 1, 2,
+                     21600, 28800, 43200 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 284.0, 285.0]
   Stuck Check: *referenceFilterArguments
@@ -129,8 +136,9 @@ Different variable streaks:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
-                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T10:00:00Z' ]
+        dateTimes: [ 0, 7200, 14400,
+                     21600, 28800, 36000 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0, 1.0]
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
   air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]
@@ -149,8 +157,9 @@ Different variable streaks, 1 filter variable considered:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
-                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T10:00:00Z' ]
+        dateTimes: [ 0, 7200, 14400,
+                     21600, 28800, 36000 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0, 1.0]
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
   air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]

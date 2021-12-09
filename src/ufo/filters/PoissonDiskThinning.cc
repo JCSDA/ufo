@@ -244,7 +244,7 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   obsData.minTimeSpacings = options_.minTimeSpacing.value();
   if (obsData.minTimeSpacings != boost::none) {
     validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
-    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "datetime");
+    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "dateTime");
     ++numNonspatialDims;
   }
 

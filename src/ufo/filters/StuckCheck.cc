@@ -51,7 +51,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
   const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
   *obsGroupDateTimes_ = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   // Create groups based on record number (assumed station ID) or category variable
   // (stationIdVariable) or otherwise assume observations all taken by the same station (1 group)
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);

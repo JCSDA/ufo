@@ -8,7 +8,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, humidity_mixing_ratio]
   obs filters:
@@ -35,7 +35,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft_nosupersat.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, humidity_mixing_ratio]
   obs filters:

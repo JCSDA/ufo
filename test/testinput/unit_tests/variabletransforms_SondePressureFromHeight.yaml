@@ -12,7 +12,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conversion_height2pressure.nc4
       obsgrouping:
         group variables: ["station_id"]
-        sort variable: "datetime"
+        sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
   obs filters:

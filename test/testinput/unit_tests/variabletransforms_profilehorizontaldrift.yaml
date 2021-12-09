@@ -32,9 +32,9 @@ observations:
         name: longitude@DerivedMetaData
       absTol: 1.0e-4
     - reference:
-        name: datetime@TestReference
+        name: dateTime@TestReference
       test:
-        name: datetime@DerivedMetaData
+        name: dateTime@DerivedMetaData
 
 # The same test using 'height' as the vertical coordinate.
 - obs space:
@@ -67,9 +67,9 @@ observations:
         name: longitude@DerivedMetaData
       absTol: 1.0e-4
     - reference:
-        name: datetime@TestReference
+        name: dateTime@TestReference
       test:
-        name: datetime@DerivedMetaData
+        name: dateTime@DerivedMetaData
 
 # The sample is not grouped into profiles, throwing an exception.
 - obs space:

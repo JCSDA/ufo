@@ -71,7 +71,7 @@ void TrackCheckUtils::sortTracksChronologically(const std::vector<size_t> &valid
                                                 const ObsAccessor &obsAccessor,
                                                 RecursiveSplitter &splitter) {
   const std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
   { return times[validObsIds[obsIndex]]; });
 }
@@ -82,7 +82,7 @@ TrackCheckUtils::ObsGroupLocationTimes
 
   locationTimes.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
   locationTimes.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
-  locationTimes.datetimes = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "datetime");
+  locationTimes.datetimes = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "dateTime");
 
   return locationTimes;
 }

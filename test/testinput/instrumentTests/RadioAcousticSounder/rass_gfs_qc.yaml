@@ -7,7 +7,7 @@ observations:
     obsdatain: 
       obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
       obsgrouping:
-        group variables: ["station_id", "datetime"]
+        group variables: ["station_id", "dateTime"]
         sort variable: "air_pressure"
         sort order: "descending"
 #   obsdataout: 

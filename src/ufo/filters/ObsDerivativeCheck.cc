@@ -130,7 +130,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
   // when x is distance:
   //       longitude and latitude are used to compute great circle distances
   //       for denominator
-  if ( strInd_ == "datetime" ) {  // special case for datetime
+  if ( strInd_ == "dateTime" ) {  // special case for datetime
       std::vector<util::DateTime> varIndT_(nlocs_);
       obsdb_.get_db("MetaData", strInd_, varIndT_);
       ioda::ObsSpace::RecIdxIter irec;

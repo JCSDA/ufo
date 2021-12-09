@@ -12,7 +12,8 @@ Pair of observations:
       list:
         lats: [ 20, 21 ]
         lons: [ 31, 32 ]
-        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z' ]
+        dateTimes: [ 240, 240 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0, 1.0, 1.0]
   FloatVariables:
     air_temperature@ObsValue:              [ 290, 291]

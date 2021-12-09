@@ -347,7 +347,7 @@ std::vector<bool> TemporalThinning::identifyThinnedObservations(
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
                         { return times[validObsIds[obsIndex]]; });
 

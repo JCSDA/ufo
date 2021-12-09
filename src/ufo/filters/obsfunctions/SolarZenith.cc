@@ -49,7 +49,7 @@ SolarZenith::SolarZenith(const eckit::LocalConfiguration & conf) {
   // List of required ObsSpace variables
   invars_ += Variable("latitude@MetaData");
   invars_ += Variable("longitude@MetaData");
-  invars_ += Variable("datetime@MetaData");
+  invars_ += Variable("dateTime@MetaData");
 }
 
 void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
@@ -72,7 +72,7 @@ void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> &
   std::vector<util::DateTime> datetimes(nlocs);
   in.get(Variable("latitude@MetaData"), lats);
   in.get(Variable("longitude@MetaData"), lons);
-  in.get(Variable("datetime@MetaData"), datetimes);
+  in.get(Variable("dateTime@MetaData"), datetimes);
 
   std::vector<bool> rejected;
   const bool skipRejected = options_.skipRejected;
