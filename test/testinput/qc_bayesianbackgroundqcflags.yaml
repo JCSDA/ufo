@@ -52,7 +52,7 @@ observations:
   - filter: Bayesian Background QC Flags
     filter variables:
     - name: eastward_wind
-  expectExceptionWithMessage: At least one of eastward_wind@GrossErrorProbability or eastward_wind@GrossErrorProbabilityBuddyCheck must be present
+  expectExceptionWithMessage: eastward_wind@GrossErrorProbability must be present
 - obs space:
     name: Bayesian background QC flags with where clause
     obsdatain:

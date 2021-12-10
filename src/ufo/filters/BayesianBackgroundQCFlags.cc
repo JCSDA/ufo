@@ -50,14 +50,10 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
   const float missingValueFloat = util::missingValue(missingValueFloat);
   const int missingValueInt = util::missingValue(missingValueInt);
   const size_t nlocs = obsdb_.nlocs();
-  // PGE multiplication factor used to store PGE values for later use.
-  const float PGEMult = 1000.0;
-  // Missing data indicator for packed PGEs (for compatibility with OPS).
+  // Missing data indicator for PGEs (for compatibility with OPS).
   const float PGEMDI = 1.111;
   // PGE rejection limit.
   const float PGECrit = parameters_.PGEParameters.PGE_PGECrit.value();
-  // Packed PGE rejection limit.
-  const float packedPGECrit = PGEMult * PGECrit;
 
   // Sometimes the PGE of one variable is used to set the QC flags of another;
   // this happens for (e.g.) wind u and v components.
@@ -72,41 +68,24 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
     throw eckit::BadValue(varname + "@QCFlags not present", Here());
 
   // Get the PGE values that each observation had after
-  // the Bayesian background and buddy checks were applied.
-  // If the checks were not applied, default to using
-  // the existing PGE values.
-  if (obsdb_.has("GrossErrorProbabilityBuddyCheck", varPGE)) {
-    // Buddy check was applied.
-    std::vector <float> buddyCheckPGEs(nlocs, missingValueFloat);
-    obsdb_.get_db("GrossErrorProbabilityBuddyCheck", varPGE, buddyCheckPGEs);
+  // the Bayesian background and/or buddy checks were applied.
+  if (obsdb_.has("GrossErrorProbability", varPGE)) {
+    std::vector <float> PGE(nlocs, missingValueFloat);
+    obsdb_.get_db("GrossErrorProbability", varPGE, PGE);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (!apply[iloc]) continue;
-      if (buddyCheckPGEs[iloc] == PGEMDI) {
+      if (PGE[iloc] == PGEMDI) {
         QCflags[iloc] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         flagged[iloc] = true;
-      } else if (buddyCheckPGEs[iloc] >= PGECrit) {
+      } else if (PGE[iloc] >= PGECrit) {
         QCflags[iloc] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         QCflags[iloc] |= ufo::MetOfficeQCFlags::Elem::BuddyRejectFlag;
         flagged[iloc] = true;
       }
     }
-  } else if (obsdb_.has("GrossErrorProbability", varPGE)) {
-    // Get the PGE values that each observation had before
-    // the Bayesian background and buddy checks were applied.
-    std::vector <float> PGEs(nlocs, missingValueFloat);
-    obsdb_.get_db("GrossErrorProbability", varPGE, PGEs);
-    // Buddy check was not applied.
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (apply[iloc] && PGEs[iloc] >= packedPGECrit) {
-        QCflags[iloc] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
-        flagged[iloc] = true;
-      }
-    }
   } else {
     std::stringstream errormessage;
-    errormessage << "At least one of "
-                 << varname + "@GrossErrorProbability or "
-                 << varname + "@GrossErrorProbabilityBuddyCheck must be present"
+    errormessage << varname + "@GrossErrorProbability must be present"
                  << std::endl;
     throw eckit::BadValue(errormessage.str(), Here());
   }

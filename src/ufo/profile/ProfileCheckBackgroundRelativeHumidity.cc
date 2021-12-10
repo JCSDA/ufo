@@ -32,8 +32,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::bkgerr_relative_humidity);
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_relative_humidity);
-    std::vector <float> &rhPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_relative_humidity);
     std::vector <int> &rhFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     const std::vector <int> &timeFlags =
@@ -84,7 +82,6 @@ namespace ufo {
                            ModelLevels,
                            rhFlags,
                            rhPGE,
-                           rhPGEBd,
                            options_.BkCheck_ErrVarMax_rh.value());
   }
 }  // namespace ufo

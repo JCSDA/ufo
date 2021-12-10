@@ -32,8 +32,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
     std::vector <float> &uPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_eastward_wind);
-    std::vector <float> &uPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_eastward_wind);
     std::vector <int> &uFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     const std::vector <float> &vObs =
@@ -46,8 +44,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::bkgerr_northward_wind);
     std::vector <float> &vPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
-    std::vector <float> &vPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_northward_wind);
     std::vector <int> &vFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &timeFlags =
@@ -93,7 +89,6 @@ namespace ufo {
                            ModelLevels,
                            uFlags,
                            uPGE,
-                           uPGEBd,
                            -1,
                            &vObs,
                            &vBkg);
@@ -101,6 +96,5 @@ namespace ufo {
     // Update v PGE and flags.
     vPGE = uPGE;
     vFlags = uFlags;
-    vPGEBd = uPGEBd;
   }
 }  // namespace ufo

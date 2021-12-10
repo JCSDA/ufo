@@ -67,19 +67,6 @@ struct VariableNames
   static constexpr const char* const pge_geopotential_height =
     "height@GrossErrorProbability";
 
-  // Probability of gross error used in buddy check
-
-  static constexpr const char* const pgebd_air_temperature =
-    "air_temperature@GrossErrorProbabilityBuddyCheck";
-  static constexpr const char* const pgebd_relative_humidity =
-    "relative_humidity@GrossErrorProbabilityBuddyCheck";
-  static constexpr const char* const pgebd_eastward_wind =
-    "eastward_wind@GrossErrorProbabilityBuddyCheck";
-  static constexpr const char* const pgebd_northward_wind =
-    "northward_wind@GrossErrorProbabilityBuddyCheck";
-  static constexpr const char* const pgebd_geopotential_height =
-    "height@GrossErrorProbabilityBuddyCheck";
-
   // MetaData
 
   static constexpr const char* const station_ID = "station_id@MetaData";

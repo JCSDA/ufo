@@ -52,14 +52,6 @@ constexpr const char* const ufo::VariableNames::pge_eastward_wind;
 constexpr const char* const ufo::VariableNames::pge_northward_wind;
 constexpr const char* const ufo::VariableNames::pge_geopotential_height;
 
-// Probability of gross error used in buddy check
-
-constexpr const char* const ufo::VariableNames::pgebd_air_temperature;
-constexpr const char* const ufo::VariableNames::pgebd_relative_humidity;
-constexpr const char* const ufo::VariableNames::pgebd_eastward_wind;
-constexpr const char* const ufo::VariableNames::pgebd_northward_wind;
-constexpr const char* const ufo::VariableNames::pgebd_geopotential_height;
-
 // MetaData
 
 constexpr const char* const ufo::VariableNames::station_ID;

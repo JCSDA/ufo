@@ -36,8 +36,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::bkgerr_air_temperature);
     std::vector <float> &tPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_air_temperature);
-    std::vector <float> &tPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_air_temperature);
     std::vector <int> &tFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <int> &timeFlags =
@@ -112,7 +110,6 @@ namespace ufo {
                            PdBad,
                            ModelLevels,
                            tFlags,
-                           tPGE,
-                           tPGEBd);
+                           tPGE);
   }
 }  // namespace ufo

@@ -139,11 +139,7 @@ namespace ufo {
             ufo::VariableNames::pge_relative_humidity,
             ufo::VariableNames::pge_eastward_wind,
             ufo::VariableNames::pge_northward_wind,
-            ufo::VariableNames::pge_geopotential_height,
-            ufo::VariableNames::pgebd_air_temperature,
-            ufo::VariableNames::pgebd_relative_humidity,
-            ufo::VariableNames::pgebd_eastward_wind,
-            ufo::VariableNames::pgebd_northward_wind});
+            ufo::VariableNames::pge_geopotential_height});
       } else if (check == "Pressure") {
         valuesToCompare_int_.insert({
             ufo::VariableNames::qcflags_observation_report});

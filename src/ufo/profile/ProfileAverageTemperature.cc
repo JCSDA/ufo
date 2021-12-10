@@ -40,7 +40,7 @@ namespace ufo {
     std::vector <std::string> variableNamesFloat =
       {ufo::VariableNames::obs_air_temperature,
        ufo::VariableNames::obscorrection_air_temperature,
-       ufo::VariableNames::pgebd_air_temperature,
+       ufo::VariableNames::pge_air_temperature,
        ufo::VariableNames::LogP_derived,
        ufo::VariableNames::bigPgaps_derived,
        ufo::VariableNames::modellevels_ExnerP_rho_derived,
@@ -138,8 +138,8 @@ namespace ufo {
 
     const std::vector <float> &tObs =
       profileOriginal.get<float>(ufo::VariableNames::obs_air_temperature);
-    const std::vector <float> &tPGEBd =
-      profileOriginal.get<float>(ufo::VariableNames::pgebd_air_temperature);
+    const std::vector <float> &tPGE =
+      profileOriginal.get<float>(ufo::VariableNames::pge_air_temperature);
     std::vector <int> &tFlags =
       profileOriginal.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
@@ -149,12 +149,12 @@ namespace ufo {
     std::vector <int> &NumGapsT =
        profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsT);
 
-    if (!oops::allVectorsSameNonZeroSize(tObs, tPGEBd, tFlags, rhFlags, tObsCorrection)) {
+    if (!oops::allVectorsSameNonZeroSize(tObs, tPGE, tFlags, rhFlags, tObsCorrection)) {
       std::stringstream errorMessage;
       errorMessage << "At least one vector is the wrong size. "
                    << "Temperature averaging will not be performed." << std::endl;
       errorMessage << "Vector sizes: "
-                   << oops::listOfVectorSizes(tObs, tPGEBd, tFlags, rhFlags, tObsCorrection)
+                   << oops::listOfVectorSizes(tObs, tPGE, tFlags, rhFlags, tObsCorrection)
                    << std::endl;
       throw eckit::BadValue(errorMessage.str(), Here());
     }
@@ -201,7 +201,7 @@ namespace ufo {
     // Flag reported value if the probability of gross error is too large.
     // Values which have been flagged here, or previously, are not used in the averaging routines.
     for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
-      if (tPGEBd[jlev] > options_.AvgT_PGEskip.value()) {
+      if (tPGE[jlev] > options_.AvgT_PGEskip.value()) {
         tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         // NB the relative humidity flags are modified in this routine and also
         // in the routine that performs RH averaging.

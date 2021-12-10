@@ -114,7 +114,6 @@ namespace ufo {
                  groupname == "DerivedMetaData" ||
                  groupname == "DerivedModelValue" ||
                  groupname == "GrossErrorProbability" ||
-                 groupname == "GrossErrorProbabilityBuddyCheck" ||
                  fullname == ufo::VariableNames::obs_air_pressure) {
         const std::vector <float>& profileData = get<float>(fullname);
         getProfileIndicesInEntireSample(groupname);

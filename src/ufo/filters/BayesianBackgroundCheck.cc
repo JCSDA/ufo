@@ -125,10 +125,8 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // H(x) error:
       std::vector<float> hofxerr;
       data_.get(backgrErrVariable(filtervars[filterVarIndex]), hofxerr);
-      // PGE:
+      // PGE, filled with initial value:
       std::vector<float> PGE1(obsdb_.nlocs(), parameters_.PGE.value());
-      // after-check PGE:
-      std::vector<float> PGEBd1(obsdb_.nlocs());
       // QC flags:
       std::vector<int> qcflags1(obsdb_.nlocs());
       std::vector<float> firstComponentObVal, secondComponentObVal;
@@ -189,7 +187,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<float> PdBad_reduced = reduceVector(PdBad, j_reduced);
       std::vector<int> qcflags1_reduced = reduceVector(qcflags1, j_reduced);
       std::vector<float> PGE1_reduced = reduceVector(PGE1, j_reduced);
-      std::vector<float> PGEBd1_reduced = reduceVector(PGEBd1, j_reduced);
       std::vector<float> secondComponentObVal_reduced;
       std::vector<float> hofx2_reduced;
       if (previousVariableWasFirstComponentOfTwo) {
@@ -206,7 +203,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                              ModelLevels,
                              qcflags1_reduced,
                              PGE1_reduced,
-                             PGEBd1_reduced,
                              -1,
                              previousVariableWasFirstComponentOfTwo?
                               &secondComponentObVal_reduced : nullptr,
@@ -215,21 +211,16 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // write PGE-updated values from reduced vectors back into full ones:
       unreduceVector(qcflags1_reduced, qcflags1, j_reduced);
       unreduceVector(PGE1_reduced, PGE1, j_reduced);
-      unreduceVector(PGEBd1_reduced, PGEBd1, j_reduced);
 
       // Save PGE to obsdb
-      obsdb_.put_db("GrossErrorProbabilityTotal", varname1, PGE1);  // 'packed' PGE
-      obsdb_.put_db("GrossErrorProbabilityBuddyCheck", varname1, PGEBd1);  // for buddy check
+      obsdb_.put_db("GrossErrorProbability", varname1, PGE1);              // PGE
       // Save QC flags to obsdb
       obsdb_.put_db("QCFlags", varname1, qcflags1);  // Met Office QC flags, not flagged or *flags_
 
       if (previousVariableWasFirstComponentOfTwo) {
         // Save PGE to obsdb
         std::vector<float> &PGE2 = PGE1;  // in old OPS, PGE same for both components of 2-vector
-        // after-check PGE:
-        std::vector<float> &PGEBd2 = PGEBd1;  // may assign different to each component in future
-        obsdb_.put_db("GrossErrorProbabilityTotal", varname2, PGE2);
-        obsdb_.put_db("GrossErrorProbabilityBuddyCheck", varname2, PGEBd2);
+        obsdb_.put_db("GrossErrorProbability", varname2, PGE2);
         // Save QC flags to obsdb
         std::vector<int> &qcflags2 = qcflags1;  // in old OPS, flags same for both components
         obsdb_.put_db("QCFlags", varname2, qcflags2);

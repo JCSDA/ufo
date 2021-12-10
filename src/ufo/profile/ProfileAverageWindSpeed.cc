@@ -42,7 +42,7 @@ namespace ufo {
     std::vector <std::string> variableNamesFloat =
       {ufo::VariableNames::obs_eastward_wind,
        ufo::VariableNames::obs_northward_wind,
-       ufo::VariableNames::pgebd_eastward_wind,
+       ufo::VariableNames::pge_eastward_wind,
        ufo::VariableNames::LogP_derived,
        ufo::VariableNames::bigPgaps_derived,
        ufo::VariableNames::modellevels_logP_derived,
@@ -144,8 +144,8 @@ namespace ufo {
       profileOriginal.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &vObs =
       profileOriginal.get<float>(ufo::VariableNames::obs_northward_wind);
-    const std::vector <float> &uPGEBd =
-      profileOriginal.get<float>(ufo::VariableNames::pgebd_eastward_wind);
+    const std::vector <float> &uPGE =
+      profileOriginal.get<float>(ufo::VariableNames::pge_eastward_wind);
     std::vector <int> &uFlags =
       profileOriginal.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
@@ -159,7 +159,7 @@ namespace ufo {
       profileOriginal.get<int>(ufo::VariableNames::ObsType);
 
     if (!oops::allVectorsSameNonZeroSize(uObs, vObs,
-                                         uPGEBd,
+                                         uPGE,
                                          uFlags, vFlags,
                                          ObsType)) {
       std::stringstream errorMessage;
@@ -167,7 +167,7 @@ namespace ufo {
                    << "Wind speed averaging will not be performed." << std::endl;
       errorMessage << "Vector sizes: "
                    << oops::listOfVectorSizes(uObs, vObs,
-                                              uPGEBd,
+                                              uPGE,
                                               uFlags, vFlags,
                                               ObsType)
                    << std::endl;
@@ -209,7 +209,7 @@ namespace ufo {
     // Flag reported value if the probability of gross error is too large.
     // Values which have been flagged here, or previously, are not used in the averaging routines.
     for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
-      if (uPGEBd[jlev] > options_.AvgU_PGEskip.value()) {
+      if (uPGE[jlev] > options_.AvgU_PGEskip.value()) {
         uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         vFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
       }

@@ -34,8 +34,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <float> &zPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
-    std::vector <float> &zPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_geopotential_height);
     std::vector <int> &zFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     const std::vector <int> &tFlags =
@@ -115,7 +113,6 @@ namespace ufo {
                            PdBad,
                            ModelLevels,
                            zFlags,
-                           zPGE,
-                           zPGEBd);
+                           zPGE);
   }
 }  // namespace ufo

@@ -72,12 +72,12 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
   std::vector<bool> notUsed(nvars);
   // Vector holding filter variable names
   std::vector<std::string> varname(nvars);
-  // Vector holding probability of gross error for input to Buddy check
-  std::vector<std::vector<float>> varPGEBd(nvars, std::vector<float>(nlocs));
-  // Vector holding combined probability densities
+  // Vector holding probability of gross error
   std::vector<std::vector<float>> varPGE(nvars, std::vector<float>(nlocs));
-  // Vector holding packed PGEs
-  std::vector<std::vector<float>> varPGEFinal(nvars, std::vector<float>(nlocs));
+  // Vector holding initial probability of gross error
+  std::vector<std::vector<float>> varPGEInitial(nvars, std::vector<float>(nlocs));
+  // Vector holding combined probability densities
+  std::vector<std::vector<float>> varPGETotal(nvars, std::vector<float>(nlocs));
   // Vector holding OPS style QCflags for each variable
   std::vector<std::vector<int>> varQCflags(nvars, std::vector<int>(nlocs));
 
@@ -85,18 +85,18 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
       varname[ivar] = filtervars.variable(ivar).variable();
     // Get Gross Error Probability values and Met Office QCFlags from ObsSpace
     if (obsdb_.has("GrossErrorProbability", varname[ivar]) &&
+        obsdb_.has("GrossErrorProbabilityInitial", varname[ivar]) &&
         obsdb_.has("GrossErrorProbabilityTotal", varname[ivar]) &&
-        obsdb_.has("GrossErrorProbabilityFinal", varname[ivar]) &&
         obsdb_.has("QCFlags", varname[ivar])) {
-    obsdb_.get_db("GrossErrorProbability", varname[ivar], varPGEBd[ivar]);
-    obsdb_.get_db("GrossErrorProbabilityTotal", varname[ivar], varPGE[ivar]);
-    obsdb_.get_db("GrossErrorProbabilityFinal", varname[ivar], varPGEFinal[ivar]);
+    obsdb_.get_db("GrossErrorProbability", varname[ivar], varPGE[ivar]);
+    obsdb_.get_db("GrossErrorProbabilityInitial", varname[ivar], varPGEInitial[ivar]);
+    obsdb_.get_db("GrossErrorProbabilityTotal", varname[ivar], varPGETotal[ivar]);
     obsdb_.get_db("QCFlags", varname[ivar], varQCflags[ivar]);
     } else {
       std::stringstream errormessage;
       errormessage << "GrossErrorProbability/" + varname[ivar] + ", "
-                   << "GrossErrorProbabilityTotal/" + varname[ivar] + ", "
-                   << "GrossErrorProbabilityFinal/" + varname[ivar] + ", and "
+                   << "GrossErrorProbabilityInitial/" + varname[ivar] + ", "
+                   << "GrossErrorProbabilityTotal/" + varname[ivar] + ", and "
                    << "QCFlags/" + varname[ivar] + " must all be present"
                    << std::endl;
       throw eckit::BadValue(errormessage.str(), Here());
@@ -138,7 +138,7 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
       float PdBadRep = 1.0f;
       for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
         if (!notUsed[ivar]) {
-          PdReport[jobs] *= varPGE[ivar][jobs];
+          PdReport[jobs] *= varPGETotal[ivar][jobs];
           if (ObsType[jobs] == MetOfficeObsIDs::Bogus::Bogus) {
             PdBad_used[ivar][jobs] = PdBad_bogus[ivar];
           } else if (ObsType[jobs] == MetOfficeObsIDs::Surface::SynopManual ||
@@ -170,47 +170,40 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
   for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
     secondComponentOfTwo = filtervars[ivar].options().getBool("second_component_of_two", false);
     if (secondComponentOfTwo) {
-      varPGEBd[ivar] = varPGEBd[ivar - 1];
-      varPGEFinal[ivar] = varPGEFinal[ivar - 1];
+      varPGE[ivar] = varPGE[ivar - 1];
       varQCflags[ivar] = varQCflags[ivar - 1];
       flagged[ivar] = flagged[ivar - 1];
     } else {
       for (size_t jobs = 0; jobs < nlocs; ++jobs) {
         if (apply[jobs] && (ReportPGE[jobs] > 0) && (PdReport[jobs] > 0)) {
-          if (varPGEFinal[ivar][jobs] < PGEMult) {
-            float intpart;
-            // Initial Probability of Gross error in element
-            float const PGE0 = std::modf(varPGEFinal[ivar][jobs], &intpart);
+          if (std::abs(varPGE[ivar][jobs] - PGEMDI) > 0.001f) {
             float PdProduct = 1.0f;
             for (size_t jvar = 0; jvar < filtervars.nvars(); ++jvar) {
               if ((jvar != ivar) && !notUsed[jvar]) {
-                PdProduct *= varPGE[jvar][jobs];
+                PdProduct *= varPGETotal[jvar][jobs];
               }
             }
             // PGE in element or whole report
             float PGE1;
             if (notUsed[ivar]) {
-             PGE1 = ReportPGE[jobs] + varPGEBd[ivar][jobs] -
-                     ReportPGE[jobs] * varPGEBd[ivar][jobs];
+             PGE1 = ReportPGE[jobs] + varPGE[ivar][jobs] -
+                     ReportPGE[jobs] * varPGE[ivar][jobs];
             } else {
-             PGE1 = ReportPGE[jobs] + (PdBad_used[ivar][jobs] * PdProduct) * PGE0 *
+             PGE1 = ReportPGE[jobs] + (PdBad_used[ivar][jobs] * PdProduct)
+                   * varPGEInitial[ivar][jobs] *
                    (1.0f - PBadRep[jobs])/PdReport[jobs];
                 }
-            varPGEFinal[ivar][jobs] = floor(PGE1 * PGEMult) + PGE0;  // PGE packing
             if (PGE1 >= PGECrit) {
               varQCflags[ivar][jobs] |= ufo::MetOfficeQCFlags::Elem::BackRejectFlag;
               flagged[ivar][jobs] = true;
             }
-            if (std::abs(varPGEBd[ivar][jobs] - PGEMDI) > 0.001f) {
-              varPGEBd[ivar][jobs] = PGE1;
-            }
+            varPGE[ivar][jobs] = PGE1;
           }
         }
       }
     }
     // Save updated gross error probabilities and QCFlags to ObsSpace
-    obsdb_.put_db("GrossErrorProbability", varname[ivar], varPGEBd[ivar]);
-    obsdb_.put_db("GrossErrorProbabilityFinal", varname[ivar], varPGEFinal[ivar]);
+    obsdb_.put_db("GrossErrorProbability", varname[ivar], varPGE[ivar]);
     obsdb_.put_db("QCFlags", varname[ivar], varQCflags[ivar]);
   }
   obsdb_.put_db("MetaData", "GrossErrorProbabilityReport", ReportPGE);

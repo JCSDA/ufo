@@ -39,7 +39,7 @@ namespace ufo {
        ufo::VariableNames::InstrType};
     std::vector <std::string> variableNamesFloat =
       {ufo::VariableNames::obs_relative_humidity,
-       ufo::VariableNames::pgebd_relative_humidity,
+       ufo::VariableNames::pge_relative_humidity,
        ufo::VariableNames::LogP_derived,
        ufo::VariableNames::bigPgaps_derived,
        ufo::VariableNames::modellevels_logP_derived,
@@ -123,8 +123,8 @@ namespace ufo {
 
     const std::vector <float> &rhObs =
       profileOriginal.get<float>(ufo::VariableNames::obs_relative_humidity);
-    std::vector <float> &rhPGEBd =
-      profileOriginal.get<float>(ufo::VariableNames::pgebd_relative_humidity);
+    std::vector <float> &rhPGE =
+      profileOriginal.get<float>(ufo::VariableNames::pge_relative_humidity);
     std::vector <int> &rhFlags =
       profileOriginal.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     // Optional: vector of sonde instrument types.
@@ -133,12 +133,12 @@ namespace ufo {
     std::vector <int> &NumGapsRH =
       profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsRH);
 
-    if (!oops::allVectorsSameNonZeroSize(rhObs, rhPGEBd, rhFlags)) {
+    if (!oops::allVectorsSameNonZeroSize(rhObs, rhPGE, rhFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Relative humidity averaging will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(rhObs,
-                                                      rhPGEBd,
+                                                      rhPGE,
                                                       rhFlags)
                            << std::endl;
       throw eckit::BadValue("Error in relative humidity averaging", Here());
@@ -175,7 +175,7 @@ namespace ufo {
     // Flag reported value if the probability of gross error is too large.
     // Values which have been flagged here, or previously, are not used in the averaging routines.
     for (size_t jlev = 0; jlev < numProfileLevels; ++jlev)
-      if (rhPGEBd[jlev] > options_.AvgRH_PGEskip.value())
+      if (rhPGE[jlev] > options_.AvgRH_PGEskip.value())
         rhFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
 
     // Interpolate Sonde RH onto model levels? The alternative is to perform a vertical average.
