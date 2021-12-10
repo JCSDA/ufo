@@ -311,6 +311,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_ModelSurfaceHeightAdjustRelativeHumidity.yaml
   testinput/unit_tests/function_ModelSurfaceHeightAdjustWindVector.yaml
   testinput/unit_tests/function_ModelSurfaceHeightAdjustTemperature.yaml
+  testinput/unit_tests/function_linear_combination_int.yaml
   testinput/unit_tests/function_linear_combination_multichannel.yaml
   testinput/unit_tests/function_exponential.yaml
   testinput/unit_tests/function_obserrorfactorquotient.yaml
@@ -3096,6 +3097,13 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrorfactorconv
 ecbuild_add_test( TARGET  test_ufo_function_linear_combination
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_reperr.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_linear_combination_int
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/function_linear_combination_int.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS

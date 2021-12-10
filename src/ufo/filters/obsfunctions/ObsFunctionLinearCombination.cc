@@ -17,12 +17,13 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<LinearCombination>
-                       makerLinearCombination_("LinearCombination");
+static ObsFunctionMaker<LinearCombination<float>> floatMaker("LinearCombination");
+static ObsFunctionMaker<LinearCombination<int>> intMaker("LinearCombination");
 
 // -----------------------------------------------------------------------------
 
-LinearCombination::LinearCombination(const eckit::LocalConfiguration & conf)
+template <typename FunctionValue>
+LinearCombination<FunctionValue>::LinearCombination(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.validateAndDeserialize(conf);
@@ -35,12 +36,9 @@ LinearCombination::LinearCombination(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-LinearCombination::~LinearCombination() {}
-
-// -----------------------------------------------------------------------------
-
-void LinearCombination::compute(const ObsFilterData & in,
-                                ioda::ObsDataVector<float> & out) const {
+template <typename FunctionValue>
+void LinearCombination<FunctionValue>::compute(const ObsFilterData & in,
+                                               ioda::ObsDataVector<FunctionValue> & out) const {
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -48,16 +46,16 @@ void LinearCombination::compute(const ObsFilterData & in,
   const size_t nv = invars_.size();
 
   // get coefs for linear combination
-  const std::vector<float> coefs = options_.coefs.value();
+  const std::vector<FunctionValue> coefs = options_.coefs.value();
 
   // sanity checks / initialize
   ASSERT(coefs.size() == nv);
   out.zero();
 
   // compute linear combination of input variables
-  const float missing = util::missingValue(missing);
+  const FunctionValue missing = util::missingValue(missing);
   for (size_t ivar = 0; ivar < nv; ++ivar) {
-    ioda::ObsDataVector<float> varin(in.obsspace(), invars_[ivar].toOopsVariables());
+    ioda::ObsDataVector<FunctionValue> varin(in.obsspace(), invars_[ivar].toOopsVariables());
     in.get(invars_[ivar], varin);
     ASSERT(varin.nvars() == out.nvars());
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
@@ -74,7 +72,8 @@ void LinearCombination::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & LinearCombination::requiredVariables() const {
+template <typename FunctionValue>
+const ufo::Variables & LinearCombination<FunctionValue>::requiredVariables() const {
   return invars_;
 }
 
