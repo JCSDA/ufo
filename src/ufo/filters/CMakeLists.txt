@@ -266,6 +266,8 @@ set ( filters_files
       obsfunctions/ProfileAverageObsPressure.h
       obsfunctions/DateTimeOffset.cc
       obsfunctions/DateTimeOffset.h
+      obsfunctions/FillAveragedProfileData.cc
+      obsfunctions/FillAveragedProfileData.h
 )
 
 if( ${rttov_FOUND} )
