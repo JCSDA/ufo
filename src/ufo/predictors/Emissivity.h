@@ -10,10 +10,6 @@
 
 #include "ufo/predictors/PredictorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace oops {
   class Variables;
 }

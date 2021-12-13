@@ -15,7 +15,6 @@
 
 #include <boost/optional.hpp>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"

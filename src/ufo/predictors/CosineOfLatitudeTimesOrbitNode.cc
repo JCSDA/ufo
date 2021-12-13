@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
-
+#include "ioda/ObsVector.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {

@@ -5,13 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 #include <fstream>
-#include <iterator>
 #include <string>
 #include <vector>
 
 #include "ufo/predictors/LapseRate.h"
 
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"

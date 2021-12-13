@@ -11,9 +11,7 @@
 #include "ufo/predictors/ScanAngle.h"
 
 #include "ioda/ObsSpace.h"
-
-#include "oops/util/abor1_cpp.h"
-#include "oops/util/Logger.h"
+#include "ioda/ObsVector.h"
 
 #include "ufo/utils/Constants.h"
 

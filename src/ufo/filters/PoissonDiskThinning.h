@@ -28,7 +28,6 @@ namespace ioda {
 }
 
 namespace util {
-  class DateTime;
   template <typename Key, typename Value> class ScalarOrMap;
 }
 

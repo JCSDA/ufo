@@ -11,6 +11,7 @@
 #include "eckit/exception/Exceptions.h"
 
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 #include "oops/util/missingValues.h"
 

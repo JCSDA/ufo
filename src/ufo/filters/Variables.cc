@@ -12,12 +12,12 @@
 #include <string>
 #include <vector>
 
-#include "eckit/exception/Exceptions.h"
-
+#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 // -----------------------------------------------------------------------------
 namespace ufo {

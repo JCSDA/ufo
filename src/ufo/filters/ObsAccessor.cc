@@ -15,6 +15,7 @@
 #include "ioda/ObsSpace.h"
 #include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {

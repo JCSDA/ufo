@@ -16,6 +16,8 @@
 #include "ioda/ObsVector.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/Variable.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 

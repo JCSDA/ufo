@@ -25,6 +25,7 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/StringUtils.h"

@@ -16,6 +16,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/DateTime.h"

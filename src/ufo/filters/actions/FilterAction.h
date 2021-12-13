@@ -9,20 +9,19 @@
 #define UFO_FILTERS_ACTIONS_FILTERACTION_H_
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
 
-#include "ufo/filters/actions/FilterActionBase.h"
-
-namespace eckit {
-  class Configuration;
+namespace ioda {
+  template<typename DATATYPE> class ObsDataVector;
 }
 
 namespace ufo {
-
-class ObsFilterData;
+  class FilterActionBase;
+  class FilterActionParametersBase;
+  class ObsFilterData;
+  class Variables;
 
 // -----------------------------------------------------------------------------
 

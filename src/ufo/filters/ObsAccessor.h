@@ -15,9 +15,7 @@
 #include <boost/optional.hpp>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/util/DateTime.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/filters/Variables.h"
 
 namespace ioda {
 class Distribution;
@@ -25,8 +23,13 @@ template <typename DATATYPE> class ObsDataVector;
 class ObsSpace;
 }
 
+namespace util {
+class DateTime;
+}
+
 namespace ufo {
 
+class Variables;
 class RecursiveSplitter;
 
 /// \brief This class provides access to observations that may be held on multiple MPI ranks.

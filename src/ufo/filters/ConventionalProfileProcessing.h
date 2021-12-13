@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
 
 #include "ufo/filters/ConventionalProfileProcessingParameters.h"
 #include "ufo/filters/FilterBase.h"

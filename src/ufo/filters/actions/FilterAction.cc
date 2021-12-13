@@ -7,12 +7,7 @@
 
 #include "ufo/filters/actions/FilterAction.h"
 
-#include <vector>
-
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsDataVector.h"
-#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/actions/FilterActionBase.h"
 
 namespace ufo {
 

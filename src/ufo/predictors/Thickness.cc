@@ -6,7 +6,10 @@
  */
 
 #include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/predictors/Thickness.h"
 #include "ufo/utils/Constants.h"

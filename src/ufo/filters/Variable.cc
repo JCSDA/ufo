@@ -16,6 +16,7 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"

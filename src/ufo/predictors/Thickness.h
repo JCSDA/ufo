@@ -8,7 +8,6 @@
 #ifndef UFO_PREDICTORS_THICKNESS_H_
 #define UFO_PREDICTORS_THICKNESS_H_
 
-#include <vector>
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/predictors/PredictorBase.h"

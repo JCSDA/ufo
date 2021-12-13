@@ -15,7 +15,6 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"

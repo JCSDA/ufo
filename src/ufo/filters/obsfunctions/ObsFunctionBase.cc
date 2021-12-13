@@ -13,6 +13,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 

@@ -13,12 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
 #include "ufo/filters/FilterParametersBase.h"
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/ObsProcessorBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
@@ -30,12 +25,9 @@ namespace eckit {
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// \brief Base class for UFO QC filters
 ///

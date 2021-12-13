@@ -12,11 +12,10 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
 #include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/PolymorphicParameter.h"
+#include "oops/util/parameters/RequiredPolymorphicParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"  // for FilterActionFactory
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variable.h"

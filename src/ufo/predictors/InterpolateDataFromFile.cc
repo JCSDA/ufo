@@ -14,6 +14,7 @@
 #include <boost/make_unique.hpp>
 
 #include "eckit/exception/Exceptions.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/AssociativeContainers.h"
 #include "ufo/filters/ObsFilterData.h"

@@ -15,12 +15,9 @@
 #include <boost/make_unique.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsDataVector.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/PolymorphicParameter.h"
 
 namespace ioda {
 template <typename T> class ObsDataVector;

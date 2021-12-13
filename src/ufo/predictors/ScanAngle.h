@@ -12,7 +12,6 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
 
 #include "ufo/predictors/PredictorBase.h"
 

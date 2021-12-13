@@ -11,7 +11,7 @@
 #include "ufo/predictors/Emissivity.h"
 
 #include "ioda/ObsSpace.h"
-
+#include "ioda/ObsVector.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 

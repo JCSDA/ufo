@@ -10,7 +10,6 @@
 
 #include <memory>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilterBase.h"
 #include "ufo/filters/ObsFilterData.h"

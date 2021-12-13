@@ -11,12 +11,9 @@
 #include <memory>
 #include <ostream>
 
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/interface/ObsFilterBase.h"
-#include "oops/util/Printable.h"
 #include "ufo/ObsTraits.h"
 
 namespace ioda {

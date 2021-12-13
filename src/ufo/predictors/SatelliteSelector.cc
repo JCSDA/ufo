@@ -8,11 +8,13 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "ufo/predictors/SatelliteSelector.h"
 #include "ufo/utils/Constants.h"
 
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 namespace ufo {
 

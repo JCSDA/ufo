@@ -10,7 +10,6 @@
 
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
 #include "ufo/filters/Variables.h"
 

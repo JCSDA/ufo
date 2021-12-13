@@ -13,8 +13,11 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
+
+namespace oops {
+  class Variables;
+}
 
 namespace ufo {
 

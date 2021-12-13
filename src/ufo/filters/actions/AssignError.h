@@ -8,7 +8,6 @@
 #ifndef UFO_FILTERS_ACTIONS_ASSIGNERROR_H_
 #define UFO_FILTERS_ACTIONS_ASSIGNERROR_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"

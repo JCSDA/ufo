@@ -7,8 +7,10 @@
 
 #include <cmath>
 #include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
-#include "oops/util/Logger.h"
+#include "ioda/ObsVector.h"
 #include "ufo/predictors/OrbitalAngle.h"
 #include "ufo/utils/Constants.h"
 

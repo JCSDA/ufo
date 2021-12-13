@@ -13,15 +13,15 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
-#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/StuckCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
+
+namespace util {
+class DateTime;
+}
 
 namespace ioda {
 template <typename DATATYPE> class ObsDataVector;

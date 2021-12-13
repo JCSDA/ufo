@@ -8,10 +8,6 @@
 #ifndef UFO_PREDICTORS_ORBITALANGLE_H_
 #define UFO_PREDICTORS_ORBITALANGLE_H_
 
-#include <string>
-#include <vector>
-
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/ParameterTraits.h"
 #include "oops/util/parameters/RequiredParameter.h"
 

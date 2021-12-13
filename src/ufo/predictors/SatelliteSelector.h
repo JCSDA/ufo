@@ -10,7 +10,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"

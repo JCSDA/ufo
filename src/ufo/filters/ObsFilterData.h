@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019 UCAR
+ * (C) Copyright 2019-2021 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -13,13 +13,18 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
 #include "ufo/filters/DiagnosticFlag.h"
-#include "ufo/filters/Variable.h"
+
+namespace util {
+  class DateTime;
+}
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
+  enum class ObsDtype;
   class ObsSpace;
   class ObsVector;
 }
@@ -27,6 +32,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
+  class Variable;
 
 // -----------------------------------------------------------------------------
 /*! \brief ObsFilterData provides access to all data related to an ObsFilter

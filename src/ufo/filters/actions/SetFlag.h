@@ -11,7 +11,8 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
 #include "ufo/filters/Variables.h"
 

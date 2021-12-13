@@ -16,7 +16,6 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/variabletransforms/TransformBase.h"
 
 namespace eckit {
 class Configuration;
