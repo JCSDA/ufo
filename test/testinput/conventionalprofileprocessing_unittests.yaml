@@ -42,7 +42,6 @@ observations:
         name: test_id@MetaData
       is_in: 0
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Standard sonde profile (test_id = 0), no sorting ===#
@@ -67,7 +66,6 @@ observations:
         name: test_id@MetaData
       is_in: 0
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Standard sonde profile (test_id = 0), no checks defined ===#
@@ -94,7 +92,6 @@ observations:
         name: test_id@MetaData
       is_in: 0
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
@@ -121,7 +118,6 @@ observations:
         name: test_id@MetaData
       is_in: 1
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
@@ -150,7 +146,6 @@ observations:
         name: test_id@MetaData
       is_in: 1
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with negative pressure reading (test_id = 2) ===#
@@ -177,7 +172,6 @@ observations:
         name: test_id@MetaData
       is_in: 2
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== No data (invalid test_id) ===#
@@ -205,7 +199,6 @@ observations:
         name: test_id@MetaData
       is_in: 999
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with pressures out of order (test_id = 3), sorting by pressure ===#
@@ -232,7 +225,6 @@ observations:
         name: test_id@MetaData
       is_in: 3
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
@@ -257,7 +249,6 @@ observations:
         name: test_id@MetaData
       is_in: 3
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with all pressures missing (test_id = 4) ===#
@@ -282,7 +273,6 @@ observations:
         name: test_id@MetaData
       is_in: 4
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 69
 #=== Sonde with all temperatures missing (test_id = 5) ===#
@@ -309,7 +299,6 @@ observations:
         name: test_id@MetaData
       is_in: 5
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with all temperatures missing (test_id = 5), all checks ===#
@@ -337,6 +326,5 @@ observations:
         name: test_id@MetaData
       is_in: 5
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 0

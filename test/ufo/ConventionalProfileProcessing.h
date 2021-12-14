@@ -73,11 +73,13 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   ioda::ObsVector bias(obsspace);
   bias.zero();
 
-  const eckit::LocalConfiguration obsdiagconf(conf, "obs diagnostics");
+  const eckit::LocalConfiguration obsdiagconf = conf.getSubConfiguration("obs diagnostics");
+  GeoVaLsParameters obsdiagparams;
+  obsdiagparams.validateAndDeserialize(obsdiagconf);
   std::vector<eckit::LocalConfiguration> varconfs;
-  obsdiagconf.get("variables", varconfs);
+  conf.get("obs diagnostics variables", varconfs);
   const Variables diagvars(varconfs);
-  const ObsDiagnostics obsdiags(obsdiagconf, obsspace, diagvars.toOopsVariables());
+  const ObsDiagnostics obsdiags(obsdiagparams, obsspace, diagvars.toOopsVariables());
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
       obsspace, obsspace.obsvariables(), "ObsError"));
@@ -112,7 +114,9 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   std::unique_ptr <GeoVaLs> geovals;
   if (!ignoreGeoVaLs && geovars.size() > 0) {
     const eckit::LocalConfiguration geovalsConf(conf, "geovals");
-    geovals.reset(new GeoVaLs(geovalsConf, obsspace, geovars));
+    GeoVaLsParameters geovalsparams;
+    geovalsparams.validateAndDeserialize(geovalsConf);
+    geovals.reset(new GeoVaLs(geovalsparams, obsspace, geovars));
   } else {
     geovals.reset(new GeoVaLs(obsspace.distribution(), oops::Variables()));
   }

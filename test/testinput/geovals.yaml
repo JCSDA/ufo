@@ -9,6 +9,7 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
+  geovals test:
     state variables: [eastward_wind, northward_wind, air_pressure]
     norm: 4307792.01444180
 - obs space:
@@ -19,6 +20,7 @@ observations:
     channels: 1-10,15
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+  geovals test:
     state variables:
     - air_temperature
     - air_pressure

@@ -30,7 +30,6 @@ observations:
     SCheck_CorrectT: true
     HCheck_CorrectZ: true
   HofX: HofX
-  obs diagnostics:
   passedBenchmark: 901
   benchmarkFlag: 24
   flaggedBenchmark: 10057

@@ -26,14 +26,15 @@
 
 namespace ufo {
 
-template <typename MODEL> class RunCRTM : public oops::Application {
-  typedef oops::GeoVaLs<MODEL>           GeoVaLs_;
-  typedef oops::ObsAuxControl<MODEL>     ObsAuxCtrl_;
-  typedef oops::ObsDiagnostics<MODEL>    ObsDiags_;
-  typedef oops::Observations<MODEL>      Observations_;
-  typedef oops::ObsOperator<MODEL>       ObsOperator_;
-  typedef oops::ObsSpaces<MODEL>         ObsSpaces_;
-  typedef oops::ObsVector<MODEL>         ObsVector_;
+template <typename OBS> class RunCRTM : public oops::Application {
+  typedef oops::GeoVaLs<OBS>             GeoVaLs_;
+  typedef typename GeoVaLs_::Parameters_ GeoVaLsParameters_;
+  typedef oops::ObsAuxControl<OBS>       ObsAuxCtrl_;
+  typedef oops::ObsDiagnostics<OBS>      ObsDiags_;
+  typedef oops::Observations<OBS>        Observations_;
+  typedef oops::ObsOperator<OBS>         ObsOperator_;
+  typedef oops::ObsSpaces<OBS>           ObsSpaces_;
+  typedef oops::ObsVector<OBS>           ObsVector_;
 
  public:
 // -----------------------------------------------------------------------------
@@ -62,7 +63,9 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       ObsOperator_ hop(obsdb[jj], obsopparams);
 
       const eckit::LocalConfiguration gconf(conf[jj], "geovals");
-      const GeoVaLs_ gval(gconf, obsdb[jj], hop.requiredVars());
+      GeoVaLsParameters_ geovalsparams;
+      geovalsparams.validateAndDeserialize(gconf);
+      const GeoVaLs_ gval(geovalsparams, obsdb[jj], hop.requiredVars());
 
       eckit::LocalConfiguration biasconf = conf[jj].getSubConfiguration("obs bias");
       typename ObsAuxCtrl_::Parameters_ biasparams;
@@ -87,7 +90,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 // -----------------------------------------------------------------------------
  private:
   std::string appname() const {
-    return "oops::RunCRTM<" + MODEL::name() + ">";
+    return "oops::RunCRTM<" + OBS::name() + ">";
   }
 // -----------------------------------------------------------------------------
 };

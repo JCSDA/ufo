@@ -7,27 +7,26 @@
 
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-
 #include "oops/util/Logger.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
 ObsDiagnosticsWriter::ObsDiagnosticsWriter(
-                       ioda::ObsSpace &, const eckit::Configuration & config,
+                       ioda::ObsSpace &, const Parameters_ & params,
                        std::shared_ptr<ioda::ObsDataVector<int> >,
                        std::shared_ptr<ioda::ObsDataVector<float> >)
-  : config_(config), extradiagvars_()
+  : params_(params), extradiagvars_()
 {
   oops::Log::trace() << "ObsDiagnosticsWriter contructor" << std::endl;
-  if (config_.has("filter variables")) {
-    Variables diagvars(config_.getSubConfigurations("filter variables"));
+  // Identify diagnostics variables
+  Variables diagvars;
+  if (params.filterVariables.value() != boost::none) {
+  // read filter variables
+    for (const Variable &var : *params.filterVariables.value())
+      diagvars += var;
     extradiagvars_ += Variables(diagvars, "ObsDiag").toOopsVariables();
   }
 }
@@ -35,7 +34,7 @@ ObsDiagnosticsWriter::ObsDiagnosticsWriter(
 // -----------------------------------------------------------------------------
 
 void ObsDiagnosticsWriter::print(std::ostream & os) const {
-  os << "ObsDiagnosticsWriter: " << config_;
+  os << "ObsDiagnosticsWriter: " << params_.toConfiguration();
 }
 
 // -----------------------------------------------------------------------------

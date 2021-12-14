@@ -17,7 +17,6 @@ Sondes:
       average profiles onto model levels: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_pressure_geovals_extended.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure"]
     compareWithOPS: true

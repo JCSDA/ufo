@@ -15,7 +15,6 @@ Sondes:
     simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     compareWithOPS: true

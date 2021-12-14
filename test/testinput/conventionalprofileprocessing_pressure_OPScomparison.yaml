@@ -15,7 +15,6 @@ Sondes:
     simulated variables: [height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_pressure_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Pressure"]
     compareWithOPS: true

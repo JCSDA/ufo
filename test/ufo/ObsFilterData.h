@@ -148,17 +148,21 @@ void testObsFilterData() {
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
+    GeoVaLsParameters geovalsparams;
+    geovalsparams.validateAndDeserialize(gconf);
     std::vector<eckit::LocalConfiguration> varconfs;
-    gconf.get("variables", varconfs);
+    confs[jconf].get("geovals variables", varconfs);
     const Variables geovars(varconfs);
-    const GeoVaLs gval(gconf, ospace, geovars.toOopsVariables());
+    const GeoVaLs gval(geovalsparams, ospace, geovars.toOopsVariables());
 
 ///  Setup ObsDiags
     const eckit::LocalConfiguration obsdiagconf(confs[jconf], "obs diagnostics");
+    GeoVaLsParameters obsdiagparams;
+    obsdiagparams.validateAndDeserialize(obsdiagconf);
     varconfs.clear();
-    obsdiagconf.get("variables", varconfs);
+    confs[jconf].get("obs diagnostics variables", varconfs);
     const Variables diagvars(varconfs);
-    const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsVariables());
+    const ObsDiagnostics obsdiags(obsdiagparams, ospace, diagvars.toOopsVariables());
 
 ///  Setup H(x)
     const eckit::LocalConfiguration hofxconf(confs[jconf], "HofX");

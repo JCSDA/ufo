@@ -15,7 +15,6 @@
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
-#include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "oops/base/ObsFilters.h"
 #include "oops/interface/GeoVaLs.h"
@@ -111,11 +110,11 @@ class ObsTypeParameters : public oops::Parameters {
 
   /// Options used to load GeoVaLs from a file. Required if any observation filters depend on
   /// GeoVaLs or of the `obs operator` option is set.
-  oops::OptionalParameter<eckit::LocalConfiguration> geovals{"geovals", this};
+  oops::OptionalParameter<GeoVaLsParameters> geovals{"geovals", this};
 
   /// Options used to load observation diagnostics from a file. Required if any observation filters
   /// depend on observation diagnostics.
-  oops::OptionalParameter<eckit::LocalConfiguration> obsDiagnostics{"obs diagnostics", this};
+  oops::Parameter<GeoVaLsParameters> obsDiagnostics{"obs diagnostics", {}, this};
 
   /// Options used to configure the observation bias.
   oops::Parameter<ObsBiasParameters> obsBias{"obs bias", {}, this};
@@ -428,17 +427,15 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     oops::Log::info() << "HofX section specified, reading HofX from file" << std::endl;
     const std::string &hofxgroup = *params.hofx.value();
     ObsVector_ hofx(obspace, hofxgroup);
-    eckit::LocalConfiguration obsdiagconf;
     if (diagvars.size() > 0) {
-      if (params.obsDiagnostics.value() == boost::none)
+      if (params.obsDiagnostics.value().filename.value() == boost::none)
         throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                               " of the 'observations' list requires an 'obs diagnostics' section",
-                               Here());
-      obsdiagconf = *params.obsDiagnostics.value();
+                     " of the 'observations' list requires an 'obs diagnostics.filename' section",
+                     Here());
       oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
                         << std::endl;
     }
-    const ObsDiags_ diags(obsdiagconf, obspace, diagvars);
+    const ObsDiags_ diags(params.obsDiagnostics.value(), obspace, diagvars);
     filters.postFilter(hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags

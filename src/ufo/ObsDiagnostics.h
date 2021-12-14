@@ -34,8 +34,10 @@ namespace ufo {
 class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
+  typedef GeoVaLs::Parameters_ Parameters_;
+
   ObsDiagnostics(const ioda::ObsSpace &, const Locations &, const oops::Variables &);
-  ObsDiagnostics(const eckit::Configuration &, const ioda::ObsSpace &,
+  ObsDiagnostics(const Parameters_ &, const ioda::ObsSpace &,
                  const oops::Variables &);
   ~ObsDiagnostics() {}
 
@@ -64,8 +66,8 @@ class ObsDiagnostics : public util::Printable,
     gdiags_.get(vals, var);
   }
 
-  void write(const eckit::Configuration & config) const {
-    gdiags_.write(config);}
+  void write(const Parameters_ & params) const {
+    gdiags_.write(params);}
  private:
   void print(std::ostream &) const;
   const ioda::ObsSpace & obsdb_;

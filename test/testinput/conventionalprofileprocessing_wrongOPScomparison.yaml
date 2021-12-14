@@ -18,7 +18,6 @@ Incorrect and missing values, RH:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, relative_humidity]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
     compareWithOPS: true
@@ -39,7 +38,6 @@ Incorrect and missing values:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
     compareWithOPS: true
@@ -60,7 +58,6 @@ Incorrect and missing values, averaging:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["AverageTemperature", "AverageWindSpeed", "AverageRelativeHumidity"]
     compareWithOPS: true
@@ -82,7 +79,6 @@ Incorrect and missing values, Basic:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic"]
     compareWithOPS: true
@@ -104,7 +100,6 @@ Wrong number of entries per profile:
     simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["SamePDiffT", "Basic", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     compareWithOPS: true
@@ -126,7 +121,6 @@ Wrong number of entries per profile, UInterp:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [eastward_wind, northward_wind]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["UInterp"]
     compareWithOPS: true
@@ -148,7 +142,6 @@ Wrong number of entries per profile, UInterpAlternative:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [eastward_wind, northward_wind]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["UInterpAlternative"]
     BChecks_Skip: true
@@ -168,7 +161,6 @@ Wrong number of entries per profile, RH:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, relative_humidity]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
     compareWithOPS: true
@@ -190,7 +182,6 @@ Wrong number of entries per profile, background:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: true
@@ -214,7 +205,6 @@ Wrong number of entries per profile, pressure transformation:
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure"]
     compareWithOPS: true
@@ -239,7 +229,6 @@ Wrong number of entries per profile, temperature averaging:
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure", "AverageTemperature"]
     compareWithOPS: true
@@ -264,7 +253,6 @@ Wrong number of entries per profile, wind speed averaging:
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
     compareWithOPS: true
@@ -289,7 +277,6 @@ Wrong number of entries per profile, relative humidity averaging:
     simulated variables: [relative_humidity]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure", "AverageRelativeHumidity"]
     compareWithOPS: true
@@ -309,7 +296,6 @@ No group variable chosen:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
     simulated variables: [air_temperature, relative_humidity]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
     compareWithOPS: true
@@ -332,7 +318,6 @@ Ascending sort order:
         sort variable: "air_pressure"
         sort order: "ascending"
     simulated variables: [air_temperature, relative_humidity]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["RH"]
     compareWithOPS: true
@@ -353,7 +338,6 @@ Invalid check requested:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, relative_humidity]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["WrongCheck"]
     compareWithOPS: true
@@ -376,7 +360,6 @@ Duplicate check requested:
     simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Sign"]
     compareWithOPS: true
@@ -399,7 +382,6 @@ Incorrect type in get:
     simulated variables: [air_temperature, height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Sign"]
     compareWithOPS: true
@@ -422,7 +404,6 @@ Standard levels out of order:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Hydrostatic"]
     compareWithOPS: true
@@ -444,7 +425,6 @@ Background SondeLaunchWindRej:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [eastward_wind, northward_wind]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Time"]
     compareWithOPS: true
@@ -465,7 +445,6 @@ Background manual QC flags:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Time"]
     compareWithOPS: true
@@ -490,7 +469,6 @@ Profile pressure not run before temperature averaging:
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Sign", "AverageTemperature"]
     compareWithOPS: true
@@ -513,7 +491,6 @@ Missing GeoVaLs for pressure calculation:
     simulated variables: [height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Pressure"]
     flagBasicChecksFail: true
@@ -535,7 +512,6 @@ Missing GeoVaLs for temperature averaging:
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AverageTemperature"]
     compareWithOPS: true
@@ -561,7 +537,6 @@ Profile pressure not run before wind speed averaging:
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Sign", "AverageWindSpeed"]
     compareWithOPS: true
@@ -584,7 +559,6 @@ Missing GeoVaLs for wind speed averaging:
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AverageWindSpeed"]
     compareWithOPS: true
@@ -610,7 +584,6 @@ Profile pressure not run before relative humidity averaging:
     simulated variables: [relative_humidity]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Sign", "AverageRelativeHumidity"]
     compareWithOPS: true
@@ -634,7 +607,6 @@ Exception in ProfileDataHandler due to reorderzdir:
     simulated variables: [relative_humidity]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AverageRelativeHumidity"]
     compareWithOPS: true
@@ -657,7 +629,6 @@ Missing GeoVaLs for relative humidity averaging:
     simulated variables: [relative_humidity]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity.nc4
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "AverageRelativeHumidity"]
     compareWithOPS: true
@@ -679,7 +650,6 @@ Missing GeoVaLs for sign check:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Sign"]
     compareWithOPS: true

@@ -53,7 +53,6 @@ observations:
     HCheck_CorrectZ: true
     HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]
   HofX: HofX
-  obs diagnostics:
   passedBenchmark: 901
   benchmarkFlag: 24
   flaggedBenchmark: 10057

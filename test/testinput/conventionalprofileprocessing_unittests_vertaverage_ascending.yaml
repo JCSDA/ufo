@@ -13,7 +13,6 @@ Vertical averaging:
         group variables: [ "station_id" ]
     simulated variables: [eastward_wind]
   HofX: HofX
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic"]
     compareWithOPS: true

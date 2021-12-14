@@ -15,7 +15,6 @@ Vertical interpolation:
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
   HofX: HofX
-  obs diagnostics:
   Conventional Profile Processing:
     Checks: ["Basic", "Pressure"]
     compareWithOPS: true

@@ -28,7 +28,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
   HofX: HofX
-  obs diagnostics:
   passedBenchmark: 1605
   benchmarkFlag: 24
   flaggedBenchmark: 108
@@ -55,7 +54,6 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
   HofX: HofX
-  obs diagnostics:
   passedBenchmark: 1605
   benchmarkFlag: 24
   flaggedBenchmark: 108

@@ -62,7 +62,9 @@ void testObsDiagnostics() {
 
   // read geovals from the file
   eckit::LocalConfiguration gconf(conf, "geovals");
-  const GeoVaLs gval(gconf, ospace, hop.requiredVars());
+  GeoVaLsParameters geovalsparams;
+  geovalsparams.validateAndDeserialize(gconf);
+  const GeoVaLs gval(geovalsparams, ospace, hop.requiredVars());
 
   // initialize bias correction
   eckit::LocalConfiguration biasconf = conf.getSubConfiguration("obs bias");
@@ -90,7 +92,9 @@ void testObsDiagnostics() {
   // read tolerance and reference Diagnostics
   const double tol = conf.getDouble("tolerance");
   eckit::LocalConfiguration diagrefconf(conf, "reference obs diagnostics");
-  ObsDiagnostics diagref(diagrefconf, ospace, diagvars);
+  GeoVaLsParameters diagrefparams;
+  diagrefparams.validateAndDeserialize(diagrefconf);
+  ObsDiagnostics diagref(diagrefparams, ospace, diagvars);
 
   // loop over all diag variables and levels and compare with reference
   for (size_t ivar = 0; ivar < diagvars.size(); ivar++) {

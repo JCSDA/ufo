@@ -27,9 +27,9 @@ ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations & locs
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const eckit::Configuration & conf, const ioda::ObsSpace & os,
+ObsDiagnostics::ObsDiagnostics(const Parameters_ & params, const ioda::ObsSpace & os,
                                const oops::Variables & vars)
-  : obsdb_(os), gdiags_(conf, os, vars)
+  : obsdb_(os), gdiags_(params, os, vars)
 {}
 
 // -----------------------------------------------------------------------------

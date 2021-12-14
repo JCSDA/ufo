@@ -30,6 +30,5 @@ observations:
         name: test_id@MetaData
       is_in: 0
   HofX: HofX
-  obs diagnostics:
   benchmarkFlag: 24
   flaggedBenchmark: 69

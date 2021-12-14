@@ -17,13 +17,12 @@
 #include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/Fortran.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -33,6 +32,21 @@ namespace ioda {
 namespace ufo {
   class Locations;
 
+/// \brief Parameters controlling GeoVaLs read/write
+class GeoVaLsParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GeoVaLsParameters, Parameters)
+
+ public:
+  /// Filename for I/O.
+  /// Note: this parameter is optional because filename does not need
+  /// to be specified for GeoVaLs ctor when Variables are empty.
+  oops::OptionalParameter<std::string> filename{"filename", this};
+  /// A multiplier for how many locations in the geovals file per
+  /// a single location in the obs file. There needs to be at least
+  /// loc_multiplier * obs_all_nlocs locations in the geovals file.
+  oops::Parameter<int> loc_multiplier{"loc_multiplier", 1, this};
+};
+
 // -----------------------------------------------------------------------------
 
 /// GeoVaLs: geophysical values at locations
@@ -40,6 +54,8 @@ namespace ufo {
 class GeoVaLs : public util::Printable,
                 private util::ObjectCounter<GeoVaLs> {
  public:
+  typedef GeoVaLsParameters Parameters_;
+
   static const std::string classname() {return "ufo::GeoVaLs";}
 
   GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
@@ -48,7 +64,7 @@ class GeoVaLs : public util::Printable,
   GeoVaLs(const Locations & locs, const oops::Variables & vars,
           const std::vector<size_t> & nlevs);
 
-  GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
+  GeoVaLs(const Parameters_ &, const ioda::ObsSpace &,
           const oops::Variables &);
   GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
@@ -124,8 +140,8 @@ class GeoVaLs : public util::Printable,
   /// Put GeoVaLs for int variable \p var at location \p loc.
   void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
 
-  void read(const eckit::Configuration &, const ioda::ObsSpace &);
-  void write(const eckit::Configuration &) const;
+  void read(const Parameters_ &, const ioda::ObsSpace &);
+  void write(const Parameters_ &) const;
   size_t nlocs() const;
 
   int & toFortran() {return keyGVL_;}
