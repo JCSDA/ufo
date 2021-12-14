@@ -7,11 +7,11 @@ obs space:
   simulated variables: [brightness_temperature]
   channels: 7-16
 obs operator:
-   name: CRTM
-   Absorbers: [H2O,O3,CO2]
-   Clouds: [Water, Ice]
-   Cloud_Fraction: 1.0
-   obs options:
-     Sensor_ID: abi_g16
-     EndianType: little_endian
-     CoefficientPath: $(jedi_build)/ufo/test/Data/
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  Cloud_Fraction: 1.0
+  obs options:
+    Sensor_ID: abi_g16
+    EndianType: little_endian
+    CoefficientPath: $(jedi_build)/ufo/test/Data/
