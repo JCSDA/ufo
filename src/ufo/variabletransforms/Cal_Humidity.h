@@ -21,14 +21,36 @@ namespace ufo {
 
 /// Configuration parameters for the variable transformation of specific humidity to
 /// relative humidity
-class Cal_RelativeHumidityParameters: public VariableTransformParametersBase {
-  OOPS_CONCRETE_PARAMETERS(Cal_RelativeHumidityParameters, VariableTransformParametersBase);
+class Cal_HumidityParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_HumidityParameters, VariableTransformParametersBase);
 
  public:
   /// Should we allow super-saturated relative humidity? [Optional]:
   /// By default \e AllowSuperSaturation is set to \e false.
   /// See ReadTheDoc for more details
   oops::Parameter<bool> AllowSuperSaturation{"AllowSuperSaturation", false, this};
+  oops::Parameter<std::string> SpecificHumidityVariable{"specific humidity variable",
+                                                        "specificHumidity", this};
+  oops::Parameter<std::string> PressureVariable{"pressure variable",
+                                                "pressure", this};
+  oops::Parameter<std::string> PressureAt2MVariable{"pressure at 2m variable",
+                                                    "pressureAt2M", this};
+  oops::Parameter<std::string> PressureGroupVariable{"pressure group variable",
+                                                     "ObsValue", this};
+  oops::Parameter<std::string> TemperatureVariable{"temperature variable",
+                                                   "airTemperature", this};
+  oops::Parameter<std::string> TemperatureAt2MVariable{"temperature at 2m variable",
+                                                       "airTemperatureAt2M", this};
+  oops::Parameter<std::string> RelativeHumidityVariable{"relative humidity variable",
+                                                        "relativeHumidity", this};
+  oops::Parameter<std::string> RelativeHumidityAt2MVariable{"relative humidity at 2m variable",
+                                                            "relativeHumidityAt2M", this};
+  oops::Parameter<std::string> WaterVaporMixingRatioVariable{"water vapor mixing ratio variable",
+                                                             "waterVaporMixingRatio", this};
+  oops::Parameter<std::string> DewPointTemperatureVariable{"dew point temperature variable",
+                                                           "dewpointTemperature", this};
+  oops::Parameter<std::string> DewPointTemperature2MVariable{"dew point temperature at 2m variable",
+                                                             "dewpointTemperatureAt2M", this};
 };
 
 /*!
@@ -51,7 +73,7 @@ class Cal_RelativeHumidityParameters: public VariableTransformParametersBase {
 */
 class Cal_RelativeHumidity : public TransformBase {
  public:
-  typedef Cal_RelativeHumidityParameters Parameters_;
+  typedef Cal_HumidityParameters Parameters_;
 
   Cal_RelativeHumidity(const Parameters_ &options,
                        const ObsFilterData &data,
@@ -61,6 +83,17 @@ class Cal_RelativeHumidity : public TransformBase {
 
  private:
   bool allowSuperSaturation_;
+  std::string specifichumidityvariable_;
+  std::string pressurevariable_;
+  std::string pressureat2mvariable_;
+  std::string pressuregroupvariable_;
+  std::string temperaturevariable_;
+  std::string temperatureat2mvariable_;
+  std::string relativehumidityvariable_;
+  std::string relativehumidityat2mvariable_;
+  std::string watervapormixingratiovariable_;
+  std::string dewpointtemperaturevariable_;
+  std::string dewpointtemperatureat2mvariable_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
   void methodUKMOmixingratio(const std::vector<bool> &apply);
@@ -89,13 +122,21 @@ class Cal_RelativeHumidity : public TransformBase {
 */
 class Cal_SpecificHumidity : public TransformBase {
  public:
-  Cal_SpecificHumidity(const GenericVariableTransformParameters &options,
+  typedef Cal_HumidityParameters Parameters_;
+
+  Cal_SpecificHumidity(const Parameters_ &options,
                        const ObsFilterData &data,
                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  std::string specifichumidityvariable_;
+  std::string pressurevariable_;
+  std::string pressureat2mvariable_;
+  std::string pressuregroupvariable_;
+  std::string temperaturevariable_;
+  std::string relativehumidityvariable_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
 };

@@ -27,6 +27,9 @@ class Cal_PressureFromHeightParameters: public VariableTransformParametersBase {
 
   /// Pressure coordinate name.
   oops::RequiredParameter<std::string> PressureCoord{"pressure coordinate", this};
+
+  /// Pressure group name.
+  oops::Parameter<std::string> PressureGroup{"pressure group", "ObsValue", this};
 };
 
 
@@ -58,6 +61,9 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 
   /// Pressure coordinate name.
   std::string pressureCoord_;
+
+  /// Pressure group name.
+  std::string pressureGroup_;
 };
 
 /*!
@@ -86,6 +92,9 @@ class Cal_PressureFromHeightForICAO : public TransformBase {
 
   /// Pressure coordinate name.
   std::string pressureCoord_;
+
+  /// Pressure group name.
+  std::string pressureGroup_;
 };
 }  // namespace ufo
 

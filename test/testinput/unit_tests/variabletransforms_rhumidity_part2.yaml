@@ -16,7 +16,11 @@ observations:
     Transform: RelativeHumidity
     Method: UKMO 
     AllowSuperSaturation: true
-  compareVariables:                 
+    pressure at 2m variable: "pressure_surface"
+    temperature at 2m variable: "air_temperature_surface"
+    relative humidity at 2m variable: "relative_humidity_surface"
+    dew point temperature at 2m variable: "dew_point_temperature_surface"
+  compareVariables:
     - reference:
         name: relative_humidity_reference@ObsValue
       test:
@@ -36,6 +40,11 @@ observations:
     Transform: RelativeHumidity
     Method: UKMO
     AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    dew point temperature variable: "dew_point_temperature"
   compareVariables:
     - reference:
         name: relative_humidity_reference@ObsValue
@@ -56,6 +65,11 @@ observations:
     Transform: RelativeHumidity
     Method: UKMO
     AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    dew point temperature variable: "dew_point_temperature"
   compareVariables:
     - reference:
         name: relative_humidity_reference@ObsValue

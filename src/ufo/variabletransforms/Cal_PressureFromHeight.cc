@@ -21,7 +21,8 @@ Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags),
       heightCoord_(options.HeightCoord),
-      pressureCoord_(options.PressureCoord)
+      pressureCoord_(options.PressureCoord),
+      pressureGroup_(options.PressureGroup)
 {}
 
 /************************************************************************************/
@@ -82,7 +83,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
 
   // 0. Innitialise the ouput array
   // -------------------------------------------------------------------------------
-  getObservation("MetaData", pressureCoord_,
+  getObservation(pressureGroup_, pressureCoord_,
                  airPressure);
   if (airPressure.empty()) {
     airPressure = std::vector<float>(nlocs_);
@@ -251,7 +252,8 @@ Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
     : TransformBase(options, data, flags),
       heightCoord_(options.HeightCoord),
-      pressureCoord_(options.PressureCoord)
+      pressureCoord_(options.PressureCoord),
+      pressureGroup_(options.PressureGroup)
 {}
 
 /************************************************************************************/
@@ -287,7 +289,7 @@ void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
 
   // 0. Initialise the ouput array
   // -------------------------------------------------------------------------------
-  getObservation("MetaData", pressureCoord_,
+  getObservation(pressureGroup_, pressureCoord_,
                  airPressure);
   if (airPressure.empty()) {
     airPressure = std::vector<float>(nlocs_);

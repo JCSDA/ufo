@@ -11,6 +11,12 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
                                   # using Default method and default Formulation (Roger 1989)
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    pressure at 2m variable: "surface_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    specific humidity variable: "specific_humidity"
   compareVariables:               # test output matches precalculated values
     - reference:
         name: specific_humidity_NOAA@TestReference
@@ -28,6 +34,12 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
     Method: UKMO                  # Using UKMO method and UKMO default formulation 
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    pressure at 2m variable: "surface_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    specific humidity variable: "specific_humidity"
   compareVariables:               # test output matches precalculated values
     - reference:
         name: specific_humidity_UKMO@TestReference
@@ -46,6 +58,12 @@ observations:
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
     Method: UKMO                  # Using UKMO method and UKMO default formulation 
     Formulation: Sonntag          # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    pressure at 2m variable: "surface_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    specific humidity variable: "specific_humidity"
   compareVariables:               # test output matches precalculated values
     - reference:
         name: specific_humidity_UKMO@TestReference
@@ -62,7 +80,13 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: SpecificHumidity    # calculate specific humidity from relative humidity
-    Formulation: Walko              
+    Formulation: Walko
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    pressure at 2m variable: "surface_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    specific humidity variable: "specific_humidity"
   compareVariables:                # test output matches precalculated values
     - reference:
         name: specific_humidity_Walko@TestReference
@@ -79,7 +103,13 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: SpecificHumidity
-    Formulation: Murphy              
+    Formulation: Murphy
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    pressure at 2m variable: "surface_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    specific humidity variable: "specific_humidity"
   compareVariables:                   # test output matches precalculated values
     - reference:
         name: specific_humidity_Murphy@TestReference

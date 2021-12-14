@@ -23,6 +23,10 @@ observations:
     Transform: RelativeHumidity
     Method: UKMOmixingratio
     AllowSuperSaturation: true
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    water vapor mixing ratio variable: "humidity_mixing_ratio"
   compareVariables:
     - reference:
         name: relative_humidity_reference@ObsValue
@@ -50,6 +54,10 @@ observations:
     Transform: RelativeHumidity
     Method: UKMOmixingratio
     AllowSuperSaturation: false
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    water vapor mixing ratio variable: "humidity_mixing_ratio"
   compareVariables:
     - reference:
         name: relative_humidity_reference@ObsValue

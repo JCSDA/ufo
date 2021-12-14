@@ -11,6 +11,11 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity # calculate relative humidity from specific humidity (also T, P)
                                 # using Default method and default Formulation (Roger 1989)
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
   compareVariables:             # test output matches precalculated values
     - reference:
         name: relative_humidity_NOAA@TestReference
@@ -29,6 +34,11 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_UKMO@TestReference
@@ -47,6 +57,11 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Walko
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_Walko@TestReference
@@ -65,6 +80,11 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Murphy
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
   compareVariables:                # test output matches precalculated values
     - reference:
         name: relative_humidity_Murphy@TestReference

@@ -21,6 +21,7 @@ observations:
     Method: UKMO
     height coordinate: geopotential_height
     pressure coordinate: air_pressure
+    pressure group: MetaData
   compareVariables:
   - test:
       name: air_pressure@DerivedObsValue
