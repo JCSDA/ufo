@@ -22,6 +22,8 @@ set ( variabletransforms_files
       Cal_QNHtoQFEpressure.cc
       Cal_PStar.h
       Cal_PStar.cc
+      Cal_PotentialTFromT.h
+      Cal_PotentialTFromT.cc
       LookupTable.h
       TransformBase.cc
       TransformBase.h

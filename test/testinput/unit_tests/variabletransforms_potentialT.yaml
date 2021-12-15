@@ -1,0 +1,24 @@
+window begin: 2021-05-21T08:59:00Z
+window end: 2021-05-21T15:00:00Z
+
+observations:
+- obs space:
+    name: Potential Temperature from Temperature
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/T2potentialT_conversion_aircraft.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: PotentialTFromT
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+  compareVariables:
+    - reference:
+        name: potentialTemperature_reference@ObsValue
+      test:
+        name: potentialTemperature@DerivedObsValue
+      relTol: 1.0e-3
