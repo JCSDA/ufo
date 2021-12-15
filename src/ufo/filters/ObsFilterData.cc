@@ -413,7 +413,8 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
              ObsFunctionFactory<util::DateTime>::functionExists(var)) {
     res = ioda::ObsDtype::DateTime;
   } else if (!this->has(varname)) {
-    oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
+    oops::Log::error() << "ObsFilterData::dtype unable to find provided variable: "
+                       << varname.fullName()
                        << std::endl;
     ABORT("ObsFilterData::dtype unable to find provided variable.");
   }
