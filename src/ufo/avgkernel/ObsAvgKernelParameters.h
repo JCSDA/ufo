@@ -27,22 +27,16 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
      "Number of layers in the averaging kernel",
      this};
 
-  oops::RequiredParameter <std::vector<double>> ak
-    {"ak",
-     "First pressure coordinate coefficient. "
-     "P(z) = ak(z) + bk(z) * P(surface).",
-     this};
-
-  oops::RequiredParameter <std::vector<double>> bk
-    {"bk",
-     "Second pressure coordinate coefficient. "
-     "P(z) = ak(z) + bk(z) * P(surface).",
-     this};
-
   oops::Parameter <std::string> AvgKernelVar
     {"AvgKernelVar",
      "Name of observation variable used in averaging kernel",
      "averaging_kernel",
+     this};
+
+  oops::Parameter <std::string> PresLevVar
+    {"PresLevVar",
+     "Name of vertical pressure coordinate in observation metadata",
+     "pressure_level",
      this};
 
   oops::RequiredParameter <std::vector<std::string>> tracerVariables

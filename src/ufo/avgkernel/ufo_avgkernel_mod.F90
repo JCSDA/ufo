@@ -23,8 +23,7 @@ module ufo_avgkernel_mod
    type(oops_variables), public :: obsvars
    type(oops_variables), public :: geovars
    integer :: nlayers_kernel
-   real(kind_real), allocatable, dimension(:) :: ak_kernel, bk_kernel
-   character(kind=c_char,len=:), allocatable :: obskernelvar, tracervars(:)
+   character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
    logical :: troposphere, totalcolumn
    real(kind_real) :: convert_factor_model, convert_factor_hofx
  contains
@@ -49,25 +48,12 @@ subroutine ufo_avgkernel_setup(self, f_conf)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_kernel", self%nlayers_kernel)
-  nlevs_yaml = f_conf%get_size("ak")
-  if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of ak array"
-    call abor1_ftn(err_msg)
-  end if
-  nlevs_yaml = f_conf%get_size("bk")
-  if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of bk array"
-    call abor1_ftn(err_msg)
-  end if
-
-  ! allocate and read ak/bk for the averaging kernel
-  allocate(self%ak_kernel(nlevs_yaml))
-  allocate(self%bk_kernel(nlevs_yaml))
-  call f_conf%get_or_die("ak", self%ak_kernel)
-  call f_conf%get_or_die("bk", self%bk_kernel)
 
   ! get variable name from IODA for observation averaging kernel
   call f_conf%get_or_die("AvgKernelVar", self%obskernelvar)
+
+  ! get vertical pressure grid 
+  call f_conf%get_or_die("PresLevVar", self%obspressurevar)
 
   ! get name of geoval/tracer to use from the model
   nvars = self%obsvars%nvars()
@@ -118,7 +104,7 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   use kinds
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, &
                              ufo_geovals_reorderzdir, ufo_geovals_copy
-  use ufo_constants_mod, only: half
+  use ufo_constants_mod, only: half, zero
   use satcolumn_mod, only: simulate_column_ob
   use iso_c_binding
   use obsspace_mod
@@ -163,13 +149,19 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     call obsspace_get_db(obss, "MetaData", trim(varstring), avgkernel_obs(ilev, :))
   end do
 
-  ! compute prsl_obs/prsi_obs from ak/bk/psfc
+  ! compute prsl_obs/prsi_obs
   allocate(prsl_obs(self%nlayers_kernel, nlocs))
   allocate(prsi_obs(self%nlayers_kernel+1, nlocs))
   ! prsi_obs calculation
-  do ilev = 1, self%nlayers_kernel+1
-    prsi_obs(ilev,:) = self%ak_kernel(ilev) + self%bk_kernel(ilev) * psfc%vals(1,:)
+  do ilev = 1, self%nlayers_kernel
+    write(levstr, fmt = "(I3)") ilev
+    levstr = adjustl(levstr)
+    varstring = trim(self%obspressurevar)//"_"//trim(levstr)
+    call obsspace_get_db(obss, "MetaData", trim(varstring), prsi_obs(ilev, :))
   end do
+  !last vertice is always TOA (0 hPa)
+  prsi_obs(self%nlayers_kernel+1,:) = zero 
+
   ! using simple averaging for now for prsl, can use more complex way later
   do ilev = 1, self%nlayers_kernel
     prsl_obs(ilev,:) = (prsi_obs(ilev,:) + prsi_obs(ilev+1,:)) * half

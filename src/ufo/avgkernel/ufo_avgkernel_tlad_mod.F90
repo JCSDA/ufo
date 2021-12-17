@@ -25,8 +25,7 @@ module ufo_avgkernel_tlad_mod
    type(oops_variables), public :: geovars
    integer :: nlayers_kernel
    integer :: nlocs, nvars, nval
-   real(kind_real), allocatable, dimension(:) :: ak_kernel, bk_kernel
-   character(kind=c_char,len=:), allocatable :: obskernelvar, tracervars(:)
+   character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
    logical :: troposphere, totalcolumn
    real(kind_real) :: convert_factor_model, convert_factor_hofx
    real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsl_obs, prsi_obs
@@ -59,26 +58,13 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_kernel", self%nlayers_kernel)
-  nlevs_yaml = f_conf%get_size("ak")
-  if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_tlad_setup error: YAML nlayers_kernel != size of ak array"
-    call abor1_ftn(err_msg)
-  end if
-  nlevs_yaml = f_conf%get_size("bk")
-  if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_tlad_setup error: YAML nlayers_kernel != size of bk array"
-    call abor1_ftn(err_msg)
-  end if
-
-  ! allocate and read ak/bk for the averaging kernel
-  allocate(self%ak_kernel(nlevs_yaml))
-  allocate(self%bk_kernel(nlevs_yaml))
-  call f_conf%get_or_die("ak", self%ak_kernel)
-  call f_conf%get_or_die("bk", self%bk_kernel)
 
   ! get variable name from IODA for observation averaging kernel
   call f_conf%get_or_die("AvgKernelVar", self%obskernelvar)
 
+  ! get vertical pressure grid 
+  call f_conf%get_or_die("PresLevVar", self%obspressurevar)
+ 
   ! get name of geoval/tracer to use from the model
   nvars = self%obsvars%nvars()
   call f_conf%get_or_die("tracer variables", str_array)
@@ -119,7 +105,7 @@ end subroutine destructor
 subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
   use iso_c_binding
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-  use ufo_constants_mod, only: half
+  use ufo_constants_mod, only: half, zero
   use obsspace_mod
   implicit none
   class(ufo_avgkernel_tlad), intent(inout) :: self
@@ -178,13 +164,19 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
     call obsspace_get_db(obss, "MetaData", trim(varstring), self%avgkernel_obs(ilev, :))
   end do
 
-  ! compute prsl_obs/prsi_obs from ak/bk/psfc
+  ! compute prsl_obs/prsi_obs
   allocate(self%prsl_obs(self%nlayers_kernel, self%nlocs))
   allocate(self%prsi_obs(self%nlayers_kernel+1, self%nlocs))
   ! prsi_obs calculation
-  do ilev = 1, self%nlayers_kernel+1
-    self%prsi_obs(ilev,:) = self%ak_kernel(ilev) + self%bk_kernel(ilev) * psfc%vals(1,:)
+  do ilev = 1, self%nlayers_kernel
+    write(levstr, fmt = "(I3)") ilev
+    levstr = adjustl(levstr)
+    varstring = trim(self%obspressurevar)//"_"//trim(levstr)
+    call obsspace_get_db(obss, "MetaData", trim(varstring), self%prsi_obs(ilev, :))
   end do
+  !last vertice should be always TOA (0 hPa)
+  self%prsi_obs(self%nlayers_kernel+1,:) = zero
+
   ! using simple averaging for now for prsl, can use more complex way later
   do ilev = 1, self%nlayers_kernel
     self%prsl_obs(ilev,:) = (self%prsi_obs(ilev,:) + self%prsi_obs(ilev+1,:)) * half
@@ -316,9 +308,8 @@ subroutine avgkernel_tlad_cleanup_(self)
   self%nlocs = 0
   self%nval = 0
   ! deallocate things
-  if (allocated(self%ak_kernel)) deallocate(self%ak_kernel)
-  if (allocated(self%bk_kernel)) deallocate(self%bk_kernel)
   if (allocated(self%obskernelvar)) deallocate(self%obskernelvar)
+  if (allocated(self%obspressurevar)) deallocate(self%obspressurevar)
   if (allocated(self%tracervars)) deallocate(self%tracervars)
   if (allocated(self%avgkernel_obs)) deallocate(self%avgkernel_obs)
   if (allocated(self%prsl_obs)) deallocate(self%prsl_obs)
