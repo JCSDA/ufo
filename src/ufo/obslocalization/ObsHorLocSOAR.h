@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
-#define UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
+#ifndef UFO_OBSLOCALIZATION_OBSHORLOCSOAR_H_
+#define UFO_OBSLOCALIZATION_OBSHORLOCSOAR_H_
 
 #include <ostream>
 #include <vector>
@@ -18,19 +18,19 @@
 
 #include "oops/generic/soar.h"
 
-#include "ufo/obslocalization/ObsLocalization.h"
-#include "ufo/obslocalization/ObsLocSOARParameters.h"
+#include "ufo/obslocalization/ObsHorLocalization.h"
+#include "ufo/obslocalization/ObsHorLocSOARParameters.h"
 
 namespace ufo {
 
 /// Horizontal SOAR observation space localization
 template<class MODEL>
-class ObsLocSOAR: public ufo::ObsLocalization<MODEL> {
+class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
-  typedef typename ObsLocalization<MODEL>::LocalObs LocalObs_;
+  typedef typename ObsHorLocalization<MODEL>::LocalObs LocalObs_;
 
  public:
-  ObsLocSOAR(const eckit::Configuration &, const ioda::ObsSpace &);
+  ObsHorLocSOAR(const eckit::Configuration &, const ioda::ObsSpace &);
 
  protected:
   /// Compute SOAR localization using the set of \p localobs and save localization
@@ -43,14 +43,14 @@ class ObsLocSOAR: public ufo::ObsLocalization<MODEL> {
  private:
   void print(std::ostream &) const override;
 
-  ObsLocSOARParameters options_;
+  ObsHorLocSOARParameters options_;
 };
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsLocSOAR<MODEL>::ObsLocSOAR(const eckit::Configuration & config,
+ObsHorLocSOAR<MODEL>::ObsHorLocSOAR(const eckit::Configuration & config,
                               const ioda::ObsSpace & obsspace):
-       ObsLocalization<MODEL>::ObsLocalization(config, obsspace) {
+       ObsHorLocalization<MODEL>::ObsHorLocalization(config, obsspace) {
   options_.deserialize(config);
   oops::Log::debug()<< "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
@@ -59,11 +59,11 @@ ObsLocSOAR<MODEL>::ObsLocSOAR(const eckit::Configuration & config,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+void ObsHorLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
                                         ioda::ObsVector & locvector,
                                         const LocalObs_ & localobs) const {
   // Apply box car localization
-  ObsLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
+  ObsHorLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
 
   // Apply SOAR localization
   const double SOARexpDecayH = options_.SOARexpDecayH;
@@ -80,11 +80,11 @@ void ObsLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocSOAR<MODEL>::print(std::ostream & os) const {
+void ObsHorLocSOAR<MODEL>::print(std::ostream & os) const {
   os << "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCSOAR_H_
+#endif  // UFO_OBSLOCALIZATION_OBSHORLOCSOAR_H_

@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/obslocalization/ObsHorLocParameters.h"
 
 namespace ufo {
 
@@ -17,6 +17,6 @@ constexpr util::NamedEnumerator<DistanceType> DistanceTypeParameterTraitsHelper:
 constexpr char SearchMethodParameterTraitsHelper::enumTypeName[];
 constexpr util::NamedEnumerator<SearchMethod> SearchMethodParameterTraitsHelper::namedValues[];
 
-constexpr double ObsLocParameters::radius_earth;
+constexpr double ObsHorLocParameters::radius_earth;
 
 }  // namespace ufo

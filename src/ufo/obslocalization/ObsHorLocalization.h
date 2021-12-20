@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCALIZATION_H_
-#define UFO_OBSLOCALIZATION_OBSLOCALIZATION_H_
+#ifndef UFO_OBSLOCALIZATION_OBSHORLOCALIZATION_H_
+#define UFO_OBSLOCALIZATION_OBSHORLOCALIZATION_H_
 
 #include <algorithm>
 #include <memory>
@@ -29,22 +29,22 @@
 #include "oops/base/ObsLocalizationBase.h"
 #include "oops/util/missingValues.h"
 
-#include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/obslocalization/ObsHorLocParameters.h"
 #include "ufo/ObsTraits.h"
 
 namespace ufo {
 
 /// Horizontal Box car observation space localization
 template<class MODEL>
-class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
+class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
-  ObsLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
+  ObsHorLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
 
   /// Compute localization and save localization values in \p locvector.
   /// Missing values indicate that observation is outside of localization.
-  /// The lengthscale from ObsLocParameters is used.
+  /// The lengthscale from ObsHorLocParameters is used.
   void computeLocalization(const GeometryIterator_ &,
                            ioda::ObsVector & locvector) const override;
 
@@ -76,7 +76,7 @@ class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   double lengthscale() const {return options_.lengthscale;}
 
  private:
-  ObsLocParameters options_;
+  ObsHorLocParameters options_;
 
   void print(std::ostream &) const override;
 
@@ -100,7 +100,7 @@ class ObsLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
  * \details Creates a KDTree class member that can be used for searching for local obs
  */
 template<typename MODEL>
-ObsLocalization<MODEL>::ObsLocalization(const eckit::Configuration & config,
+ObsHorLocalization<MODEL>::ObsHorLocalization(const eckit::Configuration & config,
                                         const ioda::ObsSpace & obsspace)
   : lats_(obsspace.nlocs()), lons_(obsspace.nlocs())
 {
@@ -137,9 +137,9 @@ ObsLocalization<MODEL>::ObsLocalization(const eckit::Configuration & config,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
+void ObsHorLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
                                                  ioda::ObsVector & locvector) const {
-  oops::Log::trace() << "ObsLocalization::computeLocalization" << std::endl;
+  oops::Log::trace() << "ObsHorLocalization::computeLocalization" << std::endl;
 
   // get the set of local observations using the lengthscale given in the
   // config file options.
@@ -153,10 +153,10 @@ void ObsLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+void ObsHorLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
                                               ioda::ObsVector & locvector,
                                               const LocalObs & localobs) const {
-  oops::Log::trace() << "ObsLocalization::computeLocalization(lengthscale)" << std::endl;
+  oops::Log::trace() << "ObsHorLocalization::computeLocalization(lengthscale)" << std::endl;
 
   // set all to missing (outside of localization distance)
   const double missing = util::missingValue(double());
@@ -177,10 +177,10 @@ void ObsLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
 
 
 template<typename MODEL>
-const typename ObsLocalization<MODEL>::LocalObs
-ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
+const typename ObsHorLocalization<MODEL>::LocalObs
+ObsHorLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
                                     double lengthscale) const {
-  oops::Log::trace() << "ObsLocalization::getLocalObs" << std::endl;
+  oops::Log::trace() << "ObsHorLocalization::getLocalObs" << std::endl;
 
   if ( lengthscale <= 0.0 ) {
     throw eckit::BadParameter("lengthscale parameter should be >= 0.0");
@@ -190,7 +190,7 @@ ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
   // TODO(travis) this should be in the constructor, but currently
   //  breaks LETKF when using a split observer/solver
   if ( distName_ != "Halo" && distName_ != "InefficientDistribution" ) {
-    std::string message = "Can not use ObsLocalization with distribution=" + distName_;
+    std::string message = "Can not use ObsHorLocalization with distribution=" + distName_;
     throw eckit::BadParameter(message);
   }
 
@@ -246,7 +246,7 @@ ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
     oops::Log::trace() << "Local obs searching via KDTree" << std::endl;
 
     if ( options_.distanceType == DistanceType::CARTESIAN)
-      ABORT("ObsLocalization:: search method must be 'brute_force' when using"
+      ABORT("ObsHorLocalization:: search method must be 'brute_force' when using"
             " 'cartesian' distance");
 
     // Using the radius of the earth
@@ -280,11 +280,11 @@ ObsLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocalization<MODEL>::print(std::ostream & os) const {
-  os << "ObsLocalization (box car) horizontal localization with " << options_.lengthscale
+void ObsHorLocalization<MODEL>::print(std::ostream & os) const {
+  os << "ObsHorLocalization (box car) horizontal localization with " << options_.lengthscale
      << " lengthscale" << std::endl;
 }
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCALIZATION_H_
+#endif  // UFO_OBSLOCALIZATION_OBSHORLOCALIZATION_H_

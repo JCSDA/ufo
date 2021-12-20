@@ -4,12 +4,12 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( obslocalization_files
-      ObsLocGC99.h
-      ObsLocSOAR.h
-      ObsLocSOARParameters.h
-      ObsLocalization.h
-      ObsLocParameters.cc
-      ObsLocParameters.h
+      ObsHorLocGC99.h
+      ObsHorLocSOAR.h
+      ObsHorLocSOARParameters.h
+      ObsHorLocalization.h
+      ObsHorLocParameters.cc
+      ObsHorLocParameters.h
 )
 
 PREPEND( _p_obslocalization_files       "obslocalization"       ${obslocalization_files} )

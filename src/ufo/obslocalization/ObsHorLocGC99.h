@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCGC99_H_
-#define UFO_OBSLOCALIZATION_OBSLOCGC99_H_
+#ifndef UFO_OBSLOCALIZATION_OBSHORLOCGC99_H_
+#define UFO_OBSLOCALIZATION_OBSHORLOCGC99_H_
 
 #include <ostream>
 #include <vector>
@@ -18,19 +18,19 @@
 
 #include "oops/generic/gc99.h"
 
-#include "ufo/obslocalization/ObsLocalization.h"
-#include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/obslocalization/ObsHorLocalization.h"
+#include "ufo/obslocalization/ObsHorLocParameters.h"
 
 namespace ufo {
 
 /// Horizontal Gaspari-Cohn observation space localization
 template<class MODEL>
-class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
+class ObsHorLocGC99: public ufo::ObsHorLocalization<MODEL> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
-  typedef typename ObsLocalization<MODEL>::LocalObs LocalObs_;
+  typedef typename ObsHorLocalization<MODEL>::LocalObs LocalObs_;
 
  public:
-  ObsLocGC99(const eckit::Configuration &, const ioda::ObsSpace &);
+  ObsHorLocGC99(const eckit::Configuration &, const ioda::ObsSpace &);
 
  protected:
   /// Compute GC99 localization using the set of \p localobs, the same lengthscale
@@ -46,22 +46,22 @@ class ObsLocGC99: public ufo::ObsLocalization<MODEL> {
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsLocGC99<MODEL>::ObsLocGC99(const eckit::Configuration & config,
+ObsHorLocGC99<MODEL>::ObsHorLocGC99(const eckit::Configuration & config,
                               const ioda::ObsSpace & obsspace):
-       ObsLocalization<MODEL>::ObsLocalization(config, obsspace) {
+       ObsHorLocalization<MODEL>::ObsHorLocalization(config, obsspace) {
   oops::Log::debug() <<  *this;
 }
 
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocGC99<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+void ObsHorLocGC99<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
                                         ioda::ObsVector & locvector,
                                         const LocalObs_ & localobs) const {
-  oops::Log::trace() << "ObsLocGC99::computeLocalization" << std::endl;
+  oops::Log::trace() << "ObsHorLocGC99::computeLocalization" << std::endl;
 
   // Apply box car localization
-  ObsLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
+  ObsHorLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
 
   // Apply Gaspari-Cohn localization
   const size_t nvars = locvector.nvars();
@@ -79,8 +79,8 @@ void ObsLocGC99<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-void ObsLocGC99<MODEL>::print(std::ostream & os) const {
-  const double lengthscale = ObsLocalization<MODEL>::lengthscale();
+void ObsHorLocGC99<MODEL>::print(std::ostream & os) const {
+  const double lengthscale = ObsHorLocalization<MODEL>::lengthscale();
 
   os << "Gaspari-Cohn horizontal localization with " << lengthscale
      << " lengthscale" << std::endl;
@@ -88,4 +88,4 @@ void ObsLocGC99<MODEL>::print(std::ostream & os) const {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCGC99_H_
+#endif  // UFO_OBSLOCALIZATION_OBSHORLOCGC99_H_

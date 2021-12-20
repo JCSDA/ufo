@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCPARAMETERS_H_
-#define UFO_OBSLOCALIZATION_OBSLOCPARAMETERS_H_
+#ifndef UFO_OBSLOCALIZATION_OBSHORLOCPARAMETERS_H_
+#define UFO_OBSLOCALIZATION_OBSHORLOCPARAMETERS_H_
 
 #include <string>
 #include <utility>
@@ -76,8 +76,8 @@ struct ParameterTraits<ufo::SearchMethod> :
 namespace ufo {
 
 /// \brief Options controlling local observations subsetting
-class ObsLocParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsLocParameters, Parameters)
+class ObsHorLocParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsHorLocParameters, Parameters)
 
  public:
   /// Localization lengthscale (find all obs within the distance from reference point)
@@ -112,4 +112,4 @@ class ObsLocParameters : public oops::Parameters {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCPARAMETERS_H_
+#endif  // UFO_OBSLOCALIZATION_OBSHORLOCPARAMETERS_H_

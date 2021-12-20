@@ -5,20 +5,20 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSLOCALIZATION_OBSLOCSOARPARAMETERS_H_
-#define UFO_OBSLOCALIZATION_OBSLOCSOARPARAMETERS_H_
+#ifndef UFO_OBSLOCALIZATION_OBSHORLOCSOARPARAMETERS_H_
+#define UFO_OBSLOCALIZATION_OBSHORLOCSOARPARAMETERS_H_
 
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/obslocalization/ObsLocParameters.h"
+#include "ufo/obslocalization/ObsHorLocParameters.h"
 
 namespace ufo {
 
 /// \brief Options controlling SOAR obs localization. Inherits
 /// options from general horizontal obs localization.
-class ObsLocSOARParameters : public ObsLocParameters {
-  OOPS_CONCRETE_PARAMETERS(ObsLocSOARParameters, ObsLocParameters)
+class ObsHorLocSOARParameters : public ObsHorLocParameters {
+  OOPS_CONCRETE_PARAMETERS(ObsHorLocSOARParameters, ObsHorLocParameters)
 
  public:
   /// The SOAR function decay parameter
@@ -27,4 +27,4 @@ class ObsLocSOARParameters : public ObsLocParameters {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSLOCALIZATION_OBSLOCSOARPARAMETERS_H_
+#endif  // UFO_OBSLOCALIZATION_OBSHORLOCSOARPARAMETERS_H_
