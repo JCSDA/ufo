@@ -60,7 +60,6 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/Rcov_iasi_metop-b_sea.nc4
-    compute correlations from covariances: true
 
 - obs space:
     name: iasi_metop-b (channels == all channels in the correlations file)
@@ -83,4 +82,3 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/Rcov_iasi_metop-b_sea.nc4
-    compute correlations from covariances: true

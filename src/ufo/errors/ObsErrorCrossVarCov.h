@@ -32,11 +32,9 @@ namespace ufo {
 class ObsErrorCrossVarCovParameters : public oops::ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorCrossVarCovParameters, ObsErrorParametersBase)
  public:
-  /// Input file containing correlations or covariances
+  /// Input file containing correlations or covariances. If covariances are
+  /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> inputFile{"input file", this};
-  /// If the input file contains covariances, set this parameter to true to compute
-  /// the correlations. The system will throw an error if this is set incorrectly.
-  oops::Parameter<bool> computeCorr{"compute correlations from covariances", false, this};
 };
 
 // -----------------------------------------------------------------------------

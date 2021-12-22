@@ -7,6 +7,7 @@
 
 #include "ufo/errors/ObsErrorCrossVarCov.h"
 
+#include <math.h>
 #include <vector>
 
 #include "ioda/Engines/Factory.h"
@@ -39,12 +40,32 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                          ioda::detail::DataLayoutPolicy::generate(
                          ioda::detail::DataLayoutPolicy::Policies::None));
 
-  ioda::Variable corrvar = obsgroup.vars["obserror_correlations"];
-  Eigen::ArrayXXf allvarcorrelations;
-  corrvar.readWithEigenRegular(allvarcorrelations);
-
-  oops::Log::debug() << "Computing correlations from covariances: " << options.computeCorr.value()
-                     << std::endl;
+  Eigen::MatrixXf allvarcorrelations;
+  if (obsgroup.vars.exists("obserror_correlations") &&
+      (!obsgroup.vars.exists("obserror_covariances"))) {
+    ioda::Variable corrvar = obsgroup.vars["obserror_correlations"];
+    corrvar.readWithEigenRegular(allvarcorrelations);
+    // Issue an error if it's not a correlation matrix
+    if (!allvarcorrelations.diagonal().isOnes()) {
+      throw eckit::BadParameter("ObsErrorCrossVarCov: obserror_correlations matrix read from "
+                                "file is not a correlation matrix (values different from one "
+                                "found on a diagonal).");
+    }
+  } else if (obsgroup.vars.exists("obserror_covariances") &&
+             (!obsgroup.vars.exists("obserror_correlations"))) {
+    ioda::Variable covvar = obsgroup.vars["obserror_covariances"];
+    Eigen::MatrixXf allvarcovariances;
+    covvar.readWithEigenRegular(allvarcovariances);
+    // Convert to correlations
+    Eigen::MatrixXf stddevinv(allvarcovariances.diagonal().array().rsqrt().matrix().asDiagonal());
+    allvarcorrelations = stddevinv * allvarcovariances * stddevinv;
+  } else {
+    oops::Log::error() << "One of obserror_correlations or obserror_covariances has to "
+                       << "be specified in the input file " << options.inputFile.value()
+                       << std::endl;
+    throw eckit::BadParameter("One of obserror_correlations or obserror_covariances has "
+                              "to be specified in the input file.");
+  }
 
   // Get channel/variables indices in the allvarcorrelations; index == -1 means that correlations
   // don't exist in the file for this channel/variable, and we'll keep them at 0.
@@ -61,22 +82,9 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
         if (var_idx[jvar] >= 0) {
           varcorrelations_(ivar, jvar) = allvarcorrelations(var_idx[ivar], var_idx[jvar]);
-          if (options.computeCorr.value()) {
-            varcorrelations_(ivar, jvar) = varcorrelations_(ivar, jvar) /
-                 sqrt(allvarcorrelations(var_idx[ivar], var_idx[ivar])
-                      * allvarcorrelations(var_idx[jvar], var_idx[jvar]));
-          }
         }
       }
     }
-  }
-
-  // Issue a warning if it's not a correlation matrix
-  if (!varcorrelations_.diagonal().isOnes()) {
-    throw std::runtime_error("ObsErrorCrossVarCov: matrix read or computed from file is not "
-                             "a correlation matrix (values different from one found on a "
-                             "diagonal). Is 'obs error.compute correlations from covariances' "
-                             "set to 'true'?");
   }
 }
 
