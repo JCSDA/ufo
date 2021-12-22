@@ -16,7 +16,6 @@
 
 #include "ufo/utils/SurfaceReportConstants.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 

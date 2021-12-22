@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {
@@ -34,7 +35,6 @@ ObsFunctionScattering::~ObsFunctionScattering() {}
 
 void ObsFunctionScattering::compute(const ObsFilterData & input,
                                     ioda::ObsDataVector<float> & out) const {
-  // TODO(AS): should use constants for variable names
   const size_t nlocs = input.nlocs();
   std::vector<float> bt1, bt2, bt15;
   input.get(Variable("brightness_temperature_1@ObsValue"), bt1);

@@ -9,14 +9,12 @@
 
 #include <algorithm>
 #include <memory>
-#include <set>
 #include <vector>
 
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
 

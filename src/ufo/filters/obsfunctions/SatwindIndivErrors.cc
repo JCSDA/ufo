@@ -12,11 +12,13 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 #include "eckit/exception/Exceptions.h"

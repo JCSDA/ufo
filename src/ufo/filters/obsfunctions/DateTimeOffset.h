@@ -11,6 +11,11 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
+
+#include "oops/util/Duration.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 

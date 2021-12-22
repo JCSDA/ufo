@@ -7,6 +7,8 @@
 
 #include "ufo/filters/obsfunctions/DrawObsErrorFromFile.h"
 
+#include "ioda/ObsDataVector.h"
+
 namespace ufo {
 
 namespace {

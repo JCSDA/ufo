@@ -8,19 +8,19 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 /// \brief Options controlling ObsFunctionLinearCombination ObsFunction
 template <typename FunctionValue>

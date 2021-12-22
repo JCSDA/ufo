@@ -5,9 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/parameters/Parameter.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/Conditional.h"
 #include "ufo/filters/Variable.h"
 

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {

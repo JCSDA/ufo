@@ -15,9 +15,10 @@
 
 #include "eckit/exception/Exceptions.h"
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/DateTime.h"
-#include "oops/util/missingValues.h"
-
+#include "oops/util/Logger.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {
@@ -50,7 +51,6 @@ TropopauseEstimate::~TropopauseEstimate() {}
 void TropopauseEstimate::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
 
   // Ensure that only one output variable is expected.
   ASSERT(out.nvars() == 1);

@@ -15,13 +15,12 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/metoffice/MetOfficeBMatrixStatic.h"
-#include "ufo/utils/metoffice/MetOfficeRMatrixRadiance.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Options for calculating Bayesian cost function.

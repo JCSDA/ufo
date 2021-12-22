@@ -20,6 +20,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/Constants.h"

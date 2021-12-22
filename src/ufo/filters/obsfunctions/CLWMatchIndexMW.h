@@ -11,18 +11,17 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/obsfunctions/CLWRetMW.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Options applying to the determination of the cloud match index based on

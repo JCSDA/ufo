@@ -10,17 +10,13 @@
 #include <cmath>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
-#include "ufo/filters/obsfunctions/CLWRetMW.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/utils/Constants.h"
 
 namespace ufo {
 

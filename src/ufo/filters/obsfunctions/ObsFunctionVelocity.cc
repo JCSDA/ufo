@@ -12,6 +12,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {
@@ -35,7 +36,6 @@ ObsFunctionVelocity::~ObsFunctionVelocity() {}
 
 void ObsFunctionVelocity::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  // TODO(AS): should use constants for variable names
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue(missing);
   std::vector<float> u, v;

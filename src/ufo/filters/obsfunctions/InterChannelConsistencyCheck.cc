@@ -10,8 +10,6 @@
 #include <cmath>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -19,6 +17,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/StringUtils.h"

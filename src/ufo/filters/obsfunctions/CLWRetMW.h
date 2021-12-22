@@ -16,11 +16,12 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Options applying to the retrieval of cloud liquid water from 23.8 GHz and

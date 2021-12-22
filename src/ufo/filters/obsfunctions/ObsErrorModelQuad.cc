@@ -9,17 +9,15 @@
 
 #include <algorithm>
 #include <cmath>
-#include <set>
 #include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/CompareNVectors.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/PropertiesOfNVectors.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/utils/Constants.h"
 
 namespace ufo {
 

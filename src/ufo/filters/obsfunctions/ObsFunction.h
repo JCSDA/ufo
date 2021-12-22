@@ -9,17 +9,18 @@
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTION_H_
 
 #include <memory>
-#include <string>
 
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
-
+namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
+}
 
 namespace ufo {
+  class ObsFilterData;
+  template <typename FunctionValue> class ObsFunctionBase;
+  class Variable;
+  class Variables;
 
 // -----------------------------------------------------------------------------
 

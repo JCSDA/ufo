@@ -8,6 +8,8 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_SOLARZENITH_H_
 #define UFO_FILTERS_OBSFUNCTIONS_SOLARZENITH_H_
 
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 

@@ -9,6 +9,9 @@
 
 #include "eckit/exception/Exceptions.h"
 #include "ioda/Misc/StringFuncs.h"  // for convertV1PathToV2Path
+#include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 
 namespace ufo {

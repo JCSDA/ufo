@@ -11,11 +11,12 @@
 #include <string>
 #include <vector>
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Calculate Sun glint angles at observation locations.

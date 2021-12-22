@@ -12,8 +12,11 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/CloudCostFunction.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/utils/metoffice/MetOfficeBMatrixStatic.h"
+#include "ufo/utils/metoffice/MetOfficeRMatrixRadiance.h"
 #include "ufo/utils/ufo_utils.interface.h"
 
 namespace ufo {

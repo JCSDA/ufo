@@ -14,6 +14,8 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/ObsFilterData.h"
+
 namespace ufo {
 
 static ObsFunctionMaker<ObsErrorFactorQuotient> makerSteps_("ObsErrorFactorQuotient");

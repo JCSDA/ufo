@@ -7,11 +7,7 @@
 
 #include "ufo/filters/obsfunctions/DateTimeOffset.h"
 
-#include <vector>
-
 #include "ioda/ObsDataVector.h"
-#include "oops/util/Duration.h"
-#include "oops/util/missingValues.h"
 
 namespace ufo {
 

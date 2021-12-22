@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"

@@ -11,16 +11,18 @@
 #include <vector>
 
 #include "oops/util/missingValues.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 /// \brief Options controlling ObsFunctionExponential ObsFunction
 class ExponentialParameters : public oops::Parameters {

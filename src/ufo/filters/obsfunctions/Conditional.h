@@ -8,7 +8,6 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_CONDITIONAL_H_
 #define UFO_FILTERS_OBSFUNCTIONS_CONDITIONAL_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -16,12 +15,13 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 /// Parameters for one where configuration from the cases section
 /// of the yaml file.

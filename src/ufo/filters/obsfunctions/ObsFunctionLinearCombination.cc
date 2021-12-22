@@ -7,13 +7,11 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionLinearCombination.h"
 
-#include <algorithm>
-#include <set>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
 

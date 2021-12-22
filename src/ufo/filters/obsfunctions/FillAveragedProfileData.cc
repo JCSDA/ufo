@@ -12,6 +12,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/SlantPathLocations.h"
 
