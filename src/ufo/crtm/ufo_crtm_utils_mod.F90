@@ -891,6 +891,14 @@ character(kind=c_char,len=101) :: obsname
           call obsspace_get_db(obss, "MetaData", "sensor_view_angle1", TmpVar)
           geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
        endif
+!      For some microwave instruments the solar and sensor azimuth angles can be
+!      missing  (given a value of 10^11).  Set these to zero to get past CRTM QC.
+       where (geo_hf(:)%Source_Azimuth_Angle < 0.0_kind_real .or. &
+              geo_hf(:)%Source_Azimuth_Angle > 360.0_kind_real) &
+          geo_hf(:)%Source_Azimuth_Angle = 0.0_kind_real
+       where (geo_hf(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
+              geo_hf(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
+          geo_hf(:)%Sensor_Azimuth_Angle = 0.0_kind_real
     endif
  endif
  
