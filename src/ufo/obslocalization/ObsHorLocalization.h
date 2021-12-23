@@ -17,7 +17,6 @@
 
 #include "atlas/util/Earth.h"
 
-#include "eckit/config/Configuration.h"
 #include "eckit/container/KDTree.h"
 #include "eckit/geometry/Point2.h"
 #include "eckit/geometry/Point3.h"
@@ -40,7 +39,9 @@ class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
-  ObsHorLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
+  typedef ObsHorLocParameters Parameters_;
+
+  ObsHorLocalization(const Parameters_ &, const ioda::ObsSpace &);
 
   /// Compute localization and save localization values in \p locvector.
   /// Missing values indicate that observation is outside of localization.
@@ -100,12 +101,10 @@ class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
  * \details Creates a KDTree class member that can be used for searching for local obs
  */
 template<typename MODEL>
-ObsHorLocalization<MODEL>::ObsHorLocalization(const eckit::Configuration & config,
-                                        const ioda::ObsSpace & obsspace)
-  : lats_(obsspace.nlocs()), lons_(obsspace.nlocs())
+ObsHorLocalization<MODEL>::ObsHorLocalization(const Parameters_ & params,
+                                              const ioda::ObsSpace & obsspace)
+  : lats_(obsspace.nlocs()), lons_(obsspace.nlocs()), options_(params)
 {
-  options_.deserialize(config);
-
   // check that this distribution supports local obs space
   // TODO(travis) this has been moved to computeLocalization as a quick fix for a bug.
   distName_ = obsspace.distribution()->name();

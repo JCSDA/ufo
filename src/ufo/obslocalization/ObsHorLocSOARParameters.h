@@ -8,9 +8,7 @@
 #ifndef UFO_OBSLOCALIZATION_OBSHORLOCSOARPARAMETERS_H_
 #define UFO_OBSLOCALIZATION_OBSHORLOCSOARPARAMETERS_H_
 
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
-
 #include "ufo/obslocalization/ObsHorLocParameters.h"
 
 namespace ufo {

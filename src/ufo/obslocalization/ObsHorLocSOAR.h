@@ -11,8 +11,6 @@
 #include <ostream>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -30,7 +28,8 @@ class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
   typedef typename ObsHorLocalization<MODEL>::LocalObs LocalObs_;
 
  public:
-  ObsHorLocSOAR(const eckit::Configuration &, const ioda::ObsSpace &);
+  typedef ObsHorLocSOARParameters Parameters_;
+  ObsHorLocSOAR(const Parameters_ &, const ioda::ObsSpace &);
 
  protected:
   /// Compute SOAR localization using the set of \p localobs and save localization
@@ -48,10 +47,10 @@ class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsHorLocSOAR<MODEL>::ObsHorLocSOAR(const eckit::Configuration & config,
-                              const ioda::ObsSpace & obsspace):
-       ObsHorLocalization<MODEL>::ObsHorLocalization(config, obsspace) {
-  options_.deserialize(config);
+ObsHorLocSOAR<MODEL>::ObsHorLocSOAR(const Parameters_ & params,
+                                    const ioda::ObsSpace & obsspace):
+       ObsHorLocalization<MODEL>::ObsHorLocalization(params, obsspace),
+       options_(params) {
   oops::Log::debug()<< "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }
