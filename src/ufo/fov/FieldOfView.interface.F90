@@ -41,19 +41,22 @@ subroutine ufo_fov_setup_c(c_key_self, sensor_len, sensor_cstr, satellite_len, s
   character(kind=c_char, len=1), intent(in) :: sensor_cstr(sensor_len + 1)
   integer(c_int), intent(in) :: satellite_len
   character(kind=c_char, len=1), intent(in) :: satellite_cstr(satellite_len + 1)
-  logical, intent(out) :: valid
+  logical(c_bool), intent(out) :: valid
   integer(c_int), intent(out) :: npoly
 
   type(ufo_fov), pointer :: self
   character(len=sensor_len) :: sensor
   character(len=satellite_len) :: satellite
+  logical :: valid_local
 
   ! Copy C char* into Fortran char array
   call c_f_string(sensor_cstr, sensor)
   call c_f_string(satellite_cstr, satellite)
 
   call ufo_fov_registry%setup(c_key_self, self)
-  call self%setup(sensor, satellite, valid, npoly)
+  call self%setup(sensor, satellite, valid_local, npoly)
+
+  valid = valid_local
 
 end subroutine ufo_fov_setup_c
 
