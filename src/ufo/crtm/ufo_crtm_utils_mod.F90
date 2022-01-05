@@ -395,9 +395,13 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
     case ("IGBP")
        allocate(conf%Land_WSI(2))
        conf%Land_WSI(1:2) = (/15,17/)
-    case default
+    case ("NPOESS")
        allocate(conf%Land_WSI(1))
        conf%Land_WSI(1) = -1
+    case default
+       write(message,*) trim(routine_name), ' error: unknown IR/vis land coeff classification ', &
+                        trim(IRVISlandCoeff)
+       call abor1_ftn(message)
  end select
 
  ! IR emissivity coeff files
@@ -623,19 +627,10 @@ type(crtm_conf),             intent(in)    :: conf
 type(ufo_geoval), pointer :: geoval, u, v
 integer :: k1, n1
 integer :: iLand
-
-! Surface type definitions for default SfcOptics definitions
-! for IR and VIS, this is the NPOESS reflectivities.
-integer, parameter :: TUNDRA_SURFACE_TYPE         = 10  ! NPOESS Land surface type for IR/VIS Land SfcOptics
-integer, parameter :: SCRUB_SURFACE_TYPE          =  7  ! NPOESS Land surface type for IR/VIS Land SfcOptics
-integer, parameter :: COARSE_SOIL_TYPE            =  1  ! Soil type                for MW land SfcOptics
-integer, parameter :: GROUNDCOVER_VEGETATION_TYPE =  7  ! Vegetation type          for MW Land SfcOptics
-integer, parameter :: BARE_SOIL_VEGETATION_TYPE   = 11  ! Vegetation type          for MW Land SfcOptics
-integer, parameter :: SEA_WATER_TYPE              =  1  ! Water type               for all SfcOptics
-integer, parameter :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
-integer, parameter :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
+logical :: use_mw_vegtyp_soiltyp_data, use_visir_landtyp_data
 
 character(len=MAXVARLEN) :: varname
+character(len=max_string) :: message
 
 real(kind_real), allocatable :: ObsTb(:,:)
 
@@ -660,9 +655,14 @@ real(kind_real), allocatable :: ObsTb(:,:)
     enddo
 
     !Water_type
-    sfc(k1)%Water_Type = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+    sfc(k1)%Water_Type = 1  ! SEA_WATER_TYPE for all SfcOptics
   end do
   deallocate(ObsTb)
+
+  use_mw_vegtyp_soiltyp_data = any(chinfo%Sensor_Type == MICROWAVE_SENSOR)
+  use_visir_landtyp_data = any(chinfo%Sensor_Type == VISIBLE_SENSOR) .or. &
+                           any(chinfo%Sensor_Type == INFRARED_SENSOR)
 
   if (ufo_vars_getindex(geovals%variables, var_sfc_wspeed) > 0 .and. &
       ufo_vars_getindex(geovals%variables, var_sfc_wdir) > 0) then
@@ -748,13 +748,28 @@ real(kind_real), allocatable :: ObsTb(:,:)
   !Land_Type
   ! + used to lookup land sfc emiss. for IR and VIS
   ! + land sfc emiss. undefined over water/snow/ice
-  call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
-  do k1 = 1, n_Profiles
-    iLand = int(geoval%vals(1, k1))
-    if (.not.any(iLand == conf%Land_WSI)) then
-      sfc(k1)%Land_Type = iLand
+  ! + note that land type classifiation is an option
+  if (use_visir_landtyp_data) then
+    if (index(conf%IRlandCoeff_File, "NPOESS") == 1) then
+      ! this is the default if CRTM not configured otherwise
+      call ufo_geovals_get_var(geovals, var_sfc_landtyp_npoess, geoval)
+    else if (index(conf%IRlandCoeff_File, "IGBP") == 1) then
+      call ufo_geovals_get_var(geovals, var_sfc_landtyp_igbp, geoval)
+    else if (index(conf%IRlandCoeff_File, "USGS") == 1) then
+      call ufo_geovals_get_var(geovals, var_sfc_landtyp_usgs, geoval)
+    else
+      write(message,*) "Load_Sfc_Data error: cannot infer land type classification from " &
+                       // "IRlandCoeff_File " // trim(conf%IRlandCoeff_File)
+      call abor1_ftn(message)
     end if
-  end do
+
+    do k1 = 1, n_Profiles
+      iLand = int(geoval%vals(1, k1))
+      if (.not.any(iLand == conf%Land_WSI)) then
+        sfc(k1)%Land_Type = iLand
+      end if
+    end do
+  end if
 
   !Land_Temperature
   call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
@@ -774,17 +789,19 @@ real(kind_real), allocatable :: ObsTb(:,:)
     sfc(k1)%Vegetation_Fraction = geoval%vals(1, k1)
   end do
 
-  !Vegetation_Type
-  call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Vegetation_Type = int(geoval%vals(1, k1))
-  end do
+  if (use_mw_vegtyp_soiltyp_data) then
+    !Vegetation_Type
+    call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Vegetation_Type = int(geoval%vals(1, k1))
+    end do
 
-  !Soil_Type
-  call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
-  do k1 = 1, n_Profiles
-    sfc(k1)%Soil_Type = int(geoval%vals(1, k1))
-  end do
+    !Soil_Type
+    call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
+    do k1 = 1, n_Profiles
+      sfc(k1)%Soil_Type = int(geoval%vals(1, k1))
+    end do
+  end if
 
   !Soil_Moisture_Content
   call ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)

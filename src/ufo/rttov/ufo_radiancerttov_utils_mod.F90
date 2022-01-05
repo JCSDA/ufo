@@ -63,7 +63,7 @@ module ufo_radiancerttov_utils_mod
     var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
     var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
     var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
-    var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
+    var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp_npoess,       &
     var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
 
   !var_ps

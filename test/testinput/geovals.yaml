@@ -47,6 +47,5 @@ observations:
     - leaf_area_index
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
-    - land_type_index
     - soil_type
     norm: 5948559.5381

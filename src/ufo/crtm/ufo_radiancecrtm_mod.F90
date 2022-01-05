@@ -37,13 +37,12 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(19), parameter :: varin_default = &
+ character(len=maxvarlen), dimension(16), parameter :: varin_default = &
                             (/var_ts, var_prs, var_prsi,                                  &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
                               var_sfc_vegfrac, var_sfc_lai,                               &
-                              var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
-                              var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
+                              var_sfc_soilm, var_sfc_soilt, var_sfc_sdepth/)
 
 contains
 
@@ -51,6 +50,7 @@ contains
 
 subroutine ufo_radiancecrtm_setup(self, f_confOper, channels)
 use ufo_utils_mod, only: cmp_strings
+use CRTM_SpcCoeff, only: CRTM_SpcCoeff_Load, SC
 
 implicit none
 class(ufo_radiancecrtm),   intent(inout) :: self
@@ -58,10 +58,12 @@ type(fckit_configuration), intent(in)    :: f_confOper
 integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in
-integer :: ind, jspec
+integer :: ind, js, jspec
+integer :: err_stat
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
-logical :: request_cldfrac
+logical :: request_mw_vegtyp_soiltyp_data, request_visir_landtyp_data
+logical :: request_cldfrac, request_salinity
 
  call f_confOper%get_or_die("obs options",f_confOpts)
 
@@ -75,25 +77,90 @@ logical :: request_cldfrac
    call abor1_ftn(err_msg)
  end if
 
- ! request from the model all the hardcoded atmospheric & surface variables + 
+ ! Check which surface type data CRTM will need to request from the model
+ request_mw_vegtyp_soiltyp_data = .false.
+ request_visir_landtyp_data = .false.
+ ! Use CRTM_SpcCoeff_Load to fill the CRTM "SC" structure with data
+ ! Perhaps in the future a simpler lookup table could be used, but this would require changes
+ ! to the CRTM interface to expose the Sensor_ID -> Sensor_Type mapping in an easier way.
+ err_stat = CRTM_SpcCoeff_Load(Sensor_ID = self%conf%Sensor_ID, &
+                               File_Path = trim(self%conf%COEFFICIENT_PATH), &
+                               Quiet     = .true.)
+ if (err_stat /= success) then
+   write(err_msg,*) 'ufo_radiancecrtm_setup error: failed CRTM_Load_SpcCoeff'
+   call abor1_ftn(err_msg)
+ end if
+ do js=1, self%conf%n_Sensors
+   if (SC(js)%Sensor_Type == MICROWAVE_SENSOR) then
+     request_mw_vegtyp_soiltyp_data = .true.
+   else if (SC(js)%Sensor_Type == VISIBLE_SENSOR .or. SC(js)%Sensor_Type == INFRARED_SENSOR) then
+     request_visir_landtyp_data = .true.
+   else
+     write(err_msg,*) 'ufo_radiancecrtm_setup error: unsupported Sensor_Type =', &
+                      SC(js)%Sensor_Type, ', from Sensor_ID =', SC(js)%Sensor_ID
+     call abor1_ftn(err_msg)
+   end if
+ end do
+ deallocate(SC)
+ ! check that at least one surface type is requested
+ if (.not. request_mw_vegtyp_soiltyp_data .and. .not. request_visir_landtyp_data) then
+   write(err_msg,*) 'ufo_radiancecrtm_setup error: did not request surface data for Sensor_ID =', &
+                    SC(js)%Sensor_ID
+   call abor1_ftn(err_msg)
+ end if
+
+ request_cldfrac = self%conf%n_Clouds > 0 .and. self%conf%Cloud_Fraction < 0.0
+
+ request_salinity = cmp_strings(self%conf%salinity_option, "on")
+
+ ! request from the model all the hardcoded atmospheric & surface variables +
+ ! 1-3 surface classification variables (depending on the instrument wavelength)
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
  ! 2 for sfc_wind_geovars parsing
+ ! 0-1 cloud fraction
+ ! 0-1 sea surface salinity
  nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds + 2
- request_cldfrac = &
-   self%conf%n_Clouds > 0 .and. &
-   self%conf%Cloud_Fraction < 0.0
- if ( request_cldfrac ) then
+ if (request_mw_vegtyp_soiltyp_data) then
+   nvars_in = nvars_in + 2
+ else if (request_visir_landtyp_data) then
    nvars_in = nvars_in + 1
  end if
- ! if sss is in obs options + sss
- if (cmp_strings(self%conf%salinity_option, "on")) then
+ if (request_cldfrac) then
+   nvars_in = nvars_in + 1
+ end if
+ if (request_salinity) then
    nvars_in = nvars_in + 1
  end if
 
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
+
+ ! varin_default specifies the NPOESS land_type classification to match the CRTM default.
+ ! Here we check if an alternate land_type classification has been requested, and, if so, we
+ ! swap out the variable in varin.
  ind = size(varin_default) + 1
+ if (request_mw_vegtyp_soiltyp_data) then
+   self%varin(ind) = var_sfc_vegtyp
+   ind = ind + 1
+   self%varin(ind) = var_sfc_soiltyp
+   ind = ind + 1
+ end if
+ if (request_visir_landtyp_data) then
+   if (index(self%conf%IRlandCoeff_File, "IGBP") == 1) then
+     self%varin(ind) = var_sfc_landtyp_igbp
+   else if (index(self%conf%IRlandCoeff_File, "USGS") == 1) then
+     self%varin(ind) = var_sfc_landtyp_usgs
+   else if (index(self%conf%IRlandCoeff_File, "NPOESS") == 1) then
+     self%varin(ind) = var_sfc_landtyp_npoess
+   else
+     write(err_msg,*) "ufo_radiancecrtm_setup error: cannot infer land type classification from " &
+                      // "IRlandCoeff_File: " // trim(self%conf%IRlandCoeff_File)
+     call abor1_ftn(err_msg)
+   end if
+   ind = ind + 1
+ endif
+
  !Use list of Absorbers and Clouds from conf
  do jspec = 1, self%conf%n_Absorbers
    self%varin(ind) = self%conf%Absorbers(jspec)
@@ -105,14 +172,15 @@ logical :: request_cldfrac
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
- if ( request_cldfrac ) then
+ if (request_cldfrac) then
    self%varin(ind) = var_cldfrac
    ind = ind + 1
  end if
- if (cmp_strings(self%conf%salinity_option, "on")) then
+ if (request_salinity) then
    self%varin(ind) = var_sfc_sss
    ind = ind + 1
  end if
+
  if (trim(self%conf%sfc_wind_geovars) == 'vector') then
    self%varin(ind) = var_sfc_wspeed
    ind = ind + 1
