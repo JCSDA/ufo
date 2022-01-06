@@ -123,8 +123,15 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // H(x):
       std::vector<float> hofx1, hofx2;
       // H(x) error:
-      std::vector<float> hofxerr;
-      data_.get(backgrErrVariable(filtervars[filterVarIndex]), hofxerr);
+      std::vector<float> hofxerr(obsdb_.nlocs());
+      if (parameters_.BkgErr.value() != boost::none) {
+        // set it to a constant term
+        oops::Log::debug() << "Setting a constant bg error term" << std::endl;
+        std::fill(hofxerr.begin(), hofxerr.end(), *parameters_.BkgErr.value());
+      } else {
+        oops::Log::debug() << "Using the real background errors" << std::endl;
+        data_.get(backgrErrVariable(filtervars[filterVarIndex]), hofxerr);
+      }
       // PGE, filled with initial value:
       std::vector<float> PGE1(obsdb_.nlocs(), parameters_.PGE.value());
       // QC flags:

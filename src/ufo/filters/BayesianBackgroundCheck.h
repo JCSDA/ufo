@@ -15,6 +15,7 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/NumericConstraints.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "oops/util/Printable.h"
@@ -44,6 +45,9 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // Initial probability of gross error:
   oops::RequiredParameter<float> PGE{"initial prob gross error", this,
                                      {oops::exclusiveMinConstraint(0.0f)}};
+
+  // constant background error term (optional):
+  oops::OptionalParameter<float> BkgErr{"bg error", this};
 };
 
 /// \brief BayesianBackgroundCheck: check observation closeness to background, accounting
@@ -71,7 +75,13 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 ///   * max exponent: maximum allowed value of the exponent in the 'good'
 ///      probability distribution;
 ///   * obs error multiplier: weight of observation error in combined error variance;
-///   * BG error multiplier: weight of background error in combined error variance.
+///   * BG error multiplier: weight of background error in combined error variance,
+///
+/// or the optional parameter (no default):
+///   * bg error: a constant background error term. If this is specified it will be used
+/// in the Probability of Gross Error calculation. If not the real background errors
+/// will be used.
+///
 class BayesianBackgroundCheck : public FilterBase,
                         private util::ObjectCounter<BayesianBackgroundCheck> {
  public:
