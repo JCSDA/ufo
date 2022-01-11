@@ -54,7 +54,8 @@ class TransformBase {
  public:
   TransformBase(const VariableTransformParametersBase &options,
                 const ObsFilterData& data,
-                const std::shared_ptr<ioda::ObsDataVector<int>>& flags);
+                const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
+                const std::shared_ptr<ioda::ObsDataVector<float>>& obserr);
   /// Destructor
   virtual ~TransformBase() {}
   /// Run variable conversion
@@ -147,6 +148,7 @@ class TransformBase {
   /// Observation space
   ioda::ObsSpace &obsdb_ = data_.obsspace();
   ioda::ObsDataVector<int> &flags_;
+  ioda::ObsDataVector<float> &obserr_;
   /// Missing value (int)
   const int missingValueInt = util::missingValue(1);
   /// Missing value (float)
@@ -161,7 +163,8 @@ class TransformFactory {
   static std::unique_ptr<TransformBase> create(
       const std::string &, const VariableTransformParametersBase &,
       const ObsFilterData &,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &);
+      const std::shared_ptr<ioda::ObsDataVector<int>> &,
+      const std::shared_ptr<ioda::ObsDataVector<float>> &);
   static std::unique_ptr<VariableTransformParametersBase> createParameters(
       const std::string &);
   virtual ~TransformFactory() = default;
@@ -173,7 +176,8 @@ class TransformFactory {
   virtual std::unique_ptr<TransformBase> make(
       const VariableTransformParametersBase &,
       const ObsFilterData &,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &) = 0;
+      const std::shared_ptr<ioda::ObsDataVector<int>> &,
+      const std::shared_ptr<ioda::ObsDataVector<float>> &) = 0;
   virtual std::unique_ptr<VariableTransformParametersBase> makeParameters() const = 0;
   static std::map<std::string, TransformFactory *> &getMakers() {
     static std::map<std::string, TransformFactory *> makers_;
@@ -194,9 +198,10 @@ class TransformMaker : public TransformFactory {
   std::unique_ptr<TransformBase> make(
       const VariableTransformParametersBase &options,
       const ObsFilterData& data,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &flags) override {
+      const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+      const std::shared_ptr<ioda::ObsDataVector<float>> &obserr) override {
     const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(options);
-    return std::unique_ptr<TransformBase>(new T(stronglyTypedParams, data, flags));
+    return std::unique_ptr<TransformBase>(new T(stronglyTypedParams, data, flags, obserr));
   }
 
   std::unique_ptr<VariableTransformParametersBase> makeParameters() const override {

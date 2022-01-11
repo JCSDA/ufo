@@ -35,8 +35,9 @@ namespace ufo {
 class Cal_QNHtoQFEpressure : public TransformBase {
  public:
   Cal_QNHtoQFEpressure(const GenericVariableTransformParameters &options,
-                        const ObsFilterData &data,
-                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                       const ObsFilterData &data,
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 };

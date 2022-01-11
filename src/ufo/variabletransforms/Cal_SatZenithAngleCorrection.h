@@ -91,8 +91,9 @@ class Cal_SatZenithAngleCorrection : public TransformBase {
   typedef Cal_SatZenithAngleCorrectionParameters Parameters_;
 
   Cal_SatZenithAngleCorrection(const Parameters_ &options,
-                        const ObsFilterData &data,
-                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                               const ObsFilterData &data,
+                               const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                               const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
   Variables requiredVariables() const override { return variables_; }

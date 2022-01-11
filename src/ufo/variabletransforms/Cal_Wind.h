@@ -31,7 +31,8 @@ class Cal_WindSpeedAndDirection : public TransformBase {
  public:
   Cal_WindSpeedAndDirection(const GenericVariableTransformParameters &options,
                             const ObsFilterData &data,
-                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                            const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 };
@@ -49,7 +50,8 @@ class Cal_WindComponents : public TransformBase {
  public:
   Cal_WindComponents(const GenericVariableTransformParameters &options,
                      const ObsFilterData &data,
-                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 };

@@ -22,8 +22,9 @@ static TransformMaker<Cal_PotentialTFromT>
 Cal_PotentialTFromT::Cal_PotentialTFromT(
         const Parameters_ &options,
         const ObsFilterData &data,
-        const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags),
+        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+        const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    : TransformBase(options, data, flags, obserr),
       pressurevariable_(options.PressureVariable),
       temperaturevariable_(options.TemperatureVariable),
       potentialtempvariable_(options.PotentialTempVariable)
@@ -63,8 +64,7 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
                  pressure, true);
   getObservation("ObsValue", temperaturevariable_,
                  temperature, true);
-  getObservation("ObsError", temperaturevariable_,
-                 tempError, true);
+  data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), tempError);
   getObservation("GrossErrorProbability", temperaturevariable_,
                  temppge);
   getObservation("QCFlags", temperaturevariable_,
@@ -109,7 +109,13 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
   }
 
   obsdb_.put_db("DerivedObsValue", potentialtempvariable_, potTemp);
-  obsdb_.put_db("DerivedObsError", potentialtempvariable_, potTempErr);
+  const size_t iv = obserr_.varnames().find(potentialtempvariable_);
+  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+    if (!apply[jobs])
+      continue;
+    obserr_[iv][jobs] = potTempErr[jobs];
+  }
+
   // copy temperature's PGEFinal and QCflags to new potentialTemperature
   obsdb_.put_db("GrossErrorProbability", potentialtempvariable_, temppge);
   obsdb_.put_db("QCFlags", potentialtempvariable_, tempflags);

@@ -20,8 +20,9 @@ makerCal_ProfileHorizontalDrift_("ProfileHorizontalDrift");
 Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
 (const Parameters_ &options,
  const ObsFilterData &data,
- const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-  : TransformBase(options, data, flags),
+ const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+ const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+  : TransformBase(options, data, flags, obserr),
     heightCoord_(options.HeightCoord)
 {}
 

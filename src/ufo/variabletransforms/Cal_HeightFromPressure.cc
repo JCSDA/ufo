@@ -18,8 +18,9 @@ static TransformMaker<Cal_HeightFromPressure>
 Cal_HeightFromPressure::Cal_HeightFromPressure(
     const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags),
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    : TransformBase(options, data, flags, obserr),
       heightCoord_(options.HeightCoord),
       pressureCoord_(options.PressureCoord)
 {}

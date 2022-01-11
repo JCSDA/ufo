@@ -38,7 +38,8 @@ class Cal_HeightFromPressure : public TransformBase {
 
   Cal_HeightFromPressure(const Parameters_ &options,
                          const ObsFilterData &data,
-                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                         const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 

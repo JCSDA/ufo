@@ -77,7 +77,8 @@ class Cal_RelativeHumidity : public TransformBase {
 
   Cal_RelativeHumidity(const Parameters_ &options,
                        const ObsFilterData &data,
-                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
@@ -126,7 +127,8 @@ class Cal_SpecificHumidity : public TransformBase {
 
   Cal_SpecificHumidity(const Parameters_ &options,
                        const ObsFilterData &data,
-                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 

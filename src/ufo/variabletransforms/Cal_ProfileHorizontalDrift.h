@@ -51,7 +51,8 @@ class Cal_ProfileHorizontalDrift : public TransformBase {
 
   Cal_ProfileHorizontalDrift(const Parameters_ &options,
                              const ObsFilterData &data,
-                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                             const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 

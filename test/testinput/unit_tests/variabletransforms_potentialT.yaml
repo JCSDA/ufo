@@ -11,14 +11,28 @@ observations:
         sort variable: "dateTime"
         sort order: "descending"
     simulated variables: [air_temperature]
+    derived simulated variables: [potentialTemperature]
   obs filters:
   - filter: Variable Transforms
     Transform: PotentialTFromT
     pressure variable: "air_pressure"
     temperature variable: "air_temperature"
+  # Copy the potential temperature Obserror to an ObsSpace variable in order to
+  # enable it to be compared to a reference value.
+  - filter: Variable Assignment
+    assignments:
+    - name: potentialTemperature@ObsErrorForComparison
+      type: float
+      source variable:
+        name: potentialTemperature@ObsErrorData
   compareVariables:
     - reference:
         name: potentialTemperature_reference@ObsValue
       test:
         name: potentialTemperature@DerivedObsValue
+      relTol: 1.0e-3
+    - reference:
+        name: potentialTemperature_reference@ObsError
+      test:
+        name: potentialTemperature@ObsErrorForComparison
       relTol: 1.0e-3

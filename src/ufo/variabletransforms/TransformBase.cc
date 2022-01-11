@@ -14,8 +14,9 @@ namespace ufo {
 
 TransformBase::TransformBase(const VariableTransformParametersBase& options,
                              const ObsFilterData& data,
-                             const std::shared_ptr<ioda::ObsDataVector<int>>& flags)
-                             : options_(options), data_(data) , flags_(*flags) {
+                             const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
+                             const std::shared_ptr<ioda::ObsDataVector<float>>& obserr)
+  : options_(options), data_(data) , flags_(*flags), obserr_(*obserr) {
   method_ = formulas::resolveMethods(options.Method.value());
   formulation_  = formulas::resolveFormulations(options.Formulation.value(),
                                                 options.Method.value());
@@ -34,7 +35,8 @@ TransformFactory::TransformFactory(const std::string& name) {
 std::unique_ptr<TransformBase> TransformFactory::create(
     const std::string& name, const VariableTransformParametersBase& options,
     const ObsFilterData& data,
-    const std::shared_ptr<ioda::ObsDataVector<int>>& flags) {
+    const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>>& obserr) {
 
   oops::Log::trace() << "          --> TransformFactory::create" << std::endl;
   oops::Log::trace() << "              --> name: " << name << std::endl;
@@ -57,7 +59,7 @@ std::unique_ptr<TransformBase> TransformFactory::create(
                               Here());
   }
 
-  std::unique_ptr<TransformBase> ptr = jloc->second->make(options, data, flags);
+  std::unique_ptr<TransformBase> ptr = jloc->second->make(options, data, flags, obserr);
   oops::Log::trace() << "TransformBase::create done" << std::endl;
 
   return ptr;

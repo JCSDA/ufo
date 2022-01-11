@@ -22,8 +22,9 @@ static TransformMaker<Cal_WindSpeedAndDirection>
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
     const GenericVariableTransformParameters &options, const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    : TransformBase(options, data, flags, obserr) {
 }
 
 /************************************************************************************/
@@ -79,8 +80,9 @@ static TransformMaker<Cal_WindComponents>
 Cal_WindComponents::Cal_WindComponents(
     const GenericVariableTransformParameters &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+  : TransformBase(options, data, flags, obserr) {}
 
 /************************************************************************************/
 

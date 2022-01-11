@@ -48,7 +48,8 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 
   Cal_PressureFromHeightForProfile(const Parameters_ &options,
                                    const ObsFilterData &data,
-                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                                   const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                                   const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
@@ -79,7 +80,8 @@ class Cal_PressureFromHeightForICAO : public TransformBase {
 
   Cal_PressureFromHeightForICAO(const Parameters_ &options,
                                 const ObsFilterData &data,
-                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                                const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 

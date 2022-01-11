@@ -40,8 +40,8 @@ VariableTransforms::VariableTransforms(
   parameters_->validateAndDeserialize(config);
 
   // Create the transform
-  std::unique_ptr<TransformBase> transform = TransformFactory::create(
-          parameters_->Transform.value(), *parameters_, data_, flags_);
+  std::unique_ptr<TransformBase> transform =
+    TransformFactory::create(parameters_->Transform.value(), *parameters_, data_, flags_, obserr_);
 
   // Add any required transform variables to allvars_
   allvars_ += Variables(filtervars_);
@@ -65,8 +65,8 @@ void VariableTransforms::applyFilter(
 
   // Create the transform again.  This is because data_ is updated by the filter
   // but not by the copy held by the variable transform.
-  std::unique_ptr<TransformBase> transform = TransformFactory::create(
-          parameters_->Transform.value(), *parameters_, data_, flags_);
+  std::unique_ptr<TransformBase> transform =
+    TransformFactory::create(parameters_->Transform.value(), *parameters_, data_, flags_, obserr_);
 
   // Run all calculations requested
   oops::Log::debug() << "         estimate: " << parameters_->Transform.value() << std::endl;
