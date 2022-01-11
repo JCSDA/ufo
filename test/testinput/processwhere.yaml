@@ -72,20 +72,20 @@ successful:
         minvalue: 2
         maxvalue: 5
   # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 4
+      size where true: 8
     - where:                      # test min & max  for variable with missing values
       - variable:
           name:  var5@MetaData
         minvalue: 0
         maxvalue: 100
   # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 6
+      size where true: 10
     - where:                      # test min & max  for variable with missing values
       - variable:
           name:  var5@MetaData
         minvalue: 100
   # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 0
+      size where true: 4
     - where:                      # test min & max for datetime hours
       - variable:
           name:  dateTime@MetaData
@@ -170,6 +170,30 @@ successful:
         is_not_defined:
   # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
+    - where:                      # test is_defined on an integer variable
+      - variable:
+          name:  intvar5@MetaData
+        is_defined:
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 6
+    - where:                      # test is_not_defined on an integer variable
+      - variable:
+          name:  intvar5@MetaData
+        is_not_defined:
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 4
+    - where:                      # test is_defined on a string variable
+      - variable:
+          name:  station_id@MetaData
+        is_defined:
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 10
+    - where:                      # test is_not_defined on a string variable
+      - variable:
+          name:  station_id@MetaData
+        is_not_defined:
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 0
     - where:                       # test is_in
       - variable:
           name:  intvar3@MetaData
@@ -228,20 +252,20 @@ successful:
         minvalue: 2
         maxvalue: 5
   # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 4
+      size where true: 8
     - where:                      # test min & max  for variable with missing values
       - variable:
           name:  intvar5@MetaData
         minvalue: 0
         maxvalue: 100
   # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 6
+      size where true: 10
     - where:                      # test min & max  for variable with missing values
       - variable:
           name:  intvar5@MetaData
         minvalue: 100
   # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-      size where true: 0
+      size where true: 4
     - where:                       # test is_in for string-based inputs
       - variable:
           name:  station_id@MetaData
@@ -599,4 +623,14 @@ user_error_type_handling_is_in:
         relative_tolerance: 0.2
         absolute_tolerance: 0.2
         is_close_to_any_of: [1.5]
+      size where true: 0
+    - where:                       # test is_defined for unsupported type (DateTime)
+      - variable:
+          name:  dateTime@MetaData
+        is_defined:
+      size where true: 0
+    - where:                       # test is_not_defined for unsupported type (DateTime)
+      - variable:
+          name:  dateTime@MetaData
+        is_not_defined:
       size where true: 0

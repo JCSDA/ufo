@@ -41,13 +41,12 @@ template<typename T>
 void processWhereMinMax(const std::vector<T> & data,
                         const T & vmin, const T & vmax,
                         std::vector<bool> & mask) {
-  const T not_set_value = util::missingValue(not_set_value);
-  const size_t n = data.size();
-
-  if (vmin != not_set_value || vmax != not_set_value) {
-    for (size_t jj = 0; jj < n; ++jj) {
-      if (vmin != not_set_value && data[jj] < vmin) mask[jj] = false;
-      if (vmax != not_set_value && data[jj] > vmax) mask[jj] = false;
+  const T missing = util::missingValue(missing);
+  if (vmin != missing || vmax != missing) {
+    for (size_t jj = 0; jj < data.size(); ++jj) {
+      if (data[jj] == missing) continue;
+      if (vmin != missing && data[jj] < vmin) mask[jj] = false;
+      if (vmax != missing && data[jj] > vmax) mask[jj] = false;
     }
   }
 }
@@ -58,9 +57,10 @@ void processWhereMinMax(const std::vector<util::DateTime> & data,
                         const util::PartialDateTime & vmin, const util::PartialDateTime & vmax,
                         std::vector<bool> & mask) {
   const util::PartialDateTime not_set_value {};
-
+  const util::DateTime missing = util::missingValue(missing);
   if (vmin != not_set_value || vmax != not_set_value) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
+      if (data[jj] == missing) continue;
       if (vmin != not_set_value && vmin > data[jj]) mask[jj] = false;
       if (vmax != not_set_value && vmax < data[jj]) mask[jj] = false;
     }
@@ -69,22 +69,27 @@ void processWhereMinMax(const std::vector<util::DateTime> & data,
 
 
 // -----------------------------------------------------------------------------
-void processWhereIsDefined(const std::vector<float> & data,
+template<typename T>
+void processWhereIsDefined(const ObsFilterData & filterdata,
+                           const Variable & varname,
                            std::vector<bool> & mask) {
-  const float missing = util::missingValue(missing);
-  const size_t n = data.size();
-  for (size_t jj = 0; jj < n; ++jj) {
+  const T missing = util::missingValue(missing);
+  std::vector<T> data;
+  filterdata.get(varname, data);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] == missing) mask[jj] = false;
   }
 }
 
 // -----------------------------------------------------------------------------
-
-void processWhereIsNotDefined(const std::vector<float> & data,
+template<typename T>
+void processWhereIsNotDefined(const ObsFilterData & filterdata,
+                              const Variable & varname,
                               std::vector<bool> & mask) {
-  const float missing = util::missingValue(missing);
-  const size_t n = data.size();
-  for (size_t jj = 0; jj < n; ++jj) {
+  const T missing = util::missingValue(missing);
+  std::vector<T> data;
+  filterdata.get(varname, data);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] != missing) mask[jj] = false;
   }
 }
@@ -418,9 +423,18 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
 //      Apply mask is_defined
         if (currentParams.isDefined.value()) {
           if (filterdata.has(varname)) {
-            std::vector<float> data;
-            filterdata.get(varname, data);
-            processWhereIsDefined(data, where);
+            if (dtype == ioda::ObsDtype::Integer) {
+              processWhereIsDefined<int>(filterdata, varname, where);
+            } else if (dtype == ioda::ObsDtype::Float) {
+              processWhereIsDefined<float>(filterdata, varname, where);
+            } else if (dtype == ioda::ObsDtype::String) {
+              processWhereIsDefined<std::string>(filterdata, varname, where);
+            } else {
+              throw eckit::UserError(
+                "Only integer, float and string variables may be used for processWhere "
+                "'is_defined'",
+                Here());
+            }
           } else {
             std::fill(where.begin(), where.end(), false);
           }
@@ -428,9 +442,18 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
 
 //      Apply mask is_not_defined
         if (currentParams.isNotDefined.value()) {
-          std::vector<float> data;
-          filterdata.get(varname, data);
-          processWhereIsNotDefined(data, where);
+          if (dtype == ioda::ObsDtype::Integer) {
+            processWhereIsNotDefined<int>(filterdata, varname, where);
+          } else if (dtype == ioda::ObsDtype::Float) {
+            processWhereIsNotDefined<float>(filterdata, varname, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            processWhereIsNotDefined<std::string>(filterdata, varname, where);
+          } else {
+            throw eckit::UserError(
+              "Only integer, float and string variables may be used for processWhere "
+              "'is_not_defined'",
+              Here());
+          }
         }
 
 //      Apply mask is_in
