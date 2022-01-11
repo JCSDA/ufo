@@ -116,3 +116,33 @@ obs filter data:
     variables:
     - name: brightness_temperature@QCFlagsData
       channels: 1-10,15
+- obs space:
+    name: skipDerived false
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
+    simulated variables: [air_temperature]
+  skipDerived: false
+  test data:
+    datetime variables:
+    - name: datetime@MetaData
+    float variables:
+    - name: air_temperature@ObsValue
+    integer variables:
+    - name: air_temperature@QCFlags
+    string variables:
+    - name: station_id@MetaData
+- obs space:
+    name: skipDerived true
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
+    simulated variables: [air_temperature]
+  skipDerived: true
+  test data:
+    datetime variables:
+    - name: datetime@MetaData
+    float variables:
+    - name: air_temperature@ObsValue
+    integer variables:
+    - name: air_temperature@QCFlags
+    string variables:
+    - name: station_id@MetaData

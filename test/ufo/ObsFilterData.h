@@ -34,21 +34,22 @@ namespace test {
 template <typename T>
 void testHasDtypeAndGet(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
                         const ufo::Variable &var,
-                        ioda::ObsDtype expectedDtype, const std::vector<T> &expectedValues) {
+                        ioda::ObsDtype expectedDtype, const std::vector<T> &expectedValues,
+                        const bool skipDerived = false) {
   EXPECT(data.has(var));
   EXPECT(data.dtype(var) == expectedDtype);
 
   // Extract variable into an std::vector
   {
     std::vector<T> vec;
-    data.get(var, vec);
+    data.get(var, vec, skipDerived);
     EXPECT(vec == expectedValues);
   }
 
   // Extract variable into an ObsDataVector
   {
     ioda::ObsDataVector<T> vec(ospace, var.variable());
-    data.get(var, vec);
+    data.get(var, vec, skipDerived);
     EXPECT_EQUAL(vec.nvars(), 1);
     EXPECT(vec[0] == expectedValues);
   }
@@ -132,6 +133,34 @@ void checkObsDiagsGet(const ufo::ObsFilterData & data,
 
 // -----------------------------------------------------------------------------
 
+void testSkipDerived(const eckit::LocalConfiguration & conf,
+                     const util::DateTime & bgn,
+                     const util::DateTime & end,
+                     const bool skipDerived) {
+///  Setup ObsSpace
+    const eckit::LocalConfiguration obsconf(conf, "obs space");
+    ioda::ObsTopLevelParameters obsparams;
+    obsparams.validateAndDeserialize(obsconf);
+    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+
+/// Setup ObsFilterData
+    ObsFilterData data(ospace);
+
+///  Check that get() works with the skipDerived option:
+    const eckit::LocalConfiguration dataconf(conf, "test data");
+    std::vector<eckit::LocalConfiguration> varconfs;
+    dataconf.get("float variables", varconfs);
+    ufo::Variables obsvars(varconfs);
+    for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
+      const ufo::Variable &var = obsvars.variable(jvar);
+      std::vector<float> ref(ospace.nlocs());
+      ospace.get_db(var.group(), var.variable(), ref, {}, skipDerived);
+      testHasDtypeAndGet(data, ospace, var, ioda::ObsDtype::Float, ref, skipDerived);
+    }
+}
+
+// -----------------------------------------------------------------------------
+
 void testObsFilterData() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   util::DateTime bgn(conf.getString("window begin"));
@@ -140,6 +169,12 @@ void testObsFilterData() {
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("obs filter data", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
+///  Test the skipDerived option if it is present. After doing so move to the next configuration.
+    if (confs[jconf].has("skipDerived")) {
+      testSkipDerived(confs[jconf], bgn, end, confs[jconf].getBool("skipDerived"));
+      continue;
+    }
+
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
     ioda::ObsTopLevelParameters obsparams;

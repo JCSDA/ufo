@@ -70,15 +70,20 @@ class ObsFilterData : public util::Printable,
   //!   Vector to be filled with values of the requested variable.
   //!
   //! An exception is thrown if the requested variable does not exist or is not of the correct type.
-  void get(const Variable &varname, std::vector<float> &values) const;
+  void get(const Variable &varname, std::vector<float> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, std::vector<int> &values) const;
+  void get(const Variable &varname, std::vector<int> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, std::vector<std::string> &values) const;
+  void get(const Variable &varname, std::vector<std::string> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, std::vector<util::DateTime> &values) const;
+  void get(const Variable &varname, std::vector<util::DateTime> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, std::vector<DiagnosticFlag> &values) const;
+  void get(const Variable &varname, std::vector<DiagnosticFlag> &values,
+           bool skipDerived = false) const;
 
   //! \brief Fills a `std::vector` with values of the specified variable at a single level.
   //!
@@ -107,15 +112,20 @@ class ObsFilterData : public util::Printable,
   //!   pre-populated, i.e. contain a row corresponding to each requested channel of that variable.
   //!
   //! An exception is thrown if the requested variable does not exist or is not of the correct type.
-  void get(const Variable &varname, ioda::ObsDataVector<float> &values) const;
+  void get(const Variable &varname, ioda::ObsDataVector<float> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, ioda::ObsDataVector<int> &values) const;
+  void get(const Variable &varname, ioda::ObsDataVector<int> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, ioda::ObsDataVector<std::string> &values) const;
+  void get(const Variable &varname, ioda::ObsDataVector<std::string> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, ioda::ObsDataVector<util::DateTime> &values) const;
+  void get(const Variable &varname, ioda::ObsDataVector<util::DateTime> &values,
+           bool skipDerived = false) const;
   //! \overload
-  void get(const Variable &varname, ioda::ObsDataVector<DiagnosticFlag> &values) const;
+  void get(const Variable &varname, ioda::ObsDataVector<DiagnosticFlag> &values,
+           bool skipDerived = false) const;
 
   //! Returns true if variable `varname` is known to ObsFilterData, false otherwise.
   bool has(const Variable &varname) const;
@@ -143,10 +153,12 @@ class ObsFilterData : public util::Printable,
   bool hasDataVectorInt(const std::string &, const std::string &) const;
 
   template <typename T>
-  void getVector(const Variable &varname, std::vector<T> &values) const;
+  void getVector(const Variable &varname, std::vector<T> &values,
+                 bool skipDerived = false) const;
   /// Called by the overloads of get() taking an ioda::ObsDataVector of strings or datetimes.
   template <typename T>
-  void getNonNumeric(const Variable &varname, ioda::ObsDataVector<T> &values) const;
+  void getNonNumeric(const Variable &varname, ioda::ObsDataVector<T> &values,
+                     bool skipDerived = false) const;
 
   ioda::ObsSpace & obsdb_;                 //!< ObsSpace associated with this object
   const GeoVaLs mutable * gvals_;          //!< pointer to GeoVaLs associated with this object
