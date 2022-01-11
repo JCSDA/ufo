@@ -9,6 +9,7 @@
 #define TEST_UFO_OBSFILTERS_H_
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -551,6 +552,19 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       switch (ufoObsSpace.dtype(referenceVariable.group(), referenceVariable.variable())) {
       case ioda::ObsDtype::Integer:
         expectVariablesEqual<int>(ufoObsSpace, referenceVariable, testVariable);
+        break;
+      case ioda::ObsDtype::Integer_64:
+        // If this variable contains epoch metadata, that means it is a DateTime represented as
+        // seconds from epoch, so we reinterpret and compare the int64 as a DateTime. Otherwise,
+        // fall back to comparing as int64s.
+        try {
+          const std::string varname = referenceVariable.fullName();
+          const ioda::Variable &iodavar = ufoObsSpace.getObsGroup().vars.open(varname);
+          const util::DateTime epoch = ioda::getEpochAsDtime(iodavar);
+          expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
+        } catch (ioda::Exception&) {
+          expectVariablesEqual<int64_t>(ufoObsSpace, referenceVariable, testVariable);
+        }
         break;
       case ioda::ObsDtype::String:
         expectVariablesEqual<std::string>(ufoObsSpace, referenceVariable, testVariable);
