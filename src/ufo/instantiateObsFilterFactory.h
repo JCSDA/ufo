@@ -35,6 +35,7 @@
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
+#include "ufo/filters/PrintFilterData.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProcessAMVQI.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
@@ -113,6 +114,8 @@ void instantiateObsFilterFactory() {
            poissonDiskThinningMaker("Poisson Disk Thinning");
   static oops::interface::FilterMaker<ObsTraits, PreQC>
            preQCMaker("PreQC");
+  static oops::interface::FilterMaker<ObsTraits, PrintFilterData>
+           printFilterDataMaker("Print Filter Data");
   static oops::interface::FilterMaker<ObsTraits, ProcessAMVQI>
              ProcessAMVQIMaker("Process AMV QI");
   static oops::interface::FilterMaker<ObsTraits, ProfileBackgroundCheck>

@@ -397,6 +397,39 @@ void ObsFilterData::print(std::ostream & os) const {
     os << ", diags";
   }
   os << std::endl;
+
+  // Print quantities in more detail
+  os << "Contents of ObsValue" << std::endl;
+  for (const std::string & varname : obsdb_.obsvariables().variables()) {
+    os << "- " << varname << std::endl;
+  }
+  os << std::endl;
+  if (gvals_) {
+    os << "Contents of GeoVaLs" << std::endl;
+    for (const std::string & varname : gvals_->getVars().variables()) {
+      os << "- " << varname << std::endl;
+    }
+    os << std::endl;
+  }
+  for (const auto & ovec : ovecs_) {
+    os << "Contents of " << ovec.first << std::endl;
+    for (const std::string & varname : ovec.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  for (const auto & dvecf : dvecsf_) {
+    os << "Contents of " << dvecf.first << std::endl;
+    for (const std::string & varname : dvecf.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  for (const auto & dveci : dvecsi_) {
+    os << "Contents of " << dveci.first << std::endl;
+    for (const std::string & varname : dveci.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  // todo: add accessor method to contents of ObsDiagnostics
 }
 
 // -----------------------------------------------------------------------------

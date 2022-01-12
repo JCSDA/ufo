@@ -133,6 +133,8 @@ set ( filters_files
       processWhere.h
       ObsAccessor.cc
       ObsAccessor.h
+      PrintFilterData.cc
+      PrintFilterData.h
       actions/AssignError.cc
       actions/AssignError.h
       actions/AcceptObs.cc

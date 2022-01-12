@@ -1,0 +1,148 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+
+  obs operator:
+    name: VertInterp
+    variables:
+    - name: air_temperature
+
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+
+  obs filters:
+  - filter: Print Filter Data
+    message: Printing filter data before Background Check
+    minimum location: 0
+    maximum location: 11
+    variables:
+    - variable: HofX/air_temperature
+    defer to post: true
+  - filter: Print Filter Data
+    message: Printing filter data before Background Check, MPI rank 0 only
+    minimum location: 1735
+    maximum location: 0
+    variables:
+    - variable: HofX/air_temperature
+    defer to post: true
+    print only rank 0: true
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: BkgFlag
+      initial value: true
+  - filter: Background Check
+    filter variables:
+    - air_temperature
+    absolute threshold: 2.0
+    defer to post: true
+    actions:
+    - name: set
+      flag: BkgFlag
+      ignore: rejected observations
+    - name: reject
+  - filter: Print Filter Data
+    message: Printing filter data after Background Check
+    minimum location: 0
+    maximum location: 11
+    variables:
+    - variable: ObsValue/air_temperature
+    - variable: HofX/air_temperature
+    - variable: MetaData/dateTime
+    - variable: MetaData/air_pressure
+    - variable: GeoVaLs/air_temperature
+      levels: 0, 2-4, 100
+    - variable: MetaData/ObsType
+    - variable: MetaData/station_id
+    - variable: ObsValue/missing
+    - variable: missing/air_temperature
+    - variable: GeoVaLs/missing
+    defer to post: true
+  - filter: Print Filter Data
+    message: Printing filter data with masking after Background Check
+    where:
+    - variable:
+       name: ObsValue/air_temperature
+      minvalue: 280
+    minimum location: 0
+    maximum location: 11
+    variables:
+    - variable: ObsValue/air_temperature
+    - variable: DiagnosticFlags/BkgFlag/air_temperature
+    defer to post: true
+  - filter: Variable Assignment
+    assignments:
+    - name: air_temperature@DerivedObsValue
+      type: float
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables: [air_temperature@ObsValue]
+          coefs: [2.0]
+    defer to post: true
+  - filter: Print Filter Data
+    message: Printing filter data after Variable Assignment, skip derived true
+    minimum location: 0
+    maximum location: 11
+    variables:
+    - variable: ObsValue/air_temperature
+    - variable: DerivedObsValue/air_temperature
+    defer to post: true
+    skip derived: true
+  - filter: Print Filter Data
+    message: Printing filter data after Variable Assignment, skip derived false
+    minimum location: 0
+    maximum location: 11
+    variables:
+    - variable: ObsValue/air_temperature
+    - variable: DerivedObsValue/air_temperature
+    defer to post: true
+    skip derived: false
+
+  # The number of non-missing observations
+  passedBenchmark: 1531
+
+- obs space:
+    name: minimum location > maximum location, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Print Filter Data
+    message: Printing filter data
+    minimum location: 2
+    maximum location: 1
+    variables:
+    - variable: ObsValue/air_temperature
+  expectExceptionWithMessage: Minimum location cannot be larger than maximum location
+
+- obs space:
+    name: atms
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: Print Filter Data
+    message: Printing ATMS channels
+    minimum location: 1
+    maximum location: 2
+    variables:
+    - variable:
+        name: ObsValue/brightness_temperature
+        channels: 1-7, 15-28, 100
+  passedBenchmark: 2200
+

@@ -177,6 +177,7 @@ list( APPEND ufo_test_input
   testinput/parameters_older_eckit.yaml
   testinput/primitive_variables.yaml
   testinput/metoffice_radiance_error_matrices.yaml
+  testinput/print_filter_data.yaml
   testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_bayesianbackgroundqcflags.yaml
@@ -2403,6 +2404,21 @@ set_tests_properties(test_ufo_qc_rejectlist_both_action_and_actions
 ecbuild_add_test( TARGET  test_ufo_qc_bayesianbackgroundqcflags
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_bayesianbackgroundqcflags.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_print_filter_data
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/print_filter_data.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_print_filter_data_mpi
+                  MPI 2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/print_filter_data.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
