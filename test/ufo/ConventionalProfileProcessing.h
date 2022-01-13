@@ -209,8 +209,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &zFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
-    std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     ReportFlags[0] |= ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport;
     tFlags[0] |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
@@ -230,9 +228,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
     // Run time check
     profileCheckTime.runCheck(profileDataHandler);
-
-    // Modify time flag
-    timeFlags[0] = true;
 
     // Run remaining checks
     profileCheckBackgroundT.runCheck(profileDataHandler);

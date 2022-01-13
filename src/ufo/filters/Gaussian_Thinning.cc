@@ -29,6 +29,7 @@
 #include "ufo/utils/MaxNormDistanceCalculator.h"
 #include "ufo/utils/metoffice/MetOfficeSort.h"
 #include "ufo/utils/NullDistanceCalculator.h"
+#include "ufo/utils/RecordHandler.h"
 #include "ufo/utils/RecursiveSplitter.h"
 #include "ufo/utils/RoundingEquispacedBinSelector.h"
 #include "ufo/utils/SpatialBinSelector.h"
@@ -54,10 +55,19 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
+  // The RecordHandler deals with data that have been grouped into records.
+  // If the grouping has not been performed then each RecordHandler function simply
+  // returns what it has been passed without modification.
+  const RecordHandler recordHandler(obsdb_);
+
   bool retainOnlyIfAllFilterVariablesAreValid =
           options_.retainOnlyIfAllFilterVariablesAreValid.value();
-  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_,
-                                               filtervars, !retainOnlyIfAllFilterVariablesAreValid);
+  std::vector<size_t> validObsIds =
+    obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
+                                       recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+                                       apply,
+                                       *flags_,
+                                       filtervars, !retainOnlyIfAllFilterVariablesAreValid);
 
   if (options_.opsCompatibilityMode) {
     // Sort observations by latitude
@@ -93,7 +103,11 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
   }
-  obsAccessor.flagRejectedObservations(isThinned, flagged);
+  obsAccessor.flagRejectedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeThinnedIfRecordsAreSingleObs(isThinned) :
+     isThinned,
+     flagged);
 
   // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
   if (retainOnlyIfAllFilterVariablesAreValid)
@@ -103,7 +117,9 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 ObsAccessor Gaussian_Thinning::createObsAccessor() const {
-  if (options_.categoryVariable.value() != boost::none) {
+  if (options_.recordsAreSingleObs) {
+    return ObsAccessor::toAllObservations(obsdb_);
+  } else if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value());
   } else {

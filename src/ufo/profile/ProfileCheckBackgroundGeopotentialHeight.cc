@@ -40,8 +40,6 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <float> &zObsCorrection =
        profileDataHandler.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
-    const std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
@@ -50,14 +48,14 @@ namespace ufo {
     if (!oops::allVectorsSameNonZeroSize(Zstation, pressures,
                                          zObs, zObsErr, zBkg,
                                          zPGE, zFlags, zObsCorrection,
-                                         tFlags, timeFlags)) {
+                                         tFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Check will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(Zstation, pressures,
                                                       zObs, zObsErr, zBkg,
                                                       zPGE, zFlags, zObsCorrection,
-                                                      tFlags, timeFlags)
+                                                      tFlags)
                            << std::endl;
       return;
     }
@@ -100,8 +98,6 @@ namespace ufo {
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::HydrostaticFlag)
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
-      if (timeFlags[jlev])
-        zFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
     }
 
     // Calculate probability of gross error.

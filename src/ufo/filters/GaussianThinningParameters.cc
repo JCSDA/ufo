@@ -39,6 +39,11 @@ void GaussianThinningParameters::deserialize(util::CompositePath &path,
             path.path() + ": distance_norm must not be set to 'geodesic' when "
                           "ops_compatibility_mode is set to true", Here());
   }
+
+  if (recordsAreSingleObs && categoryVariable.value() != boost::none) {
+    throw eckit::UserError(path.path() + ": category_variable must be empty if "
+                           "records_are_single_obs is set to true", Here());
+  }
 }
 
 }  // namespace ufo

@@ -55,11 +55,9 @@ constexpr const char* const ufo::VariableNames::pge_geopotential_height;
 // MetaData
 
 constexpr const char* const ufo::VariableNames::station_ID;
-constexpr const char* const ufo::VariableNames::obs_level_time;
 constexpr const char* const ufo::VariableNames::ObsType;
 constexpr const char* const ufo::VariableNames::Latitude;
 constexpr const char* const ufo::VariableNames::Longitude;
-constexpr const char* const ufo::VariableNames::Time;
 constexpr const char* const ufo::VariableNames::Zstation;
 constexpr const char* const ufo::VariableNames::LevelType;
 constexpr const char* const ufo::VariableNames::InstrType;
@@ -73,7 +71,6 @@ constexpr const char* const ufo::VariableNames::qcflags_relative_humidity;
 constexpr const char* const ufo::VariableNames::qcflags_geopotential_height;
 constexpr const char* const ufo::VariableNames::qcflags_eastward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_northward_wind;
-constexpr const char* const ufo::VariableNames::qcflags_time;
 constexpr const char* const ufo::VariableNames::qcflags_wind_profiler;
 
 // Diagnostic flags

@@ -36,10 +36,10 @@ struct VariableNames
   // HofX
 
   static constexpr const char* const hofx_air_temperature = "air_temperature@HofX";
-  static constexpr const char* const hofx_geopotential_height = "height@HofX";
   static constexpr const char* const hofx_relative_humidity = "relative_humidity@HofX";
   static constexpr const char* const hofx_eastward_wind = "eastward_wind@HofX";
   static constexpr const char* const hofx_northward_wind = "northward_wind@HofX";
+  static constexpr const char* const hofx_geopotential_height = "height@HofX";
   static constexpr const char* const hofx_dew_point_temperature = "dew_point_temperature@HofX";
 
   // Background errors
@@ -70,14 +70,12 @@ struct VariableNames
   // MetaData
 
   static constexpr const char* const station_ID = "station_id@MetaData";
-  static constexpr const char* const obs_level_time = "level_time@MetaData";
-  static constexpr const char* const ObsType = "ObsType@MetaData";
+  static constexpr const char* const ObsType = "ops_subtype@MetaData";
   static constexpr const char* const Latitude = "latitude@MetaData";
   static constexpr const char* const Longitude = "longitude@MetaData";
-  static constexpr const char* const Time = "time@MetaData";
   static constexpr const char* const Zstation = "station_altitude@MetaData";
-  static constexpr const char* const LevelType = "LevelType@MetaData";
-  static constexpr const char* const InstrType = "InstrType@MetaData";
+  static constexpr const char* const LevelType = "level_type@MetaData";
+  static constexpr const char* const InstrType = "instrument_type@MetaData";
   static constexpr const char* const extended_obs_space = "extended_obs_space@MetaData";
 
   // QC flags
@@ -88,7 +86,6 @@ struct VariableNames
   static constexpr const char* const qcflags_geopotential_height = "height@QCFlags";
   static constexpr const char* const qcflags_eastward_wind = "eastward_wind@QCFlags";
   static constexpr const char* const qcflags_northward_wind = "northward_wind@QCFlags";
-  static constexpr const char* const qcflags_time = "time@QCFlags";
   static constexpr const char* const qcflags_wind_profiler = "wind_profiler@QCFlags";
 
   // Diagnostic flags

@@ -1,0 +1,71 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Profile level count
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: number_of_levels@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: apply@MetaData
+              is_in: 1
+  compareVariables:
+  - test:
+      name: number_of_levels@DerivedMetaData
+    reference:
+      name: number_of_levels@TestReference
+
+- obs space:
+    name: Profile level count, where clause not used
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: number_of_levels@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+  compareVariables:
+  - test:
+      name: number_of_levels@DerivedMetaData
+    reference:
+      name: number_of_levels_without_where@TestReference
+
+- obs space:
+    name: Grouping not performed, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: number_of_levels@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: apply@MetaData
+              is_in: 1
+  expectExceptionWithMessage: Group variables configuration is empty

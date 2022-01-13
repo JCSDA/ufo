@@ -230,13 +230,14 @@ Wrong number of entries per profile, temperature averaging:
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
   Conventional Profile Processing:
-    Checks: ["Basic", "AveragePressure", "AverageTemperature"]
+    Checks: ["Basic", "AverageTemperature"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
   ExpectThrowDuringOperation: true
 
 #Wind speed averaging: all ObsValue variables are given one value per profile.
@@ -254,13 +255,14 @@ Wrong number of entries per profile, wind speed averaging:
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
   Conventional Profile Processing:
-    Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
+    Checks: ["Basic", "AverageWindSpeed"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
   ExpectThrowDuringOperation: true
 
 #Relative humidity averaging: all ObsValue variables are given one value per profile.
@@ -278,13 +280,14 @@ Wrong number of entries per profile, relative humidity averaging:
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
   Conventional Profile Processing:
-    Checks: ["Basic", "AveragePressure", "AverageRelativeHumidity"]
+    Checks: ["Basic", "AverageRelativeHumidity"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
   ExpectThrowDuringOperation: true
 
 #A group variable is not chosen, throwing an exception

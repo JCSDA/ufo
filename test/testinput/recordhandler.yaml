@@ -1,0 +1,157 @@
+Two records, input true everywhere:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at earliest datetime in each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 1, 0, 0]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at latest datetime in each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 0, 0, 1, 0, 0, 1]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at earliest datetime in each, dateTimes out of order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 0, 0, 1, 0, 0, 1]
+  expected_apply: [ 0, 0, 1, 0, 0, 1 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at latest datetime in each, dateTimes out of order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 1, 0, 0]
+  expected_apply: [ 0, 0, 1, 0, 0, 1 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, missing dateTime at start of each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 252018950097, 0, 1,
+                     252018950097, 60, 61 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 0, 1, 0]
+  expected_apply: [ 0, 1, 0, 0, 1, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, all dateTimes missing:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 252018950097, 252018950097, 252018950097,
+                     252018950097, 252018950097, 252018950097 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 0, 1, 0]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, no grouping:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0]
+  input: [ 1, 0, 1, 1, 0, 1 ]
+  expected_apply: [ 1, 0, 1, 1, 0, 1 ]
+  expected_isThinned : [ 1, 0, 1, 1, 0, 1 ]

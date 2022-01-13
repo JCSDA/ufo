@@ -87,6 +87,7 @@ list( APPEND ufo_test_input
   testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
   testinput/function_orbitangle_ssmis.yaml
+  testinput/function_profilelevelcount.yaml
   testinput/function_reperr.yaml
   testinput/function_setsurfacetype.yaml
   testinput/function_setsurfacetype_ssmis.yaml
@@ -231,6 +232,7 @@ list( APPEND ufo_test_input
   testinput/qc_acceptlist.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
+  testinput/recordhandler.yaml
   testinput/reflectivity.yaml
   testinput/satellite_selector_predictor.yaml
   testinput/satname.yaml
@@ -537,6 +539,11 @@ ecbuild_add_executable( TARGET  test_ConventionalProfileProcessing.x
 
 ecbuild_add_executable( TARGET  test_Predictor.x
                         SOURCES mains/TestPredictor.cc
+                        LIBS    ufo
+                       )
+
+ecbuild_add_executable( TARGET  test_RecordHandler.x
+                        SOURCES mains/TestRecordHandler.cc
                         LIBS    ufo
                        )
 
@@ -2364,6 +2371,13 @@ ecbuild_add_test( TARGET  test_ufo_function_datetimeoffset
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_function_profilelevelcount
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/function_profilelevelcount.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_performaction
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_performaction.yaml"
@@ -2755,6 +2769,13 @@ ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_MPI_average_rel
                   ARGS    "testinput/conventionalprofileprocessing_average_relativehumidity_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ConventionalProfileProcessing.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_recordhandler
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_RecordHandler.x
+                  ARGS    "testinput/recordhandler.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_RecordHandler.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test Variable Transforms

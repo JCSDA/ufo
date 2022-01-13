@@ -38,8 +38,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::pge_air_temperature);
     std::vector <int> &tFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
-    const std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
     const std::vector <float> &tObsCorrection =
        profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     const std::vector <int> &extended_obs_space =
@@ -49,13 +47,13 @@ namespace ufo {
 
     if (!oops::allVectorsSameNonZeroSize(Latitude, pressures,
                                          tObs, tObsErr, tBkg, tBkgErr,
-                                         tPGE, tFlags, timeFlags, tObsCorrection)) {
+                                         tPGE, tFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Check will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(Latitude, pressures,
                                                       tObs, tObsErr, tBkg, tBkgErr,
-                                                      tPGE, tFlags, timeFlags, tObsCorrection)
+                                                      tPGE, tFlags, tObsCorrection)
                            << std::endl;
       return;
     }
@@ -97,8 +95,6 @@ namespace ufo {
         tPGE[jlev] = 0.5 + 0.5 * tPGE[jlev];
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::HydrostaticFlag)
         tPGE[jlev] = 0.5 + 0.5 * tPGE[jlev];
-      if (timeFlags[jlev])
-        tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
     }
 
     // Calculate probability of gross error.

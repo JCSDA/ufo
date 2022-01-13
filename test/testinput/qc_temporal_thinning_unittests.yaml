@@ -676,3 +676,95 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
                                   6,  7,  8,   10, 11,
                                  12, 13, 14,   16, 17,
                                  18, 19, 20]
+
+Records are single obs:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1, 1 ]
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  priority: [3, 3, 3, 4, 4, 4, 4]
+  TemporalThinning:
+    min_spacing: PT1M
+    tolerance: PT1M
+    priority_variable:
+      name: priority@MetaData
+    records_are_single_obs: true
+  expected_thinned_obs_indices: [0, 1, 2]
+
+Records are single obs, no priority:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1, 1 ]
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  TemporalThinning:
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+  expected_thinned_obs_indices: [3, 4, 5, 6]
+
+Records are single obs, category_variable set (expect exception):
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1, 1 ]
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  category: [0, 0, 0, 1, 1, 1, 1]
+  TemporalThinning:
+    min_spacing: PT1M
+    tolerance: PT1M
+    category_variable:
+      name: category@MetaData
+    records_are_single_obs: true
+  on_deserialization_expect_exception_with_message: category_variable must be empty if records_are_single_obs is set to true
+
+

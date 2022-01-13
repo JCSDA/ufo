@@ -46,8 +46,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
     std::vector <int> &vFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
-    const std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
@@ -56,14 +54,14 @@ namespace ufo {
     if (!oops::allVectorsSameNonZeroSize(uObs, uObsErr, uBkg, uBkgErr,
                                          uPGE, uFlags,
                                          vObs, vObsErr, vBkg, vBkgErr,
-                                         vPGE, vFlags, timeFlags)) {
+                                         vPGE, vFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
                            << "Check will not be performed." << std::endl;
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(uObs, uObsErr, uBkg, uBkgErr,
                                                       uPGE, uFlags,
                                                       vObs, vObsErr, vBkg, vBkgErr,
-                                                      vPGE, vFlags, timeFlags)
+                                                      vPGE, vFlags)
                            << std::endl;
       return;
     }
@@ -75,8 +73,6 @@ namespace ufo {
     for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)
         uPGE[jlev] = 0.5 + 0.5 * uPGE[jlev];
-      if (timeFlags[jlev])
-        uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
     }
 
     // Calculate probability of gross error.

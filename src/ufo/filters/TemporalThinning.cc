@@ -22,6 +22,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TemporalThinningParameters.h"
+#include "ufo/utils/RecordHandler.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {
@@ -319,13 +320,30 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
                                    std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  const std::vector<bool> isThinned = identifyThinnedObservations(apply, filtervars, obsAccessor);
+  // The RecordHandler deals with data that have been grouped into records.
+  // If the grouping has not been performed then each RecordHandler function simply
+  // returns what it has been passed without modification.
+  const RecordHandler recordHandler(obsdb_);
 
-  obsAccessor.flagRejectedObservations(isThinned, flagged);
+  const std::vector<bool> isThinned =
+    identifyThinnedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+     apply,
+     filtervars,
+     obsAccessor);
+
+  obsAccessor.flagRejectedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeThinnedIfRecordsAreSingleObs(isThinned) :
+     isThinned,
+     flagged);
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {
-  if (options_.categoryVariable.value() != boost::none) {
+  if (options_.recordsAreSingleObs) {
+    return ObsAccessor::toAllObservations(obsdb_);
+  } else if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value() );
   } else if (!obsdb_.obs_group_vars().empty()) {
