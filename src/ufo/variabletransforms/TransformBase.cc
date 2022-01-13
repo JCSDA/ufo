@@ -24,6 +24,10 @@ TransformBase::TransformBase(const VariableTransformParametersBase& options,
   obsName_ = data_.obsspace().obsname();
 }
 
+std::string TransformBase::getDerivedGroup(const std::string group) const {
+  return std::string("Derived") + group;
+}
+
 TransformFactory::TransformFactory(const std::string& name) {
   if (getMakers().find(name) != getMakers().end())
     throw eckit::BadParameter(

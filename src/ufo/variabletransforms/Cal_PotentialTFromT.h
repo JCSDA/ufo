@@ -26,6 +26,9 @@ class Cal_PotentialTFromTParameters: public VariableTransformParametersBase {
   /// input pressure variable name
   oops::Parameter<std::string> PressureVariable{"pressure variable",
                                                 "pressure", this};
+  /// input pressure group name
+  oops::Parameter<std::string> PressureGroup{"pressure group",
+                                             "ObsValue", this};
   /// input temperature variable name
   oops::Parameter<std::string> TemperatureVariable{"temperature variable",
                                                    "airTemperature", this};
@@ -63,6 +66,7 @@ class Cal_PotentialTFromT : public TransformBase {
 
  private:
   std::string pressurevariable_;
+  std::string pressuregroup_;
   std::string temperaturevariable_;
   std::string potentialtempvariable_;
 };

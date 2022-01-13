@@ -33,7 +33,7 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
     this};
 
   oops::RequiredParameter<std::string> modelVerticalCoordinate{
-    "vertical coordinate",
+    "model vertical coordinate",
     "Name of model vertical coordinate",
     this};
 
@@ -50,6 +50,16 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
     "If true, perform comparisons of auxiliary variables with OPS",
     false,
     this};
+
+  oops::Parameter<std::string> pressureCoord{"pressure coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+
+  oops::Parameter<std::string> pressureGroup{"pressure group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
 };
 
 }  // namespace ufo

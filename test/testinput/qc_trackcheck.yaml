@@ -25,6 +25,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark: &referenceCaseFlaggedObsIds
       - 184
       - 187
@@ -80,6 +82,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "10000":   400.000000, "35000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 184
       - 187
@@ -146,6 +150,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   275.000000, "100000":    20.000000, "110000":    20.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 184
       - 187
@@ -215,6 +221,8 @@ observations:
     max_climb_rate:   150.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 184
       - 187
@@ -316,6 +324,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 188
       - 193
@@ -369,6 +379,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 193
       - 195
@@ -390,6 +402,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 188
       - 193
@@ -443,6 +457,8 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.750000
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark:
       - 188
       - 193
@@ -494,6 +510,8 @@ observations:
     rejection_threshold:     0.500000
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
   benchmarkFlag: 21 # track
@@ -515,6 +533,8 @@ observations:
     rejection_threshold:     0.500000
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
   benchmarkFlag: 21 # track

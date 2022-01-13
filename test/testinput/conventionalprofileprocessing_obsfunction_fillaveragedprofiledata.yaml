@@ -25,6 +25,7 @@ observations:
           options:
             variable to copy: latitude@MetaData
             model vertical coordinate: air_pressure_levels
+            observation vertical coordinate: MetaData/air_pressure
   compareVariables:
   - test:
       name: latitude@DerivedMetaData
@@ -51,6 +52,7 @@ observations:
           options:
             variable to copy: latitude@MetaData
             model vertical coordinate: air_pressure_levels
+            observation vertical coordinate: MetaData/air_pressure
   expectExceptionWithMessage: Group variables configuration is empty
 
 - obs space:
@@ -74,6 +76,7 @@ observations:
           options:
             variable to copy: latitude@MetaData
             model vertical coordinate: air_pressure_levels
+            observation vertical coordinate: MetaData/air_pressure
   expectExceptionWithMessage: The extended obs space has not been produced
 
 - obs space:
@@ -99,4 +102,5 @@ observations:
           options:
             variable to copy: latitude@MetaData
             model vertical coordinate: theta
+            observation vertical coordinate: MetaData/air_pressure
   expectExceptionWithMessage: Model vertical coordinate must be a pressure

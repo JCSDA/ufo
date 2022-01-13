@@ -30,6 +30,11 @@ class FillAveragedProfileDataParameters : public oops::Parameters {
       "Name of the variable to be copied from the original to the averaged profiles.",
       this};
 
+  oops::RequiredParameter<std::string> observation_vertical_coordinate
+    {"observation vertical coordinate",
+     "Name of the observation vertical coordinate.",
+     this};
+
   oops::RequiredParameter<std::string> model_vertical_coordinate
     {"model vertical coordinate",
      "Name of the model vertical coordinate.",

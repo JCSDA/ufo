@@ -237,7 +237,8 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   obsData.minVerticalSpacings = options_.minVerticalSpacing.value();
   if (obsData.minVerticalSpacings != boost::none) {
     validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
-    obsData.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+    obsData.pressures =
+      obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup, options_.pressureCoord);
     ++numNonspatialDims;
   }
 

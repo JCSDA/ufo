@@ -13,19 +13,23 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/SlantPathLocations.h"
+#include "ufo/utils/StringUtils.h"  // for splitVarGroup
 
 namespace ufo {
 
   std::vector<std::size_t> getSlantPathLocations(const ioda::ObsSpace & odb,
                                                  const GeoVaLs & gv,
                                                  const std::vector<std::size_t> & locs,
+                                                 const std::string & obsVerticalCoord,
                                                  const std::string & modelVerticalCoord,
                                                  const int itermax) {
     const float missing = util::missingValue(missing);
 
     // Get observed pressure.
     std::vector<float> pressure_obs(odb.nlocs());
-    odb.get_db("MetaData", "air_pressure", pressure_obs);
+    std::string obsVar, obsGroup;
+    splitVarGroup(obsVerticalCoord, obsVar, obsGroup);
+    odb.get_db(obsGroup, obsVar, pressure_obs);
 
     // If the pressure GeoVaL is not present, return an empty vector.
     // todo(ctgh): eventually throw an exception here.

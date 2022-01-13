@@ -24,7 +24,7 @@ observations:
     pressure group: MetaData
   compareVariables:
   - test:
-      name: air_pressure@DerivedObsValue
+      name: air_pressure@DerivedMetaData
     reference:
       name: air_pressure_ICAO_reference@ObsValue
     relTol: 1.0e-5

@@ -78,6 +78,16 @@ class TrackCheckParameters : public TrackCheckUtilsParameters {
   /// rejected.
   oops::Parameter<float> rejectionThreshold {
     "rejection_threshold", 0.5f, this};
+  /// Name of air pressure coordinate
+  oops::Parameter<std::string> pressureCoord{"pressure_coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+  /// Name of air pressure group
+  oops::Parameter<std::string> pressureGroup{"pressure_group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
 };
 
 }  // namespace ufo

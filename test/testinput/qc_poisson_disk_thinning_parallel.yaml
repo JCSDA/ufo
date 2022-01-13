@@ -11,6 +11,8 @@
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 02 Seed from clock, inefficient distribution, categories:
   window begin: 2000-01-01T00:00:00Z
@@ -26,6 +28,8 @@
     category_variable:
       name: round@MetaData
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 03 Seed from clock, inefficient distribution, categories, records:
   window begin: 2000-01-01T00:00:00Z
@@ -43,6 +47,8 @@
     category_variable:
       name: round@MetaData
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 04 Seed from clock, round-robin distribution:
   window begin: 2000-01-01T00:00:00Z
@@ -55,6 +61,8 @@
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 05 Seed from clock, round-robin distribution, categories:
   window begin: 2000-01-01T00:00:00Z
@@ -69,6 +77,8 @@
     category_variable:
       name: round@MetaData
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 06 Seed from clock, round-robin distribution, categories, records:
   window begin: 2000-01-01T00:00:00Z
@@ -85,6 +95,8 @@
     category_variable:
       name: round@MetaData
     shuffle: true
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
 
 07 Fixed seed, round-robin distribution, categories:
   window begin: 2000-01-01T00:00:00Z
@@ -100,3 +112,5 @@
       name: round@MetaData
     shuffle: true
     random_seed: 12345
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData

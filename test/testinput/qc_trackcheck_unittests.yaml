@@ -24,6 +24,8 @@ Only valid observations:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: []
 
 One observation with excessive speed:
@@ -52,6 +54,8 @@ One observation with excessive speed:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
 One observation with excessive climb rate:
@@ -80,6 +84,8 @@ One observation with excessive climb rate:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
 Climb rate checks disabled:
@@ -107,6 +113,8 @@ Climb rate checks disabled:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: []
 
 Where clause:
@@ -139,6 +147,8 @@ Where clause:
     - variable:
         name: latitude@MetaData
       minvalue: -1
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
 Multiple clusters of observations with excessive speed:
@@ -209,6 +219,8 @@ Multiple clusters of observations with excessive speed:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
 
 Multiple station ids:
@@ -240,6 +252,8 @@ Multiple station ids:
     rejection_threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [4, 5]
 
 No station id variable, no observation grouping:
@@ -265,4 +279,6 @@ No station id variable, no observation grouping:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
+    pressure_coordinate: air_pressure
+    pressure_group: MetaData
   expected_rejected_obs_indices: [2]

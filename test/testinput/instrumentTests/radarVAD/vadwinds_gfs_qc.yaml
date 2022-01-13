@@ -99,6 +99,7 @@ observations:
         options:
           test QCflag: PreQC
           inflate variables: [eastward_wind]
+          pressure: MetaData/air_pressure
     defer to post: true
   #
   - filter: Perform Action
@@ -111,6 +112,7 @@ observations:
         options:
           test QCflag: PreQC
           inflate variables: [northward_wind]
+          pressure: MetaData/air_pressure
     defer to post: true
   #
   # Gross error check with (O - B) / ObsError greater than threshold.

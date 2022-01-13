@@ -159,6 +159,18 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// Tracing information will be output for observations lying within any of the specified boxes.
   oops::Parameter<std::vector<LatLonBoxParameters>> tracedBoxes{"traced_boxes", {}, this};
 
+  /// Name of air pressure coordinate
+  oops::Parameter<std::string> pressureCoord{"pressure_coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+
+  /// Name of air pressure group
+  oops::Parameter<std::string> pressureGroup{"pressure_group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
+
   /// @}
 };
 

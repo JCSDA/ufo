@@ -162,6 +162,18 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   ///
   /// If omitted, a seed will be generated based on the current (calendar) time.
   oops::OptionalParameter<int> randomSeed{"random_seed", this};
+
+  /// Name of air pressure coordinate
+  oops::Parameter<std::string> pressureCoord{"pressure_coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+
+  /// Name of air pressure group
+  oops::Parameter<std::string> pressureGroup{"pressure_group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
 };
 
 }  // namespace ufo

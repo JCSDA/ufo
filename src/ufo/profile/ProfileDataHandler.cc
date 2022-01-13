@@ -240,6 +240,7 @@ namespace ufo {
           ufo::getSlantPathLocations(obsdb_,
                                      *geovals_,
                                      profileIndices_->getProfileIndices(),
+                                     ufo::VariableNames::obs_air_pressure,
                                      this->getAssociatedVerticalCoordinate(variableName));
         // Vector storing GeoVaL data for current profile.
         vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);

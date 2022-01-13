@@ -129,6 +129,7 @@ void FillAveragedProfileData<FunctionValue>::fillAverageProfile
       ufo::getSlantPathLocations(obsdb,
                                  gv_copy,
                                  locsOriginal,
+                                 options_.observation_vertical_coordinate,
                                  options_.model_vertical_coordinate,
                                  options_.numIntersectionIterations.value() - 1);
 

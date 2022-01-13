@@ -38,6 +38,11 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
   /// distance between the two vertical points is bigger than the threshold,
   /// these observations will not be considered for the obs inflation
   oops::OptionalParameter<float> distthreshold{"distance threshold", this};
+  /// Name of air pressure
+  oops::Parameter<std::string> pressureFullName{"pressure",
+                                                "Full name of air pressure",
+                                                "ObsValue/pressure",
+                                                this};
 };
 
 // -----------------------------------------------------------------------------

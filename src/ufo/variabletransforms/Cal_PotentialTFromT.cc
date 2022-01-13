@@ -26,6 +26,7 @@ Cal_PotentialTFromT::Cal_PotentialTFromT(
         const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr),
       pressurevariable_(options.PressureVariable),
+      pressuregroup_(options.PressureGroup),
       temperaturevariable_(options.TemperatureVariable),
       potentialtempvariable_(options.PotentialTempVariable)
 {}
@@ -60,7 +61,7 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
   std::vector<float> potTempErr(nlocs, missingValueFloat);
   std::vector<float> temppge;
   std::vector<int> tempflags;
-  getObservation("ObsValue", pressurevariable_,
+  getObservation(pressuregroup_, pressurevariable_,
                  pressure, true);
   getObservation("ObsValue", temperaturevariable_,
                  temperature, true);

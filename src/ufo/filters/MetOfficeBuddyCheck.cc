@@ -440,8 +440,9 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
   obsData.longitudes = getGlobalObsSpaceVariable<float>("MetaData", "longitude");
   obsData.datetimes = getGlobalObsSpaceVariable<util::DateTime>("MetaData", "dateTime");
 
-  if (obsdb_.has("MetaData", "air_pressure")) {
-    obsData.pressures = getGlobalObsSpaceVariable<float>("MetaData", "air_pressure");
+  if (obsdb_.has(options_.pressureGroup, options_.pressureCoord)) {
+    obsData.pressures =
+      getGlobalObsSpaceVariable<float>(options_.pressureGroup, options_.pressureCoord);
     obsData.pressuresML = unravel(*obsData.pressures, profileIndex);
   }
   obsData.stationIds = getStationIds();
@@ -451,7 +452,7 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
     obsData.longitudes = extract1stLev(obsData.longitudes, profileIndex);
     obsData.datetimes = extract1stLev(obsData.datetimes, profileIndex);
     obsData.stationIds = extract1stLev(obsData.stationIds, profileIndex);
-    if (obsdb_.has("MetaData", "air_pressure")) {
+    if (obsdb_.has(options_.pressureGroup, options_.pressureCoord)) {
       obsData.pressures = extract1stLev(*obsData.pressures, profileIndex);
     }
   }

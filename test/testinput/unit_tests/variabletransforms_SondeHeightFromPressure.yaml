@@ -21,10 +21,12 @@ observations:
     Transform: HeightFromPressure
     Method: UKMO
     height coordinate: geopotential_height
+    height group: MetaData
     pressure coordinate: air_pressure
+    pressure group: MetaData
   compareVariables:
   - test:
-      name: geopotential_height@DerivedObsValue
+      name: geopotential_height@DerivedMetaData
     reference:
       name: geopotential_height_ICAO_reference@ObsValue
     relTol: 1.0e-5
@@ -44,10 +46,12 @@ observations:
     Transform: HeightFromPressure
     Method: NCAR
     height coordinate: geopotential_height
+    height group: MetaData
     pressure coordinate: air_pressure
+    pressure group: MetaData
   compareVariables:
   - test:
-      name: geopotential_height@DerivedObsValue
+      name: geopotential_height@DerivedMetaData
     reference:
       name: geopotential_height_NCAR_reference@ObsValue
     relTol: 1.0e-5
@@ -67,10 +71,12 @@ observations:
     Transform: HeightFromPressure
     Method: UKMO
     height coordinate: height
+    height group: MetaData
     pressure coordinate: air_pressure
+    pressure group: MetaData
   compareVariables:
   - test:
-      name: height@DerivedObsValue
+      name: height@DerivedMetaData
     reference:
       name: height_ICAO_reference@ObsValue
     relTol: 1.0e-5
@@ -90,10 +96,12 @@ observations:
     Transform: HeightFromPressure
     Method: UKMO
     height coordinate: geopotential_height_levels
+    height group: MetaData
     pressure coordinate: air_pressure_levels
+    pressure group: MetaData
   compareVariables:
   - test:
-      name: geopotential_height_levels@DerivedObsValue
+      name: geopotential_height_levels@DerivedMetaData
     reference:
       name: geopotential_height_levels_ICAO_reference@ObsValue
     relTol: 1.0e-5
@@ -113,10 +121,12 @@ observations:
     Transform: HeightFromPressure
     Method: UKMO
     height coordinate: height_levels
+    height group: MetaData
     pressure coordinate: air_pressure_levels
+    pressure group: MetaData
   compareVariables:
   - test:
-      name: height_levels@DerivedObsValue
+      name: height_levels@DerivedMetaData
     reference:
       name: height_levels_ICAO_reference@ObsValue
     relTol: 1.0e-5

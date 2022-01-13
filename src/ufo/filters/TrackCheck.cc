@@ -132,7 +132,8 @@ TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocation
     const ObsAccessor &obsAccessor) const {
   ObsGroupPressureLocationTime obsPressureLoc;
   obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
-  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
+                                                                      options_.pressureCoord);
   return obsPressureLoc;
 }
 

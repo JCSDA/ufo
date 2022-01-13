@@ -24,3 +24,4 @@ observations:
       test QCflag: PreQC  # Optional. Default is from filter qcflags     
       test QCthreshold: 2 # Optonal only when using PreQC flags 
                           # Default value = 3 for PreQC
+      pressure: "MetaData/air_pressure"

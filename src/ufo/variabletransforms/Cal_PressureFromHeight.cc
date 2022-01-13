@@ -238,7 +238,8 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
   if (hasBeenUpdated) {
     // if updated the airPressure
     // assign the derived air pressure as DerivedObsValue
-    putObservation(pressureCoord_, airPressure);
+    putObservation(pressureCoord_, airPressure,
+                   getDerivedGroup(pressureGroup_));
   }
 }
 
@@ -335,7 +336,8 @@ void Cal_PressureFromHeightForICAO::methodUKMO(const std::vector<bool> &apply) {
   if (hasBeenUpdated) {
     // if updated the airPressure
     // assign the derived air pressure as DerivedObsValue
-    putObservation(pressureCoord_, airPressure);
+    putObservation(pressureCoord_, airPressure,
+                   getDerivedGroup(pressureGroup_));
   }
 }
 }  // namespace ufo

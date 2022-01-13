@@ -65,6 +65,7 @@ observations:
         options:
           test QCflag: PreQC
           inflate variables: [virtual_temperature]
+          pressure: MetaData/air_pressure
     defer to post: true
   #
   # Gross error check with (O - B) / ObsError greater than threshold.

@@ -25,8 +25,10 @@ namespace ufo {
       throw eckit::UserError("Group variables configuration is empty", Here());
 
     // Ensure observations have been sorted by air pressure in descending order.
-    if (odb_.obs_sort_var() != "air_pressure")
-      throw eckit::UserError("Sort variable must be air_pressure", Here());
+    if (odb_.obs_sort_var() != parameters.pressureCoord.value())
+      throw eckit::UserError(std::string("Sort variable must be ") +
+                             parameters.pressureCoord.value(),
+                             Here());
     if (odb_.obs_sort_order() != "descending")
       throw eckit::UserError("Profiles must be sorted in descending order", Here());
 
@@ -35,11 +37,6 @@ namespace ufo {
     // extended sections of the ObsSpace.
     if (!odb_.has("MetaData", "extended_obs_space"))
       throw eckit::UserError("The extended obs space has not been produced", Here());
-
-    // Check the observed pressure is present. This is necessary in order to
-    // determine the slant path locations.
-    if (!odb_.has("MetaData", "air_pressure"))
-      throw eckit::UserError("air_pressure@MetaData not present", Here());
 
     // Add model air pressure to the list of variables used in this operator.
     // This GeoVaL is used to determine the slant path locations.
@@ -92,6 +89,9 @@ namespace ufo {
       ufo::getSlantPathLocations(odb_,
                                  *cachedGeoVaLs_,
                                  locsOriginal,
+                                 options_.pressureGroup.value() +
+                                 std::string("/") +
+                                 options_.pressureCoord.value(),
                                  modelVerticalCoord_,
                                  options_.numIntersectionIterations.value() - 1);
 

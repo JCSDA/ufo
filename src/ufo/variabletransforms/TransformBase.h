@@ -117,7 +117,8 @@ class TransformBase {
   /// \param varName Variable name.
   /// \param obsVactor Variable values.
   template <typename T>
-  void putObservation(const std::string &varName, const std::vector<T> &obsVector) {
+  void putObservation(const std::string &varName, const std::vector<T> &obsVector,
+                      const std::string &outputTag = "DerivedObsValue") {
     obsdb_.put_db(outputTag, varName, obsVector);
     if (flags_.has(varName)) {
       std::vector<int> &varFlags = flags_[varName];
@@ -132,6 +133,8 @@ class TransformBase {
       }
     }
   }
+
+  std::string getDerivedGroup(const std::string group) const;
 
   /// subclasses to access Method and formualtion used for the calculation
   formulas::MethodFormulation method() const { return method_; }
@@ -153,8 +156,6 @@ class TransformBase {
   const int missingValueInt = util::missingValue(1);
   /// Missing value (float)
   const float missingValueFloat = util::missingValue(1.0f);
-  /// output tag for derived parameters
-  const std::string outputTag = "DerivedObsValue";
 };
 
 /// \brief Transform factory
