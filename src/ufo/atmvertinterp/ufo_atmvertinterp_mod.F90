@@ -48,7 +48,8 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name
   if( (trim(self%v_coord) .eq. var_prs) .or. &
-    (trim(self%v_coord) .eq. var_prsi) ) then
+    (trim(self%v_coord) .eq. var_prsi) .or. &
+    (trim(self%v_coord) .eq. var_prsimo) ) then
       self%use_ln = .true.
   endif
 
