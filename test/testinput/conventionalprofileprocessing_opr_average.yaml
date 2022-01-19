@@ -154,7 +154,7 @@ observations:
   vector ref: MetOfficeHofX
   tolerance: 1.0e-04
 
-# GeoVaLs ordered from bottom to top: eastward_wind.
+# GeoVaLs ordered from bottom to top, throwing an exception
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -179,8 +179,7 @@ observations:
     coef TL: 0.1
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
-  vector ref: MetOfficeHofX
-  tolerance: 1.0e-06
+  expect simulateObs to throw exception with message: GeoVaLs are in the wrong order
 
 # The group variable is not used, throwing an exception.
 - obs space:

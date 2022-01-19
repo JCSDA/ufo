@@ -32,12 +32,19 @@ namespace ufo {
   {
     if (data.getGeoVaLs() && data.getGeoVaLs()->nlocs() > 0) {
       geovals_.reset(new GeoVaLs(*(data.getGeoVaLs())));
-      if (geovals_->has(ufo::VariableNames::geovals_pressure))
-        geovals_->reorderzdir(ufo::VariableNames::geovals_pressure, "bottom2top");
-      else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho))
-        geovals_->reorderzdir(ufo::VariableNames::geovals_pressure_rho, "bottom2top");
-      else
+      if (geovals_->has(ufo::VariableNames::geovals_pressure)) {
+        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure));
+        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure, 0);
+        if (vec_gv.front() > vec_gv.back())
+          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
+      } else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho)) {
+        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure_rho));
+        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure_rho, 0);
+        if (vec_gv.front() > vec_gv.back())
+          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
+      } else {
         throw eckit::BadValue("GeoVaLs must contain a pressure coordinate");
+      }
     }
     profileIndices_.reset(new ProfileIndices(obsdb_, options, apply));
     entireSampleDataHandler_.reset(new EntireSampleDataHandler(data, options));
@@ -256,12 +263,13 @@ namespace ufo {
           for (std::size_t mlev = 0; mlev < slant_path_location.size(); ++mlev) {
             const std::size_t jloc = slant_path_location[mlev];
             geovals_->getAtLocation(vec_GeoVaL_loc, variableName, jloc);
-            vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[mlev];
+            vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[slant_path_location.size() - 1 - mlev];
           }
         } else {
           // Take the GeoVaL at the first location.
           const std::size_t jloc = profileIndices_->getProfileIndices()[0];
           geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
+          std::reverse(vec_GeoVaL_column.begin(), vec_GeoVaL_column.end());
         }
       }
       // Add GeoVaL vector to map (even if it is empty).

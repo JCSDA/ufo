@@ -59,11 +59,6 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
   // GeoVaLs.
   const GeoVaLs * const gv(in.getGeoVaLs());
 
-  // Copy and reverse the GeoVaLs for use in the operator.
-  // todo(ctgh): eventually remove this.
-  GeoVaLs gv_copy(*gv);
-  gv_copy.reorderzdir(options_.model_vertical_coordinate.value(), "bottom2top");
-
   // Number of locations.
   const size_t nlocs = obsdb.nlocs();
 
@@ -82,7 +77,7 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
     options_.model_vertical_coordinate.value();
 
   // Vector holding model vertical coordinate at different locations.
-  std::vector<double> var_gv(gv_copy.nlevs(model_vertical_coordinate));
+  std::vector<double> var_gv(gv->nlevs(model_vertical_coordinate));
 
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < nprofs; ++jprof) {
@@ -97,7 +92,10 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
     const std::vector<std::size_t> &locsExtended = obsdb.recidx_vector(recnums[jprof + nprofs]);
 
     // GeoVaL vector for this variable at the first location in the original profile.
-    gv_copy.getAtLocation(var_gv, model_vertical_coordinate, locsOriginal[0]);
+    gv->getAtLocation(var_gv, model_vertical_coordinate, locsOriginal[0]);
+    // The GeoVaLs must be ordered from bottom to top for this algorithm to work.
+    if (var_gv.front() > var_gv.back())
+      throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
 
     // Write out values to output vector
     // Pressures in original profile.
@@ -106,7 +104,7 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
 
     // Pressures in averaged profile.
     for (size_t idx = 0; idx < locsExtended.size(); ++idx)
-      out[0][locsExtended[idx]] = var_gv[idx];
+      out[0][locsExtended[idx]] = var_gv[locsExtended.size() - 1 - idx];
   }
 
   oops::Log::trace() << "ProfileAverageObsPressure::compute finished" << std::endl;

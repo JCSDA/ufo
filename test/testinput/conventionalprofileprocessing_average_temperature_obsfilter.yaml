@@ -31,7 +31,7 @@ observations:
   passedBenchmark: 1605
   benchmarkFlag: 24
   flaggedBenchmark: 108
-# The same test wtih GeoVaLs ordered from bottom to top.
+# The same test wtih GeoVaLs ordered from bottom to top, throwing an exception
 - obs space:
     name: Radiosonde, GeoVaLs reversed
     obsdatain:
@@ -54,7 +54,4 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
   HofX: HofX
-  passedBenchmark: 1605
-  benchmarkFlag: 24
-  flaggedBenchmark: 108
-
+  expectExceptionWithMessage: GeoVaLs are in the wrong order

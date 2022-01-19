@@ -50,12 +50,12 @@ namespace ufo {
     // It is initialised at the first location in the original profile.
     std::size_t jlocslant = locs.front();
     // Loop over each model level in turn.
-    for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
+    for (int mlev = nlevs_p - 1; mlev >= 0; --mlev) {
       for (int iter = 0; iter <= itermax; ++iter) {
         // Get the GeoVaL that corresponds to the current slanted profile location.
         gv.getAtLocation(pressure_gv, modelVerticalCoord, jlocslant);
-        // The GeoVaLs must be ordered from bottom to top for this algorithm to work.
-        if (pressure_gv.front() < pressure_gv.back())
+        // The GeoVaLs must be ordered from top to bottom for this algorithm to work.
+        if (pressure_gv.front() > pressure_gv.back())
           throw eckit::BadValue("Pressure GeoVaLs are in the wrong order.", Here());
         // Define an iteration-specific location that is initialised to the
         // current slanted profile location.
@@ -81,7 +81,7 @@ namespace ufo {
         if (iter == itermax) {
           // Record the value of the slant path location at this model level and all above.
           // This ensures that missing values are dealt with correctly.
-          for (std::size_t mlevcolumn = mlev; mlevcolumn < nlevs_p; ++mlevcolumn)
+          for (int mlevcolumn = nlevs_p - 1 - mlev; mlevcolumn < nlevs_p; ++mlevcolumn)
            slant_path_location[mlevcolumn] = jlocslant;
         }
       }

@@ -17,8 +17,7 @@ namespace ufo {
   ObsProfileAverageData::ObsProfileAverageData(const ioda::ObsSpace & odb,
                                                const ObsProfileAverageParameters & parameters)
     : odb_(odb),
-      options_(parameters),
-      GeoVaLsAreTopToBottom_(true)
+      options_(parameters)
   {
     // Ensure observations have been grouped into profiles.
     if (odb_.obs_group_vars().empty())
@@ -67,18 +66,8 @@ namespace ufo {
 
   void ObsProfileAverageData::cacheGeoVaLs(const GeoVaLs & gv) const {
     // Only perform the caching once.
-    if (!cachedGeoVaLs_) {
+    if (!cachedGeoVaLs_)
       cachedGeoVaLs_.reset(new GeoVaLs(gv));
-      // Determine the direction of the input GeoVaLs.
-      std::vector<float> pressure(gv.nlevs(modelVerticalCoord_));
-      gv.getAtLocation(pressure, modelVerticalCoord_, 0);
-      if (pressure.front() > pressure.back()) {
-        GeoVaLsAreTopToBottom_ = false;
-      } else {
-        // Reorder the cached GeoVaLs.
-        cachedGeoVaLs_->reorderzdir(modelVerticalCoord_, "bottom2top");
-      }
-    }
   }
 
   std::vector<std::size_t> ObsProfileAverageData::getSlantPathLocations
@@ -105,7 +94,7 @@ namespace ufo {
       std::vector <float> pressure_gv(nlevs_p);
       for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
         cachedGeoVaLs_->getAtLocation(pressure_gv, modelVerticalCoord_, slant_path_location[mlev]);
-        slant_pressure.push_back(pressure_gv[mlev]);
+        slant_pressure.push_back(pressure_gv[nlevs_p - 1 - mlev]);
       }
       this->compareAuxiliaryReferenceVariables(locsExtended,
                                                slant_path_location,

@@ -94,11 +94,6 @@ void FillAveragedProfileData<FunctionValue>::fillAverageProfile
   // GeoVaLs.
   const GeoVaLs * const gv(in.getGeoVaLs());
 
-  // Copy and reverse the GeoVaLs for use in the operator.
-  // todo(ctgh): eventually remove this.
-  GeoVaLs gv_copy(*gv);
-  gv_copy.reorderzdir(options_.model_vertical_coordinate.value(), "bottom2top");
-
   // Number of locations.
   const size_t nlocs = obsdb.nlocs();
 
@@ -127,7 +122,7 @@ void FillAveragedProfileData<FunctionValue>::fillAverageProfile
     // Retrieve slant path locations.
     const std::vector<std::size_t> slant_path_location =
       ufo::getSlantPathLocations(obsdb,
-                                 gv_copy,
+                                 *gv,
                                  locsOriginal,
                                  options_.observation_vertical_coordinate,
                                  options_.model_vertical_coordinate,

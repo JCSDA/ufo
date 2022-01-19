@@ -52,9 +52,6 @@ namespace ufo {
     /// Get the name of the model vertical coordinate.
     std::string getModelVerticalCoord() const {return modelVerticalCoord_;}
 
-    /// Get GeoVaLs direction.
-    bool GeoVaLsAreTopToBottom() const {return GeoVaLsAreTopToBottom_;}
-
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.
     /// These reference variables are called MetOfficeHofX/slant_path_location and
@@ -94,9 +91,6 @@ namespace ufo {
 
     /// Reference values of slant path pressures.
     std::vector<float> slant_pressure_ref_;
-
-    /// Direction of GeoVaLs.
-    mutable bool GeoVaLsAreTopToBottom_;
   };
 }  // namespace ufo
 
