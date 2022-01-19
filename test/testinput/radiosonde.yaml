@@ -22,6 +22,7 @@ observations:
     name: VertInterp
     vertical coordinate: air_pressure
     observation vertical coordinate: air_pressure
+    observation vertical coordinate group: MetaData
   linear obs operator test:
     coef TL: 0.1
     tolerance TL: 1.0e-13

@@ -44,10 +44,13 @@ class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase 
   /// If not specified, defaults to the list of all simulated variables in the ObsSpace.
   oops::OptionalParameter<std::vector<Variable>> variables{"variables", this};
 
-  /// Name of the ufo variable (from the `MetaData` group) storing the vertical coordinate of
-  /// observation locations.
+  /// Name of the ufo variable storing the vertical coordinate of observation locations.
   oops::RequiredParameter<std::string> observationVerticalCoordinate{
     "observation vertical coordinate", this};
+
+  /// Name of the observation vertical coordinate group.
+  oops::Parameter<std::string> observationVerticalGroup{
+    "observation vertical coordinate group", "MetaData", this};
 
   /// Name of the GeoVaL storing the interpolation levels of background errors.
   oops::RequiredParameter<std::string> verticalCoordinate{"vertical coordinate", this};

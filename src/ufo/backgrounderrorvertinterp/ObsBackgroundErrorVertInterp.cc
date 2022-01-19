@@ -61,6 +61,7 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
   oops::Log::trace() << "ObsBackgroundErrorVertInterp: simulateObs entered" << std::endl;
 
   const std::string &obsVerticalCoordinate = parameters_.observationVerticalCoordinate;
+  const std::string &obsVerticalGroup = parameters_.observationVerticalGroup;
   const std::string &verticalCoordinate = parameters_.verticalCoordinate;
 
   oops::Variables variables;
@@ -72,6 +73,8 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
 
   ufo_backgrounderrorvertinterp_fillobsdiags_f90(obsVerticalCoordinate.size(),
                                                  obsVerticalCoordinate.c_str(),
+                                                 obsVerticalGroup.size(),
+                                                 obsVerticalGroup.c_str(),
                                                  verticalCoordinate.size(),
                                                  verticalCoordinate.c_str(),
                                                  geovals.toFortran(), odb_, hofx.nlocs(),

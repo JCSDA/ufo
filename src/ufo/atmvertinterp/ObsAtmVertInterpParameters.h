@@ -41,6 +41,11 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
     {"observation vertical coordinate",
      "vertical coordinate for the observations",
      this};
+
+  oops::OptionalParameter<std::string> ObsVertGroup
+    {"observation vertical coordinate group",
+     "observation vertical coordinate group",
+     this};
 };
 
 }  // namespace ufo

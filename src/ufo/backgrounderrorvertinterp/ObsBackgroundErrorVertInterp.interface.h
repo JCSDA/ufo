@@ -24,6 +24,8 @@ extern "C" {
 
   void ufo_backgrounderrorvertinterp_fillobsdiags_f90(const int &len_obs_vcoord,
                                                       const char *obs_vcoord,
+                                                      const int &len_obs_vgroup,
+                                                      const char *obs_vgroup,
                                                       const int &len_vcoord,
                                                       const char *vcoord,
                                                       const F90goms &geovals,

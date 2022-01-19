@@ -25,6 +25,7 @@ module ufo_atmvertinterp_tlad_mod
     integer, allocatable :: wi(:)
     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
     character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
+    character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
@@ -46,6 +47,7 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   type(fckit_configuration), intent(in) :: grid_conf
 
   character(kind=c_char,len=:), allocatable :: coord_name
+  character(kind=c_char,len=:), allocatable :: coord_group
   integer :: ivar, nvars
 
   !> Fill in variables requested from the model
@@ -70,6 +72,16 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
      self%o_v_coord = coord_name
   else
      self%o_v_coord = self%v_coord
+  endif
+
+  !> Determine observation vertical coordinate group.
+  !  Use MetaData unless the option
+  !  'observation vertical coordinate' is specified.
+  if ( grid_conf%has("observation vertical coordinate group") ) then
+    call grid_conf%get_or_die("observation vertical coordinate group",coord_group)
+    self%o_v_group = coord_group
+  else
+    self%o_v_group = "MetaData"
   endif
 
 end subroutine atmvertinterp_tlad_setup_
@@ -101,7 +113,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   ! Get the observation vertical coordinates
   self%nlocs = obsspace_get_nlocs(obss)
   allocate(obsvcoord(self%nlocs))
-  call obsspace_get_db(obss, "MetaData", self%o_v_coord, obsvcoord)
+  call obsspace_get_db(obss, self%o_v_group, self%o_v_coord, obsvcoord)
 
   ! Set missing value
   if (self%nlocs > 0) then

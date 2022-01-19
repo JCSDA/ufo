@@ -14,7 +14,7 @@ contains
 !> For each obs diagnostic called <var>_background_error, where <var> belongs to the set of variable
 !> names @p obsvars, fill this diagnostic with estimates of the background error of variable <var>
 !> at observation locations.
-subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_name, &
+subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoord_group, vcoord_name, &
                                                       geovals, obsspace, nlocs, obsvars, obsdiags)
   use kinds,              only: kind_real
   use missing_values_mod, only: missing_value
@@ -26,6 +26,8 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_na
 
   ! Name of the variable with vertical coordinates of observations
   character(len=*), intent(in)     :: obs_vcoord_name
+  ! Group of the variable with vertical coordinates of observations
+  character(len=*), intent(in)     :: obs_vcoord_group
   ! Name of the GeoVaL with the vertical coordinate levels to use for
   ! interpolation of background errors
   character(len=*), intent(in)     :: vcoord_name
@@ -53,7 +55,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, vcoord_na
   call ufo_geovals_get_var(geovals, vcoord_name, vcoord_profile)
 
   ! Get the observation vertical coordinates
-  call obsspace_get_db(obsspace, "MetaData", obs_vcoord_name, obs_vcoord)
+  call obsspace_get_db(obsspace, obs_vcoord_group, obs_vcoord_name, obs_vcoord)
 
   ! Set missing value
   if (nlocs > 0) then

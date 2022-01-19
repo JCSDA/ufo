@@ -116,6 +116,8 @@ class GaussianThinningParameters : public FilterParametersBase {
   oops::Parameter<float> verticalMax{"vertical_max", 110000.0f, this};
   /// Observation vertical coordinate.
   oops::Parameter<std::string> verticalCoord{"vertical_coordinate", "air_pressure", this};
+  /// Observation vertical coordinate group.
+  oops::Parameter<std::string> verticalGroup{"vertical_coordinate group", "MetaData", this};
 
   // Temporal grid
 

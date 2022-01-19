@@ -266,7 +266,7 @@ void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
                        << *binSelector->numBins() << std::endl;
 
   std::vector<float> vcoord = obsAccessor.getFloatVariableFromObsSpace(
-        "MetaData", options_.verticalCoord);
+        options_.verticalGroup, options_.verticalCoord);
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());

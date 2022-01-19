@@ -14,6 +14,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_obs_vcoord, c_obs_vcoord, &
+                                                        len_obs_vgroup, c_obs_vgroup, &
                                                         len_vcoord, c_vcoord, &
                                                         c_key_geovals, c_obsspace, c_nlocs, &
                                                         c_obsvars, c_key_obsdiags) &
@@ -28,6 +29,8 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_obs_vcoord, c_obs_vc
 
   integer(c_int), intent(in) :: len_obs_vcoord
   character(kind=c_char, len=1), intent(in) :: c_obs_vcoord(len_obs_vcoord + 1)
+  integer(c_int), intent(in) :: len_obs_vgroup
+  character(kind=c_char, len=1), intent(in) :: c_obs_vgroup(len_obs_vgroup + 1)
   integer(c_int), intent(in) :: len_vcoord
   character(kind=c_char, len=1), intent(in) :: c_vcoord(len_vcoord + 1)
   integer(c_int), intent(in) :: c_key_geovals
@@ -37,18 +40,20 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_obs_vcoord, c_obs_vc
   integer(c_int), intent(in) :: c_key_obsdiags
 
   character(len=MAXVARLEN) :: obs_vcoord
+  character(len=MAXVARLEN) :: obs_vgroup
   character(len=MAXVARLEN) :: vcoord
   type(ufo_geovals), pointer :: geovals
   type(oops_variables)       :: obsvars
   type(ufo_geovals), pointer :: obsdiags
 
   call c_f_string(c_obs_vcoord, obs_vcoord)
+  call c_f_string(c_obs_vgroup, obs_vgroup)
   call c_f_string(c_vcoord, vcoord)
   call ufo_geovals_registry%get(c_key_geovals, geovals)
   obsvars = oops_variables(c_obsvars)
   call ufo_geovals_registry%get(c_key_obsdiags, obsdiags)
 
-  call ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord, vcoord, &
+  call ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord, obs_vgroup, vcoord, &
                                                   geovals, c_obsspace, c_nlocs, obsvars, obsdiags)
 
 end subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c
