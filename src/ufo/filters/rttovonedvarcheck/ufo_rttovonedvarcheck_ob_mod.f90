@@ -10,7 +10,6 @@ module ufo_rttovonedvarcheck_ob_mod
 use kinds
 use missing_values_mod
 use ufo_constants_mod, only: zero
-use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_setup_mod
 use ufo_rttovonedvarcheck_pcemis_mod

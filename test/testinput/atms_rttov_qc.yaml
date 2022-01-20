@@ -95,7 +95,6 @@ observations:
         - surface_pressure
         qtotal: true
         qtotal split rain: true
-        reverse Jacobian order: true
         HofX group: HofX  # default, awaits bias correction
     maxvalue: 69.8        # example value
     action:

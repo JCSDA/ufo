@@ -82,7 +82,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-22 
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+    filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   rms ref: 228.54196297632672
   tolerance: 1.e-7
   linear obs operator test:
@@ -113,7 +113,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-22 
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+    filename: *geovals
   rms ref: 227.88586699673394
   tolerance: 1.e-7
   linear obs operator test:

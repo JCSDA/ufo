@@ -9,6 +9,24 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-22
   geovals:
+    filename: &geovalsin Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors_reversed.nc4
+  obs bias:
+    variational bc:
+      predictors:
+      - name: thickness
+        layer top: 300000
+        layer base: 850000
+        mean: 7.6
+        standard deviation: 0.4
+  expectExceptionWithMessage: GeoVaLs are in the wrong order.
+
+- obs space: &ObsSpace
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  geovals:
     filename: &geovalsin Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
   obs bias:
     variational bc:
@@ -36,7 +54,7 @@ observations:
         layer top: 5000
         layer base: 20000
         mean: 8.6
-        standard deviation: 0.4 
+        standard deviation: 0.4
       - name: thickness
         layer top: 85000
         layer base: 100000

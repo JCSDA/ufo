@@ -94,7 +94,7 @@ nlevels = profindex % nlevels
 ! var_ts - air_temperature - K
 if (profindex % t(1) > 0) then
   call ufo_geovals_get_var(geovals, var_ts, geoval)
-  prof_x(profindex % t(1):profindex % t(2)) = geoval%vals(nlevels:1:-1, 1) ! K
+  prof_x(profindex % t(1):profindex % t(2)) = geoval%vals(:, 1) ! K
 end if
 
 ! var_q - specific_humidity - kg/kg
@@ -102,7 +102,7 @@ end if
 if (profindex % q(1) > 0) then
   call ufo_geovals_get_var(geovals, var_q, geoval)
   prof_x(profindex % q(1):profindex % q(2)) = &
-         log (geoval%vals(nlevels:1:-1, 1) * 1000.0_kind_real) ! ln(g/kg)
+         log (geoval%vals(:, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
 ! var_q - specific_humidity - kg/kg
@@ -115,11 +115,11 @@ if (profindex % qt(1) > 0) then
   
   ! Get humidity data from geovals
   call ufo_geovals_get_var(geovals, var_q, geoval)
-  humidity_total(:) = humidity_total(:) + geoval%vals(nlevels:1:-1, 1)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, var_clw, geoval)
-  humidity_total(:) = humidity_total(:) + geoval%vals(nlevels:1:-1, 1)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, var_cli, geoval)
-  humidity_total(:) = humidity_total(:) + geoval%vals(nlevels:1:-1, 1)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   
   ! Convert from kg/kg to ln(g/kg)
   prof_x(profindex % qt(1):profindex % qt(2)) = log (humidity_total * 1000.0_kind_real) ! ln(g/kg)
@@ -275,7 +275,7 @@ if (profindex % t(1) > 0) then
   do i=1,geovals%nvar
     if (cmp_strings(var_ts, geovals%variables(i))) gv_index = i
   end do
-  geovals%geovals(gv_index)%vals(nlevels:1:-1,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
+  geovals%geovals(gv_index)%vals(:,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
 end if
 
 ! var_q = "specific_humidity" ! kg/kg
@@ -285,8 +285,8 @@ if (profindex % q(1) > 0) then
   do i=1,geovals%nvar
     if (cmp_strings(var_q, geovals%variables(i))) gv_index = i
   end do
-  geovals%geovals(gv_index)%vals(nlevels:1:-1,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
-                                                  1000.0_kind_real ! ln(g/kg) => kg/kg
+  geovals%geovals(gv_index)%vals(:,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
+                                             1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
 ! var_q = "specific_humidity" ! kg/kg
@@ -302,8 +302,8 @@ if (profindex % qt(1) > 0) then
   allocate(qi(nlevels))
   
   ! Convert from ln(g/kg) to kg/kg
-  humidity_total(nlevels:1:-1) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / &
-                                1000.0_kind_real ! ln(g/kg) => kg/kg
+  humidity_total(:) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / &
+                           1000.0_kind_real ! ln(g/kg) => kg/kg
 
   ! var_prs  = "air_pressure" Pa
   call ufo_geovals_get_var(geovals, var_prs, geoval)
@@ -575,7 +575,7 @@ else
   varname = var_ts
   call ufo_geovals_get_var(geovals, varname, geoval)
   ! Note: profile is TOA -> surface
-  Temp = geoval%vals(nlevels_1dvar:1:-1, 1) ! K
+  Temp = geoval%vals(:, 1) ! K
 end if
 
 !----
@@ -629,7 +629,7 @@ Constrain: if (.not. OutOfRange) then
   call ufo_geovals_get_var(geovals, varname, geoval)
   if (.not. allocated(Plevels_1DVar)) allocate(Plevels_1DVar(nlevels_q))
   ! Note: profile is TOA -> surface
-  Plevels_1DVar(:) = geoval%vals(nlevels_1dvar:1:-1, 1) ! K
+  Plevels_1DVar(:) = geoval%vals(:, 1) ! K
 
   !----
   ! 2.1) Levels
@@ -868,19 +868,19 @@ if (any(ciw(:) > zero) .or. &
 
 !1.1 compute iwp, lwp
 
-  do i=1, nlevels_1dvar-1
+  do i=2, nlevels_1dvar
 
-    dp =  Plevels_1DVar(i) - Plevels_1DVar(i+1)
+    dp =  Plevels_1DVar(i) - Plevels_1DVar(i-1)
 
     ! Calculate layer mean from CloudIce on levels
     meanqi = half * &
-      (ciw(i) + ciw(i+1))
+      (ciw(i) + ciw(i-1))
     if (meanqi > zero) then
       IWP = IWP + dp * meanqi
     end if
 
     ! Calculate layer mean from CLW on levels
-    meanql = half * (clw(i) + clw(i+1))
+    meanql = half * (clw(i) + clw(i-1))
     if (meanql > zero) then
       LWP = LWP + dp * meanql
     end if

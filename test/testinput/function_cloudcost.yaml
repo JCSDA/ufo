@@ -44,7 +44,6 @@ observations:
           - surface_pressure
           qtotal: true
           qtotal split rain: true
-          reverse Jacobian order: true
           scattering radiative transfer: false  # default
           minimum ObsValue: 70.0                # default
           maximum ObsValue: 340.0               # default

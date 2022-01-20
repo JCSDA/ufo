@@ -162,7 +162,7 @@ if (profindex % q(1) > 0) then
   ! Get humidity data from geovals
   q_kgkg(:) = zero
   call ufo_geovals_get_var(geovals, var_q, geoval)
-  q_kgkg(:) = geoval%vals(nlevels:1:-1, 1)
+  q_kgkg(:) = geoval%vals(:, 1)
 
   do i = 1, nchans
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_q),"_",channels(i) ! kg/kg
@@ -198,20 +198,20 @@ if (profindex % qt(1) > 0) then
   ! Get humidity data from geovals
   q_kgkg(:) = zero
   call ufo_geovals_get_var(geovals, var_q, geoval)
-  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, var_clw, geoval)
-  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, var_cli, geoval)
-  q_kgkg(:) = q_kgkg(:) + geoval%vals(nlevels:1:-1, 1)
+  q_kgkg(:) = q_kgkg(:) + geoval%vals(:, 1)
 
   ! var_prs  = "air_pressure" Pa
   call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
-  pressure(:) = geoval%vals(nlevels:1:-1, 1)
+  pressure(:) = geoval%vals(:, 1)
 
   ! Calculate the gradients with respect to qtotal
   call Ops_SatRad_Qsplit ( 0,      &
                     pressure(:),   &
-                    ob % background_T(nlevels:1:-1),   &
+                    ob % background_T(:),   &
                     q_kgkg(:),     & ! in
                     dq_dqt(:),     & ! out
                     dql_dqt(:),    & ! out
