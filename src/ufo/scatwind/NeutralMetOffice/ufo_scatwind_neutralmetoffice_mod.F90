@@ -14,7 +14,7 @@
 !! stability function for momentum, integrated to the model's lowest wind level.
 !! The calculations are dependant upon on whether we have stable or unstable conditions
 !! according to the Obukhov Length. The neutral 10m wind components are then calculated
-!! from the lowest model level winds.
+!! from the lowest height model level winds.
 !!
 !! \author J.Cotton (Met Office)
 !!
@@ -32,6 +32,7 @@ use obsspace_mod
 use oops_variables_mod
 use missing_values_mod
 use fckit_log_module,  only : fckit_log
+use fckit_exception_module,  only : fckit_exception
 
 implicit none
 private
@@ -48,7 +49,7 @@ end type ufo_scatwind_neutralmetoffice
 character(len=maxvarlen), dimension(7), parameter :: geovars_default = (/ &
                                                              var_u,            &
                                                              var_v,            &
-                                                             var_zi,           &
+                                                             var_zimo,         &
                                                              var_sfc_ifrac,    &
                                                              var_sfc_geomz,    &
                                                              var_sea_fric_vel, &
@@ -112,8 +113,7 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
 
   ! check that hofx is the correct size for simulated variables
   if (size(hofx(:,1)) /= 2) then
-    write(err_msg,*) myname_, ' error: hofx should have 2 variables - eastward_wind and northward_wind'
-    call abor1_ftn(err_msg)
+    call fckit_exception%throw("HofX should have 2 variables eastward_wind and northward_wind")
   endif
 
   write(message, *) myname_, ' Running Met Office neutral wind operator'
@@ -122,11 +122,16 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_u, cx_u)              ! Eastward wind
   call ufo_geovals_get_var(geovals, var_v, cx_v)              ! Northward wind
-  call ufo_geovals_get_var(geovals, var_zi, cx_za)            ! Geopotential height of wind levels
+  call ufo_geovals_get_var(geovals, var_zimo, cx_za)          ! Geopotential height of wind levels
   call ufo_geovals_get_var(geovals, var_sfc_ifrac, cx_seaice) ! Sea ice
   call ufo_geovals_get_var(geovals, var_sfc_geomz, cx_orog)   ! Orography
   call ufo_geovals_get_var(geovals, var_sea_fric_vel, cx_friction_vel)  ! Friction velocity
   call ufo_geovals_get_var(geovals, var_obk_length, cx_obukhov_length)  ! Obukhov length
+
+  ! check GeoVaLs are in correct vertical order (top to bottom)
+  if (cx_za % vals(1,1) .lt. cx_za % vals(cx_za % nval,1) ) then
+    call fckit_exception%throw("GeoVaLs are not ordered from model top to bottom")
+  end if
 
   ! Allocate arrays for interpolation weights and initialise to missing data
   allocate(CDR10(nlocs))
@@ -136,7 +141,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   call fckit_log%info(err_msg)
 
   obs_loop: do iobs = 1, nlocs
-    call ops_scatwind_forwardmodel(cx_za % vals(:, iobs),            &
+    call ops_scatwind_forwardmodel(cx_za % nval,                     &
+                                   cx_za % vals(:, iobs),            &
                                    cx_u % vals(:, iobs),             &
                                    cx_v % vals(:, iobs),             &
                                    cx_friction_vel % vals(1,iobs),   &
@@ -171,7 +177,7 @@ end subroutine ufo_scatwind_neutralmetoffice_simobs
 !! \f$\alpha_{ch} =0.018\f$ is the charnock parameter, and
 !! \f$g\f$ is the acceleration due to gravity.
 !! * Call a subroutine to calculate the Monin-Obukhov stability
-!! function for momentum integrated to the lowest model level,
+!! function for momentum integrated to the lowest height model level,
 !! \f$\Phi_{m}\f$.
 !! The calculations are dependant upon on whether we have stable or unstable
 !! conditions according to the Obukhov Length, \f$L\f$.
@@ -196,7 +202,8 @@ end subroutine ufo_scatwind_neutralmetoffice_simobs
 !! \date 22/12/2020: Created
 !!
 ! ------------------------------------------------------------------------------
-subroutine ops_scatwind_forwardmodel(za,     &
+subroutine ops_scatwind_forwardmodel(nlevz,  &
+                                     za,     &
                                      u,      &
                                      v,      &
                                      ustr,   &
@@ -209,6 +216,7 @@ subroutine ops_scatwind_forwardmodel(za,     &
 use ufo_constants_mod, only: &
     grav                                       ! Gravitational field strength
 
+integer, intent(in)            :: nlevz        !< no. of height levels in state vec.
 real(kind_real), intent(in)    :: za(:)        !< heights of rho levs
 real(kind_real), intent(in)    :: u(:)         !< Model eastward wind profile
 real(kind_real), intent(in)    :: v(:)         !< Model northward wind profile
@@ -243,17 +251,17 @@ real                         :: phi_mn_10    ! Neutral form of stability
                                              ! function integrated to 10m
 character(max_string)        :: err_msg      ! Error message to be output
 
-if (u(1) == missing_value(u(1))) then  ! u wind missing
+if (u(nlevz) == missing_value(u(nlevz))) then  ! u wind missing
   write(message, *) myname_, "Missing value u1"
   call abor1_ftn(message)
 end if
 
-if (v(1) == missing_value(v(1))) then  ! v wind missing
+if (v(nlevz) == missing_value(v(nlevz))) then  ! v wind missing
   write(message, *) myname_, "Missing value v1"
   call abor1_ftn(message)
 end if
 
-if (za(1) == missing_value(za(1))) then  ! height missing
+if (za(nlevz) == missing_value(za(nlevz))) then  ! height missing
   write(message, *) myname_, "Missing value z1_uv"
   call abor1_ftn(message)
 end if
@@ -279,11 +287,11 @@ if (seaice == missing_value(seaice)) then  ! sea ice missing
 end if
 
 ! Get u,v wind components on lowest model level
-u1 = u(1)
-v1 = v(1)
+u1 = u(nlevz)
+v1 = v(nlevz)
 
 ! Height (m) of lowest wind (rho) level
-z1_uv = za(1)
+z1_uv = za(nlevz)
 
 ! Obukhov length (m) and its reciprocal
 oblen_1 = sign( max(1.0E-6, abs(oblen)),oblen)
