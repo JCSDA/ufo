@@ -84,9 +84,9 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
           geovals.getAtLevel(plev[i], "air_pressure_levels", i);
           }
 
-    // check model fields are from surface upwards
-    if ((plev[2][0] - plev[1][0]) > 0) {
-        throw eckit::UserError("model fields must be ordered from surface upwards", Here());
+    // check model fields are ordered from top down, fail if not
+    if (plev.front() > plev.back()) {
+      throw eckit::BadValue("model fields must be ordered from top down", Here());
     }
 
     // calculate dAOD/dmass for each bin, level and profile
@@ -109,10 +109,12 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
       // loop over dust bins and calculate gradient w.r.t mass concentration per bin:
       for (size_t d = 0; d < NDustBins_; d++) {
         // lowest model layer:
-        kMatrix_[d][0][p] = (1.0 / Constants::grav) * (ps[p] - plev[1][p]) * AodKExt_[d];
+        kMatrix_[d][nlevels - 2][p] = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 2][p]) *
+                AodKExt_[d];
         // loop over the rest of the model layers
-        for (size_t k=1; k < (nlevels - 1); k++) {
-          kMatrix_[d][k][p] = (1.0 / Constants::grav) * (plev[k][p] - plev[k+1][p]) * AodKExt_[d];
+        for (size_t k = 0; k < (nlevels - 2); k++) {
+          kMatrix_[d][k][p] = (1.0 / Constants::grav) * (plev[k+1][p] - plev[k][p]) *
+                  AodKExt_[d];
         }
       }
     }

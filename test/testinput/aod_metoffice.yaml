@@ -1,11 +1,13 @@
 window begin: 2021-05-21T08:59:59Z
 window end: 2021-05-21T15:00:00Z
 
+# NB: In the following AodKExt are dummy values used for the ctests only
 observations:
+# 1. check operator works with correct geoval order
 - obs operator:
     name: AodMetOffice 
     NDustBins: 2
-    AodKExt: [1.00E+02,2.00E+02] 
+    AodKExt: [1.00E+02,2.00E+02] # dummy values
   obs space:
     name: Aod
     obsdatain:
@@ -20,3 +22,23 @@ observations:
     iterations TL: 10
     tolerance TL: 1.0e-14
     tolerance AD: 1.0e-14
+# 2. check operator throws an error with incorrect geoval order
+- obs operator:
+    name: AodMetOffice 
+    NDustBins: 2
+    AodKExt: [1.00E+02,2.00E+02] # dummy values
+  obs space:
+    name: Aod
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_mo.nc4
+    simulated variables: [aerosol_optical_depth]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_reversed_20210521T1200Z_mo.nc4
+  norm ref: HofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14
+  expect simulateObs to throw exception with message: model fields must be ordered from the top down

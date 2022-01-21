@@ -90,12 +90,10 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
         geovals.getAtLevel(plev[i], "air_pressure_levels", i);
         }
 
-  // check model fields are from surface upwards
-  if ((plev[2][0] - plev[1][0]) > 0) {
-      throw eckit::UserError("model fields must be ordered from surface upwards", Here());
+  // check model fields are from top-down, fail if not
+  if (plev.front() > plev.back()) {
+    throw eckit::BadValue("model fields must be ordered from the top down", Here());
   }
-
-  // Calculate AOD for each profile, integrating over each layer and each dust bin:
 
   double alpha;
   std::vector<double> mass(nlevels - 1);  // mass concentration on half (theta) levels
@@ -110,11 +108,11 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
       geovals.getAtLocation(mass, dust_var_name, p);
       // start with lowest model layer, using surface pressure
       // NB this assumes the first mass layer is the lowest layer just above the surface
-      alpha = (1.0 / Constants::grav) * (ps[p] - plev[1][p]) * AodKExt_[d];
-      hofx[p] += mass[0] * alpha;
+      alpha = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 2][p]) * AodKExt_[d];
+      hofx[p] += mass[nlevels - 2] * alpha;
       // loop over the rest of the model layers
-      for (size_t k=1; k < (nlevels - 1); k++) {
-        alpha = (1.0 / Constants::grav) * (plev[k][p] - plev[k+1][p]) * AodKExt_[d];
+      for (size_t k = 0; k < (nlevels - 2); k++) {
+        alpha = (1.0 / Constants::grav) * (plev[k+1][p] - plev[k][p]) * AodKExt_[d];
         hofx[p] += mass[k]*alpha;
       }
     }
