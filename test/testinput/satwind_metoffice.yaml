@@ -5,11 +5,11 @@ observations:
 - obs operator:
     name: VertInterp
     observation vertical coordinate: air_pressure
-    vertical coordinate: air_pressure_levels
+    vertical coordinate: air_pressure_levels_minus_one
   linear obs operator:
     name: VertInterp
     observation vertical coordinate: air_pressure
-    vertical coordinate: air_pressure_levels
+    vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Satwind
     obsdatain:

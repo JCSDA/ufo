@@ -20,6 +20,7 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/GeoVaLs.h"
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/Logger.h"
@@ -129,13 +130,14 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   // check profile name matches one of eastward_wind or northward_wind
   if ( profile != "eastward_wind" && profile != "northward_wind" ) {
     errString << "Wind component must be one of eastward_wind or northward_wind" << std::endl;
-    throw eckit::BadValue(errString.str());
+    throw eckit::BadValue(errString.str(), Here());
   }
 
-  // check vcoord name matches one of air_pressure or air_pressure_levels
-  if ( vcoord != "air_pressure" && vcoord != "air_pressure_levels" ) {
-    errString << "Vertical coordinate must be air_pressure or air_pressure_levels" << std::endl;
-    throw eckit::BadValue(errString.str());
+  // check vcoord name matches air_pressure, air_pressure_levels, or air_pressure_levels_minus_one
+  if ( vcoord != "air_pressure" && vcoord != "air_pressure_levels" &&
+       vcoord != "air_pressure_levels_minus_one") {
+    errString << "Vertical coordinate not recognised" << std::endl;
+    throw eckit::BadValue(errString.str(), Here());
   }
 
   // Get dimensions
@@ -155,18 +157,11 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);
 
-  // Get variables from GeoVals
-  // Get pressure [Pa] (nlevs, nlocs)
-  std::vector<std::vector<float>> cx_p(nlevs, std::vector<float>(nlocs));
-  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(vcoord+"@GeoVaLs"), ilev, cx_p[ilev]);
-  }
-
-  // Get wind component (nlevs, nlocs)
-  std::vector<std::vector<float>> cx_windcomponent(nlevs, std::vector<float>(nlocs));
-  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    in.get(Variable(profile+"@GeoVaLs"), ilev, cx_windcomponent[ilev]);
-  }
+  // Get GeoVaLs
+  const ufo::GeoVaLs * gvals = in.getGeoVaLs();
+  // Vectors storing GeoVaL column for current location.
+  std::vector <double> cx_p(gvals->nlevs(vcoord), 0.0);
+  std::vector <double> cx_windcomponent(gvals->nlevs(profile), 0.0);
 
   // diagnostic variables to be summed over all processors at the end of the routine
   std::unique_ptr<ioda::Accumulator<size_t>> countQiAccumulator =
@@ -174,6 +169,13 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Loop through locations
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
+    // Get GeoVaLs at the specified location.
+    gvals->getAtLocation(cx_p, vcoord, iloc);
+    gvals->getAtLocation(cx_windcomponent, profile, iloc);
+    // Check GeoVaLs are in correct vertical order
+    if (cx_p.front() > cx_p.back()) {
+      throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
+    }
     // Initialize at each location
     float error_press = 0.0;  // default wind error contribution from error in pressure, ms-1
     float error_vector = 3.5;  // default wind error contribution from error in vector, ms-1
@@ -192,7 +194,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
          pressure_error[iloc] < min_pressure_error ||
          pressure_error[iloc] > max_pressure_error ) {
         errString << "Pressure error invalid: " << pressure_error[iloc] << " Pa" << std::endl;
-        throw eckit::BadValue(errString.str());
+        throw eckit::BadValue(errString.str(), Here());
     }
 
     // Calculate vector error using QI
@@ -205,17 +207,18 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     }
 
     // Calculate the error in vector due to error in pressure
-    // Start at level number 2 (ilev=1) as need to difference with ilev-1
-    for (size_t ilev = 1; ilev < nlevs; ++ilev) {
+    // Loop over levels starting from highest pressure (bottom to top)
+    // Start at level number 2 (ilev=nlevs-2) as need to difference with ilev-1
+    for (int ilev = nlevs-2; ilev >= 0; ilev--) {
       // ignore contribution above min_press in atmosphere
-      if (cx_p[ilev][iloc] < min_press) {
+      if (cx_p[ilev] < min_press) {
         continue;
       }
       // Calculate weight for each background level, avoiding zero divide.
       if (pressure_error[iloc] > 0) {
-        weight = exp(-0.5 * pow(cx_p[ilev][iloc] - ob_p[iloc], 2) /
+        weight = exp(-0.5 * pow(cx_p[ilev] - ob_p[iloc], 2) /
                             pow(pressure_error[iloc], 2) )
-                 * std::abs(cx_p[ilev][iloc] - cx_p[ilev - 1][iloc]);
+                 * std::abs(cx_p[ilev] - cx_p[ilev + 1]);
       } else {
           weight = 0.0;
       }
@@ -226,8 +229,8 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
         continue;
       }
 
-      sum_top = sum_top + weight * pow(cx_windcomponent[ilev][iloc] - bg_windcomponent[iloc], 2);
-      sum_weight = sum_weight + weight;
+      sum_top += weight * pow(cx_windcomponent[ilev] - bg_windcomponent[iloc], 2);
+      sum_weight += weight;
     }
 
     if (sum_weight > 0) {

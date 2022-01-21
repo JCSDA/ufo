@@ -117,7 +117,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     obsdb_.get_db("QCFlags", "eastward_wind", u_flags);
     obsdb_.get_db("QCFlags", "northward_wind", v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised");
+    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+                           Here());
   }
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
@@ -149,6 +150,10 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
         gvals->getAtLocation(model_temp_profile, model_temp_name, iloc);
         gvals->getAtLocation(model_rh_profile, model_rh_name, iloc);
         gvals->getAtLocation(model_vcoord_profile, model_vcoord_name, iloc);
+        // Check GeoVaLs are in correct vertical order
+        if (model_vcoord_profile.front() > model_vcoord_profile.back()) {
+          throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
+        }
         // ---------------------------------------------------------------------------
         //  Search for inversion and if present find T and P of base and top
         // ---------------------------------------------------------------------------
@@ -158,8 +163,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
         float inversion_top = std::numeric_limits<float>::max();
         float temp_inversion_base = std::numeric_limits<float>::max();
         float temp_inversion_top = std::numeric_limits<float>::max();
-        //  loop over levels starting from lowest
-        for (int ilev  = 0; ilev  < nlevs-2  ; ++ilev) {
+        //  loop over levels starting from highest pressure (bottom to top)
+        for (int ilev  = nlevs-1; ilev >= 1; ilev--) {
           //  if haven't found inversion and pressure is less than min_pressure Pa then exit
           if (inversion == false && model_vcoord_profile[ilev] < min_pressure) {
             break;
@@ -169,7 +174,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
             continue;
           }
           //  if haven't found inversion, check for increase in temperature
-          if (inversion == false && model_temp_profile[ilev+1] > model_temp_profile[ilev]) {
+          if (!inversion && model_temp_profile[ilev-1] > model_temp_profile[ilev]) {
             //  T of level above is greater so take base at current level
             inversion_base =  model_vcoord_profile[ilev];
             temp_inversion_base = model_temp_profile[ilev];
@@ -178,7 +183,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
           // if inversion found, then detect level the temperature starts to decrease again above
           // the inversion base
           if (inversion &&
-              model_temp_profile[ilev+1] < model_temp_profile[ilev] &&
+              model_temp_profile[ilev-1] < model_temp_profile[ilev] &&
               model_vcoord_profile[ilev] < inversion_base &&
               firsttime) {
             //  Check humidity of inversion top

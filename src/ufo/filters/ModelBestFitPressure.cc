@@ -60,7 +60,7 @@ ModelBestFitPressure::~ModelBestFitPressure() {
  *    observation pressure:
  *      name: air_pressure@MetaData
  *    model pressure:
- *      name: air_pressure_levels@GeoVaLs
+ *      name: air_pressure_levels_minus_one@GeoVaLs
  *    top pressure: 10000
  *    pressure band half-width: 10000
  *    upper vector diff: 4
@@ -126,7 +126,8 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
     obsdb_.get_db("QCFlags", model_eastvec_name, u_flags);
     obsdb_.get_db("QCFlags", model_northvec_name, v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised");
+    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+                           Here());
   }
 
   // Vectors storing GeoVaL column for each location.
@@ -145,29 +146,17 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
       gvals->getAtLocation(model_eastvec_profile, model_eastvec_name, idata);
       gvals->getAtLocation(model_northvec_profile, model_northvec_name, idata);
 
-      // check ascending or decending (this code assume pressures are in descending order)
-      // if the model pressures are ascending, reverse order
-      if (std::is_sorted(model_pressure_profile.begin(),
-                         model_pressure_profile.end()) ||
-          model_pressure_profile.front() < model_pressure_profile.back()) {
-        std::reverse(model_pressure_profile.begin(), model_pressure_profile.end());
-        std::reverse(model_eastvec_profile.begin(), model_eastvec_profile.end());
-        std::reverse(model_northvec_profile.begin(), model_northvec_profile.end());
+      // Check GeoVaLs are in correct vertical order
+      if (model_pressure_profile.front() > model_pressure_profile.back()) {
+        throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
       }
-
-      // check gvals are descending
-      ASSERT(!std::is_sorted(model_pressure_profile.begin(),
-                             model_pressure_profile.end()));
 
       float min_vector_diff = std::numeric_limits<float>::max();
       const size_t UNINITIALIZED = std::numeric_limits<size_t>::max();
       size_t imin = UNINITIALIZED;
 
-      // 1) Calculate vector difference between observed and background at all levels.
-      //    Calculate best-fit pressure using vector difference.
-      //    Find model level best-fit pressure (minimum vector difference).
-      //    Use parabolic fit to find best-fit pressure.
-      for (size_t ilev = 0; ilev < num_level - 1; ++ilev) {
+      // Calculate vector difference between observed and background at all levels and find minima
+      for (int ilev = num_level - 1; ilev >= 0; ilev--) {
         vec_diff[ilev] = std::hypot(obs_eastward[idata] - model_eastvec_profile[ilev],
                                     obs_northward[idata] - model_northvec_profile[ilev]);
         if (model_pressure_profile[ilev] < top_pressure) continue;
@@ -178,83 +167,74 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
       }
       // check if imin set
       if (imin == UNINITIALIZED) {
-        throw eckit::Exception("No model level pressure above top_pressure",
-                               Here());
+        throw eckit::Exception("No model level pressure above top_pressure", Here());
       }
 
-      // use parabolic fit to find best-fit pressure
-      float pressure_1;
-      const float pressure_2 = model_pressure_profile[imin];
-      float pressure_3;
-      float vec_diff_1;
-      const float vec_diff_2 = vec_diff[imin];
-      float vec_diff_3;
-
-      // if bottom model level
-      if (imin == 0) {
-        satwind_best_fit_press[idata] = pressure_2;
-      } else {
-        pressure_1 = model_pressure_profile[imin - 1];
-        pressure_3 = model_pressure_profile[imin + 1];
-        vec_diff_1 = vec_diff[imin - 1];
-        vec_diff_3 = vec_diff[imin + 1];
-
-        // if top of allowed region
-        if (pressure_3 < top_pressure) {
-          satwind_best_fit_press[idata] = pressure_2;
-        // if vec_diff_2 /= vec_diff_3
-        } else if (!(std::fabs(vec_diff_2 - vec_diff_3) <= tolerance_vector_diff)) {
-          const float top = (((pressure_2 - pressure_1) *
-                              (pressure_2 - pressure_1) *
-                              (vec_diff_2 - vec_diff_3)) -
-                             ((pressure_2 - pressure_3) *
-                              (pressure_2 - pressure_3) *
-                              (vec_diff_2 - vec_diff_1)));
-          const float bottom = (((pressure_2 - pressure_1) *
-                                 (vec_diff_2 - vec_diff_3)) -
-                                ((pressure_2 - pressure_3) *
-                                 (vec_diff_2 - vec_diff_1)));
-          satwind_best_fit_press[idata] = pressure_2 -
-              (0.5f * (top / bottom));
-        // if vec_diff_2 = vec_diff_3 set best fit pressure = pressure_2
-        } else {
-          satwind_best_fit_press[idata] = pressure_2;
-        }
-      }
-
-      // 2) Find bestfit eastward and northwards winds by linear interpolation,
-      //    if calculate_best_fit_winds set to true (default: false)
-      if (calculate_best_fit_winds) {
-        size_t lev_below;
-        size_t lev_above;
-        float prop;
-        if (std::fabs(pressure_2 - satwind_best_fit_press[idata]) <=
-            tolerance_pressure) {
+      // 1)  Calculate best-fit pressure using vector difference.
+      const float pressure_imin = model_pressure_profile[imin];
+      const float vec_diff_imin = vec_diff[imin];
+      // if bottom or top model level
+      if (imin == num_level-1 || imin == 0) {
+        satwind_best_fit_press[idata] = pressure_imin;
+        if (calculate_best_fit_winds) {
           satwind_best_fit_eastward_wind[idata] = model_eastvec_profile[imin];
           satwind_best_fit_northward_wind[idata] = model_northvec_profile[imin];
+        }
+      } else {
+        // use parabolic fit to find best-fit pressure
+        // where "above" and "below" are such that pressure_below > pressure_min > pressure_above
+        const float pressure_above_imin = model_pressure_profile[imin - 1];
+        const float pressure_below_imin = model_pressure_profile[imin + 1];
+        const float vec_diff_above_imin = vec_diff[imin - 1];
+        const float vec_diff_below_imin = vec_diff[imin + 1];
+        // if top of allowed region, or if vec_diff_imin = vec_diff_above
+        // set best fit pressure = pressure_imin
+        if ((pressure_above_imin < top_pressure) ||
+            (std::fabs(vec_diff_imin - vec_diff_above_imin) <= tolerance_vector_diff)) {
+          satwind_best_fit_press[idata] = pressure_imin;
         } else {
-          if (pressure_2 < satwind_best_fit_press[idata]) {
-            lev_below = imin - 1;
-            lev_above = imin;
-            prop = (satwind_best_fit_press[idata] - pressure_1) /
-                (pressure_2 - pressure_1);
+          const float top = (((pressure_imin - pressure_below_imin) *
+                              (pressure_imin - pressure_below_imin) *
+                              (vec_diff_imin - vec_diff_above_imin)) -
+                             ((pressure_imin - pressure_above_imin) *
+                              (pressure_imin - pressure_above_imin) *
+                              (vec_diff_imin - vec_diff_below_imin)));
+          const float bottom = (((pressure_imin - pressure_below_imin) *
+                                 (vec_diff_imin - vec_diff_above_imin)) -
+                                ((pressure_imin - pressure_above_imin) *
+                                 (vec_diff_imin - vec_diff_below_imin)));
+          satwind_best_fit_press[idata] = pressure_imin -
+              (0.5f * (top / bottom));
+        }
+        // 2) Find bestfit eastward and northwards winds by linear interpolation,
+        //    if calculate_best_fit_winds set to true (default: false)
+        if (calculate_best_fit_winds) {
+          if (std::fabs(pressure_imin - satwind_best_fit_press[idata]) <=
+              tolerance_pressure) {
+            satwind_best_fit_eastward_wind[idata] = model_eastvec_profile[imin];
+            satwind_best_fit_northward_wind[idata] = model_northvec_profile[imin];
           } else {
-            lev_below = imin;
-            lev_above = imin + 1;
-            prop = (satwind_best_fit_press[idata] - pressure_2) /
-                (pressure_3 - pressure_2);
+            const size_t lev_below = pressure_imin < satwind_best_fit_press[idata] ?
+              imin + 1 : imin;
+            const size_t lev_above = pressure_imin < satwind_best_fit_press[idata] ?
+              imin : imin - 1;
+            const float prop       = pressure_imin < satwind_best_fit_press[idata] ?
+              (satwind_best_fit_press[idata] - pressure_below_imin) /
+                  (pressure_imin - pressure_below_imin) :
+              (satwind_best_fit_press[idata] - pressure_imin) /
+                  (pressure_above_imin - pressure_imin);
+            ASSERT(prop >= 0 && prop <= 1);
+            satwind_best_fit_eastward_wind[idata] = model_eastvec_profile[lev_below] *
+                (1.0f - prop) + model_eastvec_profile[lev_above] * prop;
+            satwind_best_fit_northward_wind[idata] = model_northvec_profile[lev_below] *
+                (1.0f - prop) + model_northvec_profile[lev_above] * prop;
           }
-          ASSERT(prop >= 0 && prop <= 1);
-          satwind_best_fit_eastward_wind[idata] = model_eastvec_profile[lev_below] *
-              (1.0f - prop) + model_eastvec_profile[lev_above] * prop;
-          satwind_best_fit_northward_wind[idata] = model_northvec_profile[lev_below] *
-              (1.0f - prop) + model_northvec_profile[lev_above] * prop;
         }
       }
 
       // 3) Check if best-fit pressure is well constrained then set flag SatwindPoorConstraint.
       if (min_vector_diff <= upper_vector_diff) {
-        for (size_t ilev = 0; ilev < num_level - 1; ++ilev) {
+        for (int ilev = num_level - 1; ilev >= 0; ilev--) {
           if (model_pressure_profile[ilev] < top_pressure) continue;
           if ((model_pressure_profile[ilev] <
                satwind_best_fit_press[idata] - pressure_band_half_width ||
@@ -278,7 +258,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   const std::size_t iconstraint = countAccumulator->computeResult();
   if (iconstraint  > 0) {
     oops::Log::info() << "Satwind Poor constraint: "<< iconstraint
-                      << " observations with modified pressure" << std::endl;
+                      << " observations with poorly constrained bestfit pressure" << std::endl;
   }
   // write back flags and best-fit pressure/ winds
   obsdb_.put_db("QCFlags", model_eastvec_name, u_flags);

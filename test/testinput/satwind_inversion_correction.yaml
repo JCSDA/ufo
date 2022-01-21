@@ -30,3 +30,39 @@ observations:
       test:
         name: air_pressure@MetaData       # corrected pressures in ufo
       absTol: 1.0e-5                      # tolerance in Pa
+#---------------------------------------------------
+- obs space:
+    name: GeoVaLs are in the wrong order, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: eastward_wind@QCFlags
+      type: int
+      value: 0
+    - name: northward_wind@QCFlags
+      type: int
+      value: 0
+  - filter: Satwind Inversion Correction
+    observation pressure:
+      name: air_pressure@MetaData
+    RH threshold: 54
+  expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
+#---------------------------------------------------
+- obs space:
+    name: QcFlags not initialised
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
+  obs filters:
+  - filter: Satwind Inversion Correction
+    observation pressure:
+      name: air_pressure@MetaData
+    RH threshold: 54
+  expectExceptionWithMessage: eastward_wind@QCFlags or northward_wind@QCFlags not initialised
