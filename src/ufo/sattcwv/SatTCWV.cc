@@ -72,20 +72,9 @@ void SatTCWV::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
     geovals.getAtLevel(q[lev], "specific_humidity", lev);
   }
 
-  // Check whether model fields are top-down or bottom-up
-  int lev_near_surf, lay_near_surf, lev1, lev2;
-  if (plev[2][0] - plev[1][0] > 0) {
-    // Top-down
-    lev_near_surf = nlevels - 2;
-    lay_near_surf = nlevels - 2;
-    lev1 = 0;
-    lev2 = nlevels - 2;
-  } else {
-    // Bottom-up
-    lev_near_surf = 1;
-    lay_near_surf = 0;
-    lev1 = 1;
-    lev2 = nlevels - 1;
+  // Check model fields are top-down, fail if not
+  if (plev.front() > plev.back()) {
+    throw eckit::BadValue("model fields must be ordered from the top down", Here());
   }
 
   // Calculate TCWV for each profile, integrating over each layer
@@ -94,12 +83,12 @@ void SatTCWV::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
   for (size_t prof = 0; prof < nprofiles; ++prof) {
     // Start with lowest model layer, using surface pressure
     // NB this assumes surface q is same as q 10m but could use q2m in future
-    hofx[prof] = abs(ps[prof] - plev[lev_near_surf][prof]) *
-                 q[lay_near_surf][prof] / Constants::grav;
+    hofx[prof] = (ps[prof] - plev[nlevels - 2][prof]) *
+                 q[nlevels - 2][prof] / Constants::grav;
 
     // Loop over the rest of the model layers
-    for (size_t lev = lev1; lev < lev2; ++lev) {
-      hofx[prof] += abs(plev[lev][prof] - plev[lev+1][prof]) *
+    for (size_t lev = 0; lev < nlevels - 2; ++lev) {
+      hofx[prof] += (plev[lev+1][prof] - plev[lev][prof]) *
                     q[lev][prof] / Constants::grav;
     }
   }
