@@ -32,12 +32,12 @@ class ObsIdentityParameters : public ObsOperatorParametersBase {
      "List of variables to be simulated",
      this};
 
-  /// The boolean parameter `level index 0 is closest to surface` can be set to `false`
-  /// for models whose level index 0 is furthest from the Earth's surface.
+  /// The boolean parameter `level index 0 is closest to surface` can be set to `true`
+  /// for GeoVaLs whose level index 0 is closest to the Earth's surface.
   oops::Parameter<bool> levelIndex0IsClosestToSurface{
      "level index 0 is closest to surface",
-     "model level 0 is closest to the surface",
-     true,
+     "GeoVaL level 0 is closest to the surface",
+     false,
      this};
 };
 

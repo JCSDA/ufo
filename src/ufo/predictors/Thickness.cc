@@ -63,7 +63,7 @@ void Thickness::compute(const ioda::ObsSpace & odb,
     geovals.getAtLocation(t_prof, "air_temperature", jl);
 
     if (p_prof.front() > p_prof.back())
-          throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
+      throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
 
     // Check that layer top is within pressure levels
     if (p_high > p_prof.back()) {

@@ -56,8 +56,10 @@ void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   for (int jvar : operatorVarIndices_) {
     const std::string& varname = ovec.varnames().variables()[jvar];
     // Get GeoVaL at the level closest to the Earth's surface.
-    if (levelIndexZeroAtSurface_)
+    if (levelIndexZeroAtSurface_) {
       gv.getAtLevel(vec, varname, 0);
+      oops::Log::info() << "WARNING: Bottom up GeoVaLs will eventually be deprecated."
+                        << std::endl;}
     else
       gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {

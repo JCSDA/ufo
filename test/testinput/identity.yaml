@@ -39,7 +39,7 @@ observations:
   rms ref: 208.52332007792242
   tolerance: 1.0e-06
 
-# GeoVaLs for which level index 0 is furthest from the Earth's surface.
+# GeoVaLs for which level index 0 is nearest to the Earth's surface.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -47,7 +47,7 @@ observations:
     simulated variables: [air_temperature]
   obs operator:
     name: Identity
-    level index 0 is closest to surface: false
+    level index 0 is closest to surface: true
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s_reversed.nc4
   linear obs operator test:
