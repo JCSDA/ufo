@@ -37,6 +37,7 @@ list( APPEND ufo_test_input
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/atms_rttov_qc.yaml
+  testinput/atovs_rttov_scatt.yaml
   testinput/amsua_rttovcpp.yaml
   testinput/background_error_vert_interp.yaml
   testinput/background_error_identity.yaml
@@ -1002,6 +1003,14 @@ if( ${rttov_FOUND} )
                     ARGS    "testinput/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_atovs_rttov_scatt
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                    ARGS    "testinput/atovs_rttov_scatt.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsOperator.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+  
 
   ecbuild_add_test( TARGET  test_ufo_opr_rttovcpp_amsua
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -3803,12 +3812,18 @@ rttov7pred54L/rtcoef_noaa_19_amsua.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
+rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
+mietable/mietable_metop_amsuamhs.dat
 )
 
-# Symlink all CRTM files
+# Symlink RTcoef files
 CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
+
+file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tgz
+                     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
+                     
 endif( ${rttov_FOUND} )
 
 ######

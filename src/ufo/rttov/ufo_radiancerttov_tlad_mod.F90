@@ -151,6 +151,7 @@ contains
     integer                                      :: prof_start, prof_end
 
     logical                                      :: jacobian_needed
+    real(kind_real), allocatable                 :: sfc_emiss(:,:)
 
     include 'rttov_k.interface'
 
@@ -190,6 +191,13 @@ contains
 
     ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
     nchan_inst = size(self % channels)
+
+    ! Read emissivity from obs space if its requested
+    if (self % conf % surface_emissivity_group /= "") then
+      allocate(sfc_emiss(nchan_inst, self % nprofiles)) ! nchans, nprofiles
+      call rttov_read_emissivity_from_obsspace(obss, self % conf % surface_emissivity_group, &
+                                               self % channels, sfc_emiss)
+    end if
 
     ! Allocate memory for *ALL* RTTOV_K channels
     write(message,'(A,A,I0,A)') &
@@ -251,6 +259,15 @@ contains
         ! check RTTOV profile and flag it if it fails the check
         if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check(self % conf, iprof, i_inst, errorstatus)
 
+        ! check sfc_emiss valid if read in
+        if (allocated(sfc_emiss)) then
+          do ichan = 1, nchan_inst
+            if ((sfc_emiss(ichan,iprof) > 1.0) .or. (sfc_emiss(ichan,iprof) < 0.0)) then
+              errorstatus = errorstatus_fatal
+            end if
+          end do
+        end if
+
         if (errorstatus == errorstatus_success) then 
           do ichan = 1, nchan_inst
             ichan_sim = ichan_sim + 1_jpim
@@ -261,11 +278,32 @@ contains
           end do
           nchan_sim = ichan_sim
         endif
-                  
+
       end do
 
       ! Set surface emissivity
-      call self % RTProf_K % init_emissivity(self % conf, prof_start)
+      if (allocated(sfc_emiss)) then
+        self % RTprof_K % calcemis(:) = .false.
+        do ichan = 1, ichan_sim
+          self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(chanprof(ichan) % chan, iprof)
+          if (self % RTprof_K % emissivity(ichan) % emis_in == 0.0) then
+            self % RTprof_K % calcemis(ichan) = .true.
+          end if
+        end do
+      else
+        call self % RTProf_K % init_emissivity(self % conf, prof_start)
+      end if
+
+      ! Write out emissivity if checking profile
+      if(size(self % conf % inspect) > 0) then
+        do ichan = 1, ichan_sim, nchan_inst
+          iprof = chanprof(ichan) % prof
+          if(any(self % conf % inspect == iprof)) then
+            write(*,*) "calcemiss = ",self % RTprof_K % calcemis(ichan:ichan+nchan_inst-1)
+            write(*,*) "emissivity in = ",self % RTprof_K % emissivity(ichan:ichan+nchan_inst-1) % emis_in
+          end if
+        end do
+      end if
 
       ! --------------------------------------------------------------------------
       ! Call RTTOV K model

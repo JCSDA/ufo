@@ -231,6 +231,9 @@ Iterations: do iter = 1, config % max1DVarIterations
     write(*,'(10F10.3)') ob % yobs(:)
     write(*,*) "HofX BT = "
     write(*,'(10F10.3)') Y(:)
+    call ufo_rttovonedvarcheck_PrintIterInfo(ob % yobs(:), Y(:), ob % channels_used, &
+                                             guessprofile, backprofile, &
+                                             Xdiff, b_inv, H_matrix)
   end if
 
   if (config % UseJForConvergence) then

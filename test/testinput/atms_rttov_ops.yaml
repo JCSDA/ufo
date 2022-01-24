@@ -8,12 +8,13 @@ window end: 2019-12-30T03:00:00Z
 observations:
 - obs operator:
      name: RTTOV
-     GeoVal_type: MetO # default
      Debug: false # default
-     Absorbers: [Water_vapour]
-     linear model absorbers: [Water_vapour]
+     Absorbers: []
+     linear model absorbers: []
      obs options:
-       Sensor_ID: noaa_20_atms
+       Platform_Name: NOAA
+       Sat_ID: 20
+       Instrument_Name: ATMS
        CoefficientPath: Data/
        RTTOV_GasUnitConv: false # default
        RTTOV_default_opts: UKMO_PS43 # non-default
@@ -25,6 +26,7 @@ observations:
        QtSplitRain: true # optional parameter
        RTTOV_profile_checkinput: false # default
        InspectProfileNumber: [1, 2] # optional parameter
+       Do_MW_Scatt: false
        RTTOV_addrefrac: false # default
        RTTOV_switchrad: true # non-default PS43 setting
        RTTOV_use_q2m: false # non-default PS43 setting
@@ -91,15 +93,16 @@ observations:
     tolerance AD: 1.0e-11
 - obs operator:
      name: RTTOV
-     GeoVal_type: MetO # default
      Debug: false # default
-     Absorbers: [Water_vapour]
-     linear model absorbers: [Water_vapour]
+     Absorbers: []
+     linear model absorbers: []
      obs options:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility
        SatRad_compatibility: false # non-default
-       Sensor_ID: noaa_20_atms
+       Platform_Name: NOAA
+       Sat_ID: 20
+       Instrument_Name: ATMS
        CoefficientPath: Data/
        UseRHwaterForQC: false # non-default
        UseColdSurfaceCheck: false # non-default

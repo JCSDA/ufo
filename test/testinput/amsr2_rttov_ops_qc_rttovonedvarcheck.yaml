@@ -5,16 +5,17 @@ observations:
 # Test Newton minimizer
 - obs operator: &ObsOperator
     name: RTTOV
-    GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear model absorbers: [Water_vapour]
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    linear model absorbers: []
     obs options:
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
       RTTOV_GasUnitConv: true
       UseRHwaterForQC: &UseRHwaterForQC true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default
-      Sensor_ID: &sensor_id gcom-w_1_amsr2
+      Platform_Name: &platform_name GCOM-W
+      Sat_ID: &sat_id 1
+      Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
   obs space: &ObsSpace
     name: Test RTTOVOneDVarCheck for AMSR-2
@@ -36,14 +37,16 @@ observations:
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options: 
         RTTOV_default_opts: UKMO_PS44
         SatRad_compatibility: false # done in filter
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name 
+        Sat_ID: *sat_id 
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/amsr_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
@@ -100,14 +103,16 @@ observations:
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options: 
         RTTOV_default_opts: UKMO_PS44
         SatRad_compatibility: true # should draw a failure
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name 
+        Sat_ID: *sat_id 
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/amsr_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4

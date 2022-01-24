@@ -4,9 +4,8 @@ window end: 2021-07-01T23:59:00Z
 observations:
 - obs operator:
      name: RTTOV
-     GeoVal_type: MetO
-     Absorbers: &rttov_absorbers [Water_vapour, CLW, CIW]
-     linear model absorbers: [Water_vapour]
+     Absorbers: &rttov_absorbers [CLW, CIW]
+     linear model absorbers: []
      obs options:
        RTTOV_default_opts: UKMO_PS45
        SatRad_compatibility: true
@@ -14,7 +13,9 @@ observations:
        QtSplitRain: false   #ssmis seems to be the only instrument to do this
        RTTOV_GasUnitConv: true
        UseColdSurfaceCheck: &UseColdSurfaceCheck false
-       Sensor_ID: &sensor_id dmsp_17_ssmis
+       Platform_Name: &platform_name DMSP
+       Sat_ID: &sat_id 17
+       Instrument_Name: &inst_name SSMIS
        CoefficientPath: Data/
   obs space:
     name: SSMIS
@@ -95,7 +96,9 @@ observations:
         RTTOV_GasUnitConv: true 
         UseRHwaterForQC: false
         UseColdSurfaceCheck: false
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/ssmis_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4

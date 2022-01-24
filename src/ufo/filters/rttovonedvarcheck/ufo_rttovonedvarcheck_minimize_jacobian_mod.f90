@@ -108,6 +108,7 @@ real(kind_real), allocatable :: dql_dqt(:)
 real(kind_real), allocatable :: dqi_dqt(:)
 real(kind_real), allocatable :: dBT_dq(:)
 real(kind_real), allocatable :: dBT_dql(:)
+real(kind_real), allocatable :: dBT_dqi(:)
 character(len=max_string)    :: varname
 real(c_double)               :: BT(size(ob % channels_all))
 real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
@@ -194,6 +195,7 @@ if (profindex % qt(1) > 0) then
   allocate(dqi_dqt(nlevels))
   allocate(dBT_dq(nlevels))
   allocate(dBT_dql(nlevels))
+  allocate(dBT_dqi(nlevels))
 
   ! Get humidity data from geovals
   q_kgkg(:) = zero
@@ -231,9 +233,22 @@ if (profindex % qt(1) > 0) then
     dBT_dql(:) = zero
     dBT_dql(:) = geoval % vals(:,1)
 
-    H_matrix(i,profindex % qt(1):profindex % qt(2)) = &
-            (dBT_dq(:)  * dq_dqt(:) + &
-             dBT_dql(:) * dql_dqt(:) ) * q_kgkg(:)
+    if (config % RTTOV_mwscattSwitch) then
+      ! Get liquid ice jacobian
+      write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_cli), "_", channels(i) ! kg/kg
+      call ufo_geovals_get_var(hofxdiags, varname, geoval)
+      dBT_dqi(:) = zero
+      dBT_dqi(:) = geoval % vals(:,1)
+
+      H_matrix(i,profindex % qt(1):profindex % qt(2)) = &
+              (dBT_dq(:)  * dq_dqt(:) + &
+               dBT_dql(:) * dql_dqt(:) + &
+               dBT_dqi(:) * dqi_dqt(:)) * q_kgkg(:)
+    else
+      H_matrix(i,profindex % qt(1):profindex % qt(2)) = &
+              (dBT_dq(:)  * dq_dqt(:) + &
+               dBT_dql(:) * dql_dqt(:) ) * q_kgkg(:)
+    end if
 
   end do
 

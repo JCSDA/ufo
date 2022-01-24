@@ -184,6 +184,13 @@ if (profindex % qt(1) > 0) then
   where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
+  ! Add ciw if rttov scatt is being used
+  if (self % RTTOV_mwscattSwitch) then
+    call ufo_geovals_get_var(geovals, trim(var_cli), geoval)
+    where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
+    humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+  end if
+
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
   call Ops_SatRad_Qsplit ( 1,       &
                     pressure(:),    &

@@ -5,16 +5,17 @@ observations:
 # Test Newton minimizer
 - obs operator: &ObsOperator
     name: RTTOV
-    GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear model absorbers: [Water_vapour]
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    linear model absorbers: []
     obs options:
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
       RTTOV_GasUnitConv: true
+      Platform_Name: &platform_name NOAA
+      Sat_ID: &sat_id 20
+      Instrument_Name: &inst_name ATMS
       UseRHwaterForQC: &UseRHwaterForQC1 true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck1 true # default
-      Sensor_ID: &sensor_id noaa_20_atms
       CoefficientPath: Data/
   obs space: &ObsSpace
     name: Test 1D-Var Newton Minimizer for ATMS
@@ -42,12 +43,14 @@ observations:
   - filter: RTTOV OneDVar Check
     ModName: RTTOV
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options: 
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
         RTTOV_GasUnitConv: true
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
@@ -85,16 +88,17 @@ observations:
 ## Test ML minimizer
 - obs operator:
     name: RTTOV
-    GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
-    linear model absorbers: [Water_vapour]
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    linear model absorbers: []
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
       RTTOV_GasUnitConv: false
+      Platform_Name: *platform_name
+      Sat_ID: *sat_id
+      Instrument_Name: *inst_name
       UseRHwaterForQC: &UseRHwaterForQC2 false # non-default
       UseColdSurfaceCheck: &UseColdSurfaceCheck2 false # non-default
-      Sensor_ID: *sensor_id
       CoefficientPath: Data/
       QtSplitRain: false
   obs space:
@@ -114,11 +118,13 @@ observations:
   - filter: RTTOV OneDVar Check
     ModName: RTTOV
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options: 
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
@@ -171,11 +177,13 @@ observations:
       maxvalue: 60.0
     ModName: RTTOV
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options: 
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
@@ -201,11 +209,13 @@ observations:
       minvalue: 60.0
     ModName: RTTOV
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options:
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
@@ -289,11 +299,13 @@ observations:
   - filter: RTTOV OneDVar Check
     ModName: RTTOV
     ModOptions:
-      Absorbers: *rttov_absobers
+      Absorbers: *rttov_absorbers
       obs options:
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Sensor_ID: *sensor_id
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
         CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atovs_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4

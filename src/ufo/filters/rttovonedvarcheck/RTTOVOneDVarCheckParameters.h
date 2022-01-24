@@ -187,6 +187,9 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Value to scale the skin temperature error over land.  If less than zero
   /// no scaling is done hence the default value of -1.0.
   oops::Parameter<double> SkinTempErrorLand{"SkinTempErrorLand", -1.0, this};
+
+  /// Get ObsBias from database if testing code.
+  oops::OptionalParameter<std::string> obsBiasGroupForTesting{"obs bias group for testing", this};
 };
 
 }  // namespace ufo

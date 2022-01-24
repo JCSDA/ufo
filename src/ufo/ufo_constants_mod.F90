@@ -78,6 +78,8 @@ real(kind_real), parameter, public :: so2_mixratio_to_ppmv = 4.52118e+5_kind_rea
                                                                                   ! constant was never explicitly calculated 
                                                                                   ! mso2 = 32.065 + 2 * 15.9994 = 64.0638
 
+real(kind_real), parameter, public :: RTTOV_ToA = 0.0001_kind_real ! hPa 
+
 
 end module ufo_constants_mod
 

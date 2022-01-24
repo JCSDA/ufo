@@ -23,9 +23,19 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(RTTOVObsOptionsParameters, Parameters)
 
  public:
-  /// This is a string used to create the coefficient file name for example "noaa_20_atms" to make
-  /// RTTOV use rtcoef_noaa_20_atms.dat
-  oops::RequiredParameter<std::string> sensorID{"Sensor_ID", this};
+  /// Platform_Name is the first part of the unique instrument triplet used to create the RTTOV
+  /// coefficient file name. This must correspond to platform name used in rttov_const.F90 but the
+  /// case needn't match as it's converted to lower case in the interface.
+  oops::RequiredParameter<std::string> platformName{"Platform_Name", this};
+
+  /// Sat_ID is the second part of the instrument triplet used to create the RTTOV coefficient
+  /// file name. This is always required but is not used for reading RTTOV-SCATT hydro/mietables.
+  oops::RequiredParameter<std::string> satID{"Sat_ID", this};
+
+  /// Instrument_Name is the third part of the unique instrument triplet used to create the RTTOV
+  /// coefficient file name. This must correspond to platform name used in rttov_const.F90 but the
+  /// case needn't match as it's converted to lower case in the interface.
+  oops::RequiredParameter<std::string> instrumentName{"Instrument_Name", this};
 
   /// The path to the coefficient files.
   oops::RequiredParameter<std::string> coefficientPath{"CoefficientPath", this};
@@ -70,10 +80,17 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// This check makes sure the values read from the geovals are within certain bounds.
   oops::Parameter<bool> RTTOVProfileCheckInput{"RTTOV_profile_checkinput", false, this};
 
+  /// Use RTTOV-Scatt interface to simulate microwave radiances affected by cloud and precipitation.
+  oops::Parameter<bool> doMWScatt{"Do_MW_Scatt", false, this};
+
   /// Specify the profiles where further diagnostics are needed
   /// for debugging e.g. [1, 2, 3]
   /// Note this is numbering from 1 as it is Fortran that will provide output.
   oops::OptionalParameter<std::vector<int>> inspectProfileNumber{"InspectProfileNumber", this};
+
+  /// An optional group which provides the path to reading surface_emissivity@<Group>.  This allows
+  /// RTTOV to use surface emissivity from the ObsSpace
+  oops::Parameter<std::string> surfaceEmissivityGroup{"surface emissivity group", "", this};
 
   /// -----------------------------------------------------------------------------------
   /// RTTOV options all of these are loaded using set_options_rttov and are not required
@@ -365,10 +382,41 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// ----------------------------------------------------------------------
 
   /// ---------------------------------------------------------------------------
-  /// Options related RTTOV-SCATT: opts_scatt
-  /// This is being deliberately omitted because the interface is currently
-  /// not setup to use RTTOV-SCATT
+  /// RTTOV-SCATT specific options: opts_scatt
+  /// Note that only RTTOV-Scatt specific options are exposed here.
+  /// Other valid options for RTTOV-Scatt (see user guide) are copied from the
+  /// RTTOV options structure
   /// ---------------------------------------------------------------------------
+
+  /// If true do RT calculation in radiances instead of brightness
+  /// temperatures. Default is false, recommended is true.
+  oops::OptionalParameter<bool> MWScattLradiance{"MW_Scatt_lradiance", this};
+
+  /// If true, you should supply supply the effective cloud fraction in
+  /// the rttov_profile_cloud. If false, this is calculated
+  /// internally in RTTOV-SCATT. Default is false
+  oops::OptionalParameter<bool> MWScattLusercfrac{"MW_Scatt_lusercfrac", this};
+
+  /// If the effective cloud fraction for the profile is below this value, it
+  /// is ignored and the simulation is clear-sky. The value must be in
+  /// the range 0-1 (default = 0.05).
+  oops::OptionalParameter<int> MWScattCCthreshold{"MW_Scatt_CC_threshold", this};
+
+  /// hydrometeor TL/AD/K sensitivity is usually generated through two mechanisms,
+  /// first the direct effect of bulk optical properties on the cloudy radiances;
+  /// second the indirect effect through the effective cloud fraction
+  /// (which is weighted vertically by hydrometeor amount).
+  /// Setting this flag to false turns off the second effect, making for smoother
+  /// and less complicated Jacobians in the vertical.
+  /// The default in false
+  oops::OptionalParameter<bool> MWScattHydroCfracTLAD{"MW_Scatt_hydro_cfrac_tlad", this};
+
+  /// if true, then the hydrometeor concentrations are active TL/AD variables in layers where the
+  /// concentrations are zero (i.e. clear layers have non-zero hydrometeor AD/K). Setting this
+  /// option can provide smoother Jacobians which may also be a solution for inverse methods that
+  /// are susceptible to the 'zero cloud, zero gradient' problem.
+  /// The default value (false) yields the old RTTOV behaviour (no sensitivity for clear layers).
+  oops::OptionalParameter<bool> MWScattZeroHydroTLAD{"MW_Scatt_zero_hydro_tlad", this};
 };
 
 class ObsRadianceRTTOVParameters : public ObsOperatorParametersBase {
@@ -382,11 +430,6 @@ class ObsRadianceRTTOVParameters : public ObsOperatorParametersBase {
   /// Write out detailed information to help with diagnosing problems with the interface and/or
   /// RTTOV
   oops::Parameter<bool> debug{"Debug", false, this};
-
-  /// The type of geoval that is expected by the interface.  Hopefully this can be removed
-  /// in the future but for now the oprions are: MetO, SatRad and CRTM.  This is to allow
-  /// for Met Office specific setups and comparison with CRTM.
-  oops::OptionalParameter<std::string> geovalType{"GeoVal_type", this};
 
   /// The absorbers needed by RTTOV for this observation type and RTTOV model.
   oops::OptionalParameter<std::vector<std::string>> absorbers{"Absorbers", this};

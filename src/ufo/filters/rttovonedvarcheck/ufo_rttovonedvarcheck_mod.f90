@@ -116,7 +116,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix     ! r_submatrix object
   type(ufo_geovals)                      :: hofxdiags       ! hofxdiags containing jacobian
   type(ufo_geoval), pointer          :: geoval
-  character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
@@ -164,8 +163,14 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
 
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix, self % nlevels)
+  if (prof_index % mwemiss(1) > 0 .and. .not. self % mwEmissRetrieval) then
+    write(message, *) "MWemiss is in the b-matrix but the mw retrieval flag, ", &
+                      "retrieve mw emissivity, is false.  Set this to true in ", &
+                      "the surface emissivty configuration to allow the correct arrays ", &
+                      "to be loaded => aborting."
+    call abor1_ftn(message)
+  end if
 
-  
   ! sanity check on clw storage - only store to obs space
   ! if qtotal or ql is present in retrieval vector
   if (self % Store1DVarCLW) then

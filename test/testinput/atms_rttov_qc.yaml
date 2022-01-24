@@ -4,13 +4,13 @@ window end: 2019-12-30T03:00:00Z
 observations:
 - obs operator:
     name: RTTOV
-    GeoVal_type: MetO
-    Absorbers: &rttov_absorbers [Water_vapour, CLW]
-    linear model absorbers: [Water_vapour]
+    Absorbers: &rttov_absorbers [CLW]
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      Sensor_ID: noaa_20_atms
+      Platform_Name: NOAA
+      Sat_ID: 20
+      Instrument_Name: ATMS
       CoefficientPath: Data/
       RTTOV_GasUnitConv: true
       UseRHwaterForQC: true

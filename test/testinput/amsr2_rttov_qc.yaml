@@ -4,13 +4,14 @@ window end: 2019-12-30T03:00:00Z
 observations:
 - obs operator:
     name: RTTOV
-    GeoVal_type: MetO
-    Absorbers: &rttov_absobers [Water_vapour]
-    linear model absorbers: [Water_vapour]
+    Absorbers: &rttov_absorbers []
+    linear model absorbers: []
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
-      Sensor_ID: gcom-w_1_amsr2 
+      Platform_Name: &platform_name GCOM-W
+      Sat_ID: &sat_id 1
+      Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
       InspectProfileNumber: [1] # optional parameter
   obs space:

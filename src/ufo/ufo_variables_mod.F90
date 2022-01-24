@@ -99,8 +99,11 @@ character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_ref
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
-character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
+character(len=maxvarlen), public, parameter :: var_cloud_layer = "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_qcl  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_qci  = "mass_content_of_cloud_ice_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
+character(len=MAXVARLEN), public, parameter :: var_surf_tau = "transmission_at_surface" 
 character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
 character(len=MAXVARLEN), public, parameter :: var_sfc_seaicefrac = "seaice_fraction"
 

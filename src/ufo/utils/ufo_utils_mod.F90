@@ -24,6 +24,8 @@ public Ops_SatRad_Qsplit
 public Ops_Cholesky
 public ufo_utils_iogetfreeunit
 public InvertMatrix
+public upper2lower
+public getindex
 public cmp_strings
 
 contains
@@ -1411,5 +1413,40 @@ function cmp_ordered_strings(shorter_str, longer_str)
 end function cmp_ordered_strings
 
 !-------------------------------------------------------------------------------
+
+  FUNCTION upper2lower(str) RESULT(string)
+
+    IMPLICIT NONE
+
+    CHARACTER(*), INTENT(in) :: str
+    CHARACTER(LEN(str))      :: string
+
+    INTEGER :: ic, i
+
+    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+
+!   lowcase each letter if it is lowecase
+    string = str
+    DO i = 1, LEN_TRIM(str)
+      ic = INDEX(upper, str(i:i))
+      IF (ic > 0) string(i:i) = lower(ic:ic)
+    END DO
+
+  END FUNCTION upper2lower
+
+  INTEGER FUNCTION getindex(names,usrname)
+    IMPLICIT NONE
+    CHARACTER(len=*),INTENT(in) :: names(:)
+    CHARACTER(len=*),INTENT(in) :: usrname
+    INTEGER i
+    getindex=-1
+    DO i=1,SIZE(names)
+      IF(TRIM(usrname)==TRIM(names(i))) THEN
+        getindex=i
+        EXIT
+      ENDIF
+    ENDDO
+  END FUNCTION getindex
 
 end module ufo_utils_mod
