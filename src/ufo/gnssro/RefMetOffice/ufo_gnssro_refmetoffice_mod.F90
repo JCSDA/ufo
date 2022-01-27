@@ -20,6 +20,7 @@ use obsspace_mod
 use missing_values_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
 use fckit_log_module,  only : fckit_log
+use fckit_exception_module, only: fckit_exception
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
@@ -83,13 +84,13 @@ end subroutine ufo_gnssro_refmetoffice_setup
 !! \date 20 March 2021
 !!
 !-------------------------------------------------------------------------------
-subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diags)
+subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
   implicit none
 
   ! Arguments to this routine
   class(ufo_gnssro_RefMetOffice), intent(in)    :: self       ! The object in which this operator is contained
-  type(ufo_geovals),              intent(in)    :: geovals_in ! The model values, interpolated to the observation locations
+  type(ufo_geovals),              intent(in)    :: geovals    ! The model values, interpolated to the observation locations
   real(kind_real),                intent(inout) :: hofx(:)    ! The model forecast of the observations
   type(c_ptr), value,             intent(in)    :: obss       ! The observations, and meta-data for those observations
   type(ufo_geovals),              intent(inout) :: obs_diags  ! Observation diagnostics
@@ -113,8 +114,6 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   integer                            :: iVar                  ! Loop variable, obs diagnostics variable number
   real(kind_real), allocatable       :: refractivity(:)       ! Refractivity on various model levels
   real(kind_real), allocatable       :: model_heights(:)      ! Geopotential heights that refractivity is calculated on
-  type(ufo_geovals)                  :: geovals               ! The model values, interpolated to the observation locations
-                                                              ! and flipped in the vertical (if required)
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: begin"
   call fckit_log%info(err_msg)
@@ -133,14 +132,10 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   END DO
 
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals_in%nlocs /= size(hofx)) then
+  if (geovals%nlocs /= size(hofx)) then
       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
       call abor1_ftn(err_msg)
   endif
-  
-! make sure that the geovals are in the correct vertical order (surface first)
-  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
-  call ufo_geovals_reorderzdir(geovals, var_prsi, "bottom2top")
 
   write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with:'
   call fckit_log%info(message)
@@ -153,6 +148,12 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   call ufo_geovals_get_var(geovals, var_prsi, prs)          ! pressure
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
+
+! make sure that the geovals are in the correct vertical order (top-to-bottom)
+  if (prs%vals(1,1) > prs%vals(prs%nval,1) ) then
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
+  end if
 
   write(message, '(A,10I6)') 'Q: ', q%nval, q%nlocs, shape(q%vals)
   call fckit_log%info(message)
@@ -174,10 +175,10 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
 
     call RefMetOffice_ForwardModel(prs % nval, &
                                    q % nval, &
-                                   rho_heights % vals(:,iobs), &
-                                   theta_heights % vals(:,iobs), &
-                                   prs % vals(:,iobs), &
-                                   q % vals(:,iobs), &
+                                   rho_heights % vals(prs%nval:1:-1,iobs), &
+                                   theta_heights % vals(q%nval:1:-1,iobs), &
+                                   prs % vals(prs%nval:1:-1,iobs), &
+                                   q % vals(q%nval:1:-1,iobs), &
                                    self % pseudo_ops, &
                                    self % vert_interp_ops, &
                                    self % min_temp_grad, &
@@ -206,7 +207,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
             IF (BAerr) THEN
                 obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
             ELSE
-                obs_diags % geovals(iVar) % vals(:,iobs) = refractivity(:)
+                ! Flip the order of the calculated refractivity, since the geovals are oriented
+                ! top-to-bottom, but the code works bottom-to-top
+                obs_diags % geovals(iVar) % vals(:,iobs) = refractivity(SIZE(refractivity):1:-1)
             END IF
         END IF
 
@@ -219,7 +222,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
             IF (BAerr) THEN
                 obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
             ELSE
-                obs_diags % geovals(iVar) % vals(:,iobs) = model_heights(:)
+                ! Flip the order of the calculated refractivity, since the geovals are oriented
+                ! top-to-bottom, but the code works bottom-to-top
+                obs_diags % geovals(iVar) % vals(:,iobs) = model_heights(SIZE(model_heights):1:-1)
             END IF
         END IF
     END DO
@@ -228,7 +233,6 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals_in, obss, hofx, obs_diag
   deallocate(obsLat)
   deallocate(obsLon)
   deallocate(obs_height)
-  call ufo_geovals_delete(geovals)
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: completed"
   call fckit_log%info(err_msg)

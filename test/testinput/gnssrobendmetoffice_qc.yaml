@@ -127,6 +127,7 @@ observations:
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
+    verbose output: true
   - filter: Profile Few Observations Check
     filter variables:
     - name: bending_angle

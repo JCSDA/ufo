@@ -44,7 +44,6 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   integer                       :: nlevp
   integer                       :: nlevq
   integer                       :: nlocs
-  logical                       :: flip_it
   real(kind_real), allocatable  :: K(:,:)
   contains
     procedure :: setup      => ufo_gnssro_bendmetoffice_setup
@@ -97,6 +96,8 @@ end subroutine ufo_gnssro_bendmetoffice_setup
 !-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
        
+  use fckit_exception_module, only: fckit_exception
+
   implicit none
 ! Subroutine arguments
   class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self  !< The object that we use to save data in
@@ -118,9 +119,6 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable       :: impact_param(:)        ! Impact parameter of the observation
   real(kind_real), allocatable       :: obsLocR(:)             ! Earth's radius of curvature at the observation tangent point
   real(kind_real), allocatable       :: obsGeoid(:)            ! Undulation - height of the geoid above the ellipsoid
-  type(ufo_geovals)                  :: geovals_local          ! The model values, interpolated to the observation locations
-                                                               ! and flipped in the vertical (if required)
-  type(ufo_geoval), pointer          :: p_temp                 ! The model geovals - atmospheric pressure before flipping
 
   write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_tlad_settraj: begin"
   call fckit_log%info(err_msg)
@@ -128,21 +126,17 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
 
-! make sure that the geovals are in the correct vertical order (surface first)
-  call ufo_geovals_copy(geovals, geovals_local)  ! dont want to change geovals input
-  call ufo_geovals_get_var(geovals_local, var_prsi, p_temp)
-  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then 
-    self%flip_it = .true.
-  else
-    self%flip_it = .false.
-  endif
-  call ufo_geovals_reorderzdir(geovals_local, var_prsi, "bottom2top")
-
 ! get model state variables from geovals
-  call ufo_geovals_get_var(geovals_local, var_q,    q)             ! specific humidity
-  call ufo_geovals_get_var(geovals_local, var_prsi, prs)           ! pressure
-  call ufo_geovals_get_var(geovals_local, var_z,    theta_heights) ! Geopotential height of the normal model levels
-  call ufo_geovals_get_var(geovals_local, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
+  call ufo_geovals_get_var(geovals, var_q,    q)             ! specific humidity
+  call ufo_geovals_get_var(geovals, var_prsi, prs)           ! pressure
+  call ufo_geovals_get_var(geovals, var_z,    theta_heights) ! Geopotential height of the normal model levels
+  call ufo_geovals_get_var(geovals, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
+
+! make sure that the geovals are in the correct vertical order (top-to-bottom)
+  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then 
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
+  endif
 
 ! Keep copy of dimensions
   self % nlevp = prs % nval
@@ -162,21 +156,25 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
-    CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
-                            q % nval, &                            ! Number of specific humidity levels
-                            rho_heights % vals(:,iobs), &          ! Heights of the pressure levels
-                            theta_heights % vals(:,iobs), &        ! Heights of the specific humidity levels
-                            q % vals(:,iobs), &                    ! Values of the specific humidity
-                            prs % vals(:,iobs), &                  ! Values of the pressure
-                            self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
-                            self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
-                            self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
-                            obsLocR(iobs), &                       ! Local radius of curvature of the earth
-                            obsLat(iobs), &                        ! Latitude of the observation
-                            obsGeoid(iobs), &                      ! Geoid undulation at the tangent point
-                            1, &                                   ! Number of observations in the profile
-                            impact_param(iobs:iobs), &             ! Impact parameter for this observation
-                            self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
+    ! Note: The Geovals are passed bottom-to-top as this is the way the bending angle code works
+    CALL jacobian_interface(prs % nval, &                              ! Number of pressure levels
+                            q % nval, &                                ! Number of specific humidity levels
+                            rho_heights % vals(prs%nval:1:-1,iobs), &  ! Heights of the pressure levels
+                            theta_heights % vals(q%nval:1:-1,iobs), &  ! Heights of the specific humidity levels
+                            q % vals(q%nval:1:-1,iobs), &              ! Values of the specific humidity
+                            prs % vals(prs%nval:1:-1,iobs), &          ! Values of the pressure
+                            self % pseudo_ops, &                       ! Whether to use pseudo-levels in the calculation
+                            self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
+                            self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
+                            obsLocR(iobs), &                           ! Local radius of curvature of the earth
+                            obsLat(iobs), &                            ! Latitude of the observation
+                            obsGeoid(iobs), &                          ! Geoid undulation at the tangent point
+                            1, &                                       ! Number of observations in the profile
+                            impact_param(iobs:iobs), &                 ! Impact parameter for this observation
+                            self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+    ! Flip the K-matrix back the right way around
+    self % K(iobs,1:prs%nval) = self % K(iobs, prs%nval:1:-1)
+    self % K(iobs,prs%nval+1:prs%nval+q%nval) = self % K(iobs, prs%nval+q%nval:prs%nval+1:-1)
   end do obs_loop
 
 ! Note that this routine has been run.
@@ -249,8 +247,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
 ! Loop through the obs, calculating the increment to the observation
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-    x_d(1:prs_d%nval) = prs_d % vals(:,iobs)
-    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = q_d % vals(:,iobs)
+    x_d(1:prs_d%nval) = prs_d % vals(1:prs_d%nval,iobs)
+    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = q_d % vals(1:q_d%nval,iobs)
     hofx(iobs) = SUM(self % K(iobs,:) * x_d)
 
   end do obs_loop
@@ -328,13 +326,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 
     if (hofx(iobs) /= missing) then
         x_d = self % K(iobs,:) * hofx(iobs)
-        if (self%flip_it) then
-            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(prs_d%nval:1:-1)
-            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+q_d%nval:prs_d%nval+1:-1)
-        else
-            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
-            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
-        end if
+        prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+        q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
     end if
 
   end do obs_loop

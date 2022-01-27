@@ -19,6 +19,7 @@ use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module, only : fckit_log
+use fckit_exception_module, only: fckit_exception
 use ufo_utils_refractivity_calculator, only: &
     ufo_calculate_refractivity, ufo_refractivity_partial_derivatives
 use ufo_constants_mod, only: &
@@ -47,7 +48,6 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_refmetoffice_tlad
   private
   logical :: vert_interp_ops              !< Do vertical interpolation using ln(p) or exner?
   logical :: pseudo_ops                   !< Use pseudo-levels in the refractivity calculation
-  logical :: flip_it                      !< Do the outputs need to be flipped in order
   real(kind_real) :: min_temp_grad        !< The minimum temperature gradient before a profile is considered isothermal
                                           !  Used in pseudo-levels calculation
   integer                       :: nlevp  !< The number of pressure levels
@@ -98,7 +98,7 @@ end subroutine ufo_gnssro_refmetoffice_tlad_setup
 !! \details **ufo_gnssro_refmetoffice_tlad_settraj**
 !! * It is necessary to run this routine before calling the TL or AD routines.
 !! * Get the geovals specifying the state around which to linearise, flipping
-!!   the vertical order if required.
+!!   the vertical order as refractivity is calculated starting from the surface.
 !! * Call the helper function to calculate the K-matrix for each observation.
 !!
 !! \author Neill Bowler (Met Office)
@@ -123,12 +123,9 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer   :: prs                           ! The model geovals - atmospheric pressure
   type(ufo_geoval), pointer   :: rho_heights                   ! The model geovals - heights of the pressure-levels
   type(ufo_geoval), pointer   :: theta_heights                 ! The model geovals - heights of the theta-levels (stores q)
-  type(ufo_geoval), pointer   :: p_temp                        ! The model geovals - atmospheric pressure before flipping
   integer                     :: iobs                          ! Loop variable, observation number
 
   real(kind_real), allocatable       :: obs_height(:)          ! Geopotential height of the observation
-  type(ufo_geovals)                  :: geovals_local          ! The model values, interpolated to the observation locations
-                                                               ! and flipped in the vertical (if required)
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_tlad_settraj: begin"
   call fckit_log%info(err_msg)
@@ -136,21 +133,17 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
 
-! make sure that the geovals are in the correct vertical order (surface first)
-  call ufo_geovals_copy(geovals, geovals_local)  ! dont want to change geovals input
-  call ufo_geovals_get_var(geovals_local, var_prsi, p_temp)
-  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then 
-    self%flip_it = .true.
-  else
-    self%flip_it = .false.
-  endif
-  call ufo_geovals_reorderzdir(geovals_local, var_prsi, "bottom2top")
-
 ! get model state variables from geovals
-  call ufo_geovals_get_var(geovals_local, var_q,    q)             ! specific humidity
-  call ufo_geovals_get_var(geovals_local, var_prsi, prs)           ! pressure
-  call ufo_geovals_get_var(geovals_local, var_z,    theta_heights) ! Geopotential height of the normal model levels
-  call ufo_geovals_get_var(geovals_local, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
+  call ufo_geovals_get_var(geovals, var_q,    q)             ! specific humidity
+  call ufo_geovals_get_var(geovals, var_prsi, prs)           ! pressure
+  call ufo_geovals_get_var(geovals, var_z,    theta_heights) ! Geopotential height of the normal model levels
+  call ufo_geovals_get_var(geovals, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
+
+! make sure that the geovals are in the correct vertical order (top-to-bottom)
+  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then 
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
+  endif
 
 ! Keep copy of dimensions
   self % nlevp = prs % nval
@@ -164,18 +157,21 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
-    CALL jacobian_interface(prs % nval, &                          ! Number of pressure levels
-                            q % nval, &                            ! Number of specific humidity levels
-                            rho_heights % vals(:,iobs), &          ! Heights of the pressure levels
-                            theta_heights % vals(:,iobs), &        ! Heights of the specific humidity levels
-                            prs % vals(:,iobs), &                  ! Values of the pressure
-                            q % vals(:,iobs), &                    ! Values of the specific humidity
-                            self % pseudo_ops, &                   ! Whether to use pseudo-levels in the calculation
-                            self % vert_interp_ops, &              ! Whether to interpolate using log(pressure)
-                            self % min_temp_grad, &                ! Minimum allowed vertical temperature gradient
-                            1, &                                   ! Number of observations in the profile
-                            obs_height(iobs:iobs), &               ! Impact parameter for this observation
-                            self % K(iobs:iobs,1:prs%nval+q%nval)) ! K-matrix (Jacobian of the observation with respect to the inputs)
+    CALL jacobian_interface(prs % nval, &                              ! Number of pressure levels
+                            q % nval, &                                ! Number of specific humidity levels
+                            rho_heights % vals(prs%nval:1:-1,iobs), &  ! Heights of the pressure levels
+                            theta_heights % vals(q%nval:1:-1,iobs), &  ! Heights of the specific humidity levels
+                            prs % vals(prs%nval:1:-1,iobs), &          ! Values of the pressure
+                            q % vals(q%nval:1:-1,iobs), &              ! Values of the specific humidity
+                            self % pseudo_ops, &                       ! Whether to use pseudo-levels in the calculation
+                            self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
+                            self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
+                            1, &                                       ! Number of observations in the profile
+                            obs_height(iobs:iobs), &                   ! Impact parameter for this observation
+                            self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+    ! Flip the K-matrix back the right way around
+    self % K(iobs,1:prs%nval) = self % K(iobs, prs%nval:1:-1)
+    self % K(iobs,prs%nval+1:prs%nval+q%nval) = self % K(iobs, prs%nval+q%nval:prs%nval+1:-1)
   end do obs_loop
 
 ! Note that this routine has been run.
@@ -328,13 +324,8 @@ subroutine ufo_gnssro_refmetoffice_simobs_ad(self, geovals, hofx, obss)
 
     if (hofx(iobs) /= missing) then
         x_d = self % K(iobs,:) * hofx(iobs)
-        if (self%flip_it) then
-            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(prs_d%nval:1:-1)
-            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+q_d%nval:prs_d%nval+1:-1)
-        else
-            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
-            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
-        end if
+        prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+        q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
     end if
 
   end do obs_loop

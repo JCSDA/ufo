@@ -21,6 +21,7 @@ use missing_values_mod
 use ufo_gnssro_ukmo1d_utils_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
 use fckit_log_module,  only : fckit_log
+use fckit_exception_module, only: fckit_exception
 
 implicit none
 public             :: ufo_gnssro_bendmetoffice
@@ -88,7 +89,6 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   real(kind_real), allocatable       :: impact_param(:)       ! Impact parameter of the observation
   real(kind_real), allocatable       :: radius_curv(:)        ! Earth's radius of curvature at the observation tangent point
   real(kind_real), allocatable       :: undulation(:)         ! Undulation - height of the geoid above the ellipsoid
-  logical                            :: flip_data             ! Whether to reverse the order of the model data
   logical                            :: BAErr                 ! Was there an error in the calculation?
   integer                            :: iVar                  ! Loop variable, obs diagnostics variable number
   real(kind_real), allocatable       :: refractivity(:)       ! Refractivity on various model levels
@@ -135,13 +135,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
   nobs  = obsspace_get_nlocs(obss)
 
-  flip_data = .false.
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-    write(err_msg,'(a)') '  ufo_gnssro_bendmetoffice_simobs:'//new_line('a')//                         &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  The data will be flipped for processing'
-    call fckit_log%info(err_msg)
-    flip_data = .true.
+  if (prs%vals(1,1) .gt. prs%vals(prs%nval,1) ) then
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
   end if
 
 ! set obs space struture
@@ -159,45 +155,27 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
   obs_loop: do iobs = 1, nobs 
 
-    if (flip_data) then
-        call Ops_GPSRO_ForwardModel(prs % nval, &
-                                    q % nval, &
-                                    rho_heights % vals(rho_heights%nval:1:-1, iobs), &
-                                    theta_heights % vals(theta_heights%nval:1:-1, iobs), &
-                                    prs % vals(prs%nval:1:-1, iobs), &
-                                    q % vals(q%nval:1:-1, iobs), &
-                                    self % pseudo_ops, &
-                                    self % vert_interp_ops, &
-                                    self % min_temp_grad, &
-                                    1, &
-                                    impact_param(iobs:iobs), &
-                                    radius_curv(iobs), &
-                                    obsLat(iobs), &
-                                    undulation(iobs), &
-                                    hofx(iobs:iobs), &
-                                    BAErr, &
-                                    refractivity, &
-                                    model_heights)
-    else
-        call Ops_GPSRO_ForwardModel(prs % nval, &
-                                    q % nval, &
-                                    rho_heights % vals(:,iobs), &
-                                    theta_heights % vals(:,iobs), &
-                                    prs % vals(:,iobs), &
-                                    q % vals(:,iobs), &
-                                    self % pseudo_ops, &
-                                    self % vert_interp_ops, &
-                                    self % min_temp_grad, &
-                                    1, &
-                                    impact_param(iobs:iobs), &
-                                    radius_curv(iobs), &
-                                    obsLat(iobs), &
-                                    undulation(iobs), &
-                                    hofx(iobs:iobs), &
-                                    BAErr, &
-                                    refractivity, &
-                                    model_heights)
-    end if
+    ! Note: The forward operator is coded for bottom-to-top geovals.  Therefore
+    ! the arguments are flipped as they are passed.  This will not create a memory
+    ! overhead since the geovals are processed one at a time.
+    call Ops_GPSRO_ForwardModel(prs % nval, &
+                                q % nval, &
+                                rho_heights % vals(rho_heights%nval:1:-1, iobs), &
+                                theta_heights % vals(theta_heights%nval:1:-1, iobs), &
+                                prs % vals(prs%nval:1:-1, iobs), &
+                                q % vals(q%nval:1:-1, iobs), &
+                                self % pseudo_ops, &
+                                self % vert_interp_ops, &
+                                self % min_temp_grad, &
+                                1, &
+                                impact_param(iobs:iobs), &
+                                radius_curv(iobs), &
+                                obsLat(iobs), &
+                                undulation(iobs), &
+                                hofx(iobs:iobs), &
+                                BAErr, &
+                                refractivity, &
+                                model_heights)
 
     if (BAErr) then
       write(err_msg,*) "Error with observation processing ", iobs
@@ -215,7 +193,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
             IF (BAerr) THEN
                 obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
             ELSE
-                obs_diags % geovals(iVar) % vals(:,iobs) = refractivity(:)
+                ! Flip the order of the calculated refractivity, since the geovals are oriented
+                ! top-to-bottom, but the code works bottom-to-top
+                obs_diags % geovals(iVar) % vals(:,iobs) = refractivity(SIZE(refractivity):1:-1)
             END IF
         END IF
 
@@ -228,7 +208,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
             IF (BAerr) THEN
                 obs_diags % geovals(iVar) % vals(:,iobs) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
             ELSE
-                obs_diags % geovals(iVar) % vals(:,iobs) = model_heights(:)
+                ! Flip the order of the calculated refractivity, since the geovals are oriented
+                ! top-to-bottom, but the code works bottom-to-top
+                obs_diags % geovals(iVar) % vals(:,iobs) = model_heights(SIZE(model_heights):1:-1)
             END IF
         END IF
     END DO

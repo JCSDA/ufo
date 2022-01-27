@@ -168,8 +168,8 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
         continue;
       }
 
-      oops::Log::debug() << "Min and max refrac for profile " << iProfile <<
-                            " is " << refracProfile[0] << " to " << refracProfile.back() <<
+      oops::Log::debug() << "Top and bottom refrac for profile " << iProfile <<
+                            " is " << refracProfile.front() << " to " << refracProfile.back() <<
                             std::endl;
 
       const std::vector<float> & gradient = calcVerticalGradient(refracProfile, heightProfile);
@@ -183,19 +183,20 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
 
       float sharpGradientImpact = std::numeric_limits<float>::lowest();
       // Search for sharp gradients (super-refraction) starting at the top of the profile
-      for (int iLevel = static_cast<int>(nRefLevels)-2; iLevel >= 0; --iLevel) {
-        size_t thisLevel = static_cast<size_t>(iLevel);
-        if (gradient[thisLevel] != missingFloat &&
-            gradient[thisLevel] < parameters_.gradientThreshold.value()) {
-          sharpGradientImpact = calcImpactHeight(refracProfile[thisLevel],
-                                                 heightProfile[thisLevel],
+      for (size_t iLevel=0; iLevel < nRefLevels-1; ++iLevel) {
+        if (gradient[iLevel] != missingFloat &&
+            gradient[iLevel] < parameters_.gradientThreshold.value()) {
+          // Note: The sharp gradient is ascribed to the level below where the gradient
+          // is found
+          sharpGradientImpact = calcImpactHeight(refracProfile[iLevel+1],
+                                                 heightProfile[iLevel+1],
                                                  radiusCurvature[bottomOb]);
-          oops::Log::info() << "Sharp refractivity gradient of " << gradient[thisLevel] <<
-                               " found at " << thisLevel << "  " << sharpGradientImpact <<
+          oops::Log::info() << "Sharp refractivity gradient of " << gradient[iLevel] <<
+                               " found at " << iLevel << "  " << sharpGradientImpact <<
                                std::endl;
-          oops::Log::debug() << thisLevel << "   " << refracProfile[thisLevel] << "   " <<
-                                heightProfile[thisLevel] << "   " <<
-                                radiusCurvature[thisLevel] << std::endl;
+          oops::Log::debug() << iLevel << "   " << refracProfile[iLevel] << "   " <<
+                                heightProfile[iLevel] << "   " <<
+                                radiusCurvature[iLevel] << std::endl;
           break;
         }
       }
@@ -209,27 +210,28 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
           if (parameters_.verboseOutput.value())
             oops::Log::debug() << "Checking minimum height " << obsImpactHeight << "   " <<
                                   sharpGradientImpact + parameters_.sharpGradientOffset.value() <<
-                                  "   " << calcImpactHeight(refracProfile[0], heightProfile[0],
+                                  "   " << calcImpactHeight(refracProfile.back(),
+                                                            heightProfile.back(),
                                                             radiusCurvature[jobs]) +
                                   parameters_.surfaceOffset.value() << "   " <<
                                   (obsImpactHeight < sharpGradientImpact +
                                         parameters_.sharpGradientOffset.value()) << "   " <<
-                                  (obsImpactHeight < calcImpactHeight(refracProfile[0],
-                                                                      heightProfile[0],
+                                  (obsImpactHeight < calcImpactHeight(refracProfile.back(),
+                                                                      heightProfile.back(),
                                                                       radiusCurvature[jobs]) +
                                       parameters_.surfaceOffset.value()) << std::endl;
           if (obsImpactHeight < sharpGradientImpact + parameters_.sharpGradientOffset.value() ||
-              obsImpactHeight < calcImpactHeight(refracProfile[0], heightProfile[0],
+              obsImpactHeight < calcImpactHeight(refracProfile.back(), heightProfile.back(),
                                                  radiusCurvature[jobs]) +
                                                  parameters_.surfaceOffset.value())
             flagged[iFilterVar][jobs] = true;
 
           if (parameters_.verboseOutput.value())
             oops::Log::debug() << "Checking maximum height " << obsImpactHeight << "   " <<
-                                  calcImpactHeight(refracProfile.back(), heightProfile.back(),
+                                  calcImpactHeight(refracProfile.front(), heightProfile.front(),
                                                    radiusCurvature[jobs]) << std::endl;
           // Reject observation if it is above the maximum
-          if (obsImpactHeight > calcImpactHeight(refracProfile.back(), heightProfile.back(),
+          if (obsImpactHeight > calcImpactHeight(refracProfile.front(), heightProfile.front(),
                                                  radiusCurvature[jobs]))
             flagged[iFilterVar][jobs] = true;
         }
@@ -241,6 +243,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 /// Calculate the vertical gradient of refractivity, assuming that any missing
 /// data has already been removed
+/// Note: Since the geovals are oriented top-down the denominator is negative
 std::vector<float> ImpactHeightCheck::calcVerticalGradient(
         const std::vector<float> & refrac,
         const std::vector<float> & height) const {

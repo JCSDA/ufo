@@ -266,10 +266,12 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     end do
 
     ! Load the geovals into the background structure
-    Back % za(:) = rho_heights % vals(:, index_vals(start_point))
-    Back % zb(:) = theta_heights % vals(:, index_vals(start_point))
-    Back % p(:) = prs % vals(:, index_vals(start_point))
-    Back % q(:) = q % vals(:, index_vals(start_point))
+    ! Reverse the order of the geovals, since this routine (and the forward
+    ! operator) works bottom-to-top
+    Back % za(:) = rho_heights % vals(prs%nval:1:-1, index_vals(start_point))
+    Back % zb(:) = theta_heights % vals(q%nval:1:-1, index_vals(start_point))
+    Back % p(:) = prs % vals(prs % nval:1:-1, index_vals(start_point))
+    Back % q(:) = q % vals(q%nval:1:-1, index_vals(start_point))
 
     ! Allocate the observations structure
     nobs_profile = current_point - start_point

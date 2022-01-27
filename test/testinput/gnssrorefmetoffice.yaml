@@ -26,7 +26,7 @@ observations:
     coef TL: 1.0e-4
     iterations TL:  10
     tolerance TL: 1.0e-14
-    tolerance AD: 1.0e-14
+    tolerance AD: 1.0e-13
 - obs operator:
     name: GnssroRefMetOffice
     obs options:
@@ -51,4 +51,18 @@ observations:
     coef TL: 1.0e-4
     iterations TL:  10
     tolerance TL: 1.0e-14
-    tolerance AD: 1.0e-14
+    tolerance AD: 1.0e-13
+- obs operator:
+    name: GnssroRefMetOffice
+    obs options:
+      vert_interp_ops: true
+      pseudo_ops: true
+      min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
+    simulated variables: [refractivity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity_reversed.nc4
+  expect simulateObs to throw exception with message: Geovals should be ordered top to bottom
