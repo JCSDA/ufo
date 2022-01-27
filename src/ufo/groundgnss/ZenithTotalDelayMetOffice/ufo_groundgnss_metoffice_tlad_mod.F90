@@ -75,6 +75,8 @@ end subroutine ufo_groundgnss_metoffice_setup
 ! ------------------------------------------------------------------------------
 subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
 
+  use fckit_exception_module, only: fckit_exception
+
   implicit none
 ! Subroutine arguments
   class(ufo_groundgnss_metoffice_tlad), intent(inout) :: self      ! The object that we use to save data in
@@ -115,19 +117,16 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
+! Check that the geovals are ordered top to bottom
+  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
+  endif
+
 ! Keep copy of dimensions
   self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
-
-! Check whether the pressure levels are in descending order
-  self%iflip = 0
-  IF (prs % vals(1,1)-prs % vals(self%nlevp,1) < 0.0) THEN
-    self%iflip = 1
-    WRITE(message, *) "Pressure is in ascending order. Reorder the variables in vertical direction"
-    CALL fckit_log % warning(message)
-  END IF
-
 
 ! Get the meta-data from the observations
   nobs  = obsspace_get_nlocs(obss)
@@ -137,28 +136,19 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
 
   nstate = prs % nval + q % nval
   ALLOCATE(self % K(1:self%nlocs, 1:nstate))
-  ALLOCATE(pressure(1:self%nlevp)) 
+  ALLOCATE(pressure(1:self%nlevp))
   ALLOCATE(humidity(1:self%nlevq))
   ALLOCATE(za(1:self%nlevp))
   ALLOCATE(zb(1:self%nlevq))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
-      IF (self%iflip == 1) THEN
-        do ilev = 1, self%nlevp
-          pressure(ilev) = prs % vals(self%nlevp-ilev+1,iobs)
-          za(ilev) = rho_heights % vals(self%nlevp-ilev+1,iobs)
-        end do
-        do ilev = 1, self%nlevq
-          humidity(ilev) = q % vals(self%nlevq-ilev+1,iobs)
-          zb(ilev) = theta_heights % vals(self%nlevq-ilev+1,iobs)
-        end do
-      ELSE
-        pressure = prs % vals(:,iobs)
-        humidity = q % vals(:,iobs)
-        za = rho_heights % vals(:,iobs)
-        zb = theta_heights % vals(:,iobs)
-      END IF
+
+      pressure = prs % vals(:,iobs)
+      humidity = q % vals(:,iobs)
+      za = rho_heights % vals(:,iobs)
+      zb = theta_heights % vals(:,iobs)
+
       CALL groundgnss_jacobian_interface(self % nlevp,                 &   ! Number of pressure levels
                                          self % nlevq,                 &   ! Number of specific humidity levels
                                          za(1:self%nlevp),             &   ! Heights of the pressure levels
@@ -233,25 +223,15 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   nlocs = self % nlocs ! number of observations
 
   allocate(x_d(1:prs_d%nval+q_d%nval))
-  allocate(pressure_d(1:self % nlevp)) 
+  allocate(pressure_d(1:self % nlevp))
   allocate(humidity_d(1:self % nlevq))
 
-  iflip = self%iflip
 
 ! Loop through the obs, calculating the increment to the observation
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
- 
-    IF (iflip == 1) THEN
-      do ilev = 1, self % nlevp
-        pressure_d(ilev) = prs_d % vals(self % nlevp-ilev+1,iobs)
-      end do
-      do ilev = 1, self % nlevq
-        humidity_d(ilev) = q_d % vals(self % nlevq-ilev+1,iobs)
-      end do
-    ELSE
-      pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
-      humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
-    END IF
+
+    pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
+    humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
 
     x_d(1:prs_d%nval) = pressure_d
     x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = humidity_d
@@ -327,8 +307,6 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   allocate(pressure_d(1:prs_d%nval))
   allocate(humidity_d(1:q_d%nval))
 
-  iflip = self%iflip
-
 ! Loop through the obs, calculating the increment to the model state
   obs_loop: do iobs = 1, self % nlocs
 
@@ -338,18 +316,8 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
         humidity_d(1:q_d%nval) = x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
     end if
 
-    if (iflip == 1) then
-      do ilev = 1, self % nlevp
-        prs_d % vals(self % nlevp-ilev+1,iobs) = pressure_d(ilev)
-      end do
-      do ilev = 1, self % nlevq
-        q_d % vals(self % nlevq-ilev+1,iobs) = humidity_d(ilev)
-      end do
-    else
-      prs_d % vals(:,iobs) = pressure_d(1:self % nlevp)
-      q_d % vals(:,iobs) = humidity_d(1:self % nlevq)
-    end if
-
+     prs_d % vals(:,iobs) = pressure_d(1:self % nlevp)
+     q_d % vals(:,iobs) = humidity_d(1:self % nlevq)
 
   end do obs_loop
 
@@ -440,12 +408,15 @@ nstate = nlevP + nlevq
 refracerr = .FALSE.
 
 ! Calculate the refractivity
+! The ufo_utils_refractivity_calculator currently relies on the variables being provided
+! bottom to top. The geovals are provided top to bottom and so the vertical variables need
+! to be reveresed when they are passed into this routine and the outputs then need to be reversed
 CALL ufo_calculate_refractivity(nlevp,                &
                                 nlevq,                &
-                                za,                   &
-                                zb,                   &
-                                prs,                  &
-                                q,                    &
+                                za(nlevp:1:-1),       &
+                                zb(nlevq:1:-1),       &
+                                prs(nlevp:1:-1),      &
+                                q(nlevq:1:-1),        &
                                 vert_interp_ops,      &
                                 pseudo_ops,           &
                                 gbgnss_min_temp_grad, &
@@ -453,6 +424,10 @@ CALL ufo_calculate_refractivity(nlevp,                &
                                 nRefLevels,           &
                                 refrac,               &
                                 model_heights)
+
+! Flip the vertical direction of refrac and model_height back to top to bottom.
+refrac = refrac(nRefLevels:1:-1)
+model_heights = model_heights(nRefLevels:1:-1)
 
 IF (.NOT. refracerr) THEN
     ! Calculate the K-matrix (Jacobian)
@@ -600,23 +575,24 @@ pN(:)          = 0.0
 LocalZenithDelay = 0.0
 StationRefrac    = 0.0
 
-! If negative pressures exist, replace these
+! If negative pressures exist or pressure is greater at a level then
+! the level below, replace these
 ! and any above with values calculated as an exponential decay (scale height
 ! = 6km) from the highest positive pressure.
-
-FirstNeg = 0
-DO Level=1, nlevp
-  IF (Level==1) THEN
+! Start at the bottom level and increment the levels towards the top
+FirstNeg = nlevp+1
+DO Level=nlevp, 1, -1
+  IF (Level==nlevp) THEN
     p_local(Level) = P(Level)
     dp_local_dPin(Level,Level) = 1.0
   ELSE
-    IF ((P(Level) <= 0.0 .OR. (FirstNeg /= 0 .AND. Level > FirstNeg)) .OR. &
-        (P(Level) > P(Level-1))) THEN
+    IF ((P(Level) <= 0.0 .OR. (FirstNeg /= nlevp+1 .AND. Level < FirstNeg)) .OR. &
+        (P(Level) > P(Level+1))) THEN
 
-      IF (FirstNeg == 0) FirstNeg = Level
+      IF (FirstNeg == nlevp+1) FirstNeg = Level
 
-      p_local(Level) = P(FirstNeg-1) * EXP(-(za(Level) - za(FirstNeg-1)) / PressScale)
-      dp_local_dPin(Level,FirstNeg-1) = p_local(Level) / P(FirstNeg-1)
+      p_local(Level) = P(FirstNeg+1) * EXP(-(za(Level) - za(FirstNeg+1)) / PressScale)
+      dp_local_dPin(Level,FirstNeg+1) = p_local(Level) / P(FirstNeg+1)
 
     ELSE
       p_local(Level)             = P(Level)
@@ -628,48 +604,55 @@ END DO
 ! Calculate Pressure on theta
 ! Assume ln(p) linear with height
 
-DO Level = 1, nlevp-1
+DO Level = nlevp-1, 1, -1
 
-  z_weight1 = (za(Level+1) - zb(Level)) / (za(Level+1) - za(Level))
+  z_weight1 = (za(Level) - zb(Level)) / (za(Level) - za(Level+1))
   z_weight2 = 1.0 - z_weight1
 
-  pN(Level) = EXP(z_weight1 * LOG(p_local(Level)) + z_weight2 * LOG(p_local(Level+1)))
+  pN(Level) = EXP(z_weight1 * LOG(p_local(Level+1)) + z_weight2 * LOG(p_local(Level)))
 
-  dPb_dP(Level,Level) = pN(Level) * z_weight1 / p_local(Level)
-  dPb_dP(Level,Level+1) = pN(Level) * z_weight2 / p_local(Level+1)
+  dPb_dP(Level,Level+1) = pN(Level) * z_weight1 / p_local(Level+1)
+  dPb_dP(Level,Level) = pN(Level) * z_weight2 / p_local(Level)
 
 END DO
 
 ! Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
 
+! The ufo_utils_refractivity_calculator currently relies on the variables being provided
+! bottom to top. The geovals are provided top to bottom and so the vertical variables need
+! to be reveresed when they are passed into this routine and the outputs then need to be reversed
+! The arrays need to flipped
+call reverse_levels_in_matrix(nlevq, nlevp, dPb_dP)
 CALL ufo_refractivity_kmat (nlevP,                &
                             nlevq,                &
                             nlevq,                &
-                            za,                   &
-                            zb,                   &
-                            P,                    &
-                            q,                    &
+                            za(nlevp:1:-1),       &
+                            zb(nlevq:1:-1),       &
+                            P(nlevp:1:-1),        &
+                            q(nlevq:1:-1),        &
                             pseudo_ops,           &
                             vert_interp_ops,      &
                             gbgnss_min_temp_grad, &
                             dref_dP,              &
                             dref_dq,              &
                             dPb_dP)
-                            
-                            
+
+call reverse_levels_in_matrix(nlevq, nlevp, dref_dP)
+call reverse_levels_in_matrix(nlevq, nlevq, dref_dq)
+call reverse_levels_in_matrix(nlevq, nlevp, dPb_dP)
 
 ! In Layer where station height lies, define lowest level required for
 ! iteration and integration
 
-DO Level = 1, nlevp-1
+DO Level = nlevp-1, 1, -1
   IF (zb(Level) > zStation) THEN
     Lowest_Level = Level
     EXIT
   END IF
 END DO
 
-DO Level = Lowest_Level, nlevq-1
-  IF (refrac(Level+1) / refrac(Level) <= 0.0) THEN
+DO Level = 1, Lowest_Level
+  IF (refrac(Level) <= 0.0) THEN
 
     write(err_msg,*) "Refractivity error. Refractivity < 0.0"
     CALL fckit_log % warning(err_msg)
@@ -683,20 +666,21 @@ END DO
 ! 3. Calculate Zenith delays
 !---------------------------
 
-! Start at bottom level
+! Start at bottom of the model
 
-DO Level = Lowest_Level, nlevq
+DO Level = Lowest_Level, 1,  -1
 
   LocalZenithDelay = 0.0
 
-  IF (Level == Lowest_Level .AND. Level /= 1) THEN
+  IF (Level == Lowest_Level .AND. Level /= nlevq) THEN
 
     ! If station lies above the lowest model level, interpolate refractivity
     ! to station height
-    h_diff             = zb(Level - 1) - zb(Level)
+    ! h_diff is expected to be a negative number
+    h_diff             = zb(Level + 1) - zb(Level)
     station_diff       = zStation - zb(Level)
-    c                  = (LOG (refrac(Level) / refrac(Level - 1))) / h_diff
-    StationRefrac      = refrac(Level - 1) * EXP(-c * (zStation-zb(Level - 1)))
+    c                  = (LOG (refrac(Level) / refrac(Level + 1))) / h_diff
+    StationRefrac      = refrac(Level + 1) * EXP(-c * (zStation-zb(Level + 1)))
     const              = (-StationRefrac / c) * EXP(c * zStation)
     term1              = EXP(-c * (zb(Level)))
     term2              = EXP(-c * zStation)
@@ -706,26 +690,26 @@ DO Level = Lowest_Level, nlevq
     dztd_dc            = (-refrac_scale * StationRefrac / c) * &
                          (c_rep + EXP(c * station_diff) * (station_diff - c_rep))
     dztd_dc            = dztd_dc - (station_diff * LocalZenithDelay)
-    dc_dref            = -1.0 / (refrac(Level - 1) * h_diff)
+    dc_dref            = -1.0 / (refrac(Level + 1) * h_diff)
     dc_dref2           = 1.0 / (refrac(Level) * h_diff)
-    drefsta_dref       = StationRefrac / refrac(Level - 1)
-    drefsta_dc         = -(zStation - zb(Level - 1)) * StationRefrac
+    drefsta_dref       = StationRefrac / refrac(Level + 1)
+    drefsta_dc         = -(zStation - zb(Level + 1)) * StationRefrac
     drefsta_dref       = drefsta_dref + drefsta_dc * dc_dref
     dztd_drefsta       = LocalZenithDelay / StationRefrac
 
-    dztd_dref(Level-1) = dztd_drefsta * drefsta_dref + dztd_dc * dc_dref
+    dztd_dref(Level+1) = dztd_drefsta * drefsta_dref + dztd_dc * dc_dref
     dztd_dref(Level)   = dztd_dc * dc_dref2
 
-  ELSE IF (Level == 1) THEN
+  ELSE IF (Level == nlevq) THEN
 
-    ! If station lies below model level 1 (ie. the lowest level for which refractivity is
+    ! If station lies below the bottom level (ie. the lowest level for which refractivity is
     ! calculated), then use c from the first full layer, but integrate down to height of
     ! station
 
-    h_diff            = zb(Level) - zb(Level + 1)
-    c                 = (LOG (refrac(Level + 1) / refrac(Level))) / h_diff
+    h_diff            = zb(Level) - zb(Level - 1)
+    c                 = (LOG (refrac(Level - 1) / refrac(Level))) / h_diff
     const             = (-refrac(Level) / c) * EXP(c * (zb(Level)))
-    term1             = EXP(-c * (zb(Level + 1)))
+    term1             = EXP(-c * (zb(Level - 1)))
     term2             = EXP(-c * zStation)
     LocalZenithDelay  = refrac_scale * const * (term1 - term2)
 
@@ -733,29 +717,29 @@ DO Level = Lowest_Level, nlevq
     dztd_dc           = (-refrac_scale * refrac(Level) / c) * &
                         (c_rep + EXP(c * h_diff) * (h_diff - c_rep))
     dc_dref           = -1.0 / (refrac(Level) * h_diff)
-    dc_dref2          = 1.0 / (refrac(Level + 1) * h_diff)
+    dc_dref2          = 1.0 / (refrac(Level - 1) * h_diff)
 
     dztd_dref(Level)  = LocalZenithDelay / refrac(Level)
     dztd_dref(Level)  = dztd_dref(Level) + dztd_dc * dc_dref
-    dztd_dref(Level+1)= dztd_dc * dc_dref2
+    dztd_dref(Level-1)= dztd_dc * dc_dref2
 
-  ELSE IF (Level <= nlevq .AND. Level > 2 .AND. Level > Lowest_Level) THEN
-    
-    ! For the other Levels in the column above the station. 
-    
-    h_diff            = zb(Level - 1) - zb(Level)
-    c                 = (LOG (refrac(Level) / refrac(Level-1))) / h_diff
-    const             = (-refrac(Level - 1) / c) * EXP(c * (zb(Level - 1)))
+  ELSE IF (Level >= 1 .AND. Level < nlevq-1 .AND. Level < Lowest_Level) THEN
+
+    ! For the other Levels in the column above the station.
+
+    h_diff            = zb(Level + 1) - zb(Level)
+    c                 = (LOG (refrac(Level) / refrac(Level+1))) / h_diff
+    const             = (-refrac(Level + 1) / c) * EXP(c * (zb(Level + 1)))
     term1             = EXP(-c * (zb(Level)))
-    term2             = EXP(-c * (zb(Level - 1)))
+    term2             = EXP(-c * (zb(Level + 1)))
     LocalZenithDelay  = refrac_scale * const * (term1 - term2)
 
     c_rep             = 1.0 / c
-    dztd_dc           = (-refrac_scale * refrac(Level - 1) / c) * (c_rep + EXP(c * h_diff) * (h_diff - c_rep))
-    dc_dref           = -1.0 / (refrac(Level - 1) * h_diff)
+    dztd_dc           = (-refrac_scale * refrac(Level + 1) / c) * (c_rep + EXP(c * h_diff) * (h_diff - c_rep))
+    dc_dref           = -1.0 / (refrac(Level + 1) * h_diff)
     dc_dref2          = 1.0 / (refrac(Level) * h_diff)
 
-    dztd_dref(Level-1) = dztd_dref(Level - 1) + LocalZenithDelay / refrac(Level - 1) + dztd_dc * dc_dref
+    dztd_dref(Level+1) = dztd_dref(Level + 1) + LocalZenithDelay / refrac(Level + 1) + dztd_dc * dc_dref
     dztd_dref(Level)   = dztd_dc * dc_dref2
 
   END IF
@@ -777,7 +761,7 @@ dztd_dp(:) = MATMUL(dztd_dp,dp_local_dPin)
 
 ! First add in dZTD/dp for the top correction, which only depends on top level theta pressure
 
-dztd_dpN(nlevq) = refrac_scale * n_alpha * rd / (hpa_to_pa * grav)
+dztd_dpN(1) = refrac_scale * n_alpha * rd / (hpa_to_pa * grav)
 x1 = MATMUL(dPb_dP, dp_local_dPin)
 x2 = MATMUL(dztd_dpN, x1)
 dztd_dp = x2 + dztd_dp
@@ -795,6 +779,25 @@ DEALLOCATE (dref_dq)
 DEALLOCATE (dref_dP)
 
 END SUBROUTINE Groundgnss_GetK
+
+
+subroutine reverse_levels_in_matrix(sizea, sizeb, array)
+
+implicit none
+
+integer, intent(in) :: sizea
+integer, intent(in) :: sizeb
+real(kind_real), intent(inout) :: array(1:sizea, 1:sizeb)
+
+real(kind_real) :: temp(1:sizea, 1:sizeb)
+integer :: i
+
+temp = array
+do i = 1, sizea
+  array(i,:) = temp(sizea-i+1, sizeb:1:-1)
+end do
+
+end subroutine reverse_levels_in_matrix
 
 end module ufo_groundgnss_metoffice_tlad_mod
 

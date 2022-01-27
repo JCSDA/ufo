@@ -60,6 +60,8 @@ end subroutine ufo_groundgnss_metoffice_setup
 ! ------------------------------------------------------------------------------
 subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
+  use fckit_exception_module, only: fckit_exception
+
   implicit none
 
   ! Arguments to this routine
@@ -105,15 +107,14 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
+! Check that the geovals are ordered top to bottom
+  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then
+    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
+    call fckit_exception%throw(err_msg)
+  endif
+
   nlevp = prs % nval
   nlevq = q % nval
-
-  iflip = 0
-  IF (prs % vals(1,1)-prs % vals(nlevp,1) < 0.0) THEN
-    iflip = 1
-    WRITE(message, *) "Pressure is in ascending order. Reorder the variables in vertical direction"
-    CALL fckit_log % warning(message)
-  END IF
 
   nobs  = obsspace_get_nlocs(obss)
   allocate(zStation(nobs))
@@ -130,29 +131,18 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   allocate(za(1:nlevp))
   allocate(zb(1:nlevq))
 
-  obs_loop: do iobs = 1, nobs 
- 
-    IF (iflip == 1) THEN
-      do ilev = 1, nlevp
-        pressure(ilev) = prs % vals(nlevp-ilev+1,iobs)
-        za(ilev) = rho_heights % vals(nlevp-ilev+1,iobs)
-      end do
-      do ilev = 1, nlevq
-        humidity(ilev) = q % vals(nlevq-ilev+1,iobs)
-        zb(ilev) = theta_heights % vals(nlevq-ilev+1,iobs)
-      end do
-    ELSE
-      pressure = prs % vals(:,iobs)
-      humidity = q % vals(:,iobs)
-      za = rho_heights % vals(:,iobs)
-      zb = theta_heights % vals(:,iobs)
-    END IF
+  obs_loop: do iobs = 1, nobs
+
+    pressure = prs % vals(:,iobs)
+    humidity = q % vals(:,iobs)
+    za = rho_heights % vals(:,iobs)
+    zb = theta_heights % vals(:,iobs)
 
     call Ops_Groundgnss_ForwardModel(nlevp,                  &
                                      nlevq,                  &
                                      za(1:nlevp),            &
                                      zb(1:nlevq),            &
-                                     pressure(1:nlevp  ),    &
+                                     pressure(1:nlevp),      &
                                      humidity(1:nlevq),      &
                                      self % vert_interp_ops, &
                                      self % pseudo_ops,      &
@@ -239,12 +229,15 @@ IF (nlevp /= nlevq + 1) THEN
     call abor1_ftn(err_msg)
 END IF
 
+! The ufo_utils_refractivity_calculator currently relies on the variables being provided
+! bottom to top. The geovals are provided top to bottom and so the vertical variables need
+! to be reveresed when they are passed into this routine and the outputs then need to be reversed
 CALL ufo_calculate_refractivity(nlevp,                  &
                                 nlevq,                  &
-                                za,                     &
-                                zb,                     &
-                                pressure,               &
-                                humidity,               &
+                                za(nlevp:1:-1),         &
+                                zb(nlevq:1:-1),         &
+                                pressure(nlevp:1:-1),   &
+                                humidity(nlevq:1:-1),   &
                                 vert_interp_ops,        &
                                 pseudo_ops,             &
                                 gbgnss_min_temp_grad,   &
@@ -252,6 +245,9 @@ CALL ufo_calculate_refractivity(nlevp,                  &
                                 nRefLevels,             &
                                 refrac,                 &
                                 model_heights)
+! Flip the vertical direction of refrac and model_height back to top to bottom.
+refrac = refrac(nRefLevels:1:-1)
+model_heights = model_heights(nRefLevels:1:-1)
 
 CALL Ops_groundgnss_TopCorrection(pressure,    &
                                   nlevq,       &
