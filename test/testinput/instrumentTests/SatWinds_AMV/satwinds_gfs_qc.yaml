@@ -15,6 +15,20 @@ observations:
     name: VertInterp
   #
   obs filters:
+  # Assign the initial observation error, based on height/pressure
+  - filter: Perform Action
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    action:
+      name: assign error
+      error function:
+        name: ObsErrorModelStepwiseLinear@ObsFunction
+        options:
+          xvar:
+            name: MetaData/air_pressure
+          xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]   #Pressure (Pa)
+          errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
   # Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
@@ -140,22 +154,6 @@ observations:
     reference: GeoVaLs/surface_pressure
     value: MetaData/air_pressure
     maxvalue: -10000
-  # Assign the initial observation error, based on height/pressure
-  - filter: Bounds Check
-    filter variables:
-    - name: eastward_wind
-    - name: northward_wind
-    minvalue: -135
-    maxvalue: 135
-    action:
-      name: assign error
-      error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
-        options:
-          xvar:
-            name: MetaData/air_pressure
-          xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]   #Pressure (Pa)
-          errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
 
   # Reject when difference of wind direction is more than 50 degrees.
   - filter: Bounds Check
@@ -217,7 +215,7 @@ observations:
     where:
       - variable:
           name: ObsType/eastward_wind
-        is_in: 244, 257, 258, 259
+        is_in: 245, 256, 253, 254
       - variable:
           name: MetaData/air_pressure
         minvalue: 30000
@@ -234,4 +232,4 @@ observations:
     action:
       name: reject
 
-  passedBenchmark: 5984
+  passedBenchmark: 5940

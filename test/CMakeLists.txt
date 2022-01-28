@@ -303,6 +303,7 @@ list( APPEND ufo_test_input
   testinput/variables.yaml
   testinput/vert_interp_pmissing.yaml
   testinput/windprof.yaml
+  testinput/unit_tests/assign_error_using_where.yaml
   testinput/unit_tests/composite_GsiSfcModel_SfcPCorrected.yaml
   testinput/unit_tests/composite_vertInterp_SfcPCorrected.yaml
   testinput/unit_tests/function_clwret_ssmis.yaml
@@ -1824,6 +1825,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_grosserror_wholereport
 ecbuild_add_test( TARGET  test_ufo_qc_velocitybounds
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_velocitycheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_obserror_where
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/assign_error_using_where.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
