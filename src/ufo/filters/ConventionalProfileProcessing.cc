@@ -34,14 +34,17 @@ namespace ufo {
    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
     : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
   {
-    allvars_ += Variables(filtervars_, "HofX");
-
-    // Add the names of any required GeoVaLs to \c allvars_.
+    // Determine whether any check requires HofX to have been calculated.
+    // If so, add the filter variables to \c allvars_.
     // This is performed here because \c allvars_ must be filled prior to the filter being run.
-    // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
-    // of each check (which returns an empty set by default).
     // The \c profileChecker class must be instantiated in order to do this.
     const ProfileChecker profileChecker(options_);
+    if (profileChecker.requiresHofX())
+      allvars_ += Variables(filtervars_, "HofX");
+
+    // Add the names of any required GeoVaLs to \c allvars_.
+    // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
+    // of each check (which returns an empty set by default).
     const auto &requiredGeoVaLNames = profileChecker.getGeoVaLNames();
     if (requiredGeoVaLNames.size() > 0) {
       ufo::Variables reqGeoVaLs(requiredGeoVaLNames);

@@ -41,6 +41,9 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
+    /// This check requires HofX to have been calculated.
+    bool requiresHofX() override {return true;}
+
     /// List of names of required obs diagnostics.
     oops::Variables getObsDiagNames() override {
       return oops::Variables({ufo::VariableNames::bkgerr_eastward_wind,

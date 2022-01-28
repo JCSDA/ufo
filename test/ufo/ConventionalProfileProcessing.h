@@ -94,9 +94,11 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   // Determine whether an exception is expected to be thrown.
   // Exceptions can be thrown in the following places:
   // - on instantiation of the filter,
-  // - during the operation of the filter,
-  bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
-  bool expectThrowDuringOperation = conf.getBool("ExpectThrowDuringOperation", false);
+  // - during the operation of the filter at the prior stage
+  // - during the operation of the filter at the post stage
+  const bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
+  const bool expectThrowDuringPriorFilter = conf.getBool("ExpectThrowDuringPriorFilter", false);
+  const bool expectThrowDuringPostFilter = conf.getBool("ExpectThrowDuringPostFilter", false);
 
   if (expectThrowOnInstantiation) {
     EXPECT_THROWS(ufo::ConventionalProfileProcessing filterThrow(obsspace, filterParameters,
@@ -122,11 +124,16 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   }
 
   filter.preProcess();
+  if (expectThrowDuringPriorFilter) {
+    EXPECT_THROWS(filter.priorFilter(*geovals));
+    return;
+  }
   filter.priorFilter(*geovals);
-  if (expectThrowDuringOperation)
+  if (expectThrowDuringPostFilter) {
     EXPECT_THROWS(filter.postFilter(hofx, bias, obsdiags));
-  else
-    filter.postFilter(hofx, bias, obsdiags);
+    return;
+  }
+  filter.postFilter(hofx, bias, obsdiags);
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are

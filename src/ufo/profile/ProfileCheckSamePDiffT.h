@@ -26,6 +26,9 @@ namespace ufo {
 
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
+
+    /// This check requires HofX to have been calculated.
+    bool requiresHofX() override {return true;}
   };
 }  // namespace ufo
 

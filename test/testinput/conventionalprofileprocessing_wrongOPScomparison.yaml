@@ -66,7 +66,7 @@ Incorrect and missing values, averaging:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #One of the variables is missing, basic check is run.
 Incorrect and missing values, Basic:
@@ -213,7 +213,7 @@ Wrong number of entries per profile, pressure transformation:
     Comparison_Tol: 0.1
     groups_singlevalue: ["QCFlags"]
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #Temperature averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
@@ -238,7 +238,7 @@ Wrong number of entries per profile, temperature averaging:
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #Wind speed averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
@@ -263,7 +263,7 @@ Wrong number of entries per profile, wind speed averaging:
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #Relative humidity averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
@@ -288,7 +288,7 @@ Wrong number of entries per profile, relative humidity averaging:
     groups_singlevalue: ["ObsValue"]
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #A group variable is not chosen, throwing an exception
 No group variable chosen:
@@ -328,7 +328,7 @@ Ascending sort order:
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true
 
 #An invalid check is requested, throwing an exception
 Invalid check requested:
@@ -415,7 +415,7 @@ Standard levels out of order:
     Comparison_Tol: 0.1
     StandardLevels: [1, 1000]
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true
 
 #Time: set SondeLaunchWindRej to a nonzero value
 Background SondeLaunchWindRej:
@@ -479,7 +479,7 @@ Profile pressure not run before temperature averaging:
     PrintStationID: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true
 
 #GeoVaLs missing for pressure calculation (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for pressure calculation:
@@ -523,7 +523,7 @@ Missing GeoVaLs for temperature averaging:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #Do not run profile pressure routine before wind speed averaging
 #The Sign check ensures that pressure GeoVaLs are loaded, avoiding
@@ -547,7 +547,7 @@ Profile pressure not run before wind speed averaging:
     PrintStationID: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true
 
 #GeoVaLs missing for wind speed averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for wind speed averaging:
@@ -570,7 +570,7 @@ Missing GeoVaLs for wind speed averaging:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #Do not run profile pressure routine before relative humidity averaging
 #The Sign check ensures that pressure GeoVaLs are loaded, avoiding
@@ -594,7 +594,7 @@ Profile pressure not run before relative humidity averaging:
     PrintStationID: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true
 
 #Do not run profile pressure routine before relative humidity averaging
 #This triggers the exception related to reorderzdir in ProfileDataHandled.
@@ -617,7 +617,7 @@ Exception in ProfileDataHandler due to reorderzdir:
     PrintStationID: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #GeoVaLs missing for relative humidity averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for relative humidity averaging:
@@ -640,7 +640,7 @@ Missing GeoVaLs for relative humidity averaging:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPriorFilter: true
 
 #GeoVaLs missing for sign check (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for sign check:
@@ -661,4 +661,4 @@ Missing GeoVaLs for sign check:
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   IgnoreGeoVaLs: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowDuringPostFilter: true

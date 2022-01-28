@@ -29,7 +29,8 @@
 namespace ufo {
   ProfileChecker::ProfileChecker(const ConventionalProfileProcessingParameters &options)
     : options_(options),
-      checks_(options.Checks.value())
+      checks_(options.Checks.value()),
+      requiresHofX_(false)
   {
     // Ensure basic checks are always performed first
     auto it_checks = std::find(checks_.begin(), checks_.end(), "Basic");
@@ -67,6 +68,7 @@ namespace ufo {
           // Invert checkMode whenever a check with a different mode is reached.
           checkMode = !checkMode;
         }
+        requiresHofX_ = requiresHofX_ || profileCheck->requiresHofX();
         GeoVaLNames_ += profileCheck->getGeoVaLNames();
         validationGeoVaLNames_ += profileCheck->getValidationGeoVaLNames();
         obsDiagNames_ += profileCheck->getObsDiagNames();

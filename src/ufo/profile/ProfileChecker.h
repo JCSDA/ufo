@@ -54,6 +54,9 @@ namespace ufo {
     /// Get container of check subgroups
     CheckSubgroupList getCheckSubgroups() {return checkSubgroups_;}
 
+    /// Indicate whether at least one check requires HofX to have been calculated.
+    bool requiresHofX() const {return requiresHofX_;}
+
     /// Get vector of GeoVaL names for all checks.
     oops::Variables getGeoVaLNames() const {return GeoVaLNames_;}
 
@@ -75,6 +78,9 @@ namespace ufo {
 
     /// Subgroups of checks with the same mode of operation.
     CheckSubgroupList checkSubgroups_;
+
+    /// Variable indicating whether at least one check requires HofX to have been calculated.
+    bool requiresHofX_;
 
     /// Names of all required GeoVaLs.
     oops::Variables GeoVaLNames_;
