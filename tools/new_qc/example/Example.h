@@ -78,8 +78,11 @@ class Example : public oops::interface::ObsFilterBase<ObsTraits>,
 
   void preProcess() override {}
   void priorFilter(const GeoVaLs &) override;
-  void postFilter(const ioda::ObsVector &, const ioda::ObsVector &,
+  void postFilter(const GeoVaLs &,
+                  const ioda::ObsVector &,
+                  const ioda::ObsVector &,
                   const ObsDiagnostics &) override;
+  void checkFilterData(const oops::FilterStage filterStage) override {};
 
   oops::Variables requiredVars() const override {return geovars_;}
   oops::Variables requiredHdiagnostics() const override {return diagnostics_;}

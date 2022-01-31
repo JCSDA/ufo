@@ -44,7 +44,9 @@ void Example::priorFilter(const GeoVaLs & gv) {
 
 // -----------------------------------------------------------------------------
 
-void Example::postFilter(const ioda::ObsVector & hofxb, const ioda::ObsVector & bias,
+void Example::postFilter(const GeoVaLs &,
+                         const ioda::ObsVector & hofxb,
+                         const ioda::ObsVector & bias,
                          const ObsDiagnostics & diags) {
   oops::Log::trace() << "Example postFilter" << std::endl;
   ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran(),

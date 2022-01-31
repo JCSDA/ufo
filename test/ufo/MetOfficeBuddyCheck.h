@@ -25,6 +25,7 @@
 #include "test/TestEnvironment.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/StringUtils.h"
@@ -85,7 +86,8 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsDiags.save(diag, name, 0);
   }
 
-  filter.postFilter(hofx, bias, obsDiags);
+  const GeoVaLs gval(obsSpace.distribution(), oops::Variables());
+  filter.postFilter(gval, hofx, bias, obsDiags);
 
   const eckit::LocalConfiguration pgeConf(conf, "ExpectedGrossErrorProbabilities");
   for (const std::string & varNameGroup : pgeConf.keys()) {

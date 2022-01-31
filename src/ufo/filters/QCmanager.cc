@@ -92,7 +92,8 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
 
 // -----------------------------------------------------------------------------
 
-void QCmanager::postFilter(const ioda::ObsVector & hofx,
+void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
+                           const ioda::ObsVector & hofx,
                            const ioda::ObsVector & /*bias*/,
                            const ObsDiagnostics & /*diags*/) {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;

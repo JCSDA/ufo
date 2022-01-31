@@ -130,10 +130,10 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   }
   filter.priorFilter(*geovals);
   if (expectThrowDuringPostFilter) {
-    EXPECT_THROWS(filter.postFilter(hofx, bias, obsdiags));
+    EXPECT_THROWS(filter.postFilter(*geovals, hofx, bias, obsdiags));
     return;
   }
-  filter.postFilter(hofx, bias, obsdiags);
+  filter.postFilter(*geovals, hofx, bias, obsdiags);
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are

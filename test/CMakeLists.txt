@@ -55,6 +55,7 @@ list( APPEND ufo_test_input
   testinput/cris_qc_filters.yaml
   testinput/cris_qc_land.yaml
   testinput/empty.yaml
+  testinput/filter_stage.yaml
   testinput/function_bennartzscatindex.yaml
   testinput/function_cloudcost.yaml
   testinput/function_clouddetect_iasi.yaml
@@ -2450,6 +2451,21 @@ ecbuild_add_test( TARGET  test_ufo_print_filter_data_mpi
                   MPI 2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/print_filter_data.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_filter_stage
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/filter_stage.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_filter_stage_mpi
+                  MPI 2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/filter_stage.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

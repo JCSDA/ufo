@@ -94,8 +94,7 @@ class ObsTypeParameters : public oops::Parameters {
   oops::Parameter<ioda::ObsTopLevelParameters> obsSpace{"obs space", {}, this};
 
   /// Options used to configure observation filters.
-  oops::Parameter<std::vector<oops::ObsFilterParametersWrapper<ObsTraits>>> obsFilters{
-    "obs filters", {}, this};
+  oops::ObsFiltersParameters<ObsTraits> filtersParams{this};
 
   /// Options passed to the observation operator that will be applied during the test. If not set,
   /// no observation operator will be applied. To speed up tests of filters that depend on the
@@ -111,7 +110,7 @@ class ObsTypeParameters : public oops::Parameters {
 
   /// Options used to load GeoVaLs from a file. Required if any observation filters depend on
   /// GeoVaLs or of the `obs operator` option is set.
-  oops::OptionalParameter<GeoVaLsParameters> geovals{"geovals", this};
+  oops::Parameter<GeoVaLsParameters> geovals{"geovals", {}, this};
 
   /// Options used to load observation diagnostics from a file. Required if any observation filters
   /// depend on observation diagnostics.
@@ -401,7 +400,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
-  ObsFilters_ filters(obspace, params.obsFilters, qcflags, obserr);
+  ObsFilters_ filters(obspace,
+                      params.filtersParams,
+                      qcflags, obserr);
   filters.preProcess();
 
 /// call priorFilter and postFilter if hofx is available
@@ -414,14 +415,10 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 
   if (params.hofx.value() != boost::none) {
 ///   read GeoVaLs from file if required
-    std::unique_ptr<const GeoVaLs_> gval;
+    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
     if (geovars.size() > 0) {
-      if (params.geovals.value() == boost::none)
-        throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                               " of the 'observations' list requires a 'geovals' section", Here());
-      gval.reset(new GeoVaLs_(*params.geovals.value(), obspace, geovars));
-      filters.priorFilter(*gval);
-    } else {
+      filters.priorFilter(gval);
+      } else {
       oops::Log::info() << "Filters don't require geovals, priorFilter not called" << std::endl;
     }
 ///   read H(x) and ObsDiags from file
@@ -437,7 +434,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
                         << std::endl;
     }
     const ObsDiags_ diags(params.obsDiagnostics.value(), obspace, diagvars);
-    filters.postFilter(hofx, bias, diags);
+    filters.postFilter(gval, hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
@@ -448,24 +445,18 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     vars += hop.requiredVars();
     vars += filters.requiredVars();
     vars += ybias.requiredVars();
-    if (params.geovals.value() == boost::none)
-      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                             " of the 'observations' list requires a 'geovals' section", Here());
-    const GeoVaLs_ gval(*params.geovals.value(), obspace, vars);
+    const GeoVaLs_ gval(params.geovals.value(), obspace, vars);
     oops::Variables diagvars;
     diagvars += filters.requiredHdiagnostics();
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
     hop.simulateObs(gval, hofx, ybias, bias, diags);
-    filters.postFilter(hofx, bias, diags);
+    filters.postFilter(gval, hofx, bias, diags);
     hofx.save("hofx");
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
-    if (params.geovals.value() == boost::none)
-      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                             " of the 'observations' list requires a 'geovals' section", Here());
-    const GeoVaLs_ gval(*params.geovals.value(), obspace, geovars);
+    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
