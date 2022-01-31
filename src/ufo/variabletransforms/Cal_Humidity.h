@@ -139,6 +139,7 @@ class Cal_SpecificHumidity : public TransformBase {
   std::string pressuregroupvariable_;
   std::string temperaturevariable_;
   std::string relativehumidityvariable_;
+  std::string dewpointtemperaturevariable_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
 };

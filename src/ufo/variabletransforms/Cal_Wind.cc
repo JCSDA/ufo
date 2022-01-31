@@ -98,7 +98,11 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
   getObservation("ObsValue", "wind_speed",
                  windSpeed, true);
   getObservation("ObsValue", "wind_from_direction",
-                 windFromDirection, true);
+                 windFromDirection, false);
+  if (windFromDirection.empty()) {
+    getObservation("ObsValue", "wind_direction",
+                   windFromDirection, true);
+  }
 
   if (!oops::allVectorsSameNonZeroSize(windSpeed, windFromDirection)) {
     oops::Log::warning() << "Vector sizes: "
