@@ -5,7 +5,7 @@ obs space:
   channels: &atms_n20_channels 1-22
 obs operator:
   name: CRTM
-  Absorbers: [H2O,O3,CO2]
+  Absorbers: [H2O,O3]
   Clouds: [Water, Ice]
   Cloud_Fraction: 1.0
   obs options:
