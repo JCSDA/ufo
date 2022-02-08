@@ -764,7 +764,7 @@ Assign observation error from CSV file; data types float, int and string; payloa
       error function:
         name: DrawObsErrorFromFile@ObsFunction
         options:
-          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude.csv
+          file: Data/ufo/testinput_tier_1/obsvariance_stringvar_pressure_longitude.csv
           interpolation:
           - name: StringVar@MetaData
             method: exact
@@ -1237,7 +1237,7 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
       error function:
         name: DrawObsErrorFromFile@ObsFunction
         options:
-          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude.csv
+          file: Data/ufo/testinput_tier_1/obsvariance_stringvar_pressure_longitude.csv
           interpolation:
           - name: StringVar@MetaData
             method: exact
@@ -1277,3 +1277,43 @@ Assign observation error from CSV file; data types float, int and string; missin
           - name: longitude@MetaData
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
+
+# Tests using the CSV backend to extract errors instead of variancse
+
+Assign observation error from CSV file containing errors; data types float, int and string; payload of type float:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
+        lons: [ 31, 59, 31, 59, 31, 59, 31, 59 ]
+        dateTimes: [ 0, 0,
+                     0, 0,
+                     0, 0,
+                     0, 3600 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
+  StringVar: [south, south, south, south, north, north, north, north]
+  ObsError assign:
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude.csv
+          interpolation:
+          - name: StringVar@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: nearest
+          - name: longitude@MetaData
+            method: nearest
+          group: Error
+          dispersion measure: standard deviation
+  expected_obserror: [1, 2, 3, 4, 5, 6, 7, 8]

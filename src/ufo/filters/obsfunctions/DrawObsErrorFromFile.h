@@ -8,12 +8,56 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_DRAWOBSERRORFROMFILE_H_
 #define UFO_FILTERS_OBSFUNCTIONS_DRAWOBSERRORFROMFILE_H_
 
+#include <memory>
 #include <string>
+
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 namespace ufo {
+
+enum class DispersionMeasure {
+  STDEV, VARIANCE
+};
+
+struct DispersionMeasureParameterTraitsHelper {
+  typedef DispersionMeasure EnumType;
+  static constexpr char enumTypeName[] = "DispersionMeasure";
+  static constexpr util::NamedEnumerator<DispersionMeasure> namedValues[] = {
+    { DispersionMeasure::STDEV, "standard deviation" },
+    { DispersionMeasure::VARIANCE, "variance" }
+  };
+};
+}  // namespace ufo
+
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::DispersionMeasure> :
+    public EnumParameterTraits<ufo::DispersionMeasureParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+
+namespace ufo {
+
+/// \brief Options controlling the DrawObsErrorFromFile ObsFunction
+class DrawObsErrorFromFileParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(DrawObsErrorFromFileParameters, Parameters)
+
+ public:
+  /// Group
+  oops::Parameter<std::string> group{"group", "ErrorVariance", this};
+  /// Measure of dispersion (standard deviation or variance)
+  oops::Parameter<DispersionMeasure> dispersionMeasure{"dispersion measure",
+      DispersionMeasure::VARIANCE, this};
+};
+
 
 /// \brief Derive observation error from a file representing the variance or the covariance
 /// matrix.
@@ -53,7 +97,8 @@ class DrawObsErrorFromFile : public ObsFunctionBase<float> {
   const ufo::Variables & requiredVariables() const;
 
  private:
-  DrawValueFromFile<float> drawValueFromFile_;
+  std::unique_ptr<DrawValueFromFile<float>> drawValueFromFile_;
+  std::unique_ptr<DrawObsErrorFromFileParameters> options_;
 };
 
 }  // namespace ufo
