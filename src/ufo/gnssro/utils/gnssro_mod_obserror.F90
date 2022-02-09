@@ -194,41 +194,50 @@ end subroutine refractivity_obserr_NBAM
 
 subroutine gnssro_obserr_avtemp(nobs, n_horiz, rmatrix_filename, obsSatid, obsOrigC, nlevs, &
                                 air_temperature, geopotential_height, obsZ, obsValue, obsErr, &
-                                QCflags, missing)
+                                QCflags, missing, allow_extrapolation, record_number, &
+                                sort_order, unique, verboseOutput)
 
 implicit none
 
 ! Subroutine arguments
-integer, intent(in)          :: nobs                     ! Number of observations
-integer, intent(in)          :: n_horiz                  ! Number of geovals per observation
-character(len=*), intent(in) :: rmatrix_filename         ! Name of the R-matrix file
-integer, intent(in)          :: obsSatid(:)              ! Satellite identifier
-integer, intent(in)          :: obsOrigC(:)              ! Originating centre number
-integer, intent(in)          :: nlevs                    ! Number of model levels
-real, intent(in)             :: air_temperature(:,:)     ! Temperature of the model background
-real, intent(in)             :: geopotential_height(:,:) ! Geopotential height of the model levels
-real(kind_real), intent(in)  :: obsZ(:)                  ! Height of the observation
-real(kind_real), intent(in)  :: obsValue(:)              ! The observed value
-real(kind_real), intent(out) :: obsErr(:)                ! The calculated observation error (uncertainty)
-integer(c_int),  intent(in)  :: QCflags(:)               ! Quality control flags for the observations
-real(kind_real), intent(in)  :: missing                  ! Missing value indicator
+integer, intent(in)              :: nobs                     ! Number of observations
+integer, intent(in)              :: n_horiz                  ! Number of geovals per observation
+character(len=*), intent(in)     :: rmatrix_filename         ! Name of the R-matrix file
+integer, intent(in)              :: obsSatid(:)              ! Satellite identifier
+integer, intent(in)              :: obsOrigC(:)              ! Originating centre number
+integer, intent(in)              :: nlevs                    ! Number of model levels
+real, intent(in)                 :: air_temperature(:,:)     ! Temperature of the model background
+real, intent(in)                 :: geopotential_height(:,:) ! Geopotential height of the model levels
+real(kind_real), intent(in)      :: obsZ(:)                  ! Height of the observation
+real(kind_real), intent(in)      :: obsValue(:)              ! The observed value
+real(kind_real), intent(out)     :: obsErr(:)                ! The calculated observation error (uncertainty)
+integer(c_int),  intent(in)      :: QCflags(:)               ! Quality control flags for the observations
+real(kind_real), intent(in)      :: missing                  ! Missing value indicator
+logical, intent(in)              :: allow_extrapolation      ! Extrapolate the obs errors outside the range specified
+integer(c_size_t), intent(in)    :: record_number(1:nobs)    ! Number used to identify unique profiles in the data
+integer, intent(in)              :: sort_order(1:nobs)       ! An index to sort the record numbers
+integer, allocatable, intent(in) :: unique(:)                ! Set of unique profile numbers
+logical, intent(in)              :: verboseOutput            ! Whether to output extra debugging information
 
 ! Local parameters
 integer, parameter :: Rmax_num = 1000                    ! Max number of R matrices to be read in
-logical, parameter :: verboseOutput = .FALSE.            ! Whether to output extra debugging information
 
 ! Local variables
 type(rmatrix_type), allocatable :: Rmatrix_list(:) ! List of all the R matrices to use
-type(rmatrix_type) :: Rmatrix                     ! The chosen R matrix
-real(kind_real) :: frac_err                       ! Fractional observation error
-real :: av_temp
-integer :: npoints
-integer :: ilev
-integer :: R_num_sats                             ! Actual number of R-matrices read in
-character(len=200) :: Message                     ! Message to be output
-integer :: iob                                    ! Loop variable, observation number
-integer :: igeoval                                ! Loop variable, geoval number
-integer :: iheight                                ! Loop variable, height in profile
+type(rmatrix_type) :: Rmatrix                      ! The chosen R matrix
+real(kind_real) :: frac_err                        ! Fractional observation error
+real :: av_temp                                    ! Average background temperature for this observation
+integer :: npoints                                 ! Number of points used in calculating average temperature
+integer :: ilev                                    ! Loop variable, level number
+integer :: R_num_sats                              ! Actual number of R-matrices read in
+character(len=200) :: Message                      ! Message to be output
+integer :: iob                                     ! Loop variable, observation number
+integer :: iPoint                                  ! Loop variable, point in the profile
+integer :: igeoval                                 ! Loop variable, geoval number
+integer :: iheight                                 ! Loop variable, height in profile
+integer :: start_point                             ! Starting index of the current profile
+integer :: current_point                           ! Ending index of the current profile
+integer :: iprofile                                ! Loop variable, profile number
 
 ! Read in R matrix data
 CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices to read in
@@ -240,110 +249,145 @@ CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices t
 ! a matrix which depends on latitude or average temperature
 !--------------------------------------------------------
 
-do iob = 1, nobs
-  if (QCflags(iob) .eq. 0) then
+! For every profile that we have found, perform a 1DVar minimisation
+current_point = 1
+do iprofile = 1, size(unique)
+  start_point = current_point
+  ! Work out which observations belong to the current profile
+  do current_point = start_point, nobs
+    if (unique(iprofile) /= record_number(sort_order(current_point))) exit
+  end do
 
-    IF (RMatrix_list(1) % av_temp > 0) THEN
-      !--------------------------------------------------------
-      ! Choose R matrix depending on satid, origctr and the average
-      ! background temperature between the surface and 20km
-      !--------------------------------------------------------
+  do iPoint = start_point, current_point-1
+    iob = sort_order(iPoint)
+    if (QCflags(iob) .eq. 0) then
+      if (RMatrix_list(1) % av_temp > 0) then
+        !--------------------------------------------------------
+        ! Choose R matrix depending on satid, origctr and the average
+        ! background temperature between the surface and 20km
+        !--------------------------------------------------------
 
-      ! Calculate the average troposphere temperature for this profile
+        ! Calculate the average troposphere temperature for this profile
+        ! Using the geoval for the first observation in the profile
+        av_temp = 0
+        npoints = 0
+        igeoval = (sort_order(start_point)-1) * n_horiz + (n_horiz + 1) / 2
 
-      av_temp = 0
-      npoints = 0
-      igeoval = (iob-1) * n_horiz + (n_horiz + 1) / 2
-      DO ilev = 1, nlevs
-        IF (geopotential_height(igeoval, ilev) < RMatrix_list(1) % max_height) THEN
-          av_temp = av_temp + air_temperature(igeoval, ilev)
-          npoints = npoints + 1
+        DO ilev = 1, nlevs
+          IF (geopotential_height(igeoval, ilev) < RMatrix_list(1) % max_height) THEN
+            av_temp = av_temp + air_temperature(igeoval, ilev)
+            npoints = npoints + 1
+          END IF
+        END DO
+
+        IF (npoints > 0) THEN
+          av_temp = av_temp / npoints
+        ELSE
+          av_temp = missing
         END IF
-      END DO
 
-      IF (npoints > 0) THEN
-        av_temp = av_temp / npoints
+        ! Find the observation error matrix which best matches the average
+        ! temperature we found
+
+        CALL ufo_roobserror_interpolate_rmatrix(obsSatid(iob),   &
+                                                obsOrigC(iob),   &
+                                                av_temp,         &
+                                                R_num_sats,      &
+                                                RMatrix_list,    &
+                                                RMatrix)
+
       ELSE
-        av_temp = missing
+        WRITE (Message, '(2A)') "RMatrices must have positive average ", &
+                                     "temperature"
+        CALL abor1_ftn(Message)
       END IF
 
-      ! Find the observation error matrix which best matches the average
-      ! temperature we found
+      do iheight = 1, Rmatrix % num_heights
+        if (obsZ(iob) < Rmatrix % height(iheight)) then
+          exit
+        end if
+      end do
 
-      CALL ufo_roobserror_interpolate_rmatrix(obsSatid(iob),   &
-                                              obsOrigC(iob),   &
-                                              av_temp,         &
-                                              R_num_sats,      &
-                                              RMatrix_list,    &
-                                              RMatrix)
-
-    ELSE
-      WRITE (Message, '(2A)') "RMatrices must have positive average ", &
-                                   "temperature"
-      CALL abor1_ftn(Message)
-    END IF
-
-    do iheight = 1, Rmatrix % num_heights - 1
-      if (obsZ(iob) < Rmatrix % height(iheight + 1)) then
-        exit
+      ! If we are allowing the uncertainties to be extrapolated, then reset the
+      ! value of iheight if it is out of range.
+      if (allow_extrapolation) then
+        if (iheight == 1) then
+          iheight = 2
+        else if (iheight > Rmatrix % num_heights) then
+          iheight = Rmatrix % num_heights
+        end if
       end if
-    end do
 
-    ! Fractional error
-    if (iheight > Rmatrix % num_heights - 1) then
-      frac_err = Rmatrix % frac_err(Rmatrix % num_heights)
+      ! Calculate fractional error
+      if (iheight == 1) then
+        frac_err = Rmatrix % frac_err(1)
+      else if (iheight > Rmatrix % num_heights) then
+        frac_err = Rmatrix % frac_err(RMatrix % num_heights)
+      else
+        frac_err = Rmatrix % frac_err(iheight - 1) + &
+                   (Rmatrix % frac_err(iheight) - Rmatrix % frac_err(iheight - 1)) * &
+                   (obsZ(iob) - Rmatrix % height(iheight - 1)) / &
+                   (Rmatrix % height(iheight) - Rmatrix % height(iheight - 1))
+      end if
+
+      if (verboseOutput) then
+        WRITE(Message,'(A,I8,2F16.4,3E26.8)') 'Result', iob, obsZ(iob), frac_err, &
+            ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), av_temp
+        CALL fckit_log % info(Message)
+      end if
+
+      ! Standard deviation
+      ObsErr(iob) = MAX(frac_err * obsValue(iob), Rmatrix % min_error)
+
     else
-      frac_err = Rmatrix % frac_err(iheight) + &
-                 (Rmatrix % frac_err(iheight + 1) - Rmatrix % frac_err(iheight)) * &
-                 (obsZ(iob) - Rmatrix % height(iheight)) / &
-                 (Rmatrix % height(iheight + 1) - Rmatrix % height(iheight))
+      obsErr(iob) = missing
     end if
-
-    if (verboseOutput) then
-      WRITE(Message,'(A,I8,2F16.4,2E26.8)') 'Result', iob, obsZ(iob), frac_err, &
-          ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error)
-      CALL fckit_log % debug(Message)
-    end if
-
-    ! Standard deviation
-    ObsErr(iob) = MAX(frac_err * obsValue(iob), Rmatrix % min_error)
-
-  else
-    obsErr(iob) = missing
-  end if
+  end do
 end do
 
 end subroutine gnssro_obserr_avtemp
 
 
-subroutine gnssro_obserr_latitude(nobs, rmatrix_filename, obsSatid, obsOrigC, obsLat, obsZ, obsValue, obsErr, QCflags, missing)
+subroutine gnssro_obserr_latitude(nobs, rmatrix_filename, obsSatid, obsOrigC, &
+    obsLat, obsZ, obsValue, obsErr, QCflags, missing, allow_extrapolation, &
+    record_number, sort_order, unique, verboseOutput)
+
+use missing_values_mod
 
 implicit none
 
 ! Subroutine arguments
-integer, intent(in)          :: nobs              ! Number of observations
-character(len=*), intent(in) :: rmatrix_filename  ! Name of the R-matrix file
-integer, intent(in)          :: obsSatid(:)       ! Satellite identifier
-integer, intent(in)          :: obsOrigC(:)       ! Originating centre number
-real(kind_real), intent(in)  :: obsLat(:)         ! Latitude of the observation
-real(kind_real), intent(in)  :: obsZ(:)           ! Height of the observation
-real(kind_real), intent(in)  :: obsValue(:)       ! The observed value
-real(kind_real), intent(out) :: obsErr(:)         ! The calculated observation error (uncertainty)
-integer(c_int),  intent(in)  :: QCflags(:)        ! Quality control flags for the observations
-real(kind_real), intent(in)  :: missing           ! Missing value indicator
+integer, intent(in)              :: nobs                 ! Number of observations
+character(len=*), intent(in)     :: rmatrix_filename     ! Name of the R-matrix file
+integer, intent(in)              :: obsSatid(:)          ! Satellite identifier
+integer, intent(in)              :: obsOrigC(:)          ! Originating centre number
+real(kind_real), intent(in)      :: obsLat(:)            ! Latitude of the observation
+real(kind_real), intent(in)      :: obsZ(:)              ! Height of the observation
+real(kind_real), intent(in)      :: obsValue(:)          ! The observed value
+real(kind_real), intent(out)     :: obsErr(:)            ! The calculated observation error (uncertainty)
+integer(c_int),  intent(in)      :: QCflags(:)           ! Quality control flags for the observations
+real(kind_real), intent(in)      :: missing              ! Missing value indicator
+logical, intent(in)              :: allow_extrapolation  ! Extrapolate errors outside of the given range
+integer(c_size_t), intent(in)    :: record_number(1:nobs)! Number used to identify unique profiles in the data
+integer, intent(in)              :: sort_order(1:nobs)   ! An index to sort the record numbers
+integer, allocatable, intent(in) :: unique(:)            ! Set of unique profile numbers
+logical, intent(in)              :: verboseOutput        ! Whether to output extra debugging information
 
 ! Local parameters
 integer, parameter :: Rmax_num = 1000             ! Max number of R matrices to be read in
-logical, parameter :: verboseOutput = .FALSE.     ! Whether to output extra debugging information
 
 ! Local variables
 type(rmatrix_type), allocatable :: Rmatrix_list(:) ! List of all the R matrices to use
-type(rmatrix_type) :: Rmatrix                     ! The chosen R matrix
-real(kind_real) :: frac_err                       ! Fractional observation error
-integer :: R_num_sats                             ! Actual number of R-matrices read in
-character(len=200) :: Message                     ! Message to be output
-integer :: iob                                    ! Loop variable, observation number
-integer :: iheight                                ! Loop variable, height in profile
+type(rmatrix_type) :: Rmatrix                      ! The chosen R matrix
+real(kind_real) :: frac_err                        ! Fractional observation error
+integer :: R_num_sats                              ! Actual number of R-matrices read in
+character(len=200) :: Message                      ! Message to be output
+integer :: iob                                     ! Loop variable, observation number
+integer :: iPoint                                  ! Loop variable, point in the profile
+integer :: iheight                                 ! Loop variable, height in profile
+integer :: start_point                             ! Starting index of the current profile
+integer :: current_point                           ! Ending index of the current profile
+integer :: iprofile                                ! Loop variable, profile number
 
 ! Read in R matrix data
 CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices to read in
@@ -356,54 +400,76 @@ CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices t
 ! No interpolation between matrices to match old code
 !--------------------------------------------------------
 
-do iob = 1, nobs
-  if (QCflags(iob) .eq. 0) then
-    IF (RMatrix_list(1) % latitude > 0) THEN
-      CALL ufo_roobserror_findnearest_rmatrix(obsSatid(iob),  &
-                                              obsOrigC(iob),  &
-                                              obsLat(iob),    &
-                                              R_num_sats,     &
-                                              RMatrix_list,   &
-                                              RMatrix)
-    ELSE
-      WRITE (Message, '(2A)') "RMatrices must have positive average ", &
-                                   "temperature or latitude"
-      CALL abor1_ftn(Message)
-    END IF
+! For every profile that we have found, perform a 1DVar minimisation
+current_point = 1
+do iprofile = 1, size(unique)
+  start_point = current_point
+  ! Work out which observations belong to the current profile
+  do current_point = start_point, nobs
+    if (unique(iprofile) /= record_number(sort_order(current_point))) exit
+  end do
 
-    do iheight = 1, Rmatrix % num_heights
-      if (obsZ(iob) < Rmatrix % height(iheight)) then
-        exit
+  do iPoint = start_point, current_point-1
+    iOb = sort_order(iPoint)
+    if (QCflags(iob) .eq. 0) then
+      IF (RMatrix_list(1) % latitude /= &
+          missing_value(RMatrix_list(1) % latitude)) THEN
+        ! Use the R-matrix from the first observation in the profile
+        call ufo_roobserror_findnearest_rmatrix(obsSatid(iob),       &
+                                                obsOrigC(iob),       &
+                                                obsLat(sort_order(start_point)), &
+                                                R_num_sats,          &
+                                                RMatrix_list,        &
+                                                RMatrix)
+      ELSE
+        WRITE (Message, '(2A)') "RMatrices must have a valid latitude set"
+        CALL abor1_ftn(Message)
+      END IF
+
+      do iheight = 1, Rmatrix % num_heights
+        if (obsZ(iob) < Rmatrix % height(iheight)) then
+          exit
+        end if
+      end do
+
+      ! If we are allowing the uncertainties to be extrapolated, then reset the
+      ! value of iheight if it is out of range.
+      if (allow_extrapolation) then
+        if (iheight == 1) then
+          iheight = 2
+        else if (iheight > Rmatrix % num_heights) then
+          iheight = Rmatrix % num_heights
+        end if
       end if
-    end do
 
-    ! Calculate fractional error
-    if (iheight == 1) then
-      frac_err = Rmatrix % frac_err(iheight)
-    else if (iheight > Rmatrix % num_heights) then
-      frac_err = Rmatrix % frac_err(RMatrix % num_heights)
+      ! Calculate fractional error
+      if (iheight == 1) then
+        frac_err = Rmatrix % frac_err(1)
+      else if (iheight > Rmatrix % num_heights) then
+        frac_err = Rmatrix % frac_err(RMatrix % num_heights)
+      else
+        frac_err = Rmatrix % frac_err(iheight - 1) + &
+                   (Rmatrix % frac_err(iheight) - Rmatrix % frac_err(iheight - 1)) * &
+                   (obsZ(iob) - Rmatrix % height(iheight - 1)) / &
+                   (Rmatrix % height(iheight) - Rmatrix % height(iheight - 1))
+      end if
+
+      if (verboseOutput) then
+        WRITE(Message,'(A,I8,2F16.4,2E21.8,F12.4)') 'Result', iob, obsZ(iob), &
+            frac_err, ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), &
+            obsLat(iob)
+        CALL fckit_log % info(Message)
+      end if
+
+      ! Standard deviation
+      ObsErr(iob) = MAX (frac_err * obsValue(iob), Rmatrix % min_error)
+
     else
-      frac_err = Rmatrix % frac_err(iheight - 1) + &
-                 (Rmatrix % frac_err(iheight) - Rmatrix % frac_err(iheight - 1)) * &
-                 (obsZ(iob) - Rmatrix % height(iheight - 1)) / &
-                 (Rmatrix % height(iheight) - Rmatrix % height(iheight - 1))
-    end if
-
-    if (verboseOutput) then
-      WRITE(Message,'(A,I8,2F16.4,2E21.8,F12.4)') 'Result', iob, obsZ(iob), &
-          frac_err, ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), &
-          obsLat(iob)
+      WRITE(Message,'(A,I8,2F16.4)') 'Missing', iob, obsZ(iob), obsLat(iob)
       CALL fckit_log % debug(Message)
+      obsErr(iob) = missing
     end if
-
-    ! Standard deviation
-    ObsErr(iob) = MAX (frac_err * obsValue(iob), Rmatrix % min_error)
-
-  else
-    WRITE(Message,'(A,I8,2F16.4)') 'Missing', iob, obsZ(iob), obsLat(iob)
-    CALL fckit_log % debug(Message)
-    obsErr(iob) = missing
-  end if
+  end do
 end do
 
 end subroutine gnssro_obserr_latitude

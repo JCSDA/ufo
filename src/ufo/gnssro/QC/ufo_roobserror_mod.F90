@@ -15,7 +15,7 @@ use missing_values_mod
 use gnssro_mod_obserror
 use fckit_log_module, only : fckit_log
 use gnssro_mod_constants, only: max_string
-use iso_c_binding, only: c_ptr, c_int
+use iso_c_binding, only: c_ptr, c_int, c_size_t
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
@@ -29,9 +29,12 @@ type :: ufo_roobserror
   character(len=max_string)    :: errmodel
   character(len=max_string)    :: rmatrix_filename
   character(len=max_string)    :: err_variable
+  logical                      :: verbose_output       ! Whether to give extra output messages
   type(oops_variables), public :: obsvar
   type(c_ptr)                  :: obsdb
-  integer                      :: n_horiz            ! For ROPP-2D multiplier of the number of geovals
+  integer                      :: n_horiz              ! For ROPP-2D multiplier of the number of geovals
+  logical                      :: allow_extrapolation  ! Allow errors to be extrapolated outside of range?
+  logical                      :: use_profile          ! Use a single profile to give errors?
 end type ufo_roobserror
 
 ! ------------------------------------------------------------------------------
@@ -46,30 +49,60 @@ type(ufo_roobserror), intent(inout)   :: self
 type(c_ptr),  value,       intent(in) :: obspace
 type(fckit_configuration), intent(in) :: f_conf
 character(len=:), allocatable         :: str
+character(len=800)                    :: message    ! Message to be output
 
 self%errmodel = "NBAM"
 if (f_conf%has("errmodel")) then
    call f_conf%get_or_die("errmodel",str)
    self%errmodel = str
 end if
+write(message,*) 'errmodel = ', trim(self % errmodel)
+call fckit_log % info(message)
 
 self % rmatrix_filename = ""
 if (f_conf % has("rmatrix_filename")) then
    call f_conf % get_or_die("rmatrix_filename", str)
    self % rmatrix_filename = str
 end if
+write(message,*) 'rmatrix_filename = ', trim(self % rmatrix_filename)
+call fckit_log % info(message)
 
 self % err_variable = ""
 if (f_conf % has("err_variable")) then
    call f_conf % get_or_die("err_variable", str)
    self % err_variable = str
 end if
+write(message,*) 'err_variable = ', trim(self % err_variable)
+call fckit_log % info(message)
 
 ! Get the number of extra geovals as a multiplier, default to 1
 self % n_horiz = 1
 if (f_conf % has("n_horiz")) then
    call f_conf % get_or_die("n_horiz", self % n_horiz)
 end if
+write(message,*) 'n_horiz = ', self % n_horiz
+call fckit_log % info(message)
+
+self % allow_extrapolation = .false.
+if (f_conf % has("allow extrapolation")) then
+   call f_conf % get_or_die("allow extrapolation", self % allow_extrapolation)
+end if
+write(message,*) 'allow_extrapolation = ', self % allow_extrapolation
+call fckit_log % info(message)
+
+self % use_profile = .false.
+if (f_conf % has("use profile")) then
+   call f_conf % get_or_die("use profile", self % use_profile)
+end if
+write(message,*) 'use_profile = ', self % use_profile
+call fckit_log % info(message)
+
+self % verbose_output = .false.
+if (f_conf % has("verbose output")) then
+   call f_conf % get_or_die("verbose output", self % verbose_output)
+end if
+write(message,*) 'verbose_output = ', self % verbose_output
+call fckit_log % info(message)
 
 self%obsdb      = obspace
 
@@ -88,7 +121,7 @@ subroutine ufo_roobserror_prior(self, model_nobs, model_nlevs, air_temperature, 
     geopotential_height)
 
 use fckit_log_module, only : fckit_log
-use ufo_utils_mod, only: cmp_strings
+use ufo_utils_mod, only: cmp_strings, sort_and_unique
 
 implicit none
 
@@ -113,6 +146,10 @@ integer(c_int),  allocatable   :: obsSaid(:)
 integer(c_int),  allocatable   :: QCflags(:)
 real(kind_real)                :: missing
 character(max_string)          :: err_msg
+integer                        :: iob                     ! Loop variable, observation number
+integer(c_size_t), allocatable :: record_number(:)        ! Number used to identify unique profiles in the data
+integer, allocatable           :: sort_order(:)           ! Sorting order for the profile numbers
+integer, allocatable           :: unique(:)               ! Set of unique profile numbers
 
 missing = missing_value(missing)
 nobs    = obsspace_get_nlocs(self%obsdb)
@@ -144,6 +181,20 @@ case ("bending_angle")
   call obsspace_get_db(self%obsdb, "MetaData", "earth_radius_of_curvature", obsLocR)
   obsImpH(:) = obsImpP(:) - obsLocR(:)
   obsImpA(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
+
+  allocate(record_number(nobs))
+  if (self % use_profile) then
+    ! Get the record numbers and the set of unique profile numbers
+    call obsspace_get_recnum(self % obsdb, record_number)
+    call sort_and_unique(nobs, obsImpP, record_number, sort_order, unique)
+  else
+    allocate(unique(1:nobs), sort_order(1:nobs))
+    do iob = 1, nobs
+      record_number(iob) = iob
+      sort_order(iob) = iob
+      unique(iob) = iob
+    end do
+  end if
 
   select case (trim(self%errmodel))
   case ("NBAM")
@@ -199,12 +250,14 @@ case ("bending_angle")
       allocate(obsLat(nobs))
       call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
       call gnssro_obserr_latitude(nobs, self % rmatrix_filename, obsSatid, obsOrigC, obsLat, obsImpH, &
-                                  obsValue, obsErr, QCflags, missing)
+                                  obsValue, obsErr, QCflags, missing, self % allow_extrapolation, &
+                                  record_number, sort_order, unique, self % verbose_output)
       deallocate(obsLat)
     else if (self % err_variable == "average_temperature") then
       call gnssro_obserr_avtemp(nobs, self % n_horiz, self % rmatrix_filename, obsSatid, obsOrigC, &
                                 model_nlevs, air_temperature, geopotential_height, obsImpH, obsValue, &
-                                obsErr, QCflags, missing)
+                                obsErr, QCflags, missing, self % allow_extrapolation, record_number, &
+                                sort_order, unique, self % verbose_output)
     else
       err_msg = "The error variable should be either 'latitude' or 'average_temperature', but you gave " // &
                 trim(self % err_variable)

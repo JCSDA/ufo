@@ -19,11 +19,11 @@ use ufo_geovals_mod
 use ufo_vars_mod
 use ufo_gnssro_bendmetoffice_mod
 use ufo_gnssroonedvarcheck_utils_mod, only: &
-    Ops_RealSortQuick, deallocate_singleob, &
-    allocate_singleob, allocate_singlebg, deallocate_singlebg, find_unique, &
-    singlebg_type, singleob_type
+    deallocate_singleob, allocate_singleob, allocate_singlebg, &
+    deallocate_singlebg, singlebg_type, singleob_type
 use ufo_gnssroonedvarcheck_get_bmatrix_mod, only: bmatrix_type
 use ufo_gnssroonedvarcheck_do1dvar_mod, only: Ops_GPSRO_Do1DVar_BA
+use ufo_utils_mod, only: Ops_RealSortQuick, find_unique
 
 implicit none
 private

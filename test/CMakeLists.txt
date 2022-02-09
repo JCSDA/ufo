@@ -1429,7 +1429,7 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_pseudo
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice
+ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice_1dvar
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/gnssrobendmetoffice_qc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
