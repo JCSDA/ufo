@@ -88,7 +88,7 @@ implicit none
     ! Read in obs data
     allocate(obs_adt(obss_nlocs))
 
-    call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
+    call obsspace_get_db(obss, "ObsValue", "absolute_dynamic_topography", obs_adt)
 
     ! Local offset
     pe_offset_hofx = 0.0

@@ -4,7 +4,7 @@ obs space:
     obsfile: $(experiment_dir)/{{current_cycle}}/adt_3b.{{window_begin}}.nc4
   obsdataout:
     obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).adt_3b.{{window_begin}}.nc4
-  simulated variables: [obs_absolute_dynamic_topography]
+  simulated variables: [absolute_dynamic_topography]
 obs operator:
   name: ADT
 obs error:
