@@ -229,15 +229,14 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
-          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         else if (self%totalcolumn) then
           call simulate_column_ob_tl(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
                                      self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp)
-          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         end if
+        hofx(ivar,iobs) = hofx_tmp  * self%convert_factor_hofx
       else
         hofx(ivar,iobs) = missing
       end if
@@ -277,22 +276,20 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
 
     do iobs = 1, nlocs
       if (hofx(ivar,iobs) /= missing) then ! take care of missing obs
+        hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
         if (self%troposphere) then
-          hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
           call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
                                      self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs), &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
-          tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
         else if (self%totalcolumn) then
-          hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
           call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
                                      self%prsi_obs(:,iobs), self%prsi(:,iobs),&
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs), hofx_tmp)
-          tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
         end if
+        tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
       end if
       if(self%flip_it) tracer%vals(1:tracer%nval,iobs) = tracer%vals(tracer%nval:1:-1,iobs)
     end do

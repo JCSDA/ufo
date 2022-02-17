@@ -180,6 +180,7 @@ list( APPEND ufo_test_input
   testinput/parameters_older_eckit.yaml
   testinput/primitive_variables.yaml
   testinput/metoffice_radiance_error_matrices.yaml
+  testinput/mopitt_co.yaml
   testinput/print_filter_data.yaml
   testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
@@ -1278,6 +1279,19 @@ ecbuild_add_test( TARGET  test_ufo_opr_avgkernel_tropomi_no2
 ecbuild_add_test( TARGET  test_ufo_linopr_avgkernel_tropomi_no2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/tropomi_no2.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_avgkernel_mopitt_co
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/mopitt_co.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_avgkernel_mopitt_co
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/mopitt_co.yaml"
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 

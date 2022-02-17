@@ -1,0 +1,27 @@
+window begin: '2020-09-03T15:00:00Z'
+window end: '2020-09-03T21:00:00Z'
+observations:
+- obs space:
+    name: CO
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/mopitt_co_2020090318_m.nc4
+    simulated variables: [carbon_monoxide_in_total_column]
+  obs operator:
+    name: AvgKernel
+    nlayers_kernel: 10
+    AvgKernelVar: averaging_kernel_level
+    PresLevVar: pressure_level
+    tracer variables: [co]
+    tropospheric column: false
+    total column: true
+    apriori: true
+    model units coeff: 1e-6 # ppmv to 1/1
+    hofx units coeff: 1.6605392e-20 # molec/cm2 to mol/m2
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/mopitt_co_geoval_2020090318_m.nc4
+  rms ref: 0.019189470669030987
+  tolerance: 1.0e-3

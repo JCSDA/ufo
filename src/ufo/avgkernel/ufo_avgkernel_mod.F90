@@ -24,7 +24,7 @@ module ufo_avgkernel_mod
    type(oops_variables), public :: geovars
    integer :: nlayers_kernel
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
-   logical :: troposphere, totalcolumn
+   logical :: troposphere, totalcolumn, apriori
    real(kind_real) :: convert_factor_model, convert_factor_hofx
  contains
    procedure :: setup  => ufo_avgkernel_setup
@@ -59,6 +59,9 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   nvars = self%obsvars%nvars()
   call f_conf%get_or_die("tracer variables", str_array)
   self%tracervars = str_array
+
+  ! determine if the apriori term is needed
+  call f_conf%get_or_die("apriori", self%apriori)
 
   ! determine if this is a total column or troposphere calculation
   call f_conf%get_or_die("tropospheric column", self%troposphere)
@@ -122,6 +125,7 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   character(len=4) :: levstr
   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsl_obs, prsi_obs
   real(kind_real), allocatable, dimension(:) :: airmass_tot, airmass_trop
+  real(kind_real), allocatable, dimension(:) :: apriori_term
   integer, allocatable, dimension(:) :: troplev_obs
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
@@ -167,6 +171,12 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     prsl_obs(ilev,:) = (prsi_obs(ilev,:) + prsi_obs(ilev+1,:)) * half
   end do
 
+  ! getting the apriori term if applicable
+  if (self%apriori) then
+    allocate(apriori_term(nlocs))
+    call obsspace_get_db(obss, "MetaData", "apriori_term", apriori_term)
+  end if
+
   if (self%troposphere) then
     allocate(troplev_obs(nlocs))
     allocate(airmass_trop(nlocs))
@@ -188,15 +198,18 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
-          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         else if (self%totalcolumn) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
                                   prsi_obs(:,iobs), prsi%vals(:,iobs), &
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp)
-          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         end if
+        if (self%apriori) then
+          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs)) * self%convert_factor_hofx
+        else
+          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
+        endif
       else
         hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel
       end if

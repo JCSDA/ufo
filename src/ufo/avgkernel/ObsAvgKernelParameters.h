@@ -39,6 +39,12 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
      "pressure_level",
      this};
 
+  oops::Parameter <std::string> APrioriVar
+    {"APrioriVar",
+     "Name of a priori retrieval term in observation metadata",
+     "apriori_term",
+     this};
+
   oops::RequiredParameter <std::vector<std::string>> tracerVariables
     {"tracer variables",
      "Names of model tracer variables",
@@ -55,6 +61,12 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
     {"total column",
      "Perform calculation in total column. "
      "An error will be thrown if both this and 'tropospheric column' are true.",
+     false,
+     this};
+
+  oops::Parameter <bool> apriori
+    {"apriori",
+     "Add the a priori retrieval term to the AK smoothed model profile",
      false,
      this};
 
