@@ -138,6 +138,7 @@ list( APPEND ufo_test_input
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
+  testinput/iasi_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/identity.yaml
   testinput/insitupm.yaml
   testinput/interpolate_data_from_file_predictor.yaml
@@ -987,6 +988,7 @@ if( ${rttov_FOUND} )
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_ssmis_ops_qc_rttovonedvarcheck
@@ -1006,6 +1008,14 @@ if( ${rttov_FOUND} )
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_iasi_ops_qc_rttovonedvarcheck
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/iasi_rttov_ops_qc_rttovonedvarcheck.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_atovs_rttov_scatt
@@ -3854,11 +3864,12 @@ endif()
 #####################################################################
 if( ${rttov_FOUND} )
 list( APPEND rttov_test_input
-rttov7pred54L/rtcoef_noaa_19_amsua.dat
-rttov7pred54L/rtcoef_noaa_20_atms.dat
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
+rttov7pred54L/rtcoef_metop_1_iasi.dat
+rttov7pred54L/rtcoef_noaa_19_amsua.dat
+rttov7pred54L/rtcoef_noaa_20_atms.dat
 mietable/mietable_metop_amsuamhs.dat
 )
 

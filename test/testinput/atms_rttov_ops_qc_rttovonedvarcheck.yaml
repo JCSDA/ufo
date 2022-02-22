@@ -78,13 +78,77 @@ observations:
     UseJforConvergence: true
     UseRHwaterForQC: *UseRHwaterForQC1 # setting the same as obs operator
     UseColdSurfaceCheck: *UseColdSurfaceCheck1 # setting the same as obs operator
-    FullDiagnostics: true
+    FullDiagnostics: false
     JConvergenceOption: 1
     RetrievedErrorFactor: -1.0  # turned off
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
   passedBenchmark: 1380      # number of passed obs
+# Test Logging with the Newton minimizer
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the full diagnostics for Newton Minimizer
+  geovals: &GeoVaLs
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: true
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - surface_pressure
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: true
+    UseMLMinimization: false
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC1 # setting the same as obs operator
+    UseColdSurfaceCheck: *UseColdSurfaceCheck1 # setting the same as obs operator
+    FullDiagnostics: true
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0  # turned off
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    StartOb: 1
+    FinishOb: 1
+  passedBenchmark: 1500      # number of passed obs
 ## Test ML minimizer
 - obs operator:
     name: RTTOV
@@ -147,13 +211,71 @@ observations:
     UseJforConvergence: true
     UseRHwaterForQC: *UseRHwaterForQC2 # setting the same as obs operator
     UseColdSurfaceCheck: *UseColdSurfaceCheck2 # setting the same as obs operator
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+  passedBenchmark: 1455      # number of passed obs
+# Test Logging with the ML minimizer
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the full diagnostics for ML minimizer
+  geovals: &GeoVaLs
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - surface_pressure
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: false
+    UseMLMinimization: true
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC2 # setting the same as obs operator
+    UseColdSurfaceCheck: *UseColdSurfaceCheck2 # setting the same as obs operator
     FullDiagnostics: true
     JConvergenceOption: 1
     RetrievedErrorFactor: -1.0
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-  passedBenchmark: 1380      # number of passed obs
+    StartOb: 1
+    FinishOb: 1
+  passedBenchmark: 1500      # number of passed obs
+# Test the 1dvar works with satid calls
 - obs operator: 
     <<: *ObsOperator
   obs space:
@@ -240,6 +362,7 @@ observations:
       test:
         name: FinalCost@OneDVar
       absTol: 1.0e-4
+# Test the surface emissivity retrieval works
 - obs operator: 
     <<: *ObsOperator
   obs space:
@@ -335,3 +458,32 @@ observations:
     qtotal: true
     RetrievedErrorFactor: -1.0
   passedBenchmark: 774      # number of passed obs
+  compareVariables:
+    - reference:
+        name: brightness_temperature@TestReferenceOneDVar
+      test:
+        name: brightness_temperature@OneDVar
+      absTol: 1.0e-4
+  compareVariables:
+    - reference:
+        name: surface_emissivity@TestReferenceOneDVar
+      test:
+        name: surface_emissivity@OneDVar
+      absTol: 1.0e-4
+  compareVariables:
+    - reference:
+        name: skin_temperature@TestReferenceOneDVar
+      test:
+        name: skin_temperature@OneDVar
+      absTol: 1.0e-4
+  compareVariables:
+    - reference:
+        name: n_iterations@TestReferenceOneDVar
+      test:
+        name: n_iterations@OneDVar
+  compareVariables:
+    - reference:
+        name: brightness_temperature@TestReferenceOneDVarBack
+      test:
+        name: brightness_temperature@OneDVarBack
+      absTol: 1.0e-4

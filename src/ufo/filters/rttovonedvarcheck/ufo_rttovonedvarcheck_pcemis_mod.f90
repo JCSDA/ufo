@@ -21,25 +21,25 @@ implicit none
 private
 
 !< Emissivity eigen vector type definition
-type, public :: ufo_rttovonedvarcheck_EmisEigenvec
+type :: ufo_rttovonedvarcheck_EmisEigenvec
    integer          :: NChans
    integer          :: NumEV
-   integer, pointer :: Channels(:) => null()
-   real(kind_real), pointer    :: Mean(:) => null()
-   real(kind_real), pointer    :: PCmin(:) => null()
-   real(kind_real), pointer    :: PCmax(:) => null()
-   real(kind_real), pointer    :: PCguess(:) => null()
-   real(kind_real), pointer    :: EV(:,:) => null()
-   real(kind_real), pointer    :: EV_Inverse(:,:) => null()
+   integer, allocatable :: Channels(:)
+   real(kind_real), allocatable :: Mean(:)
+   real(kind_real), allocatable :: PCmin(:)
+   real(kind_real), allocatable :: PCmax(:)
+   real(kind_real), allocatable :: PCguess(:)
+   real(kind_real), allocatable :: EV(:,:)
+   real(kind_real), allocatable :: EV_Inverse(:,:)
 end type ufo_rttovonedvarcheck_EmisEigenvec
 
 !< Emissivity eigen vector atlas type definition
-type ufo_rttovonedvarcheck_EmisAtlas
+type :: ufo_rttovonedvarcheck_EmisAtlas
    integer          :: Nlat
    integer          :: Nlon
    integer          :: Npc
    real(kind_real)  :: gridstep
-   real(kind_real), POINTER  :: EmisPC(:,:,:)
+   real(kind_real), allocatable :: EmisPC(:,:,:)
 end type ufo_rttovonedvarcheck_EmisAtlas
 
 !< Principal component emissivity type definition
@@ -56,6 +56,9 @@ contains
   procedure :: emistopc => ufo_rttovonedvarcheck_EmisToPC
   procedure :: pctoemis => ufo_rttovonedvarcheck_PCToEmis
   procedure :: emisktopc => ufo_rttovonedvarcheck_EmisKToPC
+  procedure :: loadEV => ufo_rttovonedvarcheck_GetEmisEigenVec
+  procedure :: loadAtlas => ufo_rttovonedvarcheck_GetEmisAtlas
+  procedure :: mapchannels => ufo_rttovonedvarcheck_channelmapping
 
 end type ufo_rttovonedvarcheck_pcemis
 
@@ -73,21 +76,17 @@ subroutine ufo_rttovonedvarcheck_InitPCEmis(self, filepath, atlaspath)
 implicit none
 
 ! subroutine arguments:
-class(ufo_rttovonedvarcheck_pcemis), intent(out) :: self !< PC emissivity type
+class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
 character(len=*), intent(in) :: filepath
 character(len=*), intent(in), optional :: atlaspath
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitPCEmis"
 logical                     :: file_exists  ! Check if a file exists logical
-integer                     :: fileunit     ! Unit number for reading in files
 
 ! Read eigenvector file
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
-  fileunit = ufo_utils_iogetfreeunit()
-  open(unit = fileunit, file = trim(filepath))
-  call ufo_rttovonedvarcheck_GetEmisEigenVec(self, fileunit)
-  close(unit = fileunit)
+  call self % loadEV(filepath)
   call fckit_log % info("rttovonedvarcheck EmisEigenVec file exists and read in")
 else
   call abor1_ftn("rttovonedvarcheck EmisEigenVec file not found: aborting")
@@ -100,17 +99,12 @@ self % initialised = .true.
 if (present(atlaspath)) then
   inquire(file=trim(atlaspath), exist=file_exists)
   if (file_exists) then
-    fileunit = ufo_utils_iogetfreeunit()
-    open(unit = fileunit, file = trim(filepath))
-    call ufo_rttovonedvarcheck_GetEmisAtlas(self, fileunit)
-    close(unit = fileunit)
+    call self % loadAtlas(atlaspath)
     call fckit_log % info("rttovonedvarcheck Emis Atlas file exists and read in")
   else
     call abor1_ftn("rttovonedvarcheck Emis Atlas file not found but requested: aborting")
   end if
 end if
-
-call self % info()
 
 end subroutine ufo_rttovonedvarcheck_InitPCEmis
 
@@ -124,27 +118,32 @@ end subroutine ufo_rttovonedvarcheck_InitPCEmis
 !! \date 04/08/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_GetEmisEigenVec (self,     &
-                                                  fileunit  )
+                                                  filepath  )
 
 implicit none
 
 ! Subroutine arguments:
-type(ufo_rttovonedvarcheck_pcemis), intent(out) :: self !< PC emissivity type
-integer, intent(in)                     :: fileunit
+class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
+character(len=*), intent(in)                       :: filepath
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GetEmisEigenVec"
 integer :: eigversion
 integer :: i
 integer :: readstatus
+integer :: fileunit
 character(len=max_string)   :: message
+
+! Open file for reading
+fileunit = ufo_utils_iogetfreeunit()
+open(unit = fileunit, file = trim(filepath))
 
 !----------------------------------------------
 ! 1. Read header information and allocate arrays
 !----------------------------------------------
 
 read(fileunit, *, iostat = readstatus) eigversion, self % emis_eigen % Nchans, &
-                                        self % emis_eigen % NumEV
+                                       self % emis_eigen % NumEV
 
 allocate (self % emis_eigen % Channels( self % emis_eigen % Nchans))
 allocate (self % emis_eigen % Mean( self % emis_eigen % Nchans))
@@ -192,6 +191,8 @@ write(*, '(A,I0,A,I0,A)') 'Finished reading ',self % emis_eigen % NumEV, &
                           ' emissivity eigenvectors on ', &
                            self % emis_eigen % Nchans,' channels.'
 
+close(unit = fileunit)
+
 end subroutine ufo_rttovonedvarcheck_GetEmisEigenVec
 
 !-------------------------------------------------------------------------------
@@ -203,13 +204,13 @@ end subroutine ufo_rttovonedvarcheck_GetEmisEigenVec
 !!
 !! \date 16/09/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GetEmisAtlas (self, fileunit)
+subroutine ufo_rttovonedvarcheck_GetEmisAtlas (self, filepath)
 
 implicit none
 
 ! Subroutine arguments:
-type(ufo_rttovonedvarcheck_pcemis), intent(out) :: self !< PC emissivity type
-integer, intent(in) :: fileunit
+class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
+character(len=*), intent(in)                       :: filepath
 
 ! Local declarations:
 character(len=*), parameter          :: RoutineName = "ufo_rttovonedvarcheck_GetEmisAtlas"
@@ -217,6 +218,10 @@ character(len=max_string)            :: message
 integer                              :: readstatus
 integer                              :: i
 integer                              :: j
+integer                              :: fileunit
+
+fileunit = ufo_utils_iogetfreeunit()
+open(unit = fileunit, file = trim(filepath))
 
 !----------------------------------------------
 ! 1. Read header information and allocate arrays
@@ -251,6 +256,8 @@ else
                          self % emis_atlas % Npc, ' principal components.'
 end if
 
+close(unit = fileunit)
+
 end subroutine ufo_rttovonedvarcheck_GetEmisAtlas
 
 !------------------------------------------------------------------------------
@@ -273,13 +280,15 @@ character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_DeletePCEmis
 
 self % emis_eigen % NChans = 0
 self % emis_eigen % NumEV = 0
-if (associated (self % emis_eigen % Channels)) deallocate (self % emis_eigen % Channels)
-if (associated (self % emis_eigen % Mean)) deallocate (self % emis_eigen % Mean)
-if (associated (self % emis_eigen % PCmin)) deallocate (self % emis_eigen % PCmin)
-if (associated (self % emis_eigen % PCmax)) deallocate (self % emis_eigen % PCmax)
-if (associated (self % emis_eigen % PCguess)) deallocate (self % emis_eigen % PCguess)
-if (associated (self % emis_eigen % EV)) deallocate (self % emis_eigen % EV)
-if (associated (self % emis_eigen % EV_Inverse)) deallocate (self % emis_eigen % EV_Inverse)
+if (allocated (self % emis_eigen % Channels)) deallocate (self % emis_eigen % Channels)
+if (allocated (self % emis_eigen % Mean)) deallocate (self % emis_eigen % Mean)
+if (allocated (self % emis_eigen % PCmin)) deallocate (self % emis_eigen % PCmin)
+if (allocated (self % emis_eigen % PCmax)) deallocate (self % emis_eigen % PCmax)
+if (allocated (self % emis_eigen % PCguess)) deallocate (self % emis_eigen % PCguess)
+if (allocated (self % emis_eigen % EV)) deallocate (self % emis_eigen % EV)
+if (allocated (self % emis_eigen % EV_Inverse)) deallocate (self % emis_eigen % EV_Inverse)
+
+if (allocated (self % emis_atlas % EmisPC)) deallocate(self % emis_atlas % EmisPC)
 
 end subroutine ufo_rttovonedvarcheck_DeletePCEmis
 
@@ -330,24 +339,28 @@ character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_EmisToPC"
 real(kind_real)             :: Temp_Emissivity(size(Emissivity))
 integer                     :: npc
 character(len=max_string)   :: message
+integer, allocatable        :: ChannelIndex(:)
+
+allocate(ChannelIndex(size(Channels)))
+call self % mapchannels(Channels, ChannelIndex)
 
 npc = size(PC)
 
-if (associated(self % emis_eigen % EV_Inverse)) then
+if (allocated(self % emis_eigen % EV_Inverse)) then
 
   ! Convert from emissivity to sine transform
   Temp_Emissivity(:) = asin( two * Emissivity(:) - one )
 
   ! Subtract means from transformed emissivities
-  Temp_Emissivity(:) = Temp_Emissivity(:) - self % emis_eigen % Mean(Channels(:))
+  Temp_Emissivity(:) = Temp_Emissivity(:) - self % emis_eigen % Mean(ChannelIndex(:))
 
   ! Calculate PC weights from emissivity spectrum
-  PC(1:npc) = matmul(Temp_Emissivity(:), self % emis_eigen % EV_Inverse(Channels(:),1:npc))
+  PC(1:npc) = matmul(Temp_Emissivity(:), self % emis_eigen % EV_Inverse(ChannelIndex(:),1:npc))
 
 else
 
   write(message, *) RoutineName,                             &
-                 'Missing inverse eigenvector matrix - cannot convert emissivities to PCs'
+                 ' Missing inverse eigenvector matrix - cannot convert emissivities to PCs'
   call abor1_ftn(message)
 
 end if
@@ -364,10 +377,10 @@ end subroutine ufo_rttovonedvarcheck_EmisToPC
 !! \date 04/08/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_PCToEmis (self, &
-                                NumChans,   &
-                                Channels,   &
-                                NumPC,      &
-                                PC,         &
+                                NumChans,        &
+                                Channels,        &
+                                NumPC,           &
+                                PC,              &
                                 Emissivity)
 
 implicit none
@@ -384,6 +397,9 @@ real(kind_real), intent(out) :: Emissivity(NumChans)
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PCToEmis"
 real(kind_real)             :: BigEOF(NumChans,NumChans)
 real(kind_real)             :: BigPC(NumChans)
+integer                     :: ChannelIndex(NumChans)
+
+call self % mapchannels(Channels, ChannelIndex)
 
 ! Populate PC array with nchans elements
 BigPC(:) = 0.0_kind_real
@@ -391,13 +407,13 @@ BigPC(1:NumPC) = PC(:)
 
 ! Populate EOF array with nchans elements
 BigEOF(:,:) = 0.0_kind_real
-BigEOF(1:NumPC,:) = self % emis_eigen % EV(1:NumPC,Channels)
+BigEOF(1:NumPC,:) = self % emis_eigen % EV(1:NumPC,ChannelIndex)
 
 ! Calculate reconstructed emissivity spectrum
 Emissivity = matmul(BigPC, BigEOF)
 
 ! Add means (these may have been subtracted off, otherwise they are zero)
-Emissivity(:) = Emissivity(:) + self % emis_eigen % Mean(Channels)
+Emissivity(:) = Emissivity(:) + self % emis_eigen % Mean(ChannelIndex)
 
 ! Convert from sine transform to physical emissivity
 Emissivity(1:NumChans) = half * (sin(Emissivity(1:NumChans)) + one)
@@ -414,11 +430,11 @@ end subroutine ufo_rttovonedvarcheck_PCToEmis
 !! \date 04/08/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_EmisKToPC (self, &
-                                 NumChans,     &
-                                 Channels,     &
-                                 NumPC,        &
-                                 Emissivity,   &
-                                 Emissivity_K, &
+                                 NumChans,        &
+                                 Channels,        &
+                                 NumPC,           &
+                                 Emissivity,      &
+                                 Emissivity_K,    &
                                  PC_K)
 
 implicit none
@@ -436,6 +452,9 @@ real(kind_real), intent(out) :: PC_K(NumChans,NumPC)
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_EmisKToPC"
 real(kind_real)             :: JEMatrix_element
 integer                     :: ichan
+integer                     :: ChannelIndex(NumChans)
+
+call self % mapchannels(Channels, ChannelIndex)
 
 do ichan = 1, NumChans
   ! Calculate diagonal matrix elements of emissivity Jacobians
@@ -446,10 +465,40 @@ do ichan = 1, NumChans
 
 ! EOF array === EmisEigenvec % EV for the appropriate channel selection
 ! N.B. Note 'manual' transposition of matrix here
-  PC_K(ichan,1:NumPC) = self % emis_eigen % EV(1:NumPC,Channels(ichan)) * JEMatrix_element
+  PC_K(ichan,1:NumPC) = self % emis_eigen % EV(1:NumPC,ChannelIndex(ichan)) * JEMatrix_element
 end do
 
 end subroutine ufo_rttovonedvarcheck_EmisKToPC
+
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_channelmapping(self, TestChannels, ChannelIndex)
+
+implicit none
+
+class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
+integer, intent(in)  :: TestChannels(:)
+integer, intent(out) :: ChannelIndex(:)
+
+integer :: ichan, ochan, jnew
+
+if (size(ChannelIndex) /= size(TestChannels)) then
+  call abor1_ftn("rttovonedvarcheck pcemiss mod: ChannelIndex not the same size as TestChannels => aborting")
+end if
+
+jnew = 1
+outer: do ichan = 1, size(TestChannels)
+  ochan = jnew
+  do while ( ochan <= self % emis_eigen % NChans )
+    if (TestChannels(ichan) == self % emis_eigen % Channels(ochan)) then
+      ChannelIndex(ichan) = ochan
+      cycle outer
+    end if
+    ochan = ochan + 1
+  end do
+end do outer
+
+end subroutine ufo_rttovonedvarcheck_channelmapping
 
 !-------------------------------------------------------------------------------
 

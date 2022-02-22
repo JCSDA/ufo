@@ -18,6 +18,7 @@ use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_setup_mod
+use ufo_rttovonedvarcheck_utils_mod
 use ufo_utils_mod, only: Ops_Cholesky
 use ufo_vars_mod
 
@@ -114,6 +115,7 @@ integer                         :: iter
 integer                         :: RTerrorcode
 integer                         :: nchans
 integer                         :: nprofelements
+integer                         :: usedchan, allchans ! counters
 real(kind_real)                 :: Jcost     ! current value
 real(kind_real)                 :: JcostOld  ! previous iteration value
 real(kind_real)                 :: JcostOrig ! initial value
@@ -130,11 +132,10 @@ real(kind_real), allocatable    :: Xdiff(:)
 real(kind_real), allocatable    :: Ydiff(:)
 real(kind_real), allocatable    :: Y(:)
 real(kind_real), allocatable    :: Y0(:)
-real(kind_real), allocatable    :: out_H_matrix(:,:)
-real(kind_real), allocatable    :: out_Y(:)
-type(ufo_geovals)              :: geovals
+real(kind_real), allocatable    :: output_BT_usedchans(:)
+type(ufo_geovals)               :: geovals
 type(ufo_geoval), pointer       :: geoval
-real(kind_real)                :: Jout(3)
+real(kind_real)                 :: Jout(3)
 
 integer                         :: ii, jj
 
@@ -201,13 +202,8 @@ Iterations: do iter = 1, config % max1DVarIterations
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
-    do ii = 1, size(ob % channels_all)
-      do jj = 1, size(ob % channels_used)
-        if (ob % channels_all(ii) == ob % channels_used(jj)) then
-           ob % background_BT(ii) = Y0(jj)
-        end if
-      end do
-    end do
+    call ufo_rttovonedvarcheck_subset_to_all_by_channels(ob % channels_used, Y0, &
+                                     ob % channels_all, ob % background_BT)
   end if
 
   ! exit on error
@@ -336,6 +332,7 @@ Iterations: do iter = 1, config % max1DVarIterations
   call ufo_rttovonedvarcheck_CheckIteration (config, & ! in
                                   geovals,           & ! in
                                   profile_index,     & ! in
+                                  ob,                & ! in
                                   GuessProfile(:),   & ! inout
                                   outOfRange)          ! out
 
@@ -402,7 +399,6 @@ onedvar_success = converged
 call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
 ob % final_cost = Jout(1)
 ob % niter = iter
-ob % final_bt_diff = Ydiff
 
 ! Pass output profile, final BTs and final cost out
 if (converged) then
@@ -424,14 +420,24 @@ if (converged) then
   end if
   
   ! Recalculate final BTs for all channels
-  allocate(out_H_matrix(size(ob % channels_all),nprofelements))
-  allocate(out_Y(size(ob % channels_all)))
-  call ufo_rttovonedvarcheck_get_jacobian(config, geovals, ob, ob % channels_all, &
-                                          profile_index, GuessProfile(:), &
-                                          hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
-  ob % output_BT(:) = out_Y(:)
-  deallocate(out_Y)
-  deallocate(out_H_matrix)
+  call ufo_rttovonedvarcheck_get_bts(config, geovals, ob, ob % channels_all, &
+                                     profile_index, GuessProfile, &
+                                     rttov_simobs, ob % output_BT)
+
+  ! Fill the final BT diff
+  allocate(output_BT_usedchans(size(ob % channels_used)))
+  call ufo_rttovonedvarcheck_all_to_subset_by_channels(ob % channels_all, &
+                             ob % output_BT, ob % channels_used, output_BT_usedchans)
+  ob % final_bt_diff(:) = ob % yobs(:) - output_BT_usedchans(:)
+  deallocate(output_BT_usedchans)
+
+  ! If ctp retrieved then check 1 % of the integrated Jacobian for a channel is not below the
+  ! cloud top.  If it is then reject that channel.
+  if(config % cloud_retrieval .and. ob % cloudtopp > zero .and. &
+    ob % cloudfrac > 0.05_kind_real) then
+    call ufo_rttovonedvarcheck_cloudy_channel_rejection( &
+         config, profile_index, geovals, H_matrix, ob)
+  end if
 end if
 
 !---------------------

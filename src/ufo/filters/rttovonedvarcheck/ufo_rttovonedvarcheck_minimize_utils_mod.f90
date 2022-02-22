@@ -11,7 +11,7 @@ use fckit_log_module, only : fckit_log
 use iso_c_binding
 use kinds
 use oops_variables_mod
-use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q
+use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q, Pa_to_hPa
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
@@ -32,6 +32,7 @@ public ufo_rttovonedvarcheck_CheckIteration
 public ufo_rttovonedvarcheck_CheckCloudyIteration
 public ufo_rttovonedvarcheck_PrintIterInfo
 public ufo_rttovonedvarcheck_hofxdiags_levels
+public ufo_rttovonedvarcheck_cloudy_channel_rejection
 
 character(len=max_string) :: message
 
@@ -73,7 +74,6 @@ type(ufo_geoval), pointer    :: geoval
 integer                      :: nlevels
 integer                      :: ii, jj, ind
 real(kind_real), allocatable :: humidity_total(:)
-real(kind_real), allocatable :: emiss_pc(:)
 real(kind_real)              :: u, v               ! components for windspeed calculation
 
 !-------------------------------------------------------------------------------
@@ -156,17 +156,15 @@ if (profindex % tstar > 0) then
   prof_x(profindex % tstar) = geoval%vals(1, 1)
 end if
 
-! This has been left in for future development
 ! cloud top pressure
-!if (profindex % cloudtopp > 0) then
-!  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
-!end if
+if (profindex % cloudtopp > 0) then
+  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
+end if
 
-! This has been left in for future development
 ! cloud fraction
-!if (profindex % cloudfrac > 0) then
-!  prof_x(profindex % cloudfrac) = ob % cloudfrac
-!end if
+if (profindex % cloudfrac > 0) then
+  prof_x(profindex % cloudfrac) = ob % cloudfrac
+end if
 
 ! Windspeed - var_sfc_u10 = "uwind_at_10m"
 !           - var_sfc_v10 = "vwind_at_10m"
@@ -203,13 +201,9 @@ if (profindex % mwemiss(1) > 0) then
 end if
 
 ! Retrieval of emissivity principal components
-!if (profindex % emisspc(1) > 0) THEN
-!  ! convert ob % emiss to emiss pc
-!  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
-!  call ob % pcemis % emistoPC(ob % channels_used(:), ob % emiss(:), emiss_pc(:))
-!  prof_x(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
-!  deallocate(emiss_pc)
-!end if
+if (profindex % emisspc(1) > 0) THEN
+  prof_x(profindex % emisspc(1):profindex % emisspc(2)) = ob % pcemiss(:)
+end if
 
 end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
@@ -252,7 +246,6 @@ real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)
 real(kind_real), allocatable :: ql(:)
 real(kind_real), allocatable :: qi(:)
-real(kind_real), allocatable :: emiss_pc(:)
 real(kind_real)              :: u, v, windsp  ! variable needed for the windspeed calculation
 
 !-------------------------------------------------------------------------------
@@ -387,17 +380,15 @@ if (profindex % tstar > 0) then
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if
 
-! This has been left in for future development
 ! cloud top pressure - passed through via the ob
-!if (profindex % cloudtopp > 0) then
-!  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
-!end if
+if (profindex % cloudtopp > 0) then
+  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
+end if
 
-! This has been left in for future development
 ! cloud fraction - passed through via the ob
-!if (profindex % cloudfrac > 0) then
-!  ob % cloudfrac = prof_x(profindex % cloudfrac)
-!end if
+if (profindex % cloudfrac > 0) then
+  ob % cloudfrac = prof_x(profindex % cloudfrac)
+end if
 
 ! windspeed
 if (profindex % windspeed > 0) then
@@ -445,14 +436,12 @@ if (profindex % mwemiss(1) > 0) THEN
 end if
 
 ! Retrieval of emissivity principal components
-!if (profindex % emisspc(1) > 0) THEN
-!  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
-!  emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2))
-!  ! convert emiss_pc to ob % emissivity using
-!  call ob % pcemis % pctoemis(size(ob % channels_used), ob % channels_used, &
-!                              size(emiss_pc), emiss_pc(:), ob % emiss(:))
-!  deallocate(emiss_pc)
-!end if
+if (profindex % emisspc(1) > 0) then
+  ob % pcemiss(:) = prof_x(profindex % emisspc(1):profindex % emisspc(2))
+  ! convert emiss_pc to ob % emissivity using
+  call ob % pcemiss_object % pctoemis(size(ob % channels_used), ob % channels_used, &
+                                      size(ob % pcemiss), ob % pcemiss(:), ob % emiss(:))
+end if
 
 end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 
@@ -524,17 +513,19 @@ end subroutine ufo_rttovonedvarcheck_CostFunction
 subroutine ufo_rttovonedvarcheck_CheckIteration (self, &
                                       geovals,    &
                                       profindex,  &
+                                      ob,         &
                                       profile,    &
                                       OutOfRange)
 
 implicit none
 
 ! subroutine arguments:
-type(ufo_rttovonedvarcheck), intent(in) :: self
-type(ufo_geovals), intent(in)           :: geovals
+type(ufo_rttovonedvarcheck), intent(in)    :: self
+type(ufo_geovals), intent(in)              :: geovals
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
-real(kind_real), intent(inout)   :: profile(:)
-logical, intent(out)             :: OutOfRange
+type(ufo_rttovonedvarcheck_ob), intent(in) :: ob
+real(kind_real), intent(inout)             :: profile(:)
+logical, intent(out)                       :: OutOfRange
 
 ! Local declarations:
 real(kind_real), allocatable :: qsaturated(:)
@@ -542,6 +533,7 @@ real(kind_real), allocatable :: scaled_qsaturated(:)
 real(kind_real)              :: q2_sat(1)
 real(kind_real), allocatable :: Plevels_1DVar(:)
 real(kind_real)              :: Pstar_Pa(1)
+real(kind_real)              :: Pstar_hPa
 real(kind_real), allocatable :: Temp(:)
 real(kind_real)              :: Temp2(1)
 real(kind_real)              :: rtbase
@@ -552,9 +544,12 @@ type(ufo_geoval), pointer    :: geoval
 character(len=max_string)    :: varname
 integer                      :: ii
 integer                      :: nlevels_1dvar
+integer                      :: nemisspc
+logical                      :: LimitCTPtoRTBase
 
 ! Setup
 OutOfRange = .false.
+LimitCTPtoRTBase = .true.
 nlevels_1dvar = self % nlevels
 allocate(Temp(nlevels_1dvar))
 
@@ -702,37 +697,43 @@ Constrain: if (.not. OutOfRange) then
     end if
   end if
 
-! This has been left in for future development
-!  !----
-!  ! 2.3) Grey cloud
-!  !----
-!
-!  if (profindex % cloudtopp > 0) then
-!    profile(profindex % CloudFrac) = min (profile(profindex % CloudFrac), 1.0)
-!    profile(profindex % CloudFrac) = max (profile(profindex % CloudFrac), 0.0)
-!    profile(profindex % CloudTopP) = max (profile(profindex % CloudTopP), 100.0)
-!    if (LimitCTPtorTBase) then
-!      rtbase = maxval (Plevels_RTModel(:))
-!      profile(profindex % CloudTopP) = min (profile(profindex % CloudTopP), Pstar_mb, rtbase)
-!    else
-!      profile(profindex % CloudTopP) = min (profile(profindex % CloudTopP), Pstar_mb)
-!    end if
-!  end if
-!
-! This has been left in for future development
-!  !----
-!  ! 2.4) Surface emissivity PCs
-!  !----
-!
-!  if (profindex % emisspc(1) > 0) then
-!    where (profile(profindex % emisspc(1):profindex % emisspc(2)) > EmisEigenVec % PCmax(1:nemisspc))
-!      profile(profindex % emisspc(1):profindex % emisspc(2)) = EmisEigenVec % PCmax(1:nemisspc)
-!    end where
-!    where (profile(profindex % emisspc(1):profindex % emisspc(2)) < EmisEigenVec % PCmin(1:nemisspc))
-!      profile(profindex % emisspc(1):profindex % emisspc(2)) = EmisEigenVec % PCmin(1:nemisspc)
-!    end where
-!  end if
-!
+  !----
+  ! 2.3) Grey cloud
+  !----
+
+  if (profindex % cloudtopp > 0) then
+    profile(profindex % cloudfrac) = min (profile(profindex % cloudfrac), one)
+    profile(profindex % cloudfrac) = max (profile(profindex % cloudfrac), zero)
+    profile(profindex % cloudtopp) = max (profile(profindex % cloudtopp), 100.0_kind_real)
+
+    ! Get surface pressure
+    varname = var_ps
+    call ufo_geovals_get_var(geovals, varname, geoval)
+    Pstar_hPa = geoval%vals(1, 1) * Pa_to_hPa
+
+    if (LimitCTPtoRTBase) then
+      rtbase = maxval (Plevels_1DVar(:))
+      rtbase = rtbase * Pa_to_hPa
+      profile(profindex % CloudTopP) = min (profile(profindex % CloudTopP), Pstar_hPa, rtbase)
+    else
+      profile(profindex % CloudTopP) = min (profile(profindex % CloudTopP), Pstar_hPa)
+    end if
+  end if
+
+  !----
+  ! 2.4) Surface emissivity PCs
+  !----
+
+  if (profindex % emisspc(1) > 0) then
+    nemisspc = profindex % emisspc(2) - profindex % emisspc(1) + 1
+    where (profile(profindex % emisspc(1):profindex % emisspc(2)) > ob % pcemiss_object % emis_eigen % PCmax(1:nemisspc))
+      profile(profindex % emisspc(1):profindex % emisspc(2)) = ob % pcemiss_object % emis_eigen % PCmax(1:nemisspc)
+    end where
+    where (profile(profindex % emisspc(1):profindex % emisspc(2)) < ob % pcemiss_object % emis_eigen % PCmin(1:nemisspc))
+      profile(profindex % emisspc(1):profindex % emisspc(2)) = ob % pcemiss_object % emis_eigen % PCmin(1:nemisspc)
+    end where
+  end if
+
 ! This has been left in for future development
 !  !--------
 !  ! 2.5) Cloud profiles
@@ -762,7 +763,7 @@ Constrain: if (.not. OutOfRange) then
 ! Check microwave emissivity is between 0 and 1
 if (profindex % mwemiss(1) > 0) then
   do ii = profindex % mwemiss(1), profindex % mwemiss(2)
-    profile(ii) = max (min(profile(ii), 1.0), 0.0)
+    profile(ii) = max (min(profile(ii), one), zero)
   end do
 end if
 
@@ -1008,6 +1009,8 @@ do i = 1, size(varlist)
            trim(varname) == trim(var_sfc_tskin) .or. &
            trim(varname) == trim(var_sfc_u10) .or. &
            trim(varname) == trim(var_sfc_v10) .or. &
+           trim(varname) == trim("cloud_top_pressure") .or. &
+           trim(varname) == trim("cloud_fraction") .or. &
            index(trim(varname), trim(var_sfc_emiss)) > 0) then
     ret_nlevs(i) = 1
   else
@@ -1017,6 +1020,101 @@ do i = 1, size(varlist)
 end do
 
 end subroutine ufo_rttovonedvarcheck_hofxdiags_levels
+
+!-------------------------------------------------------------------------------
+!> Create a subset of channels with temperature Jacobians that peak above the
+!> given cloud top pressure.
+!!
+!! \details Heritage: Ops_SatRad_CloudyChannelSelect.f90
+!!
+!! \author Met Office
+!!
+!! \date 15/11/2021: Created
+!!
+!-------------------------------------------------------------------------------
+subroutine ufo_rttovonedvarcheck_cloudy_channel_rejection( &
+                                        config,            & ! in
+                                        profindex,         & ! in
+                                        geovals,           & ! in
+                                        H_matrix_Guess,    & ! in
+                                        ob)                  ! inout
+
+implicit none
+
+! Subroutine arguments:
+type(ufo_rttovonedvarcheck), intent(in)           :: config
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex   ! profile index
+type(ufo_geovals), intent(in)                     :: geovals     ! model data at obs location
+real(kind_real), intent(in)                       :: H_matrix_Guess(:, :) ! cloudy Jacobians for channels
+type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob
+
+! Local constants:
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_cloudy_channel_rejection"
+
+! Local variables:
+real(kind_real), allocatable :: Wfunc(:)         ! Individual temperature Jacobian
+real(kind_real) :: Wfunc_int, Wfunc_int_below     ! column temperature Jacobians
+integer         :: CTP_Level                    ! RTTOV level of cloud top
+integer         :: i,j                          ! Loop indices
+integer         :: nchans                       ! number of channels
+integer         :: nchans_rejected              ! number channels rejected
+integer, allocatable :: rejected_channels(:)    ! rejected channels peaking below cloud
+real(kind_real) :: dlnp                         ! log pressure difference
+real(kind_real) :: incr                         ! Wfunc increment
+real(kind_real), allocatable :: pressure(:)     ! atmospheric pressure
+type(ufo_geoval), pointer    :: geoval          ! pointer to geoval in geovals
+
+! Allocate variables
+nchans = size(ob % channels_used)
+allocate(Wfunc(profindex % nlevels))
+allocate(rejected_channels(nchans))
+
+! Get model pressure and convert to hPa
+allocate(pressure(profindex % nlevels))
+call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
+pressure(:) = geoval % vals(:, 1) * Pa_to_hPa
+
+! First, find the RT level nearest to the retrieved cloud top:
+CTP_Level = 1
+
+do while( pressure(CTP_Level) < ob % cloudtopp .and. CTP_Level < profindex % nlevels )
+  CTP_Level = CTP_Level + 1
+end do
+
+CTP_Level = max(CTP_Level - 2, 1)
+
+! Now work out fraction of T Jacobian below cloud top for each channel.
+! Store the channel number in rejected_channels if it's greater than IRCloud_Threshold.
+nchans_rejected = 0
+rejected_channels(:) = 0
+
+! Integrate the Jacobian wrt. ln(p)
+do i = 1, nchans
+  Wfunc = H_matrix_Guess( i, profindex%t(1) : profindex%t(2) )
+
+  Wfunc_int = zero
+  Wfunc_int_below = zero
+  do j = 2, profindex % nlevels
+    dlnp = log( pressure(j)/pressure(j-1) )
+    incr = dlnp * (Wfunc(j)+Wfunc(j-1)) / two
+    Wfunc_int = Wfunc_int + incr
+    if ( pressure(j) > ob % cloudtopp ) then
+      Wfunc_int_below = Wfunc_int_below + incr
+    end if
+  end do
+
+  if ( Wfunc_int_below > (Wfunc_int * config % IRCloud_Threshold) ) then
+    nchans_rejected = nchans_rejected + 1
+    rejected_channels(nchans_rejected) = ob % channels_used(i)
+  end if
+end do
+
+if(nchans_rejected > 0) then
+  allocate(ob % rejected_channels_ctp(nchans_rejected))
+  ob % rejected_channels_ctp(:) = rejected_channels(1:nchans_rejected)
+end if
+
+end subroutine ufo_rttovonedvarcheck_cloudy_channel_rejection
 
 ! ----------------------------------------------------------
 

@@ -26,6 +26,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   integer              :: niter
   integer, allocatable :: channels_used(:) !< channels used for this observation
   integer, allocatable :: channels_all(:) !< all channels used for output
+  integer, allocatable :: rejected_channels_ctp(:) !< a list of channels rejected based on the retrieved ctp
   real(kind_real)      :: latitude !< latitude of observation
   real(kind_real)      :: longitude !< longitude of observation
   real(kind_real)      :: elevation  !< elevation above sea level of observation
@@ -45,11 +46,12 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real), allocatable :: output_profile(:) !< retrieved state at converge as profile vector
   real(kind_real), allocatable :: output_BT(:) !< Brightness temperatures using retrieved state
   real(kind_real), allocatable :: background_BT(:) !< Brightness temperatures from 1st itreration
+  real(kind_real), allocatable :: pcemiss(:) !< principal component emissivity
   logical              :: retrievecloud  !< flag to turn on retrieve cloud
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
-  type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemis !< pointer to the IR pc emissivity object
+  type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object !< pointer to the IR pc emissivity object
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_InitOb
@@ -162,9 +164,11 @@ if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
+if (allocated(self % rejected_channels_ctp)) deallocate(self % rejected_channels_ctp)
 if (allocated(self % clw))            deallocate(self % clw)
+if (allocated(self % pcemiss))        deallocate(self % pcemiss)
 
-self % pcemis => null()
+self % pcemiss_object => null()
 
 end subroutine ufo_rttovonedvarcheck_DeleteOb
 
@@ -199,10 +203,15 @@ write(*,*) "Surface type for RTTOV: ",surface_type
 write(*,"(A,F8.2)") "Surface height:",self % elevation
 write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
+write(*,"(A,F8.2)") "Cloud Top Pressure",self % cloudtopp
+write(*,"(A,F8.2)") "Cloud Fraction",self % cloudfrac
 write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
 write(*,"(A)") "Emissivity: "
 write(*,"(10F8.2)") self % emiss(:)
+write(*,"(A)") "Emissivity PC : "
+write(*,"(10F18.8)") self % pcemiss(:)
+
 end subroutine
 
 !-------------------------------------------------------------------------------

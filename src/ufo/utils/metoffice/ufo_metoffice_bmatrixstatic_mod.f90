@@ -144,6 +144,7 @@ call cpu_time(t2)
 
 ! Check the yaml input contains all required b-matrix elements
 do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
+  if (self % fields(ii,1) == 0) cycle
   match = .false.
   do jj = 1, size(fields_in) ! loop over array generated from yaml
     if (self % fields(ii,1) == fields_in(jj)) match = .true.
@@ -650,13 +651,13 @@ do jvar = 1, nmvars
       end if
 
     case ("cloud_top_pressure")
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
+      fields_in(counter) = ufo_metoffice_fieldtype_cloudtopp
 
-    case ("effective_cloud_fraction") ! effective cloud fraction
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
+    case ("cloud_fraction") ! cloud fraction
+      fields_in(counter) = ufo_metoffice_fieldtype_cloudfrac
 
     case ("emissivity_pc") ! emissivity prinipal components
-      call abor1_ftn("rttovonedvarcheck not setup for pc emissivity yet")
+      fields_in(counter) = ufo_metoffice_fieldtype_emisspc
 
     ! 19 cloud fraction profile - not currently used
 

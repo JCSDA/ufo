@@ -110,7 +110,7 @@ observations:
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Platform_Name: *platform_name 
+        Platform_Name: *platform_name
         Sat_ID: *sat_id 
         Instrument_Name: *inst_name
         CoefficientPath: Data/

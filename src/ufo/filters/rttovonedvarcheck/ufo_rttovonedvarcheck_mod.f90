@@ -119,11 +119,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
-  integer                            :: jvar, ivar, jobs, band, ii ! counters
+  integer                            :: jvar, ivar, jobs, band, ii, irej, jnew ! counters
   integer                            :: nchans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
-  integer                            :: apply_count
+  integer                            :: apply_count ! number of profiles that the 1dvar has been applied to
+  integer                            :: failed_1dvar_count ! number of profiles that failed to converge
+  integer                            :: failed_retrievedBTcheck_count ! number of profiles with retrieved BTs outside error
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   integer, allocatable               :: fields_in(:)
   real(kind_real)                    :: missing         ! missing value
@@ -134,7 +136,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   real(kind_real), allocatable       :: max_error(:)    ! max_error = error(stdev) * factor
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
-  logical                            :: cloud_retrieval = .false.
+  logical                            :: reject_profile
   type(ufo_radiancerttov)            :: rttov_simobs
   integer(c_size_t), allocatable     :: ret_nlevs(:)
 
@@ -152,14 +154,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   
   ! Setup full R matrix object
   call full_rmatrix % setup(self % r_matrix_path)
-
-  ! Check if cloud retrievals needed
-  do ii = 1, size(self % retrieval_variables)
-    if (cmp_strings(self % retrieval_variables(ii), "cloud_top_pressure")) then
-      write(*,*) "Simple cloud is part of the state vector"
-      cloud_retrieval = .true.
-    end if
-  end do
 
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix, self % nlevels)
@@ -182,7 +176,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   
   ! Read in observation data from obsspace
   ! geovals are only providing surface information
-  call obs % setup(self, prof_index % nprofelements, geovals, vars)
+  call obs % setup(self, prof_index, geovals, vars)
 
   ! Initialize data arrays
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
@@ -206,6 +200,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! ------------------------------------------
   write(*,*) "Beginning loop over observations: ",trim(self%qcname)
   apply_count = 0
+  failed_1dvar_count = 0
+  failed_retrievedBTcheck_count = 0
   obs_loop: do jobs = self % StartOb, self % FinishOb
     if (apply(jobs)) then
 
@@ -265,12 +261,25 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
       ob % channels_all = self % channels
       ob % surface_type = obs % surface_type(jobs)
-      ob % retrievecloud = cloud_retrieval
-      ob % pcemis => obs % ir_pcemis
       ob % calc_emiss = obs % calc_emiss(jobs)
       ob % emiss(:) = obs % emiss(:, jobs)
+      if(self % cloud_retrieval) ob % retrievecloud = .true.
+      if(self % cloud_retrieval) ob % cloudtopp = obs % cloudtopp(jobs)
+      if(self % cloud_retrieval) ob % cloudfrac = obs % cloudfrac(jobs)
       if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
+      if(associated(obs % pcemiss_object)) then
+        ob % pcemiss_object => obs % pcemiss_object
+        allocate(ob % pcemiss(size(obs % pcemiss, 1)))
+        ob % pcemiss(:) = obs % pcemiss(:, jobs)
+      end if
+
+      ! Check if ctp very close to model pressure level.  If so
+      ! make them exactly equal to match OPS behaviour for RTTOV
+      ! jacobian calculation.
+      if(self % cloud_retrieval) then
+        call ufo_rttovonedvarcheck_check_ctp(ob % cloudtopp, local_geovals, self %  nlevels)
+      end if
 
       ! Store background T in ob data space
       call ufo_geovals_get_var(local_geovals, var_ts, geoval)
@@ -300,6 +309,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         write(*,'(15I5)') ob % channels_used
         write(*,*) "All Channels = "
         write(*,'(15I5)') ob % channels_all
+        call local_profindex % info()
       end if
 
       !---------------------------------------------------
@@ -324,10 +334,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       obs % final_cost(jobs) = ob % final_cost
       obs % LWP(jobs) = ob % LWP
       if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
+      if(self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
+      if(self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
       obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
+        failed_1dvar_count = failed_1dvar_count + 1
         do jvar = 1, self%nchans
           if( obs % QCflags(jvar,jobs) == 0 ) then
             obs % QCflags(jvar,jobs) = self % onedvarflag
@@ -335,13 +348,37 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         end do
       end if
 
-      ! Check the BTs are within a factor of the error
-      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == 0)) then
+      ! Reject channels that have failed the ctp check
+      if (allocated(ob % rejected_channels_ctp)) then
+        jnew = 1
+        rejected: do irej = 1, size(ob % rejected_channels_ctp)
+          jvar = jnew
+          do while ( jvar <= size(obs % channels) )
+            if (ob % rejected_channels_ctp(irej) == obs % channels(jvar)) then
+              obs % QCflags(jvar, jobs) = self % onedvarflag
+              cycle rejected
+            end if
+            jvar = jvar + 1
+          end do
+        end do rejected
+      end if
+
+      ! Check the BTs are within a factor of the error.  This only applies to channels that are still
+      ! active.
+      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == self % passflag)) then
         allocate(max_error(size(ob % channels_used)))
         call r_submatrix % multiply_factor_by_stdev(self % RetrievedErrorFactor, max_error)
-        if (any(abs(ob % final_bt_diff(:)) > max_error(:))) then
+        reject_profile = .false.
+        chanloop: do jvar = 1, size(ob % channels_used)
+          if (allocated(ob % rejected_channels_ctp)) then
+            if(any(ob % rejected_channels_ctp == ob % channels_used(jvar))) cycle chanloop
+          end if
+          if (abs(ob % final_bt_diff(jvar)) > max_error(jvar)) reject_profile = .true.
+        end do chanloop
+        if (reject_profile) then
+          failed_retrievedBTcheck_count = failed_retrievedBTcheck_count + 1
           do jvar = 1, self % nchans
-            if( obs % QCflags(jvar,jobs) == 0 ) then
+            if( obs % QCflags(jvar,jobs) == self % passflag ) then
               obs % QCflags(jvar,jobs) = self % onedvarflag
             end if
           end do
@@ -368,6 +405,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   write(message, *) "Total number of observations = ", obs % iloc
   call fckit_log % info(message)
   write(message, *) "Number tested by 1dvar = ", apply_count
+  call fckit_log % info(message)
+  write(message, *) "Number that failed to converge = ",failed_1dvar_count
+  call fckit_log % info(message)
+  write(message, *) "Number that failed the retrieved BT check = ",failed_retrievedBTcheck_count
   call fckit_log % info(message)
 
   ! Put qcflags and output variables into observation space

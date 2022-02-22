@@ -12,6 +12,7 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_rttovonedvarcheck_constants_mod
+use ufo_utils_mod, only: cmp_strings
 
 implicit none
 private
@@ -55,7 +56,8 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: Store1DVarCLW !< Output the CLW profile if 1dvar converrges for later use
   logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
-  logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
+  logical                          :: cloud_retrieval !< flag gets turned on if cloud_top_pressure in list of retrieval variables
+  logical                          :: pcemiss !< flag gets turned on if emissivity eigen vector file is present
   logical                          :: mwEmissRetrieval !< if true do emissivity retrival using the mwemiss method
   integer                          :: Max1DVarIterations !< maximum number of iterations
   integer                          :: JConvergenceOption !< integer to select convergence option
@@ -68,6 +70,7 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: EmissSeaDefault !< default emissivity value to use over sea
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
+  real(kind_real)                  :: IRCloud_Threshold !< Maximum fraction of jacobian allowed to be below ctp
   character(len=max_string)        :: EmissGroupInObsSpace !< emissivity location in the ObsSpace
   real(kind_real)                  :: SkinTempErrorLand !< value to scale the skin temperature error over land
   character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
@@ -98,7 +101,7 @@ character(len=max_string)     :: tmp
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
 type(fckit_configuration)     :: surface_emissivity_conf
-integer                       :: size_geovals, size_extravars
+integer                       :: size_geovals, size_extravars, iret
 
 ! Creat surface emissivity conf from main configuration
 call f_conf % get_or_die("surface emissivity", surface_emissivity_conf)
@@ -122,6 +125,15 @@ call f_conf % get_or_die("retrieval variables from geovals", str_array)
 self % retrieval_variables(1:size_geovals) = str_array
 call f_conf % get_or_die("retrieval variables not from geovals", str_array)
 self % retrieval_variables(size_geovals+1 : size_geovals+size_extravars) = str_array
+
+! Check if cloud retrievals needed
+self % cloud_retrieval = .false.
+do iret = 1, size(self % retrieval_variables)
+  if (cmp_strings(self % retrieval_variables(iret), "cloud_top_pressure")) then
+    write(*,*) "Simple cloud is part of the state vector"
+    self % cloud_retrieval = .true.
+  end if
+end do
 
 ! Satellite channels
 self % nchans = size(channels)
@@ -184,18 +196,23 @@ call f_conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
 ! Cost threshold for convergence check when cost function value is used for convergence
 call f_conf % get_or_die("CostConvergenceFactor", self % Cost_ConvergenceFactor)
 
+! The fraction of the Jacobian that is permitted to be below the cloud_top_pressure for the
+! IR cloudy channel selection.  The Jacobian is integrated from the toa -> surface and a
+! maximum of 1 % of the integrated Jacobian is allowed to be below the cloud top.
+call f_conf % get_or_die("IRCloud_Threshold", self % IRCloud_Threshold)
+
 ! Maximum number of iterations for internal Marquardt-Levenberg loop
 call f_conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
+
+! Value to scale the skin temperature error over land. -1.0 is default so no scaling
+! is done because the value has to be positive.
+call f_conf % get_or_die("SkinTempErrorLand", self % SkinTempErrorLand)
 
 ! Starting observation number for loop - used for testing
 call f_conf % get_or_die("StartOb", self % StartOb)
 
 ! Finishing observation number for loop - used for testing
 call f_conf % get_or_die("FinishOb", self % FinishOb)
-
-! Value to scale the skin temperature error over land. -1.0 is default so no scaling
-! is done because the value has to be positive.
-call f_conf % get_or_die("SkinTempErrorLand", self % SkinTempErrorLand)
 
 !!! --------------------------------------------
 !!! Variables from the Emissivity configuration
@@ -293,15 +310,15 @@ implicit none
 
 type(ufo_rttovonedvarcheck), intent(in) :: self
 
-integer :: ii
+integer :: ivar
 
 write(*,*) "qcname = ", trim(self % qcname)
 write(*,*) "b_matrix_path = ", trim(self % b_matrix_path)
 write(*,*) "r_matrix_path = ", trim(self % r_matrix_path)
 write(*,*) "forward_mod_name = ", trim(self % forward_mod_name)
 write(*,*) "retrieval_variables = "
-do ii = 1, self % nmvars
-  write(*,*) trim(self % retrieval_variables(ii))," "
+do ivar = 1, self % nmvars
+  write(*,*) trim(self % retrieval_variables(ivar))," "
 end do
 write(*,*) "nlevels = ",self %  nlevels
 write(*,*) "nmvars = ",self % nmvars
@@ -316,12 +333,14 @@ write(*,*) "UseRHwaterForQC = ", self % UseRHwaterForQC
 write(*,*) "UseColdSurfaceCheck = ", self % UseColdSurfaceCheck
 write(*,*) "UseQtsplitRain = ",self % UseQtsplitRain
 write(*,*) "FullDiagnostics = ",self % FullDiagnostics
+write(*,*) "cloud_retrieval = ",self % cloud_retrieval
 write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
 write(*,*) "JConvergenceOption = ",self % JConvergenceOption
 write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
 write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
 write(*,*) "CostConvergenceFactor = ",self % Cost_ConvergenceFactor
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+write(*,*) "IRCloud_Threshold = ",self % IRCloud_Threshold
 write(*,*) "Store1DVarLWP = ",self % Store1DVarLWP
 write(*,*) "Store1DVarCLW = ",self % Store1DVarCLW
 write(*,*) "Emissivity variables:"

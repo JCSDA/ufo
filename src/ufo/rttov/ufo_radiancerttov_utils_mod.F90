@@ -148,7 +148,7 @@ module ufo_radiancerttov_utils_mod
     procedure :: alloc_profs     => ufo_rttov_alloc_profiles
     procedure :: alloc_profs_k   => ufo_rttov_alloc_profiles_k
     procedure :: zero_k          => ufo_rttov_zero_k
-    procedure :: init_emissivity => ufo_rttov_init_emissivity 
+    procedure :: init_emissivity => ufo_rttov_init_emissivity
     procedure :: setup           => ufo_rttov_setup_rtprof
     procedure :: check           => ufo_rttov_check_rtprof
     procedure :: print           => ufo_rttov_print_rtprof
@@ -190,7 +190,7 @@ module ufo_radiancerttov_utils_mod
     logical                               :: SatRad_compatibility
     logical                               :: UseRHwaterForQC  ! only used with SatRad compatibility
     logical                               :: UseColdSurfaceCheck  ! to replicate pre-PS45 results
-    logical                               :: SplitQtotal
+    logical                               :: SplitQtotal = .false.
     logical                               :: UseQtsplitRain
     logical                               :: RTTOV_profile_checkinput
     logical                               :: Do_MW_Scatt
@@ -1039,7 +1039,11 @@ contains
     varname = var_sfc_tskin 
     call ufo_geovals_get_var(geovals, varname, geoval)
     profiles(1:nprofiles)%skin%t = geoval%vals(1,1:nprofiles)
-     
+
+    ! MCC: Defaults for cloud
+    profiles(1:nprofiles) % ctp = 850.0_kind_real
+    profiles(1:nprofiles) % cfraction = zero
+
 !RTTOV-Scatt profile setup
 
     ! The top half-level is the top of the atmosphere so it should be a nominal
@@ -1093,7 +1097,7 @@ contains
         end if
       enddo
     end if
-    
+
 ! ---------------------------
 ! SatRad profile manipulation
 ! ---------------------------
@@ -1743,11 +1747,13 @@ contains
     elseif ( conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_ir .or. &
       conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_hi) then
 
-      do ichan = 1, size (self % chanprof(:)), nchan_inst ! all channels initialised equally
-        prof = self % chanprof(ichan)%prof
+      do ichan = 1, nchan_sim, nchan_inst ! all channels initialised equally
+        prof = prof_start + self % chanprof(ichan)%prof - 1
+
         if (self % profiles(prof) % skin % surftype == surftype_sea) then
           ! Calculate by SSIREM or IREMIS
           self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.0_kind_real
+          self % emissivity(ichan:ichan + nchan_inst - 1) % emis_out = 0.0_kind_real
           self % calcemis(ichan:ichan + nchan_inst - 1) = .true.
         else
           if (self % profiles(prof) % skin % surftype == surftype_land) then
@@ -1967,7 +1973,8 @@ contains
     integer,              intent(in)    :: prof_start
     type(ufo_geovals),    intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
-    integer                             :: jvar, chan, prof, ichan, rttov_prof
+    integer                             :: jvar, prof, ichan, rttov_prof
+    integer                             :: coefindex, chan
     integer                             :: nchanprof, nlevels, nprofiles
     real(kind_real), allocatable        :: od_level(:), wfunc(:)
     logical, save                       :: firsttime = .true.
@@ -2007,22 +2014,27 @@ contains
 
           ! get channel/profile
           do ichan = 1, nchanprof
-            chan = chanprof(ichan)%chan
+            ! The chanprof contains the channel indexes in the coefficient file.
+            ! If cut down coefficients are used (e.g. the coeffs contain channels 6,54,75,...) then
+            ! chanprof(ichan)%chan won't contain the instrument channel numbers but the index (1,2,3,...).
+            ! The correct instrument channel numbers are stored in ff_ori_chn.
+            coefindex = chanprof(ichan)%chan
+            chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
-            
+
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
               if(cmp_strings(ystr_diags(jvar), var_qci)) then
-                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % ciw(:,iprof)
+                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % ciw(:,rttov_prof)
               else if(cmp_strings(ystr_diags(jvar), var_opt_depth)) then
-                od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
+                od_level(:) = log(RTProf % transmission%tau_levels(:,ichan)) !level->TOA transmittances -> od
                 hofxdiags%geovals(jvar)%vals(:,prof) = od_level(1:nlevels-1) - od_level(2:nlevels) ! defined +ve 
               else if (cmp_strings(ystr_diags(jvar), var_lvl_transmit)) then
-                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % transmission % tau_levels(1:nlevels-1,chan) - &
-                                                       RTProf % transmission%tau_levels(2:,chan)
+                hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % transmission % tau_levels(1:nlevels-1,ichan) - &
+                                                       RTProf % transmission%tau_levels(2:,ichan)
               else if (cmp_strings(ystr_diags(jvar), var_lvl_weightfunc)) then
-                od_level(:) = log(RTProf % transmission%tau_levels(:,chan)) !level->TOA transmittances -> od
+                od_level(:) = log(RTProf % transmission%tau_levels(:,ichan)) !level->TOA transmittances -> od
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(rttov_prof)%p, od_level(:), &
                   hofxdiags%geovals(jvar)%vals(:,prof))
 
@@ -2044,7 +2056,8 @@ contains
           end if
 
           do ichan = 1, nchanprof
-            chan = chanprof(ichan)%chan
+            coefindex = chanprof(ichan)%chan
+            chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
 
@@ -2101,7 +2114,8 @@ contains
           end if
 
           do ichan = 1, nchanprof
-            chan = chanprof(ichan)%chan
+            coefindex = chanprof(ichan)%chan
+            chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
 
@@ -2145,7 +2159,8 @@ contains
             end if
           enddo
 
-        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_ps, var_sfc_u10, var_sfc_v10)
+        case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_ps, var_sfc_u10, var_sfc_v10, &
+              "cloud_top_pressure", "cloud_fraction")
           hofxdiags%geovals(jvar)%nval = 1
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
@@ -2153,7 +2168,8 @@ contains
           end if
 
           do ichan = 1, nchanprof
-            chan = chanprof(ichan)%chan
+            coefindex = chanprof(ichan)%chan
+            chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
 
@@ -2176,6 +2192,12 @@ contains
               else if (xstr_diags(jvar) == var_sfc_v10) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % v
+              else if (xstr_diags(jvar) == "cloud_top_pressure") then
+                hofxdiags%geovals(jvar)%vals(1,prof) = &
+                  RTProf % profiles_k(ichan) % ctp
+              else if (xstr_diags(jvar) == "cloud_fraction") then
+                hofxdiags%geovals(jvar)%vals(1,prof) = &
+                  RTProf % profiles_k(ichan) % cfraction
               else if (xstr_diags(jvar) == var_sfc_emiss) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % emissivity_k(ichan) % emis_in
