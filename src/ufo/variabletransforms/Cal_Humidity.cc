@@ -85,10 +85,6 @@ Method: -
 */
 void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
   const size_t nlocs_ = obsdb_.nlocs();
-  // return if no data
-  if (obsdb_.nlocs() == 0) {
-    return;
-  }
 
   float Q_sub_s_ice, Q_sub_s_w;
   float pressure, temperature, dewPoint;

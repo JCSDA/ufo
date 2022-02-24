@@ -343,6 +343,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/variabletransforms_windcomponents.yaml
   testinput/unit_tests/variabletransforms_windspeedanddirection.yaml
   testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml
+  testinput/unit_tests/variabletransforms_profilehorizontaldrift_zero_obs.yaml
   testinput/unit_tests/variabletransforms_pstar.yaml
   testinput/unit_tests/variabletransforms_QFEtoQNH.yaml
 )
@@ -2897,6 +2898,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransforms_humidityspecific2
 ecbuild_add_test( TARGET  test_ufo_variabletransforms_profilehorizontaldrift
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/variabletransforms_profilehorizontaldrift.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransforms_profilehorizontaldrift_zero_obs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/variabletransforms_profilehorizontaldrift_zero_obs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

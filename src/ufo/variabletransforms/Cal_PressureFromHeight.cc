@@ -73,11 +73,6 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
   const size_t nlocs_ = obsdb_.nlocs();
   ioda::ObsSpace::RecIdxIter irec;
 
-  // return if no data
-  if (obsdb_.nlocs() == 0) {
-    return;
-  }
-
   // Here we can only use data that have not been QCed
   // so making sure UseValidDataOnly_ is set to True
   SetUseValidDataOnly(true);

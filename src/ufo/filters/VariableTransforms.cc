@@ -60,11 +60,18 @@ void VariableTransforms::applyFilter(
     const std::vector<bool>& apply, const Variables&,
     std::vector<std::vector<bool>>&) const {
   print(oops::Log::trace());
-  std::cout << " --> In variabletransforms::applyFilter" << std::endl;
-  std::cout << "     --> set Transform object" << std::endl;
+  oops::Log::debug() << " --> In variabletransforms::applyFilter" << std::endl;
+
+  // Do not perform transformation if there are no observations present.
+  if (data_.nlocs() == 0) {
+    oops::Log::debug() << " --> No observations present. "
+                       << "Transformation will not be performed." << std::endl;
+    return;
+  }
 
   // Create the transform again.  This is because data_ is updated by the filter
   // but not by the copy held by the variable transform.
+  oops::Log::debug() << "     --> set Transform object" << std::endl;
   std::unique_ptr<TransformBase> transform =
     TransformFactory::create(parameters_->Transform.value(), *parameters_, data_, flags_, obserr_);
 

@@ -44,10 +44,6 @@ Method: -
 void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << " Retrieve Potential Temperature from Temperature" << std::endl;
 
-  // Return if no data
-  if (obsdb_.nlocs() == 0) {
-    return;
-  }
   SetUseValidDataOnly(true);
 
   const size_t nlocs = obsdb_.nlocs();

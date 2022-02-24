@@ -1,0 +1,23 @@
+window begin: 3019-06-14T21:00:00Z
+window end: 3019-06-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [geopotential_height, wind_speed, wind_from_direction]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: ProfileHorizontalDrift
+      height coordinate: height
+      # Exclude BUFR sondes, whose position has already been measured.
+      where:
+      - variable:
+          name: ObsType@MetaData
+        is_not_in: 50500
+  passedBenchmark: 0
