@@ -304,26 +304,19 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
 
   missing = missing_value(missing)
   allocate(x_d(1:prs_d%nval + q_d%nval))
-  allocate(pressure_d(1:prs_d%nval))
-  allocate(humidity_d(1:q_d%nval))
 
 ! Loop through the obs, calculating the increment to the model state
   obs_loop: do iobs = 1, self % nlocs
 
     if (hofx(iobs) /= missing) then
         x_d = self % K(iobs,:) * hofx(iobs)
-        pressure_d(1:prs_d%nval) = x_d(1:prs_d%nval)
-        humidity_d(1:q_d%nval) = x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+	prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+	q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
     end if
-
-     prs_d % vals(:,iobs) = pressure_d(1:self % nlevp)
-     q_d % vals(:,iobs) = humidity_d(1:self % nlevq)
 
   end do obs_loop
 
   deallocate(x_d)
-  deallocate(pressure_d)
-  deallocate(humidity_d)
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: complete"
   call fckit_log%info(err_msg)
