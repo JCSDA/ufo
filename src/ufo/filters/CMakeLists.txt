@@ -240,6 +240,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/OceanPressureToDepth.cc
+      obsfunctions/OceanPressureToDepth.h
       obsfunctions/OrbitAngle.cc
       obsfunctions/OrbitAngle.h
       obsfunctions/SatwindIndivErrors.cc

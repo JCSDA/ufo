@@ -323,6 +323,7 @@ list( APPEND ufo_test_input
   testinput/unit_tests/function_linear_combination_multichannel.yaml
   testinput/unit_tests/function_exponential.yaml
   testinput/unit_tests/function_obserrorfactorquotient.yaml
+  testinput/unit_tests/function_oceanpressuretodepth.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
   testinput/unit_tests/function_solarzenith.yaml
@@ -3211,6 +3212,13 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrorfactorconv
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_oceanpressuretodepth
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/unit_tests/function_oceanpressuretodepth.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_function_linear_combination
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
