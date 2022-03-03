@@ -1278,7 +1278,7 @@ Assign observation error from CSV file; data types float, int and string; missin
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 
-# Tests using the CSV backend to extract errors instead of variancse
+# Tests using the CSV backend to extract errors instead of variances
 
 Assign observation error from CSV file containing errors; data types float, int and string; payload of type float:
   window begin: 2000-01-01T00:00:00Z

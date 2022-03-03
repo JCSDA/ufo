@@ -59,9 +59,11 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
 };
 
 
-/// \brief Derive observation error from a file representing the variance or the covariance
-/// matrix.
-/// \details See DataExtractor for details on the format of this file.
+/// \brief Derive the observation uncertainties from a file.
+/// \details The file can contain either the standard deviation or variance of each uncertainty,
+/// or the full observation-error covariance matrix.
+/// Variances are converted to standard deviations in the ObsFunction.
+/// See DataExtractor for details on the format of the file.
 ///
 /// ### example configurations: ###
 ///

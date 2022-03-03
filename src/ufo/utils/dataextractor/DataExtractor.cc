@@ -111,8 +111,6 @@ void exactMatch(const std::string &varName,
         << "' of the variable '" << varName << "'";
     throw eckit::Exception(msg.str(), Here());
   }
-  oops::Log::debug() << "Exact match; name: " << varName << " range: " <<
-    range.begin() << "," << range.end() << std::endl;
 }
 
 
@@ -185,8 +183,6 @@ void nearestMatch(const std::string &varName,
                                  varValues[nnIndex]);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Nearest match; name: " << varName << " range: " <<
-    range.begin() << "," << range.end() << std::endl;
 }
 
 
@@ -234,8 +230,6 @@ void leastUpperBoundMatch(const std::string &varName,
   const auto bounds = std::equal_range(rangeBegin, rangeEnd, *leastUpperBoundIt);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Least upper bound match; name: " << varName << " range: "
-                     << range.begin() << "," << range.end() << std::endl;
 }
 
 void leastUpperBoundMatch(const std::string &varName,
@@ -286,8 +280,6 @@ void greatestLowerBoundMatch(const std::string &varName,
                                        *greatestLowerBoundIt);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Greatest lower bound match; name: " << varName << " range: "
-                     << range.begin() << "," << range.end() << std::endl;
 }
 
 void greatestLowerBoundMatch(const std::string &varName,
@@ -479,8 +471,6 @@ void DataExtractor<ExtractedValue>::sort() {
     ind = 0;
     for (const auto &group : splitter_[dim].groups()) {
       for (const auto &index : group) {
-        oops::Log::debug() << "Sort index dim" << dim << "; index-from: " << ind <<
-          " index-to: " << index << std::endl;
         for (size_t j = 0; j < interpolatedArray_.shape()[otherDims[0]]; j++) {
           for (size_t k = 0; k < interpolatedArray_.shape()[otherDims[1]]; k++) {
             if (dim == 0) {
