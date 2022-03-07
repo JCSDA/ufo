@@ -82,9 +82,6 @@ phases:
       # jedi-cmake
       - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/jedi-cmake $CODEBUILD_GIT_BRANCH jedicmake /jcsda/ufo-bundle develop
 
-      # ioda-engines
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
-
       # rttov
       - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
 
