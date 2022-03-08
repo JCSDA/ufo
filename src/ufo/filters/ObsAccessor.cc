@@ -74,9 +74,8 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
     // Each record is held by a single process, so there's no need to exchange data between
     // processes and we can use an InefficientDistribution rather than the distribution taken from
     // obsdb_. Which in this case is *efficient*!
-    eckit::LocalConfiguration emptyConfig;
     obsDistribution_ = std::make_shared<ioda::InefficientDistribution>(obsdb_->comm(),
-                                                        emptyConfig);
+                                                        ioda::EmptyDistributionParameters());
     oops::Log::trace() << "ObservationAccessor: no MPI communication necessary" << std::endl;
   } else {
     obsDistribution_ = obsdb.distribution();

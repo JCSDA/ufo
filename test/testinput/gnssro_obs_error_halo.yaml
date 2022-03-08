@@ -9,7 +9,8 @@ observations:
       vertlayer: full
   obs space:
     name: GnssroBnd
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
@@ -28,7 +29,8 @@ observations:
     obs options:
   obs space:
     name: GnssroBnd
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
@@ -49,7 +51,8 @@ observations:
       vertlayer: full
   obs space:
     name: GnssroBnd
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
@@ -68,7 +71,8 @@ observations:
    obs options:
   obs space:
     name: GnssroRef
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
     obsdataout:

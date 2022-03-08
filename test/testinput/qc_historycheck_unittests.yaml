@@ -7,7 +7,8 @@ All observations' number and time stuck tolerated:
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace1
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -35,7 +36,8 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace2
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -63,7 +65,8 @@ Time stuck tolerated, number stuck untolerated, 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace3
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -91,7 +94,8 @@ Time stuck tolerated, number stuck tolerated, 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace4
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -118,7 +122,8 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace5
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -146,7 +151,8 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace6
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -195,7 +201,8 @@ Stuck check historical data:
     reset larger obs space variables: true
     obs space:
       name: Ship
-      distribution: InefficientDistribution
+      distribution:
+        name: InefficientDistribution
       simulated variables: [air_temperature]
       generate:
         list:
@@ -213,7 +220,8 @@ All temperatures different:
   window end: 2030-01-01T00:00:00Z
   obs space: &obsspace7
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -245,7 +253,8 @@ Ship Track Segment from Comparison Test early break false:
   window end: 2030-01-01T00:00:00Z
   obs space: &trackCheckShipObsSpace
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -277,7 +286,8 @@ Ship Track Segment from Comparison Test early break true:
   window end: 2030-01-01T00:00:00Z
   obs space: &trackCheckShipObsSpace2
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -339,7 +349,8 @@ Only ship track check, compatible with stuck check (no historical data):
   window end: 2030-01-01T00:00:00Z
   obs space: &genericObsSpace
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:
@@ -455,7 +466,8 @@ Identical observations stuck check:
   window end: 2030-01-01T00:00:00Z
   obs space: &identicalObservations
     name: Ship
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     simulated variables: [air_temperature]
     generate:
       list:

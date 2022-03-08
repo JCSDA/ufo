@@ -843,7 +843,8 @@ observations:
 # Observations not grouped into records; inefficient distribution
 - obs space:
     name: Aircraft
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
@@ -868,7 +869,8 @@ observations:
 # Observations not grouped into records; halo distribution
 - obs space:
     name: Aircraft
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]

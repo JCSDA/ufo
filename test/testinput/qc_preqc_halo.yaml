@@ -7,7 +7,8 @@ observations:
     vertical coordinate: air_pressure
   obs space:
     name: Radiosonde
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
@@ -19,7 +20,8 @@ observations:
   passedBenchmark: 155
 - obs space:
     name: amsua_n19
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]

@@ -4,7 +4,8 @@
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
@@ -19,7 +20,8 @@
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
@@ -36,7 +38,8 @@
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    distribution: InefficientDistribution
+    distribution:
+      name: InefficientDistribution
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:

@@ -16,7 +16,8 @@ observations:
       CoefficientPath: Data/
   obs space:
     name: amsr2_gcom-w1
-    distribution: Halo
+    distribution:
+      name: Halo
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020111500.nc4
     obsdataout:
