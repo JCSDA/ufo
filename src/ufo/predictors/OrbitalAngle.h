@@ -79,6 +79,7 @@ class OrbitalAngle : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
+               const ObsBias &,
                ioda::ObsVector &) const override;
 
  private:

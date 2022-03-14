@@ -30,6 +30,7 @@ SineOfLatitude::SineOfLatitude(const Parameters_ & parameters, const oops::Varia
 void SineOfLatitude::compute(const ioda::ObsSpace & odb,
                              const GeoVaLs &,
                              const ObsDiagnostics &,
+                             const ObsBias &,
                              ioda::ObsVector & out) const {
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();

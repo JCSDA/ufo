@@ -82,6 +82,7 @@ InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
 void InterpolateDataFromFile::compute(const ioda::ObsSpace & /*odb*/,
                                       const GeoVaLs & geovals,
                                       const ObsDiagnostics & obsdiags,
+                                      const ObsBias &,
                                       ioda::ObsVector & out) const {
   ObsFilterData obsFilterData(out.space());
   obsFilterData.associate(geovals);

@@ -38,7 +38,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
   predData_.resize(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
-    variablePredictors[p]->compute(odb_, geovals, ydiags, predData_[p]);
+    variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory done." << std::endl;

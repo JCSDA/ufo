@@ -40,6 +40,7 @@ Thickness::Thickness(const Parameters_ & parameters, const oops::Variables & var
 void Thickness::compute(const ioda::ObsSpace & odb,
                        const GeoVaLs & geovals,
                        const ObsDiagnostics &,
+                       const ObsBias &,
                        ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
   const std::size_t nvars = out.nvars();

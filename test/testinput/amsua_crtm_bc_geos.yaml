@@ -1,0 +1,63 @@
+window begin: 2020-12-14T21:00:00Z
+window end: 2020-12-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: &Sensor_ID amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500.nc4
+    obsdataout:
+      obsfile: Data/geos_amsua_n19_obs_2020121500_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-13,15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_geoval_2020121500.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/geos_satbias_amsua_n19.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cloud_liquid_water
+        satellite: AMSUA
+        clwdif_ch238: 1
+        clwdif_ch314: 2
+      - name: lapse_rate
+        order: 2
+        tlapse: &amsua19tlap Data/ufo/testinput_tier_1/geos_amsua_n19_tlapmean.txt
+      - name: lapse_rate
+        tlapse: *amsua19tlap
+      - name: emissivity
+      - name: scan_angle
+        order: 4
+      - name: scan_angle
+        order: 3
+      - name: scan_angle
+        order: 2
+      - name: scan_angle
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/geos_satbias_amsua_n19.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+  vector ref: GsiHofXBc
+  tolerance: 1.e-5
+  linear obs operator test:
+#   iterations TL: 2
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
+

@@ -38,7 +38,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   const std::size_t npreds = predictors.size();
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
-    predictors[p]->compute(odb_, geovals, ydiags, predData[p]);
+    predictors[p]->compute(odb_, geovals, ydiags, biascoeffs, predData[p]);
     predData[p].save(predictors[p]->name() + "Predictor");
   }
 

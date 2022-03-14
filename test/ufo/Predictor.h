@@ -8,6 +8,8 @@
 #ifndef TEST_UFO_PREDICTOR_H_
 #define TEST_UFO_PREDICTOR_H_
 
+#include <Eigen/Core>
+
 #include <memory>
 #include <set>
 #include <string>
@@ -93,11 +95,12 @@ void testPredictor() {
     for (std::size_t p = 0; p < npreds; ++p) {
       if (conf.has("expectExceptionWithMessage")) {
         const std::string msg = conf.getString("expectExceptionWithMessage");
-        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, predData[p]), msg.c_str());
+        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, ybias,
+                                                 predData[p]), msg.c_str());
         expect_error_message = true;
         break;
       }
-      predictors[p]->compute(ospace, *gval, ydiags, predData[p]);
+      predictors[p]->compute(ospace, *gval, ydiags, ybias, predData[p]);
       predData[p].save(predictors[p]->name() + "Predictor");
     }
 

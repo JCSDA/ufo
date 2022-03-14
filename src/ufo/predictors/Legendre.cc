@@ -33,6 +33,7 @@ Legendre::Legendre(const Parameters_ & parameters, const oops::Variables & vars)
 void Legendre::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
+                        const ObsBias &,
                         ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
 

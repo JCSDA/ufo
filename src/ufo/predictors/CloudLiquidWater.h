@@ -22,6 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 
@@ -43,6 +44,9 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
     oops::OptionalParameter<int> ch37v{"ch37v", this};
     oops::OptionalParameter<int> ch91h{"ch91h", this};
     oops::OptionalParameter<int> ch91v{"ch91v", this};
+    /// List below is solely for AMSU-A and ATMS data
+    oops::OptionalParameter<int> ch238d{"clwdif_ch238", this};
+    oops::OptionalParameter<int> ch314d{"clwdif_ch314", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -59,7 +63,16 @@ class CloudLiquidWater : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
+               const ObsBias &,
                ioda::ObsVector &) const override;
+
+  static void clwDerivative_amsua(const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           std::vector<float> &);
 
  private:
   CloudLiquidWaterParameters options_;
