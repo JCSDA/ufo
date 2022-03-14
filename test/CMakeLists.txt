@@ -34,6 +34,7 @@ list( APPEND ufo_test_input
   testinput/aod_metoffice.yaml
   testinput/atms_crtm.yaml
   testinput/atms_qc_filters.yaml
+  testinput/atms_rttov_bad_data.yaml
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/atms_rttov_qc.yaml
@@ -963,6 +964,13 @@ if( ${rttov_FOUND} )
                     ARGS    "testinput/function_cloudcost.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsFilters.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_opr_rttov_bad_data
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                    ARGS    "testinput/atms_rttov_bad_data.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsOperator.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_opr_rttov_atms

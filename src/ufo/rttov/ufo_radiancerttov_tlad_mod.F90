@@ -275,6 +275,13 @@ contains
 
       ! index for simulated channel
       ichan_sim = 0_jpim
+      nchan_sim = 0_jpim
+
+      !allocate list used to store 'good' profiles
+      !prof_list is defined in utils_mod
+      !initialise to -1, so no bad profile is given an emissivity
+      allocate(prof_list(nprof_sim,2))
+      prof_list = -1 
 
       ! Build the list of profile/channel indices in chanprof
       do iprof_rttov = 1, nprof_sim
@@ -299,6 +306,8 @@ contains
         end if
 
         if (errorstatus == errorstatus_success) then 
+          prof_list(iprof_rttov,1) = iprof_rttov ! chunk index
+          prof_list(iprof_rttov,2) = iprof       ! all-obs index
           do ichan = 1, nchan_inst
             ichan_sim = ichan_sim + 1_jpim
             chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
@@ -321,7 +330,7 @@ contains
           end if
         end do
       else
-        call self % RTProf_K % init_emissivity(self % conf, prof_start)
+        call self % RTProf_K % init_default_emissivity(self % conf, prof_start)
       end if
 
       ! Write out emissivity if checking profile
@@ -334,6 +343,8 @@ contains
           end if
         end do
       end if
+
+      deallocate(prof_list)
 
       ! --------------------------------------------------------------------------
       ! Call RTTOV K model

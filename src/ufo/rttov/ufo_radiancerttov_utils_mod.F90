@@ -108,7 +108,10 @@ module ufo_radiancerttov_utils_mod
   integer, public :: nlocs_total ! nprofiles (including skipped)
   logical, public :: debug
 
-!Common counters
+  ! store list of 'good' profiles
+  integer, allocatable, public :: prof_list(:,:)
+
+  !Common counters
   integer :: iprof
 
   type, public :: mw_scatt_io
@@ -148,7 +151,7 @@ module ufo_radiancerttov_utils_mod
     procedure :: alloc_profs     => ufo_rttov_alloc_profiles
     procedure :: alloc_profs_k   => ufo_rttov_alloc_profiles_k
     procedure :: zero_k          => ufo_rttov_zero_k
-    procedure :: init_emissivity => ufo_rttov_init_emissivity
+    procedure :: init_default_emissivity => ufo_rttov_init_default_emissivity 
     procedure :: setup           => ufo_rttov_setup_rtprof
     procedure :: check           => ufo_rttov_check_rtprof
     procedure :: print           => ufo_rttov_print_rtprof
@@ -1381,10 +1384,22 @@ contains
     include 'rttov_print_profile.interface'
     include 'rttov_user_profile_checkinput.interface'
 
+    errorstatus = errorstatus_success
+
     call rttov_user_profile_checkinput(errorstatus, &
       conf % rttov_opts, &
       conf % rttov_coef_array(i_inst), &
       self % profiles(iprof))
+
+    if (self % profiles(iprof) % azangle < zero .or. & 
+        self % profiles(iprof) % azangle > 360.0_kind_real) then
+      errorstatus = errorstatus_fatal
+    endif
+
+    if (self % profiles(iprof) % longitude < -180.0_kind_real .or. & 
+        self % profiles(iprof) % longitude > 360.0_kind_real) then
+      errorstatus = errorstatus_fatal
+    endif
 
     ! print erroneous profile to stderr
     if(errorstatus /= errorstatus_success .and. debug) then
@@ -1392,7 +1407,7 @@ contains
       self % profiles(iprof) % id = prof_str
       call rttov_print_profile(self % profiles(iprof), lu = stderr)
     end if
-  
+
   end subroutine ufo_rttov_check_rtprof
 
   subroutine ufo_rttov_print_rtprof(self, conf, iprof, i_inst)
@@ -1718,54 +1733,57 @@ contains
 
   end subroutine ufo_rttov_zero_k
 
-  subroutine ufo_rttov_init_emissivity(self, conf, prof_start)
+  subroutine ufo_rttov_init_default_emissivity(self, conf, prof_start)
     class(ufo_rttov_io), intent(inout) :: self
     type(rttov_conf),    intent(in)    :: conf
     integer,             intent(in)    :: prof_start
 
-    integer                            :: prof, ichan
+    integer                            :: prof, all_prof_index
+    integer                            :: start_chan, end_chan
 
-!Emissivity and calcemis are only set for used channels. 
-!So if a profile is skipped then you must not set emis data for the channels that are skipped 
+!Emissivity and calcemis are only set for used channels.
+!emissivity is already initialised to zero (so RTTOV doesn't complain)
+!cycle through the list of good profiles
 
-    if ( conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_mw) then
-      do ichan = 1, nchan_sim, nchan_inst ! all channels initialised equally
-        prof = prof_start + self % chanprof(ichan)%prof - 1
-        self % calcemis(ichan:ichan + nchan_inst - 1) = .false.
+    start_chan = 0
+    end_chan = 0
 
-        if (self % profiles(prof) % skin % surftype == surftype_sea) then
-          self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.0_kind_real
-          self % calcemis(ichan:ichan + nchan_inst - 1) = .true.
-        else
-          if (self % profiles(prof) % skin % surftype == surftype_land) then
-            self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.95_kind_real
-          elseif (self % profiles(prof) % skin % surftype == surftype_seaice) then
-            self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.92_kind_real
+    do iprof=1, size(prof_list, dim=1)
+      if (prof_list(iprof,1) > 0) then
+        prof = prof_list(iprof,1)
+        all_prof_index = prof_list(iprof,2)
+        start_chan = end_chan + 1
+        end_chan = end_chan + nchan_inst
+      else
+        cycle
+      end if
+
+      if (self % profiles(all_prof_index) % skin % surftype == surftype_sea) then
+
+        ! Calculate by RTTOV
+        self % emissivity(start_chan:end_chan) % emis_in = 0.0_kind_real
+        self % calcemis(start_chan:end_chan) = .true.
+
+      else
+
+        if (conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_mw) then
+
+          if (self % profiles(all_prof_index) % skin % surftype == surftype_land) then
+            self % emissivity(start_chan:end_chan) % emis_in = 0.95_kind_real
+          elseif (self % profiles(all_prof_index) % skin % surftype == surftype_seaice) then
+            self % emissivity(start_chan:end_chan) % emis_in = 0.92_kind_real
           end if
+
+        elseif ( conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_ir .or. &
+                 conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_hi) then
+          self % emissivity(start_chan:end_chan) % emis_in = 0.98_kind_real
+
         end if
-      enddo
-    elseif ( conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_ir .or. &
-      conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_hi) then
+        
+      end if
+    enddo
 
-      do ichan = 1, nchan_sim, nchan_inst ! all channels initialised equally
-        prof = prof_start + self % chanprof(ichan)%prof - 1
-
-        if (self % profiles(prof) % skin % surftype == surftype_sea) then
-          ! Calculate by SSIREM or IREMIS
-          self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.0_kind_real
-          self % emissivity(ichan:ichan + nchan_inst - 1) % emis_out = 0.0_kind_real
-          self % calcemis(ichan:ichan + nchan_inst - 1) = .true.
-        else
-          if (self % profiles(prof) % skin % surftype == surftype_land) then
-            self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.95_kind_real
-          elseif (self % profiles(prof) % skin % surftype == surftype_seaice) then
-            self % emissivity(ichan:ichan + nchan_inst - 1) % emis_in = 0.92_kind_real
-          end if
-        end if
-      enddo
-    end if
-
-  end subroutine ufo_rttov_init_emissivity
+  end subroutine ufo_rttov_init_default_emissivity
 
   subroutine set_defaults_rttov(self, default_opts_set)
 
