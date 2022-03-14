@@ -42,9 +42,6 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // Probability density of observation being bad:
   oops::RequiredParameter<float> PdBad{"prob density bad obs", this,
                                        {oops::exclusiveMinConstraint(0.0f)}};
-  // Initial probability of gross error:
-  oops::RequiredParameter<float> PGE{"initial prob gross error", this,
-                                     {oops::exclusiveMinConstraint(0.0f)}};
 
   // constant background error term (optional):
   oops::OptionalParameter<float> BkgErr{"bg error", this};
@@ -65,8 +62,6 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 ///
 ///   * prob density bad obs: uniform probability density that observation is "bad",
 ///           i.e. in gross error;
-///   * initial prob gross error: initial PGE value of the uniform probability
-///           distribution, before adjustment depending on obs-BG closeness;
 ///
 /// May also specify the following optional parameters (defaults in
 ///   ufo/utils/ProbabilityOfGrossErrorParameters.h):

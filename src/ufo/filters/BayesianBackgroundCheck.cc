@@ -109,7 +109,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
   const bool ModelLevels = false;
 
   bool previousVariableWasFirstComponentOfTwo = false;
-  bool thisVariableIsFirstComponentOfTwo = false;
   // Loop through all filter variables. .yaml will say if it's 2-component.
   // If so, it skips the first component and then processes both together when
   //  (previousVariableWasFirstComponentOfTwo=True).
@@ -132,8 +131,8 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         oops::Log::debug() << "Using the real background errors" << std::endl;
         data_.get(backgrErrVariable(filtervars[filterVarIndex]), hofxerr);
       }
-      // PGE, filled with initial value:
-      std::vector<float> PGE1(obsdb_.nlocs(), parameters_.PGE.value());
+      // PGE:
+      std::vector<float> PGE1(obsdb_.nlocs());
       // QC flags:
       std::vector<int> qcflags1(obsdb_.nlocs());
       std::vector<float> firstComponentObVal, secondComponentObVal;
@@ -158,6 +157,8 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
           data_.get(varflags.variable(filterVarIndex-1), qcflags1);
           oops::Log::debug() << "Got qcflags1 from file: " << qcflags1 << std::endl;
         }
+        // PGE:
+        obsdb_.get_db("GrossErrorProbability", varname1, PGE1);
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (apply[jobs] && (*flags_)[iv1][jobs] == QCflags::pass
                           && (*flags_)[iv2][jobs] == QCflags::pass) {
@@ -177,6 +178,8 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
           data_.get(varflags.variable(filterVarIndex), qcflags1);
           oops::Log::debug() << "Got qcflags1 from file: " << qcflags1 << std::endl;
         }
+        // PGE:
+        obsdb_.get_db("GrossErrorProbability", varname1, PGE1);
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (apply[jobs] && (*flags_)[iv1][jobs] == QCflags::pass) {
             applycondition[jobs] = true;
