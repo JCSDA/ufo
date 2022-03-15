@@ -44,11 +44,13 @@ integer, allocatable         :: niter(:)        ! number of iterations
 integer, allocatable         :: channels(:)     ! channel numbers
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
+real(kind_real), allocatable :: IWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile from final iteration
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
+logical                      :: Store1DVarIWP   ! flag to output the IWP if the profile converges
 logical                      :: Store1DVarCLW   ! flag to output the clw if the profile converges
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
@@ -123,6 +125,7 @@ allocate(self % niter(self % iloc))
 allocate(self % channels(config % nchans))
 allocate(self % final_cost(self % iloc))
 allocate(self % LWP(self % iloc))
+allocate(self % IWP(self % iloc))
 if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
 allocate(self % output_profile(prof_index % nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
@@ -148,6 +151,7 @@ self % niter(:) = 0
 self % channels(:) = 0
 self % final_cost(:) = missing
 self % LWP(:) = missing
+self % IWP(:) = missing
 if (allocated(self % CLW)) self % CLW(:,:) = missing
 self % emiss(:,:) = missing
 self % mwemisserr(:,:) = missing
@@ -156,6 +160,7 @@ self % output_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
+self % Store1DVarIWP = config % Store1DVarIWP
 self % Store1DVarCLW = config % Store1DVarCLW
 self % pcemiss_object => null()
 self % output_to_db(:) = .false.
@@ -328,6 +333,7 @@ if (allocated(self % surface_type))   deallocate(self % surface_type)
 if (allocated(self % niter))          deallocate(self % niter)
 if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
+if (allocated(self % IWP))            deallocate(self % IWP)
 if (allocated(self % CLW))            deallocate(self % CLW)
 if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
@@ -533,6 +539,10 @@ call put_1d_indb(self % output_to_db(:), obsdb, "n_iterations", "OneDVar", self 
 
 if (self % Store1DVarLWP) then
   call put_1d_indb(self % output_to_db(:), obsdb, "LWP", "OneDVar", self % LWP(:))
+end if
+
+if (self % Store1DVarIWP) then
+  call put_1d_indb(self % output_to_db(:), obsdb, "IWP", "OneDVar", self % IWP(:))
 end if
 
 !--

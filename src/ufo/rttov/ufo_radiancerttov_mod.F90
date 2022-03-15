@@ -174,7 +174,7 @@ contains
     integer                                 :: nprofiles, nlevels
     integer(kind=jpim)                      :: errorstatus  ! Error status of RTTOV subroutine calls
 
-    integer                                 :: i_inst, iprof_rttov, iprof, ichan, ichan_sim
+    integer                                 :: i_inst, iprof_rttov, iprof, ichan, ichan_sim, jchan
     integer                                 :: nprof_sim, nprof_max_sim, nchan_total
     integer                                 :: prof_start, prof_end
 
@@ -338,10 +338,15 @@ contains
         if (allocated(sfc_emiss)) then
           self % RTprof % calcemis(:) = .false.
           do ichan = 1, ichan_sim
-            self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(chanprof(ichan) % chan, iprof)
-            if (self % RTprof % emissivity(ichan) % emis_in == 0.0) then
-              self % RTprof % calcemis(ichan) = .true.
-            end if
+            do jchan = 1, nchan_inst
+              if (chanprof(ichan) % chan == self % channels(jchan)) then
+                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
+                if (self % RTprof % emissivity(ichan) % emis_in == 0.0) then
+                  self % RTprof % calcemis(ichan) = .true.
+                end if
+                cycle
+              end if
+            end do
           end do
         else
           call self % RTProf % init_default_emissivity(self % conf, prof_start)
@@ -401,7 +406,6 @@ contains
               calcemis    = self % RTProf % calcemis(1:nchan_sim),            &! in    flag for internal emissivity calcs
               emissivity  = self % RTProf % emissivity(1:nchan_sim),          &! inout input/output emissivities per channel
               emissivity_k = self % RTProf % emissivity_k(1:nchan_sim))        ! inout input/output emissivities per channel
-            
           end if
           
           if ( errorstatus /= errorstatus_success ) then

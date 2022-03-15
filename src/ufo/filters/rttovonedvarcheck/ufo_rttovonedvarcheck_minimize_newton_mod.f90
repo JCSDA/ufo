@@ -95,7 +95,7 @@ implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: config !< Main 1D-Var object
 type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob  !< satellite metadata
-type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(inout) :: r_matrix !< observation error covariance
 real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
 real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse of the state error covariance
 real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
@@ -167,6 +167,21 @@ JCost = 1.0e4_kind_real
 
 Iterations: do iter = 1, config % max1DVarIterations
 
+  !-----------------------------------------------------------
+  ! 0.5. Reset obs errors of specified channels in Rmatrix
+  !      if non-converging. Prevent offending channels passed
+  !      to Var if SatInfo%DontAssimSlowConvergedObsVar set.
+  !      This behaviour is disabled when retrieving MW emissivity
+  !-----------------------------------------------------------
+  if (iter > config % ConvergeCheckChansAfterIteration .and. &
+      allocated(config % ConvergeCheckChans) .and. &
+      profile_index % mwemiss(1) == 0) then
+    if (size(config % ConvergeCheckChans) > 0) then
+      call r_matrix % reset_errors(config % ConvergeCheckChans, 100000.0_kind_real)
+      ob % QC_SlowConvChans = .true.
+    end if
+  endif
+
   !-------------------------
   ! 1. Generate new profile
   !-------------------------
@@ -229,7 +244,7 @@ Iterations: do iter = 1, config % max1DVarIterations
     write(*,'(10F10.3)') Y(:)
     call ufo_rttovonedvarcheck_PrintIterInfo(ob % yobs(:), Y(:), ob % channels_used, &
                                              guessprofile, backprofile, &
-                                             Xdiff, b_inv, H_matrix)
+                                             Xdiff, b_inv, H_matrix, r_matrix % diagonal(:))
   end if
 
   if (config % UseJForConvergence) then
@@ -347,9 +362,10 @@ Iterations: do iter = 1, config % max1DVarIterations
 
     if (iter >= config % IterNumForLWPCheck) then
 
-        call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
+        call ufo_rttovonedvarcheck_CheckCloudyIteration( config,  & ! in
+                                              geovals,            & ! in
                                               profile_index,      & ! in
-                                              config % nlevels,     & ! in
+                                              config % nlevels,   & ! in
                                               OutOfRange )          ! out
 
     end if
@@ -405,12 +421,14 @@ if (converged) then
   ob % output_profile(:) = GuessProfile(:)
 
   ! If lwp output required then recalculate
-  if (config % Store1DVarLWP) then
-    call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
-                                            profile_index,    & ! in
-                                            config % nlevels, & ! in
-                                            OutOfRange,       & ! out
-                                            OutLWP = ob % LWP ) ! out
+  if (config % Store1DVarLWP .or. config % Store1DVarIWP) then
+    call ufo_rttovonedvarcheck_CheckCloudyIteration( config,    & ! in
+                                            geovals,            & ! in
+                                            profile_index,      & ! in
+                                            config % nlevels,   & ! in
+                                            OutOfRange,         & ! out
+                                            OutLWP = ob % LWP,  & ! out
+                                            OutIWP = ob % IWP)    ! out
   end if
 
   ! store final clw if required

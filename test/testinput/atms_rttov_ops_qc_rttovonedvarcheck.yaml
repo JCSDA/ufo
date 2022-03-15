@@ -84,7 +84,12 @@ observations:
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-  passedBenchmark: 1380      # number of passed obs
+    MaxLWPForCloudyCheck: 0.1
+    MaxIWPForCloudyCheck: 3.0
+    Store1DVarLWP: true
+    Store1DVarIWP: true
+    ConvergeCheckChans: [20]
+  passedBenchmark: 1160      # number of passed obs
 # Test Logging with the Newton minimizer
 - obs operator:
     <<: *ObsOperator
@@ -216,7 +221,12 @@ observations:
     ConvergenceFactor: 0.40
     CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-  passedBenchmark: 1455      # number of passed obs
+    MaxLWPForCloudyCheck: 0.1
+    MaxIWPForCloudyCheck: 3.0
+    Store1DVarLWP: true
+    Store1DVarIWP: true
+    ConvergeCheckChans: [20]
+  passedBenchmark: 1229      # number of passed obs
 # Test Logging with the ML minimizer
 - obs operator:
     <<: *ObsOperator

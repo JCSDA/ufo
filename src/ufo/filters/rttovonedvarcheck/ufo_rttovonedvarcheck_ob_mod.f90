@@ -38,6 +38,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
+  real(kind_real)      :: IWP !< retrieved ice water path. This is output for future filters
   real(kind_real), allocatable :: clw(:) !< cloud liquid water profile. Currently used in Var 
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: final_bt_diff(:) !< final bt difference if converged
@@ -50,6 +51,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   logical              :: retrievecloud  !< flag to turn on retrieve cloud
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
+  logical              :: QC_SlowConvChans !< qc flag for slow converging channels
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
   type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object !< pointer to the IR pc emissivity object
 
@@ -114,6 +116,7 @@ self % output_profile(:) = missing
 self % output_BT(:) = missing
 self % background_BT(:) = missing
 self % calc_emiss(:) = .true.
+self % QC_SlowConvChans = .false.
 
 end subroutine ufo_rttovonedvarcheck_InitOb
 
@@ -150,9 +153,11 @@ self % cloudtopp = 500.0_kind_real
 self % cloudfrac = zero
 self % final_cost = missing
 self % LWP = missing
+self % IWP = missing
 self % retrievecloud = .false.
 self % mwscatt = .false.
 self % mwscatt_totalice = .false.
+self % QC_SlowConvChans = .false.
 
 if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % final_bt_diff))  deallocate(self % final_bt_diff)

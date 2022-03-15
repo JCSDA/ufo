@@ -10,7 +10,7 @@ module ufo_rttovonedvarcheck_utils_mod
 use fckit_log_module, only : fckit_log
 use kinds
 use missing_values_mod
-use ufo_constants_mod, only: min_q, Pa_to_hPa
+use ufo_constants_mod, only: min_q, zero, Pa_to_hPa
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_obs_mod
@@ -178,20 +178,20 @@ if (profindex % qt(1) > 0) then
   allocate(ql(nlevels))
   allocate(qi(nlevels))
 
-  humidity_total(:) = 0.0
+  humidity_total(:) = zero
   ! Water vapour
   call ufo_geovals_get_var(geovals, trim(var_q), geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
   ! Cloud liquid water
   call ufo_geovals_get_var(geovals, trim(var_clw), geoval)
-  where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
+  where (geoval%vals(:, 1) < zero) geoval%vals(:, 1) = zero
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
   ! Add ciw if rttov scatt is being used
   if (self % RTTOV_mwscattSwitch) then
     call ufo_geovals_get_var(geovals, trim(var_cli), geoval)
-    where (geoval%vals(:, 1) < 0.0) geoval%vals(:, 1) = 0.0
+    where (geoval%vals(:, 1) < zero) geoval%vals(:, 1) = zero
     humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   end if
 
@@ -338,25 +338,25 @@ real(kind_real), intent(inout)              :: b_sigma(:)
 integer :: i, j, chanindex
 real(kind_real) :: MwEmissError
 real(kind_real) :: bscale
+real(kind_real) :: missing
 
-!! Switch off emissivity retrieval if not needed or over sea
-!! or if missing values exist in microwave emissivity error atlas
-if (obs % surface_type(obindex) /= RTland .or. &
-    .not. allocated(obs % mwemisserr) ) profindex % mwemiss(:) = 0
+missing = missing_value(missing)
 
 !! Make sure emisspc is not done over sea
 if (obs % surface_type(obindex) == RTsea) profindex % emisspc(:) = 0
 
-!IF (SatInfo % Systemtype /= Stype_ATOVS .OR. &
-!   .NOT. UseEmissivityAtlas .OR. Ob % surface /= RTland) THEN
-!  Profindex % mwemiss(:) = 0
-!ELSE
-!  IF (ASSOCIATED (Ob % MwEmErrAtlas)) THEN
-!    IF (ABS (Ob % MwEmErrAtlas(1) - RMDI) < RMDItol) THEN
-!      Profindex % mwemiss(:) = 0
-!    END IF
-!  END IF
-!END IF
+!! Switch off emissivity retrieval if not needed or over sea
+!! or if missing values exist in microwave emissivity error atlas
+if (obs % surface_type(obindex) /= RTland .or. &
+    .not. allocated(obs % mwemisserr) ) then
+    profindex % mwemiss(:) = 0
+else
+  if (allocated(obs % mwemisserr)) then
+    if (obs % mwemisserr(1, obindex) == missing) then
+      profindex % mwemiss = 0
+    end if
+  end if
+end if
 
 ! This has been left in for future development
 !! Use errors associated with microwave emissivity atlas
@@ -397,7 +397,7 @@ end if
 
 !! Scale the background skin temperature error covariances over land
 if (profindex % tstar > 0) then
-  if (obs % surface_type(obindex) == RTland .and. config % SkinTempErrorLand >= 0.0) then
+  if (obs % surface_type(obindex) == RTland .and. config % SkinTempErrorLand >= zero) then
     bscale = config % SkinTempErrorLand / sqrt (b_matrix(profindex % tstar,profindex % tstar))
     b_matrix(:,profindex % tstar) = b_matrix(:,profindex % tstar) * bscale
     b_matrix(profindex % tstar,:) = b_matrix(profindex % tstar,:) * bscale

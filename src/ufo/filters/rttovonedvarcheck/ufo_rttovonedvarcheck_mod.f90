@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_mod
 
+use ufo_constants_mod, only: zero
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use iso_c_binding
@@ -333,6 +334,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       obs % emiss(:, jobs) = ob % emiss(:)
       obs % final_cost(jobs) = ob % final_cost
       obs % LWP(jobs) = ob % LWP
+      obs % IWP(jobs) = ob % IWP
       if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
       if(self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
       if(self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
@@ -343,6 +345,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         failed_1dvar_count = failed_1dvar_count + 1
         do jvar = 1, self%nchans
           if( obs % QCflags(jvar,jobs) == 0 ) then
+            obs % QCflags(jvar,jobs) = self % onedvarflag
+          end if
+        end do
+      end if
+
+      ! Remove channels that have been removed because of slow convergence
+      if (ob % QC_SlowConvChans) then
+        do jvar = 1, self % nchans
+          if( obs % QCflags(jvar,jobs) == 0 .and. &
+              any( self % ConvergeCheckChans == obs % channels(jvar) ) ) then
             obs % QCflags(jvar,jobs) = self % onedvarflag
           end if
         end do
@@ -365,7 +377,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
 
       ! Check the BTs are within a factor of the error.  This only applies to channels that are still
       ! active.
-      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == self % passflag)) then
+      if (self % RetrievedErrorFactor > zero .and. any(obs % QCflags(:,jobs) == self % passflag)) then
         allocate(max_error(size(ob % channels_used)))
         call r_submatrix % multiply_factor_by_stdev(self % RetrievedErrorFactor, max_error)
         reject_profile = .false.

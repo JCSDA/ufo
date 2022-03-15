@@ -53,6 +53,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
   logical                          :: Store1DVarLWP !< Output the LWP if the profile converges
+  logical                          :: Store1DVarIWP !< Output the IWP if the profile converges
   logical                          :: Store1DVarCLW !< Output the CLW profile if 1dvar converrges for later use
   logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
@@ -63,10 +64,14 @@ type, public :: ufo_rttovonedvarcheck
   integer                          :: JConvergenceOption !< integer to select convergence option
   integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
   integer                          :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
+  integer                          :: ConvergeCheckChansAfterIteration !< number of iterations before slow converging channels removed
+  integer, allocatable             :: ConvergeCheckChans(:) !< channels to remove if more than ConvergeCheckChansAfterIteration iterations
   integer                          :: NumEmissElements !< the number of surface emissivity elements to be retrieved
   real(kind_real)                  :: RetrievedErrorFactor !< check retrieved BTs all within factor * stdev of obs
   real(kind_real)                  :: ConvergenceFactor !< 1d-var convergence if using change in profile
   real(kind_real)                  :: Cost_ConvergenceFactor !< 1d-var convergence if using % change in cost
+  real(kind_real)                  :: MaxLWPForCloudyCheck !< Maximum lwp when performing the cloudy check
+  real(kind_real)                  :: MaxIWPForCloudyCheck !< Maximum iwp when performing the cloudy check
   real(kind_real)                  :: EmissSeaDefault !< default emissivity value to use over sea
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
@@ -101,7 +106,7 @@ character(len=max_string)     :: tmp
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
 type(fckit_configuration)     :: surface_emissivity_conf
-integer                       :: size_geovals, size_extravars, iret
+integer                       :: size_geovals, size_extravars, iret, size_converge_check_chans
 
 ! Creat surface emissivity conf from main configuration
 call f_conf % get_or_die("surface emissivity", surface_emissivity_conf)
@@ -167,6 +172,9 @@ call f_conf % get_or_die("UseColdSurfaceCheck", self % UseColdSurfaceCheck)
 ! Flag to output the LWP if the profile converges
 call f_conf % get_or_die("Store1DVarLWP", self % Store1DVarLWP)
 
+! Flag to output the IWP if the profile converges
+call f_conf % get_or_die("Store1DVarIWP", self % Store1DVarIWP)
+
 ! Flag to output the CLW if the profile converges
 call f_conf % get_or_die("Store1DVarCLW", self % Store1DVarCLW)
 
@@ -196,6 +204,12 @@ call f_conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
 ! Cost threshold for convergence check when cost function value is used for convergence
 call f_conf % get_or_die("CostConvergenceFactor", self % Cost_ConvergenceFactor)
 
+! Maximum lwp when performing the cloudy check in kg/m2
+call f_conf % get_or_die("MaxLWPForCloudyCheck", self % MaxLWPForCloudyCheck)
+
+! Maximum iwp when performing the cloudy check in kg/m2
+call f_conf % get_or_die("MaxIWPForCloudyCheck", self % MaxIWPForCloudyCheck)
+
 ! The fraction of the Jacobian that is permitted to be below the cloud_top_pressure for the
 ! IR cloudy channel selection.  The Jacobian is integrated from the toa -> surface and a
 ! maximum of 1 % of the integrated Jacobian is allowed to be below the cloud top.
@@ -203,6 +217,20 @@ call f_conf % get_or_die("IRCloud_Threshold", self % IRCloud_Threshold)
 
 ! Maximum number of iterations for internal Marquardt-Levenberg loop
 call f_conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
+
+! If the iteration number is greater than ConvergeCheckChansAfterIteration then the
+! slow converging channels specified by ConvergeCheckChans have the observation error
+! inflated to 100000.0
+call f_conf % get_or_die("ConvergeCheckChansAfterIteration", self % ConvergeCheckChansAfterIteration)
+
+! List of channels to inflate the observation error (R) for if the retrieval goes beyond
+! ConvergeCheckChansAfterIteration iterations.  The inflated variance for these channels is
+! set to 100000.0 for future iterations effectively removing it from the minimization.
+if(f_conf % has("ConvergeCheckChans")) then
+  size_converge_check_chans = f_conf % get_size("ConvergeCheckChans")
+  allocate(self % ConvergeCheckChans(size_converge_check_chans))
+  call f_conf % get_or_die("ConvergeCheckChans", self % ConvergeCheckChans)
+end if
 
 ! Value to scale the skin temperature error over land. -1.0 is default so no scaling
 ! is done because the value has to be positive.
@@ -339,9 +367,18 @@ write(*,*) "JConvergenceOption = ",self % JConvergenceOption
 write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
 write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
 write(*,*) "CostConvergenceFactor = ",self % Cost_ConvergenceFactor
+write(*,*) "MaxLWPForCloudyCheck = ",self % MaxLWPForCloudyCheck
+write(*,*) "MaxIWPForCloudyCheck = ",self % MaxIWPForCloudyCheck
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+write(*,*) "ConvergeCheckChansAfterIteration = ",self % ConvergeCheckChansAfterIteration
+if (allocated(self % ConvergeCheckChans)) then
+  write(*,*) "ConvergeCheckChans = ",self % ConvergeCheckChans(:)
+else
+  write(*,*) "ConvergeCheckChans = None"
+end if
 write(*,*) "IRCloud_Threshold = ",self % IRCloud_Threshold
 write(*,*) "Store1DVarLWP = ",self % Store1DVarLWP
+write(*,*) "Store1DVarIWP = ",self % Store1DVarIWP
 write(*,*) "Store1DVarCLW = ",self % Store1DVarCLW
 write(*,*) "Emissivity variables:"
 write(*,*) "emissivity type = ",self % EmissivityType

@@ -793,19 +793,23 @@ end subroutine ufo_rttovonedvarcheck_CheckIteration
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
+  config,        & ! in
   geovals,       & ! in
   profindex,     & ! in
   nlevels_1dvar, & ! in
   OutOfRange,    & ! out
-  OutLWP         ) ! out
+  OutLWP,        & ! out
+  OutIWP         ) ! out
 
 implicit none
 
-type(ufo_geovals), intent(in)          :: geovals
+type(ufo_rttovonedvarcheck), intent(in) :: config !< object with configuration values
+type(ufo_geovals), intent(in)           :: geovals
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
-integer, intent(in)                    :: nlevels_1dvar
-logical, intent(out)                   :: OutOfRange
-real(kind_real), optional, intent(out) :: OutLWP
+integer, intent(in)                     :: nlevels_1dvar
+logical, intent(out)                    :: OutOfRange
+real(kind_real), optional, intent(out)  :: OutLWP
+real(kind_real), optional, intent(out)  :: OutIWP
 
 ! Local variables:
 real(kind_real) :: LWP
@@ -816,14 +820,11 @@ real(kind_real) :: meanqi
 integer         :: i
 integer         :: nlevels_q, toplevel_q
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_CheckCloudyIteration"
-
-real(kind_real), parameter   :: MaxLWP = two
-real(kind_real), parameter   :: MaxIWP = 3.0_kind_real
-real(kind_real)              :: Plevels_1DVar(nlevels_1dvar)
-type(ufo_geoval), pointer    :: geoval
-real(kind_real)              :: clw(nlevels_1dvar)
-real(kind_real)              :: ciw(nlevels_1dvar)
-character(len=max_string)    :: varname
+real(kind_real)             :: Plevels_1DVar(nlevels_1dvar)
+type(ufo_geoval), pointer   :: geoval
+real(kind_real)             :: clw(nlevels_1dvar)
+real(kind_real)             :: ciw(nlevels_1dvar)
+character(len=max_string)   :: varname
 
 !-------------------------------------------------------------------------------
 
@@ -894,7 +895,8 @@ if (any(ciw(:) > zero) .or. &
 
 !2.1 test if lwp iwp exceeds thresholds
 
-  if ((IWP > MaxIWP) .or. (LWP > MaxLWP)) then
+  if ((IWP > config % MaxIWPForCloudyCheck) .or. &
+      (LWP > config % MaxLWPForCloudyCheck)) then
     call fckit_log % debug("lwp or iwp exceeds thresholds")
     OutOfRange = .true.
     write(message,*) "lwp and iwp = ",LWP,IWP
@@ -908,6 +910,7 @@ if (any(ciw(:) > zero) .or. &
 end if
 
 if (present(OutLWP)) OutLWP = LWP
+if (present(OutIWP)) OutIWP = IWP
 
 end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
 
@@ -920,7 +923,8 @@ end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
 !!
 subroutine ufo_rttovonedvarcheck_PrintIterInfo(yob, hofx, channels, &
                                          guessprofile, backprofile, &
-                                         diffprofile, binv, hmatrix)
+                                         diffprofile, binv, hmatrix, &
+                                         rdiagonal)
 
 implicit none
 
@@ -932,6 +936,7 @@ real(kind_real), intent(in)       :: backprofile(:)
 real(kind_real), intent(in)       :: diffprofile(:)
 real(kind_real), intent(in)       :: binv(:,:) ! (nprofelements,nprofelements)
 real(kind_real), intent(in)       :: hmatrix(:,:) ! (nchans,nprofelements)
+real(kind_real), intent(in)       :: rdiagonal(:) ! nchans
 
 integer :: obs_size, profile_size, ii, jj
 character(len=12) :: chans_fmt, prof_fmt
@@ -950,9 +955,9 @@ write( unit=prof_fmt,fmt='(a)' ) '(' // trim(txt_nprof) // 'E30.16)'
 write(*,*) "Start print iter info"
 
 ! Print obs info
-write(*,"(2A30)") "yob", "hofx"
+write(*,"(3A30)") "yob", "hofx", "rmatrix_variance"
 do ii = 1, obs_size
-  write(*,"(2E30.16)") yob(ii),hofx(ii)
+  write(*,"(3E30.16)") yob(ii),hofx(ii),rdiagonal(ii)
 end do
 
 ! Print profile info

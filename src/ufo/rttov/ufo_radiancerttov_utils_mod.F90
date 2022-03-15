@@ -953,7 +953,6 @@ contains
           if ( conf % do_mw_scatt) then
             do iprof = 1, nProfiles
               profiles_scatt(iprof)%clw(top_level:bottom_level:stride) = geoval%vals(:, iprof)
-              profiles(iprof)%clw(top_level:bottom_level:stride) = zero
             end do
           else
             if (associated(profiles(1)%clw)) then

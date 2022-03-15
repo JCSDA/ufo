@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_rsubmatrix_mod
 
+use ufo_constants_mod, only: zero
 use kinds
 use ufo_rttovonedvarcheck_constants_mod, only: max_string
 use ufo_metoffice_rmatrixradiance_mod
@@ -17,6 +18,7 @@ private
 type, public :: ufo_rttovonedvarcheck_rsubmatrix
 
   integer :: nchans !< number of channels used in current r matrix
+  integer, allocatable :: channels(:) !< channels for the current r submatrix
   real(kind_real), allocatable :: matrix(:,:) !< full matrix
   real(kind_real), allocatable :: inv_matrix(:,:) !< inverse full matrix
   real(kind_real), allocatable :: diagonal(:) !< diagonal matrix
@@ -33,6 +35,7 @@ contains
   procedure :: multiply_inverse_matrix => rsubmatrix_multiply_inv_matrix
   procedure :: add_to_matrix => rsubmatrix_add_to_u
   procedure :: multiply_factor_by_stdev => rsubmatrix_multiply_factor_by_stdev
+  procedure :: reset_errors => rsubmatrix_reset_errors
 
 end type ufo_rttovonedvarcheck_rsubmatrix
 
@@ -90,13 +93,15 @@ select case (trim(mat_type))
       call abor1_ftn('full r matrix under development - use a diagonal')
    case ("diagonal")
       allocate(self % diagonal(nchans))
-      self % diagonal(:) = 0.0_kind_real
+      allocate(self % channels(nchans))
+      self % diagonal(:) = zero
       self % diagonal_flag = .true.
 
-      do ff=1,full_rmatrix % nchans
-        do ss=1,self % nchans
+      do ff = 1, full_rmatrix % nchans
+        do ss = 1, self % nchans
           if (full_rmatrix % channels(ff) == channels(ss)) then
             self % diagonal(ss) = full_rmatrix % errors(ff) * full_rmatrix % errors(ff)
+            self % channels(ss) = full_rmatrix % channels(ff)
           end if
         end do
       end do
@@ -118,9 +123,10 @@ subroutine rsubmatrix_delete(self)
 implicit none
 class(ufo_rttovonedvarcheck_rsubmatrix), intent(inout) :: self  !< R mtrix structure
 
-if (allocated(self % matrix))       deallocate(self % matrix)
-if (allocated(self % inv_matrix))   deallocate(self % inv_matrix)
-if (allocated(self % diagonal))     deallocate(self % diagonal)
+if (allocated(self % matrix))     deallocate(self % matrix)
+if (allocated(self % inv_matrix)) deallocate(self % inv_matrix)
+if (allocated(self % diagonal))   deallocate(self % diagonal)
+if (allocated(self % channels))   deallocate(self % channels)
 
 end subroutine rsubmatrix_delete
 
@@ -305,6 +311,38 @@ if (self % diagonal_flag) xout(:) = factor * sqrt(self % diagonal(:))
 end subroutine rsubmatrix_multiply_factor_by_stdev
 
 ! ------------------------------------------------------------------------------
+!> Setup for the r sub-matrix
+!!
+!! \author Met Office
+!!
+!! \date 24/01/2021: Created
+!!
+subroutine rsubmatrix_reset_errors(self, channels, reset_value)
+
+implicit none
+class(ufo_rttovonedvarcheck_rsubmatrix), intent(inout) :: self
+integer, intent(in)         :: channels(:)
+real(kind_real), intent(in) :: reset_value
+
+character(len=*), parameter :: routinename = "rsubmatrix_reset_errors"
+character(len=max_string)   :: message
+integer                     :: ichan
+
+! Diagonal R matrix
+if (self % diagonal_flag) then
+  do ichan = 1, self % nchans
+    if (any(self % channels(ichan) == channels)) then
+      self % diagonal(ichan) = reset_value
+    end if
+  end do
+else
+  write(message, *) routinename, ": only works with diagonal r matrix"
+  call abor1_ftn(message)
+end if
+
+end subroutine rsubmatrix_reset_errors
+
+! ------------------------------------------------------------------------------
 !> Print the contents of the r-matrix
 !!
 !! \author Met Office
@@ -337,6 +375,7 @@ if (self % diagonal_flag) then
 
   write(*,*) "Diagonal R matrix used"
   write(*,*) "nchans = ",self % nchans
+  write(*,*) "channels = ", self % channels(:)
   write(*,*) "Diagonal = ",self % diagonal(:)
 
 end if
