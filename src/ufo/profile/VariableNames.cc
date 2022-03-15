@@ -17,6 +17,10 @@ constexpr const char* const ufo::VariableNames::obs_northward_wind;
 constexpr const char* const ufo::VariableNames::obs_geopotential_height;
 constexpr const char* const ufo::VariableNames::obs_dew_point_temperature;
 
+// Derived observation values
+
+constexpr const char* const ufo::VariableNames::obs_derived_air_pressure;
+
 // Observation errors
 
 constexpr const char* const ufo::VariableNames::obserr_air_temperature;

@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <utility>
+
 #include "ufo/profile/ProfilePressure.h"
 
 namespace ufo {
@@ -63,7 +65,7 @@ namespace ufo {
 
     // Retrive the vector of observed pressures.
     std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_derived_air_pressure);
     // If pressures have not been recorded, initialise the vector with missing values.
     if (pressures.empty())
       pressures.assign(numProfileLevels, missingValueFloat);
@@ -124,5 +126,12 @@ namespace ufo {
                                         zObs,
                                         pressures);
     }
+  }
+
+  void ProfilePressure::fillValidationData(ProfileDataHandler &profileDataHandler)
+  {
+    profileDataHandler.set(ufo::VariableNames::obs_air_pressure,
+                           std::move(profileDataHandler.get<float>
+                                     (ufo::VariableNames::obs_derived_air_pressure)));
   }
 }  // namespace ufo

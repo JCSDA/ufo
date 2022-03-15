@@ -23,6 +23,10 @@ struct VariableNames
   static constexpr const char* const obs_geopotential_height = "height@ObsValue";
   static constexpr const char* const obs_dew_point_temperature = "dew_point_temperature@ObsValue";
 
+  // Derived observation values
+
+  static constexpr const char* const obs_derived_air_pressure = "air_pressure@DerivedMetaData";
+
   // Observation errors
 
   static constexpr const char* const obserr_air_temperature = "air_temperature@ObsErrorData";

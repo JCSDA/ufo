@@ -131,10 +131,26 @@ namespace ufo {
     profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
 
     const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
-    // Do not perform averaging if there is just one reported level.
-    if (numProfileLevels <= 1)
-      return;
     const size_t numModelLevels = profileExtended.getNumProfileLevels();
+
+    // Do not perform averaging if there are fewer than two reported levels.
+    // Instead, fill the averaged profile vectors with missing values.
+    if (numProfileLevels <= 1) {
+      ProfileAverageUtils::setProfileMissing<float>(profileExtended,
+        {ufo::VariableNames::modellevels_air_temperature_derived,
+         ufo::VariableNames::air_temperature_derived});
+      ProfileAverageUtils::setProfileMissing<int>(profileExtended,
+        {ufo::VariableNames::qcflags_air_temperature});
+
+      // Store the observed temperature in the vector of derived values.
+      // The derived values are initially missing, so performing this action
+      // ensures that any filters subsequently run on the original ObsSpace
+      // will work correctly.
+      ProfileAverageUtils::copyProfileValues<float>(profileOriginal,
+                                                    ufo::VariableNames::obs_air_temperature,
+                                                    ufo::VariableNames::air_temperature_derived);
+      return;
+    }
 
     const std::vector <float> &tObs =
       profileOriginal.get<float>(ufo::VariableNames::obs_air_temperature);

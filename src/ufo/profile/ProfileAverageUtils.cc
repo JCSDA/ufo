@@ -11,7 +11,6 @@
 #include "ufo/filters/QCflags.h"
 
 #include "ufo/profile/ProfileAverageUtils.h"
-#include "ufo/profile/ProfileDataHolder.h"
 
 namespace ufo {
 

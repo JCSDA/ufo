@@ -30,7 +30,8 @@ namespace ufo {
     std::vector <std::string> variableNamesInt =
       {ufo::VariableNames::qcflags_eastward_wind,
        ufo::VariableNames::counter_NumSamePErrObs,
-       ufo::VariableNames::counter_NumInterpErrObs};
+       ufo::VariableNames::counter_NumInterpErrObs,
+       ufo::VariableNames::extended_obs_space};
     std::vector <std::string> variableNamesFloat =
       {ufo::VariableNames::obs_air_pressure,
        ufo::VariableNames::obs_eastward_wind,
@@ -56,12 +57,20 @@ namespace ufo {
        {},
        {});
 
-    // Run alternative U interpolation check on each profile.
+    // Run alternative U interpolation check on each original profile.
     const size_t nprofs = profileDataHandler.getObsdb().nrecs();
     for (size_t jprof = 0; jprof < nprofs; ++jprof) {
       oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
       auto& profile = profiles[jprof];
-      runCheckOnProfile(profile);
+      // Check whether this profile is in the original ObsSpace or has been averaged
+      // onto model levels. If the former, proceed with the check.
+      // If the ObsSpace has not been extended then all profiles are by default in
+      // the original ObsSpace.
+      const auto &extended_obs_space = profile.get<int>(ufo::VariableNames::extended_obs_space);
+      if (extended_obs_space.empty() ||
+          std::find(extended_obs_space.begin(), extended_obs_space.end(), 0) !=
+          extended_obs_space.end())
+        runCheckOnProfile(profile);
       // Fill validation information if required.
       if (options_.compareWithOPS.value())
         fillValidationData(profile);
@@ -87,6 +96,12 @@ namespace ufo {
       profile.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
     std::vector <int> &NumInterpErrObs =
       profile.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
+
+    if (pressures.empty() ||
+        pressures.front() > options_.BChecks_maxValidP.value() ||
+        pressures.back() < options_.BChecks_minValidP.value()) {
+      return;
+    }
 
     if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs, uFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "

@@ -135,10 +135,33 @@ namespace ufo {
     profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
 
     const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
-    // Do not perform averaging if there is just one reported level.
-    if (numProfileLevels <= 1)
-      return;
     const size_t numModelLevels = profileExtended.getNumProfileLevels();
+
+    // Do not perform averaging if there are fewer than two reported levels.
+    // Instead, fill the averaged profile vectors with missing values.
+    if (numProfileLevels <= 1) {
+      ProfileAverageUtils::setProfileMissing<float>(profileExtended,
+        {ufo::VariableNames::eastward_wind_derived});
+      ProfileAverageUtils::setProfileMissing<float>(profileExtended,
+        {ufo::VariableNames::northward_wind_derived});
+      ProfileAverageUtils::setProfileMissing<int>(profileExtended,
+        {ufo::VariableNames::qcflags_eastward_wind});
+      ProfileAverageUtils::setProfileMissing<int>(profileExtended,
+        {ufo::VariableNames::qcflags_northward_wind});
+
+      // Store the observed eastward and northward winds in the vectors of derived values.
+      // The derived values are initially missing, so performing this action
+      // ensures that any filters subsequently run on the original ObsSpace
+      // will work correctly.
+      ProfileAverageUtils::copyProfileValues<float>(profileOriginal,
+                                                    ufo::VariableNames::obs_eastward_wind,
+                                                    ufo::VariableNames::eastward_wind_derived);
+      ProfileAverageUtils::copyProfileValues<float>(profileOriginal,
+                                                    ufo::VariableNames::obs_northward_wind,
+                                                    ufo::VariableNames::northward_wind_derived);
+
+      return;
+    }
 
     const std::vector <float> &uObs =
       profileOriginal.get<float>(ufo::VariableNames::obs_eastward_wind);

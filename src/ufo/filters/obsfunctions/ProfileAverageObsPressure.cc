@@ -103,8 +103,8 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
       out[0][loc] = vert_coord_obs[loc];
 
     // Pressures in averaged profile.
-    for (size_t idx = 0; idx < locsExtended.size(); ++idx)
-      out[0][locsExtended[idx]] = var_gv[locsExtended.size() - 1 - idx];
+    for (size_t idx = 0; idx < locsExtended.size() && idx < var_gv.size(); ++idx)
+      out[0][locsExtended[idx]] = var_gv[var_gv.size() - 1 - idx];
   }
 
   oops::Log::trace() << "ProfileAverageObsPressure::compute finished" << std::endl;

@@ -8,12 +8,17 @@
 #ifndef UFO_PROFILE_PROFILEAVERAGEUTILS_H_
 #define UFO_PROFILE_PROFILEAVERAGEUTILS_H_
 
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "oops/util/missingValues.h"
+
+#include "ufo/profile/ProfileDataHolder.h"
 
 namespace ufo {
   class ProfileDataHandler;
-  class ProfileDataHolder;
 }
 
 namespace ufo {
@@ -35,6 +40,29 @@ namespace ufo {
        const std::string & qcflags_name,
        const std::string & geovals_testreference_name,
        const std::string & geovals_qcflags_name);
+
+    /// Set values in a profile to missing.
+    template <typename T>
+    static void setProfileMissing
+      (ProfileDataHolder & profile,
+       const std::vector <std::string> & variableNames)
+    {
+      const T missing = util::missingValue(missing);
+      for (const std::string & variableName : variableNames) {
+        profile.set<T>(variableName,
+                       std::move(std::vector<T>(profile.getNumProfileLevels(), missing)));
+      }
+    }
+
+    /// Transfer one variable in a profile to another variable in the same profile.
+    template <typename T>
+      static void copyProfileValues(ProfileDataHolder & profile,
+                                    const std::string & sourceVariableName,
+                                    const std::string & destinationVariableName)
+    {
+      profile.set<T>(destinationVariableName,
+                     std::move(profile.get<T>(sourceVariableName)));
+    }
   };
 }  // namespace ufo
 

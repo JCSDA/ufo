@@ -49,6 +49,9 @@ namespace ufo {
                               ufo::VariableNames::geovals_pressure_rho,
                               ufo::VariableNames::geovals_height_rho});
     }
+
+    /// Fill variables in validator
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 
