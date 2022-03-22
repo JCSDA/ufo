@@ -128,7 +128,9 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<bool> testAtLocations = apply;
       if (onlyTestGoodFilterVarsForFlagAllFilterVars) {
         for (size_t iloc=0; iloc < testAtLocations.size(); iloc++)
-          if ((*flags_)[ifiltervar][iloc] != QCflags::pass) testAtLocations[iloc] = false;
+          if ((*flags_)[filtervars[ifiltervar].variable()][iloc] != QCflags::pass) {
+            testAtLocations[iloc] = false;
+          }
       }
       const std::vector<float> & testValues = singleChannelTestVar.values();
       flagWhereOutOfBounds(testAtLocations, testValues, vmin, vmax, treatMissingAsOutOfBounds,

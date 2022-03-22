@@ -299,6 +299,37 @@ observations:
     name: test data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable2
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: ObsValue/variable2
+    - name: ObsValue/variable3
+    treat missing as out of bounds: true
+    minvalue: 12
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+# variable1: 10,11,12,13,14,15,16,17,18,19
+# variable2: 10,12,14,16,18,20,22,24,26,28
+# variable3: 25,24,23,22,21,20,19,18,17,16
+# filter 1 rejects location 9,10 for variable2
+# filter 2 rejects location 1 for both variable2 and variable 3
+# filter 2 does not check locations 9 and 10 because these have previously been rejected.
+# filter not applied to variable 1 (though variable would be assimilated) no locations rejected.
+  passedBenchmark: 26
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable2, variable3]
   obs filters:
   - filter: Bounds Check
