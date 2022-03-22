@@ -99,7 +99,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   integer                         :: hasSRflag
 
   write(err_msg,*) myname, ": begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! Make sure nothing already allocated   
   call self%delete()
@@ -108,7 +108,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   nlocs   = obsspace_get_nlocs(obss) ! number of observations
   nrecs   = obsspace_get_nrecs(obss)
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', nlocs, nrecs
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 if (nlocs > 0 ) then
 ! get variables from geovals
@@ -147,7 +147,7 @@ if (nlocs > 0 ) then
      write(err_msg,'(a)')'  ufo_gnssro_bndnbam_tlad_settraj:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but NBAM requires it to be ascending order, need flip'
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     do k = 1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
        gesQ(k,:) = q%vals(nlev-k+1,:)
@@ -157,7 +157,6 @@ if (nlocs > 0 ) then
        gesH(k,:) = gph%vals(nlev1-k+1,:)
     enddo
   else  ! not flipping
-    call fckit_log%info(err_msg)
 
     do k = 1, nlev
        gesT(k,:) = t%vals(k,:)
@@ -452,7 +451,7 @@ if (nlocs > 0 ) then
 end if
   self%ltraj = .true.
   write(err_msg,*) myname, ": complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndnbam_tlad_settraj
 !----------------------------------------------------------------
@@ -472,7 +471,7 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   real(kind_real)                 :: sumIntgl
 
   write(err_msg,*) myname, ": begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -555,8 +554,8 @@ if (geovals%nlocs > 0 ) then
 
 end if
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_tl: complete"
+call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndnbam_simobs_tl
 
@@ -574,7 +573,7 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
   integer                       :: nlocs, iobs, k, nlev,nlev1, icount, irec
 
   write(err_msg,*) myname,": begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
    
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -661,8 +660,9 @@ if (self%nlocs > 0 ) then
   deallocate(gesP_ad)
   deallocate(gesQ_ad)
 end if
-  write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+
+write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_ad: complete"
+call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndnbam_simobs_ad
 ! ------------------------------------------------------------------------------

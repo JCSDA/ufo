@@ -74,7 +74,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   real(kind_real)               :: dtheta
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_tlad_settraj: begin"
-  call fckit_log%info(err_msg) 
+  call fckit_log%debug(err_msg) 
 
 ! get model state variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -96,7 +96,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
     write(err_msg,'(a)') '  ufo_gnssro_bndropp2d_tlad_settraj:'//new_line('a')//                   &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but ROPP requires it to be ascending order, need flip'
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
   end if
 
   allocate(self%obsLat2d(self%nlocs*n_horiz))
@@ -182,7 +182,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   dtheta  = self%roconf%dtheta
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -325,10 +325,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
-  return
-    
 end subroutine ufo_gnssro_bndropp2d_simobs_tl
  
 ! ------------------------------------------------------------------------------
@@ -370,7 +368,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   dtheta  = self%roconf%dtheta
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -547,9 +545,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: complete"
-  call fckit_log%info(err_msg)
-
-  return
+  call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndropp2d_simobs_ad
     

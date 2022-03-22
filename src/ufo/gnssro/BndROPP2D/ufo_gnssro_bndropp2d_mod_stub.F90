@@ -69,8 +69,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   integer                         :: n_horiz
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
+  call fckit_log%debug(err_msg)
 
   n_horiz = self%roconf%n_horiz
 
@@ -105,8 +105,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: begin observation loop, nobs =  ", nobs
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
+  call fckit_log%debug(err_msg)
 
   deallocate(obsLat)
   deallocate(obsLon)
@@ -114,10 +114,9 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: complete"
+  call fckit_log%debug(err_msg)
      
-  return
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------
 

@@ -156,7 +156,6 @@ end if
   x%cov%fact_chol = .FALSE.
   x%cov%equi_chol = 'N'
 
-  return
 end subroutine init_ropp_1d_statevec
 
 !------------------------------------------------------------------------------------
@@ -226,7 +225,6 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
      end do
 
   end if
-  return
 
 end subroutine init_ropp_1d_statevec_ad
 
@@ -315,7 +313,6 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
 ! covariance matrix, is this used by ROPP FM?
 !--------------------------------------------
   y%obs_ok = .TRUE.
-  return
 
 end subroutine init_ropp_1d_obvec                                                    
 
@@ -372,7 +369,6 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
   end do
 
   y%obs_ok = .TRUE.
-  return
 
 end subroutine init_ropp_1d_obvec_tlad
 
@@ -417,8 +413,6 @@ subroutine ropp_tidy_up_tlad_1d(x,x_p,y,y_p)
 
   deallocate(y%weights)
   deallocate(y_p%weights)
-
- return
 
 end subroutine ropp_tidy_up_tlad_1d
 

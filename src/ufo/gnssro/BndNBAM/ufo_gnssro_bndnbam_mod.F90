@@ -85,12 +85,12 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,          allocatable           :: LayerIdx(:)
 
   write(err_msg,*) myname, ": begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
   nlocs   = obsspace_get_nlocs(obss) ! number of observations
   nrecs   = obsspace_get_nrecs(obss) ! number of records/profiles
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', geovals%nlocs, nlocs, nrecs
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
   missing = missing_value(missing)
 
   allocate(temperature(nlocs))
@@ -152,7 +152,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      write(err_msg,'(a)')'  ufo_gnssro_bndnbam_simobs:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but bndNBAM requires it to be ascending order, need flip'
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     do k=1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
        gesQ(k,:) = q%vals(nlev-k+1,:)
@@ -399,7 +399,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(obs_max)
 
   write(err_msg,*) myname, ": complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
   end if ! end check if ZERO OBS
 
 ! putting virtual temeprature at obs location to obs space for BackgroundCheck RONBAM

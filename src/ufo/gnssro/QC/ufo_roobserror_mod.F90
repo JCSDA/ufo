@@ -57,7 +57,7 @@ if (f_conf%has("errmodel")) then
    self%errmodel = str
 end if
 write(message,*) 'errmodel = ', trim(self % errmodel)
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self % rmatrix_filename = ""
 if (f_conf % has("rmatrix_filename")) then
@@ -65,7 +65,7 @@ if (f_conf % has("rmatrix_filename")) then
    self % rmatrix_filename = str
 end if
 write(message,*) 'rmatrix_filename = ', trim(self % rmatrix_filename)
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self % err_variable = ""
 if (f_conf % has("err_variable")) then
@@ -73,7 +73,7 @@ if (f_conf % has("err_variable")) then
    self % err_variable = str
 end if
 write(message,*) 'err_variable = ', trim(self % err_variable)
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 ! Get the number of extra geovals as a multiplier, default to 1
 self % n_horiz = 1
@@ -81,28 +81,28 @@ if (f_conf % has("n_horiz")) then
    call f_conf % get_or_die("n_horiz", self % n_horiz)
 end if
 write(message,*) 'n_horiz = ', self % n_horiz
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self % allow_extrapolation = .false.
 if (f_conf % has("allow extrapolation")) then
    call f_conf % get_or_die("allow extrapolation", self % allow_extrapolation)
 end if
 write(message,*) 'allow_extrapolation = ', self % allow_extrapolation
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self % use_profile = .false.
 if (f_conf % has("use profile")) then
    call f_conf % get_or_die("use profile", self % use_profile)
 end if
 write(message,*) 'use_profile = ', self % use_profile
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self % verbose_output = .false.
 if (f_conf % has("verbose output")) then
    call f_conf % get_or_die("verbose output", self % verbose_output)
 end if
 write(message,*) 'verbose_output = ', self % verbose_output
-call fckit_log % info(message)
+call fckit_log%debug(message)
 
 self%obsdb      = obspace
 
@@ -204,7 +204,7 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NBAM(obsLat, obsImpA, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     deallocate(obsSaid)
     deallocate(obsLat)
     ! update obs error
@@ -215,7 +215,7 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
     call bending_angle_obserr_ECMWF(obsImpA, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ECMWF method"
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     deallocate(obsValue)
     ! update obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
@@ -226,7 +226,7 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NRL(obsLat, obsImpA, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NRL method"
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     deallocate(obsValue)
     deallocate(obsLat)
     ! update obs error
@@ -234,7 +234,7 @@ case ("bending_angle")
 
   case ("MetOffice")
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with the Met Office method"
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     if (cmp_strings(self % rmatrix_filename, "")) then
       err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
       call abor1_ftn(err_msg)
@@ -261,7 +261,7 @@ case ("bending_angle")
     else
       err_msg = "The error variable should be either 'latitude' or 'average_temperature', but you gave " // &
                 trim(self % err_variable)
-      call fckit_log%info(err_msg)
+      call abor1_ftn(err_msg)
     end if
     deallocate(obsValue)
     deallocate(obsSatid)
@@ -271,7 +271,7 @@ case ("bending_angle")
 
   case default
     write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, NRL or MetOffice"
-    call fckit_log%info(err_msg)
+    call abor1_ftn(err_msg)
   end select
   deallocate(obsImpP)
   deallocate(obsGeoid)
@@ -292,7 +292,7 @@ case ("refractivity")
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NBAM method" 
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
     deallocate(obsZ)
     deallocate(obsLat)  
     ! up date obs error
@@ -303,8 +303,8 @@ case ("refractivity")
      call fckit_log%info(err_msg)
 
   case default
-    write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is available now"
-    call fckit_log%info(err_msg)
+     write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is available now"
+     call abor1_ftn(err_msg)
   end select
 
 case default

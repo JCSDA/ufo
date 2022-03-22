@@ -50,7 +50,7 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   integer                     :: iobs
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj: begin"
-  call fckit_log%info(err_msg) 
+  call fckit_log%debug(err_msg) 
 
 ! get model state variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -104,7 +104,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 ! hack - set local geopotential height to zero for ropp routines
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -150,10 +150,8 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsGeoid)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
-  return
-    
 end subroutine ufo_gnssro_bndropp1d_simobs_tl
  
 ! ------------------------------------------------------------------------------
@@ -177,7 +175,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   character(max_string)           :: err_msg
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -225,9 +223,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: complete"
-  call fckit_log%info(err_msg)
-
-  return
+  call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs_ad
     

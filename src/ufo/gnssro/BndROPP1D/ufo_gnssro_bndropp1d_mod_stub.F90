@@ -51,8 +51,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_stub: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
+  call fckit_log%debug(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -91,8 +91,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_stub: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: complete"
+  call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs
 ! ------------------------------------------------------------------------------

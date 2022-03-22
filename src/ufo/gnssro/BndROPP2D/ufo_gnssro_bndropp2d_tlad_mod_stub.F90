@@ -64,7 +64,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   integer                     :: iobs
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_tlad_settraj: begin"
-  call fckit_log%info(err_msg) 
+  call fckit_log%debug(err_msg) 
 
 ! get model state variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -90,7 +90,10 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   self%prs     = prs%vals
 
   self%ltraj   = .true.
-       
+
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_tlad_settraj: complete"
+  call fckit_log%debug(err_msg)
+    
 end subroutine ufo_gnssro_bndropp2d_tlad_settraj
     
 ! ------------------------------------------------------------------------------
@@ -118,8 +121,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   n_horiz = self%roconf%n_horiz
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl_stub: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -166,8 +169,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl_stub: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
+  call fckit_log%debug(err_msg)
 
   return
     
@@ -196,8 +199,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   character(max_string)           :: err_msg
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad_stub: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: begin"
+  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -247,8 +250,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   deallocate(obsGeoid)
   deallocate(gph_d_zero)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad_stub: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: complete"
+  call fckit_log%debug(err_msg)
 
   return
 

@@ -93,7 +93,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   dtheta  = self%roconf%dtheta
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)*n_horiz) then
       write(err_msg,*) myname_, ' error: 2d nlocs inconsistent! geovals%nlocs, size(hofx), &
@@ -118,7 +118,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
     write(err_msg,'(a)') '  ufo_gnssro_bndropp2d_simobs:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but ROPP requires it to be ascending order, need flip'
-    call fckit_log%info(err_msg)
+    call fckit_log%debug(err_msg)
   end if
 
 ! set obs space struture
@@ -143,7 +143,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   allocate(ichk(nvprof))
   ichk(:) = 0
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nlocs =  ", nlocs
-  call fckit_log%info(err_msg)
+  call fckit_log%debug(err_msg)
 
 ! loop through the obs
   obs_loop: do iobs = 1, nlocs  
@@ -224,11 +224,9 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsLonnh)
   deallocate(ichk)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: complete"
+  call fckit_log%debug(err_msg)
      
-  return
-
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------
 
