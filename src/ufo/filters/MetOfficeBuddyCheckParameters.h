@@ -171,6 +171,12 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
                                              "ObsValue",
                                              this};
 
+  /// Name of background error group
+  oops::Parameter<std::string> backgroundErrorGroup{"background_error_group",
+                                                    "Name of background error group",
+                                                    "ObsDiag",
+                                                    this};
+
   /// @}
 };
 

@@ -427,7 +427,8 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
 }
 
 Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable) const {
-  return Variable(filterVariable.variable() + "_background_error@ObsDiag");
+  return Variable(filterVariable.variable() + "_background_error@" +
+                  options_.backgroundErrorGroup.value());
 }
 
 MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
