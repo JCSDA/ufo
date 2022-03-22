@@ -75,6 +75,9 @@ class ObsBias : public util::Printable,
   /// Return the list of bias-corrected variables.
   const oops::Variables & correctedVars() const {return vars_;}
 
+  /// Return the list of channels that don't need bias correction
+  const std::vector<int> & chlistNoBC() const {return chlistNoBC_;}
+
   /// Set all variable predictors coefficients to zero (used in the test)
   void zero();
 
@@ -102,6 +105,9 @@ class ObsBias : public util::Printable,
   std::size_t numStaticPredictors_;
   /// number of variable predictors (i.e. predictors with variable coefficients)
   std::size_t numVariablePredictors_;
+
+  /// channel list not bias corrected
+  std::vector<int> chlistNoBC_;
 
   /// corrected variables names (for now has to be same as "simulated variables")
   oops::Variables vars_;

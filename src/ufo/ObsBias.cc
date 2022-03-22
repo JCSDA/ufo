@@ -20,6 +20,7 @@
 #include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
@@ -53,6 +54,13 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
     // Read or initialize bias coefficients
     this->read(params);
+  }
+
+  if (params.channelsNoBC.value() != boost::none) {
+    std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
+    std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+  } else {
+    oops::Log::trace() << "ObsBias::all channels are bias corrected" << std::endl;
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;

@@ -23,6 +23,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_crtm_bc_geos.yaml
+  testinput/amsua_crtm_bc_channelnobc_geos.yaml
   testinput/amsua_n19_fov.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_qc_clwretmw.yaml
@@ -677,6 +678,13 @@ if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_bc_amsua_geos
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/amsua_crtm_bc_geos.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x
+                      TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_crtm_bc_channelnobc_amsua_geos
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/amsua_crtm_bc_channelnobc_geos.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x
                       TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
