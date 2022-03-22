@@ -37,6 +37,7 @@ namespace ufo {
   /// \param[in] ErrVarMax: (Optional) Maximum error variance.
   /// \param[in] obsVal2: (Optional) Second component of 2D observation values.
   /// \param[in] bkgVal2: (Optional) Second component of 2D background values.
+  /// \param[inout] TotalPd: (Optional) Total (combined) probability distribution.
 
   void BayesianPGEUpdate(const ProbabilityOfGrossErrorParameters &options,
                          const std::vector<float> &obsVal,
@@ -49,7 +50,8 @@ namespace ufo {
                          std::vector<float> &PGE,
                          float ErrVarMax = -1,
                          const std::vector<float> *obsVal2 = nullptr,
-                         const std::vector<float> *bkgVal2 = nullptr);
+                         const std::vector<float> *bkgVal2 = nullptr,
+                         std::vector<float> *TotalPd = nullptr);
 }  // namespace ufo
 
 #endif  // UFO_UTILS_PROBABILITYOFGROSSERROR_H_

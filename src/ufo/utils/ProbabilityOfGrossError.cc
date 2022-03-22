@@ -19,7 +19,8 @@ namespace ufo {
                          std::vector<float> &PGE,
                          float ErrVarMax,
                          const std::vector<float> *obsVal2,
-                         const std::vector<float> *bkgVal2)
+                         const std::vector<float> *bkgVal2,
+                         std::vector<float> *TotalPd)
   {
     const float missingValueFloat = util::missingValue(1.0f);
     // PGE multiplication factor used to store PGE values for later use.
@@ -86,8 +87,10 @@ namespace ufo {
         }
 
         // Calculate PGE after background check, normalising appropriately.
-        PGE[jloc] = (PdBad[jloc] * PGE[jloc]) /
-          (PdBad[jloc] * PGE[jloc] + PdGood * (1.0 - PGE[jloc]));
+        const double TotalProbDist = PdBad[jloc] * PGE[jloc] + PdGood * (1.0 - PGE[jloc]);
+        PGE[jloc] = (PdBad[jloc] * PGE[jloc]) / TotalProbDist;
+        if (TotalPd)
+            (*TotalPd)[jloc] = TotalProbDist;
 
         // Set QC flags.
         flags[jloc] |= ufo::MetOfficeQCFlags::Elem::BackPerfFlag;
