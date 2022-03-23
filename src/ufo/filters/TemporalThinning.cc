@@ -325,6 +325,13 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
   // returns what it has been passed without modification.
   const RecordHandler recordHandler(obsdb_);
 
+  // If records are treated as single obs and a category variable is also used,
+  // ensure that there are no records with multiple values of the category variable.
+  if (options_.recordsAreSingleObs &&
+      options_.categoryVariable.value() != boost::none) {
+    recordHandler.checkRecordCategories(Variable(*options_.categoryVariable.value()));
+  }
+
   const std::vector<bool> isThinned =
     identifyThinnedObservations
     (options_.recordsAreSingleObs ?
@@ -342,7 +349,14 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
 
 ObsAccessor TemporalThinning::createObsAccessor() const {
   if (options_.recordsAreSingleObs) {
-    return ObsAccessor::toAllObservations(obsdb_);
+    // If records are treated as single observations, the instantiation of the `ObsAccessor`
+    // depends on whether the category variable has been defined or not.
+    if (options_.categoryVariable.value() != boost::none) {
+      return ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(obsdb_,
+                                                      *options_.categoryVariable.value());
+    } else {
+      return ObsAccessor::toAllObservations(obsdb_);
+    }
   } else if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value() );

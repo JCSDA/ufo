@@ -76,7 +76,12 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   }
 
   ufo::Gaussian_Thinning filter(obsspace, filterParameters, qcflags, obserr);
-  filter.preProcess();
+  if (conf.get("expect_exception_with_message_during_operation", expectedMessage)) {
+    EXPECT_THROWS_MSG(filter.preProcess(), expectedMessage.c_str());
+    return;
+  } else {
+    filter.preProcess();
+  }
 
   const std::vector<size_t> expectedThinnedObsIndices =
       conf.getUnsignedVector("expected_thinned_obs_indices");

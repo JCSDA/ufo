@@ -145,7 +145,8 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// The variable used to group observations into records can be set with the
   /// `obs space.obsdatain.obsgrouping.group variable` YAML option.
   ///
-  /// If a category variable is defined then the option `records_are_single_obs` must be false.
+  /// If a category variable is defined and `records_are_single_obs` is true then
+  /// each record must contain only one value of the category variable.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   // Selection of observations to retain
@@ -226,7 +227,8 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// The variable used to group observations into records can be set with the
   /// `obs space.obsdatain.obsgrouping.group` variable YAML option.
   ///
-  /// If `records_are_single_obs` is true then the `category_variable` parameter must be empty.
+  /// If `records_are_single_obs` is true and a category variable is defined then
+  /// each record must contain only one value of the category variable.
   oops::Parameter<bool> recordsAreSingleObs{"records_are_single_obs", false, this};
 
  private:

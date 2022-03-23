@@ -677,7 +677,14 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
                                  12, 13, 14,   16, 17,
                                  18, 19, 20]
 
-Records are single obs:
+# Setup:
+# - obs divided into records
+# - records are single obs
+# - priority variable used
+# - no category variable used
+# Records:
+# - expect record with lower priority to be thinned: indices 0, 1, 2
+Records are single obs, priority variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -708,7 +715,14 @@ Records are single obs:
     records_are_single_obs: true
   expected_thinned_obs_indices: [0, 1, 2]
 
-Records are single obs, no priority:
+# Setup:
+# - obs divided into records
+# - records are single obs
+# - priority variable not used
+# - no category variable used
+# Records:
+# - expect record at later time to be thinned: indices 3, 4, 5, 6
+Records are single obs, no priority variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -736,7 +750,14 @@ Records are single obs, no priority:
     records_are_single_obs: true
   expected_thinned_obs_indices: [3, 4, 5, 6]
 
-Records are single obs, category_variable set (expect exception):
+# Setup:
+# - obs divided into records
+# - records are single obs
+# - priority variable not used
+# - category variable set to category
+# Records:
+# - expect record at later time in each category to be thinned: indices 2, 3, 6, 7
+Records are single obs, no priority variable, category variable set to category:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -744,27 +765,68 @@ Records are single obs, category_variable set (expect exception):
     simulated variables: [air_temperature]
     generate:
       list:
-        lats: [ 0, 0, 0, 1, 1, 1, 1 ]
-        lons: [ 0, 0, 0, 1, 1, 1, 1 ]
+        lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]
+        lons: [ 0, 0, 0, 0, 1, 1, 1, 1 ]
         dateTimes:
           - 240
+          - 240
           - 250
-          - 260
-          - 270
+          - 250
           - 280
-          - 290
+          - 280
+          - 300
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
       obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
-  category: [0, 0, 0, 1, 1, 1, 1]
+  category: [0, 0, 0, 0, 1, 1, 1, 1]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
     category_variable:
       name: category@MetaData
     records_are_single_obs: true
-  on_deserialization_expect_exception_with_message: category_variable must be empty if records_are_single_obs is set to true
+  expected_thinned_obs_indices: [2, 3, 6, 7]
 
-
+# Setup:
+# - obs divided into records
+# - records are single obs
+# - priority variable used
+# - category variable set to category
+# Records:
+# - expect record with lower priority in each category to be thinned: indices 0, 1, 6, 7
+Records are single obs, priority variable, category variable set to category:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]
+        lons: [ 0, 0, 0, 0, 1, 1, 1, 1 ]
+        dateTimes:
+          - 240
+          - 240
+          - 250
+          - 250
+          - 280
+          - 280
+          - 300
+          - 300
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  category: [0, 0, 0, 0, 1, 1, 1, 1]
+  priority: [3, 3, 4, 4, 4, 4, 3, 3]
+  TemporalThinning:
+    min_spacing: PT1M
+    tolerance: PT1M
+    priority_variable:
+      name: priority@MetaData
+    category_variable:
+      name: category@MetaData
+    records_are_single_obs: true
+  expected_thinned_obs_indices: [0, 1, 6, 7]

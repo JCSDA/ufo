@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include "ufo/filters/Variables.h"
+
 namespace ioda {
   class ObsSpace;
 }
@@ -43,6 +45,10 @@ class RecordHandler
   /// location of the launch site.
   std::vector<bool> changeThinnedIfRecordsAreSingleObs(const std::vector<bool> &) const;
 
+  /// Check each record only contains one value of the category variable. This determines the type
+  /// of the category variable and calls the function `checkRecordCategoriesImpl`.
+  void checkRecordCategories(const Variable & categoryVariableName) const;
+
  private:
   /// ObsSpace.
   const ioda::ObsSpace & obsdb_;
@@ -50,6 +56,11 @@ class RecordHandler
   /// Obtain 'launch' position associated with each record, which is the location in the record
   /// with the earliest non-missing datetime.
   std::vector<std::size_t> getLaunchPositions() const;
+
+  /// Type-dependent implementation of the check that each record only contains one value of the
+  /// category variable.
+  template <typename VariableType>
+  void checkRecordCategoriesImpl(const Variable & categoryVariableName) const;
 };
 
 }  // namespace ufo

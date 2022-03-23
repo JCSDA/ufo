@@ -43,11 +43,14 @@ class RecursiveSplitter;
 ///   rank if this variable was used to group observations into records or on multiple MPI ranks
 ///   if not) independently from all others.
 ///
-/// Depending on which of these cases applies, create an ObservationAccessor object by calling the
+/// Depending on which of these cases applies, create an ObservationAccessor object by
+/// calling one of the
 /// ObsAccessor::toAllObservations(),
-/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId() or the
-/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable() static function. The
-/// ObsAccessor will then determine whether each independent group consists of
+/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(),
+/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable() or
+/// ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable()
+/// static functions.
+/// The ObsAccessor will then determine whether each independent group consists of
 /// observations held only on a single MPI rank. If so, methods such as getValidObservationIds() and
 /// getIntVariableFromObsSpace() will return vectors constructed from data held only on the current
 /// MPI rank (without any MPI communication); otherwise, these vectors will be constructed from
@@ -79,6 +82,12 @@ class ObsAccessor {
   /// observations with different values of the variable \p variable can be processed independently.
   static ObsAccessor toObservationsSplitIntoIndependentGroupsByVariable(
       const ioda::ObsSpace &obsdb, const Variable &variable);
+
+  /// \brief Create an accessor to the collection of observations held in \p obsdb, assuming that
+  /// each record is treated as a single observation.
+  static ObsAccessor toSingleObservationsSplitIntoIndependentGroupsByVariable(
+      const ioda::ObsSpace &obsdb, const Variable &variable);
+
 
   /// \brief Return the IDs of observation locations that should be treated as valid by a filter.
   ///
@@ -224,11 +233,20 @@ class ObsAccessor {
                                                     std::vector<std::vector<bool> > &flagged) const;
 
  private:
-  enum class GroupBy { NOTHING, RECORD_ID, VARIABLE };
+  /// Specifies the observation grouping by a category variable.
+  /// NOTHING: no category variable used.
+  /// RECORD_ID: the category variable was also used to divide the ObsSpace into records.
+  /// VARIABLE: the category variable was not used to divide the ObsSpace into records.
+  /// SINGLE_OBS: records are treated as single obs, in which case the category variable
+  /// may or may not have been used. If it was used, the behaviour is the same regardless of whether
+  /// the category variable was used to divide the ObsSpace into records.
+  enum class GroupBy { NOTHING, RECORD_ID, VARIABLE, SINGLE_OBS };
 
   /// Private constructor. Construct instances of this class by calling toAllObservations(),
-  /// toObservationsSplitIntoIndependentGroupsByRecordId() or
-  /// toObservationsSplitIntoIndependentGroupsByVariable() instead.
+  /// toObservationsSplitIntoIndependentGroupsByRecordId(),
+  /// toObservationsSplitIntoIndependentGroupsByVariable() or
+  /// toSingleObservationsSplitIntoIndependentGroupsByVariable()
+  /// instead.
   ObsAccessor(const ioda::ObsSpace &obsdb,
               GroupBy groupBy,
               boost::optional<Variable> categoryVariable);

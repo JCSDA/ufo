@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <string>
 
 #include "ioda/ObsSpace.h"
 
@@ -93,7 +94,7 @@ std::vector<bool> RecordHandler::changeThinnedIfRecordsAreSingleObs
 
   // Create a vector for which the values of isThinned at all locations
   // in each record are set to logical `or` of the isThinned values in that record.
-  std::vector<bool> isThinnedRecord(obsdb_.nlocs(), false);
+  std::vector<bool> isThinnedRecord(isThinned.size(), false);
 
   // Get correspondence between record numbers and indices in the total sample.
   const std::vector<std::size_t> &recnums = obsdb_.recidx_all_recnums();
@@ -105,15 +106,56 @@ std::vector<bool> RecordHandler::changeThinnedIfRecordsAreSingleObs
     // Logical `or` of values of isThinned in the entire record.
     bool isThinnedLogicalOr = false;
     for (std::size_t loc : locs) {
-      isThinnedLogicalOr = isThinnedLogicalOr || isThinned[loc];
+      const std::size_t gloc = obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(loc);
+      isThinnedLogicalOr = isThinnedLogicalOr || isThinned[gloc];
       if (isThinnedLogicalOr) break;
     }
     // Set isThinned at all locations in record to logical `or` of isThinned values.
-    for (std::size_t loc : locs)
-      isThinnedRecord[loc] = isThinnedLogicalOr;
+    for (std::size_t loc : locs) {
+      const std::size_t gloc = obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(loc);
+      isThinnedRecord[gloc] = isThinnedLogicalOr;
+    }
   }
 
   return isThinnedRecord;
+}
+
+void RecordHandler::checkRecordCategories(const Variable & categoryVariableName) const {
+  switch (obsdb_.dtype(categoryVariableName.group(),
+                       categoryVariableName.variable())) {
+  case ioda::ObsDtype::Integer:
+    checkRecordCategoriesImpl<int>(categoryVariableName);
+    break;
+  case ioda::ObsDtype::String:
+    checkRecordCategoriesImpl<std::string>(categoryVariableName);
+    break;
+  default:
+    throw eckit::UserError(categoryVariableName.fullName() +
+          " is neither an integer nor a string variable", Here());
+  }
+}
+
+template <typename VariableType>
+void RecordHandler::checkRecordCategoriesImpl(const Variable & categoryVariableName) const {
+  // Get category variable from ObsSpace.
+  std::vector <VariableType> categoryVariable(obsdb_.nlocs());
+  obsdb_.get_db(categoryVariableName.group(),
+                categoryVariableName.variable(),
+                categoryVariable);
+
+  // Get correspondence between record numbers and indices in the total sample.
+  const std::vector<std::size_t> &recnums = obsdb_.recidx_all_recnums();
+
+  // Loop over profiles.
+  for (std::size_t jprof = 0; jprof < recnums.size(); ++jprof) {
+    // Get locations corresponding to this profile.
+    const std::vector<std::size_t> & locs = obsdb_.recidx_vector(recnums[jprof]);
+    for (std::size_t loc : locs) {
+      if (categoryVariable[loc] != categoryVariable[locs.front()]) {
+        throw eckit::UserError("Cannot have multiple categories per record", Here());
+      }
+    }
+  }
 }
 
 }  // namespace ufo
