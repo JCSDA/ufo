@@ -44,6 +44,12 @@ _: &1dvar_not_used 92,  269,  559, 1479, 1509, 1513, 1521, 1536, 1574, 1579, 158
                    6463, 6601, 6962, 6980, 6982, 6985, 6987, 6989, 6991, 6993, 6995, 6997, 7267, 7269, 7424,
                    7426, 7428, 7885, 8007
 
+_: &land_not_used 265, 280, 327, 345, 347, 350, 356, 371, 373, 375, 377, 379, 381, 383, 386, 389,
+                  398, 401, 404, 407, 410, 414, 416, 426, 428, 432, 434, 439, 445, 457, 515, 546,
+                  552, 566, 571, 573, 646, 662, 668, 1786, 1805, 1884, 1991, 2019, 2094, 2119,
+                  2239, 2245, 2889, 2907, 2944, 2948, 2951, 2958, 2988, 3027, 3029, 3053, 3058,
+                  3064, 5130, 5368, 5371, 5379, 5381, 5383, 5397, 5399, 5401, 5403, 5405
+
 window begin: 2021-01-14T21:00:00Z
 window end: 2021-01-15T03:00:00Z
 
@@ -86,15 +92,15 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: *1dvar_not_used
-### Bad surface ###
+### Remove channels over land
   - filter: BlackList
     filter variables:
     - name: brightness_temperature
-      channels: *all_channels
+      channels: *land_not_used
     where:
     - variable:
-        name: qcf_BadSurface@MetaData
-      is_in: 1
+        name: surface_type@MetaData
+      is_in: 0
 ### 1D-Var check ###
   - filter: RTTOV OneDVar Check
     ModOptions:
@@ -136,7 +142,7 @@ observations:
     surface emissivity:
       type: principalcomponent
       EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
-  passedBenchmark: 443
+  passedBenchmark: 439
   compareVariables:
     - reference:
         name: n_iterations@TestReference

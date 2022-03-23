@@ -151,6 +151,7 @@ real(kind_real), allocatable :: dBT_dq(:)
 real(kind_real), allocatable :: dBT_dql(:)
 real(kind_real), allocatable :: dBT_dqi(:)
 real(kind_real), allocatable :: emissivity_k(:)
+real(kind_real), allocatable :: emissivity(:)
 character(len=max_string)    :: varname
 real(c_double)               :: BT(size(ob % channels_all))
 real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
@@ -420,19 +421,25 @@ end if
 ! 3.2. Infrared Emissivity - var_sfc_emiss = "surface_emissivity"
 if (profindex % emisspc(1) > 0) THEN
   allocate(emissivity_k(nchans))
-  do i = 1, nchans
+  allocate(emissivity(nchans))
+  do i = 1, nchans ! loop over channels used
     write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
     call ufo_geovals_get_var(hofxdiags, varname, geoval)
     emissivity_k(i) = geoval % vals(1,1)
   end do
-  nemisspc = profindex % emisspc(2) - profindex % emisspc(1) + 1
 
+  ! create emissivity subset from all channels
+  call ufo_rttovonedvarcheck_all_to_subset_by_channels(ob % channels_all, &
+                             ob % emiss, channels, emissivity)
+
+  nemisspc = profindex % emisspc(2) - profindex % emisspc(1) + 1
   call ob % pcemiss_object % emisktopc (nchans,                                                           & ! in
                                         channels,                                                         & ! in
                                         nemisspc,                                                         & ! in
-                                        ob % emiss(:),                                                    & ! in
+                                        emissivity,                                                       & ! in
                                         emissivity_K(:),                                                  & ! in
                                         H_matrix(1:nchans,profindex % emisspc(1):profindex % emisspc(2)))   ! out
+  deallocate(emissivity)
   deallocate(emissivity_k)
 end if
 

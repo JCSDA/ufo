@@ -341,6 +341,11 @@ integer                     :: npc
 character(len=max_string)   :: message
 integer, allocatable        :: ChannelIndex(:)
 
+! Check the input
+if (size(Channels) /= size(Emissivity) ) &
+  call abor1_ftn("ufo_rttovonedvarcheck_EmisToPC: channels and emissivity not the same size: aborting")
+
+! Create the input channel to pc emissivity index mapping
 allocate(ChannelIndex(size(Channels)))
 call self % mapchannels(Channels, ChannelIndex)
 
@@ -388,10 +393,10 @@ implicit none
 ! Subroutine arguments:
 class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
 integer, intent(in)          :: NumChans
-integer, intent(in)          :: Channels(NumChans)
+integer, intent(in)          :: Channels(:)
 integer, intent(in)          :: NumPC
-real(kind_real), intent(in)  :: PC(NumPC)
-real(kind_real), intent(out) :: Emissivity(NumChans)
+real(kind_real), intent(in)  :: PC(:)
+real(kind_real), intent(out) :: Emissivity(:)
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PCToEmis"
@@ -399,6 +404,17 @@ real(kind_real)             :: BigEOF(NumChans,NumChans)
 real(kind_real)             :: BigPC(NumChans)
 integer                     :: ChannelIndex(NumChans)
 
+! Check the input
+if (size(Channels) /= NumChans ) &
+  call abor1_ftn("rttovonedvarcheck PCToEmis: channels not of size NumChans: aborting")
+
+if (size(PC) /= NumPC) &
+  call abor1_ftn("rttovonedvarcheck PCToEmis: PC not of size NumPC: aborting")
+
+if (size(Emissivity) /= NumChans) &
+  call abor1_ftn("rttovonedvarcheck PCToEmis: emissivity not of size NumChans: aborting")
+
+! Create the input channel to pc emissivity index mapping
 call self % mapchannels(Channels, ChannelIndex)
 
 ! Populate PC array with nchans elements
@@ -442,11 +458,11 @@ implicit none
 ! Subroutine arguments
 class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
 integer, intent(in)          :: NumChans
-integer, intent(in)          :: Channels(NumChans)
+integer, intent(in)          :: Channels(:)
 integer, intent(in)          :: NumPC
-real(kind_real), intent(in)  :: Emissivity(NumChans)
-real(kind_real), intent(in)  :: Emissivity_K(NumChans)
-real(kind_real), intent(out) :: PC_K(NumChans,NumPC)
+real(kind_real), intent(in)  :: Emissivity(:)
+real(kind_real), intent(in)  :: Emissivity_K(:)
+real(kind_real), intent(out) :: PC_K(:,:)
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_EmisKToPC"
@@ -454,6 +470,20 @@ real(kind_real)             :: JEMatrix_element
 integer                     :: ichan
 integer                     :: ChannelIndex(NumChans)
 
+! Check the input
+if (size(Channels) /= NumChans ) &
+  call abor1_ftn("rttovonedvarcheck EmisKToPC: channels not of size NumChans: aborting")
+
+if (size(Emissivity) /= NumChans) &
+  call abor1_ftn("rttovonedvarcheck EmisKToPC: emissivity not of size NumChans: aborting")
+
+if (size(Emissivity_K) /= NumChans) &
+  call abor1_ftn("rttovonedvarcheck EmisKToPC: emissivity_k not of size NumChans: aborting")
+
+if (size(PC_K,1) /= NumChans .or. size(PC_K,2) /= NumPC) &
+  call abor1_ftn("rttovonedvarcheck EmisKToPC: PC_K not of size NumChans x NumPC: aborting")
+
+! Create the input channel to pc emissivity index mapping
 call self % mapchannels(Channels, ChannelIndex)
 
 do ichan = 1, NumChans

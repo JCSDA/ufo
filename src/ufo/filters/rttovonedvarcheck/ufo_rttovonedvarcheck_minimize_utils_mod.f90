@@ -439,7 +439,7 @@ end if
 if (profindex % emisspc(1) > 0) then
   ob % pcemiss(:) = prof_x(profindex % emisspc(1):profindex % emisspc(2))
   ! convert emiss_pc to ob % emissivity using
-  call ob % pcemiss_object % pctoemis(size(ob % channels_used), ob % channels_used, &
+  call ob % pcemiss_object % pctoemis(size(ob % channels_all), ob % channels_all, &
                                       size(ob % pcemiss), ob % pcemiss(:), ob % emiss(:))
 end if
 
@@ -1117,6 +1117,10 @@ end do
 if(nchans_rejected > 0) then
   allocate(ob % rejected_channels_ctp(nchans_rejected))
   ob % rejected_channels_ctp(:) = rejected_channels(1:nchans_rejected)
+end if
+
+if (config % FullDiagnostics) then
+  write(*,*) "channels rejected by ufo_rttovonedvarcheck_cloudy_channel_rejection = ",ob % rejected_channels_ctp
 end if
 
 end subroutine ufo_rttovonedvarcheck_cloudy_channel_rejection
