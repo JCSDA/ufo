@@ -82,15 +82,8 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   do ivar = 1, nvars
     call self%geovars%push_back(self%tracervars(ivar))
   end do
-  ! surface pressure
-  call self%geovars%push_back(var_ps)
-  ! column pressure both layer and interface
-  call self%geovars%push_back(var_prs)
+  ! column pressure at interface
   call self%geovars%push_back(var_prsi)
-  ! need air temperature for number density conversion
-  call self%geovars%push_back(var_ts)
-  ! need geopotential height on levels to convert units
-  call self%geovars%push_back(var_zi)
 
 end subroutine ufo_avgkernel_setup
 
@@ -119,11 +112,11 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   type(c_ptr), value, intent(in)    :: obss
 
   ! Local variables
-  type(ufo_geoval), pointer :: prsi, prsl, psfc, temp, phii, tracer
+  type(ufo_geoval), pointer :: prsi, tracer
   integer :: ivar, iobs, ilev
   character(len=MAXVARLEN) :: geovar, varstring
   character(len=4) :: levstr
-  real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsl_obs, prsi_obs
+  real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
   real(kind_real), allocatable, dimension(:) :: airmass_tot, airmass_trop
   real(kind_real), allocatable, dimension(:) :: apriori_term
   integer, allocatable, dimension(:) :: troplev_obs
@@ -135,41 +128,33 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
 
   ! get geovals of atmospheric pressure
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
-  call ufo_geovals_reorderzdir(geovals, self%geovars%variable(nvars+2), "bottom2top")
-  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+1), psfc)
-  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+2), prsl)
-  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+3), prsi)
-  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+4), temp)
-  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+5), phii)
+  call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+1), prsi)
 
   ! grab necesary metadata from IODA
   ! get observation averaging kernel
   ! once 2D arrays are allowed, rewrite/simplify this part
+  ! TEMPORARY: reverse do loops to make sure we follow the convention
+  ! TEMPORARY: top->bottom; increasing pressure 
   allocate(avgkernel_obs(self%nlayers_kernel, nlocs))
-  do ilev = 1, self%nlayers_kernel
+  do ilev = self%nlayers_kernel, 1, -1
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obskernelvar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), avgkernel_obs(ilev, :))
+    call obsspace_get_db(obss, "MetaData", trim(varstring), avgkernel_obs(self%nlayers_kernel+1-ilev, :))
   end do
 
-  ! compute prsl_obs/prsi_obs
-  allocate(prsl_obs(self%nlayers_kernel, nlocs))
+  ! get prsi_obs
   allocate(prsi_obs(self%nlayers_kernel+1, nlocs))
-  ! prsi_obs calculation
-  do ilev = 1, self%nlayers_kernel
+  do ilev = self%nlayers_kernel, 1, -1
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obspressurevar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), prsi_obs(ilev, :))
+    call obsspace_get_db(obss, "MetaData", trim(varstring), prsi_obs(self%nlayers_kernel+2-ilev, :))
   end do
-  !last vertice is always TOA (0 hPa)
-  prsi_obs(self%nlayers_kernel+1,:) = zero 
 
-  ! using simple averaging for now for prsl, can use more complex way later
-  do ilev = 1, self%nlayers_kernel
-    prsl_obs(ilev,:) = (prsi_obs(ilev,:) + prsi_obs(ilev+1,:)) * half
-  end do
+  !last vertice should be always TOA (0 hPa)
+  prsi_obs(1,:) = zero
+  prsi%vals(1,:) = zero
 
   ! getting the apriori term if applicable
   if (self%apriori) then
@@ -185,7 +170,6 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     call obsspace_get_db(obss, "MetaData", "air_mass_factor_troposphere", airmass_trop)
     call obsspace_get_db(obss, "MetaData", "air_mass_factor_total", airmass_tot)
   end if
-
   ! loop through all variables
   do ivar = 1, nvars
     geovar = self%tracervars(ivar)
@@ -195,20 +179,18 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
         if (self%troposphere) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
                                   prsi_obs(:,iobs), prsi%vals(:,iobs), &
-                                  prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
-                                  phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
+                                  tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
         else if (self%totalcolumn) then
           call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
                                   prsi_obs(:,iobs), prsi%vals(:,iobs), &
-                                  prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
-                                  phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
+                                  tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp)
         end if
         if (self%apriori) then
-          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs)) * self%convert_factor_hofx
+          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs)) !* self%convert_factor_hofx
         else
-          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
+          hofx(ivar,iobs) = hofx_tmp !* self%convert_factor_hofx
         endif
       else
         hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel

@@ -16,12 +16,11 @@ observations:
     total column: true
     apriori: true
     model units coeff: 1e-6 # ppmv to 1/1
-    hofx units coeff: 1.6605392e-20 # molec/cm2 to mol/m2
   linear obs operator test:
-    coef TL: 1.0e-5
+    coef TL: 1.0e-9
     tolerance TL: 1.0e-12
     tolerance AD: 1.0e-13
   geovals:
     filename: Data/ufo/testinput_tier_1/mopitt_co_geoval_2020090318_m.nc4
-  rms ref: 0.019189470669030987
+  rms ref: 0.019255562856267044
   tolerance: 1.0e-3
