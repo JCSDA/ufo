@@ -268,7 +268,7 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
                               " is not a function producing values of type " +
                               ObsFunctionTraits<float>::valueTypeName, Here());
   } else {
-    values.read(grp, false, skipDerived);
+    values.read(grp, true, skipDerived);
   }
 }
 
@@ -298,7 +298,7 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & val
     throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
                               " are of type float", Here());
   } else {
-    values.read(grp, false, skipDerived);
+    values.read(grp, true, skipDerived);
   }
 }
 
@@ -331,7 +331,7 @@ void ObsFilterData::get(const Variable & varname,
   } else {
     // Try to retrieve the requested diagnostic flag from the ObsSpace. read() will throw an
     // exception if that flag is not found.
-    values.read(grp, false, skipDerived);
+    values.read(grp, true, skipDerived);
   }
 }
 
@@ -353,7 +353,7 @@ void ObsFilterData::getNonNumeric(const Variable & varname, ioda::ObsDataVector<
     throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
                               " are of type float", Here());
   } else {
-    values.read(grp, false, skipDerived);
+    values.read(grp, true, skipDerived);
   }
 }
 
