@@ -466,7 +466,6 @@ do iprofile = 1, size(unique)
 
     else
       WRITE(Message,'(A,I8,2F16.4)') 'Missing', iob, obsZ(iob), obsLat(iob)
-      CALL fckit_log % debug(Message)
       obsErr(iob) = missing
     end if
   end do

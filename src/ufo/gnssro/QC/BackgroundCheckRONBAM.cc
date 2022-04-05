@@ -35,7 +35,6 @@ BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
 {
   oops::Log::trace() << "BackgroundCheckRONBAM contructor: "
                      << "using NBAM style BackgroundCheck for GnssroBndNBAM" << std::endl;
-  oops::Log::debug() << "BackgroundCheckRONBAM: config = " << config << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
 }
 
@@ -54,8 +53,6 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
-
-  oops::Log::debug() << "BackgroundCheckRONBAM flags: " << flags_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);

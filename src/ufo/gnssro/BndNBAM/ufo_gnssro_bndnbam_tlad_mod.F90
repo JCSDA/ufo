@@ -98,9 +98,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   integer,         allocatable    :: obsSRflag(:)
   integer                         :: hasSRflag
 
-  write(err_msg,*) myname, ": begin"
-  call fckit_log%debug(err_msg)
-
 ! Make sure nothing already allocated   
   call self%delete()
 
@@ -450,8 +447,6 @@ if (nlocs > 0 ) then
 
 end if
   self%ltraj = .true.
-  write(err_msg,*) myname, ": complete"
-  call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndnbam_tlad_settraj
 !----------------------------------------------------------------
@@ -469,9 +464,6 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   type(ufo_geoval), pointer       :: t_tl, prs_tl, q_tl
   real(kind_real), allocatable    :: gesT_tl(:,:), gesP_tl(:,:), gesQ_tl(:,:)
   real(kind_real)                 :: sumIntgl
-
-  write(err_msg,*) myname, ": begin"
-  call fckit_log%debug(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -554,9 +546,6 @@ if (geovals%nlocs > 0 ) then
 
 end if
 
-write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_tl: complete"
-call fckit_log%debug(err_msg)
-
 end subroutine ufo_gnssro_bndnbam_simobs_tl
 
 !----------------------------------------------------------------
@@ -572,9 +561,6 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
   character(max_string)         :: err_msg
   integer                       :: nlocs, iobs, k, nlev,nlev1, icount, irec
 
-  write(err_msg,*) myname,": begin"
-  call fckit_log%debug(err_msg)
-   
 ! check if trajectory was set
   if (.not. self%ltraj) then
      write(err_msg,*) myname, ' trajectory wasnt set!'
@@ -660,9 +646,6 @@ if (self%nlocs > 0 ) then
   deallocate(gesP_ad)
   deallocate(gesQ_ad)
 end if
-
-write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_ad: complete"
-call fckit_log%debug(err_msg)
 
 end subroutine ufo_gnssro_bndnbam_simobs_ad
 ! ------------------------------------------------------------------------------

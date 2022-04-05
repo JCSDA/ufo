@@ -58,7 +58,10 @@ class Locations : public util::Printable,
   std::vector<float> lats() const;
   /// accessor to DateTimes (on current MPI task)
   const std::vector<util::DateTime> & times() const {return times_;}
-
+  /// get local coordinates
+  void localCoords(const util::DateTime & t1, const util::DateTime & t2,
+                   std::vector<double> & lats, std::vector<double> & lons,
+                   std::vector<size_t> & indx) const;
 
  private:
   void initializeObsGroup(size_t nlocs);

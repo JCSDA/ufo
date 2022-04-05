@@ -38,7 +38,6 @@ ROobserror::ROobserror(ioda::ObsSpace & obsdb,
   // Get the number of horizontal geovals (used by ROPP-2D)
   // Default to 1
   n_horiz = config.getInt("n_horiz", 1);
-  oops::Log::debug() << "constructor: n_horiz = " << n_horiz << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -59,8 +58,6 @@ void ROobserror::applyFilter(const std::vector<bool> & apply,
     // Get the geovals
     Eigen::ArrayXXf air_temperature = get_geovals("air_temperature@GeoVaLs");
     Eigen::ArrayXXf geopot_height = get_geovals("geopotential_height@GeoVaLs");
-    oops::Log::debug() << "Shape geopotential height " << geopot_height.rows() <<
-                          "   " << geopot_height.cols() << std::endl;
 
     // Call the fortran routines to do the processing
     flags_->save("FortranQC");    // should pass values to fortran properly
@@ -76,17 +73,14 @@ void ROobserror::applyFilter(const std::vector<bool> & apply,
 
 Eigen::ArrayXXf ROobserror::get_geovals(const std::string& var_name) const {
     // Get the geovals
-    oops::Log::debug() << "Running get_geovals for " << var_name << std::endl;
     // Note that ROPP has more geovals than observation locations, and this converts to
     // the correct number (there are n_horiz geovals for every observation)
     size_t nlocs = obsdb_.nlocs() * static_cast<size_t>(n_horiz);
     ASSERT(nlocs == data_.getGeoVaLs()->nlocs());
     size_t nlevs = data_.nlevs(Variable(var_name));
-    oops::Log::debug() << "nlocs = " << nlocs << "  nlevs = " << nlevs << std::endl;
     Eigen::ArrayXXf all_geovals(nlocs, nlevs);
     std::vector<float> single_geoval(nlocs);
     for (int ilev=0; ilev < static_cast<int>(nlevs); ilev++) {
-        oops::Log::debug() << "Getting data for level " << ilev+1 << std::endl;
         data_.getGeoVaLs()->getAtLevel(single_geoval, Variable(var_name).variable(), ilev);
         all_geovals.col(ilev) = Eigen::VectorXf::Map(single_geoval.data(), single_geoval.size());
     }

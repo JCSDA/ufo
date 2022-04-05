@@ -288,7 +288,6 @@ IF (upper_match > 0) THEN
       WRITE (ErrorMessage, '(A,3F10.2)') "Interpolating between locations.. ", &
                                          RMatrix_list(lower_match) % av_temp, &
                                          av_temp, RMatrix_list(upper_match) % av_temp
-      call fckit_log % debug(ErrorMessage)
     end if
     weight = (av_temp - RMatrix_list(lower_match) % av_temp) / &
       (RMatrix_list(upper_match) % av_temp - RMatrix_list(lower_match) % av_temp)

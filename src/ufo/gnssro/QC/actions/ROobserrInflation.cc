@@ -35,7 +35,6 @@ void ROobserrInflation::apply(const Variables & vars,
                               ioda::ObsDataVector<int> & flags,
                               ioda::ObsDataVector<float> & obserr) const {
   const float missing = util::missingValue(missing);
-  oops::Log::debug() << " input obserr: " << obserr << std::endl;
   size_t nlocs = data.nlocs();
   ioda::ObsDataVector<int> record(data.obsspace(), "record_number", "MetaData");
   ioda::ObsDataVector<int> layeridx(data.obsspace(), "bending_angle", "LayerIdx");

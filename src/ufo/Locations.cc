@@ -30,6 +30,7 @@ Locations::Locations(const std::vector<float> & lons, const std::vector<float> &
                      const std::vector<util::DateTime> & times,
                      std::shared_ptr<const ioda::Distribution> dist)
   : dist_(std::move(dist)), times_(std::move(times)) {
+  oops::Log::trace() << "ufo::Locations::Locations start" << std::endl;
   const size_t nlocs = times_.size();
   ASSERT(nlocs == lons.size());
   ASSERT(nlocs == lats.size());
@@ -170,6 +171,29 @@ std::vector<float> Locations::lats() const {
   std::vector<float> lats(nlocs);
   og_.vars["latitude"].read<float>(gsl::make_span(lats));
   return lats;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+void Locations::localCoords(const util::DateTime & t1, const util::DateTime & t2,
+                            std::vector<double> & lats, std::vector<double> & lons,
+                            std::vector<size_t> & indx) const {
+  const size_t nlocs = size();
+  std::vector<float> loclons(nlocs);
+  std::vector<float> loclats(nlocs);
+  og_.vars["longitude"].read<float>(gsl::make_span(loclons));
+  og_.vars["latitude"].read<float>(gsl::make_span(loclats));
+
+  lats.clear();
+  lons.clear();
+  indx.clear();
+  for (size_t jloc = 0; jloc < nlocs; ++jloc) {
+    if (times_[jloc] > t1 && times_[jloc] <= t2) {
+      lats.push_back(loclats[jloc]);
+      lons.push_back(loclons[jloc]);
+      indx.push_back(jloc);
+    }
+  }
 }
 
 // -------------------------------------------------------------------------------------------------

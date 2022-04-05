@@ -58,14 +58,15 @@ class GeoVaLs : public util::Printable,
 
   static const std::string classname() {return "ufo::GeoVaLs";}
 
+  GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &);
+
+// Deprecated default constructor - Please do not use this constructor in new code.
   GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
+// Deprecated default constructor - Please do not use this constructor in new code.
   GeoVaLs(const Locations &, const oops::Variables &);
+// Constructor for tests - Please do not use this constructor in new code.
+  GeoVaLs(const Parameters_ &, const ioda::ObsSpace &, const oops::Variables &);
 
-  GeoVaLs(const Locations & locs, const oops::Variables & vars,
-          const std::vector<size_t> & nlevs);
-
-  GeoVaLs(const Parameters_ &, const ioda::ObsSpace &,
-          const oops::Variables &);
   GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
 
@@ -143,6 +144,9 @@ class GeoVaLs : public util::Printable,
   void read(const Parameters_ &, const ioda::ObsSpace &);
   void write(const Parameters_ &) const;
   size_t nlocs() const;
+
+  void fill(const std::vector<size_t> &, const std::vector<double> &);
+  void fillAD(const std::vector<size_t> &, std::vector<double> &) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}
