@@ -135,9 +135,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
 // diagnostic variables to be summed over all processors at the end of the routine
   std::unique_ptr<ioda::Accumulator<size_t>> countAccumulator =
       obsdb_.distribution()->createAccumulator<size_t>();
-  enum {PDIFF};
-  std::unique_ptr<ioda::Accumulator<std::vector<double>>> totalsAccumulator =
-      obsdb_.distribution()->createAccumulator<double>(nlocs);
+  std::unique_ptr<ioda::Accumulator<double>> pdiffAccumulator =
+      obsdb_.distribution()->createAccumulator<double>();
 
 // Loop through locations
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
@@ -206,7 +205,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
             obs_pressure[iloc] < inversion_base) {
           // re-assign to base of inversion
           countAccumulator->addTerm(iloc, 1);
-          totalsAccumulator->addTerm(iloc, PDIFF, inversion_base - obs_pressure[iloc]);
+          pdiffAccumulator->addTerm(iloc, inversion_base - obs_pressure[iloc]);
           obs_pressure[iloc] = inversion_base;
           // set flag
           u_flags[iloc] |= ufo::MetOfficeQCFlags::SatWind::SatwindInversionFlag;
@@ -226,11 +225,11 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
 
   // sum number corrected and pressure differences
   const std::size_t count = countAccumulator->computeResult();
-  const std::vector<double> totals = totalsAccumulator->computeResult();
+  const double pdiff = pdiffAccumulator->computeResult();
   if (count) {
     oops::Log::info() << "Satwind Inversion: "<< count
                                        << " observations with modified pressure" << std::endl;
-    oops::Log::info() << "Satwind Inversion: "<< totals[PDIFF] / count
+    oops::Log::info() << "Satwind Inversion: "<< pdiff / count
                                        << " Pa mean pressure difference" << std::endl;
   }
 }

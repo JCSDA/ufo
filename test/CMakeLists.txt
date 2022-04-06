@@ -1857,6 +1857,7 @@ ecbuild_add_test( TARGET  test_ufo_satname
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_satwind_inversion_correction
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/satwind_inversion_correction.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
