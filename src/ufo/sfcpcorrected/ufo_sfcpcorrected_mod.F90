@@ -90,7 +90,7 @@ character(len=*), parameter       :: myname_="ufo_sfcpcorrected_simobs"
 character(max_string)             :: err_msg
 real(kind_real)                   :: wf
 integer                           :: wi
-logical                           :: variable_present
+logical                           :: variable_present, variable_present_t, variable_present_q
 real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_lat
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
 real(kind_real)                   :: model_znew
@@ -215,15 +215,21 @@ select case (trim(self%da_psfc_scheme))
 
 case ("WRFDA")
    ! get extra obs values
-   variable_present = obsspace_has(obss, "ObsValue", "air_temperature")
-   if (variable_present) then
+   variable_present_t = .false.
+   variable_present_q = .false.
+   if (obsspace_has(obss, "ObsValue", "virtual_temperature")) then
+      variable_present_t = .true.
+      allocate(obs_t(nobs))
+      call obsspace_get_db(obss, "ObsValue", "virtual_temperature", obs_t)
+   else if (obsspace_has(obss, "ObsValue", "air_temperature")) then
+      variable_present_t = .true.
       allocate(obs_t(nobs))
       call obsspace_get_db(obss, "ObsValue", "air_temperature", obs_t)
-   end if
-   variable_present = obsspace_has(obss, "ObsValue", "specific_humidity")
-   if (variable_present) then
-      allocate(obs_q(nobs))
-      call obsspace_get_db(obss, "ObsValue", "specific_humidity", obs_q)
+      variable_present_q = obsspace_has(obss, "ObsValue", "specific_humidity")
+      if (variable_present_q) then
+         allocate(obs_q(nobs))
+         call obsspace_get_db(obss, "ObsValue", "specific_humidity", obs_q)
+      end if
    end if
 
    ! get extra model values
@@ -231,10 +237,16 @@ case ("WRFDA")
    model_tvs = model_tv%vals(kbot,:) + Lclr * ( model_level1 - model_zs )  !Lclr = 0.0065 K/m
 
    ! correction
-   call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t, obs_q)
+   if (variable_present_t .and. variable_present_q) then
+      call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t, obs_q)
+   else if (variable_present_t) then
+      call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t)
+   else
+      call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs)
+   end if
 
-   deallocate(obs_t)
-   deallocate(obs_q)
+   if (variable_present_t) deallocate(obs_t)
+   if (variable_present_q) deallocate(obs_q)
    deallocate(model_tvs)
 
 case ("UKMO")
