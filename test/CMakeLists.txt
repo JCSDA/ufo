@@ -94,6 +94,7 @@ list( APPEND ufo_test_input
   testinput/function_orbitangle_ssmis.yaml
   testinput/function_profilelevelcount.yaml
   testinput/function_reperr.yaml
+  testinput/function_setseaiceemiss.yaml
   testinput/function_setsurfacetype.yaml
   testinput/function_setsurfacetype_ssmis.yaml
   testinput/function_satwind_indiv_errors.yaml
@@ -3299,6 +3300,13 @@ ecbuild_add_test( TARGET  test_ufo_function_exponential
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_setseaiceemiss
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_setseaiceemiss.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_function_setsurfacetype
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
