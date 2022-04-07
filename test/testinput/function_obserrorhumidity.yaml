@@ -1,0 +1,62 @@
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
+
+observations:
+- obs space:
+    name: test_humidity_obserror_singular
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_singular.nc4
+    simulated variables: [specific_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
+  obs operator:
+    name: VertInterp
+  obs function:
+    name: ObsErrorModelHumidity@ObsFunction
+    options:
+      xvar:
+        name: MetaData/air_pressure
+      xvals: [50000]  # Pressure (Pa)
+      errors: [0.2]   # RH error
+    variables: [specific_humidity_obserr]
+    tolerance: 1.0e-9
+
+- obs space:
+    name: test_humidity_obserror_vector
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_vector.nc4
+    simulated variables: [specific_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
+  obs operator:
+    name: VertInterp
+  obs function:
+    name: ObsErrorModelHumidity@ObsFunction
+    options:
+      xvar:
+        name: MetaData/air_pressure
+      xvals: [25000, 20000, 10]  # Pressure (Pa)
+      errors: [0.2, 0.4, 0.8]    # RH error
+    variables: [specific_humidity_obserr]
+    tolerance: 1.0e-9
+
+- obs space:
+    name: test_humidity_obserror_UKMO
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_UKMO.nc4
+    simulated variables: [specific_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
+  obs operator:
+    name: VertInterp
+  obs function:
+    name: ObsErrorModelHumidity@ObsFunction
+    options:
+      xvar:
+        name: MetaData/air_pressure
+      xvals: [50000]  # Pressure (Pa)
+      errors: [0.2]   # RH error
+      Formulation: Sonntag  #formula for sat. vapor pressure
+      Method: UKMO   #method for sat. vapor pressure (equivalent to Formulation: Sonntag)
+    variables: [specific_humidity_obserr]
+    tolerance: 1.0e-9

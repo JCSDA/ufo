@@ -104,6 +104,7 @@ list( APPEND ufo_test_input
   testinput/function_errfsdoei_atms.yaml
   testinput/function_velocity.yaml
   testinput/function_obserrorstepwiselinear.yaml
+  testinput/function_obserrorhumidity.yaml
   testinput/gmi_crtm.yaml
   testinput/gmi_clw_ret.yaml
   testinput/gmi_qc_filters.yaml
@@ -3247,6 +3248,13 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
 ecbuild_add_test( TARGET  test_ufo_function_obserrormodelstepwiselinear
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
                   ARGS    "testinput/function_obserrorstepwiselinear.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrormodelhumidity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_obserrorhumidity.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)

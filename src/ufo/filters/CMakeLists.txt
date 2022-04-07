@@ -185,6 +185,8 @@ set ( filters_files
       obsfunctions/InterChannelConsistencyCheck.h
       obsfunctions/BgdDepartureAnomaly.cc
       obsfunctions/BgdDepartureAnomaly.h
+      obsfunctions/ObsErrorModelHumidity.cc
+      obsfunctions/ObsErrorModelHumidity.h
       obsfunctions/ObsErrorModelStepwiseLinear.cc
       obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc
