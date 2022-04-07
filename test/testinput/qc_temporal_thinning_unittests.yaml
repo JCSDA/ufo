@@ -707,6 +707,7 @@ Records are single obs, priority variable:
       obsgrouping:
         group variables: [ "latitude" ]
   priority: [3, 3, 3, 4, 4, 4, 4]
+  air_temperature: [280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
@@ -744,6 +745,7 @@ Records are single obs, no priority variable:
       obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
+  air_temperature: [280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
@@ -781,6 +783,7 @@ Records are single obs, no priority variable, category variable set to category:
       obsgrouping:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]
+  air_temperature: [280, 280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
@@ -821,6 +824,7 @@ Records are single obs, priority variable, category variable set to category:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]
   priority: [3, 3, 4, 4, 4, 4, 3, 3]
+  air_temperature: [280, 280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M

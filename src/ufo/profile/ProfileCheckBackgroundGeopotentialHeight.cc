@@ -49,14 +49,14 @@ namespace ufo {
                                          zObs, zObsErr, zBkg,
                                          zPGE, zFlags, zObsCorrection,
                                          tFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(Zstation, pressures,
-                                                      zObs, zObsErr, zBkg,
-                                                      zPGE, zFlags, zObsCorrection,
-                                                      tFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(Zstation, pressures,
+                                                    zObs, zObsErr, zBkg,
+                                                    zPGE, zFlags, zObsCorrection,
+                                                    tFlags)
+                         << std::endl;
       return;
     }
 

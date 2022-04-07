@@ -38,6 +38,11 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   obsParams.validateAndDeserialize(obsSpaceConf);
   ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
+  if (conf.has("air_temperature")) {
+    const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");
+    obsspace.put_db("ObsValue", "air_temperature", air_temperature);
+  }
+
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
     obsspace.put_db("MetaData", "air_pressure", air_pressures);

@@ -512,3 +512,95 @@ observations:
       flag: FlagA
       ignore: defective observations
   expectExceptionWithMessage: Actions modifying QC flags, such as 'accept', must not be followed by any other actions performed by the same filter
+
+# Test "flag original and averaged profiles"
+# Grouping into records according to MetaData/intvar3 produces two records.
+# The ObsSpace extension produces 71 new locations per record, so there are
+# 142 new locations in total.
+# Six of the original locations are blacklisted by the filter.
+# The use of the 'flag original and averaged profiles' action means that,
+# because at least one location in each original profile is flagged,
+# both of the extended records are also flagged.
+# There are therefore 6 + 71 * 2 = 148 flagged locations in total.
+- obs space:
+    name: "Test data for 'flag original and averaged profiles'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+        group variables: ["intvar3"]
+    simulated variables: [variable1]
+    extension:
+      average profiles onto model levels: 71
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    where:
+    - variable:
+        name: var1@MetaData # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      minvalue: 5
+    action:
+      name: flag original and averaged profiles
+  benchmarkFlag: 14
+  flaggedBenchmark: 148
+
+# This is similar to the previous case, but locations in just one original profile are flagged.
+# Therefore only one of the extended profiles is flagged.
+# There are 5 + 71 = 76 flagged locations in total.
+- obs space:
+    name: "Test data for 'flag original and averaged profiles', just one profile flagged"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+        group variables: ["intvar3"]
+    simulated variables: [variable1]
+    extension:
+      average profiles onto model levels: 71
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    where:
+    - variable:
+        name: var1@MetaData # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      minvalue: 6
+    action:
+      name: flag original and averaged profiles
+  benchmarkFlag: 14
+  flaggedBenchmark: 76
+
+# Test "flag original and averaged profiles" without grouping into records, throwing an exception.
+- obs space:
+    name: "Test data for 'flag original and averaged profiles'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+    extension:
+      average profiles onto model levels: 71
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    where:
+    - variable:
+        name: var1@MetaData # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      minvalue: 5
+    action:
+      name: flag original and averaged profiles
+  expectExceptionWithMessage: Group variables configuration is empty
+
+# Test "flag original and averaged profiles" without extending the ObsSpace, throwing an exception.
+- obs space:
+    name: "Test data for 'flag original and averaged profiles'"
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+        group variables: ["intvar3"]
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    where:
+    - variable:
+        name: var1@MetaData # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      minvalue: 5
+    action:
+      name: flag original and averaged profiles
+  expectExceptionWithMessage: The extended obs space has not been produced

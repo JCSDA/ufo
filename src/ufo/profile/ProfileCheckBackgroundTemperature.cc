@@ -48,13 +48,13 @@ namespace ufo {
     if (!oops::allVectorsSameNonZeroSize(Latitude, pressures,
                                          tObs, tObsErr, tBkg, tBkgErr,
                                          tPGE, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(Latitude, pressures,
-                                                      tObs, tObsErr, tBkg, tBkgErr,
-                                                      tPGE, tFlags, tObsCorrection)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(Latitude, pressures,
+                                                    tObs, tObsErr, tBkg, tBkgErr,
+                                                    tPGE, tFlags, tObsCorrection)
+                         << std::endl;
       return;
     }
 

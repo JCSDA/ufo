@@ -15,16 +15,30 @@
 #include "ufo/utils/RecordHandler.h"
 
 namespace ufo {
-  RecordHandler::RecordHandler(const ioda::ObsSpace & obsdb)
-    : obsdb_(obsdb)
+  RecordHandler::RecordHandler(const ioda::ObsSpace & obsdb,
+                               const Variables & filtervars,
+                               const bool retainOnlyIfAllFilterVariablesAreValid)
+    : obsdb_(obsdb),
+      filtervars_(filtervars),
+      retainOnlyIfAllFilterVariablesAreValid_(retainOnlyIfAllFilterVariablesAreValid)
   {}
 
 std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
+  const float missingFloat = util::missingValue(missingFloat);
   const util::DateTime missingDateTime = util::missingValue(missingDateTime);
 
   // Retrieve datetimes.
   std::vector<util::DateTime> dateTimes(obsdb_.nlocs());
   obsdb_.get_db("MetaData", "dateTime", dateTimes);
+
+  // Retrieve filter variables
+  std::vector<std::vector<float>> filterVars;
+  for (size_t ivar = 0; ivar < filtervars_.nvars(); ++ivar) {
+    const std::string varname = filtervars_.variable(ivar).variable();
+    std::vector<float> filterVarValues(obsdb_.nlocs());
+    obsdb_.get_db("ObsValue", varname, filterVarValues);
+    filterVars.push_back(filterVarValues);
+  }
 
   // Vector of locations corresponding to profile launch positions.
   std::vector<std::size_t> launchPositions;
@@ -34,19 +48,52 @@ std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < recnums.size(); ++jprof) {
     // Get locations corresponding to this profile.
-    const std::vector<std::size_t> & locs = obsdb_.recidx_vector(recnums[jprof]);
+    std::vector<std::size_t> locs = obsdb_.recidx_vector(recnums[jprof]);
+    // Sort locs according to values of dateTime, ignoring missing values.
+    std::stable_sort(locs.begin(),
+                     locs.end(),
+                     [&](int a, int b)
+                     {return dateTimes[a] == missingDateTime ?
+                         false :
+                         (dateTimes[b] == missingDateTime ?
+                          true :
+                          dateTimes[a] < dateTimes[b]);});
+
     // Find the location corresponding to the launch position.
-    // This is defined as the smallest non-missing datetime in the profile.
-    // If all datetimes are missing this will select the first entry in the profile.
-    auto it_nonmissing = std::min_element(locs.begin(), locs.end(),
-                                          [missingDateTime, & dateTimes]
-                                          (const size_t & a, const size_t & b)
-                                          {return dateTimes[a] == missingDateTime ?
-                                           false :
-                                           (dateTimes[b] == missingDateTime ?
-                                            true :
-                                            dateTimes[a] < dateTimes[b]);});
-    launchPositions.push_back(*it_nonmissing);
+    // This is defined as the location with the earliest non-missing datetime
+    // and a certain number of non-missing filter variables.
+    // If `retainOnlyIfAllFilterVariablesAreValid` is true, all filter variables must
+    // be non-missing. If it is false then at least one must be non-missing.
+    size_t launchPosition = locs.front();
+    for (const size_t jloc : locs) {
+      // Skip location if dateTime is missing.
+      if (dateTimes[jloc] == missingDateTime) continue;
+      // Skip location if a certain number of filter variables are missing.
+      bool filterVarsOK = true;
+      if (retainOnlyIfAllFilterVariablesAreValid_) {
+        // Retain location if all filter variables are valid.
+        for (const std::vector<float> & filterVar : filterVars) {
+          if (filterVar[jloc] == missingFloat) {
+            filterVarsOK = false;
+            break;
+          }
+        }
+      } else {
+        filterVarsOK = false;
+        for (const std::vector<float> & filterVar : filterVars) {
+          // Retain location if any filter variable is valid.
+          if (filterVar[jloc] != missingFloat) {
+            filterVarsOK = true;
+            break;
+          }
+        }
+      }
+      if (!filterVarsOK) continue;
+      // Launch position is current location.
+      launchPosition = jloc;
+      break;
+    }
+    launchPositions.push_back(launchPosition);
   }
 
   return launchPositions;

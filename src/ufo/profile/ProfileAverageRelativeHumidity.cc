@@ -149,14 +149,15 @@ namespace ufo {
       profileOriginal.get<int>(ufo::VariableNames::counter_NumGapsRH);
 
     if (!oops::allVectorsSameNonZeroSize(rhObs, rhPGE, rhFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Relative humidity averaging will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(rhObs,
-                                                      rhPGE,
-                                                      rhFlags)
-                           << std::endl;
-      throw eckit::BadValue("Error in relative humidity averaging", Here());
+      std::stringstream errorMessage;
+      errorMessage << "At least one vector is the wrong size. "
+                   << "Relative humidity averaging will not be performed." << std::endl;
+      errorMessage << "Vector sizes: "
+                   << oops::listOfVectorSizes(rhObs,
+                                              rhPGE,
+                                              rhFlags)
+                   << std::endl;
+      throw eckit::BadValue(errorMessage.str(), Here());
     }
 
     // Obtain GeoVaLs.

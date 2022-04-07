@@ -39,11 +39,11 @@ namespace ufo {
       != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(ObsType, pressures, uFlags, vFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Time checks will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(ObsType, pressures, uFlags, vFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Time checks will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(ObsType, pressures, uFlags, vFlags)
+                         << std::endl;
       return;
     }
 

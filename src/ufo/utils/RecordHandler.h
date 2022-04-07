@@ -29,7 +29,9 @@ namespace ufo {
 class RecordHandler
 {
  public:
-  explicit RecordHandler(const ioda::ObsSpace & obsdb);
+  explicit RecordHandler(const ioda::ObsSpace & obsdb,
+                         const Variables & filtervars,
+                         const bool retainOnlyIfAllFilterVariablesAreValid);
 
   /// Modify the input `apply` vector if records are treated as single observations.
   /// This function first finds the location of the earliest non-missing datetime in each record,
@@ -52,6 +54,18 @@ class RecordHandler
  private:
   /// ObsSpace.
   const ioda::ObsSpace & obsdb_;
+
+  /// Filter variables.
+  const Variables & filtervars_;
+
+  /// Option to choose how to treat observations where there are multiple filter variables.
+  /// This quantity is set in the thinning routine that instantiates this class.
+  /// If true, an observation is valid only so long as all filter variables have passed QC.
+  /// For invalid observation locations (selected by a where clause) any remaining unflagged filter
+  /// variables are rejected.
+  /// If false, an observation location is valid if any filter variables have not been rejected.
+  /// The default value of this parameter is false.
+  const bool retainOnlyIfAllFilterVariablesAreValid_;
 
   /// Obtain 'launch' position associated with each record, which is the location in the record
   /// with the earliest non-missing datetime.

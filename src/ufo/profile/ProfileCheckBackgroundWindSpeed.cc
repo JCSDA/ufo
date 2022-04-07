@@ -55,14 +55,14 @@ namespace ufo {
                                          uPGE, uFlags,
                                          vObs, vObsErr, vBkg, vBkgErr,
                                          vPGE, vFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(uObs, uObsErr, uBkg, uBkgErr,
-                                                      uPGE, uFlags,
-                                                      vObs, vObsErr, vBkg, vBkgErr,
-                                                      vPGE, vFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(uObs, uObsErr, uBkg, uBkgErr,
+                                                    uPGE, uFlags,
+                                                    vObs, vObsErr, vBkg, vBkgErr,
+                                                    vPGE, vFlags)
+                         << std::endl;
       return;
     }
 

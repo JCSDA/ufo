@@ -34,11 +34,11 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (!oops::allVectorsSameNonZeroSize(zObs, ObsType, ReportFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Profile pressure routine will not run." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(zObs, ObsType, ReportFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Profile pressure routine will not run." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(zObs, ObsType, ReportFlags)
+                         << std::endl;
       return;
     }
 
@@ -53,13 +53,13 @@ namespace ufo {
     if (orogGeoVaLs.empty() ||
         !oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
                                          heightGeoVaLs)) {
-      oops::Log::warning() << "At least one GeoVaLs vector is the wrong size. "
-                           << "Profile pressure routine will not run." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(orogGeoVaLs,
-                                                      pressureGeoVaLs,
-                                                      heightGeoVaLs)
-                           << std::endl;
+      oops::Log::debug() << "At least one GeoVaLs vector is the wrong size. "
+                         << "Profile pressure routine will not run." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(orogGeoVaLs,
+                                                    pressureGeoVaLs,
+                                                    heightGeoVaLs)
+                         << std::endl;
       return;
     }
 

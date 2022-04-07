@@ -55,10 +55,13 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
+  bool retainOnlyIfAllFilterVariablesAreValid =
+          options_.retainOnlyIfAllFilterVariablesAreValid.value();
+
   // The RecordHandler deals with data that have been grouped into records.
   // If the grouping has not been performed then each RecordHandler function simply
   // returns what it has been passed without modification.
-  const RecordHandler recordHandler(obsdb_);
+  const RecordHandler recordHandler(obsdb_, filtervars, retainOnlyIfAllFilterVariablesAreValid);
 
   // If records are treated as single obs and a category variable is also used,
   // ensure that there are no records with multiple values of the category variable.
@@ -67,8 +70,6 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     recordHandler.checkRecordCategories(Variable(*options_.categoryVariable.value()));
   }
 
-  bool retainOnlyIfAllFilterVariablesAreValid =
-          options_.retainOnlyIfAllFilterVariablesAreValid.value();
   std::vector<size_t> validObsIds =
     obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
                                        recordHandler.changeApplyIfRecordsAreSingleObs(apply) :

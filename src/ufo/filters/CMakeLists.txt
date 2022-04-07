@@ -143,6 +143,8 @@ set ( filters_files
       actions/FilterAction.h
       actions/FilterActionBase.cc
       actions/FilterActionBase.h
+      actions/FlagOriginalAndAveragedProfiles.cc
+      actions/FlagOriginalAndAveragedProfiles.h
       actions/InflateError.cc
       actions/InflateError.h
       actions/PassivateObs.cc
