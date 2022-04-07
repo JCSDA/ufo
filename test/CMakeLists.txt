@@ -442,6 +442,11 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
       set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147b_jcsda/version/1.0.0/file )
     endif()
 
+    if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL_CRTM} )
+      set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL_CRTM}/${repo}/${GIT_TAG_FUNC}" )
+    endif()
+
+
     set( checksum "0" )
     set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${GIT_TAG_FUNC}" )
     # Create test-data-release in source directory
@@ -452,7 +457,7 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
           ${test_files_dirname}
           ${checksum} )
 
-    message( STATUS "Test files will be downloaded from DASH and
+    message( STATUS "Test files will be downloaded from ${ECBUILD_DOWNLOAD_BASE_URL} and
     saved to ${TESTFILE_DIR_REPO} for ${repo}")
 
     set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
