@@ -543,6 +543,78 @@ successful:
         minvalue: 2000-01-01T00:00:00Z
       size where true: 8
 
+# test use of logical operators in a where statement with multiple conditions
+operator:
+  window begin: 2018-01-01T00:00:00Z
+  window end: 2019-01-01T00:00:00Z
+  obs space:
+    name: ProcessWhere Test Data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [var1]
+  nlocs: 10
+  ProcessWhere:
+    # Check an empty list of conditions works as expected (i.e. the result is true everywhere).
+    - where: []
+      size where true: 10
+    # Check the 'and' option works as expected
+    - where:
+      - variable:
+          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 3
+      - variable:
+          name:  var2@MetaData # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        minvalue: 6
+      where operator: and
+      size where true: 3
+    - where:
+      - variable:
+          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 3
+      - variable:
+          name:  var2@MetaData # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        minvalue: 6
+      where operator: or
+      size where true: 10
+    - where:
+      - variable:
+          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 10
+      - variable:
+          name: var2@MetaData  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        minvalue: 10
+      - variable:
+          name:  intvar3@MetaData  # 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+        is_in: 1
+      where operator: or
+      size where true: 6
+    - where:
+      - variable:
+          name: intvar5@MetaData  # 1, _, 2, _, 3, _, 4, _, 5, 0
+        is_not_defined:
+      - variable:
+          name: intvar5@MetaData  # 1, _, 2, _, 3, _, 4, _, 5, 0
+        is_defined:
+      where operator: or
+      size where true: 10
+    - where:
+      - variable:
+          name:  Conditional@ObsFunction
+          options:
+            cases:
+            - where:
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                minvalue: 8
+              - variable:
+                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                maxvalue: 3
+              where operator: or
+              value: 0.6               # assigned to indices 0, 1, 2, 7, 8, 9
+            defaultvalue: 0.4          # assigned to indices 3, 4, 5, 6
+        minvalue: 0.5
+      size where true: 6
+
 user_error_type_handling_is_in:
   window begin: 2018-01-01T00:00:00Z
   window end: 2019-01-01T00:00:00Z

@@ -57,7 +57,7 @@ void ProfileLevelCount::compute(const ObsFilterData & in,
 
   // Vector of locations that pass the 'where' clause in the sample
   // (all true if there is no where clause).
-  const std::vector<bool> apply = processWhere(options_.where, in);
+  const std::vector<bool> apply = processWhere(options_.where, in, options_.whereOperator);
 
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < nprofs; ++jprof) {

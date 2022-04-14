@@ -23,6 +23,28 @@
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
+  enum class WhereOperator {AND, OR};
+
+  struct WhereOperatorParameterTraitsHelper {
+    typedef WhereOperator EnumType;
+    static constexpr char enumTypeName[] = "WhereOperator";
+    static constexpr util::NamedEnumerator<WhereOperator> namedValues[] =
+      { { WhereOperator::AND, "and" },
+        { WhereOperator::OR, "or" }
+      };
+  };
+}  // namespace ufo
+
+namespace oops {
+
+  template<>
+  struct ParameterTraits<ufo::WhereOperator> :
+    public EnumParameterTraits<ufo::WhereOperatorParameterTraitsHelper>
+  {};
+
+}  // namespace oops
+
+namespace ufo {
   class ObsFilterData;
   class Variables;
 
@@ -114,7 +136,8 @@ class WhereParameters : public oops::Parameters {
 };
 
 ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> &);
-std::vector<bool> processWhere(const std::vector<WhereParameters> &, const ObsFilterData &);
+std::vector<bool> processWhere(const std::vector<WhereParameters> &, const ObsFilterData &,
+                               const WhereOperator & whereOperator);
 
 }  // namespace ufo
 

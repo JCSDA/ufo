@@ -58,6 +58,10 @@ class FilterParametersBaseWithAbstractActions : public oops::ObsFilterParameters
   /// `where` statement.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
 
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
+
   /// If set to true, the filter will be executed only after the obs operator (even if it
   /// doesn't require any variables from the GeoVaLs or HofX groups).
   oops::Parameter<bool> deferToPost{"defer to post", false, this};

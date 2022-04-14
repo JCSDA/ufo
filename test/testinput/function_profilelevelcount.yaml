@@ -69,3 +69,35 @@ observations:
                 name: apply@MetaData
               is_in: 1
   expectExceptionWithMessage: Group variables configuration is empty
+
+- obs space:
+    name: Profile level count, where clause using logical `or`
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: number_of_levels@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: apply@MetaData
+              is_in: 1
+            - variable:
+                name: apply@MetaData
+              is_in: 0
+          where operator: or
+  compareVariables:
+  - test:
+      name: number_of_levels@DerivedMetaData
+    reference:
+      # expect all locations to be selected
+      name: number_of_levels_without_where@TestReference

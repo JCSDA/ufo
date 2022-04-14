@@ -388,7 +388,7 @@ void VariableAssignment::doFilter() const {
   oops::Log::trace() << "VariableAssignment doFilter begin" << std::endl;
 
   // Select locations at which the filter will be applied
-  const std::vector<bool> apply = processWhere(parameters_.where, data_);
+  const std::vector<bool> apply = processWhere(parameters_.where, data_, parameters_.whereOperator);
 
   // Assign values to successive sets of variables
   for (const AssignmentParameters &assignment : parameters_.assignments.value()) {

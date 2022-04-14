@@ -94,9 +94,13 @@ class PrintFilterDataParameters : public oops::ObsFilterParametersBase {
   /// The width of the columns in the output table.
   oops::Parameter<int> columnWidth {"column width", 20, this, {oops::minConstraint(0)}};
 
-  /// Conditions used to select locations where variable assignment should be performed.
+  /// Conditions used to select locations at which the filter data should be printed.
   /// If not specified, printing will be performed at all required locations.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
+
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
 
   /// If set to true, variable assignment will be done after the obs operator has been invoked
   /// (even if the filter doesn't require any variables from the GeoVaLs or HofX groups).

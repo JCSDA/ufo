@@ -870,3 +870,27 @@ observations:
       type: int
       source variable: float_variable_3@MetaData  # contains 1e20
   expectExceptionWithMessage: Value 1.00000002e+20 can not be represented in the target integer type
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing float variable using an `or` operator with the `where` statement.
+  obs filters:
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: float_variable_1@MetaData
+      minvalue: 4
+      maxvalue: 6
+    - variable:
+        name: float_variable_1@MetaData
+      minvalue: 7
+      maxvalue: 8
+    where operator: or
+    assignments:
+    - name: float_variable_1@MetaData
+      value: 75.5
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_1@TestReference

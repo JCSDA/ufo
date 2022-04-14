@@ -25,6 +25,9 @@
 
 namespace ufo {
 
+constexpr char WhereOperatorParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<WhereOperator>
+  WhereOperatorParameterTraitsHelper::namedValues[];
 
 // -----------------------------------------------------------------------------
 ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> & params) {
@@ -397,13 +400,49 @@ void isNotInInteger(std::vector<bool> & where, std::set<int> const & forbiddenVa
   processWhereIsNotIn(data, forbiddenValues, where);
 }
 
+void setWhereVector(std::vector<bool> & where,
+                    const bool value) {
+  std::fill(where.begin(), where.end(), value);
+}
+
+void applyWhereOperator(const WhereOperator & whereOperator,
+                        std::vector<bool> & whereTest,
+                        std::vector<bool> & where) {
+  ASSERT(whereTest.size() == where.size());
+  switch (whereOperator) {
+  case WhereOperator::AND:
+    for (size_t jloc = 0; jloc < whereTest.size(); ++jloc)
+      where[jloc] = where[jloc] && whereTest[jloc];
+    break;
+  case WhereOperator::OR:
+    for (size_t jloc = 0; jloc < whereTest.size(); ++jloc)
+      where[jloc] = where[jloc] || whereTest[jloc];
+    break;
+  }
+}
+
 // -----------------------------------------------------------------------------
 std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
-                               const ObsFilterData & filterdata) {
+                               const ObsFilterData & filterdata,
+                               const WhereOperator & whereOperator) {
   const size_t nlocs = filterdata.nlocs();
 
-// Everywhere by default if no mask
-  std::vector<bool> where(nlocs, true);
+  // Vector to which all selection operations are applied.
+  std::vector<bool> where(nlocs);
+  switch (whereOperator) {
+  case WhereOperator::AND:
+    // Set `where` to `true` everywhere because a logical `and` will be used.
+    setWhereVector(where, true);
+    break;
+  case WhereOperator::OR:
+    // Set `where` to `false` everywhere because a logical `or` will be used.
+    setWhereVector(where, false);
+    break;
+  }
+
+  // Set `where` to `true` everywhere if there are no comparisons to be made.
+  if (params.empty())
+    setWhereVector(where, true);
 
   for (const WhereParameters &currentParams : params) {
     const Variable &var = currentParams.variable;
@@ -412,23 +451,34 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
         const Variable varname = var[jvar];
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
-        if (dtype == ioda::ObsDtype::DateTime) {
-          applyMinMax<util::DateTime>(where, currentParams, filterdata, varname);
-        } else if (dtype == ioda::ObsDtype::Integer) {
-          applyMinMax<int>(where, currentParams, filterdata, varname);
-        } else {
-          applyMinMax<float>(where, currentParams, filterdata, varname);
+        // Vector to which each operation is applied individually.
+        // Set to `true` at the start of each test.
+        std::vector<bool> whereTest(nlocs);
+
+//      Apply mask min/max
+        if (currentParams.minvalue.value() ||
+            currentParams.maxvalue.value()) {
+          setWhereVector(whereTest, true);
+          if (dtype == ioda::ObsDtype::DateTime) {
+            applyMinMax<util::DateTime>(whereTest, currentParams, filterdata, varname);
+          } else if (dtype == ioda::ObsDtype::Integer) {
+            applyMinMax<int>(whereTest, currentParams, filterdata, varname);
+          } else {
+            applyMinMax<float>(whereTest, currentParams, filterdata, varname);
+          }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_defined
         if (currentParams.isDefined.value()) {
+          setWhereVector(whereTest, true);
           if (filterdata.has(varname)) {
             if (dtype == ioda::ObsDtype::Integer) {
-              processWhereIsDefined<int>(filterdata, varname, where);
+              processWhereIsDefined<int>(filterdata, varname, whereTest);
             } else if (dtype == ioda::ObsDtype::Float) {
-              processWhereIsDefined<float>(filterdata, varname, where);
+              processWhereIsDefined<float>(filterdata, varname, whereTest);
             } else if (dtype == ioda::ObsDtype::String) {
-              processWhereIsDefined<std::string>(filterdata, varname, where);
+              processWhereIsDefined<std::string>(filterdata, varname, whereTest);
             } else {
               throw eckit::UserError(
                 "Only integer, float and string variables may be used for processWhere "
@@ -436,54 +486,60 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
                 Here());
             }
           } else {
-            std::fill(where.begin(), where.end(), false);
+            std::fill(whereTest.begin(), whereTest.end(), false);
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_not_defined
         if (currentParams.isNotDefined.value()) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Integer) {
-            processWhereIsNotDefined<int>(filterdata, varname, where);
+            processWhereIsNotDefined<int>(filterdata, varname, whereTest);
           } else if (dtype == ioda::ObsDtype::Float) {
-            processWhereIsNotDefined<float>(filterdata, varname, where);
+            processWhereIsNotDefined<float>(filterdata, varname, whereTest);
           } else if (dtype == ioda::ObsDtype::String) {
-            processWhereIsNotDefined<std::string>(filterdata, varname, where);
+            processWhereIsNotDefined<std::string>(filterdata, varname, whereTest);
           } else {
             throw eckit::UserError(
               "Only integer, float and string variables may be used for processWhere "
               "'is_not_defined'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_in
         if (currentParams.isIn.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::String) {
-            isInString(where, currentParams.isIn.value()->as<std::vector<std::string>>(),
+            isInString(whereTest, currentParams.isIn.value()->as<std::vector<std::string>>(),
                        filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isInInteger(where, currentParams.isIn.value()->as<std::set<int>>(),
+            isInInteger(whereTest, currentParams.isIn.value()->as<std::set<int>>(),
                         filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_in'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_close
         if (currentParams.isClose.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Float) {
             std::vector<float> data;
             filterdata.get(varname, data);
             if (currentParams.relativetolerance.value() == boost::none &&
                 currentParams.absolutetolerance.value() != boost::none) {
               processWhereIsClose(data, currentParams.absolutetolerance.value().get(),
-                                  false, currentParams.isClose.value().get(), where);
+                                  false, currentParams.isClose.value().get(), whereTest);
             } else if (currentParams.relativetolerance.value() != boost::none &&
                        currentParams.absolutetolerance.value() == boost::none) {
               processWhereIsClose(data, currentParams.relativetolerance.value().get(),
-                                  true, currentParams.isClose.value().get(), where);
+                                  true, currentParams.isClose.value().get(), whereTest);
             } else {
               throw eckit::UserError(
                 "For 'is_close' one (and only one) tolerance is needed.",
@@ -494,36 +550,40 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
               "Only float variables may be used for processWhere 'is_close'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_not_in
         if (currentParams.isNotIn.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::String) {
-            isNotInString(where, currentParams.isNotIn.value()->as<std::vector<std::string>>(),
+            isNotInString(whereTest, currentParams.isNotIn.value()->as<std::vector<std::string>>(),
                           filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            isNotInInteger(where, currentParams.isNotIn.value()->as<std::set<int>>(),
+            isNotInInteger(whereTest, currentParams.isNotIn.value()->as<std::set<int>>(),
                            filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_not_close
         if (currentParams.isNotClose.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Float) {
             std::vector<float> data;
             filterdata.get(varname, data);
             if (currentParams.relativetolerance.value() == boost::none &&
                 currentParams.absolutetolerance.value() != boost::none) {
               processWhereIsNotClose(data, currentParams.absolutetolerance.value().get(),
-                                     false, currentParams.isNotClose.value().get(), where);
+                                     false, currentParams.isNotClose.value().get(), whereTest);
             } else if (currentParams.relativetolerance.value() != boost::none &&
                        currentParams.absolutetolerance.value() == boost::none) {
               processWhereIsNotClose(data, currentParams.relativetolerance.value().get(),
-                                     true, currentParams.isNotClose.value().get(), where);
+                                     true, currentParams.isNotClose.value().get(), whereTest);
             } else {
               throw eckit::UserError(
                 "For 'is_close' one (and only one) tolerance is needed.",
@@ -534,113 +594,128 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
               "Only float variables may be used for processWhere 'is_not_close'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_set
         if (currentParams.isTrue.value()) {
+          setWhereVector(whereTest, true);
           if (filterdata.has(varname)) {
             std::vector<DiagnosticFlag> data;
             filterdata.get(varname, data);
-            processWhereIsTrue(data, where);
+            processWhereIsTrue(data, whereTest);
           } else {
-            std::fill(where.begin(), where.end(), false);
+            std::fill(whereTest.begin(), whereTest.end(), false);
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask is_not_set
         if (currentParams.isFalse.value()) {
+          setWhereVector(whereTest, true);
           std::vector<DiagnosticFlag> data;
           filterdata.get(varname, data);
-          processWhereIsFalse(data, where);
+          processWhereIsFalse(data, whereTest);
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask any_bit_set_of
         if (currentParams.anyBitSetOf.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
             const std::set<int> &bitIndices = *currentParams.anyBitSetOf.value();
             filterdata.get(varname, data);
-            processWhereAnyBitSetOf(data, bitIndices, where);
+            processWhereAnyBitSetOf(data, bitIndices, whereTest);
           } else {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_set_of'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask any_bit_unset_of
         if (currentParams.anyBitUnsetOf.value() != boost::none) {
+          setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
             const std::set<int> &bitIndices = *currentParams.anyBitUnsetOf.value();
             filterdata.get(varname, data);
-            processWhereAnyBitUnsetOf(data, bitIndices, where);
+            processWhereAnyBitUnsetOf(data, bitIndices, whereTest);
           } else {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_unset_of'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask matches_regex
         if (currentParams.matchesRegex.value() != boost::none) {
+          setWhereVector(whereTest, true);
           const std::string pattern = *currentParams.matchesRegex.value();
           // Select observations for which the variable 'varname' matches the regular expression
           // 'pattern'.
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
             filterdata.get(varname, data);
-            processWhereMatchesRegex(data, pattern, where);
+            processWhereMatchesRegex(data, pattern, whereTest);
           } else if (dtype == ioda::ObsDtype::String) {
             std::vector<std::string> data;
             filterdata.get(varname, data);
-            processWhereMatchesRegex(data, pattern, where);
+            processWhereMatchesRegex(data, pattern, whereTest);
           } else {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere 'matches_regex'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask matches_wildcard
         if (currentParams.matchesWildcard.value() != boost::none) {
+          setWhereVector(whereTest, true);
           const std::string &pattern = *currentParams.matchesWildcard.value();
           // Select observations for which the variable 'varname' matches the pattern
           // 'pattern', which may contain the * and ? wildcards.
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
             filterdata.get(varname, data);
-            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, whereTest);
           } else if (dtype == ioda::ObsDtype::String) {
             std::vector<std::string> data;
             filterdata.get(varname, data);
-            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, whereTest);
           } else {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere 'matches_wildcard'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
 
 //      Apply mask matches_any_wildcard
         if (currentParams.matchesAnyWildcard.value() != boost::none) {
+          setWhereVector(whereTest, true);
           const std::vector<std::string> &patterns = *currentParams.matchesAnyWildcard.value();
           // Select observations for which the variable 'varname' matches any of the patterns
           // 'patterns'; these may contain the * and ? wildcards.
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
             filterdata.get(varname, data);
-            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+            processWhereMatchesAnyWildcardPattern(data, patterns, whereTest);
           } else if (dtype == ioda::ObsDtype::String) {
             std::vector<std::string> data;
             filterdata.get(varname, data);
-            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+            processWhereMatchesAnyWildcardPattern(data, patterns, whereTest);
           } else {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere "
               "'matches_any_wildcard'",
               Here());
           }
+          applyWhereOperator(whereOperator, whereTest, where);
         }
       }
     }

@@ -80,6 +80,10 @@ class VariableAssignmentParameters : public oops::ObsFilterParametersBase {
   /// If not specified, variable assignment will be performed at all locations.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
 
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
+
   /// If set to true, variable assignment will be done after the obs operator has been invoked
   /// (even if the filter doesn't require any variables from the GeoVaLs or HofX groups).
   oops::Parameter<bool> deferToPost{"defer to post", false, this};

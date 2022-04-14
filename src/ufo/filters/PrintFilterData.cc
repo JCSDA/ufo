@@ -254,7 +254,7 @@ void PrintFilterData::printAllData() const {
     std::max((parameters_.maxTextWidth - maxVariableNameLength) / (columnWidth + 3), 1);
 
   // Select locations at which the filter will be applied.
-  const std::vector<bool> apply = processWhere(parameters_.where, data_);
+  const std::vector<bool> apply = processWhere(parameters_.where, data_, parameters_.whereOperator);
   std::vector<int> globalApply(apply.begin(), apply.end());
   if (!parameters_.printRank0)
     obsdb_.distribution()->allGatherv(globalApply);

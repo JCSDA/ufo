@@ -411,3 +411,36 @@ observations:
                               must match that of 'primitive' filter variables when using
                               the 'test only filter variables with passed qc when flagging
                               all filter variables' option.
+
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables and a where statement that uses logical `or`
+    where:
+    - variable:
+        name: MetaData/var1
+      maxvalue: 3
+    - variable:
+        name: MetaData/var2
+      maxvalue: 3
+    where operator: or
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+# Indices 0, 1, 2, 7, 8, 9 are selected by the where clause.
+# Bounds check passes 7 values at locations selected by the where clause.
+# All 12 values at indices 3, 4, 5, 6 pass.
+# Total: 19.
+  passedBenchmark: 19

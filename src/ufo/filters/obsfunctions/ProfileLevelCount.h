@@ -31,6 +31,10 @@ class ProfileLevelCountParameters : public oops::Parameters {
   /// obsfunction should be applied.
   /// If not specified, all locations will be selected.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
+
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
 };
 
 // -----------------------------------------------------------------------------

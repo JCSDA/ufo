@@ -43,6 +43,10 @@ class LocalConditionalParameters : public oops::Parameters {
   /// object and requires the expected parameters for ufo::WhereParameters
   oops::RequiredParameter<std::vector<WhereParameters>> where{"where", this};
 
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
+
   /// \brief Value to be assigned when this particular where clause is true.
   oops::RequiredParameter<FunctionValue> value{"value", this};
 };
