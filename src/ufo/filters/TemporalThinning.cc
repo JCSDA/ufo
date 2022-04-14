@@ -325,7 +325,7 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
   // returns what it has been passed without modification.
   // The value of `retainOnlyIfAllFilterVariablesAreValid`  is set to `false`
   // because that is the default value used in the `ObsAccessor` class.
-  const RecordHandler recordHandler(obsdb_, filtervars, false);
+  const RecordHandler recordHandler(obsdb_, filtervars, *flags_, false);
 
   // If records are treated as single obs and a category variable is also used,
   // ensure that there are no records with multiple values of the category variable.

@@ -61,7 +61,10 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   // The RecordHandler deals with data that have been grouped into records.
   // If the grouping has not been performed then each RecordHandler function simply
   // returns what it has been passed without modification.
-  const RecordHandler recordHandler(obsdb_, filtervars, retainOnlyIfAllFilterVariablesAreValid);
+  const RecordHandler recordHandler(obsdb_,
+                                    filtervars,
+                                    *flags_,
+                                    retainOnlyIfAllFilterVariablesAreValid);
 
   // If records are treated as single obs and a category variable is also used,
   // ensure that there are no records with multiple values of the category variable.

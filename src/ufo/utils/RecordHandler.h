@@ -10,9 +10,12 @@
 
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "ufo/filters/Variables.h"
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
 }
 
@@ -31,6 +34,7 @@ class RecordHandler
  public:
   explicit RecordHandler(const ioda::ObsSpace & obsdb,
                          const Variables & filtervars,
+                         const ioda::ObsDataVector<int> & flags,
                          const bool retainOnlyIfAllFilterVariablesAreValid);
 
   /// Modify the input `apply` vector if records are treated as single observations.
@@ -57,6 +61,9 @@ class RecordHandler
 
   /// Filter variables.
   const Variables & filtervars_;
+
+  /// Filter QC flags.
+  const ioda::ObsDataVector<int> & flags_;
 
   /// Option to choose how to treat observations where there are multiple filter variables.
   /// This quantity is set in the thinning routine that instantiates this class.

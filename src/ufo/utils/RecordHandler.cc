@@ -12,32 +12,32 @@
 
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/QCflags.h"
 #include "ufo/utils/RecordHandler.h"
 
 namespace ufo {
   RecordHandler::RecordHandler(const ioda::ObsSpace & obsdb,
                                const Variables & filtervars,
+                               const ioda::ObsDataVector<int> & flags,
                                const bool retainOnlyIfAllFilterVariablesAreValid)
     : obsdb_(obsdb),
       filtervars_(filtervars),
+      flags_(flags),
       retainOnlyIfAllFilterVariablesAreValid_(retainOnlyIfAllFilterVariablesAreValid)
   {}
 
 std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
-  const float missingFloat = util::missingValue(missingFloat);
   const util::DateTime missingDateTime = util::missingValue(missingDateTime);
 
   // Retrieve datetimes.
   std::vector<util::DateTime> dateTimes(obsdb_.nlocs());
   obsdb_.get_db("MetaData", "dateTime", dateTimes);
 
-  // Retrieve filter variables
-  std::vector<std::vector<float>> filterVars;
+  // Indices of filter variables in the `flags` vector.
+  std::vector<size_t> indexOfFilterVariableInFlags;
   for (size_t ivar = 0; ivar < filtervars_.nvars(); ++ivar) {
-    const std::string varname = filtervars_.variable(ivar).variable();
-    std::vector<float> filterVarValues(obsdb_.nlocs());
-    obsdb_.get_db("ObsValue", varname, filterVarValues);
-    filterVars.push_back(filterVarValues);
+    const std::string filterVariableName = filtervars_.variable(ivar).variable();
+    indexOfFilterVariableInFlags.push_back(flags_.varnames().find(filterVariableName));
   }
 
   // Vector of locations corresponding to profile launch positions.
@@ -61,9 +61,10 @@ std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
 
     // Find the location corresponding to the launch position.
     // This is defined as the location with the earliest non-missing datetime
-    // and a certain number of non-missing filter variables.
+    // and a certain number of filter variables with QC flags equal to pass.
     // If `retainOnlyIfAllFilterVariablesAreValid` is true, all filter variables must
-    // be non-missing. If it is false then at least one must be non-missing.
+    // have QC flags equal to pass. If it is false then at least one must have a
+    // QC flag equal to pass.
     size_t launchPosition = locs.front();
     for (const size_t jloc : locs) {
       // Skip location if dateTime is missing.
@@ -71,18 +72,16 @@ std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
       // Skip location if a certain number of filter variables are missing.
       bool filterVarsOK = true;
       if (retainOnlyIfAllFilterVariablesAreValid_) {
-        // Retain location if all filter variables are valid.
-        for (const std::vector<float> & filterVar : filterVars) {
-          if (filterVar[jloc] == missingFloat) {
+        for (const int idx : indexOfFilterVariableInFlags) {
+          if (QCflags::isRejected(flags_[idx][jloc])) {
             filterVarsOK = false;
             break;
           }
         }
       } else {
         filterVarsOK = false;
-        for (const std::vector<float> & filterVar : filterVars) {
-          // Retain location if any filter variable is valid.
-          if (filterVar[jloc] != missingFloat) {
+        for (const int idx : indexOfFilterVariableInFlags) {
+          if (!QCflags::isRejected(flags_[idx][jloc])) {
             filterVarsOK = true;
             break;
           }
