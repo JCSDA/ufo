@@ -389,6 +389,68 @@ observations:
 # filter 2 does check variable2 location 9 and 10 even those these have previously been rejected by filter 1.
   passedBenchmark: 0
 - obs space:
+    name: Test multichannel bounds checking
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/linear_combination_multichannel_unittest.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1, 3
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    action:
+      name: assign error
+      error parameter: 99.9
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: ObsValue/brightness_temperature
+      channels: *all_channels
+    test variables:
+    - name: ObsValue/brightness_temperature
+      channels: *all_channels
+    treat missing as out of bounds: true
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: false
+    minvalue: 1.2
+# brightness_temperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
+# brightness_temperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+# filter 1 assigns the error so observations are not rejected because of this.
+# filter 2 rejects location 1 and 2 for all_channels.
+  passedBenchmark: 6
+- obs space:
+    name: Test multichannel bounds checking with differing variables
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/linear_combination_multichannel_unittest.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1,3
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: brightness_temperature
+      channels: 1,3
+    action:
+      name: assign error
+      error parameter: 99.9
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: ObsValue/brightness_temperature
+      channels: 1
+    test variables:
+    - name: ObsValue/brightness_temperature
+      channels: 3
+    treat missing as out of bounds: true
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+    maxvalue: 3.45
+# brightness_temperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
+# brightness_temperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+# filter 1 assigns the error so observations are not rejected because of this.
+# filter 2 rejects location 5 for BT1 (filter variable) because the BT3 (test variable) value
+#          exceeds the threshold.  BT1 location 2 is rejected by the Final Check filter because
+#          of the missing ObsValue.
+  passedBenchmark: 8
+- obs space:
     name: test data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
