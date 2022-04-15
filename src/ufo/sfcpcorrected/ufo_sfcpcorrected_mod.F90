@@ -13,7 +13,7 @@ module ufo_sfcpcorrected_mod
  use iso_c_binding
  use kinds
  use ufo_constants_mod, only : grav, rd, Lclr, t2tv
- use gnssro_mod_transform, only : geop2geometric
+ use gnssro_mod_transform, only : geop2geometric, geometric2geop
 
  implicit none
  private
@@ -93,6 +93,7 @@ integer                           :: wi
 logical                           :: variable_present, variable_present_t, variable_present_q
 real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_lat
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
+real(kind_real), dimension(:), allocatable :: H2000_geop
 real(kind_real)                   :: model_znew
 
 missing = missing_value(missing)
@@ -149,6 +150,7 @@ allocate(model_psfc(nobs))
 ! to get the latitude of observation to do this.
 idx_geop = -1
 idx_geop = index(trim(geovars_list(2)),'geopotential')
+model_level1 = model_geomz%vals(kbot,:)
 if (idx_geop.gt.0) then
    write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//      &
                         '  converting '//trim(geovars_list(2))//     &
@@ -164,14 +166,18 @@ if (idx_geop.gt.0) then
          call abor1_ftn('Variable latitude@MetaData does not exist, aborting')
       endif
    endif
+   if (trim(self%da_psfc_scheme) == "UKMO") allocate(H2000_geop(nobs))
    do iobs = 1, nlocs
       if (obs_psfc(iobs).ne.missing) then
-         do k = 1, model_geomz%nval
-            call geop2geometric(latitude=obs_lat(iobs),              &
-                           geopotentialH=model_geomz%vals(k,iobs),   &
-                           geometricZ=model_znew)
-            model_geomz%vals(k,iobs) = model_znew
-         enddo
+         call geop2geometric(latitude=obs_lat(iobs),              &
+                        geopotentialH=model_geomz%vals(kbot,iobs),   &
+                        geometricZ=model_znew)
+         model_level1(iobs) = model_znew
+         if (trim(self%da_psfc_scheme) == "UKMO") then
+            call geometric2geop(latitude=obs_lat(iobs), &
+                           geometricZ=H2000, &
+                           geopotentialH=H2000_geop(iobs))
+         endif
       endif
    enddo
 endif
@@ -179,6 +185,7 @@ endif
 ! Now do the same if needed for surface geopotential height.
 idx_geop = -1
 idx_geop = index(trim(geovars_list(3)),'geopotential')
+model_zs = model_sfc_geomz%vals(1,:)
 if (idx_geop.gt.0) then
    write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//      &
                         '  converting '//trim(geovars_list(3))//     &
@@ -199,16 +206,14 @@ if (idx_geop.gt.0) then
          call geop2geometric(latitude=obs_lat(iobs),            &
                    geopotentialH=model_sfc_geomz%vals(1,iobs),  &
                    geometricZ=model_znew)
-         model_sfc_geomz%vals(1,iobs) = model_znew
+         model_zs(iobs) = model_znew
       endif
    enddo
 endif
 
 if (allocated(obs_lat)) deallocate(obs_lat)
 
-model_zs = model_sfc_geomz%vals(1,:)
 model_psfc = model_ps%vals(1,:)
-model_level1 = model_geomz%vals(kbot,:)
 
 ! do terrain height correction, two optional schemes
 select case (trim(self%da_psfc_scheme))
@@ -255,10 +260,15 @@ case ("UKMO")
    allocate(model_tv_2000(nobs))
    do iobs = 1, nobs
       ! vertical interpolation for getting model P and tv at 2000 m
-      call vert_interp_weights(model_geomz%nval, H2000, model_geomz%vals(:,iobs), wi, wf)
+      if (allocated(H2000_geop)) then
+         call vert_interp_weights(model_geomz%nval, H2000_geop(iobs), model_geomz%vals(:,iobs), wi, wf)
+      else
+         call vert_interp_weights(model_geomz%nval, H2000, model_geomz%vals(:,iobs), wi, wf)
+      end if
       call vert_interp_apply(model_p%nval, model_p%vals(:,iobs), model_p_2000(iobs), wi, wf)
       call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), model_tv_2000(iobs), wi, wf)
    end do
+   if (allocated(H2000_geop)) deallocate(H2000_geop)
 
    ! correction
    call da_intpsfc_prs_ukmo(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_psfc, model_tv_2000, model_p_2000)
@@ -323,7 +333,7 @@ real(c_double),                   intent (in)           :: missing
 real(kind_real), dimension(nobs), intent (out)          :: P_o2m !<observed PS at model sfc height
 real(kind_real), dimension(nobs), intent (in)           :: H_o, P_o !<observed Height and PS
 real(kind_real), dimension(nobs), intent (in)           :: H_m, TV_m !<model sfc height and TV
-real(kind_real), dimension(nobs), intent (in), optional :: T_o, Q_o !<obserbed T and Q
+real(kind_real), dimension(nobs), intent (in), optional :: T_o, Q_o !<observed T and Q
 real(kind_real), dimension(nobs)                        :: TV_o, TV
 
 ! 1.  model and observation virtual temperature
@@ -370,7 +380,7 @@ end subroutine da_intpsfc_prs
 !!
 !!  To avoid dirunal/local variations, use TV_2000 (2000 m above the model surface height) instead of direct T_m
 !!
-!!  T_m = TV_2000 * (P_o / P_2000) ** (rd*L/grav)
+!!  T_m = TV_2000 * (P_m / P_2000) ** (rd*L/grav)
 !!
 !! Where:
 !!  P_2000  = background pressure at 2000 m
