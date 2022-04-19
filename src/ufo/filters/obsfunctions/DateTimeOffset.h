@@ -65,6 +65,12 @@ class DateTimeOffsetParameters : public oops::Parameters {
     {"offset unit",
      "Name of the offset unit. Valid options: seconds, minutes, hours.",
      this};
+
+  oops::Parameter<bool> keep_in_window
+    {"keep in window",
+     "Limit the offset so that observations remain within the window?",
+     false,
+     this};
 };
 
 // -----------------------------------------------------------------------------
@@ -74,6 +80,13 @@ class DateTimeOffsetParameters : public oops::Parameters {
 /// This function is used to add a location-dependent offset to dateTime@MetaData.
 /// If the offset at a particular location is missing then
 /// the corresponding datetime is not modified.
+///
+/// If the "keep in window" option is chosen, then the observations will be
+/// limited to stay within the DA window after the offset has been applied. This
+/// assumes that the filter is not passed observations from outside the window
+/// (which is checked in the observation extraction).
+/// Observations at the start of the window are rejected, so we add one second
+/// to the observation time to avoid this happening.
 class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
  public:
   explicit DateTimeOffset(const eckit::LocalConfiguration &);
@@ -90,6 +103,9 @@ class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
                     ioda::ObsDataVector<util::DateTime> & out) const {
     const T missing = util::missingValue(missing);
     const size_t nlocs = in.obsspace().nlocs();
+    const util::DateTime window_start = in.obsspace().windowStart();
+    const util::DateTime window_end = in.obsspace().windowEnd();
+    const util::Duration one_second = util::Duration(1);
 
     // Get datetime.
     std::vector <util::DateTime> datetimes(nlocs);
@@ -108,11 +124,19 @@ class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
     for (size_t jloc = 0; jloc < nlocs; ++jloc) {
       const T offset = offsets[jloc];
       // If the offset is missing do not modify the datetime.
-      if (offset == missing)
+      if (offset == missing) {
         out[0][jloc] = datetimes[jloc];
-      else
+      } else {
         out[0][jloc] = datetimes[jloc] +
           util::Duration(static_cast<int64_t>(offset * offsetmult));
+        // Check for the observation remaining within the window
+        if (options_.keep_in_window.value()) {
+          if (out[0][jloc] <= window_start)
+            out[0][jloc] = window_start + one_second;
+          if (out[0][jloc] > window_end)
+            out[0][jloc] = window_end;
+        }
+      }
     }
   }
 
