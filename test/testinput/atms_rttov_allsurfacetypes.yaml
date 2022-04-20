@@ -1,0 +1,28 @@
+window begin: 2020-03-31T21:00:00Z
+window end: 2020-04-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: NOAA
+      Sat_ID: 20
+      Instrument_Name: ATMS
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+      max_channels_per_batch: 22 # this is needed to test the batching
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_2020040100_allsurfacetypes.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
+  rms ref: 235.80955177337344
+  tolerance: 1.e-7
+

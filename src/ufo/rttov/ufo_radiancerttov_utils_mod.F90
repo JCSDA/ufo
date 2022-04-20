@@ -1778,7 +1778,9 @@ contains
           self % emissivity(start_chan:end_chan) % emis_in = 0.98_kind_real
 
         end if
-        
+
+        self % calcemis(start_chan:end_chan) = .false.
+
       end if
     enddo
 

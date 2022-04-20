@@ -39,6 +39,7 @@ list( APPEND ufo_test_input
   testinput/atms_rttov_bad_data.yaml
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
+  testinput/atms_rttov_allsurfacetypes.yaml
   testinput/atms_rttov_qc.yaml
   testinput/atovs_rttov_scatt.yaml
   testinput/amsua_rttovcpp.yaml
@@ -1011,6 +1012,13 @@ if( ${rttov_FOUND} )
                     ARGS    "testinput/atms_rttov_ops.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_opr_rttov_atms_allsurfacetypes
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                    ARGS    "testinput/atms_rttov_allsurfacetypes.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsOperator.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_qc_atms_rttov
