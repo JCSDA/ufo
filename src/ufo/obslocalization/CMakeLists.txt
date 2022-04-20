@@ -10,6 +10,8 @@ set ( obslocalization_files
       ObsHorLocalization.h
       ObsHorLocParameters.cc
       ObsHorLocParameters.h
+      ObsVertLocalization.h
+      ObsVertLocParameters.h
 )
 
 PREPEND( _p_obslocalization_files       "obslocalization"       ${obslocalization_files} )

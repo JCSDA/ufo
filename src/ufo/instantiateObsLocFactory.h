@@ -12,6 +12,7 @@
 #include "ufo/obslocalization/ObsHorLocalization.h"
 #include "ufo/obslocalization/ObsHorLocGC99.h"
 #include "ufo/obslocalization/ObsHorLocSOAR.h"
+#include "ufo/obslocalization/ObsVertLocalization.h"
 #include "ufo/ObsTraits.h"
 
 namespace ufo {
@@ -22,6 +23,8 @@ template<typename MODEL> void instantiateObsLocFactory() {
            makerSOAR_("Horizontal SOAR");
   static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsHorLocalization<MODEL>>
            makerBoxCar_("Horizontal Box car");
+  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsVertLocalization<MODEL>>
+           makerVertLoc_("Vertical localization");
 }
 
 }  // namespace ufo
