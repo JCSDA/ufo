@@ -1,6 +1,6 @@
 obs space:
   name: atms_n20
-  _source: noaa
+  _source: nasa
   simulated variables: [brightness_temperature]
   channels: &atms_n20_channels 1-22
 obs operator:

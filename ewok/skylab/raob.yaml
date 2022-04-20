@@ -1,6 +1,6 @@
 obs space:
   name: raob
-  _source: ldm
+  _source: noaa
   obsdatain:
     obsgrouping:
       group variables: ["station_id", "LaunchTime"]

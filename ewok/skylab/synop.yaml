@@ -1,6 +1,6 @@
 obs space:
   name: synop
-  _source: ldm
+  _source: noaa
   simulated variables: [surface_pressure, air_temperature]
 obs operator:
   name: Composite
