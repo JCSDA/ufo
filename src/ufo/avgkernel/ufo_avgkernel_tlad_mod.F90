@@ -130,8 +130,9 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
   ! get nval
   self%nval = prsi%nval
 
-  allocate(self%prsi(self%nval+1, self%nlocs))
+  allocate(self%prsi(self%nval, self%nlocs))
   do iobs = 1, self%nlocs
+
     self%prsi(:,iobs) = prsi%vals(:,iobs)
   end do
 
