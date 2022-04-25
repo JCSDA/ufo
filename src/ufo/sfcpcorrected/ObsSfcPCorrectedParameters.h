@@ -22,14 +22,15 @@ namespace ufo {
 
 /// enum type for surface correction type, and ParameterTraitsHelper for it
 enum class SfcPCorrectionType {
-  UKMO, WRFDA
+  UKMO, WRFDA, GSI
 };
 struct SfcPCorrectionTypeParameterTraitsHelper {
   typedef SfcPCorrectionType EnumType;
   static constexpr char enumTypeName[] = "SfcPCorrectionType";
   static constexpr util::NamedEnumerator<SfcPCorrectionType> namedValues[] = {
     { SfcPCorrectionType::UKMO, "UKMO" },
-    { SfcPCorrectionType::WRFDA, "WRFDA" }
+    { SfcPCorrectionType::WRFDA, "WRFDA" },
+    { SfcPCorrectionType::GSI, "GSI" }
   };
 };
 

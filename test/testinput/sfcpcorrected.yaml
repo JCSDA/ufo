@@ -32,7 +32,25 @@ observations:
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
-  rms ref: 98212.01952172
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: GSI
+  obs space:
+    name: SfcPCorrected
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/sfc_2018041500_m_GSI_out.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.45673247
   tolerance: 1.e-08
   linear obs operator test:
     coef TL: 0.1
@@ -40,7 +58,6 @@ observations:
     tolerance AD: 1.0e-11
 # New additions to test nc-diag file output variables that are not height and surface_altitude,
 # which can be overriden with new optional parameters geovar_geomz and geovar_sfc_geomz
-observations:
 - obs operator:
     name: SfcPCorrected
     da_psfc_scheme: UKMO
@@ -71,5 +88,21 @@ observations:
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
-  rms ref: 99491.19738072
+  rms ref: 99605.18477385
+  tolerance: 1.e-08
+- obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: GSI
+    geovar_geomz: geopotential_height
+    geovar_sfc_geomz: surface_geopotential_height
+  obs space:
+    name: SfcPCorrected
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+    obsdataout:
+      obsfile: Data/sfc_2018041500_m_GSI_out2.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
+  rms ref: 99603.34962776
   tolerance: 1.e-08
