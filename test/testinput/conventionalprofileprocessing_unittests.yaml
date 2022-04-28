@@ -95,7 +95,7 @@ observations:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
-#This profile is rejected by the basic checks so none of its observations pass
+#The level with the excessively large pressure is flagged.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -119,11 +119,10 @@ observations:
       is_in: 1
   HofX: HofX
   benchmarkFlag: 24
-  flaggedBenchmark: 69
+  flaggedBenchmark: 1
 #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
 #The sonde with a pressure too large (test_id = 1) is selected by the where clause but it fails the basic checks
 #However, its invididual observations are not subsequently flagged so all 69 pass
-#This shows why the flagBasicChecksFail option should usually be set to true
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -149,7 +148,8 @@ observations:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with negative pressure reading (test_id = 2) ===#
-#This profile is rejected by the basic checks so none of its observations pass
+#The minimum allowed pressure is 995 Pa.
+# Two of the levels have missing temperature so only one is flagged as failing the basic checks.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -167,13 +167,14 @@ observations:
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
+    BChecks_minValidP: 995
     where:
     - variable:
         name: test_id@MetaData
       is_in: 2
   HofX: HofX
   benchmarkFlag: 24
-  flaggedBenchmark: 69
+  flaggedBenchmark: 1
 #=== No data (invalid test_id) ===#
 #No observations are expected to be processed by the filter so the number expected is the
 #number of observations with non-missing data
@@ -228,7 +229,8 @@ observations:
   benchmarkFlag: 24
   flaggedBenchmark: 0
 #=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
-#The lack of sorting will mean this sonde fails the basic checks
+#The lack of sorting causes the sonde to fail the basic checks.
+#One pressure is out of order and is therefore flagged.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -250,9 +252,10 @@ observations:
       is_in: 3
   HofX: HofX
   benchmarkFlag: 24
-  flaggedBenchmark: 69
+  flaggedBenchmark: 1
 #=== Sonde with all pressures missing (test_id = 4) ===#
-#Expect this sonde to fail the basic checks
+#Although all pressures are missing, no observations are flagged because the
+#failure criteria have not been met.
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -274,7 +277,7 @@ observations:
       is_in: 4
   HofX: HofX
   benchmarkFlag: 24
-  flaggedBenchmark: 69
+  flaggedBenchmark: 0
 #=== Sonde with all temperatures missing (test_id = 5) ===#
 #Basic checks still passed since they only depend on pressure
 #The missing values are not dealt with any differently so the same number
