@@ -52,16 +52,14 @@ class Locations : public util::Printable,
 
   /// accessor to the observations MPI distribution
   const std::shared_ptr<const ioda::Distribution> & distribution() const {return dist_;}
-  /// accessor to observation longitudes (on current MPI task)
+  /// accessor to observation longitudes (on current MPI task) TO BE CONSOLIDATED
   std::vector<float> lons() const;
-  /// accessor to observation latitudes (on current MPI task)
+  const std::vector<double> & longitudes() const {return lons_;}
+  /// accessor to observation latitudes (on current MPI task) TO BE CONSOLIDATED
   std::vector<float> lats() const;
+  const std::vector<double> & latitudes() const {return lats_;}
   /// accessor to DateTimes (on current MPI task)
   const std::vector<util::DateTime> & times() const {return times_;}
-  /// get local coordinates
-  void localCoords(const util::DateTime & t1, const util::DateTime & t2,
-                   std::vector<double> & lats, std::vector<double> & lons,
-                   std::vector<size_t> & indx) const;
 
  private:
   void initializeObsGroup(size_t nlocs);
@@ -73,6 +71,8 @@ class Locations : public util::Printable,
   // type, so instead of doing expensive conversions of times to/from string representations, we
   // opt to keep the times outside the ObsGroup.
   std::vector<util::DateTime> times_;  /// times of observations on current MPI task
+  std::vector<double> lons_;  /// longitudes of observations on current MPI task
+  std::vector<double> lats_;  /// latitudes of observations on current MPI task
 };
 
 }  // namespace ufo
