@@ -4,6 +4,7 @@ Normal ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -39,6 +40,7 @@ Bending ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 1, 1, 0 ]
@@ -74,6 +76,7 @@ Fast ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2]
@@ -109,6 +112,7 @@ Short ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2]
@@ -145,6 +149,7 @@ Short buoy track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2]
@@ -181,6 +186,7 @@ Fast/short ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2]
@@ -216,6 +222,7 @@ Ship Track Dist0:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0]
@@ -250,6 +257,7 @@ Ship Track Simultaneous Same Location:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0]
@@ -284,6 +292,7 @@ Ship Track Simultaneous Different Location:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2]
@@ -318,6 +327,7 @@ Ship Tracks Different Station IDs:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 1, 1, 0, 0, 1, 2 ]
@@ -354,6 +364,7 @@ Ship Tracks Different Station IDs Shuffled:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1, 1, 1, 0, 0, 1, 0, 2 ]
@@ -390,6 +401,7 @@ Ship Track Segment from Comparison Test early break false:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -37.00999832, -37.00999832, -37.02000046, -37.02000046, -37.02000046]
@@ -416,6 +428,7 @@ Ship Track Segment from Comparison Test early break true:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -4.94999981, -4.94999981, -4.94999981, -4.96000004, -4.96000004, -4.96000004]

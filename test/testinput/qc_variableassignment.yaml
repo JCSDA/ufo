@@ -533,6 +533,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/multichannel_variable_assignment_testdata.nc
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     channels: 1, 2, 4
   obs filters:
   - filter: Variable Assignment

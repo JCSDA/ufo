@@ -395,7 +395,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
 
 /// init QC and error
-  ObsVector_ obserr(obspace, "ObsError");
+  ObsVector_ obserr(obspace, "ObsError", true);
   std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
     qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 

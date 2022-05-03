@@ -36,7 +36,7 @@ namespace QCflags {
   constexpr int bayesianQC = 26;  // observation failed due to Bayesian background check
   constexpr int modelobthresh = 27;  // observation failed modelob threshold check
   constexpr int history = 28;  // observation failed when compared with historical data
-
+  constexpr int processed = 29;  // observation processed but deliberately H(x) not calculated
   /// \brief Return true if the QC flag \p qcflag indicates that an observation has been rejected,
   /// false otherwise.
   inline bool isRejected(int qcflag) {

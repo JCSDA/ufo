@@ -41,19 +41,20 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
   // Obs
   std::vector<float> PStn, Pmsl;
   getObservation("ObsValue", "station_pressure",
-                 PStn, true);
+                 PStn);
   getObservation("ObsValue", "mean_sea_level_pressure",
-                 Pmsl, true);
+                 Pmsl);
 
   // MetaData
   std::vector<float> ZStn, PStn_error;
   getObservation("MetaData", "station_elevation",
-                 ZStn, true);
-  getObservation("ObsError", "station_pressure",
-                 PStn_error, true);
+                 ZStn);
+  data_.get(Variable("ObsError/station_pressure"),
+            PStn_error);
   std::vector<int> PStn_flag;
+
   getObservation("QCFlags", "station_pressure",
-                 PStn_flag, true);
+                 PStn_flag);
 
   if (!oops::allVectorsSameNonZeroSize(Pmsl, PStn)) {
     oops::Log::warning() << "Vector sizes: " << oops::listOfVectorSizes(Pmsl, PStn)

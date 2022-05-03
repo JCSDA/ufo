@@ -27,7 +27,7 @@ ObsAodExt::ObsAodExt(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   ufo_aodext_setup_f90(keyOper_, params.toConfiguration(),
-                       odb.obsvariables(), varin_);
+                       odb.assimvariables(), varin_);
   oops::Log::trace() << "ObsAodExt created." << std::endl;
 }
 

@@ -25,10 +25,13 @@ class FinalCheckParameters : public oops::ObsFilterParametersBase {
 
 /// \brief A filter run automatically at the end of the whole sequence of filters.
 ///
-/// It does two things:
+/// It does three things:
 /// - verifies that all derived simulated variables have been created and if not, throws an
 ///   exception
 /// - sets the QC flag of all observations with missing error estimates to `missing`.
+/// - sets the QC flag of all observations that have been processed but are not to
+///   be assimilated.
+
 class FinalCheck : public ObsProcessorBase,
                    private util::ObjectCounter<FinalCheck> {
  public:

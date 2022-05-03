@@ -13,6 +13,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_mo.nc4
     simulated variables: [aerosol_optical_depth]
+    observed variables: [aerosol_optical_depth]
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_20210521T1200Z_mo.nc4
   norm ref: HofX
@@ -32,6 +33,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_mo.nc4
     simulated variables: [aerosol_optical_depth]
+    observed variables: [aerosol_optical_depth]
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_reversed_20210521T1200Z_mo.nc4
   norm ref: HofX

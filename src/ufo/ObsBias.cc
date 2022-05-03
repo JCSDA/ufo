@@ -32,7 +32,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
-  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()),
+  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
     rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 

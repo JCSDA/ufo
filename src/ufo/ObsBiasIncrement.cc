@@ -20,7 +20,7 @@ namespace ufo {
 
 ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
-  : vars_(odb.obsvariables()) {
+  : vars_(odb.assimvariables()) {
   oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory

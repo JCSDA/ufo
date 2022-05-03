@@ -4,6 +4,7 @@ All observations' number and time stuck tolerated:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -25,6 +26,7 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -43,6 +45,7 @@ Time stuck tolerated, number stuck untolerated, 1 value:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -61,6 +64,7 @@ Time stuck tolerated, number stuck tolerated, 1 value:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1 ]
@@ -78,6 +82,7 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -96,6 +101,7 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -114,6 +120,7 @@ All temperatures different:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -132,6 +139,7 @@ Different variable streaks:
   obs space:
     name: Ship
     simulated variables: [ air_temperature, air_pressure ]
+    observed variables: [ air_temperature, air_pressure ]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -153,6 +161,7 @@ Different variable streaks, 1 filter variable considered:
   obs space:
     name: Ship
     simulated variables: [ air_temperature, air_pressure ]
+    observed variables: [ air_temperature, air_pressure ]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]

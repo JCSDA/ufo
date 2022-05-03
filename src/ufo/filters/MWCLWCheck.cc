@@ -50,7 +50,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
 
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::Variables observed = obsdb_.assimvariables();
   const float missing = util::missingValue(missing);
   float amsua_clw(float, float, float);
 

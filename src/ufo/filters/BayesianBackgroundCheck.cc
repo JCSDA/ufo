@@ -194,7 +194,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // create reduced vectors, copied from full ones, fulfilling applycondition:
       std::vector<float> firstComponentObVal_reduced = reduceVector(firstComponentObVal,
                                                                     j_reduced);
-      std::vector<float> ObsErr_reduced = reduceVector((*obserr_)[iv1], j_reduced);
+      std::vector<float> ObsErr_reduced = reduceVector((*obserr_)[varname1], j_reduced);
       std::vector<float> hofx1_reduced = reduceVector(hofx1, j_reduced);
       std::vector<float> hofxerr_reduced = reduceVector(hofxerr, j_reduced);
       std::vector<float> PdBad_reduced = reduceVector(PdBad, j_reduced);

@@ -9,6 +9,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
     simulated variables: [sea_water_temperature]
+    observed variables: [sea_water_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
   rms ref: 15.020734025831988

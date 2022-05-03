@@ -54,7 +54,7 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   }
 
   // get channels from observations
-  const oops::Variables & observed = odb.obsvariables();
+  const oops::Variables & observed = odb.assimvariables();
   channels_ = observed.channels();  // set private data member channels_
 
   // get optical depth coef file name from yaml

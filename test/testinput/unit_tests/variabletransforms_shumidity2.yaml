@@ -8,9 +8,9 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/instruments/conventional/buoy_wmo_multi.nc
    obsdataout:
       obsfile: Data/buoy_wmo_multi.nc
-   simulated variables: [dewpoint_temperature, air_temperature, surface_pressure]
-   derived simulated variables: [specific_humidity]
-
+   simulated variables: [dewpoint_temperature, air_temperature, surface_pressure, specific_humidity]
+   derived variables: [specific_humidity]
+   observed variables: [dewpoint_temperature, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
     Transform: "SpecificHumidity"

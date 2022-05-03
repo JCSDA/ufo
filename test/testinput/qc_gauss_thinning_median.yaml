@@ -104,8 +104,9 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
     obsdataout:
       obsfile: Data/superob_testout4.nc4
-    simulated variables: []
-    derived simulated variables: [sea_surface_temperature]
+    simulated variables: [sea_surface_temperature]
+    derived variables: [sea_surface_temperature]
+    observed variables: []
   obs filters:
   - filter: Variable Assignment
     assignments:

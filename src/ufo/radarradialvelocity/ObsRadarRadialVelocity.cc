@@ -25,7 +25,8 @@ ObsRadarRadialVelocity::ObsRadarRadialVelocity(const ioda::ObsSpace & odb,
                        const ObsRadarRadialVelocityParameters & params)
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_radarradialvelocity_setup_f90(keyOper_, params.toConfiguration(), odb.obsvariables(), varin_);
+  ufo_radarradialvelocity_setup_f90(keyOper_, params.toConfiguration(),
+                                    odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsRadarRadialVelocity created." << std::endl;
 }

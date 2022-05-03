@@ -29,7 +29,7 @@ ObsRadarRadialVelocityTLAD::ObsRadarRadialVelocityTLAD(const ioda::ObsSpace & od
   : LinearObsOperatorBase(odb), keyOperRadarRadialVelocity_(0), varin_()
 {
   ufo_radarradialvelocity_tlad_setup_f90(keyOperRadarRadialVelocity_,
-                                            config, odb.obsvariables(), varin_);
+                                            config, odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD created" << std::endl;
 }

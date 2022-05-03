@@ -91,9 +91,10 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2]
+    observed variables: [variable1, variable2]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables: [variable1, variable3]
     flags:
     - name: FlagA
-  expectExceptionWithMessage: Filter variable 'variable3' is not a simulated variable
+  expectExceptionWithMessage: Filter variable 'variable3' is not an observed variable

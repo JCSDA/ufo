@@ -32,7 +32,7 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
   operatorVars += oper_->simulatedVars();
   operatorVars.sort();
   oops::Variables obsSpaceVars;
-  obsSpaceVars += os.obsvariables();
+  obsSpaceVars += os.assimvariables();
   obsSpaceVars.sort();
   if (!(operatorVars == obsSpaceVars))
     throw eckit::UserError("The list of variables simulated by the obs operator differs from "

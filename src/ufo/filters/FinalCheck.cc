@@ -59,6 +59,16 @@ void FinalCheck::doFilter() const {
     }
   }
 
+  // Set the QC flag to reject observations that have been processed but are not to
+  // be assimilated.
+  for (size_t jv = 0; jv < obsdb_.obsvariables().size(); ++jv) {
+    if (!obsdb_.assimvariables().has(obsdb_.obsvariables()[jv])) {
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        (*flags_)[jv][jobs] = QCflags::processed;
+      }
+    }
+  }
+
   oops::Log::trace() << "FinalCheck doFilter done" << std::endl;
 }
 

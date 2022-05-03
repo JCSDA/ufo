@@ -28,7 +28,7 @@ ObsAvgKernelTLAD::ObsAvgKernelTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOperAvgKernel_(0), varin_()
 {
   ufo_avgkernel_tlad_setup_f90(keyOperAvgKernel_, parameters.toConfiguration(),
-                               odb.obsvariables(), varin_);
+                               odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsAvgKernelTLAD created" << std::endl;
 }

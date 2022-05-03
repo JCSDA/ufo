@@ -30,7 +30,7 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
 {
   oops::Log::trace() << "ObsIdentity constructor starting" << std::endl;
 
-  getOperatorVariables(parameters.variables.value(), odb.obsvariables(),
+  getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
   requiredVars_ += operatorVars_;
 

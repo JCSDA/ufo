@@ -30,11 +30,11 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
 {
   std::vector<std::string> vvin{"sea_ice_category_area_fraction",
                                 "sea_ice_category_thickness"};
-  if (odb.obsvariables().has("sea_ice_freeboard")) {
+  if (odb.assimvariables().has("sea_ice_freeboard")) {
     vvin.push_back("sea_ice_category_snow_thickness");
   }
   varin_.reset(new oops::Variables(vvin));
-  ufo_seaicethickness_setup_f90(keyOper_, params.toConfiguration(), odb.obsvariables());
+  ufo_seaicethickness_setup_f90(keyOper_, params.toConfiguration(), odb.assimvariables());
   oops::Log::trace() << "ObsSeaIceThickness created." << std::endl;
 }
 

@@ -11,6 +11,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
+    observed variables: [variable1]
   obs filters:
   # Blacklist locations 2 and 3
   - filter: BlackList
@@ -41,6 +42,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The first two elements of ObsValue and the last two of ObsError are missing
     simulated variables: [surface_pressure]
+    observed variables: [surface_pressure]
   obs filters:
   # Blacklist location 2
   - filter: BlackList
@@ -63,22 +65,24 @@ observations:
   flaggedObservationsBenchmark: [0, 3, 4]  # loc 0 has a missing ob, locs 3 and 4 -- a missing error
   failedObservationsBenchmark: [0, 2, 3, 4]  # in addition, loc 2 was blacklisted
 
-# The following tests check if derived simulated variables are handled appropriately
+# The following tests check if derived variables are handled appropriately
 
 - obs space:
-    name: Derived simulated variable not assigned
+    name: Derived variable not assigned
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
-    derived simulated variables: [eastward_wind]
+    simulated variables: [air_temperature, eastward_wind]
+    derived variables: [eastward_wind]
+    observed variables: [air_temperature]
   expectExceptionWithMessage: All filters have been run, but the derived simulated variable eastward_wind can't be found either in the ObsValue or the DerivedObsValue group
 
 - obs space:
-    name: Derived simulated variable assigned values, but not error estimates
+    name: Derived variable assigned values, but not error estimates
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
-    derived simulated variables: [eastward_wind]
+    simulated variables: [air_temperature, eastward_wind]
+    derived variables: [eastward_wind]
+    observed variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -92,8 +96,9 @@ observations:
     name: Derived simulated variable assigned both values and error estimates
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
-    derived simulated variables: [eastward_wind]
+    simulated variables: [air_temperature, eastward_wind]
+    derived variables: [eastward_wind]
+    observed variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -110,9 +115,10 @@ observations:
     name: Derived simulated variable already exists
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: []
+    simulated variables: [surface_pressure]
     # Already exists. But the first two elements of ObsValue and the last two of ObsError are missing
-    derived simulated variables: [surface_pressure]
+    derived variables: [surface_pressure]
+    observed variables: []
   obs filters:
   # Add a dummy filter to force the QCmanager and Final Check to be run.
   - filter: Domain Check
@@ -127,6 +133,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The input file contains no relative_humidity@ObsError variable
     simulated variables: [relative_humidity, air_temperature]
+    observed variables: [relative_humidity, air_temperature]
   obs filters:
   # Add a dummy filter to force the QCmanager and Final Check to be run.
   - filter: Domain Check
@@ -139,6 +146,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The input file contains no relative_humidity@ObsError variable
     simulated variables: [relative_humidity, air_temperature]
+    observed variables: [relative_humidity, air_temperature]
   obs filters:
   - filter: Perform Action
     filter variables: [relative_humidity]

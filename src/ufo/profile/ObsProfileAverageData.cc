@@ -43,7 +43,7 @@ namespace ufo {
     requiredVars_ += oops::Variables({modelVerticalCoord_});
 
     // Add any simulated variables to the list of variables used in this operator.
-    getOperatorVariables(parameters.variables.value(), odb_.obsvariables(),
+    getOperatorVariables(parameters.variables.value(), odb_.assimvariables(),
                          operatorVars_, operatorVarIndices_);
     requiredVars_ += operatorVars_;
 

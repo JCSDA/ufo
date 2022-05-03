@@ -10,6 +10,7 @@ All observations' number and time stuck tolerated:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -39,6 +40,7 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -68,6 +70,7 @@ Time stuck tolerated, number stuck untolerated, 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -97,6 +100,7 @@ Time stuck tolerated, number stuck tolerated, 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1 ]
@@ -125,6 +129,7 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -154,6 +159,7 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -181,6 +187,7 @@ Stuck check historical data:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [4, 5, 6, 7]
@@ -204,6 +211,7 @@ Stuck check historical data:
       distribution:
         name: InefficientDistribution
       simulated variables: [air_temperature]
+      observed variables: [air_temperature]
       generate:
         list:
           lats: [3, 4, 5, 6, 7]
@@ -223,6 +231,7 @@ All temperatures different:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 1, 2, 3, 4, 5 ]
@@ -256,6 +265,7 @@ Ship Track Segment from Comparison Test early break false:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -37.00999832, -37.00999832, -37.02000046, -37.02000046, -37.02000046]
@@ -289,6 +299,7 @@ Ship Track Segment from Comparison Test early break true:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -4.94999981, -4.94999981, -4.94999981, -4.96000004, -4.96000004, -4.96000004]
@@ -320,6 +331,7 @@ Ship track check historical data:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -37.02000046 ]
@@ -352,6 +364,7 @@ Only ship track check, compatible with stuck check (no historical data):
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0.0, .05, 0.1, 0.2, 2.0, 0.3]
@@ -431,6 +444,7 @@ Both checks (with historical data):
   obs space:
     name: Ship
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0.1, 0.2, 2.0, 0.3]
@@ -469,6 +483,7 @@ Identical observations stuck check:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0 ]

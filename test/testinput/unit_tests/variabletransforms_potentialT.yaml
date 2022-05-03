@@ -10,8 +10,9 @@ observations:
         group variables: ["station_id"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [air_temperature]
-    derived simulated variables: [potentialTemperature]
+    simulated variables: [air_temperature, potentialTemperature]
+    derived variables: [potentialTemperature]
+    observed variables: [air_temperature]
   obs filters:
   - filter: Variable Transforms
     Transform: PotentialTFromT

@@ -25,7 +25,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                                          ioda::ObsSpace & obspace,
                                          const eckit::mpi::Comm &timeComm)
   : ObsErrorBase(timeComm),
-    stddev_(obspace, "ObsError"), vars_(obspace.obsvariables()),
+    stddev_(obspace, "ObsError"), vars_(obspace.assimvariables()),
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars()))
 {
   // Open and read error correlations from the hdf5 file

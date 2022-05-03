@@ -35,7 +35,7 @@ ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & od
 
   // simulateObs() may be asked to interpolate the background errors of any simulated variables.
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.
-  const oops::Variables &obsvars = odb.obsvariables();
+  const oops::Variables &obsvars = odb.assimvariables();
   for (size_t ivar = 0; ivar < obsvars.size(); ++ivar)
     requiredVars_.push_back(obsvars[ivar] + "_background_error");
 
@@ -55,7 +55,7 @@ void ObsBackgroundErrorIdentity::simulateObs(const GeoVaLs & geovals, ioda::ObsV
     for (const Variable &variable : *parameters_.variables.value())
       variables += variable.toOopsVariables();
   else
-    variables = odb_.obsvariables();
+    variables = odb_.assimvariables();
 
   ufo_backgrounderroridentity_fillobsdiags_f90(geovals.toFortran(), hofx.nlocs(), variables,
                                                ydiags.toFortran());

@@ -26,7 +26,7 @@ ObsAodExtTLAD::ObsAodExtTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   ufo_aodext_tlad_setup_f90(keyOper_, params.toConfiguration(),
-                            odb.obsvariables(), varin_);
+                            odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsAodExtTLAD created" << std::endl;
 }

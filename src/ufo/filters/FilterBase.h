@@ -67,6 +67,7 @@ class FilterBase : public ObsProcessorBase {
 
  protected:
   ufo::Variables filtervars_;
+  ufo::Variables filtersimvars_;
 
  private:
   void doFilter() const override;

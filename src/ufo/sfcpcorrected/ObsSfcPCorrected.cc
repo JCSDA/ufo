@@ -30,7 +30,7 @@ ObsSfcPCorrected::ObsSfcPCorrected(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(params.variables.value(), odb.obsvariables(),
+  getOperatorVariables(params.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
 
   ufo_sfcpcorrected_setup_f90(keyOper_, params.toConfiguration(),

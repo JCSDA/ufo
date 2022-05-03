@@ -255,6 +255,7 @@ observations:
 - obs space:
     name: Where using datetimes
     simulated variables: [brightness_temperature]
+    observed variables: [brightness_temperature]
     channels: 20
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4

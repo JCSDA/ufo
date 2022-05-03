@@ -57,12 +57,11 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
   std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   ufo::Variables allvars_;
   ObsFilterData data_;
+  bool prior_;
+  bool post_;
 
  private:
   virtual void doFilter() const = 0;
-
-  bool prior_;
-  bool post_;
 
   // Variables extracted from the filter parameters.
   bool deferToPost_;

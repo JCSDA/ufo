@@ -29,12 +29,12 @@ CreateDiagnosticFlags::CreateDiagnosticFlags(ioda::ObsSpace &obsdb, const Parame
 {
   oops::Log::trace() << "CreateDiagnosticFlags constructor starts" << std::endl;
   if (parameters.filterVariables.value().is_initialized()) {
-    const oops::Variables &simulatedVariables = obsdb.obsvariables();
+    const oops::Variables &observedVariables = obsdb.obsvariables();
     const oops::Variables filterVariables = getFilterVariables();
     for (size_t i = 0; i < filterVariables.size(); ++i)
-      if (!simulatedVariables.has(filterVariables[i])) {
+      if (!observedVariables.has(filterVariables[i])) {
         throw eckit::UserError("Filter variable '" + filterVariables[i] +
-                               "' is not a simulated variable", Here());
+                               "' is not an observed variable", Here());
       }
   }
   oops::Log::trace() << "CreateDiagnosticFlags constructed" << std::endl;
@@ -69,7 +69,7 @@ void CreateDiagnosticFlags::doFilter() const {
   for (const DiagnosticFlagParameters &params : parameters_.flags.value()) {
     const std::string &flagName = params.name;
     const std::string groupName = "DiagnosticFlags/" + flagName;
-    // Loop over simulated variables.
+    // Loop over observed variables.
     for (size_t jv = 0; jv < filterVars.size(); ++jv) {
       const std::string &varName = filterVars[jv];
       bool createOrReinitializeVar = true;
@@ -79,7 +79,7 @@ void CreateDiagnosticFlags::doFilter() const {
       }
       if (createOrReinitializeVar) {
         // We need to create or reinitialize the Boolean variable corresponding to the
-        // current flag and simulated variable.
+        // current flag and observed variable.
         obsdb_.put_db(groupName, varName,
                       std::vector<DiagnosticFlag>(obsdb_.nlocs(), params.initialValue));
       }

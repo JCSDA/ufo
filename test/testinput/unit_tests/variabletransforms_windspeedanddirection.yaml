@@ -27,14 +27,15 @@ observations:
         name: wind_from_direction@DerivedObsValue
       absTol: 5.0e-5
 
-# Check the filter can create derived simulated variables and sets correct QC flags
+# Check the filter can create derived variables and sets correct QC flags
 - obs space:
     name: Sonde
     #  Ioda file we want to apply the filter to
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: []
-    derived simulated variables: [wind_speed, wind_from_direction]
+    simulated variables: [wind_speed, wind_from_direction]
+    observed variables: []
+    derived variables: [wind_speed, wind_from_direction]
   obs filters:
   - filter: Variable Transforms
     Transform: WindSpeedAndDirection

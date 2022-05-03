@@ -37,7 +37,7 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   requiredVars_.push_back(parameters_.verticalCoordinate);
 
   /// All simulated variables.
-  const oops::Variables & obsVars = odb.obsvariables();
+  const oops::Variables & obsVars = odb.assimvariables();
 
   // If the `variables` option is specified, only the variables in that list will have
   // their background errors computed. Otherwise the background errors for all simulated
@@ -69,7 +69,7 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
     for (const Variable &variable : *parameters_.variables.value())
       variables += variable.toOopsVariables();
   else
-    variables = odb_.obsvariables();
+    variables = odb_.assimvariables();
 
   ufo_backgrounderrorvertinterp_fillobsdiags_f90(obsVerticalCoordinate.size(),
                                                  obsVerticalCoordinate.c_str(),

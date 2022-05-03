@@ -9,6 +9,7 @@ observations:
     obsdataout:
       obsfile: Data/synthetic-adt-2018041500_function_output.nc
     simulated variables: [absolute_dynamic_topography]
+    observed variables: [absolute_dynamic_topography]
   geovals:
     filename: Data/ufo/testinput_tier_1/synthetic-adt-2018041500-geovals.nc
   obs function:

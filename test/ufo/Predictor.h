@@ -118,7 +118,7 @@ void testPredictor() {
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       vars.push_back("predictor_" + predictor_names[jp]);
     }
-    const oops::Variables testvars = ospace.obsvariables();
+    const oops::Variables testvars = ospace.assimvariables();
     const std::size_t nvars = testvars.size();
     if (!testvars.channels().empty()) {
       // At present we can label predictors with either the channel number or the variable

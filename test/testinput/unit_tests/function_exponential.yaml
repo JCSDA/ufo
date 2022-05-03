@@ -8,8 +8,9 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/obsfunction_exponential_testdata.nc4
     obsdataout:
       obsfile: Data/function_exp_testout_1channel.nc4
-    simulated variables: []
-    derived simulated variables: [fake_y1_data]
+    simulated variables: [fake_y1_data]
+    derived variables: [fake_y1_data]
+    observed variables: []
   obs function:
     name: Exponential@ObsFunction
     options:
@@ -28,8 +29,9 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/obsfunction_exponential_testdata.nc4
     obsdataout:
       obsfile: Data/function_exp_testout_multichannel.nc4
-    simulated variables: []
-    derived simulated variables: [fake_y_data]
+    simulated variables: [fake_y_data]
+    derived variables: [fake_y_data]
+    observed variables: []
     channels: 1-3
   obs function:
     name: Exponential@ObsFunction

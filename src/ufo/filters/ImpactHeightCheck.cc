@@ -61,7 +61,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ImpactHeightCheck post-filter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::Variables observed = obsdb_.assimvariables();
   const float missingFloat = util::missingValue(missingFloat);
 
   // Get the refractivity from the obs diagnostics, including the number of

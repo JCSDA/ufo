@@ -4,6 +4,7 @@ Only valid observations:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -34,6 +35,7 @@ One observation with excessive speed:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -64,6 +66,7 @@ One observation with excessive climb rate:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -94,6 +97,7 @@ Climb rate checks disabled:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -123,6 +127,7 @@ Where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -157,6 +162,7 @@ Multiple clusters of observations with excessive speed:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
@@ -229,6 +235,7 @@ Multiple station ids:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -2, -1, -1, 0, 0, 1, 1, 2, 2 ]
@@ -262,6 +269,7 @@ No station id variable, no observation grouping:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
+    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]

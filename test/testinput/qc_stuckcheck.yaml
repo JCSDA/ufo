@@ -11,6 +11,7 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [northward_wind]
+    observed variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
     filter variables: [northward_wind]
@@ -34,6 +35,7 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [northward_wind]
+    observed variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
     number stuck tolerance: 7
@@ -48,6 +50,7 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [northward_wind]
+    observed variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
     number stuck tolerance: 7
@@ -61,6 +64,7 @@ observations:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [northward_wind]
+    observed variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
     filter variables: [northward_wind]

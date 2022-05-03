@@ -33,7 +33,7 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.obsvariables();
+  const oops::Variables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine

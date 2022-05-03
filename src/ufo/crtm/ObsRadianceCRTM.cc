@@ -28,7 +28,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
     odb_(odb), varin_(), parameters_(parameters)
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.obsvariables();
+  const oops::Variables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine

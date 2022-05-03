@@ -27,7 +27,7 @@ ObsAtmVertInterpLayTLAD::ObsAtmVertInterpLayTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOperAtmVertInterpLay_(0), varin_()
 {
   ufo_atmvertinterplay_tlad_setup_f90(keyOperAtmVertInterpLay_, params.toConfiguration(),
-                                      odb.obsvariables(), varin_);
+                                      odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpLayTLAD created" << std::endl;
 }

@@ -30,7 +30,7 @@ ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const Parameters_ &
     odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(parameters.variables.value(), odb.obsvariables(),
+  getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
 
   ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, parameters.toConfiguration(),

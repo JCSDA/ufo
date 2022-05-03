@@ -9,6 +9,7 @@ observations:
       obsdatain:
         obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
       simulated variables: [sea_water_salinity]
+      observed variables: [sea_water_salinity]
     geovals:
       filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
     rms ref: 35.0

@@ -356,6 +356,8 @@ list( APPEND ufo_test_input
   testinput/unit_tests/variabletransforms_profilehorizontaldrift_zero_obs.yaml
   testinput/unit_tests/variabletransforms_pstar.yaml
   testinput/unit_tests/variabletransforms_QFEtoQNH.yaml
+
+  testinput/observed_derived_and_simulated_variables.yaml
 )
 
 
@@ -2902,6 +2904,13 @@ ecbuild_add_test( TARGET  test_ufo_recordhandler
                   ARGS    "testinput/recordhandler.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_RecordHandler.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_decoupled_obs_space
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/observed_derived_and_simulated_variables.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test Variable Transforms

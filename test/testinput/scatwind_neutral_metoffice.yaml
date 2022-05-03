@@ -11,6 +11,7 @@ observations:
     obsdataout:
       obsfile: Data/scatwind_obs_1d_2020100106_opr_test_out.nc4
     simulated variables: [eastward_wind, northward_wind]
+    observed variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4
   vector ref: MetOfficeHofX
@@ -22,6 +23,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_small_2020100106.nc4
     simulated variables: [eastward_wind]
+    observed variables: [eastward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_20201001T0600Z.nc4
   expect simulateObs to throw exception with message: HofX should have 2 variables eastward_wind and northward_wind
@@ -32,6 +34,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_small_2020100106.nc4
     simulated variables: [eastward_wind, northward_wind]
+    observed variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_reversed_20201001T0600Z.nc4
   expect simulateObs to throw exception with message: GeoVaLs are not ordered from model top to bottom

@@ -25,7 +25,7 @@ ObsAtmVertInterpLay::ObsAtmVertInterpLay(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperAtmVertInterpLay_(0), odb_(odb), varin_()
 {
   ufo_atmvertinterplay_setup_f90(keyOperAtmVertInterpLay_, params.toConfiguration(),
-                                 odb.obsvariables(), varin_);
+                                 odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpLay created." << std::endl;
 }

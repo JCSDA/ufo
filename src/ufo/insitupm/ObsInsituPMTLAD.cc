@@ -26,7 +26,7 @@ ObsInsituPMTLAD::ObsInsituPMTLAD(const ioda::ObsSpace & odb,
                                const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  ufo_insitupm_tlad_setup_f90(keyOper_, parameters.toConfiguration(), odb.obsvariables(), varin_);
+  ufo_insitupm_tlad_setup_f90(keyOper_, parameters.toConfiguration(), odb.assimvariables(), varin_);
   oops::Log::trace() << "ObsInsituPMTLAD created" << std::endl;
 }
 

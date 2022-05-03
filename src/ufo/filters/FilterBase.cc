@@ -43,11 +43,14 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
   // Identify filter variables
   if (parameters.filterVariables.value() != boost::none) {
   // read filter variables
-    for (const Variable &var : *parameters.filterVariables.value())
+    for (const Variable &var : *parameters.filterVariables.value()) {
       filtervars_ += var;
+      filtersimvars_ += var;
+    }
   } else {
   // if no filter variables explicitly specified, filter out all variables
     filtervars_ += Variables(obsdb_.obsvariables());
+    filtersimvars_ += Variables(obsdb_.assimvariables());
   }
 
   // Identify input variables required by the filter and notify user if any action except the last
@@ -92,18 +95,36 @@ void FilterBase::doFilter() const {
 // Select locations to which the filter will be applied
   std::vector<bool> apply = processWhere(whereParameters_, data_, whereOperator_);
 
+  ufo::Variables vars;
+  if (post_) {
+    oops::Variables oopsfiltersimvars = filtersimvars_.toOopsVariables();
+    vars += filtersimvars_;
+    if (allvars_.hasGroup("HofX")) {
+      for (size_t jv = 0; jv < filtersimvars_.toOopsVariables().size(); ++jv) {
+        if (!obsdb_.assimvariables().has(filtersimvars_.toOopsVariables()[jv])) {
+          throw eckit::UserError("Filter variable '"
+                                 + filtersimvars_.toOopsVariables()[jv] +
+                                 "' is not a simulated variable,"
+                                 " but an HofX is required", Here());
+        }
+      }
+    }
+  } else {
+    vars += filtervars_;
+  }
+
 // Allocate flagged obs indicator (false by default)
-  const size_t nvars = filtervars_.nvars();
+  const size_t nvars = vars.nvars();
   std::vector<std::vector<bool>> flagged(nvars);
   for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
 
 // Apply filter
-  this->applyFilter(apply, filtervars_, flagged);
+  this->applyFilter(apply, vars, flagged);
 
 // Take actions
   for (const std::unique_ptr<FilterActionParametersBase> &actionParameters : actionsParameters_) {
     FilterAction action(*actionParameters);
-    action.apply(filtervars_, flagged, data_, this->qcFlag(), *flags_, *obserr_);
+    action.apply(vars, flagged, data_, this->qcFlag(), *flags_, *obserr_);
   }
 
 // Done

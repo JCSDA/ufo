@@ -32,7 +32,7 @@ std::unique_ptr<Locations> ObsOperatorBase::locations() const {
 // -----------------------------------------------------------------------------
 
 oops::Variables ObsOperatorBase::simulatedVars() const {
-  return odb_.obsvariables();
+  return odb_.assimvariables();
 }
 
 // -----------------------------------------------------------------------------

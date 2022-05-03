@@ -158,3 +158,43 @@ observations:
     threshold wrt background error: true
     threshold: 3.0
   passedBenchmark: 12  # [0:7] accepted; [7:11] missing; [16:22] BG-rejected
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+    observed variables: [variable1, variable2, variable3, variable4]
+  HofX: HofX
+  obs filters:
+  - filter: Background Check
+    absolute threshold: 2.0
+  # Filter out where abs(ObsValue - HofX) < absolute_threshold
+  #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  #  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+  #  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+  #  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+  #  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  #  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+  # variable4@ObsValue is identical to variable3@ObsValue but
+  # variable4@HofX does not exist as varaible4 is not a simulated
+  # variable, therefore this test will not be applied to varaible4;
+  # all values of varaible 4 should be rejected by FinalCheck.
+  passedBenchmark: 16
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+    observed variables: [variable1, variable2, variable3, variable4]
+  HofX: HofX
+  obs filters:
+  - filter: Background Check     # test abs threshold with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    - name: variable4
+    absolute threshold: 2.0
+  # Filter varaible 4 is not a valid filter variable.
+  expectExceptionWithMessage: Filter variable 'variable4' is not a simulated variable, but an HofX is required
+

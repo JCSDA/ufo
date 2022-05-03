@@ -26,7 +26,7 @@ ObsInsituPM::ObsInsituPM(const ioda::ObsSpace & odb,
                        const Parameters_ & parameters)
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_insitupm_setup_f90(keyOper_, parameters.toConfiguration(), odb.obsvariables(), varin_);
+  ufo_insitupm_setup_f90(keyOper_, parameters.toConfiguration(), odb.assimvariables(), varin_);
   oops::Log::trace() << "ObsInsituPM created." << std::endl;
 }
 

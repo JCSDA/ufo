@@ -31,7 +31,7 @@ ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
     odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
-  getOperatorVariables(params.variables.value(), odb.obsvariables(),
+  getOperatorVariables(params.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
 
   ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),

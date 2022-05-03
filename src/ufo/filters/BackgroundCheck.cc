@@ -99,7 +99,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
-//    H(x)
+      //    H(x)
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {

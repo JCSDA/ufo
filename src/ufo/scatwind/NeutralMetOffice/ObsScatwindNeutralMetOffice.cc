@@ -28,7 +28,7 @@ ObsScatwindNeutralMetOffice::ObsScatwindNeutralMetOffice(const ioda::ObsSpace & 
     odb_(odb), varin_()
 {
   ufo_scatwind_neutralmetoffice_setup_f90(keyOperScatwindNeutralMetOffice_,
-                                          odb.obsvariables(), varin_);
+                                          odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsScatwindNeutralMetOffice created." << std::endl;
 }
