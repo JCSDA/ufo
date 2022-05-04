@@ -134,11 +134,12 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
     }
   }
   // Creating obs accessors for both obs spaces, assuming the same variable is used for grouping
-  // into stations on both obs spaces
+  // into stations on both obs spaces. 3rd arg: recordsAreSingleObs=false always for History Check.
   ObsAccessor historicalObsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
-                                                                   widerObsSpace);
+                                                                   widerObsSpace,
+                                                                   false);
   ObsAccessor windowObsAccessor =
-      TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+      TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_, false);
 
   std::vector<util::DateTime> wideDts = historicalObsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "dateTime");

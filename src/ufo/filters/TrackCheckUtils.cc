@@ -53,8 +53,16 @@ float TrackCheckUtils::distance(const Point &a, const Point &b) {
 }
 
 ObsAccessor TrackCheckUtils::createObsAccessor(const boost::optional<Variable> &stationIdVariable,
-                                               const ioda::ObsSpace &obsdb) {
-  if (stationIdVariable != boost::none) {
+                                               const ioda::ObsSpace &obsdb,
+                                               const bool recordsAreSingleObs) {
+  if (recordsAreSingleObs && (stationIdVariable != boost::none)) {
+    return ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(obsdb,
+                                                      *stationIdVariable);
+  } else if (recordsAreSingleObs && (stationIdVariable == boost::none)) {
+    // No station ID variable was provided.
+    // Assume all records form one track.
+    return ObsAccessor::toAllObservations(obsdb);
+  } else if (stationIdVariable != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb, *stationIdVariable);
   } else if (!obsdb.obs_group_vars().empty()) {

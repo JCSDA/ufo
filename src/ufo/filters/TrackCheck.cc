@@ -109,7 +109,10 @@ TrackCheck::~TrackCheck()
 void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+  // 3rd arg: recordsAreSingleObs = false for Track Check.
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
+                                                               obsdb_,
+                                                               false);
 
   const std::vector<size_t> validObsIds
                                    = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);

@@ -449,3 +449,32 @@ Ship Track Segment from Comparison Test early break true:
     station_id_variable:
       name: station_id@MetaData
   expected rejected obs indices: [0, 1, 2, 3, 4, 5]
+Ship Track Records as single obs:  # 3rd profile [8-11] is off-track
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ocean Profile
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 ]
+        lons: [ 0, 0, 0, 0, 0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3 ]
+        dateTimes: [ 0, 0, 0, 0, 3600, 3600, 3600, 3600, 7200, 7200, 7200, 7200, 9800, 9800, 9800, 9800 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "dateTime" ]
+  air_temperature: [273,273,273,273,273,273,273,273,273,273,273,273,273,273,273,273]
+  station_ids: [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+  Ship Track Check:
+    comparison test: true
+    unit testing mode: false
+    temporal resolution: PT1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 10
+    rejection threshold: 0.5
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+    records_are_single_obs: true
+  expected rejected obs indices: [8,9,10,11]

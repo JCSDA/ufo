@@ -90,8 +90,14 @@ class CheckCounter {
 /// *stationIdVariable.  If this variable was also used to group observations into records, the
 /// returned ObsAccessor is constructed as if \p stationIdVariable was empty; otherwise, it gives
 /// access to observations held on all MPI ranks.
+///
+/// If \p recordsAreSingleObs is true, the ObsAccessor created will group by category variable
+/// i.e. by *stationIdVariable, but also allow access to observations on all MPI ranks.
+/// This is necessary because each track (defined by *stationIdVariable) may contain multiple
+/// records and thus be split over multiple ranks.
 ObsAccessor createObsAccessor(const boost::optional<Variable> &stationIdVariable,
-                              const ioda::ObsSpace &obsdb);
+                              const ioda::ObsSpace &obsdb,
+                              const bool recordsAreSingleObs);
 
 void sortTracksChronologically(const std::vector<size_t> &validObsIds,
                                const ObsAccessor &obsAccessor,
