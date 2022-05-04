@@ -202,16 +202,14 @@ DO i = jbot,nlev - 1
   kval(i) = LOG (refrac(i) / refrac(i + 1)) / &
               MAX (1.0,(nr(i + 1) - nr(i)))
 
-  kval(i) = MAX (1.0E-6,kval(i))
-
   IF (kval(i) > 1.0E-6) THEN
-
     dkval_dref(i,1) = 1.0 / (refrac(i) * MAX (1.0,(nr(i + 1) - nr(i))))
     dkval_dref(i,2) = -1.0 / (refrac(i + 1) * MAX (1.0,(nr(i + 1) - nr(i))))
 
     dkval_dnr(i,1) = kval(i) / MAX (1.0,(nr(i + 1) - nr(i)))
     dkval_dnr(i,2) = -kval(i) / MAX (1.0,(nr(i + 1) - nr(i)))
-
+  ELSE
+    kval(i) = 1.0E-6
   END IF
 
 END DO
