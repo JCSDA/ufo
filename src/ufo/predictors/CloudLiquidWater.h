@@ -31,12 +31,12 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
   OOPS_CONCRETE_PARAMETERS(CloudLiquidWaterParameters, PredictorParametersBase)
 
  public:
-    /// We must specify a satellite reference name such as SSMIS to know which channels to expect.
-    oops::RequiredParameter<std::string> satellite{"satellite", this};
+    /// We must specify a sensor reference name such as SSMIS to know which channels to expect.
+    oops::RequiredParameter<std::string> sensor{"sensor", this};
     /// In case we need to override the ObsValue group name with another optional group name.
     oops::Parameter<std::string> varGroup{"varGroup", "ObsValue", this};
     /// List below is solely for SSMIS data, but a different list of channel numbers could be
-    /// added for a different satellite platform in the future.
+    /// added for a different sensor platform in the future.
     oops::OptionalParameter<int> ch19h{"ch19h", this};
     oops::OptionalParameter<int> ch19v{"ch19v", this};
     oops::OptionalParameter<int> ch22v{"ch22v", this};

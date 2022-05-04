@@ -314,6 +314,7 @@ observations:
       channels: *all_channels
       options:
         channels: *all_channels
+        use passive_bc: true
         sensor: *Sensor_ID
         use_flag: [ 1,  1,  1,  1,  1,
                     1, -1, -1,  1,  1,

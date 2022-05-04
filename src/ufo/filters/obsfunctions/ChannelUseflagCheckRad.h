@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
@@ -33,6 +34,9 @@ class ChannelUseflagCheckRadParameters : public oops::Parameters {
 
   /// Useflag (-1: not used; 0: monitoring; 1: used) for each channel in channelList
   oops::RequiredParameter<std::vector<int>> useflagChannel{"use_flag", this};
+
+  /// Configure passive bias correction
+  oops::OptionalParameter<bool> passiveBC{"use passive_bc", this};
 };
 
 ///

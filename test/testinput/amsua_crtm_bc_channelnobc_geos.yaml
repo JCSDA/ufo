@@ -28,7 +28,7 @@ observations:
       predictors:
       - name: constant
       - name: cloud_liquid_water
-        satellite: AMSUA
+        sensor: AMSUA
         clwdif_ch238: 1
         clwdif_ch314: 2
       - name: lapse_rate

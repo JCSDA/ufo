@@ -41,6 +41,7 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
   // Get test groups from options
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &biastermgrp = options_.testBiasTerm.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -55,6 +56,11 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
   invars_ += Variable("land_area_fraction@GeoVaLs");
   invars_ += Variable("ice_area_fraction@GeoVaLs");
   invars_ += Variable("surface_snow_area_fraction@GeoVaLs");
+
+  // Include list of optional data
+  if (options_.useBiasTerm.value() != boost::none) {
+    invars_ += Variable("cloud_liquid_water@"+biastermgrp, channels_);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -69,6 +75,19 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
+
+  // Get instrument and satellite from sensor
+  std::string inst;
+  size_t ich536, ich890;
+  if (nchans <= 15) {
+    inst = "amsua";
+    ich536 = 5;
+    ich890 = 15;
+  } else {
+    inst = "atms";
+    ich536 = 6;
+    ich890 = 16;
+  }
 
   // Load area fraction of each surface type
   std::vector<float> water_frac(nlocs);
@@ -125,7 +144,12 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
   float varinv = 0.0;
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &biastermgrp = options_.testBiasTerm.value();
   const float missing = util::missingValue(missing);
+  bool usebiasterm = false;
+  if (options_.useBiasTerm.value() != boost::none) {
+    usebiasterm = options_.useBiasTerm.value().get();
+  }
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
                      channels_)[ichan], dbtdts);
@@ -133,6 +157,11 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
                      channels_)[ichan], dbtdes);
     in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
     in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
+
+    std::vector<float> clwbias(nlocs, 0.0);
+    if (usebiasterm) {
+      in.get(Variable("cloud_liquid_water@"+biastermgrp, channels_)[ichan], clwbias);
+    }
 
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
@@ -144,6 +173,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
         float vaux = demisf[iloc] * std::fabs(dbtdes[iloc]) +
                dtempf[iloc] * std::fabs(dbtdts[iloc]);
         float term = pow(vaux, 2);
+        if (ichan <= ich536 - 1 || ichan == ich890 - 1) term += 0.2 * pow(clwbias[iloc], 2);
         if (term > 0.0) {
           out[ichan][iloc] = sqrt(1.0 / (1.0 / (1.0 + varinv * term)));
         }

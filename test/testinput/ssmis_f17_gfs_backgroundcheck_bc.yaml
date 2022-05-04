@@ -25,7 +25,7 @@ observations:
       predictors:
       - name: constant
       - name: cloud_liquid_water
-        satellite: SSMIS
+        sensor: SSMIS
         ch19h: 12
         ch19v: 13
         ch22v: 14

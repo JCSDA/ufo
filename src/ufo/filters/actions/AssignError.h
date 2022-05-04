@@ -27,6 +27,7 @@ class AssignErrorParameters : public FilterActionParametersBase {
 
  public:
   oops::OptionalParameter<float> errorParameter{"error parameter", this};
+  oops::OptionalParameter<std::vector<float>> errorParameterVector{"error parameter vector", this};
   oops::OptionalParameter<Variable> errorFunction{"error function", this};
 
   /// This function is overridden to check that either `error parameter` or `error function`

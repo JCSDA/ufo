@@ -30,8 +30,10 @@ void AssignErrorParameters::deserialize(util::CompositePath &path,
 
   // These checks should really be done at the validation stage (using JSON Schema),
   // but this isn't supported yet, so this is better than nothing.
-  if ((errorParameter.value() == boost::none && errorFunction.value() == boost::none) ||
-      (errorParameter.value() != boost::none && errorFunction.value() != boost::none))
+  if ((errorParameter.value() == boost::none && errorFunction.value() == boost::none
+       && errorParameterVector.value() == boost::none) ||
+      (errorParameter.value() != boost::none && errorFunction.value() != boost::none
+       && errorParameterVector.value() != boost::none))
     throw eckit::UserError(path.path() +
                            ": Exactly one of the 'error parameter' and 'error function' "
                            "options must be present");
@@ -64,6 +66,18 @@ void AssignError::apply(const Variables & vars,
       size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
         if (mask[jv][jobs] && qcFlags[kv][jobs] == QCflags::pass) obserr[iv][jobs] = error;
+      }
+    }
+    // If variable is specified
+  } else if (parameters_.errorParameterVector.value() != boost::none) {
+    std::vector<float> errorvector = *parameters_.errorParameterVector.value();
+    for (size_t jv = 0; jv < vars.nvars(); ++jv) {
+      size_t iv = obserr.varnames().find(vars.variable(jv).variable());
+      size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
+      for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
+        if (mask[jv][jobs] && qcFlags[kv][jobs] == QCflags::pass) {
+          obserr[iv][jobs] = errorvector[iv];
+        }
       }
     }
     // If variable is specified

@@ -32,12 +32,12 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
   : PredictorBase(parameters, vars) {
   // Initialize options
   options_ = parameters;
-  const std::string &satellite = options_.satellite.value();
+  const std::string &sensor = options_.sensor.value();
 
   // Currently the code is designed only for SSMIS brightness temperatures from
-  // channels 12 through 18, but a different satellite could use a different list of
+  // channels 12 through 18, but a different sensor could use a different list of
   // channels and frequencies requiring a different block of input checks.
-  if (satellite == "SSMIS") {
+  if (sensor == "SSMIS") {
     ASSERT(options_.ch19h.value() != boost::none && options_.ch19v.value() != boost::none &&
            options_.ch22v.value() != boost::none && options_.ch37h.value() != boost::none &&
            options_.ch37v.value() != boost::none && options_.ch91v.value() != boost::none &&
@@ -53,20 +53,20 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
            options_.ch37v.value().get() != 0 && options_.ch91v.value().get() != 0 &&
            options_.ch91h.value().get() != 0 && channels_.size() == 7);
 
-  } else if (satellite == "AMSUA" || satellite == "ATMS") {
+  } else if (sensor == "AMSUA" || sensor == "ATMS") {
     ASSERT(options_.ch238d.value() != boost::none && options_.ch314d.value() != boost::none);
     channels_ = {options_.ch238d.value().get(), options_.ch314d.value().get()};
     ASSERT(options_.ch238d.value().get() != 0 && options_.ch314d.value().get() != 0 &&
            channels_.size() == 2);
 
   } else {
-    std::string errString = "Currently only SSMIS, AMSUA, ATMS satellites are supported.";
+    std::string errString = "Currently only SSMIS, AMSUA, ATMS sensor are supported.";
     oops::Log::error() << errString;
     throw eckit::BadValue(errString);
   }
 
   // required variables
-  if (satellite == "AMSUA" || satellite == "ATMS") {
+  if (sensor == "AMSUA" || sensor == "ATMS") {
     geovars_ += oops::Variables({"water_area_fraction",
                                  "average_surface_temperature_within_field_of_view"});
     hdiags_ += oops::Variables({"brightness_temperature"}, vars.channels());
@@ -82,7 +82,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
                              ioda::ObsVector & out) const {
   // Get required parameters
   const std::string &vargrp = options_.varGroup.value();
-  const std::string &satellite = options_.satellite.value();
+  const std::string &sensor = options_.sensor.value();
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();
 
@@ -90,7 +90,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   const double dmiss = util::missingValue(dmiss);
 
   std::vector<float> bt19h, bt19v, bt22v, bt37h, bt37v, bt91v, bt91h;
-  if (satellite == "SSMIS") {
+  if (sensor == "SSMIS") {
     bt19h.resize(nlocs);
     bt19v.resize(nlocs);
     bt22v.resize(nlocs);
@@ -110,7 +110,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   }
 
   std::vector<float> bt238o, bt314o, bt238f, bt314f, bt238fBC, bt314fBC;
-  if (satellite == "AMSUA" || satellite == "ATMS") {
+  if (sensor == "AMSUA" || sensor == "ATMS") {
     bt238o.resize(nlocs);
     bt314o.resize(nlocs);
     bt238f.resize(nlocs);
@@ -154,17 +154,17 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   std::vector<float> water_frac(nlocs, 0.0);
   std::vector<float> tsavg(nlocs, 0.0);
   geovals.get(water_frac, "water_area_fraction");
-  if (satellite == "AMSUA" || satellite == "ATMS") {
+  if (sensor == "AMSUA" || sensor == "ATMS") {
     geovals.get(tsavg, "average_surface_temperature_within_field_of_view");
   }
 
   // Compute cloud liquid water amount
   std::vector<float> clw(nlocs, 0.0);
-  if (satellite == "SSMIS") {
+  if (sensor == "SSMIS") {
     CLWRetMW_SSMIS::cloudLiquidWater(bt19h, bt19v, bt22v, bt37h, bt37v, bt91v, bt91h,
                                      water_frac, clw);
   }
-  if (satellite == "AMSUA" || satellite == "ATMS") {
+  if (sensor == "AMSUA" || sensor == "ATMS") {
     CloudLiquidWater::clwDerivative_amsua(tsavg, water_frac, bt238o, bt314o,
                                           bt238fBC, bt314fBC, clw);
   }

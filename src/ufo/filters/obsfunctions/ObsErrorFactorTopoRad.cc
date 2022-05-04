@@ -133,7 +133,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
         (qcflagdata[iloc] != 0) ? (factor = 0.0) : (factor = 1.0);
 
         if (zsges[iloc] > 2000.0) {
-          if (channel <= ich544 || channel == ich890) {
+          if (channel <= ich544 || channel >= ich890) {
             out[ichan][iloc] = (2000.0/zsges[iloc]) * factor;
           }
           if ((zsges[iloc] > 4000.0) && (channel == ich549)) {

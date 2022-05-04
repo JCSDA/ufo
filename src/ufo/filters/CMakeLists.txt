@@ -181,6 +181,8 @@ set ( filters_files
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
       obsfunctions/HydrometeorCheckATMS.h
+      obsfunctions/HydrometeorCheckAMSUAclr.cc
+      obsfunctions/HydrometeorCheckAMSUAclr.h
       obsfunctions/ImpactHeight.cc
       obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc

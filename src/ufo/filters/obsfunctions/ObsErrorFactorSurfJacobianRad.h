@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -38,6 +39,13 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
   /// Observation error scale factors applied to surface emissivity jacobians
   /// over five surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorEsfc{"obserr_demisf", this};
+
+  /// Bias term usage indicator
+  oops::OptionalParameter<bool> useBiasTerm{"use_biasterm", this};
+
+  /// Name of the group for bias correction terms used to replace the default group
+  /// (default is ObsBiasTerm)
+  oops::Parameter<std::string> testBiasTerm{"test_biasterm", "ObsBiasTerm", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
