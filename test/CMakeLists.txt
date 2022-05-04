@@ -43,6 +43,7 @@ list( APPEND ufo_test_input
   testinput/atms_rttov_allsurfacetypes.yaml
   testinput/atms_rttov_qc.yaml
   testinput/atovs_rttov_scatt.yaml
+  testinput/atovs_scenedeperrors.yaml
   testinput/amsua_rttovcpp.yaml
   testinput/background_error_vert_interp.yaml
   testinput/background_error_identity.yaml
@@ -1071,7 +1072,6 @@ if( ${rttov_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperator.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
-  
 
   ecbuild_add_test( TARGET  test_ufo_opr_rttovcpp_amsua
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -3197,6 +3197,13 @@ ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_atovs_scenedeperrors
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/atovs_scenedeperrors.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

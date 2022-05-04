@@ -207,6 +207,8 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
+      obsfunctions/MetOfficeAllSkyErrorModel.cc
+      obsfunctions/MetOfficeAllSkyErrorModel.h
       obsfunctions/ModelHeightAdjustedWindVectorComponent.cc
       obsfunctions/ModelHeightAdjustedWindVectorComponent.h
       obsfunctions/ModelHeightAdjustedAirTemperature.cc
