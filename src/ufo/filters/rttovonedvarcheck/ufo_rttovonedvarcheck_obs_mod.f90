@@ -46,12 +46,14 @@ real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: IWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile from final iteration
+real(kind_real), allocatable :: transmittance(:,:) ! surface to space transmittance for each channel
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
 logical                      :: Store1DVarIWP   ! flag to output the IWP if the profile converges
 logical                      :: Store1DVarCLW   ! flag to output the clw if the profile converges
+logical                      :: Store1DVarTransmittance !  flag to output the surfacespace transmittance if profile convergences
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
 real(kind_real), allocatable :: mwemisserr(:,:) ! surface emissivity error from atlas
@@ -127,6 +129,7 @@ allocate(self % final_cost(self % iloc))
 allocate(self % LWP(self % iloc))
 allocate(self % IWP(self % iloc))
 if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
+if (config % Store1DVarTransmittance) allocate(self % transmittance(config % nchans, self % iloc))
 allocate(self % output_profile(prof_index % nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
@@ -153,6 +156,7 @@ self % final_cost(:) = missing
 self % LWP(:) = missing
 self % IWP(:) = missing
 if (allocated(self % CLW)) self % CLW(:,:) = missing
+if (allocated(self % transmittance)) self % transmittance(:,:) = missing
 self % emiss(:,:) = missing
 self % mwemisserr(:,:) = missing
 self % output_profile(:,:) = missing
@@ -162,6 +166,7 @@ self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
 self % Store1DVarIWP = config % Store1DVarIWP
 self % Store1DVarCLW = config % Store1DVarCLW
+self % Store1DVarTransmittance = config % Store1DVarTransmittance
 self % pcemiss_object => null()
 self % output_to_db(:) = .false.
 
@@ -335,6 +340,7 @@ if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
 if (allocated(self % IWP))            deallocate(self % IWP)
 if (allocated(self % CLW))            deallocate(self % CLW)
+if (allocated(self % transmittance))  deallocate(self % transmittance)
 if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
@@ -530,6 +536,10 @@ do jvar = 1, nchans
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
   write(var,"(A19,I0)") "surface_emissivity_",self % channels(jvar)
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
+  if (self % Store1DVarTransmittance) then
+    write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
+    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % transmittance(jvar,:))
+  endif
 end do
 
 ! Output Diagnostics

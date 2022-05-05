@@ -18,6 +18,7 @@ list( APPEND ufo_resources
   rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
   rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
   rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4
+  rmatrix/rttov/atovs_metopb_rmatrix_test.nc4
   rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
   rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
   bmatrix/gnssro/gnssro_bmatrix.txt

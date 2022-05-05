@@ -552,7 +552,6 @@ real(kind_real)                     :: V(nprofelements)                        !
 real(kind_real)                     :: USave(nprofelements, nprofelements)     ! U = H.B.H^T + R
 real(kind_real)                     :: VSave(nprofelements)                    ! V = (y-y(x_n))-H^T(xb-x_n)
 real(kind_real)                     :: New_DeltaProfile(nprofelements)
-real(kind_real)                     :: Tau_Surf(nchans)                ! Transmittance from surface
 real(kind_real)                     :: BriTemp(nchans)                 ! Forward modelled brightness temperatures
 real(kind_real)                     :: Ydiff(nchans)
 real(kind_real)                     :: Xdiff(nprofelements)

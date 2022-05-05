@@ -89,7 +89,8 @@ integer, intent(in)                               :: channels(:)   !< channels u
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
 type(ufo_radiancerttov), intent(inout)            :: rttov_simobs  !< rttov simulate obs object
-real(kind_real), intent(out)                      :: hofx(:)       !< BT's
+real(kind_real), intent(out)                      :: hofx(:)       !< BTs
+
 
 integer           :: i, j !< counters
 type(ufo_geovals) :: empty_hofxdiags  !< model data to pass the jacobian
@@ -99,7 +100,6 @@ select case (trim(ob % forward_mod_name))
   case ("RTTOV")
     call rttov_simobs % simobs(geovals, config % obsdb, size(ob % channels_all), 1, BT, empty_hofxdiags, ob_info=ob)
     call ufo_rttovonedvarcheck_all_to_subset_by_channels(ob % channels_all, BT, channels, hofx)
-
   case default
     call abor1_ftn("rttovonedvarcheck get jacobian: no suitable forward model => exiting")
 end select

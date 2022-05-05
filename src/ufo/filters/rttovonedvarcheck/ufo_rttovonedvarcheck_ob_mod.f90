@@ -48,6 +48,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real), allocatable :: output_BT(:) !< Brightness temperatures using retrieved state
   real(kind_real), allocatable :: background_BT(:) !< Brightness temperatures from 1st itreration
   real(kind_real), allocatable :: pcemiss(:) !< principal component emissivity
+  real(kind_real), allocatable :: transmittance(:) ! surface to space transmittance at end of 1dvar
   logical              :: retrievecloud  !< flag to turn on retrieve cloud
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
@@ -76,7 +77,8 @@ subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
                                         nlevels, & ! in
                                         nprofelements, & ! in
                                         nchans_all, & ! in
-                                        storeclw)
+                                        storeclw, & !in
+                                        storetransmittance) !in
 
 implicit none
 
@@ -87,6 +89,7 @@ integer, intent(in) :: nlevels !< number of levels in the profile
 integer, intent(in) :: nprofelements !< number of profile elements used
 integer :: nchans_all !< Size of all channels in ObsSpace
 logical, intent(in) :: storeclw
+logical, intent(in) :: storetransmittance
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
 real(kind_real) :: missing
 
@@ -107,6 +110,10 @@ allocate(self % calc_emiss(nchans_all))
 if (storeclw) then
   allocate(self % clw(nlevels))
   self % clw(:) = missing
+endif
+if (storetransmittance) then
+  allocate(self % transmittance(nchans_all))
+  self % transmittance(:) = missing
 endif
 self % yobs(:) = missing
 self % final_bt_diff(:) = missing
@@ -172,6 +179,7 @@ if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 if (allocated(self % rejected_channels_ctp)) deallocate(self % rejected_channels_ctp)
 if (allocated(self % clw))            deallocate(self % clw)
 if (allocated(self % pcemiss))        deallocate(self % pcemiss)
+if (allocated(self % transmittance))  deallocate(self % transmittance)
 
 self % pcemiss_object => null()
 

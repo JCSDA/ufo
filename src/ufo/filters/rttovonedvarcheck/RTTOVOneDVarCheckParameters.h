@@ -147,11 +147,14 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Output the LWP if the profile converges
   oops::Parameter<bool> Store1DVarLWP{"Store1DVarLWP", false, this};
 
-  /// Output the IWP if the profile converges
+  /// Output the Ice Water Path if the profile converges
   oops::Parameter<bool> Store1DVarIWP{"Store1DVarIWP", false, this};
 
   /// Output the CLW if the profile converges
   oops::Parameter<bool> Store1DVarCLW{"Store1DVarCLW", false, this};
+
+  /// Output the surface to space transmittance if the profile converges
+  oops::Parameter<bool> Store1DVarTransmittance{"Store1DVarTransmittance", false, this};
 
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};

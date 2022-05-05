@@ -147,7 +147,7 @@ contains
   end subroutine ufo_radiancerttov_delete
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs,               &
+  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs,      &
                                       hofx, hofxdiags, ob_info)
     use fckit_mpi_module,   only: fckit_mpi_comm
     use ufo_rttovonedvarcheck_ob_mod
@@ -162,7 +162,7 @@ contains
     real(c_double),        intent(inout)    :: hofx(nvars,nlocs)
     type(ufo_geovals),     intent(inout)    :: hofxdiags    !non-h(x) diagnostics
     type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
-
+    
     real(c_double)                          :: missing
     type(fckit_mpi_comm)                    :: f_comm
 
@@ -455,6 +455,17 @@ contains
           do ichan = 1, nchan_sim, size(self%channels)
             iprof = self % RTProf % chanprof(nchan_total + ichan)%prof
             hofx(1:size(self%channels),iprof) = self % RTprof % radiance % bt(ichan:ichan+size(self%channels)-1)
+            
+            !store transmittance if ob_info present in call and transmittance part of structure
+            if (present(ob_info)) then
+              if (allocated(ob_info % transmittance)) then
+                if (self % conf % do_mw_scatt) then
+                  ob_info % transmittance(1:size(self%channels)) = self % RTprof % mw_scatt % emis_retrieval % tau_clr(ichan:ichan+size(self%channels)-1)
+                else
+                  ob_info % transmittance(1:size(self%channels)) = self % RTProf % transmission % tau_total(ichan:ichan+size(self%channels)-1)
+                end if
+              end if
+            end if
           enddo
 
           ! Write out emissivity out and hofx
@@ -465,6 +476,14 @@ contains
                 write(*,*) "profile ", iprof
                 write(*,*) "emissivity out = ",self % RTprof % emissivity(ichan:ichan+nchan_inst-1) % emis_out
                 write(*,*) "hofx out = ",hofx(1:size(self%channels),iprof)
+                
+                if (self % conf % do_mw_scatt) then
+                  write(*,*) "emis_retrieval cfrac = ",self % RTprof % mw_scatt % emis_retrieval % cfrac(ichan:ichan+nchan_inst-1)
+                  write(*,*) "emis_retrieval tau_clr = ",self % RTprof % mw_scatt % emis_retrieval % tau_clr(ichan:ichan+nchan_inst-1)
+                  write(*,*) "emis_retrieval tau_cld = ",self % RTprof % mw_scatt % emis_retrieval % tau_cld(ichan:ichan+nchan_inst-1)
+                else
+                  write(*,*) "tau_total out = ",self % RTProf % transmission % tau_total(ichan:ichan+nchan_inst-1)
+                end if
               end if
             end do
           end if

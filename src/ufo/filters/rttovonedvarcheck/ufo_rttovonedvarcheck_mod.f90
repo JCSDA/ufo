@@ -250,7 +250,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans, self % Store1DVarCLW)
+      call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans, &
+           self % Store1DVarCLW, self % Store1DVarTransmittance)
       
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
@@ -336,6 +337,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       obs % LWP(jobs) = ob % LWP
       obs % IWP(jobs) = ob % IWP
       if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
+      if (self % store1dvartransmittance) obs % transmittance(:, jobs) = ob % transmittance(:)
       if(self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
       if(self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
       obs % niter(jobs) = ob % niter
