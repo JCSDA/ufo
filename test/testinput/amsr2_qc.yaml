@@ -1,11 +1,11 @@
-window begin: 2020-11-14T21:00:00Z
-window end: 2020-11-15T03:00:00Z
+window begin: 2020-11-30T21:00:00Z
+window end: 2020-12-01T03:00:00Z
 
 observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
-    Clouds: [Water, Ice]
+    Clouds: [Water, Ice, Rain, Snow]
     Cloud_Fraction: 1.0
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
@@ -17,13 +17,35 @@ observations:
   obs space:
     name: amsr2_gcom-w1
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020111500.nc4
+      obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020120100_m.nc4
     obsdataout:
-      obsfile: Data/amsr2_gcom-w1_obs_2020111500_out.nc4
+      obsfile: Data/amsr2_gcom-w1_obs_2020120100_m_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-14
   geovals:
-    filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020111500.nc4
+    filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020120100_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/satbias_amsr2_gcom-w1.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapse_rate
+        order: 2
+        tlapse: &amsr2tlap Data/ufo/testinput_tier_1/amsr2_gcom-w1_tlapmean.txt
+      - name: lapse_rate
+        tlapse: *amsr2tlap
+      - name: emissivity
+      - name: scan_angle
+        var_name: scan_position
+        order: 4
+      - name: scan_angle
+        var_name: scan_position
+        order: 3
+      - name: scan_angle
+        var_name: scan_position
+        order: 2
+      - name: scan_angle
+        var_name: scan_position
   obs filters:
   - filter: Bounds Check
     filter variables:
@@ -38,7 +60,7 @@ observations:
     where:
     - variable:
         name: water_area_fraction@GeoVaLs
-      minvalue: 1
+      minvalue: 0.999
     - variable:
         name: surface_temperature_where_sea@GeoVaLs
       minvalue: 275
@@ -176,4 +198,4 @@ observations:
     absolute threshold: 50
     action:
       name: reject
-  passedBenchmark: 45464
+  passedBenchmark: 649
