@@ -66,6 +66,11 @@ class VariableTransformParametersBase : public FilterParametersBase {
   /// By default \e UseValidDataOnly is set to \e true.
   /// See ReadTheDoc for more details
   oops::Parameter<bool> UseValidDataOnly{"UseValidDataOnly", true, this};
+
+  /// Fill any missing entries of a vector in a Derived group (e.g. DerivedObsValue) with
+  /// the non-missing entries of the vector in the equivalent original group (e.g. ObsValue).
+  oops::Parameter<bool> FillMissingDerivedFromOriginal{"FillMissingDerivedFromOriginal",
+                                                       false, this};
 };
 
 /// \brief Concrete class containing the options specified by the VariableTransformParametersBase.

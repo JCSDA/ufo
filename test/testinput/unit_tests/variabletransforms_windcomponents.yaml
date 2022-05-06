@@ -25,3 +25,24 @@ observations:
       test:
         name: northward_wind@DerivedObsValue
       absTol: 5.0e-5
+
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_missing_values_2018041500.nc4
+    simulated variables: [wind_speed, wind_from_direction]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: WindComponents
+    FillMissingDerivedFromOriginal: true
+  compareVariables:                #  test output matches precalculated values
+    - reference:
+        name: eastward_wind@TestReference
+      test:
+        name: eastward_wind@DerivedObsValue
+      absTol: 5.0e-5
+    - reference:
+        name: northward_wind@TestReference
+      test:
+        name: northward_wind@DerivedObsValue
+      absTol: 5.0e-5
