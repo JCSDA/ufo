@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,7 +43,10 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 *
 * \details Performs a variable conversion from wind_speed and wind_from_direction to
 *  the wind components, eastward_wind and northward_wind. The newly calculated variables
-*  are included in the same obs space.
+*  are included in the same obs space. This filter supports the use of nchans as the
+*  the second observed dimension. The variable conversion is performed for
+*  each channel and so the output eastward_wind and northward_wind variables will have the
+*  same dimensions as wind_speed and wind_from_direction.
 *
 * See VariableTransformParametersBase for filter setup.
 */

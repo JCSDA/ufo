@@ -155,6 +155,35 @@ class TransformBase {
     }
   }
 
+  /// \brief Save a transformed 2d variable to the `DerivedObsValue` group of the obs space.
+  ///
+  /// If the saved variable is a simulated variable, QC flags are only set to `pass` at locations
+  /// where at least one valid obs value has been assigned.
+  ///
+  /// \param varName Variable name.
+  /// \param channel channel number string.
+  /// \param obsVactor Variable values.
+  /// \param dimList List of dimension names.
+  template <typename T>
+  void putObservation(const std::string &varName,
+                      const std::string &channel,
+                      const std::vector<T> &obsVector,
+                      const std::vector<std::string> & dimList,
+                      const std::string &outputTag = "DerivedObsValue") {
+    obsdb_.put_db(outputTag, varName + "_" + channel, obsVector, dimList);
+    if (flags_.has(varName)) {
+      std::vector<int> &varFlags = flags_[varName];
+      ASSERT(varFlags.size() == obsVector.size());
+
+      const T missing = util::missingValue(T());
+      for (size_t iloc = 0; iloc < obsVector.size(); ++iloc) {
+        /// Set flag to pass if at least one good DerivedObsValue is present
+        if (obsVector[iloc] != missing)
+          varFlags[iloc] = QCflags::pass;
+      }
+    }
+  }
+
   std::string getDerivedGroup(const std::string group) const;
 
   /// subclasses to access Method and formualtion used for the calculation
