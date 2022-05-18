@@ -9,6 +9,8 @@
 
 #include "ufo/profile/ProfilePressure.h"
 
+#include "ufo/utils/PiecewiseLinearInterpolation.h"
+
 namespace ufo {
 
   static ProfileCheckMaker<ProfilePressure>
@@ -43,21 +45,17 @@ namespace ufo {
     }
 
     // Retrieve the model background fields.
-    const std::vector <float> &orogGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_orog);
     const std::vector <float> &pressureGeoVaLs =
       profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
     const std::vector <float> &heightGeoVaLs =
       profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho);
 
-    if (orogGeoVaLs.empty() ||
-        !oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
+    if (!oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
                                          heightGeoVaLs)) {
       oops::Log::debug() << "At least one GeoVaLs vector is the wrong size. "
                          << "Profile pressure routine will not run." << std::endl;
       oops::Log::debug() << "Vector sizes: "
-                         << oops::listOfVectorSizes(orogGeoVaLs,
-                                                    pressureGeoVaLs,
+                         << oops::listOfVectorSizes(pressureGeoVaLs,
                                                     heightGeoVaLs)
                          << std::endl;
       return;
@@ -121,10 +119,13 @@ namespace ufo {
     if (ObsHasNoPressureSensor &&
         !AllLevelsHaveValidP) {
       // Compute observation pressures based on vertical interpolation from model heights.
-      ufo::profileVerticalInterpolation(heightGeoVaLs,
-                                        pressureGeoVaLs,
-                                        zObs,
-                                        pressures);
+      ufo::PiecewiseLinearInterpolation interpolate
+        (std::vector<double>(heightGeoVaLs.begin(), heightGeoVaLs.end()),
+         std::vector<double>(pressureGeoVaLs.begin(), pressureGeoVaLs.end()));
+      for (size_t jloc = 0; jloc < pressures.size(); ++jloc) {
+        if (zObs[jloc] != missingValueFloat)
+          pressures[jloc] = interpolate(static_cast<double>(zObs[jloc]));
+      }
     }
   }
 

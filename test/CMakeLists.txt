@@ -277,7 +277,6 @@ list( APPEND ufo_test_input
   testinput/conventionalprofileprocessing_unittest_oneprofileMPI.yaml
   testinput/conventionalprofileprocessing_unittests_vertaverage.yaml
   testinput/conventionalprofileprocessing_unittests_vertaverage_ascending.yaml
-  testinput/conventionalprofileprocessing_unittests_vertinterp.yaml
   testinput/conventionalprofileprocessing_unittests_profiledataholder.yaml
   testinput/conventionalprofileprocessing_RH_obsfilter.yaml
   testinput/conventionalprofileprocessing_RH_OPScomparison.yaml
@@ -2753,13 +2752,6 @@ ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_verta
 ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_vertaverage_ascending
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
                   ARGS    "testinput/conventionalprofileprocessing_unittests_vertaverage_ascending.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ConventionalProfileProcessing.x
-                  TEST_DEPENDS ufo_get_ufo_test_data )
-
-ecbuild_add_test( TARGET  test_ufo_conventionalprofileprocessing_unittests_vertinterp
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
-                  ARGS    "testinput/conventionalprofileprocessing_unittests_vertinterp.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ConventionalProfileProcessing.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

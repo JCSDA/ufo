@@ -77,8 +77,6 @@ set ( profile_files
       ProfileStandardLevels.h
       ProfileVerticalAveraging.cc
       ProfileVerticalAveraging.h
-      ProfileVerticalInterpolation.cc
-      ProfileVerticalInterpolation.h
       ProfileWindProfilerFlags.cc
       ProfileWindProfilerFlags.h
       SlantPathLocations.cc

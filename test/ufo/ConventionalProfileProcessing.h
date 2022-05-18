@@ -47,7 +47,6 @@
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/ProfileVerticalAveraging.h"
-#include "ufo/profile/ProfileVerticalInterpolation.h"
 #include "ufo/profile/VariableNames.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -241,78 +240,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     profileCheckBackgroundRH.runCheck(profileDataHandler);
     profileCheckBackgroundUV.runCheck(profileDataHandler);
     profileCheckBackgroundZ.runCheck(profileDataHandler);
-  }
-
-  // Test the profile vertical interpolation
-  const bool testProfileVerticalInterpolation =
-    conf.getBool("testProfileVerticalInterpolation", false);
-  if (testProfileVerticalInterpolation) {
-    ConventionalProfileProcessingParameters options;
-    options.deserialize(conf);
-
-    std::vector<bool> apply(obsspace.nlocs(), true);
-    std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(filterdata,
-                                          *qcflags,
-                                          options.DHParameters,
-                                          apply,
-                                          filtervars,
-                                          flagged);
-
-    // Get interpolation options for each profile.
-    const auto interpMethodNames = conf.getStringVector("interpMethodNames");
-    const auto coordOrderNames = conf.getStringVector("coordOrderNames");
-    const auto outOfBoundsNames = conf.getStringVector("outOfBoundsNames");
-
-    for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {
-      profileDataHandler.initialiseNextProfile();
-
-      const std::string interpMethodName = interpMethodNames[jprof];
-      const std::string coordOrderName = coordOrderNames[jprof];
-      const std::string outOfBoundsName = outOfBoundsNames[jprof];
-
-      // The GeoVaLs used in this test are indexed from top to bottom.
-      std::vector <float> zRhoGeoVaLs(geovals->nlevs(ufo::VariableNames::geovals_height_rho));
-      geovals->getAtLocation(zRhoGeoVaLs, ufo::VariableNames::geovals_height_rho, 0);
-      if (coordOrderName == "Ascending")
-        std::reverse(zRhoGeoVaLs.begin(), zRhoGeoVaLs.end());
-
-      std::vector <float> pressureGeoVaLs(geovals->nlevs(ufo::VariableNames::geovals_pressure_rho));
-      geovals->getAtLocation(pressureGeoVaLs, ufo::VariableNames::geovals_pressure_rho, 0);
-      std::reverse(pressureGeoVaLs.begin(), pressureGeoVaLs.end());
-
-      // Get observed geopotential height and (empty) pressure vector.
-      const auto &zObs = profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
-      auto &pressures = profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
-
-      auto interpMethod = ProfileInterpolation::InterpolationMethod::Linear;
-      if (interpMethodName == "LogLinear")
-        interpMethod = ProfileInterpolation::InterpolationMethod::LogLinear;
-      auto coordOrder = ProfileInterpolation::CoordinateOrder::Ascending;
-      if (coordOrderName == "Descending")
-        coordOrder = ProfileInterpolation::CoordinateOrder::Descending;
-      auto outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetToBound;
-      if (outOfBoundsName == "SetMissing")
-        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetMissing;
-      if (outOfBoundsName == "Extrapolate")
-        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::Extrapolate;
-
-      // Interpolate to determine pressure.
-      profileVerticalInterpolation(zRhoGeoVaLs,
-                                   pressureGeoVaLs,
-                                   zObs,
-                                   pressures,
-                                   interpMethod,
-                                   coordOrder,
-                                   outOfBounds);
-
-      // Compare each value of pressure.
-      const std::string expectedPressureName = "OPS_" +
-        static_cast<std::string>(ufo::VariableNames::obs_air_pressure);
-      const auto &expected_pressures = profileDataHandler.get<float>(expectedPressureName);
-      for (size_t jlev = 0; jlev < pressures.size(); ++jlev)
-        EXPECT(oops::is_close_relative(pressures[jlev], expected_pressures[jlev], 1e-5f));
-    }
   }
 
   // Test the profile vertical averaging.
