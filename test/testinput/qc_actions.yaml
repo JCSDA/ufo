@@ -530,7 +530,7 @@ observations:
         group variables: ["intvar3"]
     simulated variables: [variable1]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   HofX: HofX
   obs filters:
   - filter: BlackList
@@ -554,7 +554,7 @@ observations:
         group variables: ["intvar3"]
     simulated variables: [variable1]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   HofX: HofX
   obs filters:
   - filter: BlackList
@@ -574,7 +574,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   HofX: HofX
   obs filters:
   - filter: BlackList

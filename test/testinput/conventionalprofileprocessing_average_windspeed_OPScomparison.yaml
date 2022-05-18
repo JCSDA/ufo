@@ -14,7 +14,7 @@ Sondes:
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
     simulated variables: [eastward_wind, northward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
   Conventional Profile Processing:

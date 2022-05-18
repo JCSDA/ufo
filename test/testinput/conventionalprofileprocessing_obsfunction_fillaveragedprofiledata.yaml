@@ -12,7 +12,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -39,7 +39,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
     simulated variables: [air_temperature]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -89,7 +89,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:

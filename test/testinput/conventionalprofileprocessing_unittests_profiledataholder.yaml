@@ -13,7 +13,7 @@ ProfileDataHolder:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
   Conventional Profile Processing:

@@ -61,7 +61,7 @@ namespace ufo {
 ///
 /// - obs space:
 ///    extension:
-///      average profiles onto model levels: 71
+///      allocate companion records with length: 71
 ///
 /// (where 71 can be replaced by the length of the air_pressure_levels GeoVaL).
 /// The H(x) values are placed in the extended section of the ObsSpace.

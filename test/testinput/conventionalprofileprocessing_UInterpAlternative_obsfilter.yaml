@@ -41,7 +41,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind, northward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:

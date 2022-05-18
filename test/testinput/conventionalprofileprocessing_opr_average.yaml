@@ -13,7 +13,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -41,7 +41,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind, northward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -69,7 +69,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -97,7 +97,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -125,7 +125,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind, northward_wind, air_temperature, relative_humidity]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: Composite
     components:
@@ -165,7 +165,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -188,7 +188,7 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   expect constructor to throw exception with message: Group variables configuration is empty
   obs operator:
     name: ProfileAverage
@@ -214,7 +214,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   expect constructor to throw exception with message: Sort variable must be air_pressure
   obs operator:
     name: ProfileAverage
@@ -241,7 +241,7 @@ observations:
         sort order: "ascending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   expect constructor to throw exception with message: Profiles must be sorted in descending order
   obs operator:
     name: ProfileAverage
@@ -294,7 +294,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -324,7 +324,7 @@ observations:
         sort order: "descending"
     simulated variables: [eastward_wind]
     extension:
-      average profiles onto model levels: 71
+      allocate companion records with length: 71
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"

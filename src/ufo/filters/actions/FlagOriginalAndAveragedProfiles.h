@@ -44,7 +44,7 @@ class FlagOriginalAndAveragedProfilesParameters : public FilterActionParametersB
 /// NB the ObsSpace extension is produced with the following yaml options:
 ///
 ///    extension:
-///      average profiles onto model levels: N
+///      allocate companion records with length: N
 ///
 /// where N is the desired number of levels per averaged profile.
 /// This is different to the use of the DerivedObsValue group which adds an additional variable
