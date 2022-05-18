@@ -1717,12 +1717,20 @@ contains
     class(rttov_conf), intent(in) :: conf
 
     include 'rttov_init_prof.interface'
+    include 'rttov_init_rad.interface'
     include 'rttov_init_scatt_prof.interface'
+    include 'rttov_init_transmission.interface'
 
     call rttov_init_prof(self % profiles_k)
+    call rttov_init_rad(self % radiance_k)
+    call rttov_init_transmission(self % transmission_k)
+
+! manually reset emissivity as there's no RTTOV routine to do it
     self % emissivity_k(:) % emis_in = zero
     self % emissivity_k(:) % emis_out = zero
     self % emissivity(:) % emis_out = zero
+
+! Set radiance jacobian scaling (should equal one) 
     self % radiance_k % bt(:) = one
     self % radiance_k % total(:) = one
 
