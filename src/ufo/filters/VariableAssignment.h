@@ -50,6 +50,13 @@ class AssignmentParameters : public oops::Parameters {
   /// Exactly one of the `value`, `source variable` and `function` options must be given.
   oops::OptionalParameter<ufo::Variable> sourceVariable{"source variable", this};
 
+  /// This option applies to assigning values from a source variable.
+  /// Assume the source variable is called `ObsValue/varname`. If \p skipDerived is false,
+  /// the variable `DerivedObsValue/varname` (if it exists) will be used as the source variable.
+  /// If \p skipDerived is true or the derived variable does not exist, `ObsValue/varname`
+  /// will be used as the source variable.
+  oops::Parameter<bool> skipDerived{"skip derived", false, this};
+
   /// An ObsFunction that should be evaluated and assigned to the specified
   /// variable (at all locations selected be the `where` statement, if present).
   ///

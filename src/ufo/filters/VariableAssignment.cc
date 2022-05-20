@@ -123,11 +123,12 @@ void assignObsDataVector(const std::vector<bool> &apply,
 /// statement).
 template <typename SourceVariableType, typename DestinationVariableType>
 void assignVariable(const ufo::Variable &variable,
+                    const bool skipDerived,
                     const std::vector<bool> &apply,
                     const ObsFilterData &data,
                     ioda::ObsDataVector<DestinationVariableType> &values) {
   ioda::ObsDataVector<SourceVariableType> newValues(data.obsspace(), variable.toOopsVariables());
-  data.get(variable, newValues);
+  data.get(variable, newValues, skipDerived);
   assignObsDataVector(apply, newValues, values);
 }
 
@@ -156,10 +157,12 @@ void assignNumericValues(const AssignmentParameters &params,
   } else if (params.sourceVariable.value() != boost::none) {
     switch (data.dtype(*params.sourceVariable.value())) {
     case ioda::ObsDtype::Float:
-      assignVariable<float>(*params.sourceVariable.value(), apply, data, values);
+      assignVariable<float>(*params.sourceVariable.value(), params.skipDerived,
+                            apply, data, values);
       break;
     case ioda::ObsDtype::Integer:
-      assignVariable<int>(*params.sourceVariable.value(), apply, data, values);
+      assignVariable<int>(*params.sourceVariable.value(), params.skipDerived,
+                          apply, data, values);
       break;
     default:
       throw eckit::BadParameter(params.sourceVariable.value()->fullName() +
@@ -187,7 +190,8 @@ void assignNonnumericValues(const AssignmentParameters &params,
   if (params.value_.value() != boost::none) {
     assignValue(*params.value_.value(), apply, values);
   } else if (params.sourceVariable.value() != boost::none) {
-    assignVariable<VariableType>(*params.sourceVariable.value(), apply, data, values);
+    assignVariable<VariableType>(*params.sourceVariable.value(), params.skipDerived,
+                                 apply, data, values);
   } else {
     ASSERT(params.function.value() != boost::none);
     assignFunction<VariableType>(*params.function.value(), variable, apply, data, values);
@@ -199,13 +203,14 @@ void assignNonnumericValues(const AssignmentParameters &params,
 /// entirely of missing values.
 template <typename VariableType>
 ioda::ObsDataVector<VariableType> getCurrentValues(const ufo::Variable &variable,
-                                                   ioda::ObsSpace &obsdb) {
+                                                   ioda::ObsSpace &obsdb,
+                                                   const bool skipDerived) {
   ioda::ObsDataVector<VariableType> values(obsdb, variable.toOopsVariables());
   for (size_t ich = 0; ich < variable.size(); ++ich) {
     const std::string variableWithChannel = variable.variable(ich);
     if (obsdb.has(variable.group(), variableWithChannel)) {
       // Variable exists -- retrieve its values from the ObsSpace
-      obsdb.get_db(variable.group(), variableWithChannel, values[ich]);
+      obsdb.get_db(variable.group(), variableWithChannel, values[ich], {}, skipDerived);
     } else {
       // Variable doesn't exist yet -- fill the vector with missing values
       values[ich].assign(obsdb.nlocs(), util::missingValue(VariableType()));
@@ -250,7 +255,7 @@ void assignToIntVariable(const ufo::Variable &variable,
                          const std::vector<bool> &apply,
                          const ObsFilterData &data,
                          ioda::ObsSpace &obsdb) {
-  ioda::ObsDataVector<int> values = getCurrentValues<int>(variable, obsdb);
+  ioda::ObsDataVector<int> values = getCurrentValues<int>(variable, obsdb, params.skipDerived);
   assignNumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
 }
@@ -265,7 +270,8 @@ void assignToFloatVariable(const ufo::Variable &variable,
                            const ObsFilterData &data,
                            ioda::ObsSpace &obsdb,
                            ioda::ObsDataVector<int> &qcflags) {
-  ioda::ObsDataVector<float> values = getCurrentValues<float>(variable, obsdb);
+  ioda::ObsDataVector<float> values =
+    getCurrentValues<float>(variable, obsdb, params.skipDerived);
   assignNumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
   if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue")
@@ -281,7 +287,8 @@ void assignToNonnumericVariable(const ufo::Variable &variable,
                                 const std::vector<bool> &apply,
                                 const ObsFilterData &data,
                                 ioda::ObsSpace &obsdb) {
-  ioda::ObsDataVector<VariableType> values = getCurrentValues<VariableType>(variable, obsdb);
+  ioda::ObsDataVector<VariableType> values =
+    getCurrentValues<VariableType>(variable, obsdb, params.skipDerived);
   assignNonnumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
 }

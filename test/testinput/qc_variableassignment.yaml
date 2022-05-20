@@ -895,3 +895,54 @@ observations:
       name: float_variable_1@MetaData
     reference:
       name: assigned_float_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Variable assignment from a DerivedObsValue with 'skip derived' set to false then true
+  obs filters:
+  # (1) Set up a variable in the MetaData and DerivedMetaData groups.
+  - filter: Variable Assignment
+    assignments:
+    - name: modified_variable@MetaData
+      type: float
+      value: 3.0
+    - name: modified_variable@DerivedMetaData
+      type: float
+      value: 4.0
+  # (2) Set up the reference values by copying them from the variables created in stage (1).
+  - filter: Variable Assignment
+    assignments:
+    - name: modified_variable@TestReference
+      type: float
+      source variable:
+        name: modified_variable@MetaData
+    - name: modified_variable_derived@TestReference
+      type: float
+      source variable:
+        name: modified_variable@DerivedMetaData
+  # (3) Assign from MetaData to DerivedMetaData with 'skip derived' set to false (the default).
+  - filter: Variable Assignment
+    assignments:
+    - name: modified_variable@DerivedMetaData
+      source variable:
+        name: modified_variable@MetaData
+      skip derived: false
+  # (4) Expect DerivedMetaData to have been copied to itself.
+  compareVariables:
+  - test:
+      name: modified_variable@DerivedMetaData
+    reference:
+      name: modified_variable_derived@TestReference
+  # (5) Assign from MetaData to DerivedMetaData with 'skip derived' set to true.
+  - filter: Variable Assignment
+    assignments:
+    - name: modified_variable@DerivedMetaData
+      source variable:
+        name: modified_variable@MetaData
+      skip derived: true
+  # (6) Expect DerivedMetaData to have been set to MetaData.
+  compareVariables:
+  - test:
+      name: modified_variable@DerivedMetaData
+    reference:
+      name: modified_variable@TestReference
