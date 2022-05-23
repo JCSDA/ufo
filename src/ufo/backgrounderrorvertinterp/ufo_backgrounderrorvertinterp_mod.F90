@@ -19,7 +19,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
   use kinds,              only: kind_real
   use missing_values_mod, only: missing_value
   use obsspace_mod,       only: obsspace_get_db
-  use ufo_vars_mod,       only: MAXVARLEN, var_prs, var_prsi
+  use ufo_vars_mod,       only: MAXVARLEN, var_prs, var_prsi, var_prsimo
   use ufo_geovals_mod,    only: ufo_geoval, ufo_geovals, ufo_geovals_get_var
   use vert_interp_mod,    only: vert_interp_weights, vert_interp_apply
   implicit none
@@ -62,9 +62,11 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
      missing = missing_value(obs_vcoord(1))
   end if
 
-  ! Use logarithmic interpolation if the vertical coordinate is air_pressure
-  ! or air_pressure_levels
-  use_ln = (obs_vcoord_name .eq. var_prs) .or. (obs_vcoord_name .eq. var_prsi)
+  ! Use logarithmic interpolation if the vertical coordinate is air_pressure,
+  ! air_pressure_levels, or air_pressure_levels_minus_one
+  use_ln = (obs_vcoord_name .eq. var_prs) .or. &
+       (obs_vcoord_name .eq. var_prsi) .or. &
+       (obs_vcoord_name .eq. var_prsimo)
 
   ! Calculate the interpolation weights
   allocate(interp_nodes(vcoord_profile%nval))
