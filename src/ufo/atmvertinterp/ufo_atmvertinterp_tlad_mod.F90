@@ -26,6 +26,8 @@ module ufo_atmvertinterp_tlad_mod
     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
     character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
     character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
+    character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
+
     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
@@ -48,6 +50,7 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
 
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: coord_group
+  character(kind=c_char,len=:), allocatable :: interp_method
   integer :: ivar, nvars
 
   !> Fill in variables requested from the model
@@ -56,12 +59,22 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
     call self%geovars%push_back(self%obsvars%variable(ivar))
   enddo
   !> grab what vertical coordinate/variable to use from the config
-  self%use_ln = .false.
-
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name
-  if( (self%v_coord .eq. var_prs) .or. (self%v_coord .eq. var_prsi) ) then
-    self%use_ln = .true.
+
+  call grid_conf%get_or_die("interpolation method",interp_method)
+  self%interp_method = interp_method
+
+  !> Linear interpolation is used by default.
+  self%use_ln = .false.
+  !> Log-linear interpolation is used either if it is explicitly requested
+  !  or the method is automatically determined based on the vertical coordinate used.
+  if ((trim(self%interp_method) == "automatic" .and. &
+       ((trim(self%v_coord) .eq. var_prs) .or. &
+        (trim(self%v_coord) .eq. var_prsi) .or. &
+        (trim(self%v_coord) .eq. var_prsimo))) .or. &
+      (trim(self%interp_method) == "log-linear")) then
+     self%use_ln = .true.
   endif
 
   !> Determine observation vertical coordinate.

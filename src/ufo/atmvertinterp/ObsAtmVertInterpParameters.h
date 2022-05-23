@@ -19,6 +19,33 @@
 
 namespace ufo {
 
+enum class InterpolationMethod {
+  AUTOMATIC, LINEAR, LOGLINEAR
+};
+
+struct InterpolationMethodParameterTraitsHelper {
+  typedef InterpolationMethod EnumType;
+  static constexpr char enumTypeName[] = "InterpolationMethod";
+  static constexpr util::NamedEnumerator<InterpolationMethod> namedValues[] = {
+    { InterpolationMethod::AUTOMATIC, "automatic" },
+    { InterpolationMethod::LINEAR, "linear" },
+    { InterpolationMethod::LOGLINEAR, "log-linear"}
+  };
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::InterpolationMethod> :
+    public EnumParameterTraits<ufo::InterpolationMethodParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+namespace ufo {
+
 /// Configuration options recognized by the AtmVertInterp operator.
 class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsAtmVertInterpParameters, ObsOperatorParametersBase)
@@ -45,6 +72,12 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
   oops::OptionalParameter<std::string> ObsVertGroup
     {"observation vertical coordinate group",
      "observation vertical coordinate group",
+     this};
+
+  oops::Parameter<InterpolationMethod> interpMethod
+    {"interpolation method",
+     "interpolation method (options: automatic, linear, log-linear)",
+     InterpolationMethod::AUTOMATIC,
      this};
 };
 
