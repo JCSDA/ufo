@@ -187,6 +187,8 @@ set ( filters_files
       obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/LiquidWaterPathGuess.cc
+      obsfunctions/LiquidWaterPathGuess.h
       obsfunctions/BgdDepartureAnomaly.cc
       obsfunctions/BgdDepartureAnomaly.h
       obsfunctions/ObsErrorModelHumidity.cc
