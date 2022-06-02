@@ -17,6 +17,7 @@
 
 #include <boost/none.hpp>
 #include <boost/optional.hpp>
+#include <boost/unordered_map.hpp>
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -211,10 +212,17 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                                     options_.stationIdVariable.value(),
                                                     obsdb_, windowObsAccessor);
 
+  // Determine vector of locations at which this filter should be applied.
+  // If each independent group of observations is stored entirely on a single MPI rank
+  // then this vector will be determined separately for each rank.
+  // Otherwise, this vector will be concatenated across all ranks.
+  const std::vector <bool> globalApply = windowObsAccessor.getGlobalApply(apply);
+
   // Map obsIdentifierData for every assimilation window observation to its index within the
   // window's full observation accessor.
-  std::map<obsIdentifierData, const size_t> locationIdToIndex;
+  boost::unordered_map<obsIdentifierData, const size_t> locationIdToIndex;
   for (size_t i = 0; i < windowDts.size(); i++) {
+    if (!globalApply[i]) continue;
     // Set up all observation labels with differentiator counter initially set to 0
     obsIdentifierData obsLabel = {windowDts.at(i), windowLats.at(i), windowLons.at(i),
                                   windowStationIds.at(i), 0};
@@ -237,12 +245,6 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
       return lhs.first < rhs;
     }
   };
-
-  // Determine vector of locations at which this filter should be applied.
-  // If each independent group of observations is stored entirely on a single MPI rank
-  // then this vector will be determined separately for each rank.
-  // Otherwise, this vector will be concatenated across all ranks.
-  const std::vector <bool> globalApply = windowObsAccessor.getGlobalApply(apply);
 
   // Iterate through flagged observations in the historical obs space,
   // finding the observations which are also in the assimilation obs space, and
