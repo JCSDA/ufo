@@ -2,6 +2,7 @@ window begin: 2019-12-29T21:00:00Z
 window end: 2019-12-30T03:00:00Z
 
 observations:
+# (1) Test QC for 100 obs
 - obs operator:
     name: RTTOV
     Absorbers: &rttov_absorbers [CLW]
@@ -95,8 +96,71 @@ observations:
         - surface_pressure
         qtotal: true
         qtotal split rain: true
-        HofX group: HofX  # default, awaits bias correction
     maxvalue: 69.8        # example value
     action:
       name: reject
   passedBenchmark: 2164   # number passing QC after all filters
+# (2) Check ObsFunctions pass for zero obs (none in assimilation window)
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: NOAA
+      Sat_ID: 20
+      Instrument_Name: ATMS
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+  obs space:
+    name: atms_n20
+    obsdatain: # Data from different cycle to assimilation window = 0 obs processed
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_2020040100_allsurfacetypes.nc4
+    simulated variables: [brightness_temperature]
+    channels: *all_channels
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
+  obs filters:
+### Bennartz scattering test ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-7, 16-22
+    test variables:
+    - name: BennartzScatIndex@ObsFunction
+      options:
+        channel_89ghz: 16
+        channel_150ghz: 17
+        bennartz_coeff_1: 0.158
+        bennartz_coeff_2: 0.0163
+        apply_bias: ObsBias
+    maxvalue: -1.0
+    action:
+      name: reject
+### Cost function cloud check ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 18-20
+    test variables:
+    - name: CloudCostFunction@ObsFunction
+      options:
+        cost channels list: 18, 20, 22
+        RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+        BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+        background fields:
+        - air_temperature
+        - specific_humidity
+        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+        - mass_content_of_cloud_ice_in_atmosphere_layer
+        - surface_temperature
+        - specific_humidity_at_two_meters_above_surface
+        - skin_temperature
+        - surface_pressure
+        qtotal: true
+        qtotal split rain: true
+    maxvalue: 69.8        # example value
+    action:
+      name: reject
+  passedBenchmark: 0   # no valid obs, so number passing QC is zero

@@ -112,6 +112,7 @@ logical, intent(in)                :: qtotal_flag  !< Flag for qtotal
 logical                       :: file_exists  ! Check if a file exists logical
 integer                       :: fileunit     ! Unit number for reading in files
 integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matrix for testing.
+integer, allocatable          :: nonzero_fields_in(:) ! fields_in with nonzero entries removed
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
 character(len=:), allocatable :: str
 logical                       :: testing = .false.
@@ -154,6 +155,19 @@ do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
     call abor1_ftn("rttovonedvarcheck not all the model data is available for the b-matrix")
   end if
 end do
+
+! Check the yaml input is in the same order as b-matrix elements
+! (this is to ensure the b-matrix rows & columns are in the anticipated order)
+nonzero_fields_in = pack(fields_in, fields_in /= 0)
+if (.not. all(pack(self % fields(:,1), self % fields(:,1) /= 0) == nonzero_fields_in)) then
+  write(*,*) "Supplied field list [L] is not in the order contained in the B-matrix [R]:"
+  do ii = 1, size(self % fields(:,1))
+    if (self % fields(ii,1) == 0) exit
+    write(*,*) ufo_metoffice_fieldtype_text(nonzero_fields_in(ii)), &
+               ufo_metoffice_fieldtype_text(self % fields(ii,1))
+  end do
+  call abor1_ftn("Supplied field list is expected in the B-matrix order")
+endif
 
 write(message,*) "ufo_metoffice_bmatrixstatic_setup cpu time = ",(t2-t1)
 call fckit_log % info(message)

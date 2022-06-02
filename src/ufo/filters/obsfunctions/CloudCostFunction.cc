@@ -28,12 +28,26 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
   // Initialize options
   options_.deserialize(conf);
 
-  // List of field names for B matrix
+  // List of field names for B-matrix
   fields_ = options_.field_names.value();
 
-  // Get channels for computing scattering index from options
+  // Get channels used in computing cloud cost from options
   std::set<int> chanset = oops::parseIntSet(options_.chanlist.value());
   channels_.assign(chanset.begin(), chanset.end());
+
+  if (std::find(fields_.begin(), fields_.end(), "surface_emissivity") != fields_.end()) {
+    // Subset of channel numbers mapped to B-matrix elements for surface emissivity
+    if (options_.emissMap.value() == boost::none)
+      throw eckit::UserError("background emissivity channels must be defined when "
+                             "B-matrix contains surface emissivity error covariances", Here());
+    emissMap_ = oops::parseIntSet(options_.emissMap.value().value());
+    // Sets of channels for cloud cost and background emissivity are not expected to overlap
+    for (int channel : channels_) {
+      auto it = emissMap_.find(channel);
+      if (it != emissMap_.end()) throw eckit::UserError("Set of cost channels and set of background"
+        " emissivity channels cannot contain the same channel: " + std::to_string(channel), Here());
+    }
+  }
 
   // List of required data
   for (size_t i = 0; i < fields_.size(); ++i) {
@@ -63,6 +77,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   const size_t nchans = channels_.size();
   ASSERT(nchans > 0);
   ASSERT(out.nvars() == 1);
+  if (nlocs == 0) return;
 
   // B, R error covariance objects
   eckit::LocalConfiguration bMatrixConf;
@@ -75,10 +90,28 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   rMatrixConf.set("RMatrix", options_.rmatrix_filepath.value());
   MetOfficeRMatrixRadiance staticR(rMatrixConf);
 
-  bool split_rain = options_.qtotal_split_rain.value();
-
   const std::string clw_name = "mass_content_of_cloud_liquid_water_in_atmosphere_layer";
   const std::string ciw_name = "mass_content_of_cloud_ice_in_atmosphere_layer";
+
+  size_t skinTempIndex = 0;  // position of skin temperature element in B- and H-matrices
+  if (options_.skinTempError.value() != boost::none) {
+    if (std::find(fields_.begin(), fields_.end(), "skin_temperature") == fields_.end())
+      throw eckit::UserError("List of B-matrix fields must contain skin temperature when "
+                             "supplying skin temperature error parameter", Here());
+    // Scale B-matrix rows/columns for Tskin error covariances
+    for (size_t ifield = 0; ifield < fields_.size(); ++ifield) {
+      // Cloud hydrometeors are part of B-matrix qtotal along with specific humidity
+      if (options_.qtotal_lnq_gkg.value() &&
+            (fields_[ifield] == clw_name || fields_[ifield] == ciw_name)) continue;
+      if (fields_[ifield] == "skin_temperature") break;
+      skinTempIndex += in.nlevs(Variable(
+                      "brightness_temperature_jacobian_"+fields_[ifield]+"@ObsDiag", channels_)[0]);
+    }
+    staticB.scale(skinTempIndex, options_.skinTempError.value().value());
+  }
+
+  bool split_rain = options_.qtotal_split_rain.value();
+
   std::vector<float> gv_pres(nlocs), gv_temp(nlocs), gv_qgas(nlocs), gv_clw(nlocs), gv_ciw(nlocs),
                      humidity_total(nlocs);
 
@@ -184,7 +217,16 @@ void CloudCostFunction::compute(const ObsFilterData & in,
         }
 
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          jac_vec[iloc][ichan].push_back(jac_store[iloc]);
+          if (fields_[ifield] == "surface_emissivity") {
+            // B-matrix contains emissivity error covariances only for selected surface-sensitive
+            // channels j, separate from the set of cost channels i. The Jacobian with respect to
+            // emissivity sample channels, d[brightness_temperature_i]/d[surface_emissivity_j],
+            // is set to zero.
+            for (size_t jemiss = 0; jemiss < emissMap_.size(); ++jemiss)
+              jac_vec[iloc][ichan].push_back(0.0f);
+          } else {
+            jac_vec[iloc][ichan].push_back(jac_store[iloc]);
+          }
         }
       }
     }
@@ -224,7 +266,6 @@ void CloudCostFunction::compute(const ObsFilterData & in,
       out[0][iloc] = options_.maxCost.value();
       continue;
     }
-
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       Hmatrix.row(ichan) = Eigen::Map<Eigen::VectorXf>(jac_vec[iloc][ichan].data(), sizeB);
     }

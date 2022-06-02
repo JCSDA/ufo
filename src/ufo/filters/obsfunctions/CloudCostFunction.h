@@ -8,9 +8,11 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_CLOUDCOSTFUNCTION_H_
 #define UFO_FILTERS_OBSFUNCTIONS_CLOUDCOSTFUNCTION_H_
 
+#include <set>
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -80,6 +82,12 @@ class CloudCostFunctionParameters : public oops::Parameters {
   ///
   ///          HofX group: MetOfficeBiasCorrHofX
   oops::Parameter<std::string> HofXGroup{"HofX group", "HofX", this};
+
+  /// Vector of channels mapped to surface emissivity error covariances in the B-matrix
+  oops::OptionalParameter<std::string> emissMap{"background emissivity channels", this};
+
+  /// Scale B-matrix skin temperature error covariances to user value
+  oops::OptionalParameter<float> skinTempError{"skin temperature error", this};
 };
 
 ///
@@ -120,6 +128,7 @@ class CloudCostFunction : public ObsFunctionBase<float> {
   ufo::Variables invars_;
   std::vector<int> channels_;
   std::vector<std::string> fields_;
+  std::set<int> emissMap_;
   CloudCostFunctionParameters options_;
 };
 

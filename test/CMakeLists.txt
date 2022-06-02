@@ -65,6 +65,7 @@ list( APPEND ufo_test_input
   testinput/filter_stage.yaml
   testinput/function_bennartzscatindex.yaml
   testinput/function_cloudcost.yaml
+  testinput/function_cloudcost_scattering.yaml
   testinput/function_clouddetect_iasi.yaml
   testinput/function_clouddetect_airs.yaml
   testinput/function_clouddetect_cris.yaml
@@ -995,6 +996,13 @@ if( ${rttov_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_function_cloudcostfunction
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/function_cloudcost.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
+                    TEST_DEPENDS ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_function_cloudcostfunction_scattering
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/function_cloudcost_scattering.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsFilters.x
                     TEST_DEPENDS ufo_get_ufo_test_data )
