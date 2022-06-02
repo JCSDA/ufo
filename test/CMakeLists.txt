@@ -88,6 +88,7 @@ list( APPEND ufo_test_input
   testinput/function_hydrometeorchk.yaml
   testinput/function_hydrometeorchk_atms.yaml
   testinput/function_bgddepartureanomaly.yaml
+  testinput/function_metoffice_rh_corr.yaml
   testinput/function_nsstret.yaml
   testinput/function_obserrorinflatesfcp.yaml
   testinput/function_obserrorfactorconv.yaml
@@ -3410,6 +3411,13 @@ ecbuild_add_test( TARGET  test_ufo_function_solarzenith
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_metoffice_rh_corr
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/function_metoffice_rh_corr.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test Diagnostics
 

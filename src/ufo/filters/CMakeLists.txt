@@ -284,6 +284,8 @@ set ( filters_files
       obsfunctions/DateTimeOffset.h
       obsfunctions/FillAveragedProfileData.cc
       obsfunctions/FillAveragedProfileData.h
+      obsfunctions/MetOfficeRelativeHumidityCorrection.cc
+      obsfunctions/MetOfficeRelativeHumidityCorrection.h
 )
 
 if( ${rttov_FOUND} )

@@ -1,0 +1,57 @@
+window begin: 2010-01-01T03:00:00Z
+window end: 2010-01-01T09:00:00Z
+
+observations:
+- obs space: &obsspace
+    name: Sonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_rh_corr_obs.nc4
+    simulated variables: [relative_humidity]
+  geovals: &geovals
+    filename: Data/ufo/testinput_tier_1/met_office_rh_corr_gv.nc4
+  obs operator:
+    name: VertInterp
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: HofXCorrection/relative_humidity
+      type: float
+      function:
+        name: MetOfficeRelativeHumidityCorrection@ObsFunction
+        options:
+          model pressure: air_pressure
+          model specific humidity: specific_humidity
+          model relative humidity: relative_humidity
+          model temperature: air_temperature
+          observed pressure: MetaData/air_pressure
+  compareVariables:
+  - reference:
+      name: TestReference/relative_humidity
+    test:
+      name: HofXCorrection/relative_humidity
+    absTol: 0.05
+# RH is capped to 100%
+- obs space: *obsspace
+  geovals: *geovals
+  obs operator:
+    name: VertInterp
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: HofXCorrection/relative_humidity
+      type: float
+      function:
+        name: MetOfficeRelativeHumidityCorrection@ObsFunction
+        options:
+          model pressure: air_pressure
+          model specific humidity: specific_humidity
+          model relative humidity: relative_humidity
+          model temperature: air_temperature
+          observed pressure: MetaData/air_pressure
+          capsupersat: true
+  compareVariables:
+  - reference:
+      name: TestReference/relative_humidity_cap_supersat
+    test:
+      name: HofXCorrection/relative_humidity
+    absTol: 0.05

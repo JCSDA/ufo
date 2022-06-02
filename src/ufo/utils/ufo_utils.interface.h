@@ -15,6 +15,7 @@ extern "C" {
   void ufo_ops_satrad_qsplit_f90(const int &, const int &, const float *, const float *,
                                  const float *, float *, float *, float *, const bool &);
   void ufo_ops_satrad_qsatwat_f90(float *, const float *, const float *, const int &);
+  void ufo_ops_qsat_f90(float *, const float *, const float *, const int &);
 }  // extern C
 
 }  // namespace ufo
