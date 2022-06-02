@@ -93,7 +93,7 @@ character(len=MAXVARLEN), public, parameter :: var_pmaxlev_weightfunc= "pressure
 character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surface_temperature_within_field_of_view"
 character(len=MAXVARLEN), public, parameter :: var_sea_fric_vel    = "friction_velocity_over_water"
 character(len=MAXVARLEN), public, parameter :: var_obk_length      = "obukhov_length"
-
+character(len=MAXVARLEN), public, parameter :: var_tropprs     = "tropopause_pressure"
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
