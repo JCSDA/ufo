@@ -176,7 +176,8 @@ contains
 
     integer(kind=jpim)                           :: errorstatus ! Return error status of RTTOV subroutine calls
 
-    integer                                      :: i_inst, nchan_total, ichan, iprof, prof, iprof_rttov
+    integer                                      :: i_inst, nchan_total, ichan, jchan
+    integer                                      :: iprof, prof, iprof_rttov
     integer                                      :: nprof_sim, nprof_max_sim, ichan_sim
     integer                                      :: prof_start, prof_end
 
@@ -296,16 +297,16 @@ contains
         ! check RTTOV profile and flag it if it fails the check
         if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check(self % conf, iprof, i_inst, errorstatus)
 
-        ! check sfc_emiss valid if read in
-        if (allocated(sfc_emiss)) then
-          do ichan = 1, nchan_inst
-            if ((sfc_emiss(ichan,iprof) > 1.0) .or. (sfc_emiss(ichan,iprof) < 0.0)) then
-              errorstatus = errorstatus_fatal
-            end if
-          end do
-        end if
-
         if (errorstatus == errorstatus_success) then 
+          ! check sfc_emiss valid if read in
+          if (allocated(sfc_emiss)) then
+            do ichan = 1, nchan_inst
+              if ((sfc_emiss(ichan,iprof) > 1.0) .or. (sfc_emiss(ichan,iprof) < 0.0)) then
+                errorstatus = errorstatus_fatal
+              end if
+            end do
+          end if
+
           prof_list(iprof_rttov,1) = iprof_rttov ! chunk index
           prof_list(iprof_rttov,2) = iprof       ! all-obs index
           do ichan = 1, nchan_inst
@@ -322,13 +323,19 @@ contains
 
       ! Set surface emissivity
       if (allocated(sfc_emiss)) then
-        self % RTprof_K % calcemis(:) = .false.
-        do ichan = 1, ichan_sim
-          self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(chanprof(ichan) % chan, iprof)
-          if (self % RTprof_K % emissivity(ichan) % emis_in == 0.0) then
-            self % RTprof_K % calcemis(ichan) = .true.
-          end if
-        end do
+        outerloop: do ichan = 1, ichan_sim  ! list of channels*profiles
+          do jchan = 1, nchan_inst  ! list of self % channels
+            ! if the channel number for this channel * profile == channel number needed
+            ! chanprof(ichan) % chan refers to the index in the coefficient file
+            if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
+              self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(jchan, chanprof(ichan) % prof)
+              if (self % RTprof_K % emissivity(ichan) % emis_in == 0.0) then
+                self % RTprof_K % calcemis(ichan) = .true.
+              end if
+              cycle outerloop
+            end if
+          end do
+        end do outerloop
       else
         call self % RTProf_K % init_default_emissivity(self % conf, prof_start)
       end if

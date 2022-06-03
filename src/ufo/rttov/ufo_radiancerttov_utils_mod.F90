@@ -2000,16 +2000,19 @@ contains
     integer,              intent(in)    :: prof_start
     type(ufo_geovals),    intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
-    integer                             :: jvar, prof, ichan, rttov_prof
-    integer                             :: coefindex, chan
-    integer                             :: nchanprof, nlevels, nprofiles
-    real(kind_real), allocatable        :: od_level(:), wfunc(:)
-    logical, save                       :: firsttime = .true.
+    integer                       :: jvar, prof, ichan, rttov_prof
+    integer                       :: coefindex, chan
+    integer                       :: nchanprof, nlevels, nprofiles
+    real(kind_real), allocatable  :: od_level(:), wfunc(:), tstore(:), bt_overcast(:)
+    real(kind_real)               :: planck1, planck2, ff_bco, ff_bcs
+    logical, save                 :: firsttime = .true.
 
     include 'rttov_calc_weighting_fn.interface'
 
     allocate(od_level(size(RTProf % transmission%tau_levels(:,1))))
     allocate(wfunc(size(RTProf % transmission%tau_levels(:,1))))
+    allocate(bt_overcast(size(RTProf % radiance % overcast(:,1))))
+    allocate(tstore(size(RTProf % radiance % overcast(:,1))))
 
     missing = missing_value(missing)
 
@@ -2031,7 +2034,8 @@ contains
           ! variable: optical_thickness_of_atmosphere_layer_CH
           ! variable: transmittances_of_atmosphere_layer_CH
           ! variable: weightingfunction_of_atmosphere_layer_CH
-        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci)
+          ! variable: brightness_temperature_overcast_of_atmosphere_layer_CH
+        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci, var_tb_overcast)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2046,6 +2050,7 @@ contains
             ! chanprof(ichan)%chan won't contain the instrument channel numbers but the index (1,2,3,...).
             ! The correct instrument channel numbers are stored in ff_ori_chn.
             coefindex = chanprof(ichan)%chan
+            if (coefindex < 1) cycle
             chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
@@ -2064,7 +2069,24 @@ contains
                 od_level(:) = log(RTProf % transmission%tau_levels(:,ichan)) !level->TOA transmittances -> od
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(rttov_prof)%p, od_level(:), &
                   hofxdiags%geovals(jvar)%vals(:,prof))
+              else if (cmp_strings(ystr_diags(jvar), var_tb_overcast)) then
+                planck1 = conf % rttov_coef_array(1) % coef % planck1(coefindex)
+                planck2 = conf % rttov_coef_array(1) % coef % planck2(coefindex)
+                ff_bco = conf % rttov_coef_array(1) % coef % ff_bco(coefindex)
+                ff_bcs = conf % rttov_coef_array(1) % coef % ff_bcs(coefindex)
 
+                tstore(:) = planck2 / log (1.0 + planck1 / RTProf % radiance % overcast(:, ichan))
+                bt_overcast(:) = (tstore(:) - ff_bco) / ff_bcs
+
+                ! The overcast BT is output on layers but the output required is on levels.  To match OPS this
+                ! is mapped so the nearest surface level corresponds to the bottom layer.  This leaves the highest
+                ! altitude level without a value and isothermal behaviour is assummed hence the copy. e.g.
+                ! levels(2:70) = layers(1:69) - not a very good assumption.
+                ! levels(1) = layer(1)
+                ! where levels are top of the atmosphere to the surface.
+                ! MCC - something to look at in the future
+                hofxdiags%geovals(jvar)%vals(2:,prof) = bt_overcast(:)
+                hofxdiags%geovals(jvar)%vals(1,prof) = bt_overcast(1)
               end if
             end if
           enddo
@@ -2084,6 +2106,7 @@ contains
 
           do ichan = 1, nchanprof
             coefindex = chanprof(ichan)%chan
+            if (coefindex < 1) cycle
             chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
@@ -2142,6 +2165,7 @@ contains
 
           do ichan = 1, nchanprof
             coefindex = chanprof(ichan)%chan
+            if (coefindex < 1) cycle
             chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
@@ -2196,6 +2220,7 @@ contains
 
           do ichan = 1, nchanprof
             coefindex = chanprof(ichan)%chan
+            if(coefindex < 1) cycle
             chan = conf % rttov_coef_array(1) % coef % ff_ori_chn(coefindex)
             rttov_prof = chanprof(ichan)%prof
             prof = prof_start + chanprof(ichan)%prof - 1
@@ -2251,7 +2276,7 @@ contains
 
     enddo
 
-    deallocate(od_level,wfunc)
+    deallocate(od_level, wfunc, tstore, bt_overcast)
     firsttime = .false.
   end subroutine populate_hofxdiags
 

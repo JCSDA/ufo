@@ -86,6 +86,7 @@ character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickn
 character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
 character(len=MAXVARLEN), public, parameter :: var_tb          = "brightness_temperature"
 character(len=MAXVARLEN), public, parameter :: var_tb_clr      = "brightness_temperature_assuming_clear_sky"
+character(len=MAXVARLEN), public, parameter :: var_tb_overcast = "brightness_temperature_from_atmosphere_layer_to_toa"
 character(len=MAXVARLEN), public, parameter :: var_total_transmit= "toa_total_transmittance"
 character(len=MAXVARLEN), public, parameter :: var_lvl_transmit= "transmittances_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_lvl_weightfunc= "weightingfunction_of_atmosphere_layer"

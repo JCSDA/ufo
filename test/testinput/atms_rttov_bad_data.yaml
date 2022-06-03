@@ -31,8 +31,6 @@ observations:
     name: atms_n20
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_bad_data.nc4
-    obsdataout:
-      obsfile: Data/atms_n20_obs_2019123000_m_rttov_bad_data_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22 
   geovals:

@@ -337,17 +337,19 @@ contains
       else
         if (allocated(sfc_emiss)) then
           self % RTprof % calcemis(:) = .false.
-          do ichan = 1, ichan_sim
-            do jchan = 1, nchan_inst
-              if (chanprof(ichan) % chan == self % channels(jchan)) then
-                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
+          outerloop: do ichan = 1, ichan_sim  ! list of channels*profiles
+            do jchan = 1, nchan_inst  ! list of self % channels
+              ! if the channel number for this channel * profile == channel number needed
+              ! chanprof(ichan) % chan refers to the index in the coefficient file
+              if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
+                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, chanprof(ichan) % prof)
                 if (self % RTprof % emissivity(ichan) % emis_in == 0.0) then
                   self % RTprof % calcemis(ichan) = .true.
                 end if
-                cycle
+                cycle outerloop
               end if
             end do
-          end do
+          end do outerloop
         else
           call self % RTProf % init_default_emissivity(self % conf, prof_start)
         end if

@@ -23,8 +23,6 @@ observations:
     name: ATOVS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/obs_atovs_transmittance_20210701T1200Z.nc4
-    obsdataout:
-      obsfile: &outfile Data/atovs_transmittance_metopb.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-20
   geovals:
