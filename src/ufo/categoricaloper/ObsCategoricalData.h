@@ -111,8 +111,17 @@ class ObsCategoricalData  {
     }
 
     // Create list of component operators.
-    for (const eckit::LocalConfiguration &operatorConfig :
-           parameters.operatorConfigurations.value()) {
+    const std::vector<eckit::LocalConfiguration> & operatorConfigs =
+      parameters.operatorConfigurations.value();
+
+    // If a list of labels has been specified, ensure it is the correct length.
+    if (parameters.operatorLabels.value() != boost::none &&
+        operatorConfigs.size() != parameters.operatorLabels.value().value().size())
+        throw eckit::UserError("Incorrect number of operator labels specified", Here());
+
+    // Configure each component operator.
+    for (std::size_t jop = 0; jop < operatorConfigs.size(); ++jop) {
+      const eckit::LocalConfiguration & operatorConfig = operatorConfigs[jop];
       typedef typename ObsOperatorTraits<OPBASE>::Factory_ Factory_;
       typedef typename ObsOperatorTraits<OPBASE>::ParametersWrapper_ ParametersWrapper_;
 
@@ -120,7 +129,10 @@ class ObsCategoricalData  {
       operatorParams.validateAndDeserialize(operatorConfig);
       std::unique_ptr<OPBASE> op(Factory_::create(odb, operatorParams.operatorParameters));
       requiredVars_ += op->requiredVars();
-      components_.emplace(std::make_pair(operatorConfig.getString("name"), std::move(op)));
+
+      const std::string operatorLabel = parameters.operatorLabels.value() != boost::none ?
+        parameters.operatorLabels.value().value()[jop] : operatorConfig.getString("name");
+      components_.emplace(std::make_pair(operatorLabel, std::move(op)));
     }
 
     // Check the fallback operator has been configured.
@@ -133,6 +145,13 @@ class ObsCategoricalData  {
       if (components_.find(operName.second) == components_.end())
         throw eckit::UserError("The operator " + operName.second +
                                " has not been configured", Here());
+
+    // Check that there are no duplicate component operators.
+    if (components_.size() != operatorConfigs.size()) {
+      throw eckit::UserError("There are at least two duplicate component operators. Consider using "
+                             "the 'operator labels' configuration option to differentiate between "
+                             "them", Here());
+    }
   }
 
   /// Return required variables for the operator.

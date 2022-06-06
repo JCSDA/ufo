@@ -41,6 +41,13 @@ class ObsCategoricalParameters : public ObsOperatorParametersBase {
   /// and any operators that have been specified in the \p categorisedOperatorNames map).
   oops::RequiredParameter<std::vector<eckit::LocalConfiguration>>
     operatorConfigurations{"operator configurations", this};
+
+  /// This option must be used if there are at least two component operators of the same type.
+  /// The labels are associated with each component operator and can subsequently be used to
+  /// differentiate between them. The ordering of labels in this vector must correspond to the
+  /// ordering of operators in the `operator configurations` parameter.
+  oops::OptionalParameter<std::vector<std::string>>
+    operatorLabels{"operator labels", this};
 };
 
 }  // namespace ufo
