@@ -237,6 +237,7 @@ list( APPEND ufo_test_input
   testinput/qc_profile_background_check.yaml
   testinput/qc_profile_fewobs_check.yaml
   testinput/qc_rejectlist_both_action_and_actions.yaml
+  testinput/qc_spike_and_step_check.yaml
   testinput/qc_stuckcheck.yaml
   testinput/qc_stuckcheck_unittests.yaml
   testinput/qc_thinning.yaml
@@ -2121,6 +2122,14 @@ ecbuild_add_test( TARGET  test_ufo_qc_modelbestfitpressure
 ecbuild_add_test( TARGET  test_ufo_qc_modelobthreshold
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_modelobthreshold.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_spike_and_step_check
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_spike_and_step_check.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

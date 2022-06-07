@@ -1,0 +1,391 @@
+window begin: 2000-12-31T23:59:00Z
+window end: 2030-01-01T00:01:00Z
+
+observations:
+- obs space:
+    name: Ocean Profile
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+        sort variable: "ocean_depth"
+        sort group: "MetaData"
+        sort order: "ascending" # surface to depth
+    obsdataout:
+      obsfile: Data/spikestep_testout.nc4
+    simulated variables: [ocean_temperature, ocean_salinity]
+    observed variables: [ocean_temperature, ocean_salinity]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+      - name: ocean_salinity
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/ocean_depth      # dx
+    count spikes: true
+    count steps: true
+    tolerance:
+      nominal value: 10  # K nominal, in the case of temperature (not really)
+      gradient: 0.1 # K/m - if dy/dx greater, could be a spike
+      gradient x resolution: 10 # m - can't know dx to better precision
+      factors: [1,1,0.5,0.5,0.1]     # multiply tolerance, for ranges bounded by...
+      x boundaries: [0,200,300,600,600] # ...these values of x (depth in m)
+    boundary layer:
+      x range: [0.0,300.0] # when bounded by these x values (depth in m)...
+      step tolerance range: [0.0,-2.0]   # ...relax tolerance for steps in boundary layer...
+      maximum x interval: [50.0,100.0]  # ...and ignore level if dx greater than this
+    action:
+      name: reject
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_salinity
+    dependent: ObsValue/ocean_salinity  # dy/
+    independent: MetaData/ocean_depth   # dx
+    count spikes: true
+    count steps: true
+    tolerance:
+      nominal value: 1.0  # PSU nominal, in the case of salinity (not really)
+      threshold: 0.6  # weird salinity thing
+      factors: [1,1,0.2]     # multiply tolerance, for ranges bounded by...
+      x boundaries: [0,200,600] # ...these values of x (depth in m)
+    boundary layer:
+      x range: [0.0,300.0] # when bounded by these x values (depth in m)...
+      maximum x interval: [50.0,100.0]  # ...and ignore level if dx greater than this
+    action:
+      name: reject
+  - filter: Perform Action  # where T spikes, reject both S and T
+    where:
+    - variable:
+        name: DiagnosticFlags/spike/ocean_temperature
+      is_true:
+    actions:
+    - name: set
+      flag: spike
+    - name: reject
+  - filter: Variable Assignment  # create derived obs value containing only T spikes
+    assignments:
+    - name: ocean_temperature_spikes@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: DiagnosticFlags/spike/ocean_temperature
+              is_true:
+  - filter: Variable Assignment  # create derived obs value containing only T steps
+    assignments:
+    - name: ocean_temperature_steps@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: DiagnosticFlags/step/ocean_temperature
+              is_true:
+  - filter: Variable Assignment  # compute sum 2*spikes+steps
+    assignments:
+    - name: ocean_temperature_rejections@DerivedMetaData
+      type: int
+      function:
+        name: LinearCombination@IntObsFunction
+        options:
+          variables: [ocean_temperature_spikes@DerivedMetaData,ocean_temperature_steps@DerivedMetaData]
+          coefs: [2,1]
+  - filter: Perform Action  # reject whole profile if 2*spikes+steps>=rejection threshold
+    where:
+    - variable:
+        name: ocean_temperature_rejections@DerivedMetaData
+      minvalue: 3
+    action:
+      name: reject
+  - filter: Variable Assignment  # create derived obs value containing only S spikes
+    assignments:
+    - name: ocean_salinity_spikes@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: DiagnosticFlags/spike/ocean_salinity
+              is_true:
+  - filter: Variable Assignment  # create derived obs value containing only S steps
+    assignments:
+    - name: ocean_salinity_steps@DerivedMetaData
+      type: int
+      function:
+        name: ProfileLevelCount@IntObsFunction
+        options:
+          where:
+            - variable:
+                name: DiagnosticFlags/step/ocean_salinity
+              is_true:
+  - filter: Variable Assignment  # compute sum 2*spikes+steps
+    assignments:
+    - name: ocean_salinity_rejections@DerivedMetaData
+      type: int
+      function:
+        name: LinearCombination@IntObsFunction
+        options:
+          variables: [ocean_salinity_spikes@DerivedMetaData,ocean_salinity_steps@DerivedMetaData]
+          coefs: [2,1]
+  - filter: Perform Action  # reject whole profile if 2*spikes+steps>=rejection threshold
+    where:
+    - variable:
+        name: ocean_salinity_rejections@DerivedMetaData
+      minvalue: 3
+    action:
+      name: reject
+  flaggedObservationsBenchmark:
+      # - 6  # not salinity spike, below tolerance
+      - 13  # salinity large spike; also not T step but thermocline
+      - 18  # temperature small spike
+      # - 27  # temperature large spike but OPS bug
+      # [30-32]  # temperature consistent large gradient, not flagged
+      - 43  # temperature step at smaller tolerance
+      - 44  # ""
+      # 50-52  # not salinity steps but gradient; tolerance threshold 0.6 applied correctly at 52
+      - 64  # salinity step
+      - 65  # "" ; no temperature small spike as dx too large at this depth
+      # - 71  # temperature bottom step but OPS bug
+  benchmarkFlag: 21 # track
+  passedBenchmark: 77   # 73*2 total T and S, minus 1 [13], minus 2*33 ([16-49] above whole profile
+                        # rejection threshold for both T and S), minus 2 [64-65]:
+                        #  146 -1 -66 -2 = 77
+- obs space:
+    name: Nonsense test against air pressure
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    obsdataout:
+      obsfile: Data/spikestep_testout2.nc4
+    simulated variables: [ocean_temperature, ocean_salinity]
+    observed variables: [ocean_temperature, ocean_salinity]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+      - name: ocean_salinity
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10  # K nominal, in the case of temperature (not really)
+      gradient x resolution: 100 # Pa - for the sake of code coverage
+      factors: [0.15]     # multiply tolerance, for ranges bounded by...
+      x boundaries: [10000] # ...these values of x (pressure in Pa)
+    action:
+      name: reject
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_salinity
+    dependent: ObsValue/ocean_salinity  # dy/
+    independent: MetaData/air_pressure   # dx
+    tolerance:
+      nominal value: 1.0  # PSU nominal, in the case of salinity (not really)
+    action:
+      name: reject
+  flaggedObservationsBenchmark:
+      # - 6  # not salinity spike, below tolerance
+      - 13  # salinity large spike and temperature step (not thermocline)
+      - 14  # temperature step (not thermocline)
+      - 17  # temperature step (not spike because tolerance 1.5K at this pressure)
+      - 18  # ""
+      - 27  # temperature large spike (unaffected by gradient acceptance)
+      # [30-32]  # temperature consistent large gradient, not flagged
+      - 43  # temperature step
+      - 44  # ""
+      - 50  # salinity step (tolerance threshold default 0.5)
+      - 51  # ""
+      - 64  # salinity step
+      - 65  # ""; no temperature small spike as dT below tolerance 10K at this pressure
+      # - 71  # not temperature bottom step, as dT below tolerance 10K at this pressure
+  benchmarkFlag: 21 # track
+  passedBenchmark: 134  # 73*2 total T and S, minus 1 [13], minus 2 [13-14], minus 2 [17-18], 
+                        # minus 1 [27], minus 2 [43-44], minus 2 [50-51], minus 2 [64-65]:
+                        #  146 -1 -2 -2 -1 -2 -2 -2 = 134
+- obs space:
+    name: Parameter validation - non-matching number of tolerance factors and boundaries
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10  # K nominal, in the case of temperature (not really)
+      factors: [0.9,0.15]     # multiply tolerance, for ranges bounded by...
+      x boundaries: [10000] # ...these values of x (pressure in Pa)
+    action:
+      name: reject
+  expectExceptionWithMessage: "'tolerance factors' and 'tolerance boundaries' must be"
+- obs space:
+    name: Parameter validation - tolerance factors but no boundaries
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10
+      factors: [0.9,0.15]
+    action:
+      name: reject
+  expectExceptionWithMessage: "float arrays of equal size, or both none"
+- obs space:
+    name: Parameter validation - tolerance boundaries decreasing
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10
+      factors: [0.3,0.5,0.5]
+      x boundaries: [1000,900,500]
+    action:
+      name: reject
+  expectExceptionWithMessage: "'tolerance boundaries' must start from the lowest x upwards,"
+- obs space:
+    name: Parameter validation - boundary layer range wrong
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10
+    boundary layer:
+      x range: []
+  expectExceptionWithMessage: "at the top and bottom of the boundary layer"
+- obs space:
+    name: Parameter validation - step tolerance range wrong
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10
+    boundary layer:
+      step tolerance range: [50.0]
+  expectExceptionWithMessage: "the tolerance factor override"
+- obs space:
+    name: Parameter validation - maximum x interval wrong
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/air_pressure      # dx
+    tolerance:
+      nominal value: 10
+    boundary layer:
+      maximum x interval: [1,2,50]
+  expectExceptionWithMessage: "where if dx is greater, the filter doesn't check these y-values"

@@ -87,6 +87,8 @@ set ( filters_files
       SatName.cc
       SatwindInversionCorrection.cc
       SatwindInversionCorrection.h
+      SpikeAndStepCheck.cc
+      SpikeAndStepCheck.h
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
