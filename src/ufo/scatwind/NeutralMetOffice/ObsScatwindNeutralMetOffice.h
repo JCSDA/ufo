@@ -59,6 +59,7 @@ class ObsScatwindNeutralMetOffice : public ObsOperatorBase,
   F90hop keyOperScatwindNeutralMetOffice_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  ObsScatwindNeutralMetOfficeParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

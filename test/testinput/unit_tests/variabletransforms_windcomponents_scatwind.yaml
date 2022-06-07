@@ -12,10 +12,11 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
     observed variables: []
     derived variables: [eastward_wind, northward_wind]
+    channels: 1-4
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
-  passedBenchmark: 32924           #  16462 locs have at least one eastward and northward wind solution
+  passedBenchmark: 83518           #  Passes for channels 1-4: 16462, 16366, 5580, 3351, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
         name: eastward_wind_derivedobsvalue@TestReference
@@ -36,10 +37,11 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
     observed variables: []
     derived variables: [eastward_wind, northward_wind]
+    channels: 1-4
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
-  passedBenchmark: 20              #  10 locs have at least one eastward and northward wind solution
+  passedBenchmark: 44              #  Passes for channels 1-4: 10, 10, 1, 1, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
         name: eastward_wind_derivedobsvalue@TestReference

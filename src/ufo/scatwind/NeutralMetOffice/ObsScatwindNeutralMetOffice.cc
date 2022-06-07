@@ -8,6 +8,7 @@
 #include "ufo/scatwind/NeutralMetOffice/ObsScatwindNeutralMetOffice.h"
 
 #include <ostream>
+#include <vector>
 
 #include "oops/util/Logger.h"
 
@@ -25,10 +26,17 @@ static ObsOperatorMaker<ObsScatwindNeutralMetOffice>
 ObsScatwindNeutralMetOffice::ObsScatwindNeutralMetOffice(const ioda::ObsSpace & odb,
                                                          const Parameters_ & parameters)
   : ObsOperatorBase(odb), keyOperScatwindNeutralMetOffice_(0),
-    odb_(odb), varin_()
+    odb_(odb), varin_(), parameters_(parameters)
 {
+  // parse channels from the config and create variable names
+  const std::vector<int> channels_list = odb.assimvariables().channels();
+
   ufo_scatwind_neutralmetoffice_setup_f90(keyOperScatwindNeutralMetOffice_,
-                                          odb.assimvariables(), varin_);
+                                          odb.assimvariables(),
+                                          varin_,
+                                          channels_list.size(),
+                                          channels_list[0],
+                                          parameters_.toConfiguration());
 
   oops::Log::trace() << "ObsScatwindNeutralMetOffice created." << std::endl;
 }

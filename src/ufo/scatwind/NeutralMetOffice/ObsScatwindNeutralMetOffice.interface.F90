@@ -8,7 +8,8 @@
 !> Fortran module to handle scatwind observations - Met Office neutral operator
 
 module ufo_scatwind_neutralmetoffice_mod_c
-  
+
+  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
   use ufo_scatwind_neutralmetoffice_mod
   use ufo_geovals_mod,    only: ufo_geovals
@@ -34,21 +35,27 @@ contains
 ! ------------------------------------------------------------------------------
   
 subroutine ufo_scatwind_neutralmetoffice_setup_c(c_key_self, c_obsvars, &
-                                                 c_geovars) bind(c,name='ufo_scatwind_neutralmetoffice_setup_f90')
+                                                 c_geovars, c_nchan, c_channels, c_conf) bind(c,name='ufo_scatwind_neutralmetoffice_setup_f90')
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), intent(in), value :: c_obsvars !< variables to be simulated
 type(c_ptr), intent(in), value :: c_geovars !< variables requested from the model
 
+type(c_ptr), value, intent(in) :: c_conf
+integer(c_size_t), intent(in)  :: c_nchan
+integer(c_int), intent(in)     :: c_channels(c_nchan)
+
+type(fckit_configuration) :: f_conf
+
 type(ufo_scatwind_NeutralMetOffice), pointer :: self
 
 call ufo_scatwind_neutralmetoffice_registry%setup(c_key_self, self)
-
+f_conf = fckit_configuration(c_conf)
 self%obsvars = oops_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 
-call self%setup()
+call self%setup(c_channels)
 
 end subroutine ufo_scatwind_neutralmetoffice_setup_c
   

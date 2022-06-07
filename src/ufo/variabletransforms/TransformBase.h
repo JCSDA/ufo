@@ -171,15 +171,16 @@ class TransformBase {
                       const std::vector<std::string> & dimList,
                       const std::string &outputTag = "DerivedObsValue") {
     obsdb_.put_db(outputTag, varName + "_" + channel, obsVector, dimList);
-    if (flags_.has(varName)) {
-      std::vector<int> &varFlags = flags_[varName];
+    if (flags_.has(varName + "_" + channel)) {
+      std::vector<int> &varFlags = flags_[varName + "_" + channel];
       ASSERT(varFlags.size() == obsVector.size());
 
       const T missing = util::missingValue(T());
       for (size_t iloc = 0; iloc < obsVector.size(); ++iloc) {
-        /// Set flag to pass if at least one good DerivedObsValue is present
-        if (obsVector[iloc] != missing)
+        if (varFlags[iloc] == QCflags::missing && obsVector[iloc] != missing)
           varFlags[iloc] = QCflags::pass;
+        else if (varFlags[iloc] == QCflags::pass && obsVector[iloc] == missing)
+          varFlags[iloc] = QCflags::missing;
       }
     }
   }

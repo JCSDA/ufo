@@ -2,6 +2,7 @@ window begin: 2020-10-01T03:00:00Z
 window end: 2020-10-01T09:00:00Z
 
 observations:
+#  Test cases for single dimension
 - obs operator:
     name: ScatwindNeutralMetOffice
   obs space:
@@ -38,3 +39,20 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_reversed_20201001T0600Z.nc4
   expect simulateObs to throw exception with message: GeoVaLs are not ordered from model top to bottom
+#  Test case for channels
+#  In the 2d input file, the second dimension is given the label "nchans" even though they are
+#  used to store ambiguities and not channels. This will be changed in future.
+- obs operator:
+    name: ScatwindNeutralMetOffice
+  obs space:
+    name: Scatwind channels 2d
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
+    simulated variables: [eastward_wind, northward_wind]
+    observed variables: []
+    derived variables: [eastward_wind, northward_wind]
+    channels: 1-4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-05

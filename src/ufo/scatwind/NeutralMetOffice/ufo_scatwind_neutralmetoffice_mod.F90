@@ -41,6 +41,7 @@ private
 type, public :: ufo_scatwind_neutralmetoffice
     type(oops_variables), public :: geovars
     type(oops_variables), public :: obsvars
+    integer, allocatable, public :: channels(:)
   contains
     procedure :: setup     => ufo_scatwind_neutralmetoffice_setup
     procedure :: simobs    => ufo_scatwind_neutralmetoffice_simobs
@@ -58,14 +59,28 @@ character(len=maxvarlen), dimension(7), parameter :: geovars_default = (/ &
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_scatwind_neutralmetoffice_setup(self)
+subroutine ufo_scatwind_neutralmetoffice_setup(self, channels)
   implicit none
   class(ufo_scatwind_neutralmetoffice), intent(inout) :: self
+  integer(c_int), intent(in)                          :: channels(:)  !List of channels to use
 
   call self%geovars%push_back(geovars_default)
 
+  ! save channels
+  allocate(self%channels(size(channels)))
+  self%channels(:) = channels(:)
+
 end subroutine ufo_scatwind_neutralmetoffice_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_scatwind_neutralmetoffice_delete(self)
+
+  implicit none
+  class(ufo_scatwind_NeutralMetOffice), intent(inout) :: self
+
+  if (allocated(self%channels)) deallocate(self%channels)
+
+end subroutine ufo_scatwind_neutralmetoffice_delete
 
 ! ------------------------------------------------------------------------------
 !> Neutral wind forward operator for the Met Office system
@@ -80,11 +95,11 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   implicit none
 
   ! Arguments to this routine
-  class(ufo_scatwind_NeutralMetOffice), intent(in) :: self     !< The object in which this operator is contained
-  integer, intent(in)                              :: nvars, nlocs !< The number of variables and locations
-  type(ufo_geovals), intent(in)                    :: geovals  !< The model values, interpolated to the obsevation locations
+  class(ufo_scatwind_NeutralMetOffice), intent(in) :: self                !< The object in which this operator is contained
+  integer, intent(in)                              :: nvars, nlocs        !< The number of variables and locations
+  type(ufo_geovals), intent(in)                    :: geovals             !< The model values, interpolated to the obsevation locations
   real(c_double), intent(inout)                    :: hofx(nvars, nlocs)  !< The output model equivalent of the observations
-  type(c_ptr), value, intent(in)                   :: obss     !< The observations, and meta-data for those observations
+  type(c_ptr), value, intent(in)                   :: obss                !< The observations, and meta-data for those observations
 
   character(len=*), parameter     :: myname_ = "ufo_scatwind_neutralmetoffice_simobs"
   integer, parameter              :: max_string = 800
@@ -101,30 +116,46 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   type(ufo_geoval), pointer          :: cx_orog           ! Model orography
   type(ufo_geoval), pointer          :: cx_seaice         ! Model sea ice
   real(kind_real), allocatable       :: CDR10(:)          ! 10m interpolation coefficients
+  real(c_double)                     :: hofx_u(nlocs)     ! The model equivalent of eastward_wind
+  real(c_double)                     :: hofx_v(nlocs)     ! The model equivalent of northward_wind
+  integer                            :: nchans
+  integer                            :: ichan
 
   write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs: begin"
   call fckit_log%info(err_msg)
 
-! check if nlocs is consistent in geovals & hofx
+  ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx(1,:))) then
     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
     call abor1_ftn(err_msg)
   endif
 
+  ! number of channels
+  nchans = size(self%channels)
+
   ! check that hofx is the correct size for simulated variables
-  if (size(hofx(:,1)) /= 2) then
-    call fckit_exception%throw("HofX should have 2 variables eastward_wind and northward_wind")
-  endif
+  ! if we have channels as second dimension then we should have 2*nchans variables
+  ! if we have a single dimension then we should have 2 variables
+  if (nchans /= 0) then
+    if (size(hofx(:,1)) /= 2*nchans) then
+      write(err_msg, '(A,I5,A,I5)') "HofX should have nchans variables for both eastward_wind and northward_wind. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
+      call fckit_exception%throw(err_msg)
+    endif
+  else
+    if (size(hofx(:,1)) /= 2) then
+      call fckit_exception%throw("HofX should have 2 variables eastward_wind and northward_wind")
+    endif
+  end if
 
   write(message, *) myname_, ' Running Met Office neutral wind operator'
   call fckit_log%info(message)
 
-! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_u, cx_u)              ! Eastward wind
-  call ufo_geovals_get_var(geovals, var_v, cx_v)              ! Northward wind
-  call ufo_geovals_get_var(geovals, var_zimo, cx_za)          ! Geopotential height of wind levels
-  call ufo_geovals_get_var(geovals, var_sfc_ifrac, cx_seaice) ! Sea ice
-  call ufo_geovals_get_var(geovals, var_sfc_geomz, cx_orog)   ! Orography
+  ! get variables from geovals
+  call ufo_geovals_get_var(geovals, var_u, cx_u)                        ! Eastward wind
+  call ufo_geovals_get_var(geovals, var_v, cx_v)                        ! Northward wind
+  call ufo_geovals_get_var(geovals, var_zimo, cx_za)                    ! Geopotential height of wind levels
+  call ufo_geovals_get_var(geovals, var_sfc_ifrac, cx_seaice)           ! Sea ice
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, cx_orog)             ! Orography
   call ufo_geovals_get_var(geovals, var_sea_fric_vel, cx_friction_vel)  ! Friction velocity
   call ufo_geovals_get_var(geovals, var_obk_length, cx_obukhov_length)  ! Obukhov length
 
@@ -154,6 +185,18 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   end do obs_loop
 
   deallocate(CDR10)
+
+  ! if we have channels then need to spread these values across the channels correctly
+  if (nchans /= 0) then
+    ! eastward_wind hofx is stored in slot 1
+    hofx_u = hofx(1,:)
+    ! northward_wind hofx is stored in slot 2
+    hofx_v = hofx(2,:)
+    chan_loop: do ichan = 1, nchans
+      hofx(ichan,:) = hofx_u
+      hofx(ichan+nchans,:) = hofx_v
+    end do chan_loop
+  end if
 
   write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs: completed"
   call fckit_log%info(err_msg)
