@@ -18,7 +18,7 @@ observations:
     model units coeff: 1e-6 # ppmv to 1/1
   linear obs operator test:
     coef TL: 1.0e-9
-    tolerance TL: 1.0e-12
+    tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
   geovals:
     filename: Data/ufo/testinput_tier_1/mopitt_co_geoval_2020090318_m.nc4
