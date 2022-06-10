@@ -42,7 +42,7 @@ template <typename OBS> class RunCRTM : public oops::Application {
 // -----------------------------------------------------------------------------
   virtual ~RunCRTM() {}
 // -----------------------------------------------------------------------------
-  int execute(const eckit::Configuration & fullConfig) const {
+  int execute(const eckit::Configuration & fullConfig, bool validate) const {
 //  Setup observation window
     const util::DateTime winbgn(fullConfig.getString("window begin"));
     const util::Duration winlen(fullConfig.getString("window length"));
@@ -59,17 +59,20 @@ template <typename OBS> class RunCRTM : public oops::Application {
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
       eckit::LocalConfiguration obsopconf(conf[jj], "obs operator");
       typename ObsOperator_::Parameters_ obsopparams;
-      obsopparams.validateAndDeserialize(obsopconf);
+      if (validate) obsopparams.validate(obsopconf);
+      obsopparams.deserialize(obsopconf);
       ObsOperator_ hop(obsdb[jj], obsopparams);
 
       const eckit::LocalConfiguration gconf(conf[jj], "geovals");
       GeoVaLsParameters_ geovalsparams;
-      geovalsparams.validateAndDeserialize(gconf);
+      if (validate) geovalsparams.validate(gconf);
+      geovalsparams.deserialize(gconf);
       const GeoVaLs_ gval(geovalsparams, obsdb[jj], hop.requiredVars());
 
       eckit::LocalConfiguration biasconf = conf[jj].getSubConfiguration("obs bias");
       typename ObsAuxCtrl_::Parameters_ biasparams;
-      biasparams.validateAndDeserialize(biasconf);
+      if (validate) biasparams.validate(biasconf);
+      biasparams.deserialize(biasconf);
       const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
 
       ObsVector_ hofx(obsdb[jj]);
