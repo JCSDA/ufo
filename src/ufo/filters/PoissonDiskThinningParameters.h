@@ -157,6 +157,10 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// prevents that from happening).
   oops::Parameter<bool> shuffle{"shuffle", true, this};
 
+  /// Instead of randomly shuffling obs, sort by the pressure coordinate.
+  /// Must be "ascending" or "descending" wrt to pressure coordinate values.
+  oops::OptionalParameter<std::string> sortVertical{"sort_vertical", this};
+
   /// Seed with which to initialize the random number generator used to shuffle the observations
   /// if \p shuffle is set to true.
   ///

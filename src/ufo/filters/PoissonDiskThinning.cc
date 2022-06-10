@@ -149,6 +149,17 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
   oops::Log::debug() << "PoissonDiskThinning: config = " << options_ << std::endl;
+  if (options_.sortVertical.value() != boost::none &&
+      options_.minVerticalSpacing.value() == boost::none) {
+    throw eckit::UserError(
+      ": 'sort_vertical' can only be specified if 'min_vertical_spacing' is specified.", Here());
+  } else if (options_.sortVertical.value() != boost::none &&
+            (options_.sortVertical.value().value() != "ascending" &&
+             options_.sortVertical.value().value() != "descending")) {
+    throw eckit::UserError(
+      ": 'sort_vertical' can only take on string values 'ascending' or 'descending' "
+      "(with respect to the pressure coordinate values).", Here());
+  }
 }
 
 // Required for the correct destruction of options_.
@@ -195,12 +206,23 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
 
     // Within each category, sort points by descending priority and then (if requested)
-    // randomly shuffle points of equal priority.
+    // randomly shuffle points of equal priority. Otherwise, if 'min_vertical_spacing'
+    // and 'sort_vertical' are specified, sort according to pressure coordinate.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
     groupObservationsByPriority(obsIdsInCategory, obsAccessor, prioritySplitter);
-    if (options_.shuffle)
+    if (options_.shuffle) {
       prioritySplitter.shuffleGroups();
-
+    } else if (options_.sortVertical.value() != boost::none &&
+               obsData.minVerticalSpacings != boost::none) {
+      const std::vector<float> pressures = *obsData.pressures;
+      if (options_.sortVertical.value().value() == "ascending") {
+        prioritySplitter.sortGroupsBy([&pressures, &obsIdsInCategory](size_t ind)
+                                      {return pressures[obsIdsInCategory[ind]];});
+      } else if (options_.sortVertical.value().value() == "descending") {
+        prioritySplitter.sortGroupsBy([&pressures, &obsIdsInCategory](size_t ind)
+                                      {return -1.0*pressures[obsIdsInCategory[ind]];});
+      }
+    }
     // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
                  isThinned);

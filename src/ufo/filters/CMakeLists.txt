@@ -253,6 +253,8 @@ set ( filters_files
       obsfunctions/ObsFunctionLinearCombination.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
+      obsfunctions/ObsFunctionSelectStatistic.cc
+      obsfunctions/ObsFunctionSelectStatistic.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
       obsfunctions/OceanPressureToDepth.cc
