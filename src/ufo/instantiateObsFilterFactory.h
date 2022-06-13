@@ -51,8 +51,8 @@
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/VariableAssignment.h"
 #include "ufo/filters/VariableTransforms.h"
-#include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
-#include "ufo/gnssro/QC/ROobserror.h"
+#include "ufo/operators/gnssro/QC/BackgroundCheckRONBAM.h"
+#include "ufo/operators/gnssro/QC/ROobserror.h"
 
 #if defined(RTTOV_FOUND)
   #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"

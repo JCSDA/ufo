@@ -15,7 +15,7 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/FilterParametersBase.h"
-#include "ufo/rttov/ObsRadianceRTTOVParameters.h"
+#include "ufo/operators/rttov/ObsRadianceRTTOVParameters.h"
 
 namespace ufo {
 
