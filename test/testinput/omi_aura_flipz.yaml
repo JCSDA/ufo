@@ -11,8 +11,8 @@ observations:
     name: OzoneLayer
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/omi_aura_obs_2019101700_m.nc4
-    obsdataout:
-      obsfile: Data/omi_aura_obs_flipz_2019101700_m_out.nc4
+#   obsdataout:
+#     obsfile: Data/omi_aura_obs_flipz_2019101700_m_opr_flipz_out.nc4
     simulated variables: [integrated_layer_ozone_in_air]
   geovals:
     filename: Data/ufo/testinput_tier_1/omi_aura_geoval_flipz_2019101700_m.nc4

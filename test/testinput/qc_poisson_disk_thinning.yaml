@@ -9,6 +9,8 @@ observations:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out1.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Domain Check
@@ -67,6 +69,8 @@ observations:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out2.nc4
       obsgrouping:
         group variables: [ "scan_index" ]
     simulated variables: [air_temperature]
@@ -93,6 +97,8 @@ observations:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out3.nc4
       obsgrouping:
         group variables: [ "priority" ]
     simulated variables: [air_temperature]

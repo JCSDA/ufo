@@ -14,6 +14,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -42,6 +44,8 @@ observations:
     simulated variables: [eastward_wind, northward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out2.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -70,6 +74,8 @@ observations:
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out3.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -98,6 +104,8 @@ observations:
     simulated variables: [air_temperature, relative_humidity]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out4.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -126,6 +134,8 @@ observations:
     simulated variables: [eastward_wind, northward_wind, air_temperature, relative_humidity]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out5.nc4
   obs operator:
     name: Composite
     components:
@@ -166,6 +176,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out6.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -189,6 +201,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out7.nc4
   expect constructor to throw exception with message: Group variables configuration is empty
   obs operator:
     name: ProfileAverage
@@ -215,6 +229,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out8.nc4
   expect constructor to throw exception with message: Sort variable must be air_pressure
   obs operator:
     name: ProfileAverage
@@ -242,6 +258,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out9.nc4
   expect constructor to throw exception with message: Profiles must be sorted in descending order
   obs operator:
     name: ProfileAverage
@@ -267,6 +285,8 @@ observations:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out10.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -295,6 +315,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out11.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -325,6 +347,8 @@ observations:
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out12.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"

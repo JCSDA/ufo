@@ -8,6 +8,8 @@ observations:
     name: InsituTemperature
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
+#   obsdataout:
+#     obsfile: Data/profile_2018-04-15_insitutemperature_opr_out.nc
     simulated variables: [sea_water_temperature]
     observed variables: [sea_water_temperature]
   geovals:

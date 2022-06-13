@@ -6,6 +6,8 @@ observations:
     name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#   obsdataout: 
+#     obsfile: Data/sondes_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [air_temperature]
   obs error:
     covariance model: diagonal ufo
@@ -13,6 +15,8 @@ observations:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+#   obsdataout:
+#     obsfile: Data/aircraft_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [air_temperature,specific_humidity]
   obs error:
     covariance model: diagonal ufo
@@ -20,6 +24,8 @@ observations:
     name: Satwind
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_s.nc4
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs error:
     covariance model: diagonal ufo

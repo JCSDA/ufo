@@ -18,8 +18,8 @@ observations:
     name: amsr2_gcom-w1
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020120100_m.nc4
-    obsdataout:
-      obsfile: Data/amsr2_gcom-w1_obs_2020120100_m_out.nc4
+#   obsdataout:
+#     obsfile: Data/amsr2_gcom-w1_obs_2020120100_m_crtm_qc_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-14
   geovals:

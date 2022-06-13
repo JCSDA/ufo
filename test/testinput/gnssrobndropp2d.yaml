@@ -13,6 +13,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
     simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2018041500_s_ropp2d_opr_out.nc4
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4
    loc_multiplier: 3

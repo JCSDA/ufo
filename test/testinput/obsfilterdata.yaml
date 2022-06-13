@@ -5,6 +5,8 @@ obs filter data:
     name: Satwind
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_m_filterdata_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   test data:
     datetime variables:

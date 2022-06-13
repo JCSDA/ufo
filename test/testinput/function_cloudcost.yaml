@@ -21,6 +21,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/atms_obs_20200401T0000Z_10locs.nc4
     simulated variables: [brightness_temperature]
     channels: 18-22
+#   obsdataout:
+#     obsfile: Data/atms_obs_20200401T0000Z_10locs_cloudcost_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/atms_geovals_20200401T0000Z_10locs.nc4
   obs filters:

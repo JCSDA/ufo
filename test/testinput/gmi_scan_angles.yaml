@@ -18,8 +18,8 @@ observations:
     name: gmi_gpm
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020111500.nc4
-    obsdataout:
-      obsfile: Data/gmi_gpm_obs_2020111500_out.nc4
+#    obsdataout:
+#      obsfile: Data/gmi_gpm_obs_2020111500_scan_angles_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-13
   geovals:

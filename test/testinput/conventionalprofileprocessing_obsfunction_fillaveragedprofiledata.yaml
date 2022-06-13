@@ -13,6 +13,8 @@ observations:
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out1.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -40,6 +42,8 @@ observations:
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out2.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -64,6 +68,8 @@ observations:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out3.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -90,6 +96,8 @@ observations:
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out4.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:

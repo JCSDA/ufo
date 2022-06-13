@@ -13,11 +13,9 @@ observations:
   obs space:
     name: cris-fsr_npp
     obsdatain:
-#      obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
       obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
-#    obsdataout:
-#      obsfile: Data/iasi_metop-a_obs_2018041500_m_qc_out.nc4
-#      obsfile: Data/iasi_metop-a_obs_2018041500_m_unittest_out.nc4
+#   obsdataout:
+#     obsfile: Data/iasi_metop-a_obs_2018041500_m_crtm_land_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,

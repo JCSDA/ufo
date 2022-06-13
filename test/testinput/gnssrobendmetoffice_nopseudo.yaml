@@ -12,6 +12,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_nopseudo.nc4
     simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_nopseudo_ukmo_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_nopseudo.nc4
   norm ref: MetOfficeHofX
@@ -31,6 +33,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_nopseudo.nc4
     simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_nopseudo_ukmo_bottomtotop_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_nopseudo_bottomtotop.nc4
   expect simulateObs to throw exception with message: Geovals should be ordered top to bottom

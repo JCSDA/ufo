@@ -14,6 +14,8 @@ Sondes:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: ["air_temperature", "relative_humidity", "eastward_wind", "northward_wind", "height"]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_bkgqc_repobs_ops_comparison_out.nc4
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_repobs.nc4
   obs diagnostics variables:

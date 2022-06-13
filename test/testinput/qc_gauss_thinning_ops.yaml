@@ -16,6 +16,8 @@ observations:
     name: Longitudes from -180 to 180
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_lon_-180_to_180_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out1.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Gaussian Thinning
@@ -47,6 +49,8 @@ observations:
     name: Longitudes from 0 to 360  # Same obs, but with negative longitudes shifted upwards by 360 deg
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_lon_0_to_360_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out2.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Gaussian Thinning
@@ -80,6 +84,8 @@ observations:
     name: Ground GNSS, no thinning scores
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_groundgnss_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out3.nc4
     simulated variables: [ZTD]
   obs filters:
   - filter: Gaussian Thinning
@@ -2286,6 +2292,8 @@ observations:
     name: Ground GNSS, with thinning scores
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_groundgnss_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out4.nc4
     simulated variables: [ZTD]
   obs filters:
   - filter: Gaussian Thinning
@@ -4498,6 +4506,8 @@ observations:
     name: Ground GNSS pick latest only
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_groundgnssnames_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out5.nc4
     simulated variables: [ZTD]
   obs filters:
   - filter: Gaussian Thinning
@@ -7868,6 +7878,8 @@ observations:
     name: Ground GNSS pick latest with prior Gaussian thin
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_groundgnssnames_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out6.nc4
     simulated variables: [ZTD]
   obs filters:
   - filter: Gaussian Thinning
@@ -8912,6 +8924,8 @@ observations:
     name: Ground GNSS pick latest testing priority_variable
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_gauss_thinning_groundgnssnames_obs.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out7.nc4
     simulated variables: [ZTD]
   obs filters:
 

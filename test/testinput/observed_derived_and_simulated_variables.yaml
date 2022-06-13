@@ -9,6 +9,8 @@ observations:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
+#   obsdataout:
+#     obsfile: Data/PStar_obs_20210521T1200Z_observed_derived_simulated_variables_out.nc4
     observed variables: [station_pressure, mean_sea_level_pressure]
     derived variables: [surface_pressure]
     simulated variables: [surface_pressure]

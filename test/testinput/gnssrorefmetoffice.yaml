@@ -13,6 +13,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
     simulated variables: [refractivity]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2019123006_refractivity_ukmo_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
   obs filters:
@@ -38,6 +40,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity_nopseudo.nc4
     simulated variables: [refractivity]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2019123006_refractivity_ukmo_opr_nopseudo_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity_nopseudo.nc4
   obs filters:
@@ -63,6 +67,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
     simulated variables: [refractivity]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2019123006_refractivity_ukmo_opr_reversed_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity_reversed.nc4
   expect simulateObs to throw exception with message: Geovals should be ordered top to bottom

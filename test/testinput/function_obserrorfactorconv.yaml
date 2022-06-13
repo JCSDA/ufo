@@ -13,6 +13,8 @@ observations:
         sort variable: "air_pressure"
         sort order: "descending"  
     simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/converr_vadwind_obs_2020120112_s_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/converr_vadwind_geoval_2020120112_s.nc4
   obs function:

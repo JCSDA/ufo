@@ -16,6 +16,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
     simulated variables: [aerosol_optical_depth]
     channels: 4
+#   obsdataout:
+#     obsfile: Data/aod_obs_2018041500_m_aodluts_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
   #temporary to replace with NasaBench

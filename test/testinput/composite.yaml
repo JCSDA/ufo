@@ -65,6 +65,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out1.nc4
   obs operator:
     name: Composite
     components:
@@ -94,6 +96,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out2.nc4
   obs operator:
     name: Composite
     components:
@@ -123,6 +127,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind]
+#   obsdataout:
+#    obsfile: Data/sondes_obs_2018041500_s_composite_out3.nc4
   obs operator:
     name: Composite
     components:
@@ -144,6 +150,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out4.nc4
   obs operator:
     name: Composite
     components:
@@ -166,6 +174,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind, air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out5.nc4
   obs operator:
     name: Composite
     components:
@@ -186,6 +196,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out6.nc4
   obs operator:
     name: Composite
     components:
@@ -217,6 +229,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_obs.nc4
     simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_composite_out7.nc4
   obs operator:
     name: Composite
     components:

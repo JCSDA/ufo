@@ -8,6 +8,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
     simulated variables: [brightness_temperature]
     channels: 7-9,11-13
+#   obsdataout:
+#     obsfile: Data/amsr2_obs_20191230T0000Z_100subset_BgdDepartureAnomaly_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
   obs function:

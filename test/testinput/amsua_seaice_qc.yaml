@@ -6,8 +6,8 @@ observations:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-    obsdataout:
-      obsfile: Data/amsua_n19_obs_2018041500_out.nc4
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_seaice_qc_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:

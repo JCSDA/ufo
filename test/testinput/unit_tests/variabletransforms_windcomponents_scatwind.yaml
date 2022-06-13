@@ -7,8 +7,8 @@ observations:
     #  used to store ambiguities and not channels. This will be changed in future.
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
-    obsdataout:
-      obsfile: Data/windcomponents_2020100106_output.nc4
+#    obsdataout:
+#      obsfile: Data/windcomponents_2020100106_output.nc4
     simulated variables: [eastward_wind, northward_wind]
     observed variables: []
     derived variables: [eastward_wind, northward_wind]

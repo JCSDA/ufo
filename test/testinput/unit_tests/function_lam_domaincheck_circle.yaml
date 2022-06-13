@@ -6,8 +6,8 @@ observations:
     name: regional_domain_check
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
-    obsdataout:
-      obsfile: Data/lam_domaincheck_circle_sondes_tv_obs_2018041500_m.nc4
+#    obsdataout:
+#      obsfile: Data/lam_domaincheck_circle_sondes_tv_obs_2018041500_m.nc4
     simulated variables: [virtual_temperature]
   obs filters:
   # this obs function will compute, based off of input parameters,

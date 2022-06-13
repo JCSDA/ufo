@@ -7,6 +7,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
     simulated variables: [surface_pressure]
+#   obsdataout:
+#     obsfile: Data/2020100106_metars_small_SfcPCorrected_out.nc
   geovals:
     filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc
   obs operator:

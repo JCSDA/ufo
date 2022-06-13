@@ -7,6 +7,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_rh_corr_obs.nc4
     simulated variables: [relative_humidity]
+#   obsdataout:
+#     obsfile: Data/met_office_rh_corr_out.nc4
   geovals: &geovals
     filename: Data/ufo/testinput_tier_1/met_office_rh_corr_gv.nc4
   obs operator:

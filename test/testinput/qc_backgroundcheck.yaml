@@ -145,8 +145,8 @@ observations:
     name: Altimeter
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sataltimeter_sla_testdata.nc4
-    obsdataout:
-      obsfile: Data/altimeter_testout.nc4
+#    obsdataout:
+#      obsfile: Data/altimeter_testout.nc4
     simulated variables: [sea_surface_height]
   HofX: HofX
   obs diagnostics:

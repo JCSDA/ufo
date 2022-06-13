@@ -11,8 +11,8 @@ observations:
     name: GnssroBnd
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
-    obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -29,8 +29,8 @@ observations:
     name: GnssroBnd
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
-    obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -49,8 +49,8 @@ observations:
     name: GnssroBnd
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
-    obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -67,8 +67,8 @@ observations:
    name: GnssroRef
    obsdatain:
      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
-   obsdataout:
-     obsfile: Data/gnssro_ref_2018041500_s_errNBAM.nc4
+#  obsdataout:
+#    obsfile: Data/gnssro_ref_2018041500_s_errNCEP_out.nc4
    simulated variables: [refractivity]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4

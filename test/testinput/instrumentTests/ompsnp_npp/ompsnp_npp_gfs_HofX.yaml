@@ -10,8 +10,8 @@ observations:
         group variables: ["latitude"]
         sort variable: "air_pressure"
         sort order: "ascending"
-    obsdataout:
-      obsfile: Data/ompsnp_npp_hofx_2020121500.nc
+#    obsdataout:
+#      obsfile: Data/ompsnp_npp_hofx_2020121500.nc
     simulated variables: [integrated_layer_ozone_in_air]
   obs operator:
     name: AtmVertInterpLay

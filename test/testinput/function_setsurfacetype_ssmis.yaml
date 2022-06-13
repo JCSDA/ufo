@@ -10,6 +10,8 @@ observations:
       obsfile: Data/ssmis_f17_obs_20210521T1200Z_obfn_out.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-24
+#   obsdataout:
+#     obsfile: Data/ssmis_f17_20210521T1200Z_obfn_ref_setsfctype_out.nc4
   geovals:
     filename:
       Data/ufo/testinput_tier_1/geovals_ssmis_f17_20210521T1200Z_obfn_ref.nc4

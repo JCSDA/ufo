@@ -11,6 +11,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out1.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -64,6 +66,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out2.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -87,6 +91,8 @@ observations:
     name: Ship
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out3.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -109,6 +115,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "latitude" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out4.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -131,8 +139,8 @@ observations:
         group variables: [ "dateTime" ]
         sort variable: ocean_depth
         sort group: ObsValue
-    obsdataout:
-      obsfile: Data/shiptrackcheck_recordssingleobs.nc4
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -186,8 +194,8 @@ observations:
         group variables: [ "station_id", "dateTime" ]
         sort variable: ocean_depth
         sort group: ObsValue
-    obsdataout:
-      obsfile: Data/shiptrackcheck_recordssingleobs_nostationid.nc4
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationid_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -226,6 +234,8 @@ observations:
     name: Ocean Profile, records are single obs but not grouped into records
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationgrouping_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check

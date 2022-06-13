@@ -5,6 +5,8 @@ Met Office OPS SatRad 10 km thinning of near-duplicate obs:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/obs_atms_20200401T0000Z_satrad_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/obs_atms_20200401T0000Z_satrad_thinning_out1.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-22
   GaussianThinning:
@@ -35,6 +37,8 @@ Met Office OPS SatRad thinning for 154 km mesh:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/obs_atms_20200401T0000Z_satrad_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/obs_atms_20200401T0000Z_satrad_thinning_out2.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-22
   GaussianThinning:

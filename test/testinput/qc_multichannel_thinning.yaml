@@ -8,6 +8,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out1.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -20,6 +22,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out2.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -37,6 +41,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out3.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -55,6 +61,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out4.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -75,6 +83,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out5.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -100,6 +110,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out6.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:
@@ -125,6 +137,8 @@ observations:
     name: ATMS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out7.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
   obs filters:

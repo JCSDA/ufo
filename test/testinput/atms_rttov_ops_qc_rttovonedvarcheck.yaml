@@ -23,6 +23,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: &ops_channels 1-22
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_onedvarcheck_out.nc4
   geovals: &GeoVaLs
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs bias: &ObsBias

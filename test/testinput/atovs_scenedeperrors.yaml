@@ -6,8 +6,8 @@ observations:
     name: metop_1_amsua_mhs
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt_add.nc4
-    obsdataout:
-      obsfile: Data/atovs_metopb_obs_2021011512_output.nc4
+#   obsdataout:
+#     obsfile: Data/atovs_metopb_obs_2021011512_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-20
   obs filters:

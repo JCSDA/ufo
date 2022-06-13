@@ -13,6 +13,8 @@ Sondes:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
     simulated variables: [air_temperature, relative_humidity]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_rh_ops_comparison_out.nc4
   Conventional Profile Processing:
     Checks: ["Basic", "RH"]
     compareWithOPS: true

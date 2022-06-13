@@ -21,6 +21,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-22
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_qc_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
@@ -119,6 +121,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_2020040100_allsurfacetypes.nc4
     simulated variables: [brightness_temperature]
     channels: *all_channels
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_2020040100_allsurfacetypes_zeroobs_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
   obs filters:

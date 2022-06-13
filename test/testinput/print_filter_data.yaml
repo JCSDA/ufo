@@ -10,6 +10,8 @@ observations:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_temperature_obs_printfilterdata_out.nc4
     simulated variables: [air_temperature]
 
   obs operator:

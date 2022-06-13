@@ -14,6 +14,8 @@ ProfileDataHolder:
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_oneprofile_dataholder_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
   Conventional Profile Processing:

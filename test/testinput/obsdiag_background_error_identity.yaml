@@ -7,6 +7,8 @@ obs space:
   name: Sondes
   obsdatain:
     obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+# obsdataout:
+#   obsfile: Data/sondes_obs_2018041500_s_backgrounderror_identity_out.nc4
   simulated variables: [surface_pressure]
 obs operator:
   name: Composite

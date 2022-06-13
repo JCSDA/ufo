@@ -15,6 +15,8 @@ observations:
       obsgrouping:
         group variables: ["record_number"]
     simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
@@ -51,6 +53,8 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
     simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:

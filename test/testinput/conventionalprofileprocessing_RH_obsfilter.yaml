@@ -15,6 +15,8 @@ observations:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_rh_obsfilter_out.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:

@@ -17,8 +17,8 @@ observations:
         group variables: [ "record_number" ]
         sort variable: "impact_height"
         sort order: "ascending"
-    obsdataout: 
-      obsfile: ${outputdir}/gnssro_bndnbam_2020070100_f_output.nc4
+#    obsdataout: 
+#      obsfile: ${outputdir}/gnssro_bndnbam_2020070100_f_output.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: ${geovaldir}/gnssro_geovals_2020070100_f.nc4

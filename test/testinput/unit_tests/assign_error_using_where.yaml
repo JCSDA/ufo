@@ -6,8 +6,8 @@ observations:
     name: test_assign_with_where_clause
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    obsdataout:
-      obsfile: Data/test_obserror_where.nc
+#    obsdataout:
+#      obsfile: Data/test_obserror_where.nc
     simulated variables: [surface_pressure]
 
   obs filters:

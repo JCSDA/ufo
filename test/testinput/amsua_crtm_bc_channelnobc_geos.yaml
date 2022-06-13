@@ -15,8 +15,8 @@ observations:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500.nc4
-    obsdataout:
-      obsfile: Data/geos_amsua_n19_obs_2020121500_out.nc4
+#   obsdataout:
+#     obsfile: Data/geos_amsua_n19_obs_2020121500_crtm_channel_bc_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:

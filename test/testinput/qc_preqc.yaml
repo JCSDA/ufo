@@ -9,6 +9,8 @@ observations:
     name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_preqc_out.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -20,6 +22,8 @@ observations:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_preqc_out.nc4
     simulated variables: [brightness_temperature]
     channels: 4-8
   obs filters:
@@ -31,6 +35,8 @@ observations:
     name: amsua_n19, with where statement
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_preqc_out.nc4
     simulated variables: [brightness_temperature]
     observed variables: [brightness_temperature]
     channels: 4-8

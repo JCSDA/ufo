@@ -11,6 +11,8 @@ observations:
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_temperature_filter_stage_out.nc4
 
   obs operator: &obsop
     name: VertInterp

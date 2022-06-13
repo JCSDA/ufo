@@ -21,6 +21,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-13
+#   obsdataout:
+#     obsfile: Data/gmi_gpm_obs_2018041500_m_clwret_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2018041500_m.nc4
   obs filters:

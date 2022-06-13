@@ -5,6 +5,8 @@ obs space:
   name: Radiosonde
   obsdatain:
     obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_opr_utils_out.nc4
   simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
   observed variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
 cases:

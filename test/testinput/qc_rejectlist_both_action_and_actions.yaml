@@ -6,6 +6,8 @@ observations:
     name: test data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/filters_rejectlist_out.nc4
     simulated variables: [variable1, variable2]
   obs filters:
   - filter: RejectList

@@ -8,6 +8,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: ["record_number"]
+#   obsdataout:
+#     obsfile: Data/profile_filter_few_observationcheck_out1.nc4
     simulated variables: [variable]
   obs filters:
   - filter: Profile Few Observations Check
@@ -21,6 +23,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: ["record_number"]
+#   obsdataout:
+#     obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
   obs filters:
   - filter: Profile Few Observations Check
@@ -34,6 +38,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: ["record_number"]
+#   obsdataout:
+#     obsfile: Data/profile_filter_few_observationcheck_out3.nc4
     simulated variables: [variable]
   obs filters:
   - filter: Profile Few Observations Check
@@ -47,6 +53,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: ["record_number"]
+#   obsdataout:
+#     obsfile: Data/profile_filter_few_observationcheck_out4.nc4
     simulated variables: [variable]
   obs filters:
   - filter: Profile Few Observations Check
@@ -58,4 +66,3 @@ observations:
         name: record_number@MetaData
       maxvalue: 4       # First five profiles
   passedBenchmark: 50   # Rejects all profiles, except those removed by where
-

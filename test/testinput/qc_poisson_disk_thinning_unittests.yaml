@@ -7,6 +7,8 @@ No thinning:
       # This file contains observations taken at locations forming a 3x3x3x3 grid of points
       # in the 4D space (latitude, longitude, pressure, time).
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out1.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -23,6 +25,8 @@ Horizontal thinning, min spacing smaller than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out2.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -47,6 +51,8 @@ Horizontal thinning, min spacing larger than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out3.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -72,6 +78,8 @@ Vertical thinning, min spacing smaller than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out4.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -97,6 +105,8 @@ Vertical thinning, min spacing larger than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out5.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -122,6 +132,8 @@ Vertical thinning, where clause:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out6.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -148,6 +160,8 @@ Time thinning, min spacing equal to nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out7.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -173,6 +187,8 @@ Time thinning, min spacing larger than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out8.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -198,6 +214,8 @@ Horizontal and vertical thinning, min spacing larger than nearest neighbor spaci
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out9.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -224,6 +242,8 @@ Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out10.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -250,6 +270,8 @@ Vertical and time thinning, min spacing larger than nearest neighbor spacing:
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out11.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:
@@ -276,6 +298,8 @@ Horizontal, vertical and time thinning, min spacing larger than nearest neighbor
     name: Aircraft
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+#   obsdataout:
+#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out12.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   Poisson Disk Thinning:

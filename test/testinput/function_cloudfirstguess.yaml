@@ -26,6 +26,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
     simulated variables: [brightness_temperature]
     channels: *cloud_first_guess_channels
+#   obsdataout:
+#     obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs filters:

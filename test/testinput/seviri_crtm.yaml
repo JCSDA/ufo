@@ -14,6 +14,8 @@ observations:
     name: seviri_m08
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/seviri_m08_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/seviri_m08_obs_2018041500_m_crtm_opr_out.nc4
     simulated variables: [brightness_temperature]
     channels: 5
   geovals:

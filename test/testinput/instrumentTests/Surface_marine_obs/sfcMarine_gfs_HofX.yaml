@@ -7,8 +7,8 @@ observations:
     name: SurfaceComposite
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_obs_2020121500_m.nc
-    obsdataout:
-      obsfile: Data/sfcship_obs_2020121500_out.nc
+#    obsdataout:
+#      obsfile: Data/sfcship_obs_2020121500_out.nc
     simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_geoval_2020121500_m.nc

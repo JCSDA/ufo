@@ -7,6 +7,8 @@ geovals test:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [eastward_wind, northward_wind]
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
   geovals test:
@@ -18,6 +20,8 @@ geovals test:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   geovals test:
@@ -45,6 +49,8 @@ geovals test:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sbuv2_n19_obs_2018041500_m.nc4
     simulated variables: [integrated_layer_ozone_in_air]
+#   obsdataout:
+#     obsfile: Data/sbuv2_n19_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/sbuv2_n19_geoval_2018041500_m.nc4
   geovals test:
@@ -64,5 +70,7 @@ geovals get test:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15

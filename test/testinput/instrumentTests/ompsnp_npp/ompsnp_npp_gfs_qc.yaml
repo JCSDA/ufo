@@ -38,8 +38,8 @@ observations:
         group variables: ["latitude"]
         sort variable: "air_pressure"
         sort order: "ascending"
-    obsdataout:
-      obsfile: Data/ompsnp_npp_obs_2020121500_out.nc
+#    obsdataout:
+#      obsfile: Data/ompsnp_npp_obs_2020121500_out.nc
     simulated variables: [integrated_layer_ozone_in_air]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_geoval_2020121500.nc

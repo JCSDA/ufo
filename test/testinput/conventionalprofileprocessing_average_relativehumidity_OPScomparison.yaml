@@ -15,6 +15,8 @@ Sondes:
     simulated variables: [air_temperature, relative_humidity]
     extension:
       allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_relativehumidity_ops_comparison_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
   Conventional Profile Processing:

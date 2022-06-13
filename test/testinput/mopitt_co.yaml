@@ -5,6 +5,8 @@ observations:
     name: CO
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/mopitt_co_2020090318_m.nc4
+#   obsdataout:
+#     obsfile: Data/mopitt_co_2020090318_m_opr_out.nc4
     simulated variables: [carbon_monoxide_in_total_column]
   obs operator:
     name: AvgKernel

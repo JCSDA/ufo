@@ -6,8 +6,8 @@ observations:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
-    obsdataout:
-      obsfile: Data/surface_obs_20210521T1200Z_out.nc
+#    obsdataout:
+#      obsfile: Data/surface_obs_20210521T1200Z_out.nc
     simulated variables: [air_temperature_at_2m]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4

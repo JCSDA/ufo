@@ -13,6 +13,8 @@ observations:
     name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_opr_out1.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -32,6 +34,8 @@ observations:
     name: Radiosonde with vertical coordinates listed explicitly
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_opr_out2.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -52,6 +56,8 @@ observations:
     name: Radiosonde with automatic determination of interpolation method
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_opr_out3.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -71,6 +77,8 @@ observations:
     name: Radiosonde with log-linear interpolation
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_opr_out4.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
@@ -90,6 +98,8 @@ observations:
     name: Radiosonde with linear interpolation
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_m_opr_out5.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4

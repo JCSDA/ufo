@@ -6,8 +6,8 @@ observations:
     name: ATOVS
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/obs_atovs_lwpguess_20210701T1200Z.nc4
-    obsdataout:
-      obsfile: &outfile Data/atovs_lwpfirstguess.nc4 
+#   obsdataout:
+#     obsfile: &outfile Data/atovs_lwpfirstguess_20210701T1200Z_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-20
   geovals:

@@ -12,6 +12,8 @@ Vertical averaging:
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_vertaverage_out.nc4
   HofX: HofX
   Conventional Profile Processing:
     Checks: ["Basic"]

@@ -6,6 +6,8 @@ observations:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/grosserrorwholereport_filter_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/grosserrorwholereport_filter_test_out.nc4
     simulated variables: [pressure_at_model_surface,
                           air_temperature_at_2m,
                           eastward_wind,

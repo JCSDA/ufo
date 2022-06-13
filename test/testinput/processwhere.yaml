@@ -5,6 +5,8 @@ successful:
     name: ProcessWhere Test Data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/filters_testdata_processwhere_out1.nc4
     simulated variables: [var1]
     observed variables: [var1]
   nlocs: 10
@@ -552,6 +554,8 @@ operator:
     name: ProcessWhere Test Data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/filters_testdata_processwhere_out2.nc4
     simulated variables: [var1]
     observed variables: [var1]
   nlocs: 10
@@ -624,6 +628,8 @@ user_error_type_handling_is_in:
     name: ProcessWhere Test Data
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/filters_testdata_processwhere_out3.nc4
     simulated variables: [var1]
     observed variables: [var1]
   nlocs: 10

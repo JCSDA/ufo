@@ -13,8 +13,8 @@ observations:
     name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/windprof_obs_2018041500_m.nc4
-    obsdataout:
-      obsfile: Data/windprof_obs_2018041500_m_out.nc4
+#   obsdataout:
+#     obsfile: Data/windprof_obs_2018041500_m_verterp_opr_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/windprof_geoval_2018041500_m.nc4

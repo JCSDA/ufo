@@ -6,8 +6,8 @@ observations:
     name: Satwind
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_2018041500.nc4
-    obsdataout:
-       obsfile: Data/windspeedanddirection_2018041500_output.nc4
+#    obsdataout:
+#       obsfile: Data/windspeedanddirection_2018041500_output.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
     - filter: Variable Transforms
