@@ -3,7 +3,6 @@ window end: 2018-04-15T03:00:00Z
 obs space:
   name: test data
   simulated variables: [test]
-  observed variables: [test]
   generate:
     list:
       lons: [ 0.0, 10.0, 20.0, 50.0, 90.0, 100.0, 200.0, 300.0, 359.0, 0.0 ]

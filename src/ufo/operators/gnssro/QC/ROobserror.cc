@@ -26,7 +26,9 @@ ROobserror::ROobserror(ioda::ObsSpace & obsdb,
   : FilterBase(obsdb, config, qc, oberr)
 {
   oops::Log::trace() << "ROobserror contructor starting" << std::endl;
-  const oops::Variables filvar = filtervars_[0].toOopsVariables();;
+  // observation errors are always set up for the variables that are
+  // assimilated
+  const oops::Variables filvar = obsdb.assimvariables();
   oops::Log::trace() << "ROobserror contructor =  "<< filvar << std::endl;
   ufo_roobserror_create_f90(key_, obsdb, config, filvar);
   oops::Log::trace() << "ROobserror contructor key = " << key_ << std::endl;

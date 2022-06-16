@@ -4,7 +4,6 @@ Horizontal mesh 20000:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -25,7 +24,6 @@ Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,   0,   0,   0,   0 ]
@@ -46,7 +44,6 @@ Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,   0,   0,   0,   0 ]
@@ -67,7 +64,6 @@ Horizontal mesh 20000, extreme latitudes:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -90, -45, 0, 45, 90 ]
@@ -88,7 +84,6 @@ Horizontal mesh 10000:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,    0,   0,   0,    0,   0,   0     ]
@@ -110,7 +105,6 @@ Vertical mesh, single bin:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -135,7 +129,6 @@ Vertical mesh, two bins:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -160,7 +153,6 @@ Vertical mesh, two bins, all observations in single bin:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -185,7 +177,6 @@ Thinning in time, single bin:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -211,7 +202,6 @@ Thinning in time, two bins:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -237,7 +227,6 @@ Thinning in time, two bins, all observations in single bin:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -262,7 +251,6 @@ Vertical mesh, two bins, single category:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -290,7 +278,6 @@ Vertical mesh, two bins, two categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -318,7 +305,6 @@ Vertical mesh, two bins, two categories, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1]
@@ -350,7 +336,6 @@ Vertical mesh, two bins, two string-valued categories, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1]
@@ -382,7 +367,6 @@ Vertical mesh, two bins, equal priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -410,7 +394,6 @@ Vertical mesh, two bins, nonequal priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -438,7 +421,6 @@ Vertical mesh, single bin, nonequal priorities, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1]
@@ -470,7 +452,6 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1]
@@ -508,7 +489,6 @@ ops_compatibility_mode but round_horizontal_bin_count_to_nearest = false:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -529,7 +509,6 @@ ops_compatibility_mode but distance_norm = geodesic:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -550,7 +529,6 @@ Thinning in time, obs in single bin, records are single obs:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6]
@@ -582,7 +560,6 @@ Thinning in time, obs in single bin, records are single obs, no priority:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6]
@@ -611,7 +588,6 @@ Thinning in time, obs in single bin, records are single obs, category variable s
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -645,7 +621,6 @@ Thinning in time, obs in single bin, records are single obs, four categories per
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]

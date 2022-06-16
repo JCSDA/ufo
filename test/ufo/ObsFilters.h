@@ -187,10 +187,10 @@ class ObsFiltersParameters : public oops::Parameters {
 //!
 void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
                    oops::ObsDataVector<ufo::ObsTraits, int> &qcflags,
-                   oops::ObsVector<ufo::ObsTraits> &obserr) {
+                   oops::ObsDataVector<ufo::ObsTraits, float> &obserr) {
   FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
                         qcflags.obsdatavectorptr(),
-                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsvector()));
+                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsdatavector()));
   finalCheck.doFilter();
 }
 
@@ -393,18 +393,18 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   typedef oops::ObsOperator<ufo::ObsTraits>       ObsOperator_;
   typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
+  typedef oops::ObsDataVector<ufo::ObsTraits, float> ObsDataVector_;
 
 /// init QC and error
-  ObsVector_ obserr(obspace, "ObsError", true);
+  ObsDataVector_ obserrfilter(obspace, obspace.obsvariables(), "ObsError");
   std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
     qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
   ObsFilters_ filters(obspace,
                       params.filtersParams,
-                      qcflags, obserr);
+                      qcflags, obserrfilter);
   filters.preProcess();
-
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
   oops::Variables diagvars = filters.requiredHdiagnostics();
@@ -461,18 +461,18 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserr);
+    runFinalCheck(obspace, *qcflags, obserrfilter);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserr);
+    runFinalCheck(obspace, *qcflags, obserrfilter);
   }
 
   qcflags->save("EffectiveQC");
   const std::string errname = "EffectiveError";
-  obserr.save(errname);
+  obserrfilter.save(errname);
 
 //  Compare with known results
   bool atLeastOneBenchmarkFound = false;

@@ -4,7 +4,6 @@ Assign constant observation error value:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -31,7 +30,6 @@ Assign observation error from NetCDF variance; 1 exact; 1 linear (along the firs
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -63,7 +61,6 @@ Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the se
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -6, -6, -6, -4 ]
@@ -95,7 +92,6 @@ Assign observation error from NetCDF variance; 1 exact; 1 nearest:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -127,7 +123,6 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -165,7 +160,6 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrat
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -203,7 +197,6 @@ Assign observation error from NetCDF full matrix with ioda-v2-style variable nam
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -241,7 +234,6 @@ Assign observation error from NetCDF full matrix 2D; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -269,7 +261,6 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -303,7 +294,6 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
     obs space:
       name: Aircraft
       simulated variables: [air_temperature]
-      observed variables: [air_temperature]
       generate:
         list:
           lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -339,7 +329,6 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -369,7 +358,6 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -401,7 +389,6 @@ Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -433,7 +420,6 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -465,7 +451,6 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -497,7 +482,6 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -529,7 +513,6 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -561,7 +544,6 @@ Assign observation error from NetCDF variance; attempt to use the 'least upper b
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -591,7 +573,6 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -621,7 +602,6 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -653,7 +633,6 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2, 3 ]
@@ -685,7 +664,6 @@ Assign observation error from NetCDF file; 2D array of full covariance matrices:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -767,7 +745,6 @@ Assign observation error from CSV file; data types float, int and string; payloa
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -803,7 +780,6 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -839,7 +815,6 @@ Assign observation error from CSV file; data types float, int and string; payloa
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -876,7 +851,6 @@ Assign observation error from CSV file; data type datetime; payload of type int:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0 ]
@@ -904,7 +878,6 @@ Assign observation error from CSV file; data types float, int and string; missin
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -940,7 +913,6 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -969,7 +941,6 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -998,7 +969,6 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1027,7 +997,6 @@ Assign observation error from CSV file; datetime data in column with @ErrorVaria
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1056,7 +1025,6 @@ Assign observation error from CSV file; empty file:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1085,7 +1053,6 @@ Assign observation error from CSV file; only one header line:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1114,7 +1081,6 @@ Assign observation error from CSV file; no data lines:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1143,7 +1109,6 @@ Assign observation error from CSV file; empty data line:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1172,7 +1137,6 @@ Assign observation error from CSV file; incorrect number of data types:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1201,7 +1165,6 @@ Assign observation error from CSV file; incorrect number of columns in the first
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1230,7 +1193,6 @@ Assign observation error from CSV file; unsupported data type:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1 ]
@@ -1259,7 +1221,6 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0 ]
@@ -1288,7 +1249,6 @@ Assign observation error from CSV file; data types float, int and string; missin
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
@@ -1327,7 +1287,6 @@ Assign observation error from CSV file containing errors; data types float, int 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]

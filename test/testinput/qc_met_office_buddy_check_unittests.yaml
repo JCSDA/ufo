@@ -8,7 +8,6 @@ Pair of observations:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature, eastward_wind, northward_wind]
-    observed variables: [air_temperature, eastward_wind, northward_wind]
     generate:
       list:
         lats: [ 20, 21 ]

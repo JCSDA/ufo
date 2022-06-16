@@ -3,8 +3,7 @@ Only valid observations:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -34,8 +33,7 @@ One observation with excessive speed:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -65,8 +63,7 @@ One observation with excessive climb rate:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -96,8 +93,7 @@ Climb rate checks disabled:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]   
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -126,8 +122,7 @@ Where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]
@@ -161,8 +156,7 @@ Multiple clusters of observations with excessive speed:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
@@ -234,8 +228,7 @@ Multiple station ids:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]   
     generate:
       list:
         lats: [ -2, -2, -1, -1, 0, 0, 1, 1, 2, 2 ]
@@ -268,8 +261,7 @@ No station id variable, no observation grouping:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ -2, -1, 0, 1, 2 ]

@@ -4,7 +4,6 @@ Min_spacing below observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -29,7 +28,6 @@ Min spacing equal to observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -54,7 +52,6 @@ Min spacing above observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -79,7 +76,6 @@ Int-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -106,8 +102,7 @@ String-valued categories:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -134,8 +129,7 @@ Categories, observations sorted in descending order:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [air_temperature]    
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -163,7 +157,6 @@ Categories, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 1, 0, 0, 0, 0, 0, 1 ]
@@ -195,7 +188,6 @@ Tolerance and priorities, first observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -250,7 +242,6 @@ Tolerance and priorities, second observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -305,7 +296,6 @@ Tolerance and priorities, third observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -360,7 +350,6 @@ Tolerance but no priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -409,7 +398,6 @@ Seed time inside observation time range (should pick preceding observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -435,7 +423,6 @@ Seed time inside observation time range (should pick following observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -461,7 +448,6 @@ Seed time midway between two observations (should pick following observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -487,7 +473,6 @@ Seed time at earliest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -513,7 +498,6 @@ Seed time before earliest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -539,7 +523,6 @@ Seed time at latest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -565,7 +548,6 @@ Seed time after latest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
@@ -591,7 +573,6 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -647,7 +628,6 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [0, 0, 0,   0, 0, 0,
@@ -710,7 +690,6 @@ Records are single obs, priority variable:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1, 1 ]
@@ -750,7 +729,6 @@ Records are single obs, no priority variable:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1, 1 ]
@@ -787,7 +765,6 @@ Records are single obs, no priority variable, category variable set to category:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]
@@ -828,7 +805,6 @@ Records are single obs, priority variable, category variable set to category:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]

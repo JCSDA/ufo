@@ -11,6 +11,7 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: QNHtoQFEpressure
+    UseValidDataOnly: false
   compareVariables:                 # test output matches precalculated values
     - reference:
         name: Pstation@TestReference

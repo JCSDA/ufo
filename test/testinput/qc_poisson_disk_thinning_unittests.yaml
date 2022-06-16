@@ -10,7 +10,6 @@ No thinning:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out1.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -28,7 +27,6 @@ Horizontal thinning, min spacing smaller than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out2.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 999
     exclusion_volume_shape: ellipsoid
@@ -54,7 +52,6 @@ Horizontal thinning, min spacing larger than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out3.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
     exclusion_volume_shape: ellipsoid
@@ -81,7 +78,6 @@ Vertical thinning, min spacing smaller than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out4.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 9999
     exclusion_volume_shape: ellipsoid
@@ -108,7 +104,6 @@ Vertical thinning, min spacing larger than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out5.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
     exclusion_volume_shape: ellipsoid
@@ -135,7 +130,6 @@ Vertical thinning, where clause:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out6.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
     exclusion_volume_shape: ellipsoid
@@ -163,7 +157,6 @@ Time thinning, min spacing equal to nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out7.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_time_spacing: PT01H
     exclusion_volume_shape: ellipsoid
@@ -190,7 +183,6 @@ Time thinning, min spacing larger than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out8.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_time_spacing: PT01H01S
     exclusion_volume_shape: ellipsoid
@@ -217,7 +209,6 @@ Horizontal and vertical thinning, min spacing larger than nearest neighbor spaci
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out9.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
     min_vertical_spacing: 10001
@@ -245,7 +236,6 @@ Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out10.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
     min_time_spacing: PT01H01S
@@ -273,7 +263,6 @@ Vertical and time thinning, min spacing larger than nearest neighbor spacing:
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out11.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
     min_time_spacing: PT01H01S
@@ -301,7 +290,6 @@ Horizontal, vertical and time thinning, min spacing larger than nearest neighbor
 #   obsdataout:
 #     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out12.nc4
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
     min_vertical_spacing: 10001
@@ -326,7 +314,6 @@ Priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0,  0,  0 ]
@@ -353,7 +340,6 @@ Int-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0,  0,  0,  0 ]
@@ -380,7 +366,6 @@ String-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0,  0,  0,  0 ]
@@ -407,7 +392,6 @@ Variable min spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
@@ -436,7 +420,6 @@ Variable min spacings, shuffling:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
@@ -466,7 +449,6 @@ Cylindrical exclusion volumes:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  1,  2,  3,  4 ]
@@ -491,7 +473,6 @@ Ellipsoidal exclusion volumes:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  1,  2,  3,  4 ]
@@ -516,7 +497,6 @@ Incorrectly ordered min horizontal spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0 ]
@@ -542,7 +522,6 @@ Incorrectly ordered min vertical spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0 ]
@@ -568,7 +547,6 @@ Incorrectly ordered min time spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    observed variables: [air_temperature]
     generate:
       list:
         lats: [ 0,  0,  0 ]

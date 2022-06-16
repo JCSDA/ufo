@@ -4,7 +4,6 @@ Two records, input true everywhere:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -27,7 +26,6 @@ Two records, input true at earliest datetime in each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -50,7 +48,6 @@ Two records, input true at latest datetime in each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -73,7 +70,6 @@ Two records, input true at earliest datetime in each, dateTimes out of order:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -96,7 +92,6 @@ Two records, input true at latest datetime in each, dateTimes out of order:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -119,7 +114,6 @@ Two records, missing dateTime at start of each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -142,7 +136,6 @@ Two records, all dateTimes missing:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -165,7 +158,6 @@ Two records, no grouping:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -187,7 +179,6 @@ Two records, input true everywhere, air_temperature missing at first location in
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -211,7 +202,6 @@ Two records, input true everywhere, air_temperature missing at first two locatio
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -235,7 +225,6 @@ Two records, input true everywhere, air_temperature missing everywhere, retain i
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -258,7 +247,6 @@ Two records, input true everywhere, air_temperature missing everywhere, eastward
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]
@@ -281,7 +269,6 @@ Two records, input true everywhere, dateTimes out of order, air_temperature miss
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    observed variables: [air_temperature, eastward_wind]
     generate:
       list:
         lats: [ 0, 0, 0, 1, 1, 1 ]

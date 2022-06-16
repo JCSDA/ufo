@@ -84,11 +84,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
-
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
 
   std::string test_hofx = parameters_.test_hofx.value();
-  Variables varhofx(filtervars_, test_hofx);
+  Variables varhofx(filtervars, test_hofx);
 
 // Get function absolute threshold
   if (parameters_.functionAbsoluteThreshold.value()) {
@@ -118,7 +117,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   } else {
-    Variables varbias(filtervars_, "ObsBiasData");
+    Variables varbias(filtervars, "ObsBiasData");
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x) (including bias correction)
