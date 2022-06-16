@@ -50,8 +50,25 @@ void testObsBiasReadWrite() {
     biasparams.validateAndDeserialize(biasconf);
 
     // setup ObsBias parameters with input file == output file from the original yaml
+    // Need a temporary workaround for issues that surface where multiple file handles
+    // are pointing to the same file. This situation needs to be avoided, but will take
+    // some refactoring to accomplish. For the mean time we can keep test refernce files
+    // of the expected output and use those for the read and construct calls below which
+    // will keep the number of file handles at one per file.
+    //
+    // The idea is to name the test reference file the same as the output file
+    // for the write call below, but keep the test reference file in
+    // "Data/ufo/testinput_tier_1" while the output file lives in "Data".
+    //
+    // TODO(SRH) once the refactoring is completed for avoiding the "multiple file handles
+    // pointing to the same file" issue, we can restore this code to directly read
+    // the file created by the write call below.
     eckit::LocalConfiguration biasconf_forread = biasconf;
-    biasconf_forread.set("input file", biasconf.getString("output file"));
+    std::string readTestRefFile(biasconf.getString("output file"));
+    // replace the prefix "Data" with "Data/ufo/testinput_tier_1"
+    auto pos = readTestRefFile.find("Data/");
+    readTestRefFile.replace(pos, 4, "Data/ufo/testinput_tier_1");
+    biasconf_forread.set("input file", readTestRefFile);
     ObsBiasParameters biasparams_forread;
     biasparams_forread.validateAndDeserialize(biasconf_forread);
 

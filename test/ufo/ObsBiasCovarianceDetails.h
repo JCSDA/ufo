@@ -94,9 +94,25 @@ void testObsBiasCovarianceDetails() {
     }
 
     if (biasconf.has("covariance.output file")) {
+      // Need a temporary workaround for issues that surface where multiple file handles
+      // are pointing to the same file. This situation needs to be avoided, but will take
+      // some refactoring to accomplish. For the mean time we can keep test refernce files
+      // of the expected output and use those for the construct call below which
+      // will keep the number of file handles at one per file.
+      //
+      // The idea is to name the test reference file the same as the output file
+      // for the write call below, but keep the test reference file in
+      // "Data/ufo/testinput_tier_1" while the output file lives in "Data".
+      //
+      // TODO(SRH) once the refactoring is completed for avoiding the "multiple file handles
+      // pointing to the same file" issue, we can restore this code to directly read
+      // the file created by the write call below.
       std::string output_file = biasconf.getString("covariance.output file");
       ybias_cov.write(biasparams);
 
+      // replace the prefix "Data" with "Data/ufo/testinput_tier_1"
+      auto pos = output_file.find("Data/");
+      output_file.replace(pos, 4, "Data/ufo/testinput_tier_1");
       biasconf.set("covariance.prior.input file", output_file);
       biasparams.validateAndDeserialize(biasconf);
       ObsBiasCovariance ybias_cov2(odb, biasparams);
