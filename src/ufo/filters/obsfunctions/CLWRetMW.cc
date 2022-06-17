@@ -32,6 +32,7 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
   ASSERT(options_.varGroup.value().size() == 1 || options_.varGroup.value().size() == 2);
   ASSERT((options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) ||
          (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) ||
+         (options_.ch89v.value() != boost::none && options_.ch166v.value() != boost::none) ||
          (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none  &&
           options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none));
 
@@ -70,6 +71,23 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
 
     // Include list of required data from GeoVaLs
     invars_ += Variable("water_area_fraction@GeoVaLs");
+
+  } else if (options_.ch89v.value() != boost::none && options_.ch166v.value() != boost::none) {
+    // For cloud index used in GSI all-sky assimilation of MHS data.
+    // Get channels for CLW retrieval from options
+    const std::vector<int> channels = {options_.ch89v.value().get(), options_.ch166v.value().get()};
+
+    ASSERT(options_.ch89v.value().get() != 0 && options_.ch166v.value().get() != 0 &&
+           channels.size() == 2);
+    // Include list of required data from ObsSpace
+    for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
+      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+    }
+    // Get ObsBiasData for "brightness_temperature_assuming_clear_sky"
+    invars_ += Variable("brightness_temperature@ObsBiasData", channels);
+    // Include list of required data from ObsDiag
+    invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
+
   } else if (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none &&
              options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none) {
     const std::vector<int> channels = {options_.ch18v.value().get(), options_.ch18h.value().get(),
@@ -200,6 +218,46 @@ void CLWRetMW::compute(const ObsFilterData & in,
       // Compute cloud index
       CIret_37v37h_diff(bt_clr_37v, bt_clr_37h, water_frac, bt37v, bt37h, out[igrp]);
     }
+  // -------------------- MHS ---------------------------
+  } else if (options_.ch89v.value() != boost::none && options_.ch166v.value() != boost::none) {
+    const std::vector<int> channels = {options_.ch89v.value().get(), options_.ch166v.value().get()};
+    // Indices of data at channeles 89V and 166V in the above array "channels"
+    const int jch89v = 0;
+    const int jch166v = 1;
+    std::vector<float> bt_clr_89v(nlocs), bt_clr_166v(nlocs);
+    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+           [jch89v], bt_clr_89v);
+    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+           [jch166v], bt_clr_166v);
+    std::vector<float> bias89v(nlocs), bias166v(nlocs);
+    in.get(Variable("brightness_temperature@ObsBiasData", channels) [jch89v], bias89v);
+    in.get(Variable("brightness_temperature@ObsBiasData", channels) [jch166v], bias166v);
+//  Add bias correction to "brightness_temperature_assuming_clear_sky"
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      bt_clr_89v[iloc] = bt_clr_89v[iloc] + bias89v[iloc];
+      bt_clr_166v[iloc] = bt_clr_166v[iloc] + bias166v[iloc];
+    }
+    // Calculate retrieved cloud liquid water
+    std::vector<float> bt89v(nlocs), bt166v(nlocs);
+    for (size_t igrp = 0; igrp < ngrps; ++igrp) {
+      // Get data based on group type
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch89v], bt89v);
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch166v], bt166v);
+      // Get bias based on group type
+      if (options_.addBias.value() == vargrp[igrp]) {
+        // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
+        // correction
+        if (options_.addBias.value() == "ObsValue") {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt89v[iloc] = bt89v[iloc] - bias89v[iloc];
+            bt166v[iloc] = bt166v[iloc] - bias166v[iloc];
+          }
+        }
+      }
+
+      // Compute cloud index
+      mhs_si(bt_clr_89v, bt_clr_166v, bt89v, bt166v, out[igrp]);
+    }
   // -------------------- amsr2 ---------------------------
   } else if (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none &&
              options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none) {
@@ -310,7 +368,7 @@ void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
   /// \brief Retrieve cloud index from GMI 37V and 37H channels.
   ///
   /// GMI cloud index: 1.0 - (Tb_37v - Tb_37h)/(Tb_37v_clr - Tb_37h_clr), in which
-  /// Tb_37v_clr and Tb_37h_clr for calculated Tb at 37 V and 37H GHz from module values
+  /// Tb_37v_clr and Tb_37h_clr for calculated Tb at 37V and 37H GHz from model values
   /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
   ///
   for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
@@ -324,6 +382,26 @@ void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
     } else {
       out[iloc] = getBadValue();
     }
+  }
+}
+// -----------------------------------------------------------------------------
+
+void CLWRetMW::mhs_si(const std::vector<float> & bt_clr_89v,
+                                         const std::vector<float> & bt_clr_166v,
+                                         const std::vector<float> & bt89v,
+                                         const std::vector<float> & bt166v,
+                                         std::vector<float> & out) {
+  ///
+  /// \brief Retrieve cloud index from MHS 89V and 166V channels.
+  ///
+  /// MHS scattering index: mhs_si = (bt89v - bt166v) - (bt_clr_89v - bt_clr_166v)
+  /// in which bt_clr_89v and bt_clr_166v for calculated brightness temperature (Tb) at 89V
+  /// and 166V GHz from model values assuming in clear-sky condition. bt_89v and bt_166v
+  /// are Tb observations at 89V and 166V GHz.
+  ///
+  for (size_t iloc = 0; iloc < bt_clr_89v.size(); ++iloc) {
+    out[iloc] = (bt89v[iloc] - bt166v[iloc]) - (bt_clr_89v[iloc] - bt_clr_166v[iloc]);
+    out[iloc] = std::max(0.f, out[iloc]);
   }
 }
 

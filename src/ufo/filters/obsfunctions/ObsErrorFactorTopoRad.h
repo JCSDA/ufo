@@ -51,6 +51,8 @@ class ObsErrorFactorTopoRadParameters : public oops::Parameters {
 /// AMSU-A:
 ///          EIF = SQRT [ 1 / ( 2000 / H ) ] for 2000 < H < 4000 and Channels 1-6,15
 ///          EIF = SQRT [ 1 / ( 4000 / H ) ] for H > 4000 and Channel 7
+/// MHS:
+//           EIF = SQRT [ 1 / ( 2000 / H ) ] for H > 2000
 ///
 class ObsErrorFactorTopoRad : public ObsFunctionBase<float> {
  public:
