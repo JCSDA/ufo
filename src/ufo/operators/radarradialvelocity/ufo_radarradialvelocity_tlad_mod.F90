@@ -54,7 +54,7 @@ subroutine radarradialvelocity_tlad_setup_(self, yaml_conf)
   if( yaml_conf%has("VertCoord") ) then
       call yaml_conf%get_or_die("VertCoord",coord_name)
       self%v_coord = coord_name
-      if( trim(self%v_coord) .ne. var_z ) then
+      if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_zm ) then
         call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
       endif
   else  ! default
@@ -162,8 +162,8 @@ subroutine radarradialvelocity_simobs_tl_(self, geovals, obss, nvars, nlocs, hof
 
   do ivar = 1, nvars
     do iobs=1,nlocs
-      hofx(ivar,iobs) = vfields(1,iobs)*self%cosazm_costilt(iobs) &
-                      + vfields(2,iobs)*self%sinazm_costilt(iobs)
+      hofx(ivar,iobs) = vfields(1,iobs)*self%sinazm_costilt(iobs) &
+                      + vfields(2,iobs)*self%cosazm_costilt(iobs)
     enddo
   end do
 
@@ -198,8 +198,10 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
     do iobs=1,nlocs
      ! no vertical velocity and terminal velocity in GSI rw observer, it can add
      ! in future after acceptance test
-      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
-      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
+     if (hofx(ivar,iobs) .ne. missing) then
+      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
+      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
+     end if
     enddo
   end do
 

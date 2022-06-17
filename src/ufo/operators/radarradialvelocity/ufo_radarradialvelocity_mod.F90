@@ -135,8 +135,8 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
   vterminal=0.0
   do ivar = 1, nvars
     do iobs=1,nlocs
-      hofx(ivar,iobs) = vfields(1,iobs)*cosazm_costilt(iobs) &
-                      + vfields(2,iobs)*sinazm_costilt(iobs) &
+      hofx(ivar,iobs) = vfields(1,iobs)*sinazm_costilt(iobs) &
+                      + vfields(2,iobs)*cosazm_costilt(iobs) &
                       + (vfields(3,iobs)-vterminal(iobs))*sintilt(iobs)
     enddo
   end do
