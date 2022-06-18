@@ -88,7 +88,7 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
   }
 
   // Inter-channel consistency check
-  const bool &passive_bc = options_.passiveBC.value().get();
+  const bool passive_bc = options_.passiveBC.value();
   bool channel_passive = false;
   size_t ncheck = 6;
   if (inst == "atms") ncheck = 7;
