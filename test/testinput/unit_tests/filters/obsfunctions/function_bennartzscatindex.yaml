@@ -8,8 +8,8 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: 16, 17
-    obsdataout:
-      obsfile: Data/atms_n20_obs_20191230T0000_rttov_BennartzScatIndex_out.nc4
+#    obsdataout:
+#      obsfile: Data/atms_n20_obs_20191230T0000_rttov_BennartzScatIndex_out.nc4
   obs function:
     name: BennartzScatIndex@ObsFunction
     options:

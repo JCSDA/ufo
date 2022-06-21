@@ -12,7 +12,8 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: ${obsdir}/gnssro_obs_2020070100_f.nc4
+      #obsfile: ${obsdir}/gnssro_obs_2020070100_f.nc4
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "impact_height"
@@ -21,11 +22,12 @@ observations:
 #      obsfile: ${outputdir}/gnssro_bndnbam_2020070100_f_output.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: ${geovaldir}/gnssro_geovals_2020070100_f.nc4
+    #filename: ${geovaldir}/gnssro_geovals_2020070100_f.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4
   obs filters:
   - filter: Domain Check
     filter variables:
-    - name: [bending_angle]
+    - name: bending_angle
     where:
     - variable:
         name: impact_height@MetaData
@@ -33,7 +35,7 @@ observations:
       maxvalue: 50000
   - filter: Bounds Check
     filter variables:
-    - name: [bending_angle]
+    - name: bending_angle
     where:
     - variable:
         name: occulting_sat_id@MetaData
@@ -47,6 +49,6 @@ observations:
     errmodel: NBAM
   - filter: Background Check RONBAM
     filter variables:
-    - name: [bending_angle]
+    - name: bending_angle
     threshold: 3
-  passedBenchmark:  158651
+  passedBenchmark:  0   # for 2020070100 full test, number is 158651
