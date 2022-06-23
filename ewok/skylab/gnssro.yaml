@@ -1,6 +1,6 @@
 obs space:
-  name: gnssrobndnbam
-  _source: ncdiag
+  name: gnssro
+  _source: gdas
   obsdatain:
     obsgrouping:
       group variables: [ 'record_number' ]
@@ -17,7 +17,7 @@ obs operator:
 obs filters:
 - filter: Domain Check
   filter variables:
-  - name: [bending_angle]
+  - name: bending_angle
   where:
   - variable:
       name: impact_height@MetaData
@@ -25,7 +25,7 @@ obs filters:
     maxvalue: 50000
 - filter: Bounds Check
   filter variables:
-  - name: [bending_angle]
+  - name: bending_angle
   where:
   - variable:
       name: occulting_sat_id@MetaData
@@ -39,5 +39,5 @@ obs filters:
   errmodel: NBAM
 - filter: Background Check RONBAM
   filter variables:
-  - name: [bending_angle]
+  - name: bending_angle
   threshold: 3
