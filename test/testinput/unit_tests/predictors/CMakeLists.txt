@@ -6,6 +6,7 @@
 # Unit tests for predictors
 
 #
+if( crtm_FOUND )
 ufo_add_test( NAME    test_ufo_amsua_crtm_bc_channelnobc_geos
               TIER    1
               ECBUILD
@@ -49,6 +50,7 @@ ufo_add_test( NAME    test_ufo_amsua_crtm_bc_tlad
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff
               TIER    1
@@ -182,6 +184,7 @@ ufo_add_test( NAME    test_ufo_satellite_selector_predictor
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+if( crtm_FOUND )
 ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_bc
               TIER    1
               ECBUILD
@@ -203,6 +206,7 @@ ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_nbc
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_thickness_predictor
               TIER    1
