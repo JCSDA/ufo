@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
-#define UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
+#ifndef UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEPTLAD_H_
+#define UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEPTLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -15,7 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/gnssro/RefNBAM/ObsGnssroRefTLAD.interface.h"
+#include "ufo/operators/gnssro/RefNCEP/ObsGnssroRefNCEPTLAD.interface.h"
 
 // Forward declarations
 namespace eckit {
@@ -31,15 +31,15 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-// -----------------------------------------------------------------------------
-/// GnssroRef observation operator
-class ObsGnssroRefTLAD : public LinearObsOperatorBase,
-                          private util::ObjectCounter<ObsGnssroRefTLAD> {
+// -------------------------------------------------------------------------
+/// GnssroRefNCEP observation operator
+class ObsGnssroRefNCEPTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsGnssroRefNCEPTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroRefTLAD";}
+  static const std::string classname() {return "ufo::ObsGnssroRefNCEPTLAD";}
 
-  ObsGnssroRefTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroRefTLAD();
+  ObsGnssroRefNCEPTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGnssroRefNCEPTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -49,16 +49,16 @@ class ObsGnssroRefTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOperGnssroRef_;}
-  const int & toFortran() const {return keyOperGnssroRef_;}
+  int & toFortran() {return keyOperGnssroRefNCEP_;}
+  const int & toFortran() const {return keyOperGnssroRefNCEP_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperGnssroRef_;
+  F90hop keyOperGnssroRefNCEP_;
   std::unique_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREFTLAD_H_
+#endif  // UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEPTLAD_H_

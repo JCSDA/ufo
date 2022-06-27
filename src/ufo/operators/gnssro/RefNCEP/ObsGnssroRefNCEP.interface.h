@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_INTERFACE_H_
-#define UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_INTERFACE_H_
+#ifndef UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_INTERFACE_H_
+#define UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
@@ -23,13 +23,13 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Gnssro refractivity observation operator
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_ref_setup_f90(F90hop &, const eckit::Configuration &);
-  void ufo_gnssro_ref_delete_f90(F90hop &);
-  void ufo_gnssro_ref_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_gnssro_refncep_setup_f90(F90hop &, const eckit::Configuration &);
+  void ufo_gnssro_refncep_delete_f90(F90hop &);
+  void ufo_gnssro_refncep_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_INTERFACE_H_
+#endif  // UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_INTERFACE_H_

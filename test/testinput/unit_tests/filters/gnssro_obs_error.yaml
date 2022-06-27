@@ -61,7 +61,7 @@ observations:
     errmodel: NRL
   passedBenchmark: 668
 - obs operator:
-   name: GnssroRef
+   name: GnssroRefNCEP
    obs options:
   obs space:
    name: GnssroRef
@@ -76,5 +76,5 @@ observations:
   - filter: ROobserror
     filter variables:
     - name:  refractivity
-    errmodel: NBAM
+    errmodel: NCEP
   passedBenchmark: 20

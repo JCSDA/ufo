@@ -10,7 +10,7 @@ use fckit_log_module, only: fckit_log
 
 private
 public :: bending_angle_obserr_ECMWF, bending_angle_obserr_NRL
-public :: bending_angle_obserr_NBAM, refractivity_obserr_NBAM
+public :: bending_angle_obserr_NBAM, refractivity_obserr_NCEP
 public :: gnssro_obserr_avtemp, gnssro_obserr_latitude
 
 contains
@@ -160,7 +160,7 @@ end do
 end subroutine bending_angle_obserr_NBAM
 !---------------------------------------
 
-subroutine refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+subroutine refractivity_obserr_NCEP(obsLat, obsZ, nobs, obsErr, QCflags,missing)
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
@@ -189,7 +189,7 @@ do i = 1, nobs
   end if
 end do
 
-end subroutine refractivity_obserr_NBAM
+end subroutine refractivity_obserr_NCEP
 
 
 subroutine gnssro_obserr_avtemp(nobs, n_horiz, rmatrix_filename, obsSatid, obsOrigC, nlevs, &

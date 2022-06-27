@@ -15,7 +15,6 @@ public   :: gnssro_conf
 public   :: gnssro_conf_setup
 
 type gnssro_conf
-  integer(c_int)     :: ro_top_meter
   integer(c_int)     :: use_compress
   integer(c_int)     :: n_horiz
   integer(c_int)     :: sr_steps
@@ -42,8 +41,6 @@ type(fckit_configuration), intent(in) :: f_conf
 
 character(len=:), allocatable :: str
 
-roconf%ro_top_meter = 30000
-if (f_conf%has("ro_top_meter")) call f_conf%get_or_die("ro_top_meter",roconf%ro_top_meter)
 roconf%use_compress = 1
 if (f_conf%has("use_compress")) call f_conf%get_or_die("use_compress",roconf%use_compress)
 roconf%n_horiz = n_horiz_2d

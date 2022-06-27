@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_H_
-#define UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_H_
+#ifndef UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_H_
+#define UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_H_
 
 #include <memory>
 #include <ostream>
@@ -15,7 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/gnssro/RefNBAM/ObsGnssroRef.interface.h"
+#include "ufo/operators/gnssro/RefNCEP/ObsGnssroRefNCEP.interface.h"
 
 namespace eckit {
   class Configuration;
@@ -32,14 +32,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-/// GnssroRef observation operator
-class ObsGnssroRef : public ObsOperatorBase,
-                      private util::ObjectCounter<ObsGnssroRef> {
+/// GnssroRefNCEP observation operator
+class ObsGnssroRefNCEP : public ObsOperatorBase,
+                      private util::ObjectCounter<ObsGnssroRefNCEP> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroRef";}
+  static const std::string classname() {return "ufo::ObsGnssroRefNCEP";}
 
-  ObsGnssroRef(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroRef();
+  ObsGnssroRefNCEP(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGnssroRefNCEP();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
@@ -47,12 +47,12 @@ class ObsGnssroRef : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOperGnssroRef_;}
-  const int & toFortran() const {return keyOperGnssroRef_;}
+  int & toFortran() {return keyOperGnssroRefNCEP_;}
+  const int & toFortran() const {return keyOperGnssroRefNCEP_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperGnssroRef_;
+  F90hop keyOperGnssroRefNCEP_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
@@ -61,4 +61,4 @@ class ObsGnssroRef : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_OPERATORS_GNSSRO_REFNBAM_OBSGNSSROREF_H_
+#endif  // UFO_OPERATORS_GNSSRO_REFNCEP_OBSGNSSROREFNCEP_H_

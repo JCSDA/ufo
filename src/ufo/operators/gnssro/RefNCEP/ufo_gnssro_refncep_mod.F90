@@ -5,7 +5,7 @@
 
 !> Fortran module to handle gnssro refractivity observations
 
-module ufo_gnssro_ref_mod
+module ufo_gnssro_refncep_mod
   use fckit_configuration_module, only: fckit_configuration 
   use kinds
   use ufo_vars_mod
@@ -19,38 +19,38 @@ module ufo_gnssro_ref_mod
   use ufo_constants_mod
 
   implicit none
-  public             :: ufo_gnssro_Ref
+  public             :: ufo_gnssro_RefNCEP
   private
 
   !> Fortran derived type for gnssro trajectory
-  type, extends(ufo_basis) :: ufo_gnssro_Ref
+  type, extends(ufo_basis) :: ufo_gnssro_RefNCEP
   private
   type(gnssro_conf) :: roconf
   contains
-   procedure :: setup     => ufo_gnssro_ref_setup
-   procedure :: simobs    => ufo_gnssro_ref_simobs
-  end type ufo_gnssro_Ref
+   procedure :: setup     => ufo_gnssro_refncep_setup
+   procedure :: simobs    => ufo_gnssro_refncep_simobs
+  end type ufo_gnssro_RefNCEP
 
 contains
 ! ------------------------------------------------------------------------------
-   subroutine ufo_gnssro_ref_setup(self, f_conf)
+   subroutine ufo_gnssro_refncep_setup(self, f_conf)
     implicit none
-    class(ufo_gnssro_Ref), intent(inout)  :: self
-    type(fckit_configuration), intent(in) :: f_conf
+    class(ufo_gnssro_RefNCEP), intent(inout)  :: self
+    type(fckit_configuration), intent(in)     :: f_conf
 
     call gnssro_conf_setup(self%roconf,f_conf)
 
-   end subroutine ufo_gnssro_ref_setup
+   end subroutine ufo_gnssro_refncep_setup
 
-   subroutine ufo_gnssro_ref_simobs(self, geovals, hofx, obss)
+   subroutine ufo_gnssro_refncep_simobs(self, geovals, hofx, obss)
     use gnssro_mod_transform, only: geometric2geop
       implicit none
-      class(ufo_gnssro_Ref), intent(in)          :: self
-      type(ufo_geovals), intent(in)              :: geovals
-      real(kind_real),   intent(inout)           :: hofx(:)
-      type(c_ptr), value,       intent(in)       :: obss
+      class(ufo_gnssro_RefNCEP), intent(in)     :: self
+      type(ufo_geovals),         intent(in)     :: geovals
+      real(kind_real),           intent(inout)  :: hofx(:)
+      type(c_ptr), value,        intent(in)     :: obss
       
-      character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
+      character(len=*), parameter :: myname_="ufo_gnssro_refncep_simobs"
       character(max_string) :: err_msg
       integer           :: iobs,nlocs
       real(kind_real)   :: wf 
@@ -103,11 +103,10 @@ contains
            hofx(iobs)  = refr1 + refr2 + refr3
       enddo
 
-
       ! cleanup 
       deallocate(obsZ)
       deallocate(obsLat)
-    end subroutine ufo_gnssro_ref_simobs
+    end subroutine ufo_gnssro_refncep_simobs
 
 ! ------------------------------------------------------------------------------
-end module ufo_gnssro_ref_mod
+end module ufo_gnssro_refncep_mod

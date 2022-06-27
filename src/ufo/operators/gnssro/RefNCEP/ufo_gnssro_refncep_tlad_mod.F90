@@ -4,8 +4,9 @@
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
 !> Fortran module for gnssro refractivity tangent linear and adjoint
+!> following NCEP's method
 
-module ufo_gnssro_ref_tlad_mod
+module ufo_gnssro_refncep_tlad_mod
   use fckit_configuration_module, only: fckit_configuration 
   use kinds
   use ufo_vars_mod
@@ -21,7 +22,7 @@ module ufo_gnssro_ref_tlad_mod
   use iso_c_binding
 
   !> Fortran derived type for gnssro trajectory
-  type, extends(ufo_basis_tlad) :: ufo_gnssro_Ref_tlad
+  type, extends(ufo_basis_tlad) :: ufo_gnssro_RefNCEP_tlad
    private
      type(gnssro_conf)             :: roconf
      integer                       :: nval, nlocs
@@ -30,34 +31,34 @@ module ufo_gnssro_ref_tlad_mod
      real(kind_real), allocatable  :: jac_t(:), jac_q(:), jac_prs(:)
 
   contains
-    procedure :: setup      => ufo_gnssro_ref_tlad_setup
-    procedure :: delete     => ufo_gnssro_ref_tlad_delete
-    procedure :: settraj    => ufo_gnssro_ref_tlad_settraj
-    procedure :: simobs_tl  => ufo_gnssro_ref_simobs_tl
-    procedure :: simobs_ad  => ufo_gnssro_ref_simobs_ad
-  end type ufo_gnssro_Ref_tlad
+    procedure :: setup      => ufo_gnssro_refncep_tlad_setup
+    procedure :: delete     => ufo_gnssro_refncep_tlad_delete
+    procedure :: settraj    => ufo_gnssro_refncep_tlad_settraj
+    procedure :: simobs_tl  => ufo_gnssro_refncep_simobs_tl
+    procedure :: simobs_ad  => ufo_gnssro_refncep_simobs_ad
+  end type ufo_gnssro_RefNCEP_tlad
 
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_ref_tlad_setup(self, f_conf)
+subroutine ufo_gnssro_refncep_tlad_setup(self, f_conf)
   implicit none
-  class(ufo_gnssro_Ref_tlad), intent(inout) :: self
-  type(fckit_configuration), intent(in)     :: f_conf
+  class(ufo_gnssro_RefNCEP_tlad), intent(inout) :: self
+  type(fckit_configuration),     intent(in)     :: f_conf
 
   call gnssro_conf_setup(self%roconf,f_conf)
 
-end subroutine ufo_gnssro_ref_tlad_setup
+end subroutine ufo_gnssro_refncep_tlad_setup
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_ref_tlad_settraj(self, geovals, obss)
+subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
   use gnssro_mod_transform, only: geometric2geop
       
   implicit none
-  class(ufo_gnssro_Ref_tlad),intent(inout) :: self
-  type(ufo_geovals),         intent(in)    :: geovals
-  type(c_ptr), value,        intent(in)    :: obss
+  class(ufo_gnssro_RefNCEP_tlad),intent(inout) :: self
+  type(ufo_geovals),             intent(in)    :: geovals
+  type(c_ptr), value,            intent(in)    :: obss
       
-  character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_settraj"
+  character(len=*), parameter :: myname_="ufo_gnssro_refncep_tlad_settraj"
       
   type(ufo_geoval),    pointer :: t,q,prs,gph
   real(kind_real), allocatable :: obsZ(:), obsLat(:)  ! observation vector
@@ -127,18 +128,18 @@ subroutine ufo_gnssro_ref_tlad_settraj(self, geovals, obss)
   deallocate(obsZ)
   deallocate(obsLat)
 
-end subroutine ufo_gnssro_ref_tlad_settraj
+end subroutine ufo_gnssro_refncep_tlad_settraj
     
 ! ------------------------------------------------------------------------------
     
-subroutine ufo_gnssro_ref_simobs_tl(self, geovals, hofx, obss)
+subroutine ufo_gnssro_refncep_simobs_tl(self, geovals, hofx, obss)
   implicit none
-  class(ufo_gnssro_Ref_tlad), intent(in) :: self
-  type(ufo_geovals),      intent(in)     :: geovals
-  real(kind_real),        intent(inout)  :: hofx(:)
-  type(c_ptr), value,     intent(in)     :: obss
+  class(ufo_gnssro_RefNCEP_tlad), intent(in)     :: self
+  type(ufo_geovals),              intent(in)     :: geovals
+  real(kind_real),                intent(inout)  :: hofx(:)
+  type(c_ptr), value,             intent(in)     :: obss
      
-  character(len=*), parameter :: myname="ufo_gnssro_ref_tlad_tl"
+  character(len=*), parameter :: myname="ufo_gnssro_refncep_tlad_tl"
   character(max_string)       :: err_msg
       
   type(ufo_geoval), pointer :: t_tl, q_tl, prs_tl
@@ -170,17 +171,17 @@ subroutine ufo_gnssro_ref_simobs_tl(self, geovals, hofx, obss)
      hofx(iobs)  =  self%jac_t(iobs)*gesT_tl  + self%jac_q(iobs)*gesQ_tl + self%jac_prs(iobs)*gesP_tl
   enddo
     
-end subroutine ufo_gnssro_ref_simobs_tl
+end subroutine ufo_gnssro_refncep_simobs_tl
 ! ------------------------------------------------------------------------------
     
-subroutine ufo_gnssro_ref_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_gnssro_refncep_simobs_ad(self, geovals, hofx, obss)
   implicit none
-  class(ufo_gnssro_Ref_tlad), intent(in)   :: self
-  type(ufo_geovals),         intent(inout) :: geovals
-  real(kind_real),           intent(in)    :: hofx(:)
-  type(c_ptr), value,        intent(in)    :: obss
+  class(ufo_gnssro_RefNCEP_tlad), intent(in)    :: self
+  type(ufo_geovals),              intent(inout) :: geovals
+  real(kind_real),                intent(in)    :: hofx(:)
+  type(c_ptr), value,             intent(in)    :: obss
 
-  character(len=*), parameter :: myname="ufo_gnssro_ref_tlad_ad"
+  character(len=*), parameter :: myname="ufo_gnssro_refncep_tlad_ad"
   character(max_string)       :: err_msg
   type(ufo_geoval), pointer :: t_d, q_d, prs_d
   real(kind_real)           :: gesT_d, gesQ_d, gesP_d
@@ -222,13 +223,13 @@ subroutine ufo_gnssro_ref_simobs_ad(self, geovals, hofx, obss)
 
   enddo
 
-end subroutine ufo_gnssro_ref_simobs_ad
+end subroutine ufo_gnssro_refncep_simobs_ad
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_gnssro_ref_tlad_delete(self)
+subroutine ufo_gnssro_refncep_tlad_delete(self)
   implicit none
-  class(ufo_gnssro_Ref_tlad), intent(inout) :: self
-  character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_delete"
+  class(ufo_gnssro_RefNCEP_tlad), intent(inout) :: self
+  character(len=*), parameter :: myname_="ufo_gnssro_refncep_tlad_delete"
       
   self%nval = 0
   if (allocated(self%wi))    deallocate(self%wi)
@@ -237,8 +238,8 @@ subroutine ufo_gnssro_ref_tlad_delete(self)
   if (allocated(self%jac_q)) deallocate(self%jac_q)
   if (allocated(self%jac_prs)) deallocate(self%jac_prs)
   self%ltraj = .false.
-end subroutine ufo_gnssro_ref_tlad_delete
+end subroutine ufo_gnssro_refncep_tlad_delete
     
 ! ------------------------------------------------------------------------------
 
-end module ufo_gnssro_ref_tlad_mod
+end module ufo_gnssro_refncep_tlad_mod
