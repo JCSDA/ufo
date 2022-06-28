@@ -8,7 +8,7 @@
 
 if( crtm_FOUND )
     ufo_add_test( NAME    test_ufo_amsr2_clw_ret
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_clw_ret.yaml"
@@ -99,7 +99,7 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_airs
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_function_clouddetect_cris
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clouddetect_cris.yaml"
@@ -110,7 +110,7 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_cris
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_function_clouddetect_iasi
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clouddetect_iasi.yaml"
@@ -508,7 +508,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustWindVector
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_function_nsstret
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_nsstret.yaml"
@@ -662,7 +662,7 @@ ufo_add_test( NAME    test_ufo_function_reperr
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_function_satwind_indiv_errors
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_satwind_indiv_errors.yaml"

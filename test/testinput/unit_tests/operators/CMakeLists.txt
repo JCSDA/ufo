@@ -150,7 +150,7 @@ ufo_add_test( NAME    test_ufo_opr_categorical
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_linopr_categorical
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/categorical.yaml"
@@ -337,7 +337,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_linopr_gnssrobndnbam
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam.yaml"
@@ -1261,7 +1261,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_linopr_amsr2_crtm
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_crtm.yaml"
@@ -1393,7 +1393,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_linopr_gmi_crtm
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_crtm.yaml"
@@ -1404,7 +1404,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_opr_gmi_scan_angles
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_scan_angles.yaml"
@@ -1415,7 +1415,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_linopr_gmi_scan_angles
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_scan_angles.yaml"
@@ -1459,7 +1459,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_linopr_iasi_crtm
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtm.yaml"
@@ -1558,7 +1558,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_jacobian
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_jacobian.yaml"
@@ -1624,7 +1624,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_jacobian
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_jacobian.yaml"
@@ -1635,7 +1635,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_optics
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_optics.yaml"
@@ -1646,7 +1646,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_jacobian
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_jacobian.yaml"
@@ -1657,7 +1657,7 @@ if( crtm_FOUND )
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_optics
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_optics.yaml"
@@ -1766,7 +1766,7 @@ if( ${rttov_FOUND} )
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance.yaml"

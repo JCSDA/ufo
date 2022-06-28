@@ -483,7 +483,7 @@ ufo_add_test( NAME    test_ufo_qc_modelbestfitpressure
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 ufo_add_test( NAME    test_ufo_qc_modelobthreshold
-              TIER    1
+              TIER    2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_modelobthreshold.yaml"
@@ -783,7 +783,7 @@ ufo_add_test( NAME    test_ufo_iasi_qc
 
 if( crtm_FOUND )
     ufo_add_test( NAME    test_ufo_airs_qc_filters
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/airs_qc_filters.yaml"
@@ -805,7 +805,7 @@ if( crtm_FOUND )
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_amsr2_qc_halo
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_qc_halo.yaml"
@@ -904,7 +904,7 @@ if( crtm_FOUND )
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_cris_qc_filters
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris_qc_filters.yaml"
@@ -937,7 +937,7 @@ if( crtm_FOUND )
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_iasi_qc_filters
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_qc_filters.yaml"
@@ -985,7 +985,7 @@ if( ${rttov_FOUND} )
                   TEST_DEPENDS ufo_get_ufo_test_data )
 #
     ufo_add_test( NAME    test_ufo_atms_rttov_ops_qc_rttovonedvarcheck
-                  TIER    1
+                  TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
