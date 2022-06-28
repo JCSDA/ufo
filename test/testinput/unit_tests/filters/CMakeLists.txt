@@ -75,11 +75,11 @@ ufo_add_test( NAME    test_ufo_gnssrobendmetoffice_obserror
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_gnssrobndnbam_backgroundcheck_qc
+ufo_add_test( NAME    test_ufo_gnssrobndnbam_qc
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_backgroundcheck_qc.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_qc.yaml"
               MPI     1
               LIBS    ufo
               LABELS  filters
@@ -97,34 +97,12 @@ ufo_add_test( NAME    test_ufo_gnssrobndnbam_qc_action_obserr_inflation
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_gnssro_domain_check
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_domain_check.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  filters
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
-#
 ufo_add_test( NAME    test_ufo_gnssro_obs_error
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_obs_error.yaml"
               MPI     1
-              LIBS    ufo
-              LABELS  filters
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
-#
-ufo_add_test( NAME    test_ufo_gnssro_obs_error_halo
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_obs_error_halo.yaml"
-              MPI     4
               LIBS    ufo
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -1028,17 +1006,6 @@ if( ${ropp-ufo_FOUND} )
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndropp1d_qc.yaml"
-                  MPI     1
-                  LIBS    ufo
-                  LABELS  filters
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
-#
-    ufo_add_test( NAME    test_ufo_gnssro_obs_error_ropp
-                  TIER    1
-                  ECBUILD
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_obs_error_ropp.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  filters
