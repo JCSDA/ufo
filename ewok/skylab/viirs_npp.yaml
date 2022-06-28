@@ -7,6 +7,7 @@ obs space:
   name: viirs_npp_aod
   _source: noaa 
   simulated variables: [aerosol_optical_depth]
+  observed variables: [aerosol_optical_depth]
   channels: 4
 obs operator:
   name: AodCRTM
