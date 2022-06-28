@@ -1,9 +1,8 @@
 obs space:
   name: snod
   _source: noaa
-  distribution:
-    name: InefficientDistribution
   simulated variables: [totalSnowDepth]
+monitoring only: true
 obs operator:
   name: Identity
 obs filters:

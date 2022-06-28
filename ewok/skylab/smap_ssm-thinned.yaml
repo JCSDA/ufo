@@ -1,9 +1,8 @@
 obs space:
-  name: smap_smap-thinned
+  name: smap_ssm-thinned
   _source: nasa
-  distribution:
-    name: InefficientDistribution
   simulated variables: [soilMoistureVolumetric]
+monitoring only: true
 obs operator:
   name: Identity
 obs filters:
