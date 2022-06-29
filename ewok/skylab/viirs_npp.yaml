@@ -4,7 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 obs space:
-  name: viirs_npp_aod
+  name: viirs_npp_aod-thinned # thinned observations 10%
+  #name: viirs_npp_aod # full res observations can be quite slow
   _source: noaa 
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]
