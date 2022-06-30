@@ -61,25 +61,6 @@ observations:
     errmodel: NRL
   passedBenchmark: 668
 - obs operator:
-   name: GnssroBndROPP1D
-   obs options:
-  obs space:
-   name: ROPP1D
-   obsdatain:
-     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
-   simulated variables: [bending_angle]
-#  obsdataout:
-#    obsfile: Data/gnssro_ropp1d_2018041500_3prof_errNRL_out.nc4
-  geovals:
-   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
-  obs filters:
-  - filter: ROobserror
-    filter variables:
-    - name: bending_angle
-    errmodel: NRL
-    variable: bending_angle
-  passedBenchmark: 744
-- obs operator:
    name: GnssroRefNCEP
    obs options:
   obs space:
