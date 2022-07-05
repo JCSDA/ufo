@@ -16,6 +16,6 @@ obs operator:
   obs options:
     Sensor_ID: v.viirs-m_npp
     EndianType: little_endian
-    CoefficientPath: ${JEDI_BIN}/../fv3-jedi/test/Data/crtm/
+    CoefficientPath: ${JEDI_BUILD}/fv3-jedi/test/Data/crtm/
     AerosolOption: aerosols_gocart_default
     #RCFile: [geosaod.rc]
