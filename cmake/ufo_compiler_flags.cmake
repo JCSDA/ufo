@@ -11,6 +11,14 @@ if( NOT CMAKE_BUILD_TYPE MATCHES "Debug" )
 endif( )
 
 #######################################################################################
+# C++
+#######################################################################################
+
+if( CMAKE_CXX_COMPILER_ID MATCHES "PGI" OR CMAKE_CXX_COMPILER_ID MATCHES "NVHPC" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ktrap=inv,divz -Mflushz -fast" )
+endif( )
+
+#######################################################################################
 # Fortran
 #######################################################################################
 
@@ -18,6 +26,8 @@ if( CMAKE_Fortran_COMPILER_ID MATCHES "GNU" )
   include( compiler_flags_GNU_Fortran )
 elseif( CMAKE_Fortran_COMPILER_ID MATCHES "Intel" )
   include( compiler_flags_Intel_Fortran )
+elseif( CMAKE_Fortran_COMPILER_ID MATCHES "PGI" OR CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" )
+  include( compiler_flags_NVHPC_Fortran )
 elseif( CMAKE_Fortran_COMPILER_ID MATCHES "XL" )
   include( compiler_flags_XL_Fortran )
 elseif( CMAKE_Fortran_COMPILER_ID MATCHES "Cray" )
@@ -25,4 +35,3 @@ elseif( CMAKE_Fortran_COMPILER_ID MATCHES "Cray" )
 else()
   message( STATUS "Fortran compiler with ID ${CMAKE_CXX_COMPILER_ID} will be used with CMake default options")
 endif()
-

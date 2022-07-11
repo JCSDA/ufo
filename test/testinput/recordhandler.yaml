@@ -1,0 +1,286 @@
+Two records, input true everywhere:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at earliest datetime in each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 1, 0, 0]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at latest datetime in each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 0, 0, 1, 0, 0, 1]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at earliest datetime in each, dateTimes out of order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 0, 0, 1, 0, 0, 1]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 0, 0, 1, 0, 0, 1 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true at latest datetime in each, dateTimes out of order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 1, 0, 0]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 0, 0, 1, 0, 0, 1 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, missing dateTime at start of each:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 252018950097, 0, 1,
+                     252018950097, 60, 61 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 0, 1, 0]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 0, 1, 0, 0, 1, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, all dateTimes missing:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 252018950097, 252018950097, 252018950097,
+                     252018950097, 252018950097, 252018950097 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 0, 0, 0, 1, 0]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 0, 1, 0, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, no grouping:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+  input: [ 1, 0, 1, 1, 0, 1 ]
+  air_temperature: [280, 280, 280, 280, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 1, 1, 0, 1 ]
+  expected_isThinned : [ 1, 0, 1, 1, 0, 1 ]
+
+# Note that (here and below) a value of -999 is translated to the floating-point missing value in the test code.
+Two records, input true everywhere, air_temperature missing at first location in each record, retain if all filter variables are valid:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [-999, 280, 280, -999, 280, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  retainOnlyIfAllFilterVariablesAreValid: true
+  expected_apply: [ 0, 1, 0, 0, 1, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true everywhere, air_temperature missing at first two locations in each record, retain if all filter variables are valid:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [-999, -999, 280, -999, -999, 280]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  retainOnlyIfAllFilterVariablesAreValid: true
+  expected_apply: [ 0, 0, 1, 0, 0, 1 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true everywhere, air_temperature missing everywhere, retain if any filter variable is valid:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [-999, -999, -999, -999, -999, -999]
+  eastward_wind: [10, 10, 10, 10, 10, 10]
+  expected_apply: [ 1, 0, 0, 1, 0, 0]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true everywhere, air_temperature missing everywhere, eastward_wind missing at start of each profile, retain if any filter variable is valid:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 0, 1, 2,
+                     60, 61, 62 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [-999, -999, -999, -999, -999, -999]
+  eastward_wind: [-999, 10, 10, -999, 10, 10]
+  expected_apply: [ 0, 1, 0, 0, 1, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
+
+Two records, input true everywhere, dateTimes out of order, air_temperature missing everywhere, eastward_wind missing at start of each profile, retain if any filter variable is valid:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    simulated variables: [air_temperature, eastward_wind]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 1, 1, 1 ]
+        lons: [ 0, 0, 0, 1, 1, 1 ]
+        dateTimes: [ 2, 1, 0,
+                     62, 61, 60 ]
+        epoch: "seconds since 2010-01-01T00:04:00Z"
+      obs errors: [1.0, 1.0]
+      obsgrouping:
+        group variables: [ "latitude" ]
+  input: [ 1, 1, 1, 1, 1, 1]
+  air_temperature: [-999, -999, -999, -999, -999, -999]
+  eastward_wind: [10, 10, -999, 10, 10, -999]
+  expected_apply: [ 0, 1, 0, 0, 1, 0 ]
+  expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]

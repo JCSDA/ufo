@@ -8,11 +8,12 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONSCATTERING_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONSCATTERING_H_
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 

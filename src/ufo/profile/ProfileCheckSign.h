@@ -27,6 +27,9 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
+    /// This check requires HofX to have been calculated.
+    bool requiresHofX() override {return true;}
+
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
       return oops::Variables({ufo::VariableNames::geovals_pressure});}

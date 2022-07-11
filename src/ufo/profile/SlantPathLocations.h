@@ -31,6 +31,8 @@ namespace ufo {
   ///   All locations in the profile.
   /// \param modelVerticalCoord
   ///   Name of the vertical coordinate used in the model.
+  /// \param obsVerticalCoord
+  ///   The full name (e.g. MetaData/air_pressure) of the observed vertical coordinate.
   /// \param itermax
   ///   Maximum number of interations that will be used to find the intersections
   ///   between observed pressures and model levels.
@@ -40,6 +42,7 @@ namespace ufo {
                                                  const GeoVaLs & gv,
                                                  const std::vector<std::size_t> & locs,
                                                  const std::string & modelVerticalCoord,
+                                                 const std::string & obsVerticalCoord,
                                                  const int itermax = 3);
 }  // namespace ufo
 

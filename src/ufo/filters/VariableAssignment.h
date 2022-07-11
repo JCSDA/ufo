@@ -50,6 +50,13 @@ class AssignmentParameters : public oops::Parameters {
   /// Exactly one of the `value`, `source variable` and `function` options must be given.
   oops::OptionalParameter<ufo::Variable> sourceVariable{"source variable", this};
 
+  /// This option applies to assigning values from a source variable.
+  /// Assume the source variable is called `ObsValue/varname`. If \p skipDerived is false,
+  /// the variable `DerivedObsValue/varname` (if it exists) will be used as the source variable.
+  /// If \p skipDerived is true or the derived variable does not exist, `ObsValue/varname`
+  /// will be used as the source variable.
+  oops::Parameter<bool> skipDerived{"skip derived", false, this};
+
   /// An ObsFunction that should be evaluated and assigned to the specified
   /// variable (at all locations selected be the `where` statement, if present).
   ///
@@ -79,6 +86,10 @@ class VariableAssignmentParameters : public oops::ObsFilterParametersBase {
   /// Conditions used to select locations where variable assignment should be performed.
   /// If not specified, variable assignment will be performed at all locations.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
+
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
 
   /// If set to true, variable assignment will be done after the obs operator has been invoked
   /// (even if the filter doesn't require any variables from the GeoVaLs or HofX groups).

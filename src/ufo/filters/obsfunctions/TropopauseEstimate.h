@@ -11,17 +11,18 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
-
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/parameters/ParameterTraitsVariable.h"
+
+namespace ioda {
+  template<typename DATATYPE> class ObsDataVector;
+}
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Two optional parameters permit overriding default tropopause pressure at the

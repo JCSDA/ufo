@@ -15,9 +15,10 @@
 
 #include "eckit/exception/Exceptions.h"
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/DateTime.h"
-#include "oops/util/missingValues.h"
-
+#include "oops/util/Logger.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {
@@ -33,7 +34,7 @@ TropopauseEstimate::TropopauseEstimate(const eckit::LocalConfiguration & conf)
   options_.deserialize(conf);
 
   // We must know the datetime of each observation
-  invars_ += Variable("datetime@MetaData");
+  invars_ += Variable("dateTime@MetaData");
   // We must know the latitude of each observation
   invars_ += Variable("latitude@MetaData");
 
@@ -50,7 +51,6 @@ TropopauseEstimate::~TropopauseEstimate() {}
 void TropopauseEstimate::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
 
   // Ensure that only one output variable is expected.
   ASSERT(out.nvars() == 1);
@@ -64,7 +64,7 @@ void TropopauseEstimate::compute(const ObsFilterData & in,
   std::vector<float> latitude;
   in.get(Variable("latitude@MetaData"), latitude);
   std::vector<util::DateTime> datetimes;
-  in.get(Variable("datetime@MetaData"), datetimes);
+  in.get(Variable("dateTime@MetaData"), datetimes);
 
   // If datetimes is empty, then we should just exit because there is nothing we can do otherwise.
   if (datetimes.empty()) {

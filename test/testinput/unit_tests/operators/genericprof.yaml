@@ -1,0 +1,22 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+  - obs operator:
+      name: MarineVertInterp
+    obs space:
+      name: InsituSalinity
+      obsdatain:
+        obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
+      simulated variables: [sea_water_salinity]
+      observed variables: [sea_water_salinity]
+#   obsdataout:
+#     obsfile: Data/profile_2018-04-15_generic_check_out.nc
+    geovals:
+      filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
+    rms ref: 35.0
+    tolerance: 1.0e-8
+    linear obs operator test:
+      coef TL: 0.1
+      tolerance TL: 1.0e-14
+      tolerance AD: 1.0e-7

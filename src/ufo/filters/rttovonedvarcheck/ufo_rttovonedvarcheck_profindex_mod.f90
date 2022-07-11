@@ -55,7 +55,9 @@ type, public :: ufo_rttovonedvarcheck_profindex
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_profindex_setup
+  procedure :: copy   => ufo_rttovonedvarcheck_profindex_copy
   procedure :: delete => ufo_rttovonedvarcheck_profindex_delete
+  procedure :: info   => ufo_rttovonedvarcheck_profindex_print
 
 end type
 
@@ -157,20 +159,22 @@ do j = 1, bmatrix % nfields
       self % windspeed  = firstelement
 
     case( ufo_metoffice_fieldtype_mwemiss )
-      call abor1_ftn("ufo_metoffice_fieldtype_mwemiss: Not currently implemented aborting")
+      self % mwemiss(1) = firstelement
+      self % mwemiss(2) = lastelement
 
     case( ufo_metoffice_fieldtype_emisspc )
-      call abor1_ftn("ufo_metoffice_fieldtype_emisspc: Not currently implemented aborting")
+      self % emisspc(1) = firstelement
+      self % emisspc(2) = lastelement
 
    !------------------------------------
    !cloud (single-level grey cloud only)
    !------------------------------------
 
     case( ufo_metoffice_fieldtype_cloudtopp )
-      call abor1_ftn("ufo_metoffice_fieldtype_cloudtopp: Not currently implemented aborting")
+      self % cloudtopp  = firstelement
 
     case( ufo_metoffice_fieldtype_cloudfrac )
-      call abor1_ftn("ufo_metoffice_fieldtype_cloudfrac: Not currently implemented aborting")
+      self % cloudfrac  = firstelement
 
     case( ufo_metoffice_fieldtype_not_used ) ! currently unused
       continue
@@ -190,6 +194,51 @@ self % nprofelements = nelements
 end subroutine ufo_rttovonedvarcheck_profindex_setup
 
 !-------------------------------------------------------------------------------
+!> Profile index copy
+!!
+!! Copy one profile index to another.
+!!
+!! \author Met Office
+!!
+!! \date 19/05/2021: Created
+!!
+subroutine ufo_rttovonedvarcheck_profindex_copy(self, other)
+
+implicit none
+
+class(ufo_rttovonedvarcheck_profindex), intent(out) :: self   !< profindex structure
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: other    !< profindex structure
+
+self % nprofelements = other % nprofelements
+self % nlevels = other % nlevels
+self % t = other % t
+self % q = other % q
+self % ql = other % ql
+self % qt = other % qt
+self % qi = other % qi
+self % cf = other % cf
+self % o3total = other % o3total
+self % o3profile = other % o3profile
+self % t2 = other % t2
+self % q2 = other % q2
+self % rh2 = other % rh2
+self % tstar = other % tstar
+self % pstar = other % pstar
+self % windspeed = other % windspeed
+self % t70hpa = other % t70hpa
+self % t700hpa = other % t700hpa
+self % t950hpa = other % t950hpa
+self % t1000hpa = other % t1000hpa
+self % qsurf = other % qsurf
+self % lwp = other % lwp
+self % mwemiss = other % mwemiss
+self % cloudtopp = other % cloudtopp
+self % cloudfrac = other % cloudfrac
+self % emisspc = other % emisspc
+
+end subroutine ufo_rttovonedvarcheck_profindex_copy
+
+!-------------------------------------------------------------------------------
 !> Delete profile index
 !!
 !! \details Heritage: Ops_SatRad_InitProfInfo.f90
@@ -207,6 +256,7 @@ class(ufo_rttovonedvarcheck_profindex), intent(inout) :: self !< profile index s
 
 ! Zero all values
 self % nprofelements = 0
+self % nlevels = 0
 self % t = 0
 self % q = 0
 self % ql = 0
@@ -233,6 +283,49 @@ self % cloudfrac = 0
 self % emisspc = 0
 
 end subroutine ufo_rttovonedvarcheck_profindex_delete
+
+!-------------------------------------------------------------------------------
+!> Print profile index
+!!
+!! \author Met Office
+!!
+!! \date 15/12/2021: Created
+!!
+subroutine ufo_rttovonedvarcheck_profindex_print(self)
+
+implicit none
+class(ufo_rttovonedvarcheck_profindex), intent(in) :: self !< profile index structure
+
+write(*,*) "Profile index information"
+write(*,*) "nprofelements = ",self % nprofelements
+write(*,*) "nlevels = ",self % nlevels
+write(*,*) "t = ",self % t
+write(*,*) "q = ",self % q
+write(*,*) "ql = ",self % ql
+write(*,*) "qt = ",self % qt
+write(*,*) "qi = ",self % qi
+write(*,*) "cf = ",self % cf
+write(*,*) "o3total = ",self % o3total
+write(*,*) "o3profile = ",self % o3profile
+write(*,*) "t2 = ",self % t2
+write(*,*) "q2 = ",self % q2
+write(*,*) "rh2 = ",self % rh2
+write(*,*) "tstar = ",self % tstar
+write(*,*) "pstar = ",self % pstar
+write(*,*) "windspeed = ",self % windspeed
+write(*,*) "t70hpa = ",self % t70hpa
+write(*,*) "t700hpa = ",self % t700hpa
+write(*,*) "t950hpa = ",self % t950hpa
+write(*,*) "t1000hpa = ",self % t1000hpa
+write(*,*) "qsurf = ",self % qsurf
+write(*,*) "lwp = ",self % lwp
+write(*,*) "mwemiss = ",self % mwemiss
+write(*,*) "emisspc = ",self % emisspc
+write(*,*) "cloudtopp = ",self % cloudtopp
+write(*,*) "cloudfrac = ",self % cloudfrac
+write(*,*) "-------------------"
+
+end subroutine ufo_rttovonedvarcheck_profindex_print
 
 ! ------------------------------------------------------------------------------
 

@@ -111,8 +111,6 @@ void exactMatch(const std::string &varName,
         << "' of the variable '" << varName << "'";
     throw eckit::Exception(msg.str(), Here());
   }
-  oops::Log::debug() << "Exact match; name: " << varName << " range: " <<
-    range.begin() << "," << range.end() << std::endl;
 }
 
 
@@ -158,13 +156,19 @@ void nearestMatch(const std::string &varName,
                   const std::vector<T> &varValues,
                   const T &obVal,
                   ConstrainedRange &range) {
+  if (isOutOfBounds(obVal, varValues, range)) {
+    std::stringstream msg;
+    msg << "No match found for 'nearest' extraction of value '" << obVal << "' of the variable '"
+        << varName << "'.  Value is out of bounds.  Consider using extrapolation.";
+    throw eckit::Exception(msg.str(), Here());
+  }
+
   // Find first index of varValues >= obVal
   int nnIndex = std::lower_bound(varValues.begin() + range.begin(),
                                  varValues.begin() + range.end(),
                                  obVal) - varValues.begin();
-  if (nnIndex >= range.end()) {
+  if (nnIndex >= range.end())
     nnIndex = range.end() - 1;
-  }
 
   // Now fetch the nearest neighbour index (lower index prioritised for different values with
   // same distance)
@@ -179,8 +183,6 @@ void nearestMatch(const std::string &varName,
                                  varValues[nnIndex]);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Nearest match; name: " << varName << " range: " <<
-    range.begin() << "," << range.end() << std::endl;
 }
 
 
@@ -219,7 +221,8 @@ void leastUpperBoundMatch(const std::string &varName,
   if (leastUpperBoundIt == rangeEnd) {
     std::stringstream msg;
     msg << "No match found for 'least upper bound' extraction of value '" << obVal
-        << "' of the variable '" << varName << "'";
+        << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+           "extrapolation.";
     throw eckit::Exception(msg.str(), Here());
   }
 
@@ -227,8 +230,6 @@ void leastUpperBoundMatch(const std::string &varName,
   const auto bounds = std::equal_range(rangeBegin, rangeEnd, *leastUpperBoundIt);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Least upper bound match; name: " << varName << " range: "
-                     << range.begin() << "," << range.end() << std::endl;
 }
 
 void leastUpperBoundMatch(const std::string &varName,
@@ -268,7 +269,8 @@ void greatestLowerBoundMatch(const std::string &varName,
   if (greatestLowerBoundIt == reverseRangeEnd) {
     std::stringstream msg;
     msg << "No match found for 'greatest lower bound' extraction of value '" << obVal
-        << "' of the variable '" << varName << "'";
+        << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+           "extrapolation.";
     throw eckit::Exception(msg.str(), Here());
   }
 
@@ -278,8 +280,6 @@ void greatestLowerBoundMatch(const std::string &varName,
                                        *greatestLowerBoundIt);
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
                   static_cast<int>(bounds.second - varValues.begin()));
-  oops::Log::debug() << "Greatest lower bound match; name: " << varName << " range: "
-                     << range.begin() << "," << range.end() << std::endl;
 }
 
 void greatestLowerBoundMatch(const std::string &varName,
@@ -307,7 +307,7 @@ void greatestLowerBoundMatch(const std::string &varName,
 ///   `varValues` that matches all constraints considered so far. On output, the subrange of
 ///   slices matching also the current constraint.
 template <typename T>
-void match(InterpMethod method,
+void match(const InterpMethod method,
            const std::string &varName,
            const std::vector<T> &varValues,
            const T &obVal,
@@ -326,7 +326,7 @@ void match(InterpMethod method,
       greatestLowerBoundMatch(varName, varValues, obVal, range);
       break;
     default:
-      throw eckit::BadParameter("Unrecognized interpolation method", Here());
+      throw eckit::BadParameter("Unrecognized interpolation method for '" + varName + "'", Here());
   }
 }
 
@@ -355,10 +355,12 @@ float linearInterpolation(
     const CoordinateValue &obVal,
     const ConstrainedRange &range,
     const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
-  if ((obVal > varValues[range.end() - 1]) || (obVal < varValues[range.begin()])) {
-    throw eckit::Exception("Linear interpolation failed, value is beyond grid extent."
-                           "No extrapolation supported.",
-                           Here());
+  if (isOutOfBounds(obVal, varValues, range)) {
+      std::stringstream msg;
+      msg << "No match found for 'linear' interpolation of value '" << obVal
+          << "' of the variable '" << varName << "'.  Value is out of bounds.  Consider using "
+          << "extrapolation.";
+      throw eckit::Exception(msg.str(), Here());
   }
   // Find first index of varValues >= obVal
   int nnIndex = std::lower_bound(varValues.begin() + range.begin(),
@@ -413,6 +415,7 @@ void DataExtractor<ExtractedValue>::load(const std::string &filepath,
   DataExtractorInput<ExtractedValue> input = backend->loadData(interpolatedArrayGroup);
   coord2DimMapping_ = std::move(input.coord2DimMapping);
   dim2CoordMapping_ = std::move(input.dim2CoordMapping);
+  coordNDims_ = std::move(input.coordNDims);
   coordsVals_ = std::move(input.coordsVals);
   interpolatedArray_.resize(boost::extents[input.payloadArray.shape()[0]]
                                             [input.payloadArray.shape()[1]]
@@ -468,8 +471,6 @@ void DataExtractor<ExtractedValue>::sort() {
     ind = 0;
     for (const auto &group : splitter_[dim].groups()) {
       for (const auto &index : group) {
-        oops::Log::debug() << "Sort index dim" << dim << "; index-from: " << ind <<
-          " index-to: " << index << std::endl;
         for (size_t j = 0; j < interpolatedArray_.shape()[otherDims[0]]; j++) {
           for (size_t k = 0; k < interpolatedArray_.shape()[otherDims[1]]; k++) {
             if (dim == 0) {
@@ -496,7 +497,8 @@ void DataExtractor<ExtractedValue>::sort() {
 
 template <typename ExtractedValue>
 void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
-                                                 const InterpMethod &method) {
+                                                 const InterpMethod &method,
+                                                 const ExtrapolationMode &extrapMode) {
   if (!std::is_floating_point<ExtractedValue>::value) {
       std::string msg = "interpolation can be used when extracting floating-point values, but not "
                         "integers or strings.";
@@ -511,13 +513,26 @@ void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
   const std::string canonicalVarName = ioda::convertV1PathToV2Path(varName);
 
   const CoordinateValues &coordVal = coordsVals_.at(canonicalVarName);
-  const int dimIndex = coord2DimMapping_.at(canonicalVarName);
+  const std::vector<int> &dimIndices = coord2DimMapping_.at(canonicalVarName);
+  const size_t coordDim = coordNDims_.at(canonicalVarName);
+
+  if (coordDim != dimIndices.size())
+    throw eckit::Exception("Variable: '" + varName + "' has one or more dimension mappings not "
+                           "shared by the payload variable.", Here());
+  if (coordDim > 1) {
+    std::stringstream msg;
+    msg << "Variable: '" + varName + "' is a '" << coordDim << + "' dimensional coordinate."
+        << "  Only 1D coordinates currently supported.";
+    throw eckit::Exception(msg.str(), Here());
+  }
+
+  const int dimIndex = dimIndices[0];
 
   SortUpdateVisitor visitor(splitter_[static_cast<size_t>(dimIndex)]);
   boost::apply_visitor(visitor, coordVal);
 
   // Update our map between coordinate (variable) and interpolation/extract method
-  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, dimIndex});
+  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, extrapMode, dimIndex});
 }
 
 
@@ -545,15 +560,16 @@ void DataExtractor<ExtractedValue>::extractImpl(const T &obVal) {
   if (nextCoordToExtractBy_ == coordsToExtractBy_.cend())
     throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
                            Here());
+  T obValN = applyExtrapolation(obVal);
+  if (resultSet_)
+    return;
 
   // Perform the extraction using the selected method
   if (nextCoordToExtractBy_->method == InterpMethod::LINEAR)
-    maybeExtractByLinearInterpolation(obVal);
+    maybeExtractByLinearInterpolation(obValN);
   else
-    match(nextCoordToExtractBy_->method,
-          nextCoordToExtractBy_->name,
-          boost::get<std::vector<T>>(nextCoordToExtractBy_->values),
-          obVal,
+    match(nextCoordToExtractBy_->method, nextCoordToExtractBy_->name,
+          boost::get<std::vector<T>>(nextCoordToExtractBy_->values), obValN,
           constrainedRanges_[nextCoordToExtractBy_->payloadDim]);
 
   ++nextCoordToExtractBy_;
@@ -617,10 +633,13 @@ ExtractedValue DataExtractor<ExtractedValue>::getUniqueMatch() const {
   // extraction process.
   ASSERT(!resultSet_);
 
-  for (size_t dim=0; dim < constrainedRanges_.size(); dim++)
-    if (constrainedRanges_[dim].size() != 1)
-      throw eckit::Exception("Previous calls to extract() have failed to identify "
-                             "a single value to return.", Here());
+  for (size_t dim=0; dim < constrainedRanges_.size(); dim++) {
+    if (constrainedRanges_[dim].size() == 0)
+      throw eckit::Exception("No match found in the interpolation array.", Here());
+    else if (constrainedRanges_[dim].size() > 1)
+      throw eckit::Exception("Extraction criteria were not sufficient to identify a unique match "
+                             "in the interpolation array.", Here());
+  }
   return interpolatedArray_[constrainedRanges_[0].begin()]
                            [constrainedRanges_[1].begin()]
                            [constrainedRanges_[2].begin()];

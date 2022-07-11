@@ -1,0 +1,22 @@
+window begin: 2021-05-21T08:59:59Z
+window end: 2021-05-21T15:00:00Z
+
+observations:
+- obs space:
+    name: ssmis_f17
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/ssmis_f17_20210521T1200Z_obfn_ref.nc4
+#   obsdataout:
+#     obsfile: Data/ssmis_f17_20210521T1200Z_obfn_ref_setsfctype_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-24
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_ssmis_f17_20210521T1200Z_obfn_ref.nc4
+  obs function:
+    name: SetSurfaceType@ObsFunction
+    options:
+      UseReportSurface: true
+      SurfaceReport Name: surface_flag@MetaData    
+    variables: [surface_type]
+    tolerance: 1.0e-7

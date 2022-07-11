@@ -1,0 +1,60 @@
+window begin: 2021-07-01T09:00:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations:
+- obs space:
+    name: ATOVS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/obs_atovs_lwpguess_20210701T1200Z.nc4
+#   obsdataout:
+#     obsfile: &outfile Data/atovs_lwpfirstguess_20210701T1200Z_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-20
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_lwpguess_20210701T1200Z.nc4
+  obs prior filters:
+#---------------------------------------------------
+#set surface type
+#---------------------------------------------------
+  - filter: Variable Assignment
+    assignments:
+    - name: surface_type@MetaData
+      type: int
+      function:
+        name: SetSurfaceType@ObsFunction
+        options:
+          UseReportSurface: false
+#---------------------------------------------------
+# calculate first guess lwp
+#---------------------------------------------------
+  - filter: Variable Assignment
+    assignments:
+    - name: lwp_back@MetaData
+      type: float
+      function:
+        name: LiquidWaterPathGuess@ObsFunction
+#---------------------------------------------------------------
+# test on max lwp over land
+#---------------------------------------------------------------
+  - filter: Bounds Check
+    where:
+    - variable:
+        name: surface_type@MetaData
+      is_in: 0
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5
+    test variables:
+    - name: lwp_back@MetaData
+    maxvalue: 0.05
+    minvalue: 0.0
+  passedBenchmark: 37605
+#---------------------------------------------------------------
+# check first guess lwp with reference values
+#---------------------------------------------------------------
+  compareVariables:
+    - reference:
+        name: lwp_back@TestReference
+      test:
+        name: lwp_back@MetaData
+      absTol: 1.0e-6

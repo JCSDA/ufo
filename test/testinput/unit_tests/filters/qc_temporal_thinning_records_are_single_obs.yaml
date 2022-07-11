@@ -1,0 +1,251 @@
+# These tests are designed to check the behaviour of the `records_are_single_obs` thinning option
+# together with its interaction with the use of a `category_variable`.
+
+# There are eight profiles in the sample, each of which consists of two observations.
+# Metadata values of the profiles are as follows:
+# Location:   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15
+# times (s):  245, 246, 250, 251, 255, 256, 265, 266, 280, 281, 285, 286, 290, 291, 295, 296
+# station ID: 1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7,   8,   8
+# category:   1,   1,   2,   2,   1,   1,   2,   2,   1,   1,   2,   2,   1,   1,   2,   2
+# priority:   90,  90,  90,  90,  100, 100, 90,  90,  90,  90,  100, 100, 90,  90,  90,  90
+
+# The centre of the window is 270 s.
+# In the Temporal Thinning setup used, profiles at earlier times are retained.
+
+
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+# Setup:
+# - Obs grouped into records by station_id
+# - Records not treated as single obs
+# - Category variable not used
+# Results:
+# - Thinning performed within each profile. Earlier observation kept in each case.
+- obs space:
+    name: Records are not single obs, no category variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+  passedObservationsBenchmark: [0, 2, 4, 6, 8, 10, 12, 14]
+  passedBenchmark: 8
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records not treated as single obs
+# - Category variable equal to station_id
+# Results:
+# - Thinning performed within each profile. Earlier observation kept in each case.
+- obs space:
+    name: Records are not single obs, category variable station_id
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+  passedObservationsBenchmark: [0, 2, 4, 6, 8, 10, 12, 14]
+  passedBenchmark: 8
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records not treated as single obs
+# - Category variable equal to category
+# Results:
+# - Category overrides division into records.
+# - Thinning performed within each category. Earliest observation kept in each case.
+- obs space:
+    name: Records are not single obs, category variable category
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    category_variable: category@MetaData
+  passedObservationsBenchmark: [0, 2]
+  passedBenchmark: 2
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records treated as single obs
+# - Category variable not used
+# Results:
+# - Only one record is kept (earliest, locations 0 and 1)
+- obs space:
+    name: Records are single obs, no category variable
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+  passedObservationsBenchmark: [0, 1]
+  passedBenchmark: 2
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records treated as single obs
+# - Category variable equal to station_id
+# Results:
+# - Each record is in a unique category
+# - Nothing is thinned
+- obs space:
+    name: Records are single obs, category variable station_id
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: station_id@MetaData
+  passedObservationsBenchmark: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  passedBenchmark: 16
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records treated as single obs
+# - Category variable equal to category
+# Results:
+# - Thinning performed within each category. Earliest profile kept in each case.
+- obs space:
+    name: Records are single obs, category variable category
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: category@MetaData
+  passedObservationsBenchmark: [0, 1, 2, 3]
+  passedBenchmark: 4
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records treated as single obs
+# - Category variable equal to category
+# - Priority variable equal to priority
+# Results:
+# - Thinning performed within each category. Highest-priority profile kept in each case.
+- obs space:
+    name: Records are single obs, category variable category, prority variable used
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: category@MetaData
+    priority_variable: priority@MetaData
+  passedObservationsBenchmark: [4, 5, 10, 11]
+  passedBenchmark: 4
+
+# Setup:
+# - Obs grouped into records by category and station_id
+# - Records treated as single obs
+# - Category variable equal to category
+# Notes:
+# - Each category contains records on different processors
+# Results:
+# - Thinning performed within each category. Earliest profile kept in each case.
+- obs space:
+    name: Records are single obs, grouped by category and station_id, category variable category
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "category", "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: category@MetaData
+  passedObservationsBenchmark: [0, 1, 2, 3]
+  passedBenchmark: 4
+
+# Setup:
+# - Obs grouped into records by category and station_id
+# - Records treated as single obs
+# - Category variable equal to category
+# - Priority variable equal to priority
+# Notes:
+# - Each category contains records on different processors
+# Results:
+# - Thinning performed within each category. Highest-priority profile kept in each case.
+- obs space:
+    name: Records are single obs, grouped by category and station_id, category variable category, prority variable used
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "category", "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: category@MetaData
+    priority_variable: priority@MetaData
+  passedObservationsBenchmark: [4, 5, 10, 11]
+  passedBenchmark: 4
+
+# Setup:
+# - Obs grouped into records by station_id
+# - Records treated as single obs
+# - Category variable equal to category_bad
+# Results:
+# - Expect an exception to be thrown
+- obs space:
+    name: Bad category used
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    filter variables: [air_temperature]
+    min_spacing: PT1M
+    tolerance: PT1M
+    records_are_single_obs: true
+    category_variable: category_bad@MetaData
+  expectExceptionWithMessage: Cannot have multiple categories per record

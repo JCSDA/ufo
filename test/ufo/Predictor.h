@@ -8,6 +8,8 @@
 #ifndef TEST_UFO_PREDICTOR_H_
 #define TEST_UFO_PREDICTOR_H_
 
+#include <Eigen/Core>
+
 #include <memory>
 #include <set>
 #include <string>
@@ -62,7 +64,9 @@ void testPredictor() {
     if (gvars.size() > 0) {
       // Read GeoVaLs from a file
       eckit::LocalConfiguration gconf(conf, "geovals");
-      gval.reset(new GeoVaLs(gconf, ospace, gvars));
+      GeoVaLsParameters geovalsparams;
+      geovalsparams.validateAndDeserialize(gconf);
+      gval.reset(new GeoVaLs(geovalsparams, ospace, gvars));
     } else {
       // Create an empty GeoVaLs object
       gval.reset(new GeoVaLs(ospace.distribution(), gvars));
@@ -76,7 +80,7 @@ void testPredictor() {
     std::vector<util::DateTime> times(ospace.nlocs());
     ospace.get_db("MetaData", "latitude", lats);
     ospace.get_db("MetaData", "longitude", lons);
-    ospace.get_db("MetaData", "datetime", times);
+    ospace.get_db("MetaData", "dateTime", times);
     Locations locs(lons, lats, times, ospace.distribution());
     ObsDiagnostics ydiags(ospace, locs, diagvars);
 
@@ -91,11 +95,12 @@ void testPredictor() {
     for (std::size_t p = 0; p < npreds; ++p) {
       if (conf.has("expectExceptionWithMessage")) {
         const std::string msg = conf.getString("expectExceptionWithMessage");
-        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, predData[p]), msg.c_str());
+        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, ybias,
+                                                 predData[p]), msg.c_str());
         expect_error_message = true;
         break;
       }
-      predictors[p]->compute(ospace, *gval, ydiags, predData[p]);
+      predictors[p]->compute(ospace, *gval, ydiags, ybias, predData[p]);
       predData[p].save(predictors[p]->name() + "Predictor");
     }
 
@@ -113,7 +118,7 @@ void testPredictor() {
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       vars.push_back("predictor_" + predictor_names[jp]);
     }
-    const oops::Variables testvars = ospace.obsvariables();
+    const oops::Variables testvars = ospace.assimvariables();
     const std::size_t nvars = testvars.size();
     if (!testvars.channels().empty()) {
       // At present we can label predictors with either the channel number or the variable

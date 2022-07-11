@@ -1,0 +1,251 @@
+# This test compares the output of the Track Check Ship filter against reference
+# results obtained with the Met Office OPS code (Ops_CheckShipTrack/Ops_OceanTrackCheck).
+
+window begin: 2000-01-01T00:00:00Z
+window end: 2029-12-12T23:59:59Z
+
+observations:
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out1.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001 
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+  flaggedObservationsBenchmark: &referenceFlaggedObsIds
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 87
+      - 88
+      - 89
+      - 90
+      - 91
+      - 92
+      - 165
+      - 166
+      - 167
+      - 168
+      - 169
+      - 170
+      - 171
+      - 172
+      - 173
+      - 174
+      - 175
+      - 176
+      - 237
+      - 238
+      - 239
+      - 240
+      - 241
+      - 242
+      - 243
+      - 244
+      - 245
+      - 246
+      - 247
+      - 248
+  flaggedBenchmark: 35
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out2.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: true
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001 
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+  flaggedObservationsBenchmark:
+    - 87
+    - 88
+    - 89
+    - 90
+    - 91
+    - 92
+  flaggedBenchmark: 6
+  benchmarkFlag: 21 # track
+# Like in the first test, but without grouping observations into records
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out3.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 35
+  benchmarkFlag: 21 # track
+# Like in the first test, but with observations grouped into records (perversely) by
+# a variable other than station_id
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsgrouping:
+        group variables: [ "latitude" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out4.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 35
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ocean Profile, records are single obs
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+      obsgrouping:
+        group variables: [ "dateTime" ]
+        sort variable: ocean_depth
+        sort group: ObsValue
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_out.nc4
+    simulated variables: [ocean_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H10M
+    spatial resolution (km): 20
+    max speed (m/s): 2
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+    records_are_single_obs: true
+  flaggedObservationsBenchmark:
+      - 55
+      - 56
+      - 57
+      - 58
+      - 59
+      - 95
+      - 96
+      - 97
+      - 98
+      - 100
+      - 101
+      - 102
+      - 103
+      - 104
+      - 105
+      - 106
+      - 107
+      - 108
+      - 109
+      - 111
+      - 112
+      - 113
+      - 114
+      - 115
+      - 116
+      - 117
+      - 118
+      - 119
+  flaggedBenchmark: 28
+  benchmarkFlag: 21 # track-reject. [55-59, 95-98] are off-track (99 is missing);
+                    # [100-119] is a zig-zag with 2 profiles out of 4 rejected, which is >=50%, so
+                    #  the whole track is rejected (110 is missing).
+- obs space:
+    name: Ocean Profile, records are single obs, no station ID var (all one track)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+        sort variable: ocean_depth
+        sort group: ObsValue
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationid_out.nc4
+    simulated variables: [ocean_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H10M
+    spatial resolution (km): 20
+    max speed (m/s): 2
+    rejection threshold: 0.5
+    records_are_single_obs: true
+  flaggedObservationsBenchmark:
+      - 55
+      - 56
+      - 57
+      - 58
+      - 59
+      - 95
+      - 96
+      - 97
+      - 98
+      - 105
+      - 106
+      - 107
+      - 108
+      - 109
+      - 115
+      - 116
+      - 117
+      - 118
+      - 119
+  flaggedBenchmark: 19
+  benchmarkFlag: 21 # track-reject. [55-59, 95-98] are off-track as before;
+                    # but now only [105-109] and [115-119] of the 3rd callsign
+                    #  the whole track is rejected (110 is missing).
+- obs space:
+    name: Ocean Profile, records are single obs but not grouped into records
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationgrouping_out.nc4
+    simulated variables: [ocean_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    temporal resolution: PT00H10M
+    spatial resolution (km): 20
+    max speed (m/s): 2
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+    records_are_single_obs: true
+  expectExceptionWithMessage: "Cannot treat records as single obs"

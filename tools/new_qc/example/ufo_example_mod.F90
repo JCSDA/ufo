@@ -33,6 +33,11 @@ contains
 subroutine ufo_example_create(self, f_conf)
 implicit none
 type(ufo_example), intent(inout)      :: self
+
+! TODO: consider whether passing the Configuration object to this function
+! is necessary. If only a small number of parameters are used,
+! you could pass them in directly instead. In that case you can modify the
+! interface appropriately.
 type(fckit_configuration), intent(in) :: f_conf
 
 ! TODO: set self%geovars (list of variables to use from GeoVaLs) if needed

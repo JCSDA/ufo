@@ -32,6 +32,9 @@ namespace ufo {
     /// Run check
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
+    /// This check requires HofX to have been calculated.
+    bool requiresHofX() override {return true;}
+
     /// Fill variables in validator
     void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 

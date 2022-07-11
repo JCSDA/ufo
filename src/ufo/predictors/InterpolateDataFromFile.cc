@@ -14,6 +14,7 @@
 #include <boost/make_unique.hpp>
 
 #include "eckit/exception/Exceptions.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/AssociativeContainers.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -81,6 +82,7 @@ InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
 void InterpolateDataFromFile::compute(const ioda::ObsSpace & /*odb*/,
                                       const GeoVaLs & geovals,
                                       const ObsDiagnostics & obsdiags,
+                                      const ObsBias &,
                                       ioda::ObsVector & out) const {
   ObsFilterData obsFilterData(out.space());
   obsFilterData.associate(geovals);

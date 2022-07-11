@@ -1,252 +1,513 @@
-! (C) copyright 2020 Met Office
+! (C) Copyright 2021 Met Office
 !
-! this software is licensed under the terms of the apache licence version 2.0
-! which can be obtained at http://www.apache.org/licenses/license-2.0.
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module containing main type, setup and utilities for the
-!! main rttovonedvarcheck object
+!> Fortran module containing subroutines used by both minimizers.
 
 module ufo_rttovonedvarcheck_utils_mod
 
-use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use fckit_log_module, only : fckit_log
 use kinds
+use missing_values_mod
+use ufo_constants_mod, only: min_q, zero, Pa_to_hPa
+use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
+use ufo_rttovonedvarcheck_obs_mod
+use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
+use ufo_vars_mod
+use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
 
 implicit none
 private
 
-public ufo_rttovonedvarcheck_setup
+! subroutines - public
+public ufo_rttovonedvarcheck_check_geovals
+public ufo_rttovonedvarcheck_adjust_bmatrix
+public ufo_rttovonedvarcheck_check_ctp
+public ufo_rttovonedvarcheck_all_to_subset_by_channels
+public ufo_rttovonedvarcheck_subset_to_all_by_channels
 
-!===============================================================================
-! type definitions
-!===============================================================================
-
-!---------------
-! 1. 1DVar type
-!---------------
-
-type, public :: ufo_rttovonedvarcheck
-  character(len=max_string)        :: qcname !< name of the filter
-  character(len=max_string)        :: b_matrix_path !< path to the b-matrix file
-  character(len=max_string)        :: r_matrix_path !< path to the r-matrix file
-  character(len=max_string)        :: forward_mod_name !< forward model name (only RTTOV at the moment)
-  character(len=max_string), allocatable :: retrieval_variables(:) !< list of variables which form the 1D-var retrieval vector
-  type(c_ptr)                      :: obsdb !< pointer to the observation space
-  integer(c_int)                   :: onedvarflag !< flag uased by the qc manager for a 1D-var check
-  integer(c_int)                   :: passflag !< flag uased by the qc manager to flag good data
-  integer                          :: nlevels ! number 1D-Var model levels
-  integer                          :: nmvars !< number of variables being used in the retrieval
-  integer                          :: nchans !< maximum number of channels (channels can be removed by previous qc checks)
-  integer(c_int), allocatable      :: channels(:) !< integer list of channels
-  integer                          :: StartOb !< starting ob number for testing
-  integer                          :: FinishOb !< finishing ob number for testing
-  logical                          :: qtotal !< flag to enable total humidity retrievals
-  logical                          :: UseQtsplitRain !< flag to choose whether to split rain in qsplit routine
-  logical                          :: RTTOV_mwscattSwitch !< flag to switch on RTTOV-scatt
-  logical                          :: RTTOV_usetotalice !< flag for use of total ice in RTTOV MW scatt
-  logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
-  logical                          :: UseJforConvergence !< flag to Use J for convergence
-  logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
-  logical                          :: Store1DVarLWP !< Output the LWP if the profile converges
-  logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
-  logical                          :: FullDiagnostics !< flag to turn on full diagnostics
-  logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
-  integer                          :: Max1DVarIterations !< maximum number of iterations
-  integer                          :: JConvergenceOption !< integer to select convergence option
-  integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
-  integer                          :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
-  real(kind_real)                  :: RetrievedErrorFactor !< check retrieved BTs all within factor * stdev of obs
-  real(kind_real)                  :: ConvergenceFactor !< 1d-var convergence if using change in profile
-  real(kind_real)                  :: Cost_ConvergenceFactor !< 1d-var convergence if using % change in cost
-  real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
-  real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
-  character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
-  character(len=max_string)        :: EmisAtlas !< path to the emissivity atlas for IR PC emissivity
-end type ufo_rttovonedvarcheck
+character(len=max_string) :: message
 
 contains
 
-!------------------------------------------------------------------------------
-!> Setup the defaults for the main rttovonedvarcheck object and read in the 
-!! contents of the yaml file.
+!-------------------------------------------------------------------------------
+!> Check the geovals are ready for the first iteration
+!!
+!! \details Heritage: Ops_SatRad_SetUpRTprofBg_RTTOV12.f90
+!!
+!! Check the geovals profile is ready for the first iteration.  The
+!! only check included at the moment if the first calculation for 
+!! q total.
 !!
 !! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_setup(self, f_conf, channels)
+subroutine ufo_rttovonedvarcheck_check_geovals(self, geovals, profindex, surface_type)
 
 implicit none
 
-! subroutine arguments
-type(ufo_rttovonedvarcheck), intent(inout) :: self
-type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
-integer(c_int), intent(in)                 :: channels(:)
+! subroutine arguments:
+type(ufo_rttovonedvarcheck), intent(in) :: self
+type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
+integer, intent(in) :: surface_type  !< surface type for cold surface check
 
-! local variables
-character(len=max_string) :: tmp
-character(len=:), allocatable :: str
-character(len=:), allocatable :: str_array(:)
+character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
+character(len=max_string)    :: varname
+type(ufo_geoval), pointer    :: geoval
+integer                      :: gv_index, i     ! counters
+integer                      :: nlevels
+real(kind_real), allocatable :: temperature(:)  ! temperature (K)
+real(kind_real), allocatable :: pressure(:)     ! pressure (Pa)
+real(kind_real), allocatable :: qsaturated(:)
+real(kind_real), allocatable :: humidity_total(:)
+real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
+real(kind_real), allocatable :: ql(:)
+real(kind_real), allocatable :: qi(:)
+real(kind_real)              :: skin_t, pressure_2m, temperature_2m, NewT
+integer                      :: level_1000hpa, level_950hpa
 
-! Setup core paths and names
-self % qcname = "rttovonedvarcheck"
-call f_conf % get_or_die("BMatrix",str)
-self % b_matrix_path = str
-call f_conf % get_or_die("RMatrix",str)
-self % r_matrix_path = str
-call f_conf % get_or_die("ModName",str)
-self % forward_mod_name = str
-call f_conf % get_or_die("nlevels",self % nlevels)
+write(message, *) routinename, " : started"
+call fckit_log % debug(message)
 
-! Variables for profile (x,xb)
-self % nmvars = f_conf % get_size("retrieval variables")
-allocate(self % retrieval_variables(self % nmvars))
-call f_conf % get_or_die("retrieval variables", str_array)
-self % retrieval_variables(1:self % nmvars) = str_array
+! -------------------------------------------
+! Load variables needed by multiple routines
+! -------------------------------------------
 
-! Satellite channels
-self % nchans = size(channels)
-allocate(self % channels(self % nchans))
-self % channels(:) = channels(:)
+nlevels = profindex % nlevels
+allocate(temperature(nlevels))
+allocate(pressure(nlevels))
+call ufo_geovals_get_var(geovals, trim(var_ts), geoval)
+temperature(:) = geoval%vals(:, 1) ! K
+call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
+pressure(:) = geoval%vals(:, 1)    ! Pa
 
-! Flag for total humidity
-call f_conf % get_or_die("qtotal", self % qtotal)
+!---------------------------------------------------
+! 1. Make sure q and q2m does not exceed saturation
+!---------------------------------------------------
+if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
+  allocate(q(nlevels))
+  allocate(qsaturated(nlevels))
 
-! Flag to choose whether to split rain in qsplit routine
-call f_conf % get_or_die("UseQtSplitRain", self % UseQtsplitRain)
+  ! Get humidity - kg/kg
+  varname = trim(var_q)
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  q(:) = geoval%vals(:, 1)
 
-! Flag for RTTOV MW scatt
-call f_conf % get_or_die("RTTOVMWScattSwitch", self % RTTOV_mwscattSwitch)
+  ! Calculated saturation humidity
+  if (self % UseRHwaterForQC) then
+    call Ops_QsatWat (qsaturated(:),   & ! out
+                      temperature(:),  & ! in
+                      pressure(:),     & ! in
+                      nlevels)           ! in
+  else
+    call Ops_Qsat (qsaturated(:),   & ! out
+                   temperature(:),  & ! in
+                   pressure(:),     & ! in
+                   nlevels)           ! in  
+  end if
 
-! Flag for use of total ice in RTTOV MW scatt
-call f_conf % get_or_die("RTTOVUseTotalIce", self % RTTOV_usetotalice)
+  ! Limit q
+  where (q > qsaturated)
+    q = qsaturated
+  end where
+  where (q < min_q)
+    q = min_q
+  end where
 
-! Flag to turn on marquardt-levenberg minimiser
-call f_conf % get_or_die("UseMLMinimization", self % UseMLMinimization)
+  ! Assign values to geovals q
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = q(:)
 
-! Flag to Use J for convergence
-call f_conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
-
-! Flag to use water in relative humidity check
-call f_conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
-
-! Flag to use cold water check to adjust starting surface parameters
-call f_conf % get_or_die("UseColdSurfaceCheck", self % UseColdSurfaceCheck)
-
-! Flag to output the LWP if the profile converges
-call f_conf % get_or_die("Store1DVarLWP", self % Store1DVarLWP)
-
-! Flag to turn on full diagnostics
-call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
-
-! maximum number of iterations allowed
-call f_conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
-
-! integer to select convergence option
-! 1= percentage change in cost tested between iterations
-! otherwise = absolute change in cost tested between iterations
-call f_conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
-
-! Choose which iteration to start checking the liquid water path
-call f_conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
-
-! Check the retrieved brightness temperatures are within a factor * error of the
-! observed and bias corrected BTs.  If this value is less than 0.0 this check is
-! not performed
-call f_conf % get_or_die("RetrievedErrorFactor", self % RetrievedErrorFactor)
-
-! Convergence factor used when the absolute difference in the profile is used
-! to determine convergence.
-call f_conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
-
-! Cost threshold for convergence check when cost function value is used for convergence
-call f_conf % get_or_die("CostConvergenceFactor", self % Cost_ConvergenceFactor)
-
-! Maximum number of iterations for internal Marquardt-Levenberg loop
-call f_conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
-
-! Starting observation number for loop - used for testing
-call f_conf % get_or_die("StartOb", self % StartOb)
-
-! Finishing observation number for loop - used for testing
-call f_conf % get_or_die("FinishOb", self % FinishOb)
-
-! Default emissivity value to use over land
-call f_conf % get_or_die("EmissLandDefault", self % EmissLandDefault)
-
-! Default emissivity value to use over seaice
-call f_conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
-
-! Default eigen value path is blank but needs to be present if using PC emiss
-call f_conf % get_or_die("EmisEigVecPath",str)
-self % EmisEigVecPath = str
-self % pcemiss = .false. 
-if (len(trim(self % EmisEigVecPath)) > 4) then
-  self % pcemiss = .true.
+  deallocate(q)
+  deallocate(qsaturated)
 end if
 
-! Default emis atlas path is blank
-call f_conf % get_or_die("EmisAtlas",str)
-self % EmisAtlas = str
+if (profindex % q2 > 0) then
+  allocate(q(1))
+  allocate(qsaturated(1))
 
-! Print self
-if (self % FullDiagnostics) then
-  call ufo_rttovonedvarcheck_print(self)
+  ! Get humidity - kg/kg
+  varname = trim(var_sfc_q2m)
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  q(1) = geoval%vals(1, 1)
+
+  ! Calculated saturation humidity
+  if (self % UseRHwaterForQC) then
+    call Ops_QsatWat (qsaturated(1:1),   & ! out
+                      temperature(1:1),  & ! in
+                      pressure(1:1),     & ! in
+                      1)                   ! in
+  else
+    call Ops_Qsat (qsaturated(1:1),   & ! out
+                   temperature(1:1),  & ! in
+                   pressure(1:1),     & ! in
+                   1)                   ! in
+  end if
+
+  ! Limit q
+  if (q(1) > qsaturated(1)) q(1) = qsaturated(1)
+  if (q(1) < min_q) q(1) = min_q
+
+  ! Assign values to geovals q
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(1,1) = q(1)
+
+  deallocate(q)
+  deallocate(qsaturated)
 end if
 
-end subroutine ufo_rttovonedvarcheck_setup
+!-------------------------
+! 2. Specific humidity total
+!-------------------------
 
-!------------------------------------------------------------------------------
-!> Print contents of rttovonedvarcheck object
+if (profindex % qt(1) > 0) then
+
+  allocate(humidity_total(nlevels))
+  allocate(q(nlevels))
+  allocate(ql(nlevels))
+  allocate(qi(nlevels))
+
+  humidity_total(:) = zero
+  ! Water vapour
+  call ufo_geovals_get_var(geovals, trim(var_q), geoval)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+
+  ! Cloud liquid water
+  call ufo_geovals_get_var(geovals, trim(var_clw), geoval)
+  where (geoval%vals(:, 1) < zero) geoval%vals(:, 1) = zero
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+
+  ! Add ciw if rttov scatt is being used
+  if (self % RTTOV_mwscattSwitch) then
+    call ufo_geovals_get_var(geovals, trim(var_cli), geoval)
+    where (geoval%vals(:, 1) < zero) geoval%vals(:, 1) = zero
+    humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+  end if
+
+  ! Split qtotal to q(water_vapour), q(liquid), q(ice)
+  call Ops_SatRad_Qsplit ( 1,       &
+                    pressure(:),    &
+                    temperature(:), &
+                    humidity_total, &
+                    q(:),           &
+                    ql(:),          &
+                    qi(:),          &
+                    self % UseQtsplitRain)
+
+  ! Assign values to geovals q
+  varname = trim(var_q)  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = q(:)
+
+  ! Assign values to geovals q clw
+  varname = trim(var_clw)  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = ql(:)
+
+  ! Assign values to geovals ciw
+  varname = trim(var_cli)  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(:,1) = qi(:)
+
+  deallocate(humidity_total)
+  deallocate(q)
+  deallocate(ql)
+  deallocate(qi)
+
+end if
+
+!----
+! Legacy Ops_SatRad_SetUpRTprofBg_RTTOV12.f90 - done here to make sure geovals are updated
+! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
+! N.B. I think this should be flagged so it's clear that the background has been modified
+!----
+if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
+
+  ! Get skin temperature
+  call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval)
+  skin_t = geoval%vals(1, 1)
+
+  ! Get 2m pressure
+  call ufo_geovals_get_var(geovals, var_ps, geoval)
+  pressure_2m = geoval%vals(1, 1)
+
+  ! Get 2m temperature
+  call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval)
+  temperature_2m = geoval%vals(1, 1)
+
+  if(skin_t < 271.4_kind_real .and. &
+     pressure_2m  > 95000.0_kind_real) then
+
+     level_1000hpa = minloc(abs(pressure - 100000.0_kind_real),DIM=1)
+     level_950hpa = minloc(abs(pressure - 95000.0_kind_real),DIM=1)
+
+     NewT = temperature(level_950hpa)
+     if(pressure_2m > 100000.0_kind_real) then
+       NewT = max(NewT, temperature(level_1000hPa))
+     end if
+     NewT = min(NewT, 271.4_kind_real)
+
+     temperature(level_1000hPa) = max(temperature(level_1000hPa), NewT)
+     temperature_2m = max(temperature_2m, NewT)
+     skin_t = max(skin_t, NewT)
+
+     ! Put updated values back into geovals
+     ! Temperature
+     gv_index = 0
+     varname = trim(var_ts)
+     do i=1,geovals%nvar
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+     end do
+     geovals%geovals(gv_index) % vals(level_1000hPa,1) = temperature(level_1000hPa)
+
+     ! 2m Temperature
+     gv_index = 0
+     varname = trim(var_sfc_t2m)
+     do i=1,geovals%nvar
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+     end do
+     geovals%geovals(gv_index) % vals(1,1) = temperature_2m
+
+     ! Skin Temperature
+     gv_index = 0
+     varname = trim(var_sfc_tskin)
+     do i=1,geovals%nvar
+       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+     end do
+     geovals%geovals(gv_index) % vals(1,1) = skin_t
+
+   endif
+
+endif
+
+! Tidy up
+if (allocated(temperature))    deallocate(temperature)
+if (allocated(pressure))       deallocate(pressure)
+if (allocated(qsaturated))     deallocate(qsaturated)
+if (allocated(humidity_total)) deallocate(humidity_total)
+if (allocated(q))              deallocate(q)
+if (allocated(ql))             deallocate(ql)
+if (allocated(qi))             deallocate(qi)
+
+write(message, *) routinename, " : ended"
+call fckit_log % debug(message)
+
+end subroutine ufo_rttovonedvarcheck_check_geovals
+
+!-----------------------------------------------------------
+!> Adjust b matrix for 1D-Var setup.
 !!
 !! \author Met Office
 !!
-!! \date 03/08/2020: Created
+!! \date 19/05/2021: Created
 !!
-subroutine ufo_rttovonedvarcheck_print(self)
+subroutine ufo_rttovonedvarcheck_adjust_bmatrix(profindex, &
+            obs, obindex, config, &
+            b_matrix, b_inverse, b_sigma)
 
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(in) :: self
+type(ufo_rttovonedvarcheck_profindex), intent(inout) :: profindex !< index array for x vector
+type(ufo_rttovonedvarcheck_obs), intent(in) :: obs
+integer, intent(in)                         :: obindex
+type(ufo_rttovonedvarcheck), intent(in)     :: config
+real(kind_real), intent(inout)              :: b_matrix(:,:)
+real(kind_real), intent(inout)              :: b_inverse(:,:)
+real(kind_real), intent(inout)              :: b_sigma(:)
 
-integer :: ii
+integer :: i, j, chanindex
+real(kind_real) :: MwEmissError
+real(kind_real) :: bscale
+real(kind_real) :: missing
 
-write(*,*) "qcname = ", trim(self % qcname)
-write(*,*) "b_matrix_path = ", trim(self % b_matrix_path)
-write(*,*) "r_matrix_path = ", trim(self % r_matrix_path)
-write(*,*) "forward_mod_name = ", trim(self % forward_mod_name)
-write(*,*) "retrieval_variables = "
-do ii = 1, self % nmvars
-  write(*,*) trim(self % retrieval_variables(ii))," "
+missing = missing_value(missing)
+
+!! Make sure emisspc is not done over sea
+if (obs % surface_type(obindex) == RTsea) profindex % emisspc(:) = 0
+
+!! Switch off emissivity retrieval if not needed or over sea
+!! or if missing values exist in microwave emissivity error atlas
+if (obs % surface_type(obindex) /= RTland .or. &
+    .not. allocated(obs % mwemisserr) ) then
+    profindex % mwemiss(:) = 0
+else
+  if (allocated(obs % mwemisserr)) then
+    if (obs % mwemisserr(1, obindex) == missing) then
+      profindex % mwemiss = 0
+    end if
+  end if
+end if
+
+! This has been left in for future development
+!! Use errors associated with microwave emissivity atlas
+if (profindex % mwemiss(1) > 0) then
+
+  ! Atlas uncertainty stored in Ob % MwEmErrAtlas, use this to scale each
+  ! row/column of the B matrix block.
+  ! The default B matrix, contains error
+  ! covariances representing a global average. Here, those elements are scaled
+  ! by a factor MwEmissError/SQRT(diag(B_matrix)) for each channel.
+  do i = profindex % mwemiss(1), profindex % mwemiss(2)
+    chanindex = 0
+    chanloop: do j = 1, size(obs % channels)
+      if (obs % channels(j) == config % EmissToChannelMap(i - profindex % mwemiss(1) + 1)) then
+        chanindex = j
+        exit chanloop
+      end if
+    end do chanloop
+    if (chanindex == 0) then
+      write(message,*) "MwEmissError for channel ",config % EmissToChannelMap(i - profindex % mwemiss(1) + 1), &
+                       "is required. This channel should be included in the list of filter vars for the ", &
+                       "RTTOVOneDVarCheck. The channel will not be used in the minimization if it was rejected ", &
+                       "prior to the RTTOVOneDVarCheck."
+      call abor1_ftn(message)
+    end if
+    MwEmissError = obs % mwemisserr(chanindex, obindex)
+    if (MwEmissError > 1.0E-4 .and. MwEmissError < 1.0) then
+      bscale = MwEmissError / sqrt (b_matrix(i,i))
+      b_matrix(:,i) = b_matrix(:,i) * bscale
+      b_matrix(i,:) = b_matrix(i,:) * bscale
+      b_inverse(:,i) = b_inverse(:,i) / bscale
+      b_inverse(i,:) = b_inverse(i,:) / bscale
+      b_sigma(i) = b_sigma(i) * bscale
+    end if
+  end do
+
+end if
+
+!! Scale the background skin temperature error covariances over land
+if (profindex % tstar > 0) then
+  if (obs % surface_type(obindex) == RTland .and. config % SkinTempErrorLand >= zero) then
+    bscale = config % SkinTempErrorLand / sqrt (b_matrix(profindex % tstar,profindex % tstar))
+    b_matrix(:,profindex % tstar) = b_matrix(:,profindex % tstar) * bscale
+    b_matrix(profindex % tstar,:) = b_matrix(profindex % tstar,:) * bscale
+    b_inverse(:,profindex % tstar) = b_inverse(:,profindex % tstar) / bscale
+    b_inverse(profindex % tstar,:) = b_inverse(profindex % tstar,:) / bscale
+    b_sigma(profindex % tstar) = b_sigma(profindex % tstar) * bscale
+  end if
+end if
+
+end subroutine ufo_rttovonedvarcheck_adjust_bmatrix
+
+! ----------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_check_ctp(ctp, geovals, nlevels)
+
+implicit none
+real(kind_real), intent(inout) :: ctp       !< ctp in hPa
+type(ufo_geovals), intent(in)  :: geovals   !< model data at obs location
+integer, intent(in)            :: nlevels   !< number of levels in 1dvar
+
+type(ufo_geoval), pointer      :: geoval
+real(kind_real), allocatable   :: pressure(:) ! pressure (hPa)
+integer                        :: ilev        ! counter
+
+allocate(pressure(nlevels))
+call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
+pressure(:) = geoval%vals(:, 1) * Pa_to_hPa    ! hPa
+
+do ilev = 1, nlevels
+  if (abs(pressure(ilev) - ctp) < 1.0e-3) ctp = pressure(ilev)
 end do
-write(*,*) "nlevels = ",self %  nlevels
-write(*,*) "nmvars = ",self % nmvars
-write(*,*) "nchans = ",self % nchans
-write(*,*) "channels(:) = ",self % channels(:)
-write(*,*) "qtotal = ",self % qtotal
-write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
-write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
-write(*,*) "UseMLMinimization = ",self % UseMLMinimization
-write(*,*) "UseJforConvergence = ",self % UseJforConvergence
-write(*,*) "UseRHwaterForQC = ", self % UseRHwaterForQC
-write(*,*) "UseColdSurfaceCheck = ", self % UseColdSurfaceCheck
-write(*,*) "UseQtsplitRain = ",self % UseQtsplitRain
-write(*,*) "FullDiagnostics = ",self % FullDiagnostics
-write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
-write(*,*) "JConvergenceOption = ",self % JConvergenceOption
-write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
-write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
-write(*,*) "CostConvergenceFactor = ",self % Cost_ConvergenceFactor
-write(*,*) "MaxMLIterations = ",self % MaxMLIterations
-write(*,*) "EmissLandDefault = ",self % EmissLandDefault
-write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-write(*,*) "Use PC for Emissivity = ", self % pcemiss
-write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
-write(*,*) "EmisAtlas = ",self % EmisAtlas
 
-end subroutine ufo_rttovonedvarcheck_print
+end subroutine ufo_rttovonedvarcheck_check_ctp
 
-! ------------------------------------------------------------------------------
+! -------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_all_to_subset_by_channels(channels_all, &
+                          allvector, channels_subset, subsetvector)
+
+implicit none
+integer, intent(in)          :: channels_all(:)
+real(kind_real), intent(in)  :: allvector(:)
+integer, intent(in)          :: channels_subset(:)
+real(kind_real), intent(out) :: subsetvector(:)
+
+integer                      :: i, j, jnew
+real(kind_real)              :: missing         ! missing value
+
+missing = missing_value(missing)
+subsetvector(:) = missing
+
+if ((size(channels_all)  /= size(allvector)) .or. &
+    (size(channels_subset) /= size(subsetvector))) then
+  write(*,*) "channels_all and allvector sizes = ",size(channels_all),size(allvector)
+  write(*,*) "channels_subset and subsetvector sizes = ",size(channels_subset),size(subsetvector)
+  call abor1_ftn("ufo_rttovonedvarcheck_all_to_subset_by_channels: arrays and channels size don't match")
+end if
+
+jnew = 1
+used_loop: do i = 1, size(channels_subset)
+  j = jnew
+  do while ( j <= size(channels_all) )
+    if (channels_subset(i) == channels_all(j)) then
+      subsetvector(i) = allvector(j)
+      cycle used_loop
+    end if
+    j = j + 1
+  end do
+end do used_loop
+
+end subroutine ufo_rttovonedvarcheck_all_to_subset_by_channels
+
+! -------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_subset_to_all_by_channels(channels_subset, &
+                          subsetvector, channels_all, allvector)
+
+implicit none
+integer, intent(in)          :: channels_subset(:)
+real(kind_real), intent(in)  :: subsetvector(:)
+integer, intent(in)          :: channels_all(:)
+real(kind_real), intent(out) :: allvector(:)
+
+integer                      :: i, j, jnew
+real(kind_real)              :: missing         ! missing value
+
+missing = missing_value(missing)
+allvector(:) = missing
+
+if ((size(channels_subset) /= size(subsetvector)) .or. &
+    (size(channels_all)  /= size(allvector))) then
+  write(*,*) "channels_subset and subsetvector sizes = ",size(channels_subset),size(subsetvector)
+  write(*,*) "channels_all and allvector sizes = ",size(channels_all),size(allvector)
+  call abor1_ftn("ufo_rttovonedvarcheck_subset_to_all_by_channels: arrays and channels size don't match")
+end if
+
+jnew = 1
+used_loop: do i = 1, size(channels_subset)
+  j = jnew
+  do while ( j <= size(channels_all) )
+    if (channels_subset(i) == channels_all(j)) then
+      allvector(j) = subsetvector(i)
+      cycle used_loop
+    end if
+    j = j + 1
+  end do
+end do used_loop
+
+end subroutine ufo_rttovonedvarcheck_subset_to_all_by_channels
+
+! -------------------------------------------------------------
 
 end module ufo_rttovonedvarcheck_utils_mod

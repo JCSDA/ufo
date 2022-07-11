@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -49,7 +49,11 @@ class ObsErrorBoundMWParameters : public oops::Parameters {
   oops::RequiredParameter<Variable> obserrBoundTopo{"obserr_bound_topo", this};
 
   /// Function to estimate observation error based on symmetric cloud amount
-  oops::RequiredParameter<Variable> obserrFunction{"obserr_function", this};
+  // oops::RequiredParameter<Variable> obserrFunction{"obserr_function", this};
+  oops::OptionalParameter<Variable> obserrFunction{"obserr_function", this};
+
+  /// Parameter for original observation error
+  oops::OptionalParameter<std::vector<float>> obserrOriginal{"error parameter vector", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};

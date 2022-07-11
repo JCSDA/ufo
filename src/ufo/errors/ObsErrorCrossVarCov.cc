@@ -7,12 +7,15 @@
 
 #include "ufo/errors/ObsErrorCrossVarCov.h"
 
+#include <math.h>
 #include <vector>
 
 #include "ioda/Engines/Factory.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
+
+#include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
 
@@ -22,7 +25,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                                          ioda::ObsSpace & obspace,
                                          const eckit::mpi::Comm &timeComm)
   : ObsErrorBase(timeComm),
-    stddev_(obspace, "ObsError"),
+    stddev_(obspace, "ObsError"), vars_(obspace.assimvariables()),
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars()))
 {
   // Open and read error correlations from the hdf5 file
@@ -37,15 +40,51 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
                          ioda::detail::DataLayoutPolicy::generate(
                          ioda::detail::DataLayoutPolicy::Policies::None));
 
-  ioda::Variable corrvar = obsgroup.vars["obserror_correlations"];
-  corrvar.readWithEigenRegular(varcorrelations_);
-  // Check that the sizes are correct
-  const size_t nvars = stddev_.nvars();
-  if ((varcorrelations_.rows() != nvars) || (varcorrelations_.cols() != nvars)) {
-    std::string errormsg = std::string("Correlation matrix for R, specified in ") +
-                options.inputFile.value() + std::string(" should be size ") +
-                std::to_string(nvars) + std::string(" by ") + std::to_string(nvars);
-    throw eckit::UserError(errormsg, Here());
+  Eigen::MatrixXf allvarcorrelations;
+  if (obsgroup.vars.exists("obserror_correlations") &&
+      (!obsgroup.vars.exists("obserror_covariances"))) {
+    ioda::Variable corrvar = obsgroup.vars["obserror_correlations"];
+    corrvar.readWithEigenRegular(allvarcorrelations);
+    // Issue an error if it's not a correlation matrix
+    if (!allvarcorrelations.diagonal().isOnes()) {
+      throw eckit::BadParameter("ObsErrorCrossVarCov: obserror_correlations matrix read from "
+                                "file is not a correlation matrix (values different from one "
+                                "found on a diagonal).");
+    }
+  } else if (obsgroup.vars.exists("obserror_covariances") &&
+             (!obsgroup.vars.exists("obserror_correlations"))) {
+    ioda::Variable covvar = obsgroup.vars["obserror_covariances"];
+    Eigen::MatrixXf allvarcovariances;
+    covvar.readWithEigenRegular(allvarcovariances);
+    // Convert to correlations
+    Eigen::MatrixXf stddevinv(allvarcovariances.diagonal().array().rsqrt().matrix().asDiagonal());
+    allvarcorrelations = stddevinv * allvarcovariances * stddevinv;
+  } else {
+    oops::Log::error() << "One of obserror_correlations or obserror_covariances has to "
+                       << "be specified in the input file " << options.inputFile.value()
+                       << std::endl;
+    throw eckit::BadParameter("One of obserror_correlations or obserror_covariances has "
+                              "to be specified in the input file.");
+  }
+
+  // Get channel/variables indices in the allvarcorrelations; index == -1 means that correlations
+  // don't exist in the file for this channel/variable, and we'll keep them at 0.
+  const std::vector<int> var_idx =
+         getRequiredVarOrChannelIndices(obsgroup, vars_, false);
+
+  for (size_t ivar = 0; ivar < var_idx.size(); ++ivar) {
+    if (var_idx[ivar] < 0) {
+      oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
+                           << "variable " << obspace.obsvariables()[ivar] << " in "
+                           << options.inputFile.value() << ", correlations set to zero."
+                           << std::endl;
+    } else {
+      for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
+        if (var_idx[jvar] >= 0) {
+          varcorrelations_(ivar, jvar) = allvarcorrelations(var_idx[ivar], var_idx[jvar]);
+        }
+      }
+    }
   }
 }
 
@@ -183,7 +222,19 @@ std::unique_ptr<ioda::ObsVector> ObsErrorCrossVarCov::getInverseVariance() const
 void ObsErrorCrossVarCov::print(std::ostream & os) const {
   os << "Observation error covariance with cross-variable correlations." << std::endl;
   os << " Obs error stddev: " << stddev_ << std::endl;
-  os << " Cross-variable correlations: " << std::endl << varcorrelations_;
+  os << " Cross-variable correlations: " << std::endl;
+  if (varcorrelations_.rows() < 8) {
+    os << varcorrelations_;
+  } else {
+     Eigen::MatrixXf::Index maxRow, maxCol;
+     float max = varcorrelations_.maxCoeff(&maxRow, &maxCol);
+     Eigen::MatrixXf::Index minRow, minCol;
+     float min = varcorrelations_.minCoeff(&minRow, &minCol);
+     os << "  Maximum correlation: " << max <<  ", between: " <<
+            vars_[maxRow] << " and " << vars_[maxCol] << std::endl;
+     os << "  Minimum correlation: " << min << ", between: " <<
+            vars_[minRow] << " and " << vars_[minCol];
+  }
 }
 
 // -----------------------------------------------------------------------------

@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
-
+#include "ioda/ObsVector.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
@@ -29,6 +29,7 @@ CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(const Parameters_
 void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
                                              const GeoVaLs &,
                                              const ObsDiagnostics &,
+                                             const ObsBias &,
                                              ioda::ObsVector & out) const {
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();

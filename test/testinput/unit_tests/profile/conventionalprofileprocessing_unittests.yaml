@@ -1,0 +1,357 @@
+#
+#=== Unit tests for the profile QC ===#
+#
+#These tests focus on the basic checks.
+#The same sonde profile has been used multiple times (with minor tweaks) to generate a test sample.
+#Different values of the variable test_id have been assigned to each profile
+#and the where clause is used to select individual profiles from the sample by filtering on test_id.
+#
+#The sonde has 132 levels. There are 17 valid geopotential height (Z) observations (115 missing)
+#and 52 valid air temperature (T) observations (80 missing).
+#For test_id = 5 all of the T observations are missing.
+#
+#None of the QC checks flag any observations from this particular sonde.
+#Therefore using the benchmark flag either 0 or 69 observations will pass the test.
+#
+
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
+
+observations:
+#=== Standard sonde profile (test_id = 0) ===#
+#69 individual observations pass the basic checks
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out1.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Standard sonde profile (test_id = 0), no sorting ===#
+#Should be identical to the case with sorting because the indices are already in the correct order
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out2.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Standard sonde profile (test_id = 0), no checks defined ===#
+#Basic checks should be added automatically
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out3.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: []
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
+#The level with the excessively large pressure is flagged.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out4.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 1
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 1
+#=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
+#The sonde with a pressure too large (test_id = 1) is selected by the where clause but it fails the basic checks
+#However, its invididual observations are not subsequently flagged so all 69 pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out5.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: false
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 1
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with negative pressure reading (test_id = 2) ===#
+#The minimum allowed pressure is 995 Pa.
+# Two of the levels have missing temperature so only one is flagged as failing the basic checks.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out6.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    BChecks_minValidP: 995
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 2
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 1
+#=== No data (invalid test_id) ===#
+#No observations are expected to be processed by the filter so the number expected is the
+#number of observations with non-missing data
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out7.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 999
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with pressures out of order (test_id = 3), sorting by pressure ===#
+#After sorting this profile should be the same as the original sonde (test_id = 0), so expect the same observations to pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out8.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 3
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
+#The lack of sorting causes the sonde to fail the basic checks.
+#One pressure is out of order and is therefore flagged.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out9.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 3
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 1
+#=== Sonde with all pressures missing (test_id = 4) ===#
+#Although all pressures are missing, no observations are flagged because the
+#failure criteria have not been met.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out10.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 4
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with all temperatures missing (test_id = 5) ===#
+#Basic checks still passed since they only depend on pressure
+#The missing values are not dealt with any differently so the same number
+#of observations is expected to pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out11.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 5
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+#=== Sonde with all temperatures missing (test_id = 5), all checks ===#
+#Basic checks still passed since they only depend on pressure
+#All other checks pass so the number of expected observations is unchanged
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_out12.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: height
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 5
+  HofX: HofX
+  benchmarkFlag: 24
+  flaggedBenchmark: 0

@@ -8,51 +8,74 @@
 #include "ufo/filters/obsfunctions/ObsFunctionVelocity.h"
 
 #include <math.h>
+#include <algorithm>
+#include <set>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionVelocity> makerObsFuncVelocity_("Velocity");
+static ObsFunctionMaker<Velocity<float>> floatMaker("Velocity");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionVelocity::ObsFunctionVelocity(const eckit::LocalConfiguration conf)
+template <typename FunctionValue>
+Velocity<FunctionValue>::Velocity(const eckit::LocalConfiguration & conf)
   : invars_(), group_() {
+  // Check options
+  options_.deserialize(conf);
   group_ = conf.getString("type", "ObsValue");
-  invars_ += Variable("eastward_wind@" + group_);
-  invars_ += Variable("northward_wind@" + group_);
+
+  // Get channels from options
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
+  std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  invars_ += Variable(group_ + "/eastward_wind", channels_);
+  invars_ += Variable(group_ + "/northward_wind", channels_);
 }
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionVelocity::~ObsFunctionVelocity() {}
-
-// -----------------------------------------------------------------------------
-
-void ObsFunctionVelocity::compute(const ObsFilterData & in,
-                                  ioda::ObsDataVector<float> & out) const {
-  // TODO(AS): should use constants for variable names
+template <typename FunctionValue>
+void Velocity<FunctionValue>::compute(const ObsFilterData & in,
+                                      ioda::ObsDataVector<FunctionValue> & out) const {
+  // dimension
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
-  std::vector<float> u, v;
-  in.get(Variable("eastward_wind@" + group_), u);
-  in.get(Variable("northward_wind@" + group_), v);
-  for (size_t jj = 0; jj < nlocs; ++jj) {
-    if (u[jj] != missing && v[jj] != missing) {
-      out[0][jj] = sqrt(u[jj]*u[jj] + v[jj]*v[jj]);
-    } else {
-      out[0][jj] = missing;
-    }
-  }
+
+  // number of input variables
+  const size_t nv = invars_.size();
+
+  // number of channels
+  const size_t nchans = out.nvars();
+
+  // sanity check we have 2 wind components
+  ASSERT(nv == 2);
+
+  // compute wind speed
+  const FunctionValue missing = util::missingValue(missing);
+  ioda::ObsDataVector<FunctionValue> u(in.obsspace(), invars_[0].toOopsVariables());
+  ioda::ObsDataVector<FunctionValue> v(in.obsspace(), invars_[1].toOopsVariables());
+  in.get(invars_[0], u);
+  in.get(invars_[1], v);
+  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      if (u[ichan][iloc] != missing && v[ichan][iloc] != missing) {
+        out[ichan][iloc] = sqrt(u[ichan][iloc]*u[ichan][iloc] + v[ichan][iloc]*v[ichan][iloc]);
+      } else {
+        out[ichan][iloc] = missing;
+      }
+    }  // nchans
+  }  // nlocs
 }
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionVelocity::requiredVariables() const {
+template <typename FunctionValue>
+const ufo::Variables & Velocity<FunctionValue>::requiredVariables() const {
   return invars_;
 }
 

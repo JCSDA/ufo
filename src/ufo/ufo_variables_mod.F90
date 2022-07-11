@@ -1,5 +1,5 @@
 !
-!  (C) Copyright 2017-2019 UCAR
+!  (C) Copyright 2021.
 !
 !  This software is licensed under the terms of the Apache Licence Version 2.0
 !  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -24,20 +24,23 @@ character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
 character(len=MAXVARLEN), public, parameter :: var_v    = "northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
-character(len=MAXVARLEN), public, parameter :: var_delp = "air_pressure_thickness"
-character(len=MAXVARLEN), public, parameter :: var_ps   = "surface_pressure"
-character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
-character(len=MAXVARLEN), public, parameter :: var_zm   = "geometric_height"
-character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
-character(len=MAXVARLEN), public, parameter :: var_sfc_z= "surface_geopotential_height"
-character(len=MAXVARLEN), public, parameter :: var_oz   = "mole_fraction_of_ozone_in_air"
-character(len=MAXVARLEN), public, parameter :: var_co2  = "mole_fraction_of_carbon_dioxide_in_air"
-character(len=MAXVARLEN), public, parameter :: var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clr  = "mass_content_of_rain_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_cls  = "mass_content_of_snow_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clg  = "mass_content_of_graupel_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clh  = "mass_content_of_hail_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_prsimo = "air_pressure_levels_minus_one"
+character(len=MAXVARLEN), public, parameter :: var_delp   = "air_pressure_thickness"
+character(len=MAXVARLEN), public, parameter :: var_ps     = "surface_pressure"
+character(len=MAXVARLEN), public, parameter :: var_pmsl   = "surface_pressure_at_mean_sea_level"
+character(len=MAXVARLEN), public, parameter :: var_z      = "geopotential_height"
+character(len=MAXVARLEN), public, parameter :: var_zm     = "geometric_height"
+character(len=MAXVARLEN), public, parameter :: var_zi     = "geopotential_height_levels"
+character(len=MAXVARLEN), public, parameter :: var_zimo   = "geopotential_height_levels_minus_one"
+character(len=MAXVARLEN), public, parameter :: var_sfc_z  = "surface_geopotential_height"
+character(len=MAXVARLEN), public, parameter :: var_oz     = "mole_fraction_of_ozone_in_air"
+character(len=MAXVARLEN), public, parameter :: var_co2    = "mole_fraction_of_carbon_dioxide_in_air"
+character(len=MAXVARLEN), public, parameter :: var_clw    = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cli    = "mass_content_of_cloud_ice_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clr    = "mass_content_of_rain_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cls    = "mass_content_of_snow_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clg    = "mass_content_of_graupel_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clh    = "mass_content_of_hail_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
 character(len=MAXVARLEN), public, parameter :: var_cliefr = "effective_radius_of_cloud_ice_particle"
 character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of_rain_particle"
@@ -45,7 +48,6 @@ character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac= "cloud_area_fraction_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_sfc_p2m = "air_pressure_at_two_meters_above_surface"      ! (Pa)
 character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
 character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)
@@ -68,7 +70,9 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_v       = "surface_northw
 character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "leaf_area_index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "volume_fraction_of_condensed_water_in_soil"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "soil_temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp = "land_type_index"
+character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp_npoess = "land_type_index_NPOESS"
+character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp_igbp   = "land_type_index_IGBP"
+character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp_usgs   = "land_type_index_USGS"
 character(len=MAXVARLEN), public, parameter :: var_sfc_vegtyp  = "vegetation_type_index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "soil_type"
 character(len=MAXVARLEN), public, parameter :: var_geomz       = "height"
@@ -82,6 +86,7 @@ character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickn
 character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
 character(len=MAXVARLEN), public, parameter :: var_tb          = "brightness_temperature"
 character(len=MAXVARLEN), public, parameter :: var_tb_clr      = "brightness_temperature_assuming_clear_sky"
+character(len=MAXVARLEN), public, parameter :: var_tb_overcast = "brightness_temperature_from_atmosphere_layer_to_toa"
 character(len=MAXVARLEN), public, parameter :: var_total_transmit= "toa_total_transmittance"
 character(len=MAXVARLEN), public, parameter :: var_lvl_transmit= "transmittances_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_lvl_weightfunc= "weightingfunction_of_atmosphere_layer"
@@ -89,14 +94,17 @@ character(len=MAXVARLEN), public, parameter :: var_pmaxlev_weightfunc= "pressure
 character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surface_temperature_within_field_of_view"
 character(len=MAXVARLEN), public, parameter :: var_sea_fric_vel    = "friction_velocity_over_water"
 character(len=MAXVARLEN), public, parameter :: var_obk_length      = "obukhov_length"
-
+character(len=MAXVARLEN), public, parameter :: var_tropprs     = "tropopause_pressure"
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
-character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
+character(len=maxvarlen), public, parameter :: var_cloud_layer = "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_qcl  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_qci  = "mass_content_of_cloud_ice_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
+character(len=MAXVARLEN), public, parameter :: var_surf_tau = "transmission_at_surface" 
 character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
 character(len=MAXVARLEN), public, parameter :: var_sfc_seaicefrac = "seaice_fraction"
 
@@ -141,6 +149,11 @@ character(len=MAXVARLEN), public, parameter :: var_ext1 = "volume_extinction_in_
 character(len=MAXVARLEN), public, parameter :: var_ext2 = "volume_extinction_in_air_due_to_aerosol_particles_lambda2"
 character(len=MAXVARLEN), public, parameter :: var_ext3 = "volume_extinction_in_air_due_to_aerosol_particles_lambda3"
 character(len=MAXVARLEN), public, parameter :: var_airdens = "moist_air_density"
+
+! Scaling factors for deriving PM2.5 from CMAQ aerosols in the Aitken (at), accumulation (ac) and coarse (co) modes
+character(len=MAXVARLEN), public, parameter :: var_pm25at = "pm25at"
+character(len=MAXVARLEN), public, parameter :: var_pm25ac = "pm25ac"
+character(len=MAXVARLEN), public, parameter :: var_pm25co = "pm25co"
 
 character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
      &var_aerosols_gocart_default = [&

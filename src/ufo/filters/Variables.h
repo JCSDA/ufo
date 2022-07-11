@@ -12,10 +12,16 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
-#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/Variable.h"
+
+namespace eckit {
+  class LocalConfiguration;
+}
+
+namespace oops {
+  class Variables;
+}
 
 namespace ufo {
 
@@ -29,6 +35,7 @@ class Variables: public util::Printable {
   explicit Variables(const std::vector<eckit::LocalConfiguration> &);
   explicit Variables(const oops::Variables &);
   Variables(const ufo::Variables &, const std::string &);
+  explicit Variables(const std::vector<Variable> &);
   ~Variables();
 
   Variables & operator+=(const Variables &);

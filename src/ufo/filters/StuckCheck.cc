@@ -14,7 +14,6 @@
 #include <vector>
 
 #include <boost/none.hpp>
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -33,6 +32,22 @@ StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
+  if (options_.core.percentageStuckTolerance.value()) {
+    if ((options_.core.numberStuckTolerance.value()) ||
+           (options_.core.timeStuckTolerance.value())) {  // must NOT be set if percentage set
+      throw eckit::UserError(R"(If percentage stuck tolerance is set,
+            neither number stuck tolerance nor time stuck tolerance should be set.)", Here());
+    }
+    if ((options_.core.percentageStuckTolerance.value().value() < 0) ||
+        (options_.core.percentageStuckTolerance.value().value() > 100)) {  // must be 0-100
+      throw eckit::UserError(R"(Percentage stuck tolerance must be between 0 and 100.)", Here());
+    }
+  } else {  // no percentage stuck tolerance, so others MUST be set
+    if (!options_.core.numberStuckTolerance.value() || !options_.core.timeStuckTolerance.value()) {
+      throw eckit::UserError(R"(If percentage stuck tolerance is not set,
+            then both number stuck tolerance and time stuck tolerance must be set.)", Here());
+    }
+  }
   obsGroupDateTimes_.reset(new std::vector<util::DateTime>);
   oops::Log::debug() << "StuckCheck: config = " << options_ << '\n';
 }
@@ -49,10 +64,13 @@ StuckCheck::~StuckCheck()
 void StuckCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+  // 3rd arg: recordsAreSingleObs = false for Stuck Check.
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
+                                                               obsdb_,
+                                                               false);
   const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
   *obsGroupDateTimes_ = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   // Create groups based on record number (assumed station ID) or category variable
   // (stationIdVariable) or otherwise assume observations all taken by the same station (1 group)
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
@@ -69,6 +87,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
     }
     const std::vector<float> variableValues = obsAccessor.getFloatVariableFromObsSpace(
           "ObsValue", variable);
+    const float missingFloat = util::missingValue(float());
     for (auto station : splitter.multiElementGroups()) {
       std::string stationId = std::to_string(stationNumber);
       std::vector<float> variableDataStation = collectStationVariableData(
@@ -80,6 +99,9 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
       for (size_t observationIndex = 0; observationIndex < variableDataStation.size();
            observationIndex++) {
         currentObservationValue = variableDataStation.at(observationIndex);
+        if (currentObservationValue == missingFloat) {
+          continue;
+        }
         if (observationIndex == 0) {
           previousObservationValue = currentObservationValue;
         } else {
@@ -116,7 +138,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
 }
 
 void StuckCheck::print(std::ostream & os) const {
-  os << "StuckCheck: config = " << config_ << '\n';
+  os << "StuckCheck: config = " << options_ << '\n';
 }
 
 /// \returns a vector containing all of the necessary data to run this filter for each observation,
@@ -159,19 +181,30 @@ void StuckCheck::potentiallyRejectStreak(
     isRejected[obsIndex] = true;
   };
 
-  size_t streakLength = endOfStreakIndex - startOfStreakIndex + 1;
-  if (streakLength <= options_.core.numberStuckTolerance) {
-    return;
+  const size_t streakLength = endOfStreakIndex - startOfStreakIndex + 1;
+  const size_t stationLength = stationIndicesEnd - stationIndicesBegin;
+  size_t numberStuckTolerance;
+  if (options_.core.percentageStuckTolerance.value()) {
+    numberStuckTolerance =
+        std::round(options_.core.percentageStuckTolerance.value().value()*stationLength/100.0);
+    if (numberStuckTolerance < 2) {
+      return;
+    }
+  } else {
+    numberStuckTolerance = options_.core.numberStuckTolerance.value().value();
+  }
+  if (streakLength <= numberStuckTolerance) {
+      return;
   }
 
-  size_t stationLength = stationIndicesEnd - stationIndicesBegin;
-
-  if (streakLength < stationLength) {
-    util::DateTime firstStreakObservationTime = getObservationTime(startOfStreakIndex);
-    util::DateTime lastStreakObservationTime = getObservationTime(endOfStreakIndex);
-    util::Duration streakDuration = lastStreakObservationTime - firstStreakObservationTime;
-    if (streakDuration <= options_.core.timeStuckTolerance) {
-      return;
+  if (!(options_.core.percentageStuckTolerance.value())) {
+    if (streakLength < stationLength) {
+      const util::DateTime firstStreakObservationTime = getObservationTime(startOfStreakIndex);
+      const util::DateTime lastStreakObservationTime = getObservationTime(endOfStreakIndex);
+      const util::Duration streakDuration = lastStreakObservationTime - firstStreakObservationTime;
+      if (streakDuration <= options_.core.timeStuckTolerance.value().value()) {
+        return;
+      }
     }
   }
   // reject all observations within streak

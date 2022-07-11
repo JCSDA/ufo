@@ -13,8 +13,8 @@ observations:
     name: ssmis_f17
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
-    obsdataout:
-      obsfile: Data/ssmis_f17_hofx_2020110112.nc4
+#    obsdataout:
+#      obsfile: Data/ssmis_f17_hofx_2020110112.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-24
   geovals:
@@ -25,7 +25,7 @@ observations:
       predictors:
       - name: constant
       - name: cloud_liquid_water
-        satellite: SSMIS
+        sensor: SSMIS
         ch19h: 12
         ch19v: 13
         ch22v: 14

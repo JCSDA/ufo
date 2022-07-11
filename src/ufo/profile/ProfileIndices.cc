@@ -96,7 +96,7 @@ namespace ufo {
     numProfileLevels_ = static_cast<int> (profileIndices_.size());
 
     if (numProfileLevels_ > 0) {
-      oops::Log::debug() << "First and last profile indices: " << profileIndices_.front()
+      oops::Log::debug() << "    First and last profile indices: " << profileIndices_.front()
                          << ", " << profileIndices_.back() << std::endl;
     }
 

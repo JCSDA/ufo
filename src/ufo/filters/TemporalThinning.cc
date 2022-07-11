@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -23,6 +22,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TemporalThinningParameters.h"
+#include "ufo/utils/RecordHandler.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {
@@ -320,13 +320,46 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
                                    std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  const std::vector<bool> isThinned = identifyThinnedObservations(apply, filtervars, obsAccessor);
+  // The RecordHandler deals with data that have been grouped into records.
+  // If the grouping has not been performed then each RecordHandler function simply
+  // returns what it has been passed without modification.
+  // The value of `retainOnlyIfAllFilterVariablesAreValid`  is set to `false`
+  // because that is the default value used in the `ObsAccessor` class.
+  const RecordHandler recordHandler(obsdb_, filtervars, *flags_, false);
 
-  obsAccessor.flagRejectedObservations(isThinned, flagged);
+  // If records are treated as single obs and a category variable is also used,
+  // ensure that there are no records with multiple values of the category variable.
+  if (options_.recordsAreSingleObs &&
+      options_.categoryVariable.value() != boost::none) {
+    recordHandler.checkRecordCategories(Variable(*options_.categoryVariable.value()));
+  }
+
+  const std::vector<bool> isThinned =
+    identifyThinnedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+     apply,
+     filtervars,
+     obsAccessor);
+
+  obsAccessor.flagRejectedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeThinnedIfRecordsAreSingleObs(isThinned) :
+     isThinned,
+     flagged);
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {
-  if (options_.categoryVariable.value() != boost::none) {
+  if (options_.recordsAreSingleObs) {
+    // If records are treated as single observations, the instantiation of the `ObsAccessor`
+    // depends on whether the category variable has been defined or not.
+    if (options_.categoryVariable.value() != boost::none) {
+      return ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(obsdb_,
+                                                      *options_.categoryVariable.value());
+    } else {
+      return ObsAccessor::toAllObservations(obsdb_);
+    }
+  } else if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value() );
   } else if (!obsdb_.obs_group_vars().empty()) {
@@ -348,7 +381,7 @@ std::vector<bool> TemporalThinning::identifyThinnedObservations(
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
                         { return times[validObsIds[obsIndex]]; });
 

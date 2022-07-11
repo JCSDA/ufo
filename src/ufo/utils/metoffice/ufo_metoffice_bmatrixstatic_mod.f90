@@ -21,15 +21,15 @@ type, public :: ufo_metoffice_bmatrixstatic
   integer :: nbands                                 !< number of latitude bands
   integer :: nsurf                                  !< number of surface type variations
   integer :: nfields                                !< number of fields
-  integer, pointer      :: fields(:,:)              !< fieldtypes and no. elements in each
-  real(kind=kind_real), pointer :: store(:,:,:)     !< original b-matrices read from the file
-  real(kind=kind_real), pointer :: inverse(:,:,:)   !< inverse of above
-  real(kind=kind_real), pointer :: sigma(:,:)       !< diagonal elements
-  real(kind=kind_real), pointer :: proxy(:,:)       !< copy of original for manipulation
-  real(kind=kind_real), pointer :: inv_proxy(:,:)   !< copy of inverse
-  real(kind=kind_real), pointer :: sigma_proxy(:,:) !< copy of diagonal
-  real(kind=kind_real), pointer :: south(:)         !< s limit of each latitude band
-  real(kind=kind_real), pointer :: north(:)         !< n limit of each latitude band
+  integer, allocatable :: fields(:,:)               !< fieldtypes and no. elements in each
+  real(kind=kind_real), allocatable :: store(:,:,:)     !< original b-matrices read from the file
+  real(kind=kind_real), allocatable :: inverse(:,:,:)   !< inverse of above
+  real(kind=kind_real), allocatable :: sigma(:,:)       !< diagonal elements
+  real(kind=kind_real), allocatable :: proxy(:,:)       !< copy of original for manipulation
+  real(kind=kind_real), allocatable :: inv_proxy(:,:)   !< copy of inverse
+  real(kind=kind_real), allocatable :: sigma_proxy(:,:) !< copy of diagonal
+  real(kind=kind_real), allocatable :: south(:)         !< s limit of each latitude band
+  real(kind=kind_real), allocatable :: north(:)         !< n limit of each latitude band
 contains
   procedure :: setup  => ufo_metoffice_bmatrixstatic_setup
   procedure :: delete => ufo_metoffice_bmatrixstatic_delete
@@ -77,7 +77,7 @@ character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_
      var_sfc_t2m,            &
      var_sfc_q2m,            &
      var_sfc_tskin,          &
-     var_sfc_p2m,            &
+     var_ps,                 &
      'ozone (total column)', &
      '[unused field type] ', &
      var_clw,                &
@@ -112,6 +112,7 @@ logical, intent(in)                :: qtotal_flag  !< Flag for qtotal
 logical                       :: file_exists  ! Check if a file exists logical
 integer                       :: fileunit     ! Unit number for reading in files
 integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matrix for testing.
+integer, allocatable          :: nonzero_fields_in(:) ! fields_in with nonzero entries removed
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
 character(len=:), allocatable :: str
 logical                       :: testing = .false.
@@ -127,7 +128,7 @@ inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
   fileunit = ufo_utils_iogetfreeunit()
   open(unit = fileunit, file = trim(filepath))
-  call rttovonedvarcheck_covariance_InitBmatrix(self)
+  call self % delete()
   call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
   if (testing) then
     call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in)
@@ -144,6 +145,7 @@ call cpu_time(t2)
 
 ! Check the yaml input contains all required b-matrix elements
 do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
+  if (self % fields(ii,1) == 0) cycle
   match = .false.
   do jj = 1, size(fields_in) ! loop over array generated from yaml
     if (self % fields(ii,1) == fields_in(jj)) match = .true.
@@ -153,6 +155,19 @@ do ii = 1, size(self % fields(:,1)) ! loop over b-matrix elements
     call abor1_ftn("rttovonedvarcheck not all the model data is available for the b-matrix")
   end if
 end do
+
+! Check the yaml input is in the same order as b-matrix elements
+! (this is to ensure the b-matrix rows & columns are in the anticipated order)
+nonzero_fields_in = pack(fields_in, fields_in /= 0)
+if (.not. all(pack(self % fields(:,1), self % fields(:,1) /= 0) == nonzero_fields_in)) then
+  write(*,*) "Supplied field list [L] is not in the order contained in the B-matrix [R]:"
+  do ii = 1, size(self % fields(:,1))
+    if (self % fields(ii,1) == 0) exit
+    write(*,*) ufo_metoffice_fieldtype_text(nonzero_fields_in(ii)), &
+               ufo_metoffice_fieldtype_text(self % fields(ii,1))
+  end do
+  call abor1_ftn("Supplied field list is expected in the B-matrix order")
+endif
 
 write(message,*) "ufo_metoffice_bmatrixstatic_setup cpu time = ",(t2-t1)
 call fckit_log % info(message)
@@ -178,50 +193,17 @@ character(len=*), parameter :: RoutineName = "ufo_metoffice_bmatrixstatic_delete
 self % status = .false.
 self % nbands = 0
 self % nsurf = 0
-if ( associated(self % fields)      ) deallocate( self % fields      )
-if ( associated(self % store)       ) deallocate( self % store       )
-if ( associated(self % inverse)     ) deallocate( self % inverse     )
-if ( associated(self % sigma)       ) deallocate( self % sigma       )
-if ( associated(self % proxy)       ) deallocate( self % proxy       )
-if ( associated(self % inv_proxy)   ) deallocate( self % inv_proxy   )
-if ( associated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
-if ( associated(self % south)       ) deallocate( self % south       )
-if ( associated(self % north)       ) deallocate( self % north       )
+if ( allocated(self % fields)      ) deallocate( self % fields      )
+if ( allocated(self % store)       ) deallocate( self % store       )
+if ( allocated(self % inverse)     ) deallocate( self % inverse     )
+if ( allocated(self % sigma)       ) deallocate( self % sigma       )
+if ( allocated(self % proxy)       ) deallocate( self % proxy       )
+if ( allocated(self % inv_proxy)   ) deallocate( self % inv_proxy   )
+if ( allocated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
+if ( allocated(self % south)       ) deallocate( self % south       )
+if ( allocated(self % north)       ) deallocate( self % north       )
 
 end subroutine ufo_metoffice_bmatrixstatic_delete
-
-! ------------------------------------------------------------------------------------------------
-!> \brief Routine to initialize the 1D-Var B-matrix
-!!
-!! \details Met Office OPS Heritage: Ops_SatRad_InitBmatrix.f90
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
-
-implicit none
-
-! subroutine arguments:
-type(ufo_metoffice_bmatrixstatic), intent(out) :: self !< B-matrix Covariance
-
-character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
-
-self % status = .false.
-self % nbands = 0
-self % nsurf = 0
-nullify( self % fields      )
-nullify( self % store       )
-nullify( self % inverse     )
-nullify( self % sigma       )
-nullify( self % proxy       )
-nullify( self % inv_proxy   )
-nullify( self % sigma_proxy )
-nullify( self % south       )
-nullify( self % north       )
-
-end subroutine rttovonedvarcheck_covariance_InitBmatrix
 
 ! ------------------------------------------------------------------------------------------------
 !> Routine to initialize the 1D-Var B-matrix
@@ -262,8 +244,7 @@ end subroutine rttovonedvarcheck_covariance_InitBmatrix
 !! processing without affecting the original. we might wish to do this, for
 !! example, to take account of the different surface temperature errors for land
 !! and sea. this routine makes no assumption about the use of these variables,
-!! hence no space is allocated. nullification of unused pointers should take
-!! place outside (use the ops_satrad_initbmatrix routine).
+!! hence no space is allocated.
 !!
 !! \author Met Office
 !!
@@ -598,42 +579,6 @@ b_matrix(:,:) = self % store(:,:,band)
 b_inverse(:,:) = self % inverse(:,:,band)
 b_sigma(:) = self % sigma(:,band)
 
-! This has been left in for future development
-!! Use errors associated with microwave emissivity atlas
-!if (profindex % mwemiss(1) > 0) then
-!
-!  ! Atlas uncertainty stored in Ob % MwEmErrAtlas, use this to scale each
-!  ! row/column of the B matrix block.
-!  ! The default B matrix, see e.g. file ATOVS_Bmatrix_43, contains error
-!  ! covariances representing a global average. Here, those elements are scaled
-!  ! by a factor MwEmissError/SQRT(diag(B_matrix)) for each channel.
-!
-!  do i = profindex % mwemiss(1), profindex % mwemiss(2)
-!    MwEmissError = Ob % MwEmErrAtlas(i - profindex % mwemiss(1) + 1)
-!    if (MwEmissError > 1.0E-4 .and. MwEmissError < 1.0) then
-!      bscale = MwEmissError / sqrt (B_matrix(i,i))
-!      B_matrix(:,i) = B_matrix(:,i) * bscale
-!      B_matrix(i,:) = B_matrix(i,:) * bscale
-!      B_inverse(:,i) = B_inverse(:,i) / bscale
-!      B_inverse(i,:) = B_inverse(i,:) / bscale
-!      B_sigma(i) = B_sigma(i) * bscale
-!    end if
-!  end do
-!
-!end if
-!
-!! Scale the background skin temperature error covariances over land
-!if (Ob % Surface == RTland .and. SkinTempErrorLand >= 0.0) then
-!
-!  bscale = SkinTempErrorLand / sqrt (B_matrix(profindex % tstar,profindex % tstar))
-!  B_matrix(:,profindex % tstar) = B_matrix(:,profindex % tstar) * bscale
-!  B_matrix(profindex % tstar,:) = B_matrix(profindex % tstar,:) * bscale
-!  B_inverse(:,profindex % tstar) = B_inverse(:,profindex % tstar) / bscale
-!  B_inverse(profindex % tstar,:) = B_inverse(profindex % tstar,:) / bscale
-!  B_sigma(profindex % tstar) = B_sigma(profindex % tstar) * bscale
-!
-!end if
-
 end subroutine ufo_metoffice_bmatrixstatic_reset
 
 ! ------------------------------------------------------------------------------------------------
@@ -674,26 +619,26 @@ do jvar = 1, nmvars
   select case (trim(varname))
 
     case (var_ts)
-      fields_in(counter) = 1 ! air_temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_t ! air_temperature
 
     case (var_q)
       if (qtotal_flag) then
-        fields_in(counter) = 10 ! total water profile
+        fields_in(counter) = ufo_metoffice_fieldtype_qt ! total water profile
       else
-        fields_in(counter) = 2 ! water profile
+        fields_in(counter) = ufo_metoffice_fieldtype_q ! water profile
       end if
 
     case(var_sfc_t2m)
-      fields_in(counter) = 3 ! 2m air_temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_t2 ! 2m air_temperature
 
     case(var_sfc_q2m)
-      fields_in(counter) = 4 ! 2m specific_humidity
+      fields_in(counter) = ufo_metoffice_fieldtype_q2 ! 2m specific_humidity
 
     case(var_sfc_tskin)
-      fields_in(counter) = 5 ! surface skin temperature
+      fields_in(counter) = ufo_metoffice_fieldtype_tstar ! surface skin temperature
 
-    case(var_sfc_p2m)
-      fields_in(counter) = 6 ! surface air pressure
+    case(var_ps)
+      fields_in(counter) = ufo_metoffice_fieldtype_pstar ! surface air pressure
 
     ! 7 - o3total is not implmented yet
     ! 8 - not used is not implmented yet
@@ -705,13 +650,13 @@ do jvar = 1, nmvars
       end if
 
     case (var_sfc_u10, var_sfc_v10)
-      fields_in(counter) = 11 ! surface wind speed
+      fields_in(counter) = ufo_metoffice_fieldtype_windspeed ! surface wind speed
 
     ! 12 - o3profile is not implmented yet
     ! 13 - lwp (liquid water path) is not implmented yet
 
-    case ("surface_emissivity") ! microwave emissivity
-      call abor1_ftn("rttovonedvarcheck not setup for surface surface_emissivity yet")
+    case (var_sfc_emiss) ! microwave emissivity
+      fields_in(counter) = ufo_metoffice_fieldtype_mwemiss
 
     case (var_cli)
       ciw_present = .true.
@@ -720,13 +665,13 @@ do jvar = 1, nmvars
       end if
 
     case ("cloud_top_pressure")
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
+      fields_in(counter) = ufo_metoffice_fieldtype_cloudtopp
 
-    case ("effective_cloud_fraction") ! effective cloud fraction
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
+    case ("cloud_fraction") ! cloud fraction
+      fields_in(counter) = ufo_metoffice_fieldtype_cloudfrac
 
     case ("emissivity_pc") ! emissivity prinipal components
-      call abor1_ftn("rttovonedvarcheck not setup for pc emissivity yet")
+      fields_in(counter) = ufo_metoffice_fieldtype_emisspc
 
     ! 19 cloud fraction profile - not currently used
 

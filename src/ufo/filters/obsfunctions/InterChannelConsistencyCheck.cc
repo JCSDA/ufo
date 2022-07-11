@@ -10,8 +10,6 @@
 #include <cmath>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -19,6 +17,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/StringUtils.h"
@@ -89,10 +88,12 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
   }
 
   // Inter-channel consistency check
-  bool passive_bc = true;
+  const bool passive_bc = options_.passiveBC.value();
   bool channel_passive = false;
   size_t ncheck = 6;
   if (inst == "atms") ncheck = 7;
+  if (inst == "amsub" || inst == "mhs") ncheck = 5;
+  if (inst == "hsb" || inst == "msu") ncheck = 4;
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     for (int ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 0;
     int kval = 0;
@@ -103,6 +104,7 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
          (use_flag[ichan] >= 1 || (passive_bc && channel_passive))) {
         kval = std::max(channel-1, kval);
         if ((inst == "amsua" || inst == "atms") && channel <= 3) kval = 0;
+        if (inst == "amsub" || inst == "hsb" || inst == "mhs" ) kval = ncheck;
       }
     }
     if (kval > 0) {

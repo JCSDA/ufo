@@ -7,8 +7,6 @@
 
 #include "tools/new_qc/example/Example.h"
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -21,13 +19,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-Example::Example(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+Example::Example(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                  std::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), geovars_(), flags_(*flags) {
   oops::Log::trace() << "Example contructor starting" << std::endl;
-  const eckit::Configuration * conf = &config;
-  ufo_example_create_f90(key_, conf, geovars_);
+  ufo_example_create_f90(key_, parameters.toConfiguration(), geovars_);
   oops::Log::debug() << "Example contructor key = " << key_ << std::endl;
 }
 
@@ -47,7 +44,9 @@ void Example::priorFilter(const GeoVaLs & gv) {
 
 // -----------------------------------------------------------------------------
 
-void Example::postFilter(const ioda::ObsVector & hofxb, const ioda::ObsVector & bias,
+void Example::postFilter(const GeoVaLs &,
+                         const ioda::ObsVector & hofxb,
+                         const ioda::ObsVector & bias,
                          const ObsDiagnostics & diags) {
   oops::Log::trace() << "Example postFilter" << std::endl;
   ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran(),

@@ -1,7 +1,50 @@
-# (C) Copyright 2017-2021 UCAR.
+# (C) Copyright 2017-2022 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+include(ufo_functions)
+
+add_subdirectory( basis )
+add_subdirectory( errors )
+add_subdirectory( filters )
+add_subdirectory( fov )
+add_subdirectory( obslocalization )
+add_subdirectory( predictors )
+add_subdirectory( profile )
+add_subdirectory( utils )
+add_subdirectory( variabletransforms )
+
+# Operators
+add_subdirectory( operators/aerosols )
+add_subdirectory( operators/atmvertinterp )
+add_subdirectory( operators/atmvertinterplay )
+add_subdirectory( operators/atmsfcinterp )
+add_subdirectory( operators/avgkernel )
+add_subdirectory( operators/backgrounderroridentity )
+add_subdirectory( operators/backgrounderrorvertinterp )
+add_subdirectory( operators/categoricaloper )
+add_subdirectory( operators/compositeoper )
+if( crtm_FOUND )
+    add_subdirectory( operators/crtm )
+endif()
+add_subdirectory( operators/gnssro )
+add_subdirectory( operators/groundgnss )
+add_subdirectory( operators/identity )
+add_subdirectory( operators/insitupm )
+add_subdirectory( operators/marine )
+add_subdirectory( operators/radarradialvelocity )
+if( rttov_FOUND )
+    add_subdirectory( operators/rttov )
+    add_subdirectory( operators/rttovcpp )
+endif()
+add_subdirectory( operators/sattcwv )
+add_subdirectory( operators/scatwind )
+add_subdirectory( operators/sfcpcorrected )
+add_subdirectory( operators/timeoper )
+
+
+
+# Base files
 
 list( APPEND ufo_src_files
     Fortran.h
@@ -31,6 +74,8 @@ list( APPEND ufo_src_files
     ObsBiasOperator.cc
     ObsBiasOperator.h
     ObsBiasParameters.h
+    ObsBiasPreconditioner.cc
+    ObsBiasPreconditioner.h
     ObsDiagnostics.cc
     ObsDiagnostics.h
     ObsOperator.cc
@@ -47,56 +92,15 @@ list( APPEND ufo_src_files
     ufo_constants_mod.F90
 )
 
-# macro to prepend a prefix with relative path
-# can this be added to ecbuild for use elsewhere?
-function(PREPEND var prefix )
-    set ( listVar "" )
-    foreach (f ${ARGN})
-        list (APPEND listVar "${prefix}/${f}")
-    endforeach(f)
-    set ( ${var} "${listVar}" PARENT_SCOPE )
-endfunction(PREPEND)
-
-add_subdirectory( utils )
-add_subdirectory( basis )
-add_subdirectory( predictors )
-add_subdirectory( errors )
-add_subdirectory( filters )
-add_subdirectory( obslocalization )
-add_subdirectory( identity )
-add_subdirectory( atmvertinterp )
-add_subdirectory( atmvertinterplay )
-add_subdirectory( atmsfcinterp )
-add_subdirectory( avgkernel )
-if( crtm_FOUND )
-    add_subdirectory( crtm )
-endif()
-add_subdirectory( radarradialvelocity )
-if( rttov_FOUND )
-    add_subdirectory( rttov )
-    add_subdirectory( rttovcpp )
-endif()
-add_subdirectory( gnssro )
-add_subdirectory( sfcpcorrected )
-add_subdirectory( marine )
-add_subdirectory( aerosols )
-add_subdirectory( timeoper )
-add_subdirectory( profile )
-add_subdirectory( groundgnss )
-add_subdirectory( variabletransforms )
-add_subdirectory( scatwind )
-add_subdirectory( sattcwv )
-add_subdirectory( compositeoper )
-add_subdirectory( backgrounderrorvertinterp )
-add_subdirectory( backgrounderroridentity )
-add_subdirectory( categoricaloper )
 
 list( APPEND ufo_src_files
-    ${utils_src_files}
+    ${base_src_files}
     ${basis_src_files}
-    ${predictor_src_files}
     ${errors_src_files}
     ${filters_src_files}
+
+    ${utils_src_files}
+    ${predictor_src_files}
     ${obslocalization_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
@@ -107,6 +111,7 @@ list( APPEND ufo_src_files
     ${rttov_src_files}
     ${rttovcpp_src_files}
     ${gnssro_src_files}
+    ${insitupm_src_files}
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
     ${radarradialvelocity_src_files}
@@ -120,8 +125,9 @@ list( APPEND ufo_src_files
     ${backgrounderrorvertinterp_src_files}
     ${backgrounderroridentity_src_files}
     ${categoricaloper_src_files}
+    ${fov_src_files}
+    ${marine_src_files}
 )
-list( APPEND ufo_src_files ${marine_src_files} )
 
 ## Create Library target
 ecbuild_add_library( TARGET   ufo
@@ -141,13 +147,23 @@ target_link_libraries(ufo PUBLIC fckit)
 target_link_libraries(ufo PUBLIC ioda)
 target_link_libraries(ufo PUBLIC oops)
 
+target_compile_options( ufo PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,PGI,NVHPC>:-Wc,--pending_instantiations=128> )
+
 # Optional dependencies
 if(crtm_FOUND)
     target_link_libraries(ufo PUBLIC crtm)
 endif()
 
+if(geos-aero_FOUND)
+    target_link_libraries(ufo PUBLIC geos-aero)
+endif()
+
 if(gsw_FOUND)
     target_link_libraries(ufo PUBLIC gsw)
+endif()
+
+if(ropp-ufo_FOUND)
+    target_link_libraries(ufo PUBLIC ropp-ufo)
 endif()
 
 if(rttov_FOUND)
@@ -155,13 +171,6 @@ if(rttov_FOUND)
     target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
 endif()
 
-if(ropp-ufo_FOUND)
-    target_link_libraries(ufo PUBLIC ropp-ufo)
-endif()
-
-if(geos-aero_FOUND)
-    target_link_libraries(ufo PUBLIC geos-aero)
-endif()
 
 
 ## Include paths

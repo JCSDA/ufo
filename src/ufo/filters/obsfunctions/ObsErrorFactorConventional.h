@@ -12,17 +12,13 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
-
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -35,7 +31,18 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<std::string>> inflatevars{"inflate variables", this};
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test QCflag", "QCflagsData", this};
+  /// Data with QC <= threshold values will be used in this obsFunction.
+  /// Only used when "test QCflag" is "PreQC" (include pre-defined QC flags)
   oops::OptionalParameter<int> qcthreshold{"test QCthreshold", this};
+  /// Threshold for horizontal distance or chord distance. While the horizontal(chord)
+  /// distance between the two vertical points is bigger than the threshold,
+  /// these observations will not be considered for the obs inflation
+  oops::OptionalParameter<float> distthreshold{"distance threshold", this};
+  /// Name of air pressure
+  oops::Parameter<std::string> pressureFullName{"pressure",
+                                                "Full name of air pressure",
+                                                "ObsValue/pressure",
+                                                this};
 };
 
 // -----------------------------------------------------------------------------
@@ -70,6 +77,7 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
 ///                                         # this obsFunction only (not within a filter)
 ///      test QCflag: PreQC  # Optional. If not defined, use QCflags from prior filters
 ///      test QCthreshold: 2 # Optonal, only when PreQC is used
+///                          # Data with PreQC flags <= 2 will be used in this ObsFunction
 ///                          # Default is 3 for PreQC
 ///                          # In GSI(PreQC): if noiqc (no oiqc)=true, QCthreshold=7;
 ///                                           if noiqc=false, QCthreshold=3

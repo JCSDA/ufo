@@ -1,0 +1,124 @@
+Duplicates, constraints on buddy counts, legacy pair collector:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/met_office_buddy_check_pair_finder_out.nc4
+  Met Office Buddy Check, modern:
+    use_legacy_buddy_collector: false
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 6
+    max_num_buddies_from_single_band: 3
+    max_num_buddies_with_same_station_id: 2
+  Met Office Buddy Check, legacy:
+    use_legacy_buddy_collector: true
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 6
+    max_num_buddies_from_single_band: 3
+    max_num_buddies_with_same_station_id: 2
+Invariance to longitude, different zonal bands:
+  Met Office Buddy Check:
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 10
+    max_num_buddies_from_single_band: 10
+    max_num_buddies_with_same_station_id: 10
+  reference:
+    latitudes: [6, 4]
+    longitudes: [89, 91]
+  test:
+    - latitudes: [6, 4]
+      longitudes: [177, 179]
+    - latitudes: [6, 4]
+      longitudes: [179, -179]
+    - latitudes: [6, 4]
+      longitudes: [-179, -177]
+    - latitudes: [6, 4]
+      longitudes: [91, 89]
+    - latitudes: [6, 4]
+      longitudes: [179, 177]
+    - latitudes: [6, 4]
+      longitudes: [-179, 179]
+    - latitudes: [6, 4]
+      longitudes: [-177, -179]
+    - latitudes: [4, 6]
+      longitudes: [89, 91]
+    - latitudes: [4, 6]
+      longitudes: [177, 179]
+    - latitudes: [4, 6]
+      longitudes: [179, -179]
+    - latitudes: [4, 6]
+      longitudes: [-179, -177]
+    - latitudes: [4, 6]
+      longitudes: [91, 89]
+    - latitudes: [4, 6]
+      longitudes: [179, 177]
+    - latitudes: [4, 6]
+      longitudes: [-179, 179]
+    - latitudes: [4, 6]
+      longitudes: [-177, -179]
+Invariance to longitude, same zonal band:
+  Met Office Buddy Check:
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 10
+    max_num_buddies_from_single_band: 10
+    max_num_buddies_with_same_station_id: 10
+  reference:
+    latitudes: [4, 4]
+    longitudes: [89, 91]
+  test:
+    - latitudes: [4, 4]
+      longitudes: [177, 179]
+    - latitudes: [4, 4]
+      longitudes: [179, -179]
+    - latitudes: [4, 4]
+      longitudes: [-179, -177]
+    - latitudes: [4, 4]
+      longitudes: [91, 89]
+    - latitudes: [4, 4]
+      longitudes: [179, 177]
+    - latitudes: [4, 4]
+      longitudes: [-179, 179]
+    - latitudes: [4, 4]
+      longitudes: [-177, -179]
+Search radius:
+  Met Office Buddy Check:
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 100
+    max_num_buddies_from_single_band: 100
+    max_num_buddies_with_same_station_id: 100
+  test:
+    - central_latitude: 30
+      central_longitude: -50
+    - central_latitude: 30
+      central_longitude: 0
+    - central_latitude: 30
+      central_longitude: 50
+    - central_latitude: 30
+      central_longitude: 180
+    - central_latitude: -60
+      central_longitude: -50
+    - central_latitude: -60
+      central_longitude: 0
+    - central_latitude: -60
+      central_longitude: 50
+    - central_latitude: -60
+      central_longitude: 180
+    - central_latitude: 89
+      central_longitude: -50
+    - central_latitude: 89
+      central_longitude: 0
+    - central_latitude: 89
+      central_longitude: 50
+    - central_latitude: 89
+      central_longitude: 180

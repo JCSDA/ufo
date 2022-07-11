@@ -1,0 +1,27 @@
+# Test the BackgroundErrorVertInterp operator with missing air pressure observations.
+# The BackgroundErrorVertInterp operator is created as a component of the Composite operator.
+
+window begin: '2018-04-14T20:30:00Z'
+window end: '2018-04-15T03:30:00Z'
+
+observations:
+- obs space:
+    name: Sondes
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_missingp.nc4
+    simulated variables: [air_temperature]
+#   obsdataout:
+#     obsfile: Data/sondes_obs_2018041500_s_backgrounderrorinterp_opr_missingp_out.nc4
+  obs operator:
+    name: Composite
+    components:
+    # operator used to evaluate H(x)
+    - name: VertInterp
+    # operator used to evaluate background errors
+    - name: BackgroundErrorVertInterp
+      observation vertical coordinate: air_pressure
+      vertical coordinate: background_error_air_pressure
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-06

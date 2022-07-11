@@ -1,0 +1,20 @@
+MetOfficeRadianceErrorMatrices:
+  BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+  background fields:
+  - air_temperature
+  - specific_humidity
+  - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+  - mass_content_of_cloud_ice_in_atmosphere_layer
+  - surface_temperature
+  - specific_humidity_at_two_meters_above_surface
+  - skin_temperature
+  - surface_pressure
+  qtotal: true
+  RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+  channels: 18,20,21
+  latitude: -60.0
+  nelements: 144
+  BHT_value: 31.3266620636
+  HBHT_value: 594.102966309
+  HBHT_R_value: 594.232543954
+  tol: 1e-4

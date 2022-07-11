@@ -7,17 +7,19 @@ observations:
     name: SurfaceComposite
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020121500_m.nc
-    obsdataout:
-      obsfile: Data/sfc_obs_2020121500_out.nc
-    simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
+#    obsdataout:
+#      obsfile: Data/sfc_obs_2020121500_out.nc
+    simulated variables: [eastward_wind, northward_wind, virtual_temperature, air_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020121500_m.nc
   obs operator:
     name: Composite
     components:
      - name: GSISfcModel
+       use_fact10: true
        variables:
        - name: air_temperature
+       - name: virtual_temperature
        - name: specific_humidity
        - name: eastward_wind
        - name: northward_wind
@@ -25,7 +27,9 @@ observations:
        variables:
        - name: surface_pressure
        da_psfc_scheme: UKMO
+       # Remove the next two lines when using geoval from JEDI, not GSI.
        geovar_geomz: geopotential_height
        geovar_sfc_geomz: surface_geopotential_height
-  rms ref: 776494.37886
+  rms ref: 670118.56258
   tolerance: 1.e-05
+

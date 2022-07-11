@@ -15,15 +15,12 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/Variables.h"
 #include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/ObsTraits.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   class ObsSpace;
@@ -35,7 +32,8 @@ namespace ufo {
 class ObsErrorCrossVarCovParameters : public oops::ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorCrossVarCovParameters, ObsErrorParametersBase)
  public:
-  /// Input file containing correlations
+  /// Input file containing correlations or covariances. If covariances are
+  /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> inputFile{"input file", this};
 };
 
@@ -93,6 +91,8 @@ class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
   void print(std::ostream &) const override;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
+  /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
+  const oops::Variables vars_;
   /// Correlations between variables
   Eigen::MatrixXd varcorrelations_;
 };

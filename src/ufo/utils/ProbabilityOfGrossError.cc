@@ -17,16 +17,18 @@ namespace ufo {
                          const bool ModelLevels,
                          std::vector<int> &flags,
                          std::vector<float> &PGE,
-                         std::vector<float> &PGEBd,
                          float ErrVarMax,
                          const std::vector<float> *obsVal2,
-                         const std::vector<float> *bkgVal2)
+                         const std::vector<float> *bkgVal2,
+                         std::vector<float> *TotalPd)
   {
     const float missingValueFloat = util::missingValue(1.0f);
     // PGE multiplication factor used to store PGE values for later use.
     const double PGEMult = 1000.0;
     // Missing data indicator for stored PGEs.
     const double PGEMDI = 1.111;
+    // PGEMDI * PGEMult to avoid truncation errors
+    const double PGEMDIMult = 1111.0;
     // Maximum value of exponent in background QC.
     const double ExpArgMax = options.PGE_ExpArgMax.value();
     // PGE rejection limit.
@@ -42,17 +44,12 @@ namespace ufo {
     // Number of levels in profile, or total number of single-level obs.
     const size_t numLocs = obsVal.size();
 
-    // Initialise buddy check PGE to missing data indicator.
-    PGEBd.assign(obsVal.size(), PGEMDI);
-
     // Combined (obs and bkg) error variance.
     float ErrVar = 0.0;
     // Squared difference from background / ErrVar.
     double SDiff = 0.0;
     // Probability density of good observation.
     double PdGood = 0.0;
-    // PGE after background check.
-    double PGEBk = 0.0;
 
     const bool obsErrEmpty = obsErr.empty();
     const bool bkgErrEmpty = bkgErr.empty();
@@ -90,34 +87,30 @@ namespace ufo {
         }
 
         // Calculate PGE after background check, normalising appropriately.
-        PGEBk = (PdBad[jloc] * PGE[jloc]) /
-          (PdBad[jloc] * PGE[jloc] + PdGood * (1.0 - PGE[jloc]));
+        const double TotalProbDist = PdBad[jloc] * PGE[jloc] + PdGood * (1.0 - PGE[jloc]);
+        PGE[jloc] = (PdBad[jloc] * PGE[jloc]) / TotalProbDist;
+        if (TotalPd)
+            (*TotalPd)[jloc] = TotalProbDist;
 
         // Set QC flags.
         flags[jloc] |= ufo::MetOfficeQCFlags::Elem::BackPerfFlag;
-        if (PGEBk >= PGECrit) {
+        if (PGE[jloc] >= PGECrit) {
           flags[jloc] |= ufo::MetOfficeQCFlags::Elem::BackRejectFlag;
         }
       } else {
         // Deal with missing data.
         SDiff = SDiffCrit;
-        PGEBk = PGEMDI;
+        PGE[jloc] = PGEMDI;
       }
-
-      // Pack PGEs for use in later routines.
-      PGE[jloc] = trunc(PGEBk * PGEMult) + PGE[jloc];
 
       // Model-level data may have additional processing.
       if (ModelLevels &&
           (SDiff >= SDiffCrit ||
            flags[jloc] & ufo::MetOfficeQCFlags::Elem::PermRejectFlag ||
            flags[jloc] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag)) {
-        PGEBk = PGEMDI;  // Do not apply buddy check in this case.
+        PGE[jloc] = PGEMDI;  // Do not apply buddy check in this case.
         flags[jloc] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
       }
-
-      // Update PGE for buddy check.
-      PGEBd[jloc] = PGEBk;
     }
   }
 }  // namespace ufo

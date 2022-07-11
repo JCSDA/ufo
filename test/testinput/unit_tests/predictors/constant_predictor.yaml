@@ -1,0 +1,19 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+#   obsdataout:
+#     obsfile: Data/atms_obs_20191230T0000_rttov_constant_predictors_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs bias:
+    variational bc:
+      predictors:
+      - name: constant
+  tolerance: 1.0e-16

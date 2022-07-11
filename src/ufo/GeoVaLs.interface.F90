@@ -165,7 +165,7 @@ type(fckit_configuration) :: f_conf
 call ufo_geovals_registry%get(c_key_self, self)
 
 f_conf = fckit_configuration(c_conf)
-call f_conf%get_or_die("analytic_init",str)
+call f_conf%get_or_die("method",str)
 ic = str
 locs = ufo_locations(c_locs)
 call ufo_geovals_analytic_init(self,locs,ic)
@@ -686,9 +686,44 @@ end subroutine ufo_geovals_maxloc_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_fill_c(c_key, c_nloc, c_indx, c_nval, c_vals) bind(c, name="ufo_geovals_fill_f90")
+implicit none
+integer(c_int), intent(in) :: c_key
+integer(c_int), intent(in) :: c_nloc
+integer(c_int), intent(in) :: c_indx(c_nloc)
+integer(c_int), intent(in) :: c_nval
+real(c_double), intent(in) :: c_vals(c_nval)
+
+type(ufo_geovals), pointer :: geovals
+
+call ufo_geovals_registry%get(c_key, geovals)
+
+call ufo_geovals_fill(geovals, c_nloc, c_indx, c_nval, c_vals)
+
+end subroutine ufo_geovals_fill_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_fillad_c(c_key, c_nloc, c_indx, c_nval, c_vals) bind(c, name="ufo_geovals_fillad_f90")
+implicit none
+integer(c_int), intent(in) :: c_key
+integer(c_int), intent(in) :: c_nloc
+integer(c_int), intent(in) :: c_indx(c_nloc)
+integer(c_int), intent(in) :: c_nval
+real(c_double), intent(inout) :: c_vals(c_nval)
+
+type(ufo_geovals), pointer :: geovals
+
+call ufo_geovals_registry%get(c_key, geovals)
+
+call ufo_geovals_fillad(geovals, c_nloc, c_indx, c_nval, c_vals)
+
+end subroutine ufo_geovals_fillad_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_obspace, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 use oops_variables_mod
-use datetime_mod
 
 implicit none
 integer(c_int), intent(inout)  :: c_key_self

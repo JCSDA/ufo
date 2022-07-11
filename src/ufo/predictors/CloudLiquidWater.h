@@ -13,7 +13,6 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/predictors/PredictorBase.h"
@@ -23,6 +22,7 @@ namespace ioda {
 }
 
 namespace ufo {
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 
@@ -31,12 +31,12 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
   OOPS_CONCRETE_PARAMETERS(CloudLiquidWaterParameters, PredictorParametersBase)
 
  public:
-    /// We must specify a satellite reference name such as SSMIS to know which channels to expect.
-    oops::RequiredParameter<std::string> satellite{"satellite", this};
+    /// We must specify a sensor reference name such as SSMIS to know which channels to expect.
+    oops::RequiredParameter<std::string> sensor{"sensor", this};
     /// In case we need to override the ObsValue group name with another optional group name.
     oops::Parameter<std::string> varGroup{"varGroup", "ObsValue", this};
     /// List below is solely for SSMIS data, but a different list of channel numbers could be
-    /// added for a different satellite platform in the future.
+    /// added for a different sensor platform in the future.
     oops::OptionalParameter<int> ch19h{"ch19h", this};
     oops::OptionalParameter<int> ch19v{"ch19v", this};
     oops::OptionalParameter<int> ch22v{"ch22v", this};
@@ -44,6 +44,9 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
     oops::OptionalParameter<int> ch37v{"ch37v", this};
     oops::OptionalParameter<int> ch91h{"ch91h", this};
     oops::OptionalParameter<int> ch91v{"ch91v", this};
+    /// List below is solely for AMSU-A and ATMS data
+    oops::OptionalParameter<int> ch238d{"clwdif_ch238", this};
+    oops::OptionalParameter<int> ch314d{"clwdif_ch314", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -60,7 +63,16 @@ class CloudLiquidWater : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
+               const ObsBias &,
                ioda::ObsVector &) const override;
+
+  static void clwDerivative_amsua(const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           const std::vector<float> &,
+                           std::vector<float> &);
 
  private:
   CloudLiquidWaterParameters options_;

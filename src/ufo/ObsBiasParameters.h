@@ -1,8 +1,8 @@
 /*
  * (C) Crown copyright 2021, Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIASPARAMETERS_H_
@@ -81,6 +81,8 @@ class ObsBiasCovarianceParameters : public oops::Parameters {
 
   oops::OptionalParameter<ObsBiasCovariancePriorParameters> prior{
     "prior", this};
+
+  oops::OptionalParameter<std::string> outputFile{"output file", this};
 };
 
 /// Parameters influencing the bias correction process.
@@ -92,6 +94,8 @@ class ObsBiasParameters : public oops::Parameters {
   oops::Parameter<StaticOrVariationalBCParameters> staticBC{"static bc", {}, this};
   /// List of predictors with coefficients determined by variational analysis (VarBC).
   oops::Parameter<StaticOrVariationalBCParameters> variationalBC{"variational bc", {}, this};
+  /// List of channels that is not bias corrected
+  oops::OptionalParameter<std::string> channelsNoBC{"channels without bc", this};
   /// Path to a NetCDF file containing initial values of the coefficients of predictors used
   /// in VarBC.
   oops::OptionalParameter<std::string> inputFile{"input file", this};

@@ -1,0 +1,23 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: windspeedTest
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_m_windspeedtest_out.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: Velocity@ObsFunction
+    maxvalue: 60
+  passedBenchmark: 146
+# Filter the wind components if the computed wind speed is greater than 60 (m/s).
+#  In the test data set of 100 possible values, 1 ob is 2100UTC exactly and time test is (2100-0300], then
+#  25 u,v values marked as missing and one site has speed>60 therefore 26 vals each of u,v get filtered.

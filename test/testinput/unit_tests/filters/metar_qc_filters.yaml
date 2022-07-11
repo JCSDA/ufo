@@ -1,0 +1,142 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: surface_METAR
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+#   obsdataout:
+#     obsfile: Data/sfc_obs_2018041500_metars_small_qcfilters_out.nc
+    simulated variables: [air_temperature, surface_pressure, specific_humidity, eastward_wind, northward_wind]
+  obs filters:
+# Observation Range Sanity Check
+  - filter: Bounds Check
+    filter variables:
+    - name: air_temperature
+    minvalue: 195
+    maxvalue: 327
+    action:
+      name: reject 
+# passedBenchmark: 165 = 33 locs x 5 variables, all data pass this stage.
+  - filter: Bounds Check
+    filter variables:
+    - name: surface_pressure
+    minvalue: 37499
+    maxvalue: 106999
+    action:
+      name: reject 
+# passedBenchmark: 165 (nothing outside the range)
+  - filter: Bounds Check
+    filter variables:
+    - name: specific_humidity
+    minvalue: 1.0E-7
+    maxvalue: 0.034999999 
+    action:
+      name: reject 
+# passedBenchmark: 165 (nothing outside the range)
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    minvalue: -130
+    maxvalue: 130
+    action:
+      name: reject 
+# passedBenchmark: 161 (2 east and 2 north winds are missing)
+  - filter: Bounds Check      #  Possibly throw out all other variables if surface pressure means too high altitude
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    - name: specific_humidity
+    - name: air_temperature
+    test variables:
+    - name: surface_pressure@ObsValue
+    minvalue: 45000.0
+    action:
+      name: reject 
+# passedBenchmark: 161
+  - filter: Bounds Check      #  Observation Range Sanity Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: Velocity@ObsFunction
+    maxvalue: 130.0
+    action:
+      name: reject 
+# passedBenchmark: 161
+# Assign obsError to different variables.
+# Note: Bounds Check, BlackList, or maybe other filters could be used
+  - filter: Bounds Check
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error parameter: 1.2             # 1.2 K
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: surface_pressure
+    action:
+      name: assign error
+      error parameter: 120             # 120 Pa = 1.2 mb
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    action:
+      name: assign error
+      error parameter: 1.4             # 1.4 m/s
+# The next series of filters assigns obsError as a linear interpolation from steps
+# in another variable, such as pressure/altitude.
+  - filter: Bounds Check
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error function:
+        name: ObsErrorModelStepwiseLinear@ObsFunction
+        options:
+          xvar:
+            name: surface_pressure@ObsValue
+          xvals: [10000, 20000, 25000, 30000, 50000, 85000, 97500, 100000]   #Pressure (Pa), ascending order
+          errors: [3.0, 2.0, 1.5, 1.5, 2.0, 2.5, 2.5, 3.0]
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    action:
+      name: assign error
+      error function:
+        name: ObsErrorModelStepwiseLinear@ObsFunction
+        options:
+          xvar:
+            name: surface_pressure@ObsValue
+          xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]   #Pressure (Pa)
+          errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
+#
+  - filter: BlackList
+    filter variables:
+    - name: specific_humidity
+    action:
+      name: assign error
+      error function:
+        name: ObsErrorModelStepwiseLinear@ObsFunction
+        options:
+          scale_factor_var: specific_humidity@ObsValue
+          xvar:
+            name: surface_pressure@ObsValue
+          xvals: [110000, 105000, 100000, 95000, 90000, 85000, 80000, 75000, 70000, 65000, 60000, 55000,
+                   50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000]
+          errors: [.19455, .19062, .18488, .17877, .17342, .16976, .16777, .16696, .16605, .16522, .16637, .17086,
+                   .17791, .18492, .18996, .19294, .19447, .19597, .19748, .19866, .19941, .19979, .19994, .19999, .2]
+  compareVariables:
+    - reference:
+        name: specific_humidity_obserror@TestReference
+      test:
+        name: specific_humidity@EffectiveError
+      absTol: 1.0e-6
+  passedBenchmark: 161

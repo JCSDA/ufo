@@ -68,15 +68,18 @@ namespace ufo {
       {"groups_optional", {"Corrections", "Counters"}, this};
 
     /// Groups of variables which have one value per profile.
+    /// Needed for some unit tests.
     oops::Parameter<std::vector<std::string>> groups_singlevalue
       {"groups_singlevalue", {}, this};
 
     /// Groups of variables which are on model levels.
+    /// Needed for some unit tests.
     oops::Parameter<std::vector<std::string>> groups_modellevels
       {"groups_modellevels",
           {"ModelLevelsDerivedValue", "ModelLevelsQCFlags"}, this};
 
     /// Groups of variables which are on model rho levels.
+    /// Needed for some unit tests.
     oops::Parameter<std::vector<std::string>> groups_modelrholevels
       {"groups_modelrholevels",
           {"ModelRhoLevelsDerivedValue", "ModelRhoLevelsFlags"}, this};
@@ -90,10 +93,6 @@ namespace ufo {
 
     /// If not sorting observations, ensure number of profiles is consistent
     oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
-
-    /// Output filename for saving derived values on model levels.
-    oops::Parameter<std::string> ModelLevelsDerivedValuesFilename
-      {"ModelLevelsDerivedValuesFilename", "ModelLevelsDerivedValues.nc4", this};
 
     /// Default vertical coordinate to use in the slant path location algorithm.
     /// This can be overridden for each variable by using the \p alternativeVerticalCoordinate

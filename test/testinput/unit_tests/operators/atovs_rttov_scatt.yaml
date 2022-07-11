@@ -1,0 +1,34 @@
+window begin: 2021-01-14T09:00:00Z
+window end: 2021-01-15T15:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Debug: false
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS44
+      SatRad_compatibility: true
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: &UseRHwaterForQC true # default
+      UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default but reqd for PS44
+      Do_MW_Scatt: true
+      Platform_Name: &platform_name Metop
+      Sat_ID: &sat_id 1
+      Instrument_Name: &inst_name AMSUAMHS
+      CoefficientPath: &coef_path Data/
+      InspectProfileNumber: [1]
+      MW_Scatt_zero_hydro_tlad: false
+      MW_Scatt_hydro_cfrac_tlad: true
+  obs space:
+    name: metop_1_amsua_mhs
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt.nc4
+    simulated variables: [brightness_temperature]
+    channels: &ops_channels 1-20
+#   obsdataout:
+#     obsfile: Data/atovs_metopb_obs_2021011512_rttov_scatt_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_rttov_scatt.nc4
+  rms ref: 238.96294194
+  tolerance: 1.e-7

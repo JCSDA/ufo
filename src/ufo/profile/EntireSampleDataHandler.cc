@@ -7,18 +7,23 @@
 
 #include <algorithm>
 
+#include "eckit/utils/StringTools.h"
+
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
-  EntireSampleDataHandler::EntireSampleDataHandler(ioda::ObsSpace &obsdb,
+  EntireSampleDataHandler::EntireSampleDataHandler(const ObsFilterData &data,
                                                    const DataHandlerParameters &options)
-    : obsdb_(obsdb),
+    : data_(data),
+      obsdb_(data.obsspace()),
       options_(options)
   {}
 
   void EntireSampleDataHandler::writeQuantitiesToObsdb()
   {
+    oops::Log::debug() << "Writing quantities to ObsSpace" << std::endl;
+
     // Write out all variables in particular groups.
     for (const auto& it_data : entireSampleData_) {
       std::string fullname = it_data.first;
@@ -28,11 +33,14 @@ namespace ufo {
 
       if (groupname == "QCFlags") {
         putDataVector(fullname, get<int>(fullname));
+      } else if (eckit::StringTools::startsWith(groupname, "DiagnosticFlags")) {
+        putDataVector(fullname, get<bool>(fullname));
       } else if (groupname == "Corrections" ||
-                 groupname == "DerivedValue") {
-        // todo(ctgh): Add ModelLevelsDerivedValue, ModelRhoLevelsDerivedValue,
-        // ModelLevelsFlags and ModelRhoLevelsFlags to this list when
-        // it is possible to save variables with different nlocs.
+                 groupname == "DerivedObsValue" ||
+                 groupname == "GrossErrorProbability" ||
+                 groupname == "DerivedMetaData" ||
+                 groupname == "DerivedModelValue") {
+        oops::Log::debug() << " writing out " << fullname << std::endl;
         putDataVector(fullname, get<float>(fullname));
       }
     }
@@ -65,5 +73,11 @@ namespace ufo {
                                                     const std::string &groupname)
   {
     return missingValueString;
+  }
+
+  bool EntireSampleDataHandler::defaultValue(const std::vector <bool> &vec,
+                                             const std::string &groupname)
+  {
+    return false;
   }
 }  // namespace ufo

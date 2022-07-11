@@ -38,6 +38,11 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   obsParams.validateAndDeserialize(obsSpaceConf);
   ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
+  if (conf.has("air_temperature")) {
+    const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");
+    obsspace.put_db("ObsValue", "air_temperature", air_temperature);
+  }
+
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
     obsspace.put_db("MetaData", "air_pressure", air_pressures);
@@ -76,7 +81,12 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   }
 
   ufo::Gaussian_Thinning filter(obsspace, filterParameters, qcflags, obserr);
-  filter.preProcess();
+  if (conf.get("expect_exception_with_message_during_operation", expectedMessage)) {
+    EXPECT_THROWS_MSG(filter.preProcess(), expectedMessage.c_str());
+    return;
+  } else {
+    filter.preProcess();
+  }
 
   const std::vector<size_t> expectedThinnedObsIndices =
       conf.getUnsignedVector("expected_thinned_obs_indices");

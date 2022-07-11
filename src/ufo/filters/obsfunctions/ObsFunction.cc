@@ -7,8 +7,11 @@
 
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 
+#include <string>
+
 #include "ioda/ObsDataVector.h"
 #include "oops/util/DateTime.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {

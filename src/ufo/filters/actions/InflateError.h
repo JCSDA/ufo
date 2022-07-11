@@ -8,15 +8,17 @@
 #ifndef UFO_FILTERS_ACTIONS_INFLATEERROR_H_
 #define UFO_FILTERS_ACTIONS_INFLATEERROR_H_
 
-#include <string>
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
+
+namespace ioda {
+template <typename DATATYPE> class ObsDataVector;
+}
 
 namespace ufo {
 
@@ -59,6 +61,8 @@ class InflateError : public FilterActionBase {
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
 
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+
+  bool modifiesQCFlags() const override { return false; }
 
  private:
   Variables allvars_;            /// variables required to compute inflation

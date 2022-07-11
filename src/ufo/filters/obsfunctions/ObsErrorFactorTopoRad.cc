@@ -10,8 +10,6 @@
 #include <math.h>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -19,6 +17,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/StringUtils.h"
@@ -47,6 +46,7 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   std::string inst, sat;
   splitInstSat(sensor, inst, sat);
   ASSERT(inst == "amsua" || inst == "atms" ||
+         inst == "mhs" ||
          inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3");
 
   if (inst == "amsua" || inst == "atms") {
@@ -104,6 +104,20 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
         }
       }
     }
+  } else if (inst == "mhs") {
+    std::vector<float> tao_sfc(nlocs);
+    for (size_t ich = 0; ich < nchans; ++ich) {
+//    top of the model
+      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
+               0, tao_sfc);
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        out[ich][iloc] = 1.0;
+        if (zsges[iloc] > 2000.0) {
+          float factor = 2000.0/zsges[iloc];
+          out[ich][iloc] = sqrt(1.0 / (factor * tao_sfc[iloc]));
+        }
+      }
+    }
   } else if (inst == "amsua" || inst == "atms") {
     // Set channel numbers
     int ich238, ich314, ich503, ich528, ich536, ich544, ich549, ich890;
@@ -134,7 +148,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
         (qcflagdata[iloc] != 0) ? (factor = 0.0) : (factor = 1.0);
 
         if (zsges[iloc] > 2000.0) {
-          if (channel <= ich544 || channel == ich890) {
+          if (channel <= ich544 || channel >= ich890) {
             out[ichan][iloc] = (2000.0/zsges[iloc]) * factor;
           }
           if ((zsges[iloc] > 4000.0) && (channel == ich549)) {

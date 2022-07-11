@@ -13,12 +13,20 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsDataVector.h"
-#include "ufo/filters/ObsFilterData.h"
+#include "eckit/config/LocalConfiguration.h"
+
+namespace util {
+  class DateTime;
+}
+
+namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
+}
 
 namespace ufo {
-
-class Variables;
+  class Variable;
+  class Variables;
+  class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 /// Base class for computing functions on observation data

@@ -69,7 +69,6 @@ class GNSSROOneDVarCheck : public FilterBase,
   int qcFlag() const override {return QCflags::onedvar;}
 
   F90onedvarcheck key_;
-  const eckit::LocalConfiguration config_;
   GNSSROOneDVarCheckParameters parameters_;
 };
 

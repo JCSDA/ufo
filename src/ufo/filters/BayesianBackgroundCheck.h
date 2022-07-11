@@ -15,6 +15,7 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/NumericConstraints.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "oops/util/Printable.h"
@@ -41,9 +42,12 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // Probability density of observation being bad:
   oops::RequiredParameter<float> PdBad{"prob density bad obs", this,
                                        {oops::exclusiveMinConstraint(0.0f)}};
-  // Initial probability of gross error:
-  oops::RequiredParameter<float> PGE{"initial prob gross error", this,
-                                     {oops::exclusiveMinConstraint(0.0f)}};
+
+  // constant background error term (optional):
+  oops::OptionalParameter<float> BkgErr{"bg error", this};
+
+  // switch to save total (combined) probability density (optional, default false):
+  oops::Parameter<bool> SaveTotalPd{"save total pd", false, this};
 };
 
 /// \brief BayesianBackgroundCheck: check observation closeness to background, accounting
@@ -53,6 +57,9 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 /// background, and the prior probability of the observation being "bad", or in
 /// gross error. Can apply to scalar or vector observation types on single-level.
 /// (Cannot handle profiles.) Calls function ufo::BayesianPGEUpdate.
+/// This filter also saves the updated value of the Probability of Gross Error to the
+/// GrossErrorProbability group for the respective variable, and the Total (combined)
+/// Probability Distribution to the GrossErrorProbabilityTotal group.
 ///
 /// Requires the following be specified in .yaml, under
 ///
@@ -61,8 +68,6 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 ///
 ///   * prob density bad obs: uniform probability density that observation is "bad",
 ///           i.e. in gross error;
-///   * initial prob gross error: initial PGE value of the uniform probability
-///           distribution, before adjustment depending on obs-BG closeness;
 ///
 /// May also specify the following optional parameters (defaults in
 ///   ufo/utils/ProbabilityOfGrossErrorParameters.h):
@@ -71,7 +76,16 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 ///   * max exponent: maximum allowed value of the exponent in the 'good'
 ///      probability distribution;
 ///   * obs error multiplier: weight of observation error in combined error variance;
-///   * BG error multiplier: weight of background error in combined error variance.
+///   * BG error multiplier: weight of background error in combined error variance,
+///
+/// the optional parameter (no default):
+///   * bg error: a constant background error term. If this is specified it will be used
+/// in the Probability of Gross Error calculation. If not the real background errors
+/// will be used,
+///
+/// or the optional logical parameter (default false):
+///   * save total pd: save the total (combined) probability distribution to the ObsSpace.
+///
 class BayesianBackgroundCheck : public FilterBase,
                         private util::ObjectCounter<BayesianBackgroundCheck> {
  public:

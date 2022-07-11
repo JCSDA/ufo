@@ -10,6 +10,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ModelHeightAdjustedAirTemperature.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"

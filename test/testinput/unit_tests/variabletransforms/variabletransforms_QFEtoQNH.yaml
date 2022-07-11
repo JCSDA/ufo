@@ -1,0 +1,29 @@
+window begin: 2021-05-21T00:00:00Z
+window end: 2021-05-21T23:00:00Z
+
+observations:
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
+    simulated variables: [surface_pressure]
+
+  obs filters:
+  - filter: Variable Transforms
+    Transform: QNHtoQFEpressure
+    UseValidDataOnly: false
+  compareVariables:                 # test output matches precalculated values
+    - reference:
+        name: Pstation@TestReference
+      test:
+        name: station_pressure@DerivedObsValue
+      relTol: 1.0e-5
+    - reference:
+        name: PStationErr@TestReference
+      test:
+        name: station_pressure@DerivedObsError
+      absTol: 1.0e-5
+    - reference:
+        name: PStationFlags@TestReference
+      test:
+        name: station_pressure@DerivedQCFlags

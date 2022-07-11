@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2021- UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -9,19 +9,14 @@
 #define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLETLAD_H_
 
 #include <ostream>
-#include <string>
 
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
 
-#include "ufo/example/ObsExampleTLAD.interface.h"
+#include "ufo/example/ObsExampleParameters.h"
+#include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -32,12 +27,13 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Example TL/AD observation operator class
-class ObsExampleTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsExampleTLAD> {
+class ObsExampleTLAD : public LinearObsOperatorBase {
  public:
-  static const std::string classname() {return "ufo::ObsExampleTLAD";}
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the LinearObsOperatorFactory.
+  typedef ObsExampleParameters Parameters_;
 
-  ObsExampleTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsExampleTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsExampleTLAD();
 
   // Obs Operators

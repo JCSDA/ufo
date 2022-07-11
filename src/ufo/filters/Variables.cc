@@ -12,12 +12,12 @@
 #include <string>
 #include <vector>
 
-#include "eckit/exception/Exceptions.h"
-
+#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 // -----------------------------------------------------------------------------
 namespace ufo {
@@ -66,6 +66,13 @@ Variables::Variables(const ufo::Variables & vars, const std::string & group)
   for (size_t jvar = 0; jvar < vars.size(); ++jvar) {
     vars_.push_back(Variable(vars[jvar], group));
   }
+}
+
+// -----------------------------------------------------------------------------
+
+Variables::Variables(const std::vector<ufo::Variable> & vars)
+  : vars_(vars) {
+  oops::Log::trace() << "ufo::Variables(std::vector<ufo::Variable>) start " << std::endl;
 }
 
 // -----------------------------------------------------------------------------

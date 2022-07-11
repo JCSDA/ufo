@@ -1,0 +1,142 @@
+window begin: 2021-07-01T00:00:00Z
+window end: 2021-07-01T23:59:00Z
+
+observations:
+- obs operator:
+     name: RTTOV
+     Absorbers: &rttov_absorbers [CLW, CIW]
+     linear model absorbers: []
+     obs options:
+       RTTOV_default_opts: UKMO_PS45
+       SatRad_compatibility: true
+       UseRHwaterForQC: &UseRHwaterForQC true
+       QtSplitRain: false   #ssmis seems to be the only instrument to do this
+       RTTOV_GasUnitConv: true
+       UseColdSurfaceCheck: &UseColdSurfaceCheck false
+       Platform_Name: &platform_name DMSP
+       Sat_ID: &sat_id 17
+       Instrument_Name: &inst_name SSMIS
+       CoefficientPath: Data/
+  obs space:
+    name: SSMIS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/obs_ssmis_onedvar_20210701T1200Z.nc4
+#   obsdataout:
+#     obsfile: Data/obs_ssmis_onedvar_20210701T1200Z_rrtov_onedvarcheck_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-24
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_ssmis_onedvar_20210701T1200Z.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: surface_type@MetaData
+      type: int
+      function:
+        name: SetSurfaceType@ObsFunction
+        options:
+          UseReportSurface: true
+          SurfaceReport Name: surface_flag@MetaData
+### Set sensor zenith angle for rttov ###
+  - filter: Variable Assignment
+    assignments:
+    - name: sensor_zenith_angle@MetaData
+      value: 53.2
+      type: float
+### Set sensor azimuth angle for rttov ###
+  - filter: Variable Assignment
+    assignments:
+    - name: sensor_azimuth_angle@MetaData
+      value: 0.0
+      type: float
+### Set solar zenith angle for rttov (probably optional) ###
+  - filter: Variable Assignment
+    assignments:
+    - name: solar_zenith_angle@MetaData
+      type: float
+      function:
+        name: SolarZenith@ObsFunction
+### Set solar azimuth angle for rttov ###
+  - filter: Variable Assignment
+    assignments:
+    - name: solar_azimuth_angle@MetaData
+      value: 0.0
+      type: float
+### Reject all channels if supplied rain_flag is /=0 ###
+  - filter: RejectList
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    where:
+    - variable:
+        name: rain_flag@MetaData
+      is_not_in: 0
+### Reject difficult channels over all surfaces ###
+### also broken channels since start of mission ###
+  - filter: RejectList
+    defer to post: true
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-7,17-24
+### Only look at sea channels ###
+  - filter: RejectList
+    defer to post: true
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-24
+    where:
+    - variable:
+        name: surface_type@MetaData
+      is_not_in: 1
+### Perform 1D-Var ###
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false
+        RTTOV_GasUnitConv: true 
+        UseRHwaterForQC: false
+        UseColdSurfaceCheck: false
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/ssmis_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    retrieval variables from geovals:
+    - air_temperature # 1
+    - specific_humidity  # 10
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - surface_pressure # 6
+    - uwind_at_10m # 11 - windspeed
+    - vwind_at_10m # 11 - windspeed
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: false
+    UseMLMinimization: false
+    UseJforConvergence: true
+    JConvergenceOption: 1
+    IterNumForLWPCheck: 1
+    CostConvergenceFactor: 0.05
+    Max1DVarIterations: 3
+    RTTOVMWScattSwitch: false
+    RTTOVUseTotalIce: false
+    UseRHwaterForQC: *UseRHwaterForQC
+    UseColdSurfaceCheck: *UseColdSurfaceCheck
+    Store1DVarLWP: true
+    Store1DVarCLW: true
+    defer to post: true
+  passedBenchmark: 261  # dummy value

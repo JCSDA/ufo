@@ -8,7 +8,6 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_CONDITIONAL_H_
 #define UFO_FILTERS_OBSFUNCTIONS_CONDITIONAL_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -16,12 +15,13 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 /// Parameters for one where configuration from the cases section
 /// of the yaml file.
@@ -42,6 +42,10 @@ class LocalConditionalParameters : public oops::Parameters {
   /// Where clause needed for assignment.  This is passed to create a ProcessWhere
   /// object and requires the expected parameters for ufo::WhereParameters
   oops::RequiredParameter<std::vector<WhereParameters>> where{"where", this};
+
+  /// Operator used to combine the results of successive `where` options at the same location.
+  /// The available operators are `and` and `or`.
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
 
   /// \brief Value to be assigned when this particular where clause is true.
   oops::RequiredParameter<FunctionValue> value{"value", this};

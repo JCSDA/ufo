@@ -10,7 +10,6 @@
 
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
 #include "ufo/filters/Variables.h"
 
@@ -42,6 +41,8 @@ class RejectObs : public FilterActionBase {
              const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+  bool modifiesQCFlags() const override { return true; }
+
  private:
   Variables allvars_;
   Parameters_ parameters_;

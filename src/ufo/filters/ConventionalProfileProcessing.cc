@@ -12,8 +12,6 @@
 #include <limits>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
@@ -36,14 +34,17 @@ namespace ufo {
    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
     : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
   {
-    allvars_ += Variables(filtervars_, "HofX");
-
-    // Add the names of any required GeoVaLs to \c allvars_.
+    // Determine whether any check requires HofX to have been calculated.
+    // If so, add the filter variables to \c allvars_.
     // This is performed here because \c allvars_ must be filled prior to the filter being run.
-    // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
-    // of each check (which returns an empty set by default).
     // The \c profileChecker class must be instantiated in order to do this.
     const ProfileChecker profileChecker(options_);
+    if (profileChecker.requiresHofX())
+      allvars_ += Variables(filtervars_, "HofX");
+
+    // Add the names of any required GeoVaLs to \c allvars_.
+    // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
+    // of each check (which returns an empty set by default).
     const auto &requiredGeoVaLNames = profileChecker.getGeoVaLNames();
     if (requiredGeoVaLNames.size() > 0) {
       ufo::Variables reqGeoVaLs(requiredGeoVaLNames);
@@ -155,6 +156,7 @@ namespace ufo {
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(data_,
+                                          *flags_,
                                           options_.DHParameters,
                                           apply,
                                           filtervars,
@@ -186,11 +188,14 @@ namespace ufo {
 
     // Optionally compare check results with OPS values
     if (options_.compareWithOPS.value()) {
+      oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
       profileDataHandler.resetProfileIndices();
       for (int jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
+        oops::Log::debug() << " Profile " << jprof + 1 << std::endl;
         profileDataHandler.initialiseNextProfile();
         profileCheckValidator.validate(profileDataHandler, obsdb_.comm().size());
         nMismatches_.emplace_back(profileCheckValidator.getMismatches());
+        oops::Log::debug() << std::endl;
       }
     }
   }

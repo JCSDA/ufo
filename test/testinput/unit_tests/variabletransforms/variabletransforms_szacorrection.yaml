@@ -1,0 +1,35 @@
+window begin: 2021-01-14T21:00:00Z
+window end: 2021-01-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Correct the surface_emissivity using a polynomial with sensor zenith angle.
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/szacorrection_unit_transforms_2021011500.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-20
+  obs filters:
+##  Apply variable transform
+  - filter: Variable Transforms
+    Transform: SatZenithAngleCorrection
+    transform variable:
+      name: surface_emissivity@DerivedObsValue
+      channels: *all_channels
+    ## Test coeffs
+    coefficient a: [-3.60E-03, -2.38E-03, -2.58E-03, -2.58E-03, -1.56E-03, -1.49E-03, -1.76E-03, -1.83E-03, -1.58E-03, -1.62E-03,
+                    -2.49E-03, -3.87E-03, -1.45E-03, -1.82E-03, -1.76E-03, -1.88E-03, -1.62E-03, -1.56E-03, -2.35E-03, -2.86E-03]
+    coefficient b: [ 2.21E-05,  2.15E-05,  9.55E-06,  9.55E-06,  9.55E-06,  9.55E-06,  9.56E-06,  9.55E-06,  9.55E-06,  9.55E-06,
+                     9.55E-06,  9.55E-06,  9.55E-06,  9.55E-06,  9.12E-06,  9.12E-06,  7.83E-06,  7.83E-06,  6.76E-06,  6.21E-06]
+    coefficient c: [-7.83E-09, -5.00E-09, -7.15E-09, -7.62E-09, -3.54E-09, -8.22E-09, -6.81E-09, -7.56E-09, -3.21E-09, -7.71E-09,
+                    -6.91E-09, -7.81E-09, -8.81E-09, -6.45E-09, -5.44E-09, -6.04E-09, -6.52E-09, -5.42E-09, -8.72E-09, -7.62E-09]
+    exponent a: 0
+    exponent b: 2
+    exponent c: 4
+    minimum value: 0.0
+    maximum value: 1.0
+  compareVariables: # test output matches precalculated values
+    - reference:
+        name: surface_emissivity@TestReference
+      test:
+        name: surface_emissivity@DerivedObsValue
+      absTol: 1.0e-7

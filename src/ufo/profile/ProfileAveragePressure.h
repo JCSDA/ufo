@@ -36,7 +36,8 @@ namespace ufo {
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator.
-    void fillValidationData(ProfileDataHolder &profileDataHolder);
+    void fillValidationData(ProfileDataHolder &profileDataHolder,
+                            bool extended_obs_space);
 
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
@@ -48,10 +49,10 @@ namespace ufo {
 
     /// List of names of GeoVaLs used in check validation.
     oops::Variables getValidationGeoVaLNames() override {
-      return oops::Variables({ufo::VariableNames::geovals_logP,
-            ufo::VariableNames::geovals_ExnerP,
-            ufo::VariableNames::geovals_logP_rho,
-            ufo::VariableNames::geovals_ExnerP_rho});}
+      return oops::Variables({ufo::VariableNames::geovals_testreference_logP,
+            ufo::VariableNames::geovals_testreference_ExnerP,
+            ufo::VariableNames::geovals_testreference_logP_rho,
+            ufo::VariableNames::geovals_testreference_ExnerP_rho});}
 
    private:  // functions
     /// Calculate log(pressure).

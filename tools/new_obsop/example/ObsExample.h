@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2021- UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -9,19 +9,14 @@
 #define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
 
 #include <ostream>
-#include <string>
 
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
 
-#include "ufo/example/ObsExample.interface.h"
+#include "ufo/example/ObsExampleParameters.h"
+#include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -33,12 +28,13 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Example observation operator class
-class ObsExample : public ObsOperatorBase,
-                   private util::ObjectCounter<ObsExample> {
+class ObsExample : public ObsOperatorBase {
  public:
-  static const std::string classname() {return "ufo::ObsExample";}
+  /// The type of parameters accepted by the constructor of this operator.
+  /// This typedef is used by the ObsOperatorFactory.
+  typedef ObsExampleParameters Parameters_;
 
-  ObsExample(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsExample(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsExample();
 
 // Obs Operator

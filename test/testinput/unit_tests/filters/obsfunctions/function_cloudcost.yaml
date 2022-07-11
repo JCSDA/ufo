@@ -1,0 +1,61 @@
+window begin: 2020-03-31T21:00:00Z
+window end: 2020-04-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    linear model absorbers: []
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: NOAA
+      Sat_ID: 20
+      Instrument_Name: ATMS
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_obs_20200401T0000Z_10locs.nc4
+    simulated variables: [brightness_temperature]
+    channels: 18-22
+#   obsdataout:
+#     obsfile: Data/atms_obs_20200401T0000Z_10locs_cloudcost_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/atms_geovals_20200401T0000Z_10locs.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: cloud_cost@MetaData
+      type: float
+      function:
+        name: CloudCostFunction@ObsFunction
+        options:
+          cost channels list: 18, 20, 22
+          RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+          BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+          background fields:
+          - air_temperature
+          - specific_humidity
+          - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+          - mass_content_of_cloud_ice_in_atmosphere_layer
+          - surface_temperature
+          - specific_humidity_at_two_meters_above_surface
+          - skin_temperature
+          - surface_pressure
+          qtotal: true
+          qtotal split rain: true
+          scattering radiative transfer: false  # default
+          minimum ObsValue: 70.0                # default
+          maximum ObsValue: 340.0               # default
+          minimum specific humidity: 3.0e-6     # default
+          maximum final cost: 1600.0            # default
+          HofX group: MetOfficeBiasCorrHofX
+  compareVariables:
+  - reference:
+      name: cloud_cost@TestReference
+    test:
+      name: cloud_cost@MetaData
+    absTol: 1.0e-5

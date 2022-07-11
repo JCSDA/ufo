@@ -24,7 +24,12 @@ public Ops_SatRad_Qsplit
 public Ops_Cholesky
 public ufo_utils_iogetfreeunit
 public InvertMatrix
+public upper2lower
+public getindex
 public cmp_strings
+public find_unique
+public Ops_RealSortQuick
+public sort_and_unique
 
 contains
 
@@ -1410,6 +1415,201 @@ function cmp_ordered_strings(shorter_str, longer_str)
   return
 end function cmp_ordered_strings
 
+!------------------------------------------------------------------------------
+!> Find the unique entries in the input list
+!!
+!! \author Met Office
+!!
+!! \date 15/10/2020: Created
+!!
+subroutine find_unique(input, output)
+
+use, intrinsic :: iso_c_binding
+
+integer(c_size_t), intent(in) :: input(:)
+integer, allocatable, intent(out) :: output(:)
+
+integer, allocatable :: unique_vals(:)    ! The list of unique elements
+integer :: nfound                         ! The number of unique elements found
+integer :: cur_val                        ! The current value being considered
+integer :: max_val                        ! The maximum value in the input list
+
+nfound = 0
+allocate(unique_vals(1:size(input)))
+
+cur_val = minval(input) - 1
+max_val = maxval(input)
+do while (cur_val < max_val)
+    nfound = nfound + 1
+    cur_val = minval(input, mask=input>cur_val)
+    unique_vals(nfound) = cur_val
+end do
+allocate(output(nfound))
+output = unique_vals(1:nfound)
+
+end subroutine find_unique
+
+!------------------------------------------------------------------------------
+!> Generates a index array pointing to the elements of the array 'key'
+!  in increasing order
+!!
+!! \author Met Office
+!!
+!! \date 15/10/2020: Created
+!!
+!
+! Method:
+!   The heap sort invented by J.W.J.Williams is used.
+!   A description of the method can be found in 'Numerical Recipes'
+!   The group information array is used to allow easy sorting on several
+!   parameters of different types. For details see the Parent Module
+!   OpsMod_Sort
+!
+! Inputs:
+!   key : An array of character strings, to be sorted
+!
+! Input/Output:
+!   index : An integer array pointing to the sorted items.
 !-------------------------------------------------------------------------------
+SUBROUTINE Ops_RealSortQuick(key,   &
+                             index)
+
+IMPLICIT NONE
+
+! Subroutine arguments:
+REAL(kind_real), INTENT(IN)       :: key(:)
+INTEGER, ALLOCATABLE, INTENT(OUT) :: index(:)
+
+! Local declarations:
+INTEGER                           :: n     ! The number of items
+INTEGER                           :: head  ! heaps are tree structures: head and child refer
+INTEGER                           :: child ! to related items within the tree
+INTEGER                           :: j
+INTEGER                           :: dum   ! used to swap index items
+CHARACTER(len=*), PARAMETER       :: RoutineName = 'Ops_RealSortQuick'
+
+! Could put in an optional mask
+
+n = SIZE (key)
+ALLOCATE (Index(n))
+DO j = 1, n
+  Index(j) = j
+END DO
+
+! Do heapsort: Create the heap...
+
+makeheap : DO j = n / 2, 1, -1
+  head = j
+  sift1 : DO
+
+    ! find the largest out of the head and its two children...
+
+    child = head * 2
+    IF (child > n) EXIT sift1
+    IF (child < n) THEN
+      IF (key(Index(child + 1)) > key(Index(child))) child = child + 1
+    END IF
+
+    ! if the head is the largest, then sift is done...
+
+    IF (key(Index(head)) >= key(Index(child))) EXIT sift1
+
+    ! otherwise swap to put the largest child at the head,
+    ! and prepare to repeat the procedure for the head in its new
+    ! subordinate position.
+
+    dum = Index(child)
+    Index(child) = Index(head)
+    Index(head) = dum
+    head = child
+  END DO sift1
+END DO makeheap
+
+! Retire heads of the heap, which are the largest, and
+! stack them at the end of the array.
+
+retire : DO j = n, 2, -1
+  dum = Index(1)
+  Index(1) = Index(j)
+  Index(j) = dum
+  head = 1
+
+  ! second sift is similar to first...
+
+  sift2: DO
+    child = head * 2
+    IF (child > (j - 1)) EXIT sift2
+    IF (child < (j - 1)) THEN
+      IF (key(Index(child + 1)) > key(Index(child))) child = child + 1
+    END IF
+    IF (key(Index(head)) >= key(Index(child))) EXIT sift2
+    dum = Index(child)
+    Index(child) = Index(head)
+    Index(head) = dum
+    head = child
+  END DO sift2
+END DO retire
+
+END SUBROUTINE Ops_RealSortQuick
+!-------------------------------------------------------------------------------
+
+subroutine sort_and_unique(nobs, impact_param, record_number, index_vals, unique)
+
+use, intrinsic :: iso_c_binding
+
+integer, intent(in)               :: nobs                  ! Total number of observations
+real(kind_real), intent(inout)    :: impact_param(1:nobs)  ! The impact parameter for GNSS-RO
+integer(c_size_t), intent(inout)  :: record_number(1:nobs) ! Number used to identify unique profiles in the data
+integer, allocatable, intent(out) :: index_vals(:)         ! Indices of sorted observation
+integer, allocatable, intent(out) :: unique(:)             ! Set of unique profile numbers
+
+real(kind_real), allocatable  :: sort_key(:)           ! Key for the sorting (based on record number and impact parameter)
+integer                       :: start_point           ! Starting index of the current profile
+integer                       :: current_point         ! Ending index of the current profile
+integer                       :: iprofile              ! Loop variable, profile number
+
+! Read through the record numbers in order to find a profile of observations
+! Each profile shares the same record number
+allocate(sort_key(nobs))
+sort_key = record_number + (impact_param / MAXVAL(impact_param))
+call Ops_RealSortQuick(sort_key, index_vals)
+call find_unique(record_number, unique)
+
+end subroutine sort_and_unique
+
+  FUNCTION upper2lower(str) RESULT(string)
+
+    IMPLICIT NONE
+
+    CHARACTER(*), INTENT(in) :: str
+    CHARACTER(LEN(str))      :: string
+
+    INTEGER :: ic, i
+
+    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+
+!   lowcase each letter if it is lowecase
+    string = str
+    DO i = 1, LEN_TRIM(str)
+      ic = INDEX(upper, str(i:i))
+      IF (ic > 0) string(i:i) = lower(ic:ic)
+    END DO
+
+  END FUNCTION upper2lower
+
+  INTEGER FUNCTION getindex(names,usrname)
+    IMPLICIT NONE
+    CHARACTER(len=*),INTENT(in) :: names(:)
+    CHARACTER(len=*),INTENT(in) :: usrname
+    INTEGER i
+    getindex=-1
+    DO i=1,SIZE(names)
+      IF(TRIM(usrname)==TRIM(names(i))) THEN
+        getindex=i
+        EXIT
+      ENDIF
+    ENDDO
+  END FUNCTION getindex
 
 end module ufo_utils_mod

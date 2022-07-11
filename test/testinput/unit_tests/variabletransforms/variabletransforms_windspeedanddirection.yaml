@@ -1,0 +1,46 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_2018041500.nc4
+#    obsdataout:
+#       obsfile: Data/windspeedanddirection_2018041500_output.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: WindSpeedAndDirection
+      UseValidDataOnly: false
+  # how many data points will pass the filter? Should pass for all present obs
+  passedBenchmark: 148
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: wind_speed@TestReference
+      test:
+        name: wind_speed@DerivedObsValue
+      absTol: 5.0e-6
+    - reference:
+        name: wind_from_direction@TestReference
+      test:
+        name: wind_from_direction@DerivedObsValue
+      absTol: 5.0e-5
+
+# Check the filter can create derived variables and sets correct QC flags
+- obs space:
+    name: Sonde
+    #  Ioda file we want to apply the filter to
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [wind_speed, wind_from_direction]
+    observed variables: []
+    derived variables: [wind_speed, wind_from_direction]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: WindSpeedAndDirection
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  failedBenchmark: 50  # there should be 25 missing values in each of the two simulated variables

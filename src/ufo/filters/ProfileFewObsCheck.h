@@ -16,7 +16,6 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/NumericConstraints.h"
 #include "oops/util/parameters/RequiredParameter.h"
-#include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 

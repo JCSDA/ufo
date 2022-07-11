@@ -1,0 +1,19 @@
+# window is such that zero obs will be selected
+window begin: 2017-04-14T21:00:00Z
+window end: 2017-04-15T03:00:00Z
+
+observations:
+- obs operator:
+   name: GnssroBndNBAM
+   obs options:
+  obs space:
+   name: GnssroBndNBAM
+   obsdatain:
+    obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
+   simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2018041500_1obs_bending_angle_0obstest_out.nc4
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4
+  rms ref: 0.0
+  tolerance: 1.0e-13

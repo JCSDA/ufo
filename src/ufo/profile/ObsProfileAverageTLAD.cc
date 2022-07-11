@@ -27,8 +27,8 @@ static LinearObsOperatorMaker<ObsProfileAverageTLAD> obsProfileAverageMaker_("Pr
 // -----------------------------------------------------------------------------
 
 ObsProfileAverageTLAD::ObsProfileAverageTLAD(const ioda::ObsSpace & odb,
-                                             const eckit::Configuration & config)
-  : LinearObsOperatorBase(odb), odb_(odb), data_(odb, config)
+                                             const Parameters_ & parameters)
+  : LinearObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
 {
   oops::Log::trace() << "ObsProfileAverageTLAD constructed" << std::endl;
 }
@@ -42,7 +42,7 @@ ObsProfileAverageTLAD::~ObsProfileAverageTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsProfileAverageTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
-  // The initial trajectory is used to determine the slant path locations.
+  // Cache the model trajectory for use in the slant path location algorithm.
   data_.cacheGeoVaLs(geovals);
   oops::Log::trace() << "ObsProfileAverageTLAD: trajectory set" << std::endl;
 }
@@ -74,7 +74,7 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
         const std::size_t jloc = slant_path_location[mlev];
         dx.getAtLocation(var_gv, variable, jloc);
-        dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[mlev];
+        dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
       }
     }
   }
@@ -114,7 +114,7 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
         dx.getAtLocation(var_gv, variable, jloc);
         const std::size_t idx = locsExtended[mlev] * dy.nvars() + jvar;
         if (dy[idx] != missing)
-          var_gv[mlev] += dy[idx];
+          var_gv[nlevs_var - 1 - mlev] += dy[idx];
         // Store the new value of dx.
         dx.putAtLocation(var_gv, variable, jloc);
       }

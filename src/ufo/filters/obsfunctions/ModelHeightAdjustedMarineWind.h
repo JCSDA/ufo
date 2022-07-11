@@ -9,15 +9,8 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_MODELHEIGHTADJUSTEDMARINEWIND_H_
 #define UFO_FILTERS_OBSFUNCTIONS_MODELHEIGHTADJUSTEDMARINEWIND_H_
 
-#include <string>
-
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
-
-#include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
-#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 

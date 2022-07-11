@@ -1,0 +1,23 @@
+window begin: 2019-05-22T21:55:00Z
+window end: 2019-05-22T22:05:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: geopotential_height
+    observation vertical coordinate: height
+  obs space:
+    name: Radar
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/radar_dbz_obs_2019052222.nc4
+#   obsdataout:
+#     obsfile: Data/radar_dbz_obs_2019052222_radar_reflectivity_opr_out.nc4
+    simulated variables: [equivalent_reflectivity_factor]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_dbz_geoval_2019052222.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-05
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11

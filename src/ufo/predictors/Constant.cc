@@ -5,11 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include <string>
-
 #include "ufo/predictors/Constant.h"
 
-#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 namespace ufo {
 
@@ -23,9 +21,10 @@ Constant::Constant(const Parameters_ & parameters, const oops::Variables & vars)
 
 // -----------------------------------------------------------------------------
 
-void Constant::compute(const ioda::ObsSpace & odb,
+void Constant::compute(const ioda::ObsSpace &,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
+                       const ObsBias &,
                        ioda::ObsVector & out) const {
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();

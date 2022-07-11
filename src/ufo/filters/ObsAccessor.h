@@ -15,9 +15,7 @@
 #include <boost/optional.hpp>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/util/DateTime.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/filters/Variables.h"
 
 namespace ioda {
 class Distribution;
@@ -25,8 +23,13 @@ template <typename DATATYPE> class ObsDataVector;
 class ObsSpace;
 }
 
+namespace util {
+class DateTime;
+}
+
 namespace ufo {
 
+class Variables;
 class RecursiveSplitter;
 
 /// \brief This class provides access to observations that may be held on multiple MPI ranks.
@@ -40,11 +43,14 @@ class RecursiveSplitter;
 ///   rank if this variable was used to group observations into records or on multiple MPI ranks
 ///   if not) independently from all others.
 ///
-/// Depending on which of these cases applies, create an ObservationAccessor object by calling the
+/// Depending on which of these cases applies, create an ObservationAccessor object by
+/// calling one of the
 /// ObsAccessor::toAllObservations(),
-/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId() or the
-/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable() static function. The
-/// ObsAccessor will then determine whether each independent group consists of
+/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(),
+/// ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable() or
+/// ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable()
+/// static functions.
+/// The ObsAccessor will then determine whether each independent group consists of
 /// observations held only on a single MPI rank. If so, methods such as getValidObservationIds() and
 /// getIntVariableFromObsSpace() will return vectors constructed from data held only on the current
 /// MPI rank (without any MPI communication); otherwise, these vectors will be constructed from
@@ -77,6 +83,12 @@ class ObsAccessor {
   static ObsAccessor toObservationsSplitIntoIndependentGroupsByVariable(
       const ioda::ObsSpace &obsdb, const Variable &variable);
 
+  /// \brief Create an accessor to the collection of observations held in \p obsdb, assuming that
+  /// each record is treated as a single observation.
+  static ObsAccessor toSingleObservationsSplitIntoIndependentGroupsByVariable(
+      const ioda::ObsSpace &obsdb, const Variable &variable);
+
+
   /// \brief Return the IDs of observation locations that should be treated as valid by a filter.
   ///
   /// \param apply
@@ -90,10 +102,10 @@ class ObsAccessor {
   /// \param filtervars
   ///   List of filter variables.
   ///
-  /// \param validIfAnyFilterVariablePassedQC
-  ///   Boolean switch to treat an observation as valid if any filter variable has not been
-  ///   rejected. By default this is true; if false, the observation is only treated as valid
-  ///   if all filter variables have passed QC.
+  /// \param retentionCandidateIfAnyFilterVariablePassedQC
+  ///   Boolean switch to treat an observation as a candidate for retention if any filter variable
+  ///   has not been rejected. By default this is true; if false, the observation is only treated
+  ///   as a candidate for retention if all filter variables have passed QC.
   ///
   /// An observation location is treated as valid if (a) it has been selected by the \c where
   /// clause and (b) its QC flag(s) for (some/all) filtered variable(s) are set to \c pass
@@ -110,11 +122,11 @@ class ObsAccessor {
   /// as to whether to treat observation locations as valid (i) where none of the filtered variables
   /// have so far been rejected, or (ii) where at least one of these variables has not yet been
   /// rejected. The latter choice (ii) is the default, configurable via the switch
-  /// \c validIfAnyFilterVariablePassedQC.
+  /// \c retentionCandidateIfAnyFilterVariablePassedQC.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
-                                             const ioda::ObsDataVector<int> &flags,
-                                             const Variables &filtervars,
-                                             bool validIfAnyFilterVariablePassedQC = true) const;
+                                   const ioda::ObsDataVector<int> &flags,
+                                   const Variables &filtervars,
+                                   bool retentionCandidateIfAnyFilterVariablePassedQC = true) const;
 
   /// \brief Return the IDs of both flagged and unflagged observation locations selected by the
   /// where clause.
@@ -133,6 +145,17 @@ class ObsAccessor {
   /// nlocs(0) + nlocs(1) - 1 corresponding to locations held on rank 1 and so on, where nlocs(i)
   /// denotes the number of locations held on ith rank.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+
+  /// \brief Return a boolean vector indicating whether each location was selected by the
+  /// \c where clause in the filter's configuration.
+  /// If each independent group of observations is stored entirely on a single MPI rank
+  /// then this vector will be determined separately for each rank.
+  /// Otherwise, this vector will be concatenated across all ranks.
+  ///
+  /// \param apply
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  std::vector<bool> getGlobalApply(const std::vector<bool> &apply) const;
 
   /// \brief Return the values of the specified variable at successive observation locations.
   ///
@@ -186,12 +209,44 @@ class ObsAccessor {
   void flagRejectedObservations(const std::vector<bool> &isRejected,
                                 std::vector<std::vector<bool> > &flagged) const;
 
+  /// \brief Flags observations selected by a where clause and for which at least one filter
+  /// filter variable has failed QC.
+  ///
+  /// \param apply
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  ///
+  /// \param flags
+  ///   An ObsDataVector holding the QC flags (set by any filters run previously)
+  ///   of observations held on the current MPI rank.
+  ///
+  /// \param filtervars
+  ///   List of filter variables.
+  ///
+  /// \param[inout] flagged
+  ///   A vector of vectors, each with as many elements as there are observation locations on the
+  ///   current MPI rank. If any filter variable has a QC rejection for jth observation location
+  ///   then, for all filter variables i, flagged[i][j] will be set to true.
+  void flagObservationsForAnyFilterVariableFailingQC(const std::vector<bool> &apply,
+                                                    const ioda::ObsDataVector<int> &flags,
+                                                    const ufo::Variables &filtervars,
+                                                    std::vector<std::vector<bool> > &flagged) const;
+
  private:
-  enum class GroupBy { NOTHING, RECORD_ID, VARIABLE };
+  /// Specifies the observation grouping by a category variable.
+  /// NOTHING: no category variable used.
+  /// RECORD_ID: the category variable was also used to divide the ObsSpace into records.
+  /// VARIABLE: the category variable was not used to divide the ObsSpace into records.
+  /// SINGLE_OBS: records are treated as single obs, in which case the category variable
+  /// may or may not have been used. If it was used, the behaviour is the same regardless of whether
+  /// the category variable was used to divide the ObsSpace into records.
+  enum class GroupBy { NOTHING, RECORD_ID, VARIABLE, SINGLE_OBS };
 
   /// Private constructor. Construct instances of this class by calling toAllObservations(),
-  /// toObservationsSplitIntoIndependentGroupsByRecordId() or
-  /// toObservationsSplitIntoIndependentGroupsByVariable() instead.
+  /// toObservationsSplitIntoIndependentGroupsByRecordId(),
+  /// toObservationsSplitIntoIndependentGroupsByVariable() or
+  /// toSingleObservationsSplitIntoIndependentGroupsByVariable()
+  /// instead.
   ObsAccessor(const ioda::ObsSpace &obsdb,
               GroupBy groupBy,
               boost::optional<Variable> categoryVariable);
@@ -203,23 +258,6 @@ class ObsAccessor {
 
   void groupObservationsByCategoryVariable(const std::vector<size_t> &validObsIds,
                                            RecursiveSplitter &splitter) const;
-
-  /// \brief Return true if filtered variable(s) have passed QC, otherwise false.
-  ///
-  /// \param flags
-  ///   A vector of type ObsDataRow holding the QC flags for the subset of simulated variables
-  ///   present in the list of filtered variables.
-  ///
-  /// \param ObsId
-  ///   Index of observation location.
-  ///
-  /// \param validIfAnyFilterVariablePassedQC
-  ///   Boolean variable to decide how to treat observation locations where QC flags of filtered
-  ///   variables differ.
-  ///   If true, consider that observation has passed QC if any filtered variable has passed QC.
-  ///   If false, consider that observation has passed QC only if all filtered variables passed QC.
-  bool isValid(const std::vector<ioda::ObsDataRow<int>> &flags, size_t ObsId,
-               bool validIfAnyFilterVariablePassedQC) const;
 
  private:
   const ioda::ObsSpace *obsdb_;

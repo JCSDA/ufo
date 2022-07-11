@@ -12,10 +12,6 @@
 #include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {
-class Configuration;
-}
-
 namespace ufo {
 
   enum class SurfaceObservationSubtype {

@@ -1,0 +1,36 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    Salinity: on
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+      Surfaces: [Water_Temperature, Salinity]
+    obs options:
+      Sensor_ID: radiometer_smap
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: radiometer_smap
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/smap_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/smap_obs_2018041500_m_crtm_opr_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-2
+  geovals:
+    filename: Data/ufo/testinput_tier_1/smap_geoval_2018041500_m.nc4
+  rms ref: 216.57286586298164
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
+

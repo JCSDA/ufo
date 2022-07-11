@@ -13,11 +13,9 @@
 #include <string>
 #include <vector>
 
-#include "ufo/profile/ModelHeightCalculator.h"
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileVerticalInterpolation.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
 
@@ -46,9 +44,12 @@ namespace ufo {
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
-      return oops::Variables({ufo::VariableNames::geovals_orog,
-            ufo::VariableNames::geovals_pressure});
+      return oops::Variables({ufo::VariableNames::geovals_pressure_rho,
+                              ufo::VariableNames::geovals_height_rho});
     }
+
+    /// Fill variables in validator
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

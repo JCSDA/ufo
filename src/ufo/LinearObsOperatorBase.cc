@@ -18,7 +18,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 oops::Variables LinearObsOperatorBase::simulatedVars() const {
-  return odb_.obsvariables();
+  return odb_.assimvariables();
 }
 
 // -----------------------------------------------------------------------------

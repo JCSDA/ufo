@@ -58,6 +58,9 @@ namespace ufo {
     /// Run this check on the entire sample?
     virtual bool runOnEntireSample() {return false;}
 
+    /// This check requires HofX to have been calculated.
+    virtual bool requiresHofX() {return false;}
+
     /// List of names of required GeoVaLs.
     virtual oops::Variables getGeoVaLNames() {return oops::Variables();}
 

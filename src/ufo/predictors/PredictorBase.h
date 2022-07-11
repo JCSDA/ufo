@@ -8,6 +8,8 @@
 #ifndef UFO_PREDICTORS_PREDICTORBASE_H_
 #define UFO_PREDICTORS_PREDICTORBASE_H_
 
+#include <Eigen/Core>
+
 #include <map>
 #include <memory>
 #include <string>
@@ -16,21 +18,20 @@
 #include <boost/make_unique.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 namespace ioda {
   class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Base class for predictor parameters
@@ -68,6 +69,7 @@ class PredictorBase : private boost::noncopyable {
   virtual void compute(const ioda::ObsSpace &,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
+                       const ObsBias &,
                        ioda::ObsVector &) const = 0;
 
   /// geovars names required to compute the predictor

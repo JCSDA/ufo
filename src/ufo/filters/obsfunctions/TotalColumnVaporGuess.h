@@ -8,18 +8,12 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_TOTALCOLUMNVAPORGUESS_H_
 #define UFO_FILTERS_OBSFUNCTIONS_TOTALCOLUMNVAPORGUESS_H_
 
-#include <string>
-#include <vector>
-
-#include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
-
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Calculate column water vapor mass in guess at observation locations.

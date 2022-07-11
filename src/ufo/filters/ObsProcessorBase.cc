@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -78,11 +76,13 @@ void ObsProcessorBase::priorFilter(const GeoVaLs & gv) {
 
 // -----------------------------------------------------------------------------
 
-void ObsProcessorBase::postFilter(const ioda::ObsVector & hofx,
+void ObsProcessorBase::postFilter(const GeoVaLs & gv,
+                                  const ioda::ObsVector & hofx,
                                   const ioda::ObsVector & bias,
                                   const ObsDiagnostics & diags) {
   oops::Log::trace() << "ObsProcessorBase postFilter begin" << std::endl;
   if (post_) {
+    data_.associate(gv);
     data_.associate(hofx, "HofX");
     data_.associate(bias, "ObsBiasData");
     data_.associate(diags);
@@ -92,5 +92,37 @@ void ObsProcessorBase::postFilter(const ioda::ObsVector & hofx,
 }
 
 // -----------------------------------------------------------------------------
+
+void ObsProcessorBase::checkFilterData(const oops::FilterStage filterStage) {
+  // Return if filters have been automatically designated as pre, prior or post.
+  if (filterStage == oops::FilterStage::AUTO)
+    return;
+
+  // Pre filters (run before GetValues) cannot request quantities in the
+  // GeoVaLs, HofX, ObsDiag or ObsBiasData groups.
+  if (filterStage == oops::FilterStage::PRE &&
+      (allvars_.hasGroup("GeoVaLs") ||
+       allvars_.hasGroup("HofX") ||
+       allvars_.hasGroup("ObsDiag") ||
+       allvars_.hasGroup("ObsBiasData"))) {
+    throw eckit::UserError("Invalid pre filter requested", Here());
+  }
+
+  // Prior filters (run after GetValues and before observation operator) cannot request
+  // quantities in the HofX, ObsDiag or ObsBiasData groups.
+  if (filterStage == oops::FilterStage::PRIOR &&
+      (allvars_.hasGroup("HofX") ||
+       allvars_.hasGroup("ObsDiag") ||
+       allvars_.hasGroup("ObsBiasData"))) {
+    throw eckit::UserError("Invalid prior filter requested", Here());
+  }
+
+  // There are no requirements on post filters (run after observation operator).
+
+  // Set both prior_ and post_ to true.
+  // This ensures priorFilter and postFilter will run doFilter().
+  prior_ = true;
+  post_ = true;
+}
 
 }  // namespace ufo

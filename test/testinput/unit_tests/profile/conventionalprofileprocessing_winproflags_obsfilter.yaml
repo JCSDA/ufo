@@ -1,0 +1,31 @@
+#
+#=== Checking wind profiler flags ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_winproflags.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_winproflags_obsfilter_out.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: eastward_wind
+    Checks: ["Basic", "WinProFlags"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+  HofX: HofX
+  passedBenchmark: 59
+  benchmarkFlag: 24
+  flaggedBenchmark: 77

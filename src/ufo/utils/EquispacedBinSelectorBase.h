@@ -19,7 +19,7 @@ namespace ufo
 class EquispacedBinSelectorBase {
  public:
   // If necessary, these could be made template parameters.
-  typedef float ValueType;
+  typedef double ValueType;
   typedef int IndexType;
 
   virtual ~EquispacedBinSelectorBase() {}

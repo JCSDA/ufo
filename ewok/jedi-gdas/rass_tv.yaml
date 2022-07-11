@@ -1,9 +1,72 @@
-obs operator:
-  name: VertInterp
 obs space:
   name: rass_tv
   obsdatain:
     obsfile: $(experiment_dir)/{{current_cycle}}/rass_tv.{{window_begin}}.nc4
+    obsgrouping:
+      group variables: ["station_id", "datetime"]
+      sort variable: "air_pressure"
+      sort order: "descending"
   obsdataout:
     obsfile: $(experiment_dir)/{{current_cycle}}/$(experiment).rass_tv.{{window_begin}}.nc4
   simulated variables: [virtual_temperature]
+#
+obs operator:
+  name: VertInterp
+#
+obs filters:
+  #
+  # Reject all obs with PreQC mark already set above 3
+  # - filter: PreQC
+  #   maxvalue: 3
+  #   action:
+  #     name: reject
+  #
+  # Observation Range Sanity Check
+  - filter: Bounds Check
+    filter variables:
+    - name: virtual_temperature
+    minvalue: 195
+    maxvalue: 327
+    action:
+      name: reject
+  #
+  - filter: Perform Action
+    filter variables:
+    - name: virtual_temperature
+    action:
+      name: assign error
+      error parameter: 1.3
+  #
+  - filter: Perform Action
+    filter variables:
+    - name: virtual_temperature
+    action:
+      name: assign error
+      error function:
+        name: ObsErrorModelStepwiseLinear@ObsFunction
+        options:
+          xvar:
+            name: MetaData/air_pressure
+          xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
+          errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
+  #
+  - filter: Perform Action
+    filter variables:
+    - name: virtual_temperature
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsErrorFactorConventional@ObsFunction
+        options:
+          test QCflag: PreQC
+          inflate variables: [virtual_temperature]
+    defer to post: true
+  #
+  # Gross error check with (O - B) / ObsError greater than threshold.
+  - filter: Background Check
+    filter variables:
+    - name: virtual_temperature
+    threshold: 7.0
+    absolute threshold: 9.0
+    action:
+      name: reject

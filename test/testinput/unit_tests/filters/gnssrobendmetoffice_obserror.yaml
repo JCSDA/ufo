@@ -1,0 +1,76 @@
+window begin: 2020-05-01T03:00:00Z
+window end: 2020-05-01T09:00:00Z
+
+observations:
+# Test the specification of observation errors by latitude
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
+  obs filters:
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bending_angle
+    gradient threshold: -0.08
+    sharp gradient offset: 600
+    surface offset: 500
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: MetOffice
+    err_variable: latitude
+    rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
+    use profile: true
+    allow extrapolation: true
+    verbose output: true
+    defer to post: true
+  compareVariables:
+    - reference:
+        name: bending_angle@LatitudeObsError
+      test:
+        name: bending_angle@EffectiveError
+      relTol: 1.0e-5
+# Test the specification of observation errors by average temperature
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
+    simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: MetOffice
+    err_variable: average_temperature
+    rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
+    use profile: true
+    allow extrapolation: true
+    verbose output: true
+    defer to post: true
+  compareVariables:
+    - reference:
+        name: bending_angle@AvTempObsError
+      test:
+        name: bending_angle@EffectiveError
+      relTol: 4.0e-4

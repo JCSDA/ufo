@@ -1,0 +1,32 @@
+window begin: 2020-08-13T03:00:00Z
+window end: 2020-08-13T09:00:00Z
+
+observations:
+- obs space:
+    name: PM25
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/airnow-v2a-2020081306-sub.nc
+    simulated variables: [pm25]
+#   obsdataout:
+#     obsfile: Data/airnow-v2a-2020081306-sub_insitupm_out.nc
+  obs operator:
+    name: InsituPM
+    tracer_geovals: [aso4i,ano3i,anh4i,anai,acli,aeci,aothri,alvpo1i,asvpo1i,asvpo2i,alvoo1i,alvoo2i,asvoo1i,asvoo2i,
+                        aso4j,ano3j,anh4j,anaj,aclj,aecj,aothrj,afej,asij,atij,acaj,amgj,amnj,aalj,akj,
+                        alvpo1j,asvpo1j,asvpo2j,asvpo3j,aivpo1j,axyl1j,axyl2j,axyl3j,atol1j,atol2j,atol3j,
+                        abnz1j,abnz2j,abnz3j,aiso1j,aiso2j,aiso3j,atrp1j,atrp2j,asqtj,aalk1j,aalk2j,apah1j,
+                        apah2j,apah3j,aorgcj,aolgbj,aolgaj,alvoo1j,alvoo2j,asvoo1j,asvoo2j,asvoo3j,apcsoj,
+                        aso4k,asoil,acors,aseacat,aclk,ano3k,anh4k]     
+    vertical_coordinate: height_asl
+    model: CMAQ
+    use_scalefac_cmaq: true      
+    tracer_modes_cmaq: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+                        2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3]
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/airnow_hofx_rrfs_cmaq_v2a_2020081306_sub_m_geovals_0000.nc
+  vector ref: hofx
+  tolerance: 1.0e-6

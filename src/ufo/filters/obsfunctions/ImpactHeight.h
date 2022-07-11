@@ -9,9 +9,6 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_IMPACTHEIGHT_H_
 #define UFO_FILTERS_OBSFUNCTIONS_IMPACTHEIGHT_H_
 
-#include <vector>
-
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 

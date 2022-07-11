@@ -1,0 +1,64 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: &Sensor_ID ssmis_f17
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: ssmis_f17
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
+#   obsdataout:
+#     obsfile: Data/ssmis_f17_hofx_2020110112_crtm_opr_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-24
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_ssmis_f17.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cloud_liquid_water
+        sensor: SSMIS
+        ch19h: 12
+        ch19v: 13
+        ch22v: 14
+        ch37h: 15
+        ch37v: 16
+        ch91v: 17
+        ch91h: 18
+      - name: cosine_of_latitude_times_orbit_node
+      - name: sine_of_latitude
+      - name: lapse_rate
+        order: 2
+        tlapse: &ssmis_f17_tlap Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_tlapmean.txt
+      - name: lapse_rate
+        tlapse: *ssmis_f17_tlap
+      - name: emissivity
+      - name: scan_angle
+        var_name: scan_position
+        order: 4
+      - name: scan_angle
+        var_name: scan_position
+        order: 3
+      - name: scan_angle
+        var_name: scan_position
+        order: 2
+      - name: scan_angle
+        var_name: scan_position
+  obs filters:
+#step1: Gross check using abs(O-B-bias)
+  - filter: Background Check
+    filter variables:
+    - name: brightness_temperature
+      channels: *channels
+    absolute threshold: 3.5
+    action:
+      name: reject
+  passedBenchmark: 1776

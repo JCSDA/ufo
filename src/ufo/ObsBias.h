@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/LocalConfiguration.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -23,19 +21,12 @@
 #include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
-namespace oops {
-  class Variables;
-}
-
 namespace ioda {
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVals;
   class ObsBiasIncrement;
-  class ObsDiagnostics;
 
 /// Class to handle observation bias correction coefficients
 /// \details contains information on what predictors are used for bias
@@ -84,6 +75,9 @@ class ObsBias : public util::Printable,
   /// Return the list of bias-corrected variables.
   const oops::Variables & correctedVars() const {return vars_;}
 
+  /// Return the list of channels that don't need bias correction
+  const std::vector<int> & chlistNoBC() const {return chlistNoBC_;}
+
   /// Set all variable predictors coefficients to zero (used in the test)
   void zero();
 
@@ -111,6 +105,9 @@ class ObsBias : public util::Printable,
   std::size_t numStaticPredictors_;
   /// number of variable predictors (i.e. predictors with variable coefficients)
   std::size_t numVariablePredictors_;
+
+  /// channel list not bias corrected
+  std::vector<int> chlistNoBC_;
 
   /// corrected variables names (for now has to be same as "simulated variables")
   oops::Variables vars_;

@@ -1,0 +1,22 @@
+#
+#=== Profile processing: unit tests of vertical averaging routine with ascending vertical coordinate ===#
+#
+
+Vertical averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertaverage_ascending.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_unittests_vertaverage_ascending_out.nc4
+  HofX: HofX
+  Conventional Profile Processing:
+    Checks: ["Basic"]
+    compareWithOPS: true
+  BypassMismatchComparison: true
+  testProfileVerticalAveraging: true

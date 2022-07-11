@@ -7,12 +7,8 @@
 
 #include "ufo/filters/ObsDomainCheck.h"
 
-#include <string>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 

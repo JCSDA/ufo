@@ -16,11 +16,12 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 ///
 /// \brief Options applying to the retrieval of cloud liquid water from 23.8 GHz and
@@ -75,6 +76,12 @@ class CLWRetMWParameters : public oops::Parameters {
   oops::OptionalParameter<int> ch36h{"clwret_ch36h", this};
   oops::OptionalParameter<int> ch36v{"clwret_ch36v", this};
   oops::OptionalParameter<std::vector<float>> origbias{"sys_bias", this};
+
+  /// Cloud index mhs_si used in GSI all-sky assimilation of MHS data.
+  /// mhs_si = (bt89v - bt166v) - (bt_clr_89v - bt_clr_166v)
+  /// mhs_si = max(zero,mhs_si)
+  oops::OptionalParameter<int> ch89v{"clwret_ch89v", this};
+  oops::OptionalParameter<int> ch166v{"clwret_ch166v", this};
 };
 
 ///
@@ -110,6 +117,11 @@ class CLWRetMW : public ObsFunctionBase<float> {
                                const std::vector<float> &,
                                std::vector<float> &);
   static void clw_retr_amsr2(const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               std::vector<float> &);
+  static void mhs_si(const std::vector<float> &,
                                const std::vector<float> &,
                                const std::vector<float> &,
                                const std::vector<float> &,

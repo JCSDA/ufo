@@ -1,0 +1,14 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+#   obsdataout:
+#     obsfile: Data/filters_testdata_perform_neither_action_nor_actions_out.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Perform Action
+    # Error: neither the 'action' nor the 'actions' key is present

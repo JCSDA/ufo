@@ -1,0 +1,28 @@
+#
+#=== Profile average wind speed: comparison with OPS values ===#
+#
+
+Sondes:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed_obs_extended.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulated variables: [eastward_wind, northward_wind]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_windspeed_ops_comparison_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+

@@ -10,16 +10,11 @@
 
 #include <memory>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilterBase.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/ObsTraits.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -45,8 +40,11 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
 
   void preProcess() override;
   void priorFilter(const GeoVaLs &) override;
-  void postFilter(const ioda::ObsVector &, const ioda::ObsVector &,
+  void postFilter(const GeoVaLs &,
+                  const ioda::ObsVector &,
+                  const ioda::ObsVector &,
                   const ObsDiagnostics &) override;
+  void checkFilterData(const oops::FilterStage filterStage) override;
 
   oops::Variables requiredVars() const override {
     return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
@@ -59,12 +57,11 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
   std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   ufo::Variables allvars_;
   ObsFilterData data_;
+  bool prior_;
+  bool post_;
 
  private:
   virtual void doFilter() const = 0;
-
-  bool prior_;
-  bool post_;
 
   // Variables extracted from the filter parameters.
   bool deferToPost_;

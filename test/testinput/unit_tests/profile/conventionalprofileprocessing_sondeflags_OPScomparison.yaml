@@ -1,0 +1,23 @@
+#
+#=== Setting a variety of sonde flags: comparison with OPS values ===#
+#
+
+Sondes:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_sondeflags.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulated variables: [eastward_wind]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_sondeflags_ops_comparison_out.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "SondeFlags"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1

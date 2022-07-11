@@ -89,7 +89,6 @@ namespace ufo {
         valuesToCompare_int_.insert({
             ufo::VariableNames::counter_NumSamePErrObs,
             ufo::VariableNames::counter_NumInterpErrObs,
-            ufo::VariableNames::qcflags_eastward_wind,
             ufo::VariableNames::NumStd,
             ufo::VariableNames::NumSig,
             ufo::VariableNames::StdLev,
@@ -140,11 +139,7 @@ namespace ufo {
             ufo::VariableNames::pge_relative_humidity,
             ufo::VariableNames::pge_eastward_wind,
             ufo::VariableNames::pge_northward_wind,
-            ufo::VariableNames::pge_geopotential_height,
-            ufo::VariableNames::pgebd_air_temperature,
-            ufo::VariableNames::pgebd_relative_humidity,
-            ufo::VariableNames::pgebd_eastward_wind,
-            ufo::VariableNames::pgebd_northward_wind});
+            ufo::VariableNames::pge_geopotential_height});
       } else if (check == "Pressure") {
         valuesToCompare_int_.insert({
             ufo::VariableNames::qcflags_observation_report});
@@ -160,26 +155,26 @@ namespace ufo {
             ufo::VariableNames::modellevels_ExnerP_rho_derived});
       } else if (check == "AverageTemperature") {
         valuesToCompare_int_.insert({
-            ufo::VariableNames::modellevels_average_air_temperature_qcflags,
+            ufo::VariableNames::qcflags_air_temperature,
             ufo::VariableNames::counter_NumGapsT});
         valuesToCompare_float_.insert({
             ufo::VariableNames::modellevels_air_temperature_derived,
-            ufo::VariableNames::modellevels_average_air_temperature_derived});
+            ufo::VariableNames::air_temperature_derived});
       } else if (check == "AverageWindSpeed") {
         valuesToCompare_int_.insert({
-            ufo::VariableNames::modellevels_average_eastward_wind_qcflags,
-            ufo::VariableNames::modellevels_average_northward_wind_qcflags,
+            ufo::VariableNames::qcflags_eastward_wind,
+            ufo::VariableNames::qcflags_northward_wind,
             ufo::VariableNames::counter_NumGapsU,
             ufo::VariableNames::counter_NumGapsUWP});
         valuesToCompare_float_.insert({
-            ufo::VariableNames::modellevels_average_eastward_wind_derived,
-            ufo::VariableNames::modellevels_average_northward_wind_derived});
+            ufo::VariableNames::eastward_wind_derived,
+            ufo::VariableNames::northward_wind_derived});
       } else if (check == "AverageRelativeHumidity") {
         valuesToCompare_int_.insert({
-            ufo::VariableNames::modellevels_average_relative_humidity_qcflags,
+            ufo::VariableNames::qcflags_relative_humidity,
             ufo::VariableNames::counter_NumGapsRH});
         valuesToCompare_float_.insert({
-            ufo::VariableNames::modellevels_average_relative_humidity_derived});
+            ufo::VariableNames::relative_humidity_derived});
       }
     }
   }
@@ -194,7 +189,7 @@ namespace ufo {
                                             int &n)
   {
     if (!differenceWithinTol(val1, val2 + offset, tol)) {
-        oops::Log::debug() << "Mismatch for " << desc << " (OPS, this code): "
+        oops::Log::debug() << "   Mismatch for " << desc << " (OPS, this code): "
                            << val1 << ", " << val2 + offset << std::endl;
         n++;
     }
@@ -222,7 +217,7 @@ namespace ufo {
     const size_t vecsize = std::min(vec1.size(), vec2.size());
     for (size_t jvec = 0; jvec < vecsize; ++jvec) {
       if (!differenceWithinTol(vec1[jvec], vec2[jvec] + offset, tol)) {
-        oops::Log::debug() << "Mismatch for " << desc << "[" << jvec << "] "
+        oops::Log::debug() << "   Mismatch for " << desc << "[" << jvec << "] "
                            << "(OPS, this code): " << vec1[jvec] << ", "
                            << vec2[jvec] + offset << std::endl;
         n++;
@@ -233,8 +228,6 @@ namespace ufo {
   void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler,
                                        size_t commSize)
   {
-    oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
-
     // Reset number of mismatches for this profile
     nMismatches_ = 0;
 
@@ -242,6 +235,7 @@ namespace ufo {
 
     // Compare integer values obtained in this code and OPS
     for (const auto& valueToCompare_int : valuesToCompare_int_) {
+      oops::Log::debug() << "  " << valueToCompare_int << std::endl;
       std::string varname;
       std::string groupname;
       ufo::splitVarGroup(valueToCompare_int, varname, groupname);
@@ -301,6 +295,7 @@ namespace ufo {
 
     // Compare float values obtained in this code and OPS
     for (const auto& valueToCompare_float : valuesToCompare_float_) {
+      oops::Log::debug() << "  " << valueToCompare_float << std::endl;
       const std::vector <float> &values_thiscode =
         profileDataHandler.get<float>(valueToCompare_float);
       const std::vector <float> &values_OPS =

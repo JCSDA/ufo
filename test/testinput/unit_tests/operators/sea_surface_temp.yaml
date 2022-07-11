@@ -1,0 +1,23 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: Identity
+  linear obs operator:
+    name: Identity
+  obs space:
+    name: SeaSurfaceTemp
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sst_obs-2018-04-15.nc4
+#   obsdataout:
+#     obsfile: Data/sst_obs-2018-04-15_opr_out.nc4
+    simulated variables: [sea_surface_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sst_obs-2018-04-15_geovals.nc
+  rms ref: 15.0
+  tolerance: 1.0e-10
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-10

@@ -8,13 +8,11 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
@@ -22,7 +20,10 @@
 
 namespace ufo {
 
+class ObsFilterData;
+
 /// \brief Options controlling ObsFunctionLinearCombination ObsFunction
+template <typename FunctionValue>
 class LinearCombinationParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(LinearCombinationParameters, Parameters)
 
@@ -30,7 +31,7 @@ class LinearCombinationParameters : public oops::Parameters {
   /// Input variables of the linear combination
   oops::RequiredParameter<std::vector<Variable>> variables{"variables", this};
   /// coefficient associated with the above variables
-  oops::RequiredParameter<std::vector<float>> coefs{"coefs", this};
+  oops::RequiredParameter<std::vector<FunctionValue>> coefs{"coefs", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -68,16 +69,16 @@ class LinearCombinationParameters : public oops::Parameters {
 ///             0.5 * brightness_temperature_<channel>@ObsError
 ///
 
-class LinearCombination : public ObsFunctionBase<float> {
+template <typename FunctionValue>
+class LinearCombination : public ObsFunctionBase<FunctionValue> {
  public:
   explicit LinearCombination(const eckit::LocalConfiguration &);
-  ~LinearCombination();
 
   void compute(const ObsFilterData &,
-               ioda::ObsDataVector<float> &) const;
+               ioda::ObsDataVector<FunctionValue> &) const;
   const ufo::Variables & requiredVariables() const;
  private:
-  LinearCombinationParameters options_;
+  LinearCombinationParameters<FunctionValue> options_;
   ufo::Variables invars_;
 };
 

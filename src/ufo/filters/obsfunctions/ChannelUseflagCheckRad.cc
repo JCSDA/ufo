@@ -7,19 +7,14 @@
 
 #include "ufo/filters/obsfunctions/ChannelUseflagCheckRad.h"
 
-#include <cmath>
-
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 #include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -59,13 +54,21 @@ void ChannelUseflagCheckRad::compute(const ObsFilterData & in,
   const size_t nlocs = in.nlocs();
   const size_t nchans = channels_.size();
 
+  size_t bc_idx = 0;
+  if (options_.passiveBC.value() != boost::none) {
+    const bool &passive_bc = options_.passiveBC.value().get();
+    if (passive_bc) bc_idx = 1;
+  }
+
   // Get channel use flags from options
   std::vector<int> useflag = options_.useflagChannel.value();
 
   // Output
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
+    float factor = 1.0;
+    if ((bc_idx == 1) && (useflag[ichan] == -1)) {factor = -1.0;}
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      out[ichan][iloc] = useflag[ichan];
+      out[ichan][iloc] = useflag[ichan] * factor;
     }
   }
 }

@@ -34,10 +34,10 @@ namespace ufo {
   /// \param[in] ModelLevels: Have the data been averaged onto model levels?
   /// \param[inout] flags: QC flags.
   /// \param[inout] PGE: Probability of gross error.
-  /// \param[inout] PGEBd: PGE for input to buddy check.
   /// \param[in] ErrVarMax: (Optional) Maximum error variance.
   /// \param[in] obsVal2: (Optional) Second component of 2D observation values.
   /// \param[in] bkgVal2: (Optional) Second component of 2D background values.
+  /// \param[inout] TotalPd: (Optional) Total (combined) probability distribution.
 
   void BayesianPGEUpdate(const ProbabilityOfGrossErrorParameters &options,
                          const std::vector<float> &obsVal,
@@ -48,10 +48,10 @@ namespace ufo {
                          const bool ModelLevels,
                          std::vector<int> &flags,
                          std::vector<float> &PGE,
-                         std::vector<float> &PGEBd,
                          float ErrVarMax = -1,
                          const std::vector<float> *obsVal2 = nullptr,
-                         const std::vector<float> *bkgVal2 = nullptr);
+                         const std::vector<float> *bkgVal2 = nullptr,
+                         std::vector<float> *TotalPd = nullptr);
 }  // namespace ufo
 
 #endif  // UFO_UTILS_PROBABILITYOFGROSSERROR_H_

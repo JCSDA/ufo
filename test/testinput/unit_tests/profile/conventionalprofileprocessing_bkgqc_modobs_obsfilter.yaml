@@ -1,0 +1,38 @@
+#
+#=== Profile processing for background QC on model levels ==#
+#
+
+window begin: 2019-06-14T21:00:00Z
+window end: 2019-06-15T02:59:59Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_modobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_bkgqc_modobs_obsfilter_out.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: height
+    Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_modobs.nc4
+  passedBenchmark: 328
+  benchmarkFlag: 24
+  flaggedBenchmark: 24

@@ -7,8 +7,11 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [eastward_wind, northward_wind]
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_m_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
+  geovals test:
     state variables: [eastward_wind, northward_wind, air_pressure]
     norm: 4307792.01444180
 - obs space:
@@ -17,8 +20,11 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+  geovals test:
     state variables:
     - air_temperature
     - air_pressure
@@ -45,6 +51,5 @@ observations:
     - leaf_area_index
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
-    - land_type_index
     - soil_type
     norm: 5948559.5381

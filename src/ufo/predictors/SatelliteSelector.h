@@ -10,7 +10,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -66,6 +65,7 @@ class SatelliteSelector : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
+               const ObsBias &,
                ioda::ObsVector &) const override;
 
  private:

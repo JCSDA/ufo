@@ -1,0 +1,270 @@
+window begin: 2020-10-01T03:00:00Z
+window end: 2020-10-01T09:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    observation vertical coordinate: air_pressure
+    vertical coordinate: air_pressure_levels_minus_one
+  obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
+  obs filters:
+  # Create MetaData/satwind_id string variable containing channel information
+  - filter: satname
+    SatName assignments:
+    - min WMO Satellite id: 1
+      max WMO Satellite id: 999
+      Satellite_comp:
+      - satobchannel: 1
+        min frequency: 2.6e+13
+        max frequency: 2.7e+13
+        wind channel: ir112
+      - satobchannel: 1
+        min frequency: 7.5e+13
+        max frequency: 8.2e+13
+        wind channel: ir38
+      Satellite_id:
+      - Sat ID: 270
+        Sat name: GOES16
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Assign estimated pressure errors for each satellite and channel combination
+  # Errors are defined as a function of:
+  #     air_pressure@MetaData
+  #     satwind_id@MetaData
+  - filter: Variable Assignment
+    assignments:
+    - name: air_pressure@MetaDataError
+      type: float
+      function:
+        name: DrawValueFromFile@ObsFunction
+        options:
+          file: Data/ufo/testinput_tier_1/satwind_pressure_errors.nc4
+          group: MetaDataError
+          interpolation:
+          - name: satwind_id@MetaData
+            method: exact
+          - name: air_pressure@MetaData
+            method: linear
+  # Post filter - Assign individual observation errors
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: eastward_wind
+          observation vertical coordinate: air_pressure
+          vertical coordinate: air_pressure_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: northward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: northward_wind
+          observation vertical coordinate: air_pressure
+          vertical coordinate: air_pressure_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: eastward_wind@TestReference
+      test:
+        name: eastward_wind@EffectiveError
+      absTol: 1.0e-5
+    - reference:
+        name: northward_wind@TestReference
+      test:
+        name: northward_wind@EffectiveError
+      absTol: 1.0e-5
+#---------------------------------------------------
+- obs operator:
+    name: VertInterp
+    observation vertical coordinate: air_pressure
+    vertical coordinate: air_pressure_levels_minus_one
+  obs space:
+    name: GeoVaLs are in the wrong order, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
+  obs filters:
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Set constant pressure error
+  - filter: Variable Assignment
+    assignments:
+    - name: air_pressure@MetaDataError
+      type: float
+      value: 10000.0
+  # Post filter - Assign individual observation errors
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: eastward_wind
+          observation vertical coordinate: air_pressure
+          vertical coordinate: air_pressure_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
+#---------------------------------------------------
+- obs operator:
+    name: VertInterp
+    observation vertical coordinate: air_pressure
+    vertical coordinate: air_pressure_levels_minus_one
+  obs space:
+    name: Incorrect vertical coordinate
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
+  obs filters:
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Set constant pressure error
+  - filter: Variable Assignment
+    assignments:
+    - name: air_pressure@MetaDataError
+      type: float
+      value: 10000.0
+  # Post filter - Assign individual observation errors
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: eastward_wind
+          observation vertical coordinate: air_pressure
+          vertical coordinate: geopotential_height_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  expectExceptionWithMessage: Vertical coordinate not recognised
+#---------------------------------------------------
+- obs operator:
+    name: VertInterp
+    observation vertical coordinate: air_pressure
+    vertical coordinate: air_pressure_levels_minus_one
+  obs space:
+    name: Invalid pressure error input
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
+  obs filters:
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Set constant pressure error
+  - filter: Variable Assignment
+    assignments:
+    - name: air_pressure@MetaDataError
+      type: float
+      value: 100.0
+  # Post filter - Assign individual observation errors
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: eastward_wind
+          observation vertical coordinate: air_pressure
+          vertical coordinate: air_pressure_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  expectExceptionWithMessage: "Pressure error invalid: 100 Pa"
+#---------------------------------------------------
+- obs operator:
+    name: VertInterp
+    observation vertical coordinate: air_pressure
+    vertical coordinate: air_pressure_levels_minus_one
+  obs space:
+    name: Invalid wind component specified
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
+  obs filters:
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Set constant pressure error
+  - filter: Variable Assignment
+    assignments:
+    - name: air_pressure@MetaDataError
+      type: float
+      value: 10000.0
+  # Post filter - Assign individual observation errors
+  - filter: Perform Action
+    defer to post: true
+    filter variables:
+    - name: eastward_wind
+    action:
+      name: assign error
+      error function:
+        name: SatwindIndivErrors@ObsFunction
+        options:
+          verror add: 7.5
+          verror mult: -5.0
+          wind component: air_temperature
+          observation vertical coordinate: air_pressure
+          vertical coordinate: air_pressure_levels_minus_one
+          pressure error:
+            name: air_pressure@MetaDataError
+          quality index:
+            name: QI_without_forecast@MetaData
+  expectExceptionWithMessage: Wind component must be one of eastward_wind or northward_wind

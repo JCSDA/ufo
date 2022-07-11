@@ -1,0 +1,67 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+     name: RTTOV
+     Debug: false # default
+     Absorbers: []
+     linear obs operator:
+       Absorbers: []
+     obs options:
+       RTTOV_default_opts: UKMO_PS43 # non-default
+       RTTOV_apply_reg_limits: true # for compatibility with previous
+                                    # version of this test
+       RTTOV_GasUnitConv: true
+       SatRad_compatibility: true # default
+       Sensor_ID: noaa_20_atms
+       CoefficientPath: Data/
+       UseRHwaterForQC: true # default
+       UseColdSurfaceCheck: true # default
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_gasunits_default_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  rms ref: 228.54196297632672
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11
+- obs operator:
+     name: RTTOV
+     Debug: false # default
+     Absorbers: []
+     linear obs operator:
+       Absorbers: []
+     obs options:
+       RTTOV_default_opts: UKMO_PS43 # non-default
+       RTTOV_apply_reg_limits: true # for compatibility
+       SatRad_compatibility: false # non-default
+       RTTOV_GasUnitConv: true
+       Sensor_ID: noaa_20_atms
+       CoefficientPath: Data/
+       UseRHwaterForQC: false # non-default
+       UseColdSurfaceCheck: false # non-default
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_gasunits_nondefault_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  rms ref: 227.88586699673394
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11

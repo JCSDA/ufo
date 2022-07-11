@@ -7,18 +7,25 @@
 
 #include "ufo/AnalyticInit.h"
 
-#include "eckit/config/Configuration.h"
-
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/GeoVaLs.interface.h"
 #include "ufo/Locations.h"
 
 namespace ufo {
 
+// Ideally, we would have five separate analytic init classes for the below cases,
+// but for now we'll use the same class to do all.
+static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic1_("invent_state");
+static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic2_("dcmip-test-1-1");
+static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic3_("dcmip-test-1-2");
+static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic4_("dcmip-test-3-1");
+static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic5_("dcmip-test-4-0");
+
 // -----------------------------------------------------------------------------
 /// \brief Constructor for tests
-AnalyticInit::AnalyticInit(const eckit::Configuration & config) : config_(config)
+AnalyticInit::AnalyticInit(const Parameters_ & options) : options_(options)
 { }
 // -----------------------------------------------------------------------------
 /*! \brief Analytic initialization for GeoVaLs
@@ -36,9 +43,7 @@ AnalyticInit::AnalyticInit(const eckit::Configuration & config) : config_(config
 void AnalyticInit::fillGeoVaLs(const Locations & locs, GeoVaLs & geovals) const
 {
   oops::Log::trace() << "AnalyticInit::analytic_init starting" << std::endl;
-  if (config_.has("analytic_init")) {
-      ufo_geovals_analytic_init_f90(geovals.toFortran(), locs, config_);
-  }
+  ufo_geovals_analytic_init_f90(geovals.toFortran(), locs, options_.toConfiguration());
   oops::Log::trace() << "AnalyticInit::analytic_init done" << std::endl;
 }
 // -----------------------------------------------------------------------------

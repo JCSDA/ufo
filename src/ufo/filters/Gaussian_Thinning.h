@@ -15,15 +15,10 @@
 
 #include <boost/optional.hpp>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/GaussianThinningParameters.h"
 #include "ufo/filters/QCflags.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -53,7 +48,8 @@ class SpatialBinSelector;
 ///
 /// Selection of the observation to preserve in each cell is based on
 /// - its position in the cell
-/// - optionally, its priority.
+/// - optionally, its priority
+/// - optionally, its ObsValue (select the one closest to the group median).
 ///
 /// See GaussianThinningParameters for the documentation of the available options.
 class Gaussian_Thinning : public FilterBase,
@@ -100,6 +96,13 @@ class Gaussian_Thinning : public FilterBase,
       const ObsAccessor &obsAccessor,
       const RecursiveSplitter &splitter,
       const std::vector<float> &distancesToBinCenter) const;
+
+  std::vector<bool> identifyThinnedObservationsMedian(
+      const std::vector<size_t> &validObsIds,
+      const ObsAccessor &obsAccessor,
+      const RecursiveSplitter &splitter,
+      const std::vector<float> &obsval,
+      const float &minNumObsPerBin) const;
 
   std::function<bool(size_t, size_t)> makeObservationComparator(
       const std::vector<size_t> &validObsIds,

@@ -47,6 +47,8 @@ class SpatialBinSelector {
   ///     in the zonal direction is as close as possible to that in the meridional direction.
   ///   - If set to DOWN, the number of bins is chosen so that the bin width in the zonal direction
   ///     is as small as possible, but no smaller than in the meridional direction.
+  /// \param horizontalMesh
+  ///   Cell size (in km) along the meridians.
   /// \param metOfficeOpsCompatibilityMode
   ///   If true, the compatibility mode with the Met Office OPS system will be activated.
   ///   This will stop longitudeBin() from clamping longitudes to the interval [0, 360] deg.
@@ -55,8 +57,14 @@ class SpatialBinSelector {
   ///   the range [-180, 180] deg, it is normally better to wrap them to the [0, 360] deg range
   ///   before passing them to longitudeBin(). Otherwise there's a risk that points lying exactly
   ///   at -180 or 180 deg will be put into a bin of their own.
+  /// \param partitionLongitudeBinsUsingMesh
+  ///   - If true, the partitioning of longitude bins per latitude bin index is calculated
+  ///     using the horizontal mesh cell size.
+  ///   - If false, the integer number of latitude bins is used to calculate how longitude bins are
+  ///     partitioned.
   SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode,
-                     bool metOfficeOpsCompatibilityMode = false);
+                     float horizontalMesh, bool metOfficeOpsCompatibilityMode = false,
+                     bool partitionLongitudeBinsUsingMesh = false);
 
   /// \brief Partition a sphere into bins whose centers lie on a regular Gaussian grid.
   ///

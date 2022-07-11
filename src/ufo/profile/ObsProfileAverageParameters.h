@@ -13,35 +13,53 @@
 
 #include "oops/util/parameters/NumericConstraints.h"
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/Variable.h"
+#include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
 /// Configuration options recognized by the average profile operator.
-class ObsProfileAverageParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsProfileAverageParameters, Parameters)
+class ObsProfileAverageParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsProfileAverageParameters, ObsOperatorParametersBase)
 
  public:
-  /// Operator name. In future will be moved to a base class for parameters of all ObsOperators.
-  oops::OptionalParameter<std::string> name{"name", this};
+  oops::OptionalParameter<std::vector<ufo::Variable>> variables{
+    "variables",
+    "List of variables to be used by this operator",
+    this};
 
-  /// List of variables to be used by this operator.
-  oops::Parameter<std::vector<ufo::Variable>> variables{"variables", {}, this};
+  oops::RequiredParameter<std::string> modelVerticalCoordinate{
+    "model vertical coordinate",
+    "Name of model vertical coordinate",
+    this};
 
-  /// Name of model vertical coordinate.
-  oops::RequiredParameter<std::string> modelVerticalCoordinate{"vertical coordinate", this};
+  oops::Parameter<int> numIntersectionIterations{
+    "number of intersection iterations",
+    "Number of iterations that are used to find the intersection between "
+    "the observed profile and each model level",
+     3,
+     this,
+     {oops::minConstraint(1)}};
 
-  /// Number of iterations that are used to find the intersection between
-  /// the observed profile and each model level.
-  oops::Parameter<int> numIntersectionIterations
-    {"number of intersection iterations", 3, this, {oops::minConstraint(1)}};
+  oops::Parameter<bool> compareWithOPS{
+    "compare with OPS",
+    "If true, perform comparisons of auxiliary variables with OPS",
+    false,
+    this};
 
-  /// Perform comparisons of auxiliary variables with OPS?
-  oops::Parameter<bool> compareWithOPS{"compare with OPS", false, this};
+  oops::Parameter<std::string> pressureCoord{"pressure coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+
+  oops::Parameter<std::string> pressureGroup{"pressure group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
 };
 
 }  // namespace ufo

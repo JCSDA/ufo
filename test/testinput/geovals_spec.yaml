@@ -7,8 +7,11 @@ geovals test:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [eastward_wind, northward_wind]
+#   obsdataout:
+#     obsfile: Data/satwind_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
+  geovals test:
     state variables: [eastward_wind, northward_wind, air_pressure]
     tolerance: 0.001
 - obs space:
@@ -17,13 +20,15 @@ geovals test:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+  geovals test:
     state variables:
     - surface_temperature_where_snow
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
-    - land_type_index
     - surface_wind_speed
     - soil_type
     - air_temperature
@@ -44,8 +49,11 @@ geovals test:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sbuv2_n19_obs_2018041500_m.nc4
     simulated variables: [integrated_layer_ozone_in_air]
+#   obsdataout:
+#     obsfile: Data/sbuv2_n19_obs_2018041500_m_geovals_spec_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/sbuv2_n19_geoval_2018041500_m.nc4
+  geovals test:
     state variables:
     - mole_fraction_of_ozone_in_air
     - air_pressure_levels
@@ -62,5 +70,7 @@ geovals get test:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15

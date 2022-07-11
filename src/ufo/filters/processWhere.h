@@ -22,7 +22,27 @@
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {class Configuration;}
+namespace ufo {
+  enum class WhereOperator {AND, OR};
+
+  struct WhereOperatorParameterTraitsHelper {
+    typedef WhereOperator EnumType;
+    static constexpr char enumTypeName[] = "WhereOperator";
+    static constexpr util::NamedEnumerator<WhereOperator> namedValues[] =
+      { { WhereOperator::AND, "and" },
+        { WhereOperator::OR, "or" }
+      };
+  };
+}  // namespace ufo
+
+namespace oops {
+
+  template<>
+  struct ParameterTraits<ufo::WhereOperator> :
+    public EnumParameterTraits<ufo::WhereOperatorParameterTraitsHelper>
+  {};
+
+}  // namespace oops
 
 namespace ufo {
   class ObsFilterData;
@@ -90,6 +110,12 @@ class WhereParameters : public oops::Parameters {
   /// Select locations at which the condition variable is set to to the missing value indicator.
   oops::OptionalParameter<void> isNotDefined{"is_not_defined", this};
 
+  /// Select locations at which the condition variable (typically a diagnostic flag) is true.
+  oops::OptionalParameter<void> isTrue{"is_true", this};
+
+  /// Select locations at which the condition variable (typically a diagnostic flag) is false.
+  oops::OptionalParameter<void> isFalse{"is_false", this};
+
   /// Select locations at which any of the specified bits in the condition variable is set.
   oops::OptionalParameter<std::set<int>> anyBitSetOf{"any_bit_set_of", this};
 
@@ -110,7 +136,8 @@ class WhereParameters : public oops::Parameters {
 };
 
 ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> &);
-std::vector<bool> processWhere(const std::vector<WhereParameters> &, const ObsFilterData &);
+std::vector<bool> processWhere(const std::vector<WhereParameters> &, const ObsFilterData &,
+                               const WhereOperator & whereOperator);
 
 }  // namespace ufo
 

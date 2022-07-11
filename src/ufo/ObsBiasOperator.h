@@ -30,7 +30,8 @@ class ObsBiasOperator : public util::Printable {
   explicit ObsBiasOperator(ioda::ObsSpace &);
 
   /// Compute bias correction
-  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;
+  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsBias &,
+                      ObsDiagnostics &) const;
 
  private:
   /// Print details (used for logging)

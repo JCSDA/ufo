@@ -17,14 +17,14 @@
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
-#include "ioda/ObsVector.h"
+#include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
@@ -32,7 +32,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
-  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.obsvariables()),
+  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
     rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
@@ -54,6 +54,13 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
     // Read or initialize bias coefficients
     this->read(params);
+  }
+
+  if (params.channelsNoBC.value() != boost::none) {
+    std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
+    std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+  } else {
+    oops::Log::trace() << "ObsBias::all channels are bias corrected" << std::endl;
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
@@ -267,22 +274,16 @@ void ObsBias::print(std::ostream & os) const {
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < numStaticPredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
-         << ":  Min= " << std::setw(15) << std::setprecision(8)
-         << 1.0f
-         << ",  Max= " << std::setw(15) << std::setprecision(8)
-         << 1.0f
-         << ",  Norm= " << std::setw(15) << std::setprecision(8)
-         << std::sqrt(static_cast<double>(vars_.size()))
+         << ":  Min= " << std::setw(15) << 1.0f
+         << ",  Max= " << std::setw(15) << 1.0f
+         << ",  Norm= " << std::setw(15) << std::sqrt(static_cast<double>(vars_.size()))
          << std::endl;
     }
     for (std::size_t p = 0; p < numVariablePredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[numStaticPredictors_ + p]
-         << ":  Min= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).minCoeff()
-         << ",  Max= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).maxCoeff()
-         << ",  Norm= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).norm()
+         << ":  Min= " << std::setw(15) << coeffs.row(p).minCoeff()
+         << ",  Max= " << std::setw(15) << coeffs.row(p).maxCoeff()
+         << ",  Norm= " << std::setw(15) << coeffs.row(p).norm()
          << std::endl;
     }
     os << "---------------------------------------------------------------";

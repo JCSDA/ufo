@@ -1,0 +1,78 @@
+window begin: 2018-06-18T21:00:00Z
+window end: 2018-06-19T03:00:00Z
+
+observations:
+- obs space:
+    name: Relative humidity calculation, surface variables
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [dew_point_temperature_surface, air_temperature_surface, pressure_surface]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMO 
+    AllowSuperSaturation: true
+    pressure at 2m variable: "pressure_surface"
+    temperature at 2m variable: "air_temperature_surface"
+    relative humidity at 2m variable: "relative_humidity_surface"
+    dew point temperature at 2m variable: "dew_point_temperature_surface"
+  compareVariables:
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity_surface@DerivedObsValue
+      relTol: 1.0e-5
+- obs space:
+    name: Relative humidity calculation, upper-air variables
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [dew_point_temperature, air_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMO
+    AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    dew point temperature variable: "dew_point_temperature"
+  compareVariables:
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity@DerivedObsValue
+      relTol: 1.0e-5
+- obs space:
+    name: Relative humidity calculation, RH initially missing
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [dew_point_temperature, air_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMO
+    AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "air_pressure"
+    temperature variable: "air_temperature"
+    relative humidity variable: "relative_humidity"
+    dew point temperature variable: "dew_point_temperature"
+  compareVariables:
+    - reference:
+        name: relative_humidity_reference@ObsValue
+      test:
+        name: relative_humidity@DerivedObsValue
+      relTol: 1.0e-5

@@ -29,23 +29,31 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &vObs =
       profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
-    std::vector <int> &uFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &NumSamePErrObs =
       profileDataHandler.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
     std::vector <int> &NumInterpErrObs =
       profileDataHandler.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
+    std::vector <bool> &uDiagFlagsProfileInterp =
+      profileDataHandler.get<bool>
+      (ufo::VariableNames::diagflags_profile_interpolation_eastward_wind);
+    const std::vector <bool> &uDiagFlagsProfileStdLev =
+      profileDataHandler.get<bool>
+      (ufo::VariableNames::diagflags_profile_standard_level_eastward_wind);
 
-    if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs, uFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(pressures, uObs, vObs, uFlags)
-                           << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs,
+                                         uDiagFlagsProfileInterp,
+                                         uDiagFlagsProfileStdLev)) {
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(pressures, uObs, vObs,
+                                                    uDiagFlagsProfileInterp,
+                                                    uDiagFlagsProfileStdLev)
+                         << std::endl;
       return;
     }
 
-    calcStdLevelsUV(numProfileLevels, pressures, uObs, vObs, uFlags);
+    calcStdLevelsUV(numProfileLevels, pressures, uObs, vObs, uDiagFlagsProfileStdLev);
 
     LevErrors_.assign(numProfileLevels, -1);
     uInterp_.assign(numProfileLevels, 0.0);
@@ -64,8 +72,8 @@ namespace ufo {
               std::pow(vObs[jlev] - vObs[jlevprev], 2);
             if (VectDiffSq > options_.UICheck_TInterpIdenticalPTolSq.value()) {
               NumErrors++;
-              uFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
-              uFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+              uDiagFlagsProfileInterp[jlevprev] = true;
+              uDiagFlagsProfileInterp[jlev] = true;
               oops::Log::debug() << " -> Wind speed interpolation check: identical P "
                                  << "and significantly different wind speed magnitude for "
                                  << "levels " << jlevprev << " and " << jlev << std::endl;
@@ -130,9 +138,9 @@ namespace ufo {
         LevErrors_[SigB]++;
         LevErrors_[SigA]++;
         // Simplest form of flagging
-        uFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
-        uFlags[SigB] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
-        uFlags[SigA] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        uDiagFlagsProfileInterp[jlev] = true;
+        uDiagFlagsProfileInterp[SigB] = true;
+        uDiagFlagsProfileInterp[SigA] = true;
 
         oops::Log::debug() << " -> Failed wind speed interpolation check for levels " << jlev
                            << " (central), " << SigB << " (lower) and "

@@ -26,6 +26,9 @@
 
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variable.h"
+
 #include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -43,7 +46,7 @@ namespace ufo {
   /// the obsdb they will be filled with a default value if requested.
   class EntireSampleDataHandler {
    public:
-    EntireSampleDataHandler(ioda::ObsSpace &obsdb,
+    EntireSampleDataHandler(const ObsFilterData &data,
                             const DataHandlerParameters &options);
 
     /// Retrieve a vector containing the requested variable for the entire data sample.
@@ -76,7 +79,7 @@ namespace ufo {
             throw eckit::BadParameter("Template parameter passed to boost::get for " +
                                       fullname + " probably has the wrong type", Here());
           }
-        } else if (obsdb_.has(groupname, varname) || optional) {
+        } else if (data_.has(Variable(fullname)) || optional) {
           // Initially fill the vector with the default value for the type T.
           if (entriesPerProfile == 0) {
             vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all, groupname));
@@ -84,7 +87,13 @@ namespace ufo {
             vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all, groupname));
           }
           // Retrieve variable from the obsdb if present, overwriting the default value.
-          if (obsdb_.has(groupname, varname)) obsdb_.get_db(groupname, varname, vec_all);
+          if (data_.has(Variable(fullname))) {
+            if (entriesPerProfile == 0) {
+              data_.get(Variable(fullname), vec_all);
+            } else {
+              obsdb_.get_db(groupname, varname, vec_all);
+            }
+          }
         }
 
         // Add vector to map.
@@ -137,6 +146,9 @@ namespace ufo {
       }
 
    private:  // variables
+    /// ObsFilterData
+    const ObsFilterData &data_;
+
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
@@ -152,9 +164,15 @@ namespace ufo {
     /// Default value used to fill vector of strings.
     std::string defaultValue(const std::vector <std::string> &vec, const std::string &groupname);
 
+    /// Default value used to fill vector of booleans.
+    bool defaultValue(const std::vector <bool> &vec, const std::string &groupname);
+
     /// Container of each variable in the entire data set.
     std::unordered_map <std::string, boost::variant
-      <std::vector <int>, std::vector <float>, std::vector <std::string>>> entireSampleData_;
+                        <std::vector <int>,
+                         std::vector <float>,
+                         std::vector <std::string>,
+                         std::vector <bool>>> entireSampleData_;
 
     /// Missing value (int)
     const int missingValueInt = util::missingValue(missingValueInt);

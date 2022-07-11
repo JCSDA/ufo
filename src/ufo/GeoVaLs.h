@@ -8,20 +8,21 @@
 #ifndef UFO_GEOVALS_H_
 #define UFO_GEOVALS_H_
 
+#include <algorithm>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "oops/base/Variables.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/ObjectCounter.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/GeoVaLs.interface.h"
-
-namespace eckit {
-  class Configuration;
-}
+#include "ufo/Fortran.h"
 
 namespace ioda {
   class ObsSpace;
@@ -31,6 +32,21 @@ namespace ioda {
 namespace ufo {
   class Locations;
 
+/// \brief Parameters controlling GeoVaLs read/write
+class GeoVaLsParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GeoVaLsParameters, Parameters)
+
+ public:
+  /// Filename for I/O.
+  /// Note: this parameter is optional because filename does not need
+  /// to be specified for GeoVaLs ctor when Variables are empty.
+  oops::OptionalParameter<std::string> filename{"filename", this};
+  /// A multiplier for how many locations in the geovals file per
+  /// a single location in the obs file. There needs to be at least
+  /// loc_multiplier * obs_all_nlocs locations in the geovals file.
+  oops::Parameter<int> loc_multiplier{"loc_multiplier", 1, this};
+};
+
 // -----------------------------------------------------------------------------
 
 /// GeoVaLs: geophysical values at locations
@@ -38,16 +54,19 @@ namespace ufo {
 class GeoVaLs : public util::Printable,
                 private util::ObjectCounter<GeoVaLs> {
  public:
+  typedef GeoVaLsParameters Parameters_;
+
   static const std::string classname() {return "ufo::GeoVaLs";}
 
+  GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &);
+
+// Deprecated default constructor - Please do not use this constructor in new code.
   GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
+// Deprecated default constructor - Please do not use this constructor in new code.
   GeoVaLs(const Locations &, const oops::Variables &);
+// Constructor for tests - Please do not use this constructor in new code.
+  GeoVaLs(const Parameters_ &, const ioda::ObsSpace &, const oops::Variables &);
 
-  GeoVaLs(const Locations & locs, const oops::Variables & vars,
-          const std::vector<size_t> & nlevs);
-
-  GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
-          const oops::Variables &);
   GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
 
@@ -122,15 +141,33 @@ class GeoVaLs : public util::Printable,
   /// Put GeoVaLs for int variable \p var at location \p loc.
   void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
 
-  void read(const eckit::Configuration &, const ioda::ObsSpace &);
-  void write(const eckit::Configuration &) const;
+  void read(const Parameters_ &, const ioda::ObsSpace &);
+  void write(const Parameters_ &) const;
   size_t nlocs() const;
+
+  void fill(const std::vector<size_t> &, const std::vector<double> &);
+  void fillAD(const std::vector<size_t> &, std::vector<double> &) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}
 
  private:
   void print(std::ostream &) const;
+  // -----------------------------------------------------------------------------
+  /*! \brief Take the input vector and recast to type<T> whilst respecting
+             missing values */
+  template <typename T>
+  void cast(const std::vector<double> & doubleVals,
+            std::vector<T> & vals) const {
+    const T missing = util::missingValue(T());
+    const double missingDouble = util::missingValue(double());
+    std::transform(doubleVals.begin(),
+                   doubleVals.end(),
+                   vals.begin(),
+                   [missing, missingDouble](double val){
+                     return val == missingDouble ? missing : static_cast<T>(val);
+                   });
+  }
 
   F90goms keyGVL_;
   oops::Variables vars_;

@@ -1,0 +1,45 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+# All the rttov defaults are used in this yaml to test the code.
+# For operational use these should all be removed and only the 
+# non-default and required parameters should be kept.
+
+observations:
+- obs operator:
+     name: RTTOV
+     Debug: false # default
+     Absorbers: []
+     linear model absorbers: []
+     obs options:
+       Platform_Name: NOAA
+       Sat_ID: 20
+       Instrument_Name: ATMS
+       CoefficientPath: Data/
+       RTTOV_GasUnitConv: false # default
+       RTTOV_default_opts: UKMO_PS45 # non-default
+       SatRad_compatibility: true # default
+       UseRHwaterForQC: true # default
+       UseColdSurfaceCheck: true # non-default
+       prof_by_prof: false # default
+       max_channels_per_batch: 10000 # default
+       QtSplitRain: true # optional parameter
+       RTTOV_profile_checkinput: true # default
+       InspectProfileNumber: [1,2,3,4,5,6] # optional parameter
+       Do_MW_Scatt: false
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_bad_data.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+#   obsdataout:
+#     obsfile: Data/tms_n20_obs_20191230T0000_rttov_bad_data_out.nc4
+  geovals:
+    filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  rms ref: 228.08832665
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11

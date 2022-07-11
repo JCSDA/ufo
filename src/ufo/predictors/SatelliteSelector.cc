@@ -8,11 +8,13 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "ufo/predictors/SatelliteSelector.h"
 #include "ufo/utils/Constants.h"
 
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 namespace ufo {
 
@@ -41,11 +43,12 @@ SatelliteSelector::SatelliteSelector(const Parameters_ & parameters, const oops:
 void SatelliteSelector::compute(const ioda::ObsSpace & odb,
                                 const GeoVaLs & gv,
                                 const ObsDiagnostics & obsdiags,
+                                const ObsBias & biascoeffs,
                                 ioda::ObsVector & out) const {
   const size_t nlocs = out.nlocs();
   const size_t nvars = out.nvars();
 
-  predictor_->compute(odb, gv, obsdiags, out);
+  predictor_->compute(odb, gv, obsdiags, biascoeffs, out);
 
   std::vector<int> satid(nlocs);
   odb.get_db("MetaData", metadata_name_, satid);

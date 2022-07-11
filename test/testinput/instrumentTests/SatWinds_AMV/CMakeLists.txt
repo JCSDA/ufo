@@ -7,22 +7,25 @@
 
 
 # H(x) test
-ecbuild_add_test( TARGET  test_ufo_satwinds_gfs_HofX
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwinds_gfs_HofX.yaml"
-                  LABELS  satwinds HofX instrument
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+ufo_add_test( NAME    instrument_satwinds_gfs_HofX
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwinds_gfs_HofX.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  satwinds HofX instrument
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
 
 # H(x) with QC
-#ecbuild_add_test( TARGET  test_ufo_satwinds_gfs_qc
-#                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwinds_gfs_qc.yaml"
-#                  LABELS  satwinds QC instrument
-#                  ENVIRONMENT OOPS_TRAPFPE=1
-#                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#                  LIBS    ufo
-#                  TEST_DEPENDS test_ufo_satwinds_gfs_HofX )
-
+ufo_add_test( NAME    instrument_satwinds_gfs_qc
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwinds_gfs_qc.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  satwinds QC instrument
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )

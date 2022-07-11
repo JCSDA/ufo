@@ -250,7 +250,8 @@ DataExtractorInput<ExtractedValue> DataExtractorCSVBackend<ExtractedValue>::load
       boost::apply_visitor(visitor, columns[column]);
     } else {
       result.coordsVals[columnNames[column]] = std::move(columns[column]);
-      result.coord2DimMapping[columnNames[column]] = firstDim;
+      result.coord2DimMapping[columnNames[column]] = std::vector<int> {firstDim};
+      result.coordNDims[columnNames[column]] = 1;
       result.dim2CoordMapping[firstDim].push_back(columnNames[column]);
     }
   }

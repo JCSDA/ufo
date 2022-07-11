@@ -19,11 +19,11 @@ use ufo_geovals_mod
 use ufo_vars_mod
 use ufo_gnssro_bendmetoffice_mod
 use ufo_gnssroonedvarcheck_utils_mod, only: &
-    Ops_RealSortQuick, deallocate_singleob, &
-    allocate_singleob, allocate_singlebg, deallocate_singlebg, find_unique, &
-    singlebg_type, singleob_type
-use ufo_gnssroonedvarcheck_get_bmatrix_mod, only: Ops_GPSRO_GetBmatrix, bmatrix_type
+    deallocate_singleob, allocate_singleob, allocate_singlebg, &
+    deallocate_singlebg, singlebg_type, singleob_type
+use ufo_gnssroonedvarcheck_get_bmatrix_mod, only: bmatrix_type
 use ufo_gnssroonedvarcheck_do1dvar_mod, only: Ops_GPSRO_Do1DVar_BA
+use ufo_utils_mod, only: Ops_RealSortQuick, find_unique
 
 implicit none
 private
@@ -156,10 +156,15 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
   implicit none
 
+  ! Subroutine arguments
   type(ufo_gnssroonedvarcheck), intent(inout) :: self    !< gnssroonedvarcheck main object
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
+  ! Local parameters
+  logical, parameter :: verboseOutput = .FALSE.          ! Whether to output extra debugging information
+
+  ! Local variables
   integer :: nobs                                        ! Number of observations to be processed
   type(ufo_geoval), pointer          :: q                ! Model background values of specific humidity
   type(ufo_geoval), pointer          :: prs              ! Model background values of air pressure
@@ -229,7 +234,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
   ! Read in the B-matrix and background profiles
-  call Ops_GPSRO_GetBmatrix(self % bmatrix_filename, prs % nval, q % nval, b_matrix)
+  call b_matrix % get(self % bmatrix_filename, prs % nval, q % nval)
   call allocate_singlebg(Back, prs % nval, q % nval)
   allocate(Tb(q % nval), Ts(q % nval))
 
@@ -261,10 +266,12 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     end do
 
     ! Load the geovals into the background structure
-    Back % za(:) = rho_heights % vals(:, index_vals(start_point))
-    Back % zb(:) = theta_heights % vals(:, index_vals(start_point))
-    Back % p(:) = prs % vals(:, index_vals(start_point))
-    Back % q(:) = q % vals(:, index_vals(start_point))
+    ! Reverse the order of the geovals, since this routine (and the forward
+    ! operator) works bottom-to-top
+    Back % za(:) = rho_heights % vals(prs%nval:1:-1, index_vals(start_point))
+    Back % zb(:) = theta_heights % vals(q%nval:1:-1, index_vals(start_point))
+    Back % p(:) = prs % vals(prs % nval:1:-1, index_vals(start_point))
+    Back % q(:) = q % vals(q%nval:1:-1, index_vals(start_point))
 
     ! Allocate the observations structure
     nobs_profile = current_point - start_point
@@ -325,15 +332,23 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
       end if
     end do
 
-    write(Message,'(A,2I5,2F10.3,I5,F16.6)') 'Profile stats: ', obsSatid(index_vals(start_point)), &
+    write(Message,'(A,2I5,2F10.3,I5,E16.8)') 'Profile stats: ', obsSatid(index_vals(start_point)), &
         obsOrigC(index_vals(start_point)), Ob % latitude, Ob % longitude, &
         Ob % niter, Ob % jcost
     call fckit_log % debug(Message)
-    do ipoint = 0, nobs_profile-1, 100
-        write(Message,'(100I5)') qc_flags(index_vals(start_point+ipoint: &
-                                                     min(start_point+ipoint+99, current_point-1)))
-        call fckit_log % debug(Message)
-    end do
+    
+    if (verboseOutput) then
+      do ipoint = 0, nobs_profile-1, 20
+          write(Message,'(20I5)') qc_flags(index_vals(start_point+ipoint: &
+                                                      min(start_point+ipoint+19, current_point-1)))
+          call fckit_log % debug(Message)
+      end do
+      do ipoint = 0, nobs_profile-1, 10
+          write(Message,'(10E16.5)') obs_bending_angle(index_vals(start_point+ipoint: &
+                                                               min(start_point+ipoint+9, current_point-1)))
+          call fckit_log % debug(Message)
+      end do
+    end if
 
     call deallocate_singleob(Ob)
   end do

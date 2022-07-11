@@ -35,7 +35,6 @@
 #include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/EntireSampleDataHandler.h"
-#include "ufo/profile/ModelHeightCalculator.h"
 #include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
 #include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
 #include "ufo/profile/ProfileCheckBackgroundTemperature.h"
@@ -48,7 +47,6 @@
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileDataHolder.h"
 #include "ufo/profile/ProfileVerticalAveraging.h"
-#include "ufo/profile/ProfileVerticalInterpolation.h"
 #include "ufo/profile/VariableNames.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -69,16 +67,18 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
   ObsFilterData filterdata(obsspace);
 
-  ioda::ObsVector hofx(obsspace);
+  ioda::ObsVector hofx(obsspace, "HofX");
 
   ioda::ObsVector bias(obsspace);
   bias.zero();
 
-  const eckit::LocalConfiguration obsdiagconf(conf, "obs diagnostics");
+  const eckit::LocalConfiguration obsdiagconf = conf.getSubConfiguration("obs diagnostics");
+  GeoVaLsParameters obsdiagparams;
+  obsdiagparams.validateAndDeserialize(obsdiagconf);
   std::vector<eckit::LocalConfiguration> varconfs;
-  obsdiagconf.get("variables", varconfs);
+  conf.get("obs diagnostics variables", varconfs);
   const Variables diagvars(varconfs);
-  const ObsDiagnostics obsdiags(obsdiagconf, obsspace, diagvars.toOopsVariables());
+  const ObsDiagnostics obsdiags(obsdiagparams, obsspace, diagvars.toOopsVariables());
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
       obsspace, obsspace.obsvariables(), "ObsError"));
@@ -93,9 +93,11 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   // Determine whether an exception is expected to be thrown.
   // Exceptions can be thrown in the following places:
   // - on instantiation of the filter,
-  // - during the operation of the filter,
-  bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
-  bool expectThrowDuringOperation = conf.getBool("ExpectThrowDuringOperation", false);
+  // - during the operation of the filter at the prior stage
+  // - during the operation of the filter at the post stage
+  const bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
+  const bool expectThrowDuringPriorFilter = conf.getBool("ExpectThrowDuringPriorFilter", false);
+  const bool expectThrowDuringPostFilter = conf.getBool("ExpectThrowDuringPostFilter", false);
 
   if (expectThrowOnInstantiation) {
     EXPECT_THROWS(ufo::ConventionalProfileProcessing filterThrow(obsspace, filterParameters,
@@ -113,17 +115,24 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   std::unique_ptr <GeoVaLs> geovals;
   if (!ignoreGeoVaLs && geovars.size() > 0) {
     const eckit::LocalConfiguration geovalsConf(conf, "geovals");
-    geovals.reset(new GeoVaLs(geovalsConf, obsspace, geovars));
+    GeoVaLsParameters geovalsparams;
+    geovalsparams.validateAndDeserialize(geovalsConf);
+    geovals.reset(new GeoVaLs(geovalsparams, obsspace, geovars));
   } else {
     geovals.reset(new GeoVaLs(obsspace.distribution(), oops::Variables()));
   }
 
   filter.preProcess();
+  if (expectThrowDuringPriorFilter) {
+    EXPECT_THROWS(filter.priorFilter(*geovals));
+    return;
+  }
   filter.priorFilter(*geovals);
-  if (expectThrowDuringOperation)
-    EXPECT_THROWS(filter.postFilter(hofx, bias, obsdiags));
-  else
-    filter.postFilter(hofx, bias, obsdiags);
+  if (expectThrowDuringPostFilter) {
+    EXPECT_THROWS(filter.postFilter(*geovals, hofx, bias, obsdiags));
+    return;
+  }
+  filter.postFilter(*geovals, hofx, bias, obsdiags);
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are
@@ -150,7 +159,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   if (getWrongType) {
     ConventionalProfileProcessingParameters options;
     options.deserialize(conf);
-    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+    EntireSampleDataHandler entireSampleDataHandler(filterdata,
                                                     options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -159,6 +168,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -174,7 +184,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   if (ManualFlagModification) {
     ConventionalProfileProcessingParameters options;
     options.deserialize(conf);
-    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+    EntireSampleDataHandler entireSampleDataHandler(filterdata,
                                                     options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -182,6 +192,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -204,8 +215,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &zFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
-    std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     ReportFlags[0] |= ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport;
     tFlags[0] |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
@@ -226,98 +235,11 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     // Run time check
     profileCheckTime.runCheck(profileDataHandler);
 
-    // Modify time flag
-    timeFlags[0] = true;
-
     // Run remaining checks
     profileCheckBackgroundT.runCheck(profileDataHandler);
     profileCheckBackgroundRH.runCheck(profileDataHandler);
     profileCheckBackgroundUV.runCheck(profileDataHandler);
     profileCheckBackgroundZ.runCheck(profileDataHandler);
-  }
-
-  // Test the profile vertical interpolation
-  const bool testProfileVerticalInterpolation =
-    conf.getBool("testProfileVerticalInterpolation", false);
-  if (testProfileVerticalInterpolation) {
-    ConventionalProfileProcessingParameters options;
-    options.deserialize(conf);
-
-    std::vector<bool> apply(obsspace.nlocs(), true);
-    std::vector<std::vector<bool>> flagged;
-    ProfileDataHandler profileDataHandler(filterdata,
-                                          options.DHParameters,
-                                          apply,
-                                          filtervars,
-                                          flagged);
-
-    // Get interpolation options for each profile.
-    const auto interpMethodNames = conf.getStringVector("interpMethodNames");
-    const auto coordOrderNames = conf.getStringVector("coordOrderNames");
-    const auto outOfBoundsNames = conf.getStringVector("outOfBoundsNames");
-
-    for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {
-      profileDataHandler.initialiseNextProfile();
-
-      const std::string interpMethodName = interpMethodNames[jprof];
-      const std::string coordOrderName = coordOrderNames[jprof];
-      const std::string outOfBoundsName = outOfBoundsNames[jprof];
-
-      // Calculate level heights for GeoVaLs.
-      std::vector <float> orogGeoVaLs(obsspace.nlocs(), 0.0);
-      geovals->getAtLevel(orogGeoVaLs, ufo::VariableNames::geovals_orog, 0);
-      std::vector <float> zRhoGeoVaLs;
-      std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options.DHParameters.ModParameters,
-                                orogGeoVaLs[0],
-                                zRhoGeoVaLs,
-                                zThetaGeoVaLs);
-
-      // Reverse coordinate order if required.
-      if (coordOrderName == "Descending")
-        std::reverse(zRhoGeoVaLs.begin(), zRhoGeoVaLs.end());
-
-      // Create column of pressure GeoVaLs.
-      std::vector <float> pressureGeoVaLs(obsspace.nlocs(), 0.0);
-      const size_t gvnlevs = geovals->nlevs(ufo::VariableNames::geovals_pressure);
-      std::vector <float> pressureGeoVaLs_column;
-      for (int jlev = 0; jlev < gvnlevs; ++jlev) {
-        geovals->getAtLevel(pressureGeoVaLs, ufo::VariableNames::geovals_pressure, jlev);
-        pressureGeoVaLs_column.push_back(pressureGeoVaLs[0]);
-      }
-
-      // Get observed geopotential height and (empty) pressure vector.
-      const auto &zObs = profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
-      auto &pressures = profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
-
-      auto interpMethod = ProfileInterpolation::InterpolationMethod::Linear;
-      if (interpMethodName == "LogLinear")
-        interpMethod = ProfileInterpolation::InterpolationMethod::LogLinear;
-      auto coordOrder = ProfileInterpolation::CoordinateOrder::Ascending;
-      if (coordOrderName == "Descending")
-        coordOrder = ProfileInterpolation::CoordinateOrder::Descending;
-      auto outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetToBound;
-      if (outOfBoundsName == "SetMissing")
-        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetMissing;
-      if (outOfBoundsName == "Extrapolate")
-        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::Extrapolate;
-
-      // Interpolate to determine pressure.
-      profileVerticalInterpolation(zRhoGeoVaLs,
-                                   pressureGeoVaLs_column,
-                                   zObs,
-                                   pressures,
-                                   interpMethod,
-                                   coordOrder,
-                                   outOfBounds);
-
-      // Compare each value of pressure.
-      const std::string expectedPressureName = "OPS_" +
-        static_cast<std::string>(ufo::VariableNames::obs_air_pressure);
-      const auto &expected_pressures = profileDataHandler.get<float>(expectedPressureName);
-      for (size_t jlev = 0; jlev < pressures.size(); ++jlev)
-        EXPECT(oops::is_close_relative(pressures[jlev], expected_pressures[jlev], 1e-5f));
-    }
   }
 
   // Test the profile vertical averaging.
@@ -330,6 +252,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -340,13 +263,14 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
       const auto &flagsIn = profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
       const auto &valuesIn = profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
-      const auto &coordIn = profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
-      const auto &bigGap = profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
+      const auto &coordIn = profileDataHandler.get<float>("logP@DerivedValue");
+      const auto &bigGap = profileDataHandler.get<float>("bigPgaps@DerivedValue");
       const auto &coordOut = profileDataHandler.get<float>
-        (ufo::VariableNames::modellevels_logPWB_rho_derived);
+        ("LogPWB@ModelRhoLevelsDerivedValue");
       const float DZFrac = 0.5;
       const ProfileAveraging::Method method =
         ProfileAveraging::Method::Averaging;
+
 
       std::vector <int> flagsOut;
       std::vector <float> valuesOut;
@@ -367,8 +291,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
                                     &ZMin);
 
       // Compare output values with OPS equivalents.
-      // The name of the OPS variables are hardcoded because they are purely used for testing.
-      // todo(ctgh): check whether any hardcoded names can be substituted.
       const auto &expected_flagsOut =
         profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsQCFlags");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
@@ -398,6 +320,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(filterdata,
+                                          *qcflags,
                                           options.DHParameters,
                                           apply,
                                           filtervars,
@@ -410,8 +333,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     profileDataHolder.fill({ufo::VariableNames::extended_obs_space},
                            {ufo::VariableNames::obs_air_pressure},
                            {ufo::VariableNames::station_ID},
-                           {ufo::VariableNames::geovals_pressure},
-                           {ufo::VariableNames::bkgerr_air_temperature});
+                           {ufo::VariableNames::geovals_pressure});
 
     // Get GeoVaLs
     profileDataHolder.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
@@ -422,7 +344,6 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     // Attempt to access nonexistent data.
     EXPECT_THROWS(profileDataHolder.get<int>("wrong@MetaData"));
     EXPECT_THROWS(profileDataHolder.getGeoVaLVector("wrong@MetaData"));
-    EXPECT_THROWS(profileDataHolder.getObsDiagVector("wrong@MetaData"));
 
     // Check this profile has been marked as being in the correct section of the ObsSpace.
     profileDataHolder.checkObsSpaceSection(ufo::ObsSpaceSection::Original);
@@ -431,7 +352,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     // Advance to the profile in the extended section and perform the same check.
     profileDataHandler.initialiseNextProfile();
     ProfileDataHolder profileDataHolderExt(profileDataHandler);
-    profileDataHolderExt.fill({ufo::VariableNames::extended_obs_space}, {}, {}, {}, {});
+    profileDataHolderExt.fill({ufo::VariableNames::extended_obs_space}, {}, {}, {});
     EXPECT_THROWS(profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Original));
     profileDataHolderExt.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
 

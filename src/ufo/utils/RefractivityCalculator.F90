@@ -39,8 +39,10 @@ use kinds,            only: kind_real
 
 implicit none
 
+private
 public :: ufo_calculate_refractivity
 public :: ufo_refractivity_kmat
+public :: ufo_refractivity_partial_derivatives
 
 contains
 

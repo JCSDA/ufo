@@ -26,7 +26,7 @@ namespace eckit {
 namespace ufo {
 
 enum class DistanceNorm {
-  GEODESIC, MAXIMUM
+  GEODESIC, MAXIMUM, NULLNORM
 };
 
 struct DistanceNormParameterTraitsHelper {
@@ -34,7 +34,8 @@ struct DistanceNormParameterTraitsHelper {
   static constexpr char enumTypeName[] = "DistanceNorm";
   static constexpr util::NamedEnumerator<DistanceNorm> namedValues[] = {
     { DistanceNorm::GEODESIC, "geodesic" },
-    { DistanceNorm::MAXIMUM, "maximum" }
+    { DistanceNorm::MAXIMUM, "maximum" },
+    { DistanceNorm::NULLNORM, "null"}
   };
 };
 
@@ -82,6 +83,25 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// it's set to \c true.
   oops::OptionalParameter<bool> roundHorizontalBinCountToNearest{
     "round_horizontal_bin_count_to_nearest", this};
+  /// Set this option to \c true to calculate partioning of longitude bins explicitly using
+  /// horizontal mesh distance. By default, with this option set to \c false, calculating the number
+  /// of longitude bins per latitude bin index involves the integer number of latitude
+  /// bins. Setting this option to \c true adopts the Met Office OPS method whereby the
+  /// integer number of latitude bins is replaced, in the calculation of longitude bins, by the
+  /// Earth half-circumference divided by the horizontal mesh distance.
+  ///
+  /// Defaults to \c false unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c true.
+  oops::OptionalParameter<bool> partitionLongitudeBinsUsingMesh{
+    "partition_longitude_bins_using_mesh", this};
+  /// Set this option to \c true to define horizontalMesh with respect to a value for the Earth's
+  /// meridian distance (half Earth circumference) of exactly 20000.0 km.
+  /// By default, with this option set to \c false, the Earth's meridian is defined for the purposes
+  /// of calculating thinning boxes as pi*Constants::mean_earth_rad ~ 20015.087 km.
+  ///
+  /// Defaults to \c false unless the \c ops_compatibility_mode option is enabled, in which case
+  /// it's set to \c true.
+  oops::OptionalParameter<bool> defineMeridian20000km{"define_meridian_20000_km", this};
 
   // Vertical grid
 
@@ -96,6 +116,8 @@ class GaussianThinningParameters : public FilterParametersBase {
   oops::Parameter<float> verticalMax{"vertical_max", 110000.0f, this};
   /// Observation vertical coordinate.
   oops::Parameter<std::string> verticalCoord{"vertical_coordinate", "air_pressure", this};
+  /// Observation vertical coordinate group.
+  oops::Parameter<std::string> verticalGroup{"vertical_coordinate group", "MetaData", this};
 
   // Temporal grid
 
@@ -122,6 +144,9 @@ class GaussianThinningParameters : public FilterParametersBase {
   ///
   /// The variable used to group observations into records can be set with the
   /// `obs space.obsdatain.obsgrouping.group variable` YAML option.
+  ///
+  /// If a category variable is defined and `records_are_single_obs` is true then
+  /// each record must contain only one value of the category variable.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   // Selection of observations to retain
@@ -130,6 +155,18 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// the highest priority are considered as candidates for retaining. If not specified, all
   /// observations are assumed to have equal priority.
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
+
+  /// True to accept the observation whose value is closest to the median in each bin,
+  /// and reject all others.
+  /// If false or unspecified, will use distance_norm as described below.
+  oops::Parameter<bool> selectMedian{"select_median", false, this};
+
+  /// If selectMedian=true, then minNumObsPerBin is the minimum number of observations there must
+  /// be in each bin for the median-valued obs to be accepted, otherwise all obs in that bin are
+  /// rejected. E.g. if minNumObsPerBin=5, then all obs in any bin with 4 or fewer obs are rejected
+  /// on the basis that the statistics are too poor to generate a reliable median. This parameter
+  /// does nothing if selectMedian=false.
+  oops::Parameter<int> minNumObsPerBin{"min_num_obs_per_bin", 5, this};
 
   /// Determines which of the highest-priority observations lying in a cell is retained.
   ///
@@ -144,6 +181,10 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// Defaults to \c geodesic unless the \c ops_compatibility_mode option is enabled, in which case
   /// it's set to \c maximum.
   oops::OptionalParameter<DistanceNorm> distanceNorm{"distance_norm", this};
+
+  /// Break ties between candidates for retaining by picking the one with
+  /// the latest acquisition time.
+  oops::Parameter<bool> tiebreakerPickLatest{"tiebreaker_pick_latest", false, this};
 
   /// Set this option to \c true to make the filter produce identical results as the Ops_Thinning
   /// subroutine from the Met Office OPS system when both are run serially (on a single process).
@@ -171,12 +212,24 @@ class GaussianThinningParameters : public FilterParametersBase {
   ///   enough.
   oops::Parameter<bool> opsCompatibilityMode{"ops_compatibility_mode", false, this};
 
-  /// Option to choose how to treat observations where there are multiple filter variables. If true,
-  /// treats an observation location as valid if any filter variables have not been rejected.
-  /// If false, observations are treated as valid only if all filter variables have passed QC.
-  /// This is an optional parameter, if omitted the default value is true.
-  oops::Parameter<bool>
-    thinIfAnyFilterVariablesAreValid{"thin_if_any_filter_variables_are_valid", true, this};
+  /// Option to choose how to treat observations where there are multiple filter variables.
+  /// If true, an observation is valid only so long as all filter variables have passed QC.
+  /// For invalid observation locations (selected by a where clause) any remaining unflagged filter
+  /// variables are rejected.
+  /// If false, an observation location is valid if any filter variables have not been rejected.
+  /// The default value of this parameter is false.
+  oops::Parameter<bool> retainOnlyIfAllFilterVariablesAreValid{
+      "retain_only_if_all_filter_variables_are_valid", false, this};
+
+  /// Treat each record as a single observation. If this option is set to true then the records
+  /// on all MPI ranks are considered together (in contrast to treating each record in isolation).
+  ///
+  /// The variable used to group observations into records can be set with the
+  /// `obs space.obsdatain.obsgrouping.group` variable YAML option.
+  ///
+  /// If `records_are_single_obs` is true and a category variable is defined then
+  /// each record must contain only one value of the category variable.
+  oops::Parameter<bool> recordsAreSingleObs{"records_are_single_obs", false, this};
 
  private:
   static float defaultHorizontalMesh() {

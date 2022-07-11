@@ -1,0 +1,165 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+#
+# Example with all 22 channels valid (no QC rejections before thinning).
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out1.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+  passedBenchmark: 88  # 4 ob locations pass QC, 4*22 channels = 88
+#
+# Example with 3 channels blacklisted, remaining 19 channels undergo thinning.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out2.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-3
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+  passedBenchmark: 76  # 4 ob locations pass QC, 4*19 valid channels = 76
+#
+# Option retain_only_if_all_filter_variables_are_valid is false (default) meaning
+# that obs undergo thinning so long as at least one filter variable is valid.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out3.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-3
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    retain_only_if_all_filter_variables_are_valid: false  # default is false
+  passedBenchmark: 76  # 4 ob locations pass QC, 4*19 valid channels = 76
+#
+# Option retain_only_if_all_filter_variables_are_valid is true meaning
+# that obs undergo thinning only if all filter variables have passed QC.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out4.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-3
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    retain_only_if_all_filter_variables_are_valid: true  # default is false
+  passedBenchmark: 0  # every ob location has some filter variables failing QC so
+                      # retain_only_if_all_filter_variables_are_valid=true means
+                      # every ob is removed by thinning for channels 4-22
+#
+# Example where selected channels for some ob locations fail Domain Check QC
+# and retain_only_if_all_filter_variables_are_valid is false.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out5.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-3
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: 61.0
+      maxvalue: 64.0  # 75 out of 100 obs fall outside domain for channels 1-3
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    retain_only_if_all_filter_variables_are_valid: false  # default is false
+  passedBenchmark: 79  # 75 out of domain, 24 thinned out for channels 1-3
+                       # 0 out of domain, 96 thinned out for channels 4-22
+                       # 1*3 + 4*19 = 79
+#
+# Example where list of filter variables (channels) differs from list of
+# simulated variables.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out6.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-3
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: brightness_temperature
+      channels: 4-6
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    retain_only_if_all_filter_variables_are_valid: true  # default is false
+  passedBenchmark: 1612  # filter variable channels 4-6 all pass QC
+                         # 4 out of 100 ob locations pass thinning
+                         # 16 channels (7-22) neither blacklisted nor thinned
+                         # 4*3 + 100*16 = 1612
+#
+# Example where one of the filter variable channels is not valid (fails QC) so
+# with keyword retain_only_if_all_filter_variables_are_valid: true
+# obs are removed by thinning if selected by where clause.
+- obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out7.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  obs filters:
+  - filter: BlackList
+    where: &Where
+    - variable:
+        name: latitude@MetaData
+      minvalue: 61.0
+      maxvalue: 64.0
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-4
+  - filter: Gaussian Thinning
+    where: *Where
+    filter variables:
+    - name: brightness_temperature
+      channels: 4-6  # channel 4 has been blacklisted for 25 obs
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    retain_only_if_all_filter_variables_are_valid: true  # default is false
+  passedBenchmark: 2050  # 25 out of 100 obs are blacklisted for channels 1-4
+                         # thinning filter variable channel 4 fails QC for 25 obs
+                         # 25 out of 100 obs are thinned for channels 5-6
+                         # 16 channels (7-22) neither blacklisted nor thinned
+                         # 75*6 + 100*16 = 2050

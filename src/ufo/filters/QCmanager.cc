@@ -12,8 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -47,7 +45,7 @@ void updateQCFlags(const std::vector<float> *obsValues, std::vector<int>& qcflag
 
 // -----------------------------------------------------------------------------
 
-QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*config*/,
+QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
                      std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
                      std::shared_ptr<ioda::ObsDataVector<float> > /*obserr*/)
   : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(qcflags)
@@ -56,35 +54,36 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*conf
 
   ASSERT(qcflags);
 
-  const oops::Variables &allSimulatedVars = obsdb.obsvariables();
-  const oops::Variables &initialSimulatedVars = obsdb.initial_obsvariables();
-  const oops::Variables &derivedSimulatedVars = obsdb.derived_obsvariables();
+  const oops::Variables &allObservedVars = obsdb.obsvariables();
+  const oops::Variables &initialObservedVars = obsdb.initial_obsvariables();
+  const oops::Variables &derivedObservedVars = obsdb.derived_obsvariables();
+  const oops::Variables &simulatedVars = obsdb.assimvariables();
 
-  ASSERT(allSimulatedVars.size() == initialSimulatedVars.size() + derivedSimulatedVars.size());
-  ASSERT(flags_->nvars() == allSimulatedVars.size());
+  ASSERT(allObservedVars.size() == initialObservedVars.size() + derivedObservedVars.size());
+  ASSERT(flags_->nvars() == allObservedVars.size());
   ASSERT(flags_->nlocs() == obsdb_.nlocs());
 
   const float rmiss = util::missingValue(rmiss);
   const int imiss = util::missingValue(imiss);
 
-  const ioda::ObsDataVector<float> obs(obsdb, initialSimulatedVars, "ObsValue");
+  const ioda::ObsDataVector<float> obs(obsdb, initialObservedVars, "ObsValue");
 
   // Iterate over initial simulated variables
-  for (size_t jv = 0; jv < initialSimulatedVars.size(); ++jv) {
+  for (size_t jv = 0; jv < initialObservedVars.size(); ++jv) {
     const ioda::ObsDataRow<float> &currentObsValues = obs[jv];
     ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[obs.varnames()[jv]];
     updateQCFlags(&currentObsValues, currentQCFlags);
   }
 
-  // Iterate over derived simulated variables and if they don't exist yet, set their QC flags to
+  // Iterate over derived variables and if they don't exist yet, set their QC flags to
   // 'missing'.
-  for (size_t jv = 0; jv < derivedSimulatedVars.size(); ++jv) {
-    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[derivedSimulatedVars[jv]];
-    if (!obsdb.has("ObsValue", derivedSimulatedVars[jv])) {
+  for (size_t jv = 0; jv < derivedObservedVars.size(); ++jv) {
+    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[derivedObservedVars[jv]];
+    if (!obsdb.has("ObsValue", derivedObservedVars[jv])) {
       updateQCFlags(nullptr, currentQCFlags);
     } else {
       std::vector<float> currentObsValues(obsdb_.nlocs());
-      obsdb_.get_db("ObsValue", derivedSimulatedVars[jv], currentObsValues);
+      obsdb_.get_db("ObsValue", derivedObservedVars[jv], currentObsValues);
       updateQCFlags(&currentObsValues, currentQCFlags);
     }
   }
@@ -94,19 +93,21 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & /*conf
 
 // -----------------------------------------------------------------------------
 
-void QCmanager::postFilter(const ioda::ObsVector & hofx,
+void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
+                           const ioda::ObsVector & hofx,
                            const ioda::ObsVector & /*bias*/,
                            const ObsDiagnostics & /*diags*/) {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const double missing = util::missingValue(missing);
-  const oops::Variables &allSimulatedVars = obsdb_.obsvariables();
+  const oops::Variables &allObservedVars = obsdb_.assimvariables();
 
-  for (size_t jv = 0; jv < allSimulatedVars.size(); ++jv) {
+
+  for (size_t jv = 0; jv < allObservedVars.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      size_t iobs = allSimulatedVars.size() * jobs + jv;
-      if ((*flags_)[jv][jobs] == 0 && hofx[iobs] == missing) {
-        (*flags_)[jv][jobs] = QCflags::Hfailed;
+      const size_t iobs = allObservedVars.size() * jobs + jv;
+      if ((*flags_)[allObservedVars[jv]][jobs] == 0 && hofx[iobs] == missing) {
+        (*flags_)[allObservedVars[jv]][jobs] = QCflags::Hfailed;
       }
     }
   }
@@ -141,7 +142,7 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::thinned,       "removed by thinning"},
     {QCflags::derivative,    "dy/dx out of valid range"},
     {QCflags::clw,           "removed by cloud liquid water check"},
-    {QCflags::profile,       "removed by profile consistency check"},
+    {QCflags::profile,       "removed by conventional profile processing"},
     {QCflags::fguess,        "rejected by first-guess check"},
     {QCflags::diffref,       "rejected by difference check"},
     {QCflags::seaice,        "removed by sea ice check"},
@@ -149,16 +150,18 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::buddy,         "removed by buddy check"},
     {QCflags::onedvar,       "removed by 1D Var check"},
     {QCflags::bayesianQC,    "removed by Bayesian background check"},
-    {QCflags::modelobthresh, "removed by ModelOb threshold"}
+    {QCflags::modelobthresh, "removed by ModelOb threshold"},
+    {QCflags::history,       "removed by history check"},
+    {QCflags::processed,     "rejected as processed but not assimilated"}
   };
   const size_t numSpecialCases = 3;
 
   const size_t nlocs = obsdb_.nlocs();
   const size_t gnlocs = obsdb_.globalNumLocs();
 
-  const oops::Variables &allSimulatedVars = obsdb_.obsvariables();
+  const oops::Variables &allObservedVars = obsdb_.obsvariables();
 
-  for (size_t jvar = 0; jvar < allSimulatedVars.size(); ++jvar) {
+  for (size_t jvar = 0; jvar < allObservedVars.size(); ++jvar) {
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> accumulator =
         obsdb_.distribution()->createAccumulator<size_t>(cases.size());
 
@@ -171,7 +174,7 @@ void QCmanager::print(std::ostream & os) const {
     const std::vector<std::size_t> counts = accumulator->computeResult();
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_->obstype() + " " + allSimulatedVars[jvar] + ": ";
+      const std::string info = "QC " + flags_->obstype() + " " + allObservedVars[jvar] + ": ";
 
       // Normal cases
       for (size_t i = numSpecialCases; i < counts.size(); ++i)
@@ -187,7 +190,6 @@ void QCmanager::print(std::ostream & os) const {
       const size_t npass = counts[0];
       os << info << npass << " passed out of " << gnlocs << " observations." << std::endl;
     }
-
     const size_t numRecognizedFlags = std::accumulate(counts.begin(), counts.end(), 0);
     ASSERT(numRecognizedFlags == gnlocs);
   }

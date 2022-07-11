@@ -71,7 +71,7 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
   for (size_t i = 0; i < qcflags->nlocs(); ++i)
     isObsRetained[i] = ((*qcflags)[0][i] == ufo::QCflags::pass);
 
-  if (obsSpaceConf.getString("distribution", "RoundRobin") == "InefficientDistribution") {
+  if (obsspace.distribution()->name() == "InefficientDistribution") {
     // PART 1: Verify that all ranks have retained the same observations.
     const size_t rootRank = 0;
     size_t isObsRetainedSizeOnRoot = isObsRetained.size();

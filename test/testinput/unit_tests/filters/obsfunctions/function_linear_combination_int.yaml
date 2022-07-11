@@ -1,0 +1,41 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_1@MetaData
+      type: int
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_2@MetaData
+      type: int
+      value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_5@MetaData
+      type: int
+      value: 5
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_1_plus_2@MetaData
+      type: int
+      function:
+        name: LinearCombination@IntObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          coefs: [1, 2]
+  compareVariables:
+  - test:
+      name: variable_1_plus_2@MetaData
+    reference:
+      name: variable_5@MetaData

@@ -28,14 +28,14 @@ class ObsSpace;
 }
 
 namespace ufo {
-class VariableTransformsParameters;
+class VariableTransformParametersBase;
 }
 
 namespace ufo {
 
 /// \brief Main filter to apply some variable conversion.
 ///
-/// See VariableTransformsParameters for the documentation of the available
+/// See VariableTransformParametersBase for the documentation of the available
 /// parameters and options.
 ///
 /// \par Important:
@@ -55,8 +55,7 @@ class VariableTransforms : public FilterBase,
   ~VariableTransforms();
 
  private:
-  /// Configurable options
-  std::unique_ptr<VariableTransformsParameters> options_;
+  std::unique_ptr<VariableTransformParametersBase> parameters_;
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;

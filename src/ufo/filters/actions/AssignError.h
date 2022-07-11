@@ -8,7 +8,6 @@
 #ifndef UFO_FILTERS_ACTIONS_ASSIGNERROR_H_
 #define UFO_FILTERS_ACTIONS_ASSIGNERROR_H_
 
-#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -28,6 +27,7 @@ class AssignErrorParameters : public FilterActionParametersBase {
 
  public:
   oops::OptionalParameter<float> errorParameter{"error parameter", this};
+  oops::OptionalParameter<std::vector<float>> errorParameterVector{"error parameter vector", this};
   oops::OptionalParameter<Variable> errorFunction{"error function", this};
 
   /// This function is overridden to check that either `error parameter` or `error function`
@@ -50,6 +50,8 @@ class AssignError : public FilterActionBase {
              const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+  bool modifiesQCFlags() const override { return false; }
+
  private:
   Variables allvars_;
   const Parameters_ parameters_;

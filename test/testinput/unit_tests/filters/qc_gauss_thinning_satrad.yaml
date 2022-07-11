@@ -1,0 +1,62 @@
+Met Office OPS SatRad 10 km thinning of near-duplicate obs:
+  window begin: 2020-03-31T21:00:00Z
+  window end: 2020-04-01T03:00:00Z
+  obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/obs_atms_20200401T0000Z_satrad_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/obs_atms_20200401T0000Z_satrad_thinning_out1.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-22
+  GaussianThinning:
+    distance_norm: maximum
+    horizontal_mesh: 10.0  # with define_meridian_20000_km option equivalent to a
+                           # mesh of 10.0075 km with Earth meridian of 20015.087 km
+    use_reduced_horizontal_grid: true
+    round_horizontal_bin_count_to_nearest: true  # ops_compatibility_mode sets true
+    partition_longitude_bins_using_mesh: true    # ops_compatibility_mode sets true
+    define_meridian_20000_km: true               # ops_compatibility_mode sets true
+    ops_compatibility_mode: true
+    time_mesh: PT01H
+    time_min: 2020-03-31T20:30:00Z  # half time_mesh before window begin
+    time_max: 2020-04-01T03:30:00Z  # half time_mesh after window end
+    category_variable:
+      name: satellite_identifier@MetaData
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 90.0
+      minvalue: 0.0
+  # all 10 Northern Hemisphere obs should be in separate thinning boxes
+  expected_thinned_obs_indices: []
+Met Office OPS SatRad thinning for 154 km mesh:
+  window begin: 2020-03-31T21:00:00Z
+  window end: 2020-04-01T03:00:00Z
+  obs space:
+    name: ATMS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/obs_atms_20200401T0000Z_satrad_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/obs_atms_20200401T0000Z_satrad_thinning_out2.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-22
+  GaussianThinning:
+    distance_norm: maximum
+    horizontal_mesh: 154.0  # with define_meridian_20000_km option equivalent to a
+                            # mesh of 154.116 km with Earth meridian of 20015.087 km
+    use_reduced_horizontal_grid: true
+    round_horizontal_bin_count_to_nearest: true  # ops_compatibility_mode sets true
+    partition_longitude_bins_using_mesh: true    # ops_compatibility_mode sets true
+    define_meridian_20000_km: true               # ops_compatibility_mode sets true
+    ops_compatibility_mode: true
+    time_mesh: PT03H
+    time_min: 2020-03-31T19:30:00Z  # half time_mesh before window begin
+    time_max: 2020-04-01T04:30:00Z  # half time_mesh after window end
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 0.0
+      minvalue: -30.0
+  # 2 of 10 Southern Hemisphere obs should be removed by thinning
+  expected_thinned_obs_indices: [13, 14]

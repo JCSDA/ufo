@@ -6,10 +6,11 @@
  */
 
 #include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
-#include "oops/util/Logger.h"
+#include "ioda/ObsVector.h"
 #include "ufo/predictors/Legendre.h"
-#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -32,6 +33,7 @@ Legendre::Legendre(const Parameters_ & parameters, const oops::Variables & vars)
 void Legendre::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
+                        const ObsBias &,
                         ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
 

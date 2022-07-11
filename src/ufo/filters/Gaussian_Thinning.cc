@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -28,6 +28,8 @@
 #include "ufo/utils/GeodesicDistanceCalculator.h"
 #include "ufo/utils/MaxNormDistanceCalculator.h"
 #include "ufo/utils/metoffice/MetOfficeSort.h"
+#include "ufo/utils/NullDistanceCalculator.h"
+#include "ufo/utils/RecordHandler.h"
 #include "ufo/utils/RecursiveSplitter.h"
 #include "ufo/utils/RoundingEquispacedBinSelector.h"
 #include "ufo/utils/SpatialBinSelector.h"
@@ -53,8 +55,30 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   ObsAccessor obsAccessor = createObsAccessor();
 
-  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_,
-                                     filtervars, options_.thinIfAnyFilterVariablesAreValid.value());
+  bool retainOnlyIfAllFilterVariablesAreValid =
+          options_.retainOnlyIfAllFilterVariablesAreValid.value();
+
+  // The RecordHandler deals with data that have been grouped into records.
+  // If the grouping has not been performed then each RecordHandler function simply
+  // returns what it has been passed without modification.
+  const RecordHandler recordHandler(obsdb_,
+                                    filtervars,
+                                    *flags_,
+                                    retainOnlyIfAllFilterVariablesAreValid);
+
+  // If records are treated as single obs and a category variable is also used,
+  // ensure that there are no records with multiple values of the category variable.
+  if (options_.recordsAreSingleObs &&
+      options_.categoryVariable.value() != boost::none) {
+    recordHandler.checkRecordCategories(Variable(*options_.categoryVariable.value()));
+  }
+
+  std::vector<size_t> validObsIds =
+    obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
+                                       recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+                                       apply,
+                                       *flags_,
+                                       filtervars, !retainOnlyIfAllFilterVariablesAreValid);
 
   if (options_.opsCompatibilityMode) {
     // Sort observations by latitude
@@ -74,15 +98,46 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsAccessor,
                                      splitter, distancesToBinCenter);
 
-  const std::vector<bool> isThinned = identifyThinnedObservations(
+  std::vector<bool> isThinned;
+
+  if (options_.selectMedian) {
+    ASSERT(filtervars.size() == 1);  // only works on one variable at a time
+    const size_t filterVarIndex = 0;
+    std::vector<float> obs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
+                              filtervars.variable(filterVarIndex).variable());
+    // Different version of identifyThinnedObservations(), which takes additional inputs:
+    //  @ObsValue of the filter variable, and option specifying minimum number of obs there
+    //  must be in a bin to accept a super-ob (the median-valued observation)
+    isThinned = identifyThinnedObservationsMedian(
+                              validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
+  } else {  // default function, thinning obs according to distance_norm:
+    isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter);
-  obsAccessor.flagRejectedObservations(isThinned, flagged);
+  }
+  obsAccessor.flagRejectedObservations
+    (options_.recordsAreSingleObs ?
+     recordHandler.changeThinnedIfRecordsAreSingleObs(isThinned) :
+     isThinned,
+     flagged);
+
+  // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
+  if (retainOnlyIfAllFilterVariablesAreValid)
+    obsAccessor.flagObservationsForAnyFilterVariableFailingQC(apply, *flags_, filtervars, flagged);
 }
 
 // -----------------------------------------------------------------------------
 
 ObsAccessor Gaussian_Thinning::createObsAccessor() const {
-  if (options_.categoryVariable.value() != boost::none) {
+  if (options_.recordsAreSingleObs) {
+    // If records are treated as single observations, the instantiation of the `ObsAccessor`
+    // depends on whether the category variable has been defined or not.
+    if (options_.categoryVariable.value() != boost::none) {
+      return ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(obsdb_,
+                                                      *options_.categoryVariable.value());
+    } else {
+      return ObsAccessor::toAllObservations(obsdb_);
+    }
+  } else if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value());
   } else {
@@ -97,11 +152,16 @@ std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
   DistanceNorm distanceNorm = options.distanceNorm.value().value_or(DistanceNorm::GEODESIC);
   if (options.opsCompatibilityMode)
     distanceNorm = DistanceNorm::MAXIMUM;
+  if (options.selectMedian) {
+    distanceNorm = DistanceNorm::NULLNORM;
+    }
   switch (distanceNorm) {
   case DistanceNorm::GEODESIC:
     return std::unique_ptr<DistanceCalculator>(new GeodesicDistanceCalculator());
   case DistanceNorm::MAXIMUM:
     return std::unique_ptr<DistanceCalculator>(new MaxNormDistanceCalculator());
+  case DistanceNorm::NULLNORM:
+    return std::unique_ptr<DistanceCalculator>(new NullDistanceCalculator());
   }
   throw eckit::BadParameter("Unrecognized distance norm", Here());
 }
@@ -172,19 +232,33 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
   bool roundHorizontalBinCountToNearest =
       options.roundHorizontalBinCountToNearest.value().value_or(false);
-  if (options.opsCompatibilityMode)
+  bool partitionLongitudeBinsUsingMesh =
+      options.partitionLongitudeBinsUsingMesh.value().value_or(false);
+  bool defineMeridian20000km =
+      options.defineMeridian20000km.value().value_or(false);
+  float horizontalMesh = options.horizontalMesh;
+  if (options.opsCompatibilityMode) {
     roundHorizontalBinCountToNearest = true;
+    partitionLongitudeBinsUsingMesh = true;
+    defineMeridian20000km = true;
+  }
   SpatialBinCountRoundingMode roundingMode = roundHorizontalBinCountToNearest ?
         SpatialBinCountRoundingMode::NEAREST : SpatialBinCountRoundingMode::DOWN;
 
   const float earthRadius = Constants::mean_earth_rad;  // km
   const float meridianLength = M_PI * earthRadius;
-  const float tentativeNumLatBins = meridianLength / options.horizontalMesh;
+  if (defineMeridian20000km)
+    // Distance horizontalMesh is defined with respect to a meridian of exactly 20000.0 km;
+    // scale horizontalMesh to be consistent with meridian defined using Constants::mean_earth_rad
+    horizontalMesh *= meridianLength/20000.0;
+  const float tentativeNumLatBins = meridianLength / horizontalMesh;
   const int numLatBins = SpatialBinSelector::roundNumBins(tentativeNumLatBins, roundingMode);
 
   if (options.useReducedHorizontalGrid) {
     // Use fewer bins at high latitudes
-    return SpatialBinSelector(numLatBins, roundingMode, options.opsCompatibilityMode);
+    return SpatialBinSelector(numLatBins, roundingMode, horizontalMesh,
+                              options.opsCompatibilityMode,
+                              partitionLongitudeBinsUsingMesh);
   } else {
     // Use the same number of bins at all latitudes
     const int equatorToMeridianLengthRatio = 2;
@@ -210,7 +284,7 @@ void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
                        << *binSelector->numBins() << std::endl;
 
   std::vector<float> vcoord = obsAccessor.getFloatVariableFromObsSpace(
-        "MetaData", options_.verticalCoord);
+        options_.verticalGroup, options_.verticalCoord);
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
@@ -275,7 +349,7 @@ void Gaussian_Thinning::groupObservationsByTime(
                        << *binSelector->numBins() << std::endl;
 
   std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
@@ -368,6 +442,59 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservations(
   return isThinned;
 }
 
+// -----------------------------------------------------------------------------
+
+std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
+    const std::vector<size_t> &validObsIds,
+    const ObsAccessor &obsAccessor,
+    const RecursiveSplitter &splitter,
+    const std::vector<float> &obsval,
+    const float &minNumObsPerBin) const {
+
+  const size_t totalNumObs = obsAccessor.totalNumObservations();
+
+  std::vector<bool> isThinned(totalNumObs, true);
+  if (minNumObsPerBin < 2) {
+    // bins with 1 obs are not counted as a group of splitter - so if accepting single-obs,
+    // they must be accepted (isThinned=false) by default; otherwise if minNumObsPerBin >= 2,
+    // single-obs in bins must be rejected by default.
+    isThinned.assign(totalNumObs, false);
+  }
+
+  for (ufo::RecursiveSplitter::Group group : splitter.multiElementGroups()) {
+    // observation values in this bin:
+    std::vector<float> obsgroup;
+    for (size_t validObsIndex : group) {
+      if (obsval[validObsIds[validObsIndex]] !=
+          util::missingValue(obsval[validObsIds[validObsIndex]])) {
+        obsgroup.push_back(obsval[validObsIds[validObsIndex]]);
+      }
+    }
+    const size_t groupSize = obsgroup.size();
+    if (groupSize >= minNumObsPerBin) {
+      // find median obs value in bin:
+      std::vector<float> obsgroupSorted(obsgroup);
+      std::stable_sort(obsgroupSorted.begin(), obsgroupSorted.end());
+      const float obsMedian = 0.5*(obsgroupSorted[floor(0.5*(groupSize-1))]
+                            + obsgroupSorted[ceil(0.5*(groupSize-1))]);
+      auto i = std::min_element(obsgroup.begin(), obsgroup.end(), [=] (float x, float y)
+      {
+          return abs(x - obsMedian) < abs(y - obsMedian);
+      });
+      const size_t bestValidObsIndex = std::distance(obsgroup.begin(), i);
+
+      for (size_t validObsIndex : group) {
+        if (validObsIds[validObsIndex] == validObsIds[*(group.begin()+bestValidObsIndex)]) {
+          isThinned[validObsIds[validObsIndex]] = false;
+        } else {
+          isThinned[validObsIds[validObsIndex]] = true;
+        }
+      }
+    }
+  }
+  return isThinned;
+}
+
 // Should return true if the first observation is "better" than the second one.
 std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator(
     const std::vector<size_t> &validObsIds,
@@ -375,25 +502,58 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     const ObsAccessor &obsAccessor) const
 {
   if (options_.priorityVariable.value() == boost::none) {
+    if (options_.tiebreakerPickLatest) {
+      // if tiebreakerPickLatest has been set then if distance to the bin center
+      // is equal it chooses the latest observation
+      std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+           "MetaData", "dateTime");
+      return [times, &validObsIds, &distancesToBinCenter](
+               size_t validObsIndexA, size_t validObsIndexB){
+          const size_t obsIdA = validObsIds[validObsIndexA];
+          const size_t obsIdB = validObsIds[validObsIndexB];
+          return std::make_pair(-distancesToBinCenter[validObsIndexA],
+                                times[obsIdA]) >
+                 std::make_pair(-distancesToBinCenter[validObsIndexB],
+                                 times[obsIdB]);
+      };
+    }
     return [&distancesToBinCenter](size_t validObsIndexA, size_t validObsIndexB) {
       return distancesToBinCenter[validObsIndexA] < distancesToBinCenter[validObsIndexB];
     };
   }
 
   const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
-
   std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
         priorityVariable.group(), priorityVariable.variable());
 
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
+  if (options_.tiebreakerPickLatest) {
+    std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+          "MetaData", "dateTime");
+    return [priorities, times, &validObsIds, &distancesToBinCenter](
+              size_t validObsIndexA, size_t validObsIndexB){
+        // Prefer observations with large priorities, small distance and later time if tied.
+        const size_t obsIdA = validObsIds[validObsIndexA];
+        const size_t obsIdB = validObsIds[validObsIndexB];
+        return std::make_tuple(priorities[obsIdA],
+                               -distancesToBinCenter[validObsIndexA],
+                               times[obsIdA]) >
+               std::make_tuple(priorities[obsIdB],
+                               -distancesToBinCenter[validObsIndexB],
+                               times[obsIdB]);
+    };
+  } else {
   return [priorities, &validObsIds, &distancesToBinCenter]
          (size_t validObsIndexA, size_t validObsIndexB) {
       // Prefer observations with large priorities and small distances
-      return std::make_pair(-priorities[validObsIds[validObsIndexA]],
+      const size_t obsIdA = validObsIds[validObsIndexA];
+      const size_t obsIdB = validObsIds[validObsIndexB];
+      return std::make_pair(-priorities[obsIdA],
                             distancesToBinCenter[validObsIndexA]) <
-             std::make_pair(-priorities[validObsIds[validObsIndexB]],
+             std::make_pair(-priorities[obsIdB],
                             distancesToBinCenter[validObsIndexB]);
     };
+  }
 }
 
 // -----------------------------------------------------------------------------

@@ -1,0 +1,94 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: test_relative_humidity1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity # calculate relative humidity from specific humidity (also T, P)
+                                # using Default method and default Formulation (Roger 1989)
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
+  compareVariables:             # test output matches precalculated values
+    - reference:
+        name: relative_humidity_NOAA@TestReference
+      test:
+        name: relative_humidity@DerivedObsValue
+      absTol: 1.0e-5
+  passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
+
+# Exercise the method using UKMO saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity2
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_UKMO@TestReference
+      test:
+        name: relative_humidity@DerivedObsValue
+      absTol: 1.0e-5
+  passedBenchmark: 99
+
+# Exercise the method using the Walko saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity3
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Formulation: Walko
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_Walko@TestReference
+      test:
+        name: relative_humidity@DerivedObsValue
+      absTol: 1.0e-5
+  passedBenchmark: 99
+
+# Exercise the method using the Murphy saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity4
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Formulation: Murphy
+    specific humidity variable: specific_humidity
+    temperature variable: air_temperature
+    pressure variable: air_pressure
+    pressure at 2m variable: surface_pressure
+    relative humidity variable: relative_humidity
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_Murphy@TestReference
+      test:
+        name: relative_humidity@DerivedObsValue
+      absTol: 1.0e-5
+  passedBenchmark: 99

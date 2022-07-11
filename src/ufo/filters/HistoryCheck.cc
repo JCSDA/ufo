@@ -17,6 +17,7 @@
 
 #include <boost/none.hpp>
 #include <boost/optional.hpp>
+#include <boost/unordered_map.hpp>
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -115,7 +116,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   // to flag observations (number of observations is greater than the numberStuckTolerance value)
   if (stuckOptions &&
       widerObsSpace.index().size() >
-      (stuckOptions)->numberStuckTolerance) {
+      stuckOptions->numberStuckTolerance.value().value()) {
     // If the observation subtype is one which the stuck check filter should be run on
     if (subtype != SurfaceObservationSubtype::TEMP &&
         subtype != SurfaceObservationSubtype::BATHY &&
@@ -134,14 +135,15 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
     }
   }
   // Creating obs accessors for both obs spaces, assuming the same variable is used for grouping
-  // into stations on both obs spaces
+  // into stations on both obs spaces. 3rd arg: recordsAreSingleObs=false always for History Check.
   ObsAccessor historicalObsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
-                                                                   widerObsSpace);
+                                                                   widerObsSpace,
+                                                                   false);
   ObsAccessor windowObsAccessor =
-      TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+      TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_, false);
 
   std::vector<util::DateTime> wideDts = historicalObsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   std::vector<float> wideLats = historicalObsAccessor.getFloatVariableFromObsSpace(
         "MetaData", "latitude");
   std::vector<float> wideLons = historicalObsAccessor.getFloatVariableFromObsSpace(
@@ -201,7 +203,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   }
   // Retrieve relevant identifier information for all observations in assimilation window.
   std::vector<util::DateTime> windowDts = windowObsAccessor.getDateTimeVariableFromObsSpace(
-        "MetaData", "datetime");
+        "MetaData", "dateTime");
   std::vector<float> windowLats = windowObsAccessor.getFloatVariableFromObsSpace(
         "MetaData", "latitude");
   std::vector<float> windowLons = windowObsAccessor.getFloatVariableFromObsSpace(
@@ -210,10 +212,17 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                                     options_.stationIdVariable.value(),
                                                     obsdb_, windowObsAccessor);
 
+  // Determine vector of locations at which this filter should be applied.
+  // If each independent group of observations is stored entirely on a single MPI rank
+  // then this vector will be determined separately for each rank.
+  // Otherwise, this vector will be concatenated across all ranks.
+  const std::vector <bool> globalApply = windowObsAccessor.getGlobalApply(apply);
+
   // Map obsIdentifierData for every assimilation window observation to its index within the
   // window's full observation accessor.
-  std::map<obsIdentifierData, const size_t> locationIdToIndex;
-  for (size_t i = 0; i < windowObsAccessor.totalNumObservations(); i++) {
+  boost::unordered_map<obsIdentifierData, const size_t> locationIdToIndex;
+  for (size_t i = 0; i < windowDts.size(); i++) {
+    if (!globalApply[i]) continue;
     // Set up all observation labels with differentiator counter initially set to 0
     obsIdentifierData obsLabel = {windowDts.at(i), windowLats.at(i), windowLons.at(i),
                                   windowStationIds.at(i), 0};
@@ -239,12 +248,15 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
 
   // Iterate through flagged observations in the historical obs space,
   // finding the observations which are also in the assimilation obs space, and
-  // marking the associated indices to flag using the ObsAccessor flagRejectedObservations method
+  // marking the associated indices to flag using the ObsAccessor flagRejectedObservations method.
+  // The globalApply vector is used to determine which locations should be flagged
+  // based on the where clause.
   std::vector<bool> globalObsToFlag(windowObsAccessor.totalNumObservations(), false);
   for (const obsIdentifierData &id : wideFlaggedLocationIds) {
     if (locationIdToIndex.find(id) != locationIdToIndex.end()) {
-      size_t locToFlag = locationIdToIndex.at(id);
-      globalObsToFlag.at(locToFlag) = true;
+      const size_t locToFlag = locationIdToIndex.at(id);
+      if (globalApply[locToFlag])
+        globalObsToFlag.at(locToFlag) = true;
     }
   }
   windowObsAccessor.flagRejectedObservations(globalObsToFlag, flagged);
@@ -291,6 +303,6 @@ std::vector<int> HistoryCheck::getStationIds(const std::map<std::string, int> &s
 }
 
 void HistoryCheck::print(std::ostream & os) const {
-  os << "HistoryCheck: config = " << config_ << '\n';
+  os << "HistoryCheck: config = " << options_ << '\n';
 }
 }  // namespace ufo

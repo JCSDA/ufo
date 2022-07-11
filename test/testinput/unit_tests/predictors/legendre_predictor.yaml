@@ -1,0 +1,30 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_biaspred_redo_scan.nc4
+#   obsdataout:
+#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_biaspred_redo_scan_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs bias:
+    variational bc:
+      predictors:
+      - name: Legendre
+        number of scan positions: 32
+        order: 1
+      - name: Legendre
+        number of scan positions: 32
+        order: 2
+      - name: Legendre
+        number of scan positions: 32
+        order: 3
+      - name: Legendre
+        number of scan positions: 32
+        order: 4
+  tolerance: 1.0e-6

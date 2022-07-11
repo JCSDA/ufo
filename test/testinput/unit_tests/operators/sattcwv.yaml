@@ -1,0 +1,43 @@
+window begin: 2020-12-30T03:00:00Z
+window end: 2020-12-30T09:00:00Z
+
+observations: 
+# 1. check operator works with correct geoval order
+- obs operator: 
+    name: SatTCWV
+  obs space: 
+    name: SatTCWV
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
+#   obsdataout:
+#     obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_out.nc4
+    simulated variables: [precipitableWater] 
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/sattcwv_geovals_20201230T0600Z.nc4
+  norm ref: MetOfficeHofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14
+# 2. check operator throws an error with incorrect geoval order
+- obs operator: 
+    name: SatTCWV
+  obs space: 
+    name: SatTCWV
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
+#   obsdataout:
+#     obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_reversed_geovals_out.nc4
+    simulated variables: [precipitableWater]   
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/sattcwv_geovals_reversed_20201230T0600Z.nc4
+  norm ref: MetOfficeHofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14
+  expect simulateObs to throw exception with message: model fields must be ordered from the top down

@@ -1,0 +1,467 @@
+Normal ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        dateTimes: [ 0, 3600, 7200,
+                     10800, 14400 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000.0
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 157, 157, 157, 157]
+  expected speed: [0.0, 43.5, 43.5, 43.5, 43.5]
+  expected distance averaged: [0, 314, 314, 314, 0]
+  expected speed averaged: [0.0, 43.5, 43.5, 43.5, 0.0]
+  expected angle: [0.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [174.0]
+  expected mean speed: [43.5]
+  expected early breaks: [0]
+Bending ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1, 1, 0 ]
+        lons: [ 0, 0, 1, 0, -1 ]
+        dateTimes: [ 0, 3600, 7200,
+                     10800, 14400 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000.0
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5]
+  expected distance averaged: [0, 157, 0, 248, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [2]
+  expected sum speed: [135.0]
+  expected mean speed: [33.9]
+  expected early breaks: [0]
+Fast ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 3600,
+                     7200]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 10 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, 30.8, 30.8]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, 30.8, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [2]
+  expected bends: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Short ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 1800,
+                     3600]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    input category: 'SHPSYN'
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000.0 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, 61.7, 61.7]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, 61.7, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Short buoy track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 1800,
+                     3600]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    input category: 'BUOYPROF'
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, 61.7, 61.7]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, 61.7, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [0]
+Fast/short ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0,
+                     600, 1200 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 10 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, 185.0, 185.0]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, 185.0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Ship Track Dist0:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 3600, 7200]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000.0
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 0, 0]
+  expected speed: [0.0, 0.0, 0.0]
+  expected distance averaged: [0, 0, 0]
+  expected speed averaged: [0, 0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [0]
+Ship Track Simultaneous Same Location:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 0, 0]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 10 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 0, 0]
+  expected speed: [0.0, 0.0, 0.0]
+  expected distance averaged: [0, 0, 0]
+  expected speed averaged: [0, 0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0]
+  expected mean speed: [0]
+  expected early breaks: [1]
+Ship Track Simultaneous Different Location:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        dateTimes: [ 0, 0, 0]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 10 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, 185.0, 185.0] #because assumes a time difference of 10 mins btwn each obs
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, 370.0, 0] # because assumes a time difference of 10 mins btwn 1st/last obs
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected sum speed: [0]
+  expected mean speed: [0]
+  expected early breaks: [1]
+Ship Tracks Different Station IDs:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1, 1, 0, 0, 1, 2 ]
+        lons: [ 0, 0, 1, 0, -1, 0, 0, 0 ]
+        dateTimes: [ 0, 3600, 7200,
+                     10800, 14400, 0,
+                     1800, 3600]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1, 2, 2, 2]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5, 0, 61.7, 61.7]
+  expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0, 0, 61.7, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0, 2]
+  expected fast: [0, 0]
+  expected bends: [2, 0]
+  expected sum speed: [135.0, 0.0]
+  expected mean speed: [33.9, 0.0]
+  expected early breaks: [0, 1]
+Ship Tracks Different Station IDs Shuffled:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 1, 1, 1, 0, 0, 1, 0, 2 ]
+        lons: [ 0, 0, 1, -1, 0, 0, 0, 0 ]
+        dateTimes: [ 3600, 10800, 7200,
+                     14400, 0,
+                     1800, 0, 3600]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 2, 2, 1, 2]
+  Ship Track Check:
+    unit testing mode: true
+    temporal resolution: PT10M
+    spatial resolution (km): 1
+    max speed (m/s): 1000 
+    rejection threshold: 1.0
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5, 0, 61.7, 61.7]
+  expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0, 0, 61.7, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0, 2]
+  expected fast: [0, 0]
+  expected bends: [2, 0]
+  expected sum speed: [135.0, 0.0]
+  expected mean speed: [33.9, 0.0]
+  expected early breaks: [0, 1]
+Ship Track Segment from Comparison Test early break false:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -37.00999832, -37.00999832, -37.02000046, -37.02000046, -37.02000046]
+        lons: [ 82.5, 82.51000214, 82.52999878,  82.55999756,  82.56999969]
+        dateTimes: [ 0, 3600, 7200,
+                     14400, 18000]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    comparison test: true
+    unit testing mode: false
+    temporal resolution: PT1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected rejected obs indices: [0, 1, 2, 3, 4]
+Ship Track Segment from Comparison Test early break true:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -4.94999981, -4.94999981, -4.94999981, -4.96000004, -4.96000004, -4.96000004]
+        lons: [ 94.98000336,  94.98000336,  94.98000336,  94.98000336, 94.98000336,  94.98000336 ]
+        dateTimes: [ 0, 3600, 7200,
+                     10800, 14400, 18000]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1, 1]
+  Ship Track Check:
+    comparison test: true
+    unit testing mode: false
+    temporal resolution: PT1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
+    rejection threshold: 0.5
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected rejected obs indices: [0, 1, 2, 3, 4, 5]
+Ship Track Records as single obs:  # 3rd profile [8-11] is off-track
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ocean Profile
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 ]
+        lons: [ 0, 0, 0, 0, 0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3 ]
+        dateTimes: [ 0, 0, 0, 0, 3600, 3600, 3600, 3600, 7200, 7200, 7200, 7200, 9800, 9800, 9800, 9800 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+      obsgrouping:
+        group variables: [ "dateTime" ]
+  air_temperature: [273,273,273,273,273,273,273,273,273,273,273,273,273,273,273,273]
+  station_ids: [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+  Ship Track Check:
+    comparison test: true
+    unit testing mode: false
+    temporal resolution: PT1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 10
+    rejection threshold: 0.5
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+    records_are_single_obs: true
+  expected rejected obs indices: [8,9,10,11]

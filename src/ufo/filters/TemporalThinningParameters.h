@@ -18,10 +18,6 @@
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
 /// \brief Options controlling the operation of the TemporalThinning filter.
@@ -55,12 +51,25 @@ class TemporalThinningParameters : public FilterParametersBase {
   /// observations were not grouped into records, all observations will be thinned together.
   ///
   /// Note: the variable used to group observations into records can be set with the
-  /// \c obs space.obsdatain.obsgrouping.group variable YAML option.
+  /// `obs space.obsdatain.obsgrouping.group` variable YAML option.
+  ///
+  /// If a category variable is defined and `records_are_single_obs` is true then
+  /// each record must contain only one value of the category variable.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   /// Variable storing observation priorities. Used together with \c tolerance; see the
   /// documentation of that parameter for more information.
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
+
+  /// Treat each record as a single observation. If this option is set to true then the records
+  /// on all MPI ranks are considered together (in contrast to treating each record in isolation).
+  ///
+  /// Note: the variable used to group observations into records can be set with the
+  /// `obs space.obsdatain.obsgrouping.group` variable YAML option.
+  ///
+  /// If `records_are_single_obs` is true and a category variable is defined then
+  /// each record must contain only one value of the category variable.
+  oops::Parameter<bool> recordsAreSingleObs{"records_are_single_obs", false, this};
 };
 
 }  // namespace ufo

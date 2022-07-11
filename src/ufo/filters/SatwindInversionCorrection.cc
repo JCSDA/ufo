@@ -9,8 +9,6 @@
 
 #include <limits>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -76,7 +74,7 @@ SatwindInversionCorrection::~SatwindInversionCorrection() {
  *  obs filters:
  *  - filter: Satwind Inversion Correction
  *    observation pressure:
- *      name: air_pressure_levels@MetaData
+ *      name: air_pressure@MetaData
  *    RH threshold: 50
  *    maximum pressure: 96000
  * \endcode
@@ -119,7 +117,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     obsdb_.get_db("QCFlags", "eastward_wind", u_flags);
     obsdb_.get_db("QCFlags", "northward_wind", v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised");
+    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+                           Here());
   }
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
@@ -136,9 +135,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
 // diagnostic variables to be summed over all processors at the end of the routine
   std::unique_ptr<ioda::Accumulator<size_t>> countAccumulator =
       obsdb_.distribution()->createAccumulator<size_t>();
-  enum {PDIFF};
-  std::unique_ptr<ioda::Accumulator<std::vector<double>>> totalsAccumulator =
-      obsdb_.distribution()->createAccumulator<double>(nlocs);
+  std::unique_ptr<ioda::Accumulator<double>> pdiffAccumulator =
+      obsdb_.distribution()->createAccumulator<double>();
 
 // Loop through locations
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
@@ -151,6 +149,10 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
         gvals->getAtLocation(model_temp_profile, model_temp_name, iloc);
         gvals->getAtLocation(model_rh_profile, model_rh_name, iloc);
         gvals->getAtLocation(model_vcoord_profile, model_vcoord_name, iloc);
+        // Check GeoVaLs are in correct vertical order
+        if (model_vcoord_profile.front() > model_vcoord_profile.back()) {
+          throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
+        }
         // ---------------------------------------------------------------------------
         //  Search for inversion and if present find T and P of base and top
         // ---------------------------------------------------------------------------
@@ -160,8 +162,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
         float inversion_top = std::numeric_limits<float>::max();
         float temp_inversion_base = std::numeric_limits<float>::max();
         float temp_inversion_top = std::numeric_limits<float>::max();
-        //  loop over levels starting from lowest
-        for (int ilev  = 0; ilev  < nlevs-2  ; ++ilev) {
+        //  loop over levels starting from highest pressure (bottom to top)
+        for (int ilev  = nlevs-1; ilev >= 1; ilev--) {
           //  if haven't found inversion and pressure is less than min_pressure Pa then exit
           if (inversion == false && model_vcoord_profile[ilev] < min_pressure) {
             break;
@@ -171,7 +173,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
             continue;
           }
           //  if haven't found inversion, check for increase in temperature
-          if (inversion == false && model_temp_profile[ilev+1] > model_temp_profile[ilev]) {
+          if (!inversion && model_temp_profile[ilev-1] > model_temp_profile[ilev]) {
             //  T of level above is greater so take base at current level
             inversion_base =  model_vcoord_profile[ilev];
             temp_inversion_base = model_temp_profile[ilev];
@@ -180,7 +182,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
           // if inversion found, then detect level the temperature starts to decrease again above
           // the inversion base
           if (inversion &&
-              model_temp_profile[ilev+1] < model_temp_profile[ilev] &&
+              model_temp_profile[ilev-1] < model_temp_profile[ilev] &&
               model_vcoord_profile[ilev] < inversion_base &&
               firsttime) {
             //  Check humidity of inversion top
@@ -203,7 +205,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
             obs_pressure[iloc] < inversion_base) {
           // re-assign to base of inversion
           countAccumulator->addTerm(iloc, 1);
-          totalsAccumulator->addTerm(iloc, PDIFF, inversion_base - obs_pressure[iloc]);
+          pdiffAccumulator->addTerm(iloc, inversion_base - obs_pressure[iloc]);
           obs_pressure[iloc] = inversion_base;
           // set flag
           u_flags[iloc] |= ufo::MetOfficeQCFlags::SatWind::SatwindInversionFlag;
@@ -213,18 +215,21 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     }  // apply
   }  // location loop
   //  write back corrected pressure, updated flags and original pressure
-  obsdb_.put_db("MetaData", "air_pressure_levels", obs_pressure);
+  obsdb_.put_db(parameters_.obs_pressure.value().group(),
+                parameters_.obs_pressure.value().variable(), obs_pressure);
   obsdb_.put_db("QCFlags", "eastward_wind", u_flags);
   obsdb_.put_db("QCFlags", "northward_wind", v_flags);
-  obsdb_.put_db("MetaData", "air_pressure_original", original_pressure);
+  obsdb_.put_db(parameters_.obs_pressure.value().group(),
+                parameters_.obs_pressure.value().variable() + std::string("_original"),
+                original_pressure);
 
   // sum number corrected and pressure differences
   const std::size_t count = countAccumulator->computeResult();
-  const std::vector<double> totals = totalsAccumulator->computeResult();
+  const double pdiff = pdiffAccumulator->computeResult();
   if (count) {
     oops::Log::info() << "Satwind Inversion: "<< count
                                        << " observations with modified pressure" << std::endl;
-    oops::Log::info() << "Satwind Inversion: "<< totals[PDIFF] / count
+    oops::Log::info() << "Satwind Inversion: "<< pdiff / count
                                        << " Pa mean pressure difference" << std::endl;
   }
 }

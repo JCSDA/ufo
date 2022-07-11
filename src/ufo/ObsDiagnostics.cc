@@ -27,9 +27,9 @@ ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations & locs
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const eckit::Configuration & conf, const ioda::ObsSpace & os,
+ObsDiagnostics::ObsDiagnostics(const Parameters_ & params, const ioda::ObsSpace & os,
                                const oops::Variables & vars)
-  : obsdb_(os), gdiags_(conf, os, vars)
+  : obsdb_(os), gdiags_(params, os, vars)
 {}
 
 // -----------------------------------------------------------------------------
@@ -50,19 +50,6 @@ void ObsDiagnostics::save(const std::vector<double> & vals,
 
 size_t ObsDiagnostics::nlevs(const std::string & var) const {
   return gdiags_.nlevs(var);
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var) const {
-  gdiags_.get(vals, var);
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var,
-                         const int lev) const {
-  gdiags_.getAtLevel(vals, var, lev);
 }
 
 // -----------------------------------------------------------------------------

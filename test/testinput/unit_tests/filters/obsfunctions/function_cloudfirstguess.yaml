@@ -1,0 +1,51 @@
+_: &cloud_first_guess_channels 179, 205, 212, 242, 246, 280, 327, 407, 662, 1786
+
+window begin: 2021-01-14T21:00:00Z
+window end: 2021-01-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: [Ozone]
+    obs options:
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: METOP
+      Sat_ID: 1
+      Instrument_Name: IASI
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+      UseColdSurfaceCheck: false
+      RTTOV_clw_data: false
+      RTTOV_profile_checkinput: true
+      surface emissivity group: SurfEmiss
+  obs space:
+    name: Test the hyperspectral retrievals
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+    simulated variables: [brightness_temperature]
+    channels: *cloud_first_guess_channels
+#   obsdataout:
+#     obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
+  obs filters:
+### Create first guess cloud using minimum residual
+  - filter: Variable Assignment
+    defer to post: true
+    assignments:
+    - name: cloud_first_guess_cost@CloudFirstGuess
+      type: float
+      function:
+        name: CloudFirstGuessMinimumResidual@ObsFunction
+        options:
+          channels: *cloud_first_guess_channels
+          output group: CloudFirstGuess
+          obs bias group: ObsBias
+  compareVariables:
+    - reference:
+        name: initial_cloud_fraction@MetaData
+      test:
+        name: initial_cloud_fraction@CloudFirstGuess
+      absTol: 1.0e-4

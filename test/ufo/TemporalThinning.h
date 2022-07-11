@@ -38,6 +38,11 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   obsParams.validateAndDeserialize(obsSpaceConf);
   ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
+  if (conf.has("air_temperature")) {
+    const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");
+    obsspace.put_db("ObsValue", "air_temperature", air_temperature);
+  }
+
   if (conf.has("category")) {
     const std::vector<int> categories = conf.getIntVector("category");
     obsspace.put_db("MetaData", "category", categories);
@@ -61,6 +66,7 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   eckit::LocalConfiguration filterConf(conf, "TemporalThinning");
   ufo::TemporalThinningParameters filterParameters;
   filterParameters.validateAndDeserialize(filterConf);
+
   ufo::TemporalThinning filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
 

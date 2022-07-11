@@ -106,15 +106,6 @@ std::vector<int> getDimMapping(const std::vector<std::string> &dimnames,
       }
     }
   }
-  if (dimIndex.size() != dimnames.size()) {
-    oops::Log::debug() << "One or more of the dimension names provided do not map to the "
-                          "array to be interpolated: ";
-    for (std::string dimname : dimnames) oops::Log::debug() << dimname << " ";
-      oops::Log::debug() << std::endl;
-    throw eckit::Exception(
-      "Dimension mappings not associated with the array to be interpolated are not "
-      "currently supported.", Here());
-  }
   return dimIndex;
 }
 
@@ -207,6 +198,8 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
   std::unordered_map<std::string, std::vector<int>> coord2DimMapping;
   // Maps dimensions of the payload array (0 or 1) to coordinate names
   std::unordered_map<int, std::vector<std::string>> dim2CoordMapping;
+  // Maps coordinate names to their dimensionality.
+  std::unordered_map<std::string, size_t> coordNDims;
   // Coordinate values
   DataExtractorInputBase::Coordinates coordsVals;
 
@@ -217,8 +210,16 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
     // Load our variables data and keep hold of it along with relevant information.
     update(varName, variable, coordsVals);
 
-    // Create a mapping between name and array dimension and vice versa.
+    // Create a mapping between name and payload dimension and vice versa.
     std::vector<int> ddim = getDimMapping(dimnames, interpolatedArrayDimnames);
+
+    if (ddim.size() == 0) {
+      oops::Log::debug() << "Variable: '" << varName << "' does not appear to vary over " <<
+                            "dimensions describing the payload and will be ignored.";
+      continue;
+    }
+    coordNDims[varName] = dimnames.size();
+
     for (int dim : ddim) {
       dim2CoordMapping[dim].emplace_back(varName);
     }
@@ -298,16 +299,11 @@ DataExtractorInput<ExtractedValue> DataExtractorNetCDFBackend<ExtractedValue>::l
 
   // Store the coordinate values and dimension mappings in 'result', converting any ioda-v1-style
   // variable names (var@Group) to ioda-v2 style (Group/var)
-
-  for (auto &coordAndVals : coordsVals)
-    result.coordsVals[ioda::convertV1PathToV2Path(coordAndVals.first)] = coordAndVals.second;
-
-  for (const auto &coordAndDims : coord2DimMapping) {
-    if (coordAndDims.second.size() != 1)
-      throw eckit::Exception("Coordinate '" + coordAndDims.first +
-                             "'is used to index multiple dimensions of the payload array", Here());
-    result.coord2DimMapping[ioda::convertV1PathToV2Path(coordAndDims.first)] =
-        coordAndDims.second.front();
+  for (const auto &coordAndVals : coordsVals) {
+    const std::string canonicalVarName = ioda::convertV1PathToV2Path(coordAndVals.first);
+    result.coordsVals[canonicalVarName] = coordAndVals.second;
+    result.coord2DimMapping[canonicalVarName] = coord2DimMapping[coordAndVals.first];
+    result.coordNDims[canonicalVarName] = coordNDims[coordAndVals.first];
   }
 
   if (!dim2CoordMapping.empty()) {

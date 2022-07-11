@@ -11,9 +11,7 @@
 #include "ufo/predictors/ScanAngle.h"
 
 #include "ioda/ObsSpace.h"
-
-#include "oops/util/abor1_cpp.h"
-#include "oops/util/Logger.h"
+#include "ioda/ObsVector.h"
 
 #include "ufo/utils/Constants.h"
 
@@ -38,6 +36,7 @@ ScanAngle::ScanAngle(const Parameters_ & parameters, const oops::Variables & var
 void ScanAngle::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
+                        const ObsBias &,
                         ioda::ObsVector & out) const {
   const size_t nlocs = out.nlocs();
   const size_t nvars = out.nvars();

@@ -1,0 +1,132 @@
+#
+#=== Pressure to height conversion for vertical profile ===#
+#
+
+window begin: 2015-01-08T20:30:00Z
+window end: 2015-01-09T03:30:00Z
+
+observations:
+# UKMO method (uses ICAO atmosphere).
+- obs space:
+    name: Radiosonde, UKMO method
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: HeightFromPressure
+    Method: UKMO
+    height coordinate: geopotential_height
+    height group: MetaData
+    pressure coordinate: air_pressure
+    pressure group: MetaData
+  compareVariables:
+  - test:
+      name: geopotential_height@DerivedMetaData
+    reference:
+      name: geopotential_height_ICAO_reference@ObsValue
+    relTol: 1.0e-5
+
+# NCAR-RAL method (uses approximation for pressures > 120 hPa, ICAO atmosphere otherwise).
+- obs space:
+    name: Radiosonde, NCAR-RAL method
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: HeightFromPressure
+    Method: NCAR
+    height coordinate: geopotential_height
+    height group: MetaData
+    pressure coordinate: air_pressure
+    pressure group: MetaData
+  compareVariables:
+  - test:
+      name: geopotential_height@DerivedMetaData
+    reference:
+      name: geopotential_height_NCAR_reference@ObsValue
+    relTol: 1.0e-5
+
+# Pressure coordinate is 'air_pressure', height coordinate is 'height'.
+- obs space:
+    name: Radiosonde (air_pressure, height)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, height, dew_point_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: HeightFromPressure
+    Method: UKMO
+    height coordinate: height
+    height group: MetaData
+    pressure coordinate: air_pressure
+    pressure group: MetaData
+  compareVariables:
+  - test:
+      name: height@DerivedMetaData
+    reference:
+      name: height_ICAO_reference@ObsValue
+    relTol: 1.0e-5
+
+# Pressure coordinate is 'air_pressure_levels', height coordinate is 'geopotential_height_levels'.
+- obs space:
+    name: Radiosonde (air_pressure_levels, geopotential_height_levels)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, geopotential_height_levels, dew_point_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: HeightFromPressure
+    Method: UKMO
+    height coordinate: geopotential_height_levels
+    height group: MetaData
+    pressure coordinate: air_pressure_levels
+    pressure group: MetaData
+  compareVariables:
+  - test:
+      name: geopotential_height_levels@DerivedMetaData
+    reference:
+      name: geopotential_height_levels_ICAO_reference@ObsValue
+    relTol: 1.0e-5
+
+# Pressure coordinate is 'air_pressure_levels', height coordinate is 'height_levels'.
+- obs space:
+    name: Radiosonde (air_pressure_levels, height_levels)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
+      obsgrouping:
+        group variables: ["station_id"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, height_levels, dew_point_temperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: HeightFromPressure
+    Method: UKMO
+    height coordinate: height_levels
+    height group: MetaData
+    pressure coordinate: air_pressure_levels
+    pressure group: MetaData
+  compareVariables:
+  - test:
+      name: height_levels@DerivedMetaData
+    reference:
+      name: height_levels_ICAO_reference@ObsValue
+    relTol: 1.0e-5

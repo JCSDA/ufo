@@ -12,6 +12,7 @@
 #include <cmath>
 #include <vector>
 
+#include "ufo/profile/ProfileAverageUtils.h"
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
@@ -42,9 +43,6 @@ namespace ufo {
     /// are not present.
     void runCheck(ProfileDataHandler &profileDataHandler) override;
 
-    /// Fill variables in validator (for comparison with OPS output).
-    void fillValidationData(ProfileDataHolder &profileDataHolder);
-
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
 
@@ -54,10 +52,10 @@ namespace ufo {
 
     /// List of names of GeoVaLs used in check validation.
     oops::Variables getValidationGeoVaLNames() override {
-      return oops::Variables({ufo::VariableNames::geovals_average_eastward_wind,
-            ufo::VariableNames::geovals_average_eastward_wind_qcflags,
-            ufo::VariableNames::geovals_average_northward_wind,
-            ufo::VariableNames::geovals_average_northward_wind_qcflags
+      return oops::Variables({ufo::VariableNames::geovals_testreference_eastward_wind,
+            ufo::VariableNames::geovals_testreference_eastward_wind_qcflags,
+            ufo::VariableNames::geovals_testreference_northward_wind,
+            ufo::VariableNames::geovals_testreference_northward_wind_qcflags
             });}
 
    private:

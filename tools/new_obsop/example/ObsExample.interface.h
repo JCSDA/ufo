@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2021- UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,9 +8,19 @@
 #ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
 #define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
 
-#include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
+
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+}
+
+namespace oops {
+  class Variables;
+}
 
 namespace ufo {
 

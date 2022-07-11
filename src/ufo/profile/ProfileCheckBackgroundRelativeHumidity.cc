@@ -22,32 +22,31 @@ namespace ufo {
     oops::Log::debug() << " Background check for relative humidity" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &rhObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_relative_humidity);
     const std::vector <float> &rhObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_relative_humidity);
     const std::vector <float> &rhBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_relative_humidity);
     const std::vector <float> &rhBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_relative_humidity);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_relative_humidity);
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_relative_humidity);
-    std::vector <float> &rhPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_relative_humidity);
     std::vector <int> &rhFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
-    const std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(rhObs, rhObsErr, rhBkg, rhBkgErr,
-                                         rhPGE, rhFlags, timeFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(rhObs, rhObsErr, rhBkg, rhBkgErr,
-                                                      rhPGE, rhFlags, timeFlags)
-                           << std::endl;
+                                         rhPGE, rhFlags)) {
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(rhObs, rhObsErr, rhBkg, rhBkgErr,
+                                                    rhPGE, rhFlags)
+                         << std::endl;
       return;
     }
 
@@ -67,8 +66,6 @@ namespace ufo {
         BackgrErrRH[jlev] = sqrt2 * rhBkgErr[jlev];
       if (rhObsErr[jlev] != missingValueFloat)
         ObErrRH[jlev] = sqrt2 * rhObsErr[jlev];
-      if (timeFlags[jlev])
-        rhFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
     }
 
     // Calculate probability of gross error.
@@ -81,7 +78,6 @@ namespace ufo {
                            ModelLevels,
                            rhFlags,
                            rhPGE,
-                           rhPGEBd,
                            options_.BkCheck_ErrVarMax_rh.value());
   }
 }  // namespace ufo

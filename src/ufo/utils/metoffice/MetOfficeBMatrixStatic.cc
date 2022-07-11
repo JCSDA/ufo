@@ -62,6 +62,15 @@ void MetOfficeBMatrixStatic::multiply(const float lat,
 }
 
 // -----------------------------------------------------------------------------
+/// \brief Scale elements of bmatrix array to user-defined standard deviation
+void MetOfficeBMatrixStatic::scale(const size_t elem, const float stdev) {
+  for (size_t iband = 0; iband < nbands_; ++iband) {
+    float scaling = stdev/std::sqrt(elements_[iband](elem, elem));
+    elements_[iband].row(elem) *= scaling;
+    elements_[iband].col(elem) *= scaling;
+  }
+}
+// -----------------------------------------------------------------------------
 /// \brief Print
 void MetOfficeBMatrixStatic::print(std::ostream & os) const {
   os << "MetOfficeBMatrixStatic: start print" << std::endl;

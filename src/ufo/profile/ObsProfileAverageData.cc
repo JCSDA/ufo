@@ -15,16 +15,19 @@
 namespace ufo {
 
   ObsProfileAverageData::ObsProfileAverageData(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
-    : odb_(odb)
+                                               const ObsProfileAverageParameters & parameters)
+    : odb_(odb),
+      options_(parameters)
   {
     // Ensure observations have been grouped into profiles.
     if (odb_.obs_group_vars().empty())
       throw eckit::UserError("Group variables configuration is empty", Here());
 
     // Ensure observations have been sorted by air pressure in descending order.
-    if (odb_.obs_sort_var() != "air_pressure")
-      throw eckit::UserError("Sort variable must be air_pressure", Here());
+    if (odb_.obs_sort_var() != parameters.pressureCoord.value())
+      throw eckit::UserError(std::string("Sort variable must be ") +
+                             parameters.pressureCoord.value(),
+                             Here());
     if (odb_.obs_sort_order() != "descending")
       throw eckit::UserError("Profiles must be sorted in descending order", Here());
 
@@ -34,21 +37,14 @@ namespace ufo {
     if (!odb_.has("MetaData", "extended_obs_space"))
       throw eckit::UserError("The extended obs space has not been produced", Here());
 
-    // Check the observed pressure is present. This is necessary in order to
-    // determine the slant path locations.
-    if (!odb_.has("MetaData", "air_pressure"))
-      throw eckit::UserError("air_pressure@MetaData not present", Here());
-
-    // Set up configuration options.
-    options_.validateAndDeserialize(config);
-
     // Add model air pressure to the list of variables used in this operator.
     // This GeoVaL is used to determine the slant path locations.
     modelVerticalCoord_ = options_.modelVerticalCoordinate;
     requiredVars_ += oops::Variables({modelVerticalCoord_});
 
     // Add any simulated variables to the list of variables used in this operator.
-    getOperatorVariables(config, odb_.obsvariables(), operatorVars_, operatorVarIndices_);
+    getOperatorVariables(parameters.variables.value(), odb_.assimvariables(),
+                         operatorVars_, operatorVarIndices_);
     requiredVars_ += operatorVars_;
 
     // If required, set up vectors for OPS comparison.
@@ -70,7 +66,8 @@ namespace ufo {
 
   void ObsProfileAverageData::cacheGeoVaLs(const GeoVaLs & gv) const {
     // Only perform the caching once.
-    if (!cachedGeoVaLs_) cachedGeoVaLs_.reset(new GeoVaLs(gv));
+    if (!cachedGeoVaLs_)
+      cachedGeoVaLs_.reset(new GeoVaLs(gv));
   }
 
   std::vector<std::size_t> ObsProfileAverageData::getSlantPathLocations
@@ -81,6 +78,9 @@ namespace ufo {
       ufo::getSlantPathLocations(odb_,
                                  *cachedGeoVaLs_,
                                  locsOriginal,
+                                 options_.pressureGroup.value() +
+                                 std::string("/") +
+                                 options_.pressureCoord.value(),
                                  modelVerticalCoord_,
                                  options_.numIntersectionIterations.value() - 1);
 
@@ -94,7 +94,7 @@ namespace ufo {
       std::vector <float> pressure_gv(nlevs_p);
       for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
         cachedGeoVaLs_->getAtLocation(pressure_gv, modelVerticalCoord_, slant_path_location[mlev]);
-        slant_pressure.push_back(pressure_gv[mlev]);
+        slant_pressure.push_back(pressure_gv[nlevs_p - 1 - mlev]);
       }
       this->compareAuxiliaryReferenceVariables(locsExtended,
                                                slant_path_location,

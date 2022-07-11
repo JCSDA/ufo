@@ -15,11 +15,17 @@ set ( filters_files
       ConventionalProfileProcessing.cc
       ConventionalProfileProcessing.h
       ConventionalProfileProcessingParameters.h
+      CreateDiagnosticFlags.cc
+      CreateDiagnosticFlags.h
+      DiagnosticFlag.h
       DifferenceCheck.cc
       DifferenceCheck.h
       FilterBase.cc
       FilterBase.h
+      FilterParametersBase.cc
       FilterParametersBase.h
+      FilterUtils.cc
+      FilterUtils.h
       FinalCheck.cc
       FinalCheck.h
       GenericFilterParameters.h
@@ -81,6 +87,8 @@ set ( filters_files
       SatName.cc
       SatwindInversionCorrection.cc
       SatwindInversionCorrection.h
+      SpikeAndStepCheck.cc
+      SpikeAndStepCheck.h
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
@@ -108,7 +116,7 @@ set ( filters_files
       Variable.h
       VariableTransforms.cc
       VariableTransforms.h
-      VariableTransformsParameters.h
+      VariableTransformParametersBase.h
       Variables.cc
       Variables.h
       VariableAssignment.cc
@@ -127,6 +135,8 @@ set ( filters_files
       processWhere.h
       ObsAccessor.cc
       ObsAccessor.h
+      PrintFilterData.cc
+      PrintFilterData.h
       actions/AssignError.cc
       actions/AssignError.h
       actions/AcceptObs.cc
@@ -135,12 +145,16 @@ set ( filters_files
       actions/FilterAction.h
       actions/FilterActionBase.cc
       actions/FilterActionBase.h
+      actions/FlagOriginalAndAveragedProfiles.cc
+      actions/FlagOriginalAndAveragedProfiles.h
       actions/InflateError.cc
       actions/InflateError.h
       actions/PassivateObs.cc
       actions/PassivateObs.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      actions/SetFlag.cc
+      actions/SetFlag.h
       obsfunctions/BennartzScatIndex.cc
       obsfunctions/BennartzScatIndex.h
       obsfunctions/ChannelUseflagCheckRad.cc
@@ -157,6 +171,8 @@ set ( filters_files
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/Conditional.cc
       obsfunctions/Conditional.h
+      obsfunctions/SetSeaIceEmiss.cc
+      obsfunctions/SetSeaIceEmiss.h
       obsfunctions/SetSurfaceType.cc
       obsfunctions/SetSurfaceType.h
       obsfunctions/SIRetMW.cc
@@ -167,12 +183,18 @@ set ( filters_files
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
       obsfunctions/HydrometeorCheckATMS.h
+      obsfunctions/HydrometeorCheckAMSUAclr.cc
+      obsfunctions/HydrometeorCheckAMSUAclr.h
       obsfunctions/ImpactHeight.cc
       obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/LiquidWaterPathGuess.cc
+      obsfunctions/LiquidWaterPathGuess.h
       obsfunctions/BgdDepartureAnomaly.cc
       obsfunctions/BgdDepartureAnomaly.h
+      obsfunctions/ObsErrorModelHumidity.cc
+      obsfunctions/ObsErrorModelHumidity.h
       obsfunctions/ObsErrorModelStepwiseLinear.cc
       obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc
@@ -189,6 +211,10 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualAVHRR.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
+      obsfunctions/CloudFirstGuessMinimumResidual.cc
+      obsfunctions/CloudFirstGuessMinimumResidual.h
+      obsfunctions/MetOfficeAllSkyErrorModel.cc
+      obsfunctions/MetOfficeAllSkyErrorModel.h
       obsfunctions/ModelHeightAdjustedWindVectorComponent.cc
       obsfunctions/ModelHeightAdjustedWindVectorComponent.h
       obsfunctions/ModelHeightAdjustedAirTemperature.cc
@@ -221,12 +247,20 @@ set ( filters_files
       obsfunctions/ObsErrorFactorConventional.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
+      obsfunctions/ObsFunctionExponential.cc
+      obsfunctions/ObsFunctionExponential.h
       obsfunctions/ObsFunctionLinearCombination.cc
       obsfunctions/ObsFunctionLinearCombination.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
+      obsfunctions/ObsFunctionSelectStatistic.cc
+      obsfunctions/ObsFunctionSelectStatistic.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/OceanPressureToDepth.cc
+      obsfunctions/OceanPressureToDepth.h
+      obsfunctions/OrbitAngle.cc
+      obsfunctions/OrbitAngle.h
       obsfunctions/SatwindIndivErrors.cc
       obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc
@@ -250,6 +284,16 @@ set ( filters_files
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.F90
       obsfunctions/LAMDomainCheck/esg_grid_mod.F90
+      obsfunctions/ProfileAverageObsPressure.cc
+      obsfunctions/ProfileAverageObsPressure.h
+      obsfunctions/ProfileLevelCount.cc
+      obsfunctions/ProfileLevelCount.h
+      obsfunctions/DateTimeOffset.cc
+      obsfunctions/DateTimeOffset.h
+      obsfunctions/FillAveragedProfileData.cc
+      obsfunctions/FillAveragedProfileData.h
+      obsfunctions/MetOfficeRelativeHumidityCorrection.cc
+      obsfunctions/MetOfficeRelativeHumidityCorrection.h
 )
 
 if( ${rttov_FOUND} )

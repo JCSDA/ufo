@@ -1,0 +1,158 @@
+# This tests that the Stuck Check filter flags the expected observations.
+
+window begin: 2000-01-01T00:00:00Z
+window end: 2029-12-12T23:59:59Z
+
+observations:
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+    simulated variables: [northward_wind]
+    observed variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [northward_wind]
+    number stuck tolerance: 7
+    time stuck tolerance: PT2M
+  flaggedObservationsBenchmark: &referenceFlaggedObsIds
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+  flaggedBenchmark: 8
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out2.nc4
+    simulated variables: [northward_wind]
+    observed variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    number stuck tolerance: 7
+    time stuck tolerance: PT2M
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 8
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out3.nc4
+    simulated variables: [northward_wind]
+    observed variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    number stuck tolerance: 7
+    time stuck tolerance: PT2H
+  flaggedBenchmark: 0
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out4.nc4
+    simulated variables: [northward_wind]
+    observed variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [northward_wind]
+    number stuck tolerance: 8
+    time stuck tolerance: PT2M
+  flaggedBenchmark: 0
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out5.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [air_temperature]
+    percentage stuck tolerance: 15  # 15%, i.e. number stuck tolerance: 2, for record length 12
+  flaggedObservationsBenchmark:
+      - 458
+      - 459
+      - 460
+  flaggedBenchmark: 3  #
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check (only number stuck tolerance given)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out6.nc4
+    simulated variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [northward_wind]
+    number stuck tolerance: 7
+  expectExceptionWithMessage: "If percentage stuck tolerance is not set"
+- obs space:
+    name: Ship percentage stuck check (all stuck tolerance options given)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out7.nc4
+    simulated variables: [northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [northward_wind]
+    number stuck tolerance: 7
+    time stuck tolerance: PT1H
+    percentage stuck tolerance: 70
+  expectExceptionWithMessage: "If percentage stuck tolerance is set"
+- obs space:
+    name: Ship percentage stuck check (2 vars)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+#   obsdataout:
+#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out8.nc4
+    simulated variables: [air_temperature, northward_wind]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [air_temperature, northward_wind]
+    percentage stuck tolerance: 15  # 15%, i.e. number stuck tolerance: 2, for record length 12
+  flaggedObservationsBenchmark:
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 458
+      - 459
+      - 460
+  flaggedBenchmark: 11  #
+  benchmarkFlag: 21 # track

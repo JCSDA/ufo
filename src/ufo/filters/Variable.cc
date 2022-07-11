@@ -16,6 +16,7 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
@@ -87,9 +88,10 @@ size_t Variable::size() const {
 
 Variable Variable::operator[](const size_t jch) const {
   ASSERT(jch < this->size());
-  std::string var = varname_;
+  std::string var;
+  if (grpname_ != "")        var += grpname_ + "/";
+  var += varname_;
   if (channels_.size() > 0)  var += "_" + std::to_string(channels_[jch]);
-  if (grpname_ != "")        var += "@" + grpname_;
   return Variable(var, options_);
 }
 
@@ -128,9 +130,11 @@ const std::vector<int> & Variable::channels() const {
 std::string Variable::fullName() const {
   std::string result;
   result.reserve(varname_.size() + 1 + grpname_.size());
-  result = varname_;
-  result += '@';
-  result += grpname_;
+  if (!grpname_.empty()) {
+    result += grpname_;
+    result += '/';
+  }
+  result += varname_;
   return result;
 }
 
@@ -149,11 +153,16 @@ oops::Variables Variable::toOopsVariables() const {
 
 void Variable::print(std::ostream & os) const {
   if (channels_.size() == 0) {
-    os << varname_ + "@" + grpname_;
+    if (!grpname_.empty())
+      os << grpname_ << '/';
+    os << varname_;
   } else {
     for (size_t jj = 0; jj < channels_.size(); ++jj) {
-      if (jj > 0) os << ", ";
-      os << varname_ + "_" + std::to_string(channels_[jj]) + "@" + grpname_;
+      if (jj > 0)
+        os << ", ";
+      if (!grpname_.empty())
+        os << grpname_ << '/';
+      os << varname_ << '_' << std::to_string(channels_[jj]);
     }
   }
 }

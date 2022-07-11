@@ -28,6 +28,7 @@
 #include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -172,7 +173,9 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   std::unique_ptr<GeoVaLs> gval;
   if (geovars.size() > 0) {
     const eckit::LocalConfiguration gconf(conf, "geovals");
-    gval.reset(new GeoVaLs(gconf, ospace, geovars));
+    GeoVaLsParameters geovalsparams;
+    geovalsparams.validateAndDeserialize(gconf);
+    gval.reset(new GeoVaLs(geovalsparams, ospace, geovars));
     inputs.associate(*gval);
   }
 
@@ -186,7 +189,9 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
     const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
-    diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
+    GeoVaLsParameters diagparams;
+    diagparams.validateAndDeserialize(diagconf);
+    diags.reset(new ObsDiagnostics(diagparams, ospace, diagvars));
     inputs.associate(*diags);
   }
 

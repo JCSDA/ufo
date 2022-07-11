@@ -10,10 +10,10 @@
 
 #include <memory>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -26,13 +26,14 @@ namespace ufo {
 *  are included in the same obs space. The filter does not have any configuration options.
 ///
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_WindSpeedAndDirection : public TransformBase {
  public:
-  Cal_WindSpeedAndDirection(const VariableTransformsParameters &options,
+  Cal_WindSpeedAndDirection(const GenericVariableTransformParameters &options,
                             const ObsFilterData &data,
-                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                            const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 };
@@ -42,15 +43,19 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 *
 * \details Performs a variable conversion from wind_speed and wind_from_direction to
 *  the wind components, eastward_wind and northward_wind. The newly calculated variables
-*  are included in the same obs space.
+*  are included in the same obs space. This filter supports the use of nchans as the
+*  the second observed dimension. The variable conversion is performed for
+*  each channel and so the output eastward_wind and northward_wind variables will have the
+*  same dimensions as wind_speed and wind_from_direction.
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_WindComponents : public TransformBase {
  public:
-  Cal_WindComponents(const VariableTransformsParameters &options,
+  Cal_WindComponents(const GenericVariableTransformParameters &options,
                      const ObsFilterData &data,
-                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 };

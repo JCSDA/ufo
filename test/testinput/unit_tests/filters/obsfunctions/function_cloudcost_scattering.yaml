@@ -1,0 +1,67 @@
+window begin: 2021-01-15T09:00:00Z
+window end: 2021-01-15T15:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    linear model absorbers: []
+    obs options:
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: Metop
+      Sat_ID: 1
+      Instrument_Name: AMSUAMHS
+      CoefficientPath: Data/
+      Do_MW_Scatt: true
+      QtSplitRain: false
+      RTTOV_clw_data: false
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+      UseColdSurfaceCheck: false
+  obs space:
+    name: metop_1_amsua_mhs
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt.nc4
+#   obsdataout:
+#     obsfile: Data/delete.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-20
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_rttov_scatt.nc4
+  obs post filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: cloud_cost@MetaData
+      type: float
+      function:
+        name: CloudCostFunction@ObsFunction
+        options:
+          cost channels list: 18, 19, 20
+          background emissivity channels: 1, 2, 3, 16, 17
+          RMatrix: ../resources/rmatrix/rttov/atovs_metopb_rmatrix_test.nc4
+          BMatrix: ../resources/bmatrix/rttov/atovs_bmatrix_70_test.dat
+          background fields:
+          - air_temperature
+          - specific_humidity
+          - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+          - mass_content_of_cloud_ice_in_atmosphere_layer
+          - surface_temperature
+          - specific_humidity_at_two_meters_above_surface
+          - skin_temperature
+          - surface_pressure
+          - surface_emissivity
+          qtotal: true                          # not default
+          qtotal split rain: false              # default
+          scattering radiative transfer: true   # not default
+          minimum ObsValue: 70.0                # default
+          maximum ObsValue: 340.0               # default
+          minimum specific humidity: 3.0e-6     # default
+          maximum final cost: 1600.0            # default
+          skin temperature error: 10.0          # optional B-matrix scaling
+  compareVariables:
+  - reference:
+      name: cloud_cost@TestReference
+    test:
+      name: cloud_cost@MetaData
+    absTol: 1.0e-6

@@ -16,6 +16,7 @@
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/ConventionalProfileProcessing.h"
+#include "ufo/filters/CreateDiagnosticFlags.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
@@ -34,6 +35,7 @@
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
+#include "ufo/filters/PrintFilterData.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProcessAMVQI.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
@@ -41,6 +43,7 @@
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
+#include "ufo/filters/SpikeAndStepCheck.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
@@ -48,109 +51,117 @@
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/VariableAssignment.h"
 #include "ufo/filters/VariableTransforms.h"
-#include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
-#include "ufo/gnssro/QC/ROobserror.h"
+#include "ufo/operators/gnssro/QC/BackgroundCheckRONBAM.h"
+#include "ufo/operators/gnssro/QC/ROobserror.h"
 
 #if defined(RTTOV_FOUND)
   #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
 #endif
 
+#include "ufo/ObsTraits.h"
+
 namespace ufo {
-template<typename OBS> void instantiateObsFilterFactory() {
-  oops::instantiateObsFilterFactory<OBS>();
-  static oops::interface::FilterMaker<OBS, ufo::QCmanager>
-           qcManagerMaker("QCmanager");
-  static oops::interface::FilterMaker<OBS, ufo::FinalCheck>
-           finalCheckMaker("Final Check");
-  static oops::interface::FilterMaker<OBS, ufo::PreQC>
-           preQCMaker("PreQC");
-  static oops::interface::FilterMaker<OBS, ufo::ObsDomainCheck>
-           domainCheckMaker("Domain Check");
-  static oops::interface::FilterMaker<OBS, ufo::SatName>
-           satnameCheckMaker("satname");
-  static oops::interface::FilterMaker<OBS, ufo::ObsBoundsCheck>
-           boundsCheckMaker("Bounds Check");
-  static oops::interface::FilterMaker<OBS, ufo::BlackList>
-           blackListMaker("BlackList");
-  static oops::interface::FilterMaker<OBS, ufo::BlackList>
-           rejectListMaker("RejectList");  // alternative name
-  static oops::interface::FilterMaker<OBS, ufo::BackgroundCheck>
-           backgroundCheckMaker("Background Check");
-  static oops::interface::FilterMaker<OBS, ufo::BayesianBackgroundCheck>
-           BayesianBackgroundCheckMaker("Bayesian Background Check");
-  static oops::interface::FilterMaker<OBS, ufo::DifferenceCheck>
-           differenceCheckMaker("Difference Check");
-  static oops::interface::FilterMaker<OBS, ufo::HistoryCheck>
-           historyCheckMaker("History Check");
-  static oops::interface::FilterMaker<OBS, ufo::ModelBestFitPressure>
-           ModelBestFitPressureMaker("Model Best Fit Pressure");
-  static oops::interface::FilterMaker<OBS, ufo::ModelObThreshold>
-           ModelObThresholdMaker("ModelOb Threshold");
-  static oops::interface::FilterMaker<OBS, ufo::ROobserror>
-           ROobserrorMaker("ROobserror");
-  static oops::interface::FilterMaker<OBS, ufo::Thinning>
-           thinningMaker("Thinning");
-  static oops::interface::FilterMaker<OBS, ufo::Gaussian_Thinning>
-           gaussianThinningMaker("Gaussian Thinning");
-  static oops::interface::FilterMaker<OBS, ufo::MWCLWCheck>
-           MWCLWCheckMaker("MWCLW Check");
-  static oops::interface::FilterMaker<OBS, ufo::ObsDomainErrCheck>
-           domainErrCheckMaker("DomainErr Check");
-  static oops::interface::FilterMaker<OBS, ufo::ConventionalProfileProcessing>
-           conventionalProfileProcessingMaker("Conventional Profile Processing");
-  static oops::interface::FilterMaker<OBS, ufo::BackgroundCheckRONBAM>
-           backgroundCheckRONBAMMaker("Background Check RONBAM");
-  static oops::interface::FilterMaker<OBS, ufo::TemporalThinning>
-           temporalThinningMaker("Temporal Thinning");
-  static oops::interface::FilterMaker<OBS, ufo::PoissonDiskThinning>
-           poissonDiskThinningMaker("Poisson Disk Thinning");
-  static oops::interface::FilterMaker<OBS, ufo::ObsDiagnosticsWriter>
-           YDIAGsaverMaker("YDIAGsaver");
-  static oops::interface::FilterMaker<OBS, ufo::TrackCheck>
-           TrackCheckMaker("Track Check");
-  static oops::interface::FilterMaker<OBS, ufo::MetOfficeBuddyCheck>
-           MetOfficeBuddyCheckMaker("Met Office Buddy Check");
-  static oops::interface::FilterMaker<OBS, ufo::ObsDerivativeCheck>
-           DerivativeCheckMaker("Derivative Check");
-  static oops::interface::FilterMaker<OBS, ufo::TrackCheckShip>
-           ShipTrackCheckMaker("Ship Track Check");
-  static oops::interface::FilterMaker<OBS, ufo::StuckCheck>
-           StuckCheckMaker("Stuck Check");
-  static oops::interface::FilterMaker<OBS, ufo::GNSSROOneDVarCheck>
-           GNSSROOneDVarCheckMaker("GNSS-RO 1DVar Check");
-  static oops::interface::FilterMaker<OBS, ufo::VariableAssignment>
-           variableAssignmentMaker("Variable Assignment");
-  static oops::interface::FilterMaker<OBS, ufo::VariableTransforms>
-           VariableTransformsMaker("Variable Transforms");
-  static oops::interface::FilterMaker<OBS, ufo::ProfileBackgroundCheck>
-           ProfileBackgroundCheckMaker("Profile Background Check");
-  static oops::interface::FilterMaker<OBS, ufo::ProfileFewObsCheck>
-           ProfileFewObsCheckMaker("Profile Few Observations Check");
-  static oops::interface::FilterMaker<OBS, ufo::AcceptList>
+void instantiateObsFilterFactory() {
+  oops::instantiateObsFilterFactory<ObsTraits>();
+  static oops::interface::FilterMaker<ObsTraits, AcceptList>
            acceptListMaker("AcceptList");
-  static oops::interface::FilterMaker<OBS, ufo::PerformAction>
-           performActionMaker("Perform Action");
-  static oops::interface::FilterMaker<OBS, ufo::BayesianBackgroundQCFlags>
+  static oops::interface::FilterMaker<ObsTraits, BackgroundCheck>
+           backgroundCheckMaker("Background Check");
+  static oops::interface::FilterMaker<ObsTraits, BackgroundCheckRONBAM>
+           backgroundCheckRONBAMMaker("Background Check RONBAM");
+  static oops::interface::FilterMaker<ObsTraits, BayesianBackgroundCheck>
+           BayesianBackgroundCheckMaker("Bayesian Background Check");
+  static oops::interface::FilterMaker<ObsTraits, BayesianBackgroundQCFlags>
            BayesianBackgroundQCFlagsMaker("Bayesian Background QC Flags");
-  static oops::interface::FilterMaker<OBS, ufo::ProbabilityGrossErrorWholeReport>
+  static oops::interface::FilterMaker<ObsTraits, ProbabilityGrossErrorWholeReport>
            ProbabilityGrossErrorWholeReportMaker("Bayesian Whole Report");
-  static oops::interface::FilterMaker<OBS, ufo::ImpactHeightCheck>
+  static oops::interface::FilterMaker<ObsTraits, BlackList>
+           blackListMaker("BlackList");  // same as RejectList
+  static oops::interface::FilterMaker<ObsTraits, ObsBoundsCheck>
+           boundsCheckMaker("Bounds Check");
+  static oops::interface::FilterMaker<ObsTraits, ConventionalProfileProcessing>
+           conventionalProfileProcessingMaker("Conventional Profile Processing");
+  static oops::interface::FilterMaker<ObsTraits, CreateDiagnosticFlags>
+             CreateDiagnosticFlagsMaker("Create Diagnostic Flags");
+  static oops::interface::FilterMaker<ObsTraits, ObsDerivativeCheck>
+           DerivativeCheckMaker("Derivative Check");
+  static oops::interface::FilterMaker<ObsTraits, DifferenceCheck>
+           differenceCheckMaker("Difference Check");
+  static oops::interface::FilterMaker<ObsTraits, ObsDomainCheck>
+           domainCheckMaker("Domain Check");
+  static oops::interface::FilterMaker<ObsTraits, ObsDomainErrCheck>
+           domainErrCheckMaker("DomainErr Check");
+  static oops::interface::FilterMaker<ObsTraits, FinalCheck>
+           finalCheckMaker("Final Check");
+  static oops::interface::FilterMaker<ObsTraits, Gaussian_Thinning>
+           gaussianThinningMaker("Gaussian Thinning");
+  static oops::interface::FilterMaker<ObsTraits, GNSSROOneDVarCheck>
+           GNSSROOneDVarCheckMaker("GNSS-RO 1DVar Check");
+  static oops::interface::FilterMaker<ObsTraits, ImpactHeightCheck>
            ImpactHeightCheckMaker("GNSSRO Impact Height Check");
-  static oops::interface::FilterMaker<OBS, ufo::SatwindInversionCorrection>
-             SatwindInversionCorrectionMaker("Satwind Inversion Correction");
-  static oops::interface::FilterMaker<OBS, ufo::ProcessAMVQI>
+  static oops::interface::FilterMaker<ObsTraits, HistoryCheck>
+           historyCheckMaker("History Check");
+  static oops::interface::FilterMaker<ObsTraits, MetOfficeBuddyCheck>
+           MetOfficeBuddyCheckMaker("Met Office Buddy Check");
+  static oops::interface::FilterMaker<ObsTraits, ModelBestFitPressure>
+           ModelBestFitPressureMaker("Model Best Fit Pressure");
+  static oops::interface::FilterMaker<ObsTraits, ModelObThreshold>
+           ModelObThresholdMaker("ModelOb Threshold");
+  static oops::interface::FilterMaker<ObsTraits, MWCLWCheck>
+           MWCLWCheckMaker("MWCLW Check");
+  static oops::interface::FilterMaker<ObsTraits, PerformAction>
+           performActionMaker("Perform Action");
+  static oops::interface::FilterMaker<ObsTraits, PoissonDiskThinning>
+           poissonDiskThinningMaker("Poisson Disk Thinning");
+  static oops::interface::FilterMaker<ObsTraits, PreQC>
+           preQCMaker("PreQC");
+  static oops::interface::FilterMaker<ObsTraits, PrintFilterData>
+           printFilterDataMaker("Print Filter Data");
+  static oops::interface::FilterMaker<ObsTraits, ProcessAMVQI>
              ProcessAMVQIMaker("Process AMV QI");
+  static oops::interface::FilterMaker<ObsTraits, ProfileBackgroundCheck>
+           ProfileBackgroundCheckMaker("Profile Background Check");
+  static oops::interface::FilterMaker<ObsTraits, ProfileFewObsCheck>
+           ProfileFewObsCheckMaker("Profile Few Observations Check");
+  static oops::interface::FilterMaker<ObsTraits, BlackList>
+           rejectListMaker("RejectList");  // same as BlackList
+  static oops::interface::FilterMaker<ObsTraits, ROobserror>
+           ROobserrorMaker("ROobserror");
+  static oops::interface::FilterMaker<ObsTraits, QCmanager>
+           qcManagerMaker("QCmanager");
+  static oops::interface::FilterMaker<ObsTraits, SatName>
+           satnameCheckMaker("satname");
+  static oops::interface::FilterMaker<ObsTraits, SatwindInversionCorrection>
+             SatwindInversionCorrectionMaker("Satwind Inversion Correction");
+  static oops::interface::FilterMaker<ObsTraits, TrackCheckShip>
+           ShipTrackCheckMaker("Ship Track Check");
+  static oops::interface::FilterMaker<ObsTraits, SpikeAndStepCheck>
+           SpikeAndStepCheckMaker("Spike and Step Check");
+  static oops::interface::FilterMaker<ObsTraits, StuckCheck>
+           StuckCheckMaker("Stuck Check");
+  static oops::interface::FilterMaker<ObsTraits, TemporalThinning>
+           temporalThinningMaker("Temporal Thinning");
+  static oops::interface::FilterMaker<ObsTraits, Thinning>
+           thinningMaker("Thinning");
+  static oops::interface::FilterMaker<ObsTraits, TrackCheck>
+           TrackCheckMaker("Track Check");
+  static oops::interface::FilterMaker<ObsTraits, VariableAssignment>
+           variableAssignmentMaker("Variable Assignment");
+  static oops::interface::FilterMaker<ObsTraits, VariableTransforms>
+           VariableTransformsMaker("Variable Transforms");
+  static oops::interface::FilterMaker<ObsTraits, ObsDiagnosticsWriter>
+           YDIAGsaverMaker("YDIAGsaver");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
-    static oops::interface::FilterMaker<OBS, ufo::RTTOVOneDVarCheck>
+    static oops::interface::FilterMaker<ObsTraits, RTTOVOneDVarCheck>
              RTTOVOneDVarCheckMaker("RTTOV OneDVar Check");
   #endif
 
   // For backward compatibility, register some filters under legacy names used in the past
-  static oops::interface::FilterMaker<OBS, ufo::Gaussian_Thinning>
+  static oops::interface::FilterMaker<ObsTraits, Gaussian_Thinning>
            legacyGaussianThinningMaker("Gaussian_Thinning");
-  static oops::interface::FilterMaker<OBS, ufo::TemporalThinning>
+  static oops::interface::FilterMaker<ObsTraits, TemporalThinning>
            legacyTemporalThinningMaker("TemporalThinning");
 }
 

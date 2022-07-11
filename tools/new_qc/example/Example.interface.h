@@ -28,7 +28,7 @@ typedef int F90check;
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_example_create_f90(F90check &, const eckit::Configuration *,
+  void ufo_example_create_f90(F90check &, const eckit::Configuration &,
                               oops::Variables &);
   void ufo_example_delete_f90(F90check &);
   void ufo_example_prior_f90(const F90check &, const ioda::ObsSpace &,

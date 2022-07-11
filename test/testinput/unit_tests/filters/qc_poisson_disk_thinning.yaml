@@ -1,0 +1,216 @@
+# This test compares the results produced by the Poisson-disk thinning filter against ones
+# obtained with the Ops_PoissonThinning function from the Met Office observation processing system.
+# Also ocean profile level subsample.
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-12-31T23:59:59Z
+
+observations:
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out1.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: air_temperature
+    where:
+    - variable:
+        name: is_superob@MetaData
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: scan_index@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 34
+  passedObservationsBenchmark: &referencePassedObsIds
+      - 2500
+      - 2501
+      - 2502
+      - 2503
+      - 2510
+      - 2511
+      - 2514
+      - 2529
+      - 2545
+      - 3333
+      - 3334
+      - 3335
+      - 3336
+      - 3339
+      - 3341
+      - 3343
+      - 3353
+      - 3400
+      - 7500
+      - 7501
+      - 7502
+      - 7503
+      - 7504
+      - 7505
+      - 7506
+      - 7510
+      - 7511
+      - 7513
+      - 7514
+      - 7515
+      - 7590
+      - 7597
+      - 7603
+      - 7635
+# Same as above, but with records grouped by the category variable
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out2.nc4
+      obsgrouping:
+        group variables: [ "scan_index" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: air_temperature
+    where:
+    - variable:
+        name: is_superob@MetaData
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: scan_index@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 34
+  passedObservationsBenchmark: *referencePassedObsIds
+# Same as above, but with records grouped by something else than the category variable
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_poisson_disk_thinning_out3.nc4
+      obsgrouping:
+        group variables: [ "priority" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: air_temperature
+    where:
+    - variable:
+        name: is_superob@MetaData
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: scan_index@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 34
+  passedObservationsBenchmark: *referencePassedObsIds
+- obs space:
+    name: Ocean Profile, sort vertical descending (bottom to surface)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    obsdataout:
+      obsfile: oceanprofile_levelsubsample_testout.nc4
+    simulated variables: [ocean_temperature]
+  obs pre filters:
+  - filter: Poisson Disk Thinning # Thinning bottom to surface on data sorted surface to bottom
+    min_vertical_spacing: 99.999
+    shuffle: false
+    sort_vertical: "descending"
+    pressure_coordinate: ocean_depth
+    pressure_group: MetaData
+    category_variable:
+      name: station_id@MetaData
+  passedBenchmark: 16
+  passedObservationsBenchmark:
+      - 2
+      - 6
+      - 10
+      - 11
+      - 15
+      - 19
+      - 23
+      - 27
+      - 30
+      - 33
+      - 36
+      - 39
+      - 42
+      - 45
+      - 49
+      - 50
+- obs space:
+    name: Ocean Profile, sort vertical ascending (surface to bottom)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    obsdataout:
+      obsfile: oceanprofile_levelsubsample_ascending_testout.nc4
+    simulated variables: [ocean_temperature]
+  obs pre filters:
+  - filter: Poisson Disk Thinning # Thinning in same vertical order as sorting, >50m depth
+    where:
+    - variable:
+        name: ocean_depth@MetaData
+      minvalue: 50.001
+    min_vertical_spacing: 49.999
+    shuffle: false
+    sort_vertical: "ascending"
+    pressure_coordinate: ocean_depth
+    pressure_group: MetaData
+    category_variable:
+      name: station_id@MetaData
+  passedBenchmark: 30
+  passedObservationsBenchmark:
+      - 0
+      - 1
+      - 2
+      - 4
+      - 6
+      - 8
+      - 10
+      - 11
+      - 12
+      - 13
+      - 15
+      - 17
+      - 19
+      - 21
+      - 23
+      - 25
+      - 27
+      - 28
+      - 29
+      - 30
+      - 32
+      - 34
+      - 36
+      - 38
+      - 40
+      - 42
+      - 44
+      - 47
+      - 49
+      - 50

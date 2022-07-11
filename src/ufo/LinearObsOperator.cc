@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "ioda/ObsVector.h"
+#include "ufo/LinearObsBiasOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
@@ -23,12 +24,13 @@ namespace ufo {
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
   : oper_(LinearObsOperatorFactory::create(os, params.operatorParameters)), odb_(os)
 {
-  // We use += rather than = to make sure the Variables objects contain no duplicate entries
-  // and the variables are sorted alphabetically.
+  // We use += rather than = to make sure the Variables objects contain no duplicate entries.
   oops::Variables operatorVars;
   operatorVars += oper_->simulatedVars();
+  operatorVars.sort();
   oops::Variables obsSpaceVars;
-  obsSpaceVars += os.obsvariables();
+  obsSpaceVars += os.assimvariables();
+  obsSpaceVars.sort();
   if (!(operatorVars == obsSpaceVars))
     throw eckit::UserError("The list of variables simulated by the obs operator differs from "
                            "the list of simulated variables in the obs space",
@@ -45,7 +47,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   std::vector<util::DateTime> times(odb_.nlocs());
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
-  odb_.get_db("MetaData", "datetime", times);
+  odb_.get_db("MetaData", "dateTime", times);
   ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
   oper_->setTrajectory(gvals, ydiags);
   if (bias) {

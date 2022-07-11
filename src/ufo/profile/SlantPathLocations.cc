@@ -13,19 +13,23 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/SlantPathLocations.h"
+#include "ufo/utils/StringUtils.h"  // for splitVarGroup
 
 namespace ufo {
 
   std::vector<std::size_t> getSlantPathLocations(const ioda::ObsSpace & odb,
                                                  const GeoVaLs & gv,
                                                  const std::vector<std::size_t> & locs,
+                                                 const std::string & obsVerticalCoord,
                                                  const std::string & modelVerticalCoord,
                                                  const int itermax) {
     const float missing = util::missingValue(missing);
 
     // Get observed pressure.
     std::vector<float> pressure_obs(odb.nlocs());
-    odb.get_db("MetaData", "air_pressure", pressure_obs);
+    std::string obsVar, obsGroup;
+    splitVarGroup(obsVerticalCoord, obsVar, obsGroup);
+    odb.get_db(obsGroup, obsVar, pressure_obs);
 
     // If the pressure GeoVaL is not present, return an empty vector.
     // todo(ctgh): eventually throw an exception here.
@@ -46,10 +50,13 @@ namespace ufo {
     // It is initialised at the first location in the original profile.
     std::size_t jlocslant = locs.front();
     // Loop over each model level in turn.
-    for (std::size_t mlev = 0; mlev < nlevs_p; ++mlev) {
+    for (int mlev = nlevs_p - 1; mlev >= 0; --mlev) {
       for (int iter = 0; iter <= itermax; ++iter) {
         // Get the GeoVaL that corresponds to the current slanted profile location.
         gv.getAtLocation(pressure_gv, modelVerticalCoord, jlocslant);
+        // The GeoVaLs must be ordered from top to bottom for this algorithm to work.
+        if (pressure_gv.front() > pressure_gv.back())
+          throw eckit::BadValue("Pressure GeoVaLs are in the wrong order.", Here());
         // Define an iteration-specific location that is initialised to the
         // current slanted profile location.
         std::size_t jlociter = jlocslant;
@@ -74,7 +81,7 @@ namespace ufo {
         if (iter == itermax) {
           // Record the value of the slant path location at this model level and all above.
           // This ensures that missing values are dealt with correctly.
-          for (std::size_t mlevcolumn = mlev; mlevcolumn < nlevs_p; ++mlevcolumn)
+          for (int mlevcolumn = nlevs_p - 1 - mlev; mlevcolumn < nlevs_p; ++mlevcolumn)
            slant_path_location[mlevcolumn] = jlocslant;
         }
       }

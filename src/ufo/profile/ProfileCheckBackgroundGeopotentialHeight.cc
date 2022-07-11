@@ -22,44 +22,41 @@ namespace ufo {
     oops::Log::debug() << " Background check for geopotential height" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Zstation =
       profileDataHandler.get<float>(ufo::VariableNames::Zstation);
     const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &zObs =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <float> &zObsErr =
-       profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
-    std::vector <float> &zBkgErr =
-      profileDataHandler.getObsDiag(ufo::VariableNames::bkgerr_geopotential_height);
     std::vector <float> &zPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
-    std::vector <float> &zPGEBd =
-      profileDataHandler.get<float>(ufo::VariableNames::pgebd_geopotential_height);
     std::vector <int> &zFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     const std::vector <int> &tFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <float> &zObsCorrection =
        profileDataHandler.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
-    const std::vector <int> &timeFlags =
-      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(Zstation, pressures,
                                          zObs, zObsErr, zBkg,
                                          zPGE, zFlags, zObsCorrection,
-                                         tFlags, timeFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Check will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(Zstation, pressures,
-                                                      zObs, zObsErr, zBkg,
-                                                      zPGE, zFlags, zObsCorrection,
-                                                      tFlags, timeFlags)
-                           << std::endl;
+                                         tFlags)) {
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(Zstation, pressures,
+                                                    zObs, zObsErr, zBkg,
+                                                    zPGE, zFlags, zObsCorrection,
+                                                    tFlags)
+                         << std::endl;
       return;
     }
 
@@ -68,9 +65,8 @@ namespace ufo {
 
     // Probability density of 'bad' observations.
     std::vector <float> PdBad(numProfileLevels, 0);
-    // The z background error may not have been set before this point.
-    if (zBkgErr.empty())
-      zBkgErr.assign(numProfileLevels, missingValueFloat);
+    // The z background error has not been set before this point.
+    std::vector <float> zBkgErr(numProfileLevels, missingValueFloat);
     // Background error estimates are taken from ECMWF Research Manual 1
     // (ECMWF Data Assimilation Scientific Documentation, 3/92, 3rd edition), table 2.1.
     // They are then multiplied by 1.2.
@@ -102,8 +98,6 @@ namespace ufo {
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::HydrostaticFlag)
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
-      if (timeFlags[jlev])
-        zFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
     }
 
     // Calculate probability of gross error.
@@ -115,7 +109,6 @@ namespace ufo {
                            PdBad,
                            ModelLevels,
                            zFlags,
-                           zPGE,
-                           zPGEBd);
+                           zPGE);
   }
 }  // namespace ufo

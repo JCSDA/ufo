@@ -1,0 +1,509 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 13
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables and a where statement
+    where:
+    - variable:
+        name: MetaData/var1
+      maxvalue: 8
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 15
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with subset of variables
+    filter variables:
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 17
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with subset of variables, ordered different from simulate vars
+    filter variables:
+    - name: variable3
+    - name: variable1
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+# Note: variable2 is not specified in filtered variables, all obs for variable2 will pass
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  passedBenchmark: 20
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    - name: MetaData/var2
+    - name: MetaData/var3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Filter variable1, variable2, variable3 based on MetaData/var1, MetaData/var2, MetaData/var3 values
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var3 =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+  passedBenchmark: 0
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    - name: MetaData/var2
+    - name: MetaData/var3
+    minvalue: 1
+    maxvalue: 3
+# Filter variable1, variable2, variable3 based on MetaData/var1, MetaData/var2, MetaData/var3 values
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  MetaData/var3 =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+  passedBenchmark: 11
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars and subset of vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    - name: MetaData/var2
+# Filter variable2, variable3 based on MetaData/var1, MetaData/var2 values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+    minvalue: 14.0
+    maxvalue: 19.0
+  passedBenchmark: 10
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars and subset of vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    - name: MetaData/var2
+    minvalue: 1
+    maxvalue: 3
+# Filter variable2, variable3 based on MetaData/var1, MetaData/var2 values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 16
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    minvalue: 4
+# Filter variable2 AND variable3 based only on single test var: MetaData/var1 values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 24
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: ObsValue/variable1
+    maxvalue: 16
+# Filter variable2 AND variable3 based only on single test var of (ObsValue/) variable1
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  passedBenchmark: 24
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # reject all filter variables if any test variable is out of bounds
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var1
+    - name: MetaData/var2
+    flag all filter variables if any test variable is out of bounds: true
+    minvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 22 # variable2 and variable3 should be rejected at locations 0, 1, 8 and 9
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds (but not if it's missing)
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var5
+    treat missing as out of bounds: false
+    maxvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+  passedBenchmark: 26 # variable2 and variable3 should be rejected at locations 6 and 8
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var5
+    treat missing as out of bounds: true
+    maxvalue: 3
+# Filter variable2 AND variable3 based the values of var1 and MetaData/var2
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0 ;
+  passedBenchmark: 18 # variable2 and variable3 should be rejected at locations 1, 3, 5, 6, 7 and 8
+- obs space:
+    name: Where using datetimes
+    simulated variables: [brightness_temperature]
+    observed variables: [brightness_temperature]
+    channels: 20
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/ssmis_f18_obs_2018041500_m.nc4
+  obs filters:
+    - filter: BlackList
+      where:
+      - variable:
+          name:  MetaData/dateTime
+        minvalue: 2018-04-14T21:00:00Z
+        maxvalue: 2018-04-14T22:00:00Z
+  failedBenchmark: 17
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable2
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: ObsValue/variable2
+    - name: ObsValue/variable3
+    treat missing as out of bounds: true
+    maxvalue: 24
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+# variable2: 10,12,14,16,18,20,22,24,26,28
+# variable3: 25,24,23,22,21,20,19,18,17,16
+# filter 1 rejects location 9,10 for variable2
+# filter 2 rejects location 1 for both variable2 and variable 3
+# filter 2 does not check variable2 location 9 and 10 because these have previously been rejected.
+  passedBenchmark: 16
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable2
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: ObsValue/variable2
+    - name: ObsValue/variable3
+    treat missing as out of bounds: true
+    minvalue: 12
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+# variable1: 10,11,12,13,14,15,16,17,18,19
+# variable2: 10,12,14,16,18,20,22,24,26,28
+# variable3: 25,24,23,22,21,20,19,18,17,16
+# filter 1 rejects location 9,10 for variable2
+# filter 2 rejects location 1 for both variable2 and variable 3
+# filter 2 does not check locations 9 and 10 because these have previously been rejected.
+# filter not applied to variable 1 (though variable would be assimilated) no locations rejected.
+  passedBenchmark: 26
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable2
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var2
+    - name: MetaData/var1
+    treat missing as out of bounds: true
+    minvalue: 6
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+# variable2: 10,12,14,16,18,20,22,24,26,28
+# variable3: 25,24,23,22,21,20,19,18,17,16
+# MetaData/var1: 1,2,3,4,5,6,7,8,9,10
+# MetaData/var2: 10,9,8,7,6,5,4,3,2,1
+# filter 1 rejects location 9,10 for variable2
+# filter 2 rejects location 1-5 and 6-8 for variable2 and variable 3
+# filter 2 does not check location 9 and 10 because variable 2 has previously been rejected by filter 1.
+  passedBenchmark: 2 # loc 9,10 for variable3 still valid
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable2
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: MetaData/var2
+    - name: MetaData/var1
+    treat missing as out of bounds: true
+    minvalue: 6
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: false # default
+# variable2: 10,12,14,16,18,20,22,24,26,28
+# variable3: 25,24,23,22,21,20,19,18,17,16
+# MetaData/var1: 1,2,3,4,5,6,7,8,9,10
+# MetaData/var2: 10,9,8,7,6,5,4,3,2,1
+# filter 1 rejects location 9,10 for variable2
+# filter 2 rejects location 1-5 and 6-10 for both variable2 and variable 3
+# filter 2 does check variable2 location 9 and 10 even those these have previously been rejected by filter 1.
+  passedBenchmark: 0
+- obs space:
+    name: Test multichannel bounds checking
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/linear_combination_multichannel_unittest.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1, 3
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    action:
+      name: assign error
+      error parameter: 99.9
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: ObsValue/brightness_temperature
+      channels: *all_channels
+    test variables:
+    - name: ObsValue/brightness_temperature
+      channels: *all_channels
+    treat missing as out of bounds: true
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: false
+    minvalue: 1.2
+# brightness_temperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
+# brightness_temperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+# filter 1 assigns the error so observations are not rejected because of this.
+# filter 2 rejects location 1 and 2 for all_channels.
+  passedBenchmark: 6
+- obs space:
+    name: Test multichannel bounds checking with differing variables
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/linear_combination_multichannel_unittest.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1,3
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: brightness_temperature
+      channels: 1,3
+    action:
+      name: assign error
+      error parameter: 99.9
+  - filter: Bounds Check  # reject filter variables if the test variable is out of bounds or missing
+    filter variables:
+    - name: ObsValue/brightness_temperature
+      channels: 1
+    test variables:
+    - name: ObsValue/brightness_temperature
+      channels: 3
+    treat missing as out of bounds: true
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+    maxvalue: 3.45
+# brightness_temperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
+# brightness_temperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+# filter 1 assigns the error so observations are not rejected because of this.
+# filter 2 rejects location 5 for BT1 (filter variable) because the BT3 (test variable) value
+#          exceeds the threshold.  BT1 location 2 is rejected by the Final Check filter because
+#          of the missing ObsValue.
+  passedBenchmark: 8
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable2, variable3]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: ObsValue/variable2
+    maxvalue: 24
+    flag all filter variables if any test variable is out of bounds: true
+    test only filter variables with passed qc when flagging all filter variables: true
+# filter1 fails with an error because filtervars size is not equal to test variables size
+# which it needs to be when using
+# `test only filter variables with passed qc when flagging all filter variables`
+  expectExceptionWithMessage: The number of 'primitive' (single-channel) test variables
+                              must match that of 'primitive' filter variables when using
+                              the 'test only filter variables with passed qc when flagging
+                              all filter variables' option.
+
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables and a where statement that uses logical `or`
+    where:
+    - variable:
+        name: MetaData/var1
+      maxvalue: 3
+    - variable:
+        name: MetaData/var2
+      maxvalue: 3
+    where operator: or
+#  MetaData/var1 =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+# Indices 0, 1, 2, 7, 8, 9 are selected by the where clause.
+# Bounds check passes 7 values at locations selected by the where clause.
+# All 12 values at indices 3, 4, 5, 6 pass.
+# Total: 19.
+  passedBenchmark: 19

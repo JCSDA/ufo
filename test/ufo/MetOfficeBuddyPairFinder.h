@@ -113,7 +113,7 @@ void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &con
   obsSpace.get_db("MetaData", "longitude", longitudes);
 
   std::vector<util::DateTime> datetimes(obsSpace.nlocs());
-  obsSpace.get_db("MetaData", "datetime", datetimes);
+  obsSpace.get_db("MetaData", "dateTime", datetimes);
 
   std::vector<int> stationIds(obsSpace.recnum().begin(), obsSpace.recnum().end());
 

@@ -1,0 +1,24 @@
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
+
+observations:
+- obs operator:
+    name: AtmVertInterpLay
+    geovals: [mole_fraction_of_ozone_in_air]
+    coefficients: [0.007886131] # convert from ppmv to DU
+    nlevels: [22]
+  obs space:
+    name: OzoneLayer
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sbuv2_n19_obs_2018041500_m.nc4
+#   obsdataout:
+#     obsfile: Data/sbuv2_n19_obs_2018041500_m_opr_out.nc4
+    simulated variables: [integrated_layer_ozone_in_air]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sbuv2_n19_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-04  # in % so that corresponds to 10^-3
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11

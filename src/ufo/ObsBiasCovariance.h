@@ -1,19 +1,18 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIASCOVARIANCE_H_
 #define UFO_OBSBIASCOVARIANCE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <boost/noncopyable.hpp>
-
-#include "eckit/config/LocalConfiguration.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -32,6 +31,7 @@ namespace ioda {
 namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
+  class ObsBiasPreconditioner;
 
 // -----------------------------------------------------------------------------
 
@@ -55,8 +55,9 @@ class ObsBiasCovariance : public util::Printable,
 
 // Utilities
   void read(const ObsBiasCovariancePriorParameters &);
-  void write(const eckit::Configuration &);
+  void write(const Parameters_ &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
+  std::unique_ptr<ObsBiasPreconditioner> preconditioner() const;
 
  private:
   void print(std::ostream &) const {}
@@ -97,6 +98,9 @@ class ObsBiasCovariance : public util::Printable,
 
   /// variables for which bias correction coefficients will be updated
   oops::Variables vars_;
+
+  /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
+  size_t rank_;
 };
 
 // -----------------------------------------------------------------------------

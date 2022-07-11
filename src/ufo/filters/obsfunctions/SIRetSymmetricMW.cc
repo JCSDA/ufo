@@ -7,18 +7,10 @@
 
 #include "ufo/filters/obsfunctions/SIRetSymmetricMW.h"
 
-#include <algorithm>
-#include <cmath>
-#include <iomanip>
-#include <iostream>
-#include <set>
-#include <string>
-#include <vector>
-
 #include "ioda/ObsDataVector.h"
-#include "oops/util/IntSetParser.h"
+#include "oops/base/Variables.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/SIRetMW.h"
-#include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {

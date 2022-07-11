@@ -16,6 +16,8 @@
 #include "ioda/ObsVector.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/Variable.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
@@ -135,44 +137,54 @@ bool ObsFilterData::hasDataVectorInt(const std::string & grp, const std::string 
 // Overloads of get() taking a std::vector.
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, std::vector<float> & values) const {
-  getVector(varname, values);
+void ObsFilterData::get(const Variable & varname, std::vector<float> & values,
+                        bool skipDerived) const {
+  getVector(varname, values, skipDerived);
 }
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, std::vector<int> & values) const {
-  getVector(varname, values);
+void ObsFilterData::get(const Variable & varname, std::vector<int> & values,
+                        bool skipDerived) const {
+  getVector(varname, values, skipDerived);
 }
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, std::vector<std::string> & values) const {
-  getVector(varname, values);
+void ObsFilterData::get(const Variable & varname, std::vector<std::string> & values,
+                        bool skipDerived) const {
+  getVector(varname, values, skipDerived);
 }
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & values) const {
-  getVector(varname, values);
+void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & values,
+                        bool skipDerived) const {
+  getVector(varname, values, skipDerived);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, std::vector<DiagnosticFlag> & values,
+                        bool skipDerived) const {
+  getVector(varname, values, skipDerived);
 }
 
 // -----------------------------------------------------------------------------
 template <typename T>
-void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values) const {
+void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values,
+                              bool skipDerived) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
 
   if (grp == "VarMetaData") {
     values.resize(obsdb_.nvars());
-    obsdb_.get_db(grp, var, values);
+    obsdb_.get_db(grp, var, values, {}, skipDerived);
   } else {
     ioda::ObsDataVector<T> vec(obsdb_, varname.toOopsVariables(), grp, false);
-    this->get(varname, vec);
+    this->get(varname, vec, skipDerived);
     values = vec[var];
   }
 }
 
 // -----------------------------------------------------------------------------
-// Overload of get() taking an std::vector and a level index.
-
+// Overload of get() taking an std::vector<float> and a level index.
 // -----------------------------------------------------------------------------
 void ObsFilterData::get(const Variable & varname, const int level,
                         std::vector<float> & values) const {
@@ -193,10 +205,32 @@ void ObsFilterData::get(const Variable & varname, const int level,
 }
 
 // -----------------------------------------------------------------------------
+// Overload of get() taking an std::vector<double> and a level index.
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname, const int level,
+                        std::vector<double> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
+
+  ASSERT(grp == "GeoVaLs" || grp == "ObsDiag" || grp == "ObsBiasTerm");
+  values.resize(obsdb_.nlocs());
+///  For GeoVaLs read from GeoVaLs (should be available)
+  if (grp == "GeoVaLs") {
+    ASSERT(gvals_);
+    gvals_->getAtLevel(values, var, level);
+///  For ObsDiag get from ObsDiagnostics
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    ASSERT(diags_);
+    diags_->get(values, var, level);
+  }
+}
+
+// -----------------------------------------------------------------------------
 // Overloads of get() taking an ioda::ObsDataVector.
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & values) const {
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & values,
+                        bool skipDerived) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
   /// For GeoVaLs read single variable and save in the relevant field
@@ -212,14 +246,8 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
   ///  For HofX get from ObsVector H(x) (should be available)
   } else if (this->hasVector(grp, var)) {
     std::map<std::string, const ioda::ObsVector *>::const_iterator jv = ovecs_.find(grp);
-    size_t hofxnvars = jv->second->nvars();
-    for (size_t ivar = 0; ivar < varname.size(); ++ivar) {
-      const std::string currvar = varname.variable(ivar);
-      size_t iv = jv->second->varnames().find(currvar);
-      for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
-        values[currvar][jj] = (*jv->second)[iv + (jj * hofxnvars)];
-      }
-    }
+    // copy H(x) ObsVector to 'values', converting missing vals from double to float:
+    values.assignToExistingVariables(*jv->second);
 ///  For ObsDiag or ObsBiasTerm,  get it from ObsDiagnostics
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
@@ -240,12 +268,13 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
                               " is not a function producing values of type " +
                               ObsFunctionTraits<float>::valueTypeName, Here());
   } else {
-    values.read(grp);
+    values.read(grp, true, skipDerived);
   }
 }
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & values) const {
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & values,
+                        bool skipDerived) const {
   const std::string var = varname.variable(0);
   const std::string grp = varname.group();
   /// For Function call compute
@@ -269,24 +298,47 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & val
     throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
                               " are of type float", Here());
   } else {
-    values.read(grp);
+    values.read(grp, true, skipDerived);
   }
 }
 
 // -----------------------------------------------------------------------------
-void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<std::string> & values) const {
-  getNonNumeric(varname, values);
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<std::string> & values,
+                        bool skipDerived) const {
+  getNonNumeric(varname, values, skipDerived);
 }
 
 // -----------------------------------------------------------------------------
 void ObsFilterData::get(const Variable & varname,
-                        ioda::ObsDataVector<util::DateTime> & values) const {
-  getNonNumeric(varname, values);
+                        ioda::ObsDataVector<util::DateTime> & values,
+                        bool skipDerived) const {
+  getNonNumeric(varname, values, skipDerived);
+}
+
+// -----------------------------------------------------------------------------
+void ObsFilterData::get(const Variable & varname,
+                        ioda::ObsDataVector<DiagnosticFlag> & values,
+                        bool skipDerived) const {
+  const std::string &grp = varname.group();
+  // There are no ObsFunctions producing flags yet
+  if (eckit::StringTools::endsWith(grp, "ObsFunction")) {
+    throw eckit::BadParameter("ObsFilterData::get(): " + varname.fullName() +
+                              " does not produce values of type DiagnosticFlag", Here());
+  // Certain other groups can't contain diagnostic flags either
+  } else if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsBiasTerm") {
+    throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
+                              " are not of type DiagnosticFlag", Here());
+  } else {
+    // Try to retrieve the requested diagnostic flag from the ObsSpace. read() will throw an
+    // exception if that flag is not found.
+    values.read(grp, true, skipDerived);
+  }
 }
 
 // -----------------------------------------------------------------------------
 template <typename T>
-void ObsFilterData::getNonNumeric(const Variable & varname, ioda::ObsDataVector<T> & values) const {
+void ObsFilterData::getNonNumeric(const Variable & varname, ioda::ObsDataVector<T> & values,
+                                  bool skipDerived) const {
   const std::string &grp = varname.group();
   /// For Function call compute
   if (grp == ObsFunctionTraits<T>::groupName) {
@@ -301,7 +353,7 @@ void ObsFilterData::getNonNumeric(const Variable & varname, ioda::ObsDataVector<
     throw eckit::BadParameter("ObsFilterData::get(): variables from the group " + grp +
                               " are of type float", Here());
   } else {
-    values.read(grp);
+    values.read(grp, true, skipDerived);
   }
 }
 
@@ -345,6 +397,39 @@ void ObsFilterData::print(std::ostream & os) const {
     os << ", diags";
   }
   os << std::endl;
+
+  // Print quantities in more detail
+  os << "Contents of ObsValue" << std::endl;
+  for (const std::string & varname : obsdb_.obsvariables().variables()) {
+    os << "- " << varname << std::endl;
+  }
+  os << std::endl;
+  if (gvals_) {
+    os << "Contents of GeoVaLs" << std::endl;
+    for (const std::string & varname : gvals_->getVars().variables()) {
+      os << "- " << varname << std::endl;
+    }
+    os << std::endl;
+  }
+  for (const auto & ovec : ovecs_) {
+    os << "Contents of " << ovec.first << std::endl;
+    for (const std::string & varname : ovec.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  for (const auto & dvecf : dvecsf_) {
+    os << "Contents of " << dvecf.first << std::endl;
+    for (const std::string & varname : dvecf.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  for (const auto & dveci : dvecsi_) {
+    os << "Contents of " << dveci.first << std::endl;
+    for (const std::string & varname : dveci.second->varnames().variables())
+      os << "- " << varname << std::endl;
+    os << std::endl;
+  }
+  // todo: add accessor method to contents of ObsDiagnostics
 }
 
 // -----------------------------------------------------------------------------
@@ -363,8 +448,18 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
     res = obsdb_.dtype(grp, var);
   } else if (hasDataVectorInt(varname.group(), varname.variable())) {
     res = ioda::ObsDtype::Integer;
+  } else if (grp == ObsFunctionTraits<int>::groupName &&
+             ObsFunctionFactory<int>::functionExists(var)) {
+    res = ioda::ObsDtype::Integer;
+  } else if (grp == ObsFunctionTraits<std::string>::groupName &&
+             ObsFunctionFactory<std::string>::functionExists(var)) {
+    res = ioda::ObsDtype::String;
+  } else if (grp == ObsFunctionTraits<util::DateTime>::groupName &&
+             ObsFunctionFactory<util::DateTime>::functionExists(var)) {
+    res = ioda::ObsDtype::DateTime;
   } else if (!this->has(varname)) {
-    oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
+    oops::Log::error() << "ObsFilterData::dtype unable to find provided variable: "
+                       << varname.fullName()
                        << std::endl;
     ABORT("ObsFilterData::dtype unable to find provided variable.");
   }

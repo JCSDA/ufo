@@ -1,0 +1,100 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+
+# Tests the flags, initial value and force reinitialization options
+- obs space:
+    name: Test data 1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: FlagA
+    - name: FlagB
+      initial value: true
+    - name: FlagC
+      initial value: false
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: FlagB
+      initial value: false
+      force reinitialization: false
+    - name: FlagC
+      initial value: true
+      force reinitialization: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagA/variable2
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/variable1
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagB/variable2
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagC/variable1
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagC/variable2
+    reference:
+      name: TestReference/trues
+
+# Tests the filter variables option (set to a valid value)
+- obs space:
+    name: Test data 2
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables: [variable1, variable2]
+    flags:
+    - name: FlagA
+    - name: FlagB
+      initial value: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagA/variable2
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/variable1
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagB/variable2
+    reference:
+      name: TestReference/trues
+  expectVariablesNotToExist:
+  - name: DiagnosticFlags/FlagA/variable3
+  - name: DiagnosticFlags/FlagB/variable3
+
+# Tests the filter variables option (set to an invalid value)
+- obs space:
+    name: Test data 3
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+    observed variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables: [variable1, variable3]
+    flags:
+    - name: FlagA
+  expectExceptionWithMessage: Filter variable 'variable3' is not an observed variable

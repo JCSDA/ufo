@@ -11,10 +11,9 @@
 #include <set>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
@@ -122,6 +121,9 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                              "'test only filter variables with passed qc when flagging all "
                              "filter variables' option.");
     ASSERT(filtervars.nvars() == flagged.size());
+    // Convert to an oops variables which contains a simple list of variables
+    // expanding out the channels and therefore it matches the testvars list
+    const oops::Variables filtervarslist = filtervars.toOopsVariables();
     // Loop over all channels of all test variables and record all locations where any of these
     // channels is out of bounds.
     std::vector<bool> anyTestVarOutOfBounds(obsdb_.nlocs(), false);
@@ -130,7 +132,9 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<bool> testAtLocations = apply;
       if (onlyTestGoodFilterVarsForFlagAllFilterVars) {
         for (size_t iloc=0; iloc < testAtLocations.size(); iloc++)
-          if ((*flags_)[ifiltervar][iloc] != QCflags::pass) testAtLocations[iloc] = false;
+          if ((*flags_)[filtervarslist[ifiltervar]][iloc] != QCflags::pass) {
+            testAtLocations[iloc] = false;
+          }
       }
       const std::vector<float> & testValues = singleChannelTestVar.values();
       flagWhereOutOfBounds(testAtLocations, testValues, vmin, vmax, treatMissingAsOutOfBounds,

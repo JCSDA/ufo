@@ -17,7 +17,6 @@
 
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/ConfigurationParameter.h"
 #include "oops/util/parameters/HasParameters_.h"
@@ -26,6 +25,10 @@
 #include "oops/util/parameters/RequiredPolymorphicParameter.h"
 #include "oops/util/Printable.h"
 #include "ufo/ObsOperatorParametersBase.h"
+
+namespace oops {
+  class Variables;
+}
 
 namespace ioda {
   class ObsVector;

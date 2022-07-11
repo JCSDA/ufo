@@ -12,10 +12,18 @@ set ( variabletransforms_files
       Cal_Humidity.cc
       Cal_RemapScanPosition.h
       Cal_RemapScanPosition.cc
+      Cal_SatZenithAngleCorrection.h
+      Cal_SatZenithAngleCorrection.cc
       Cal_Wind.h
       Cal_Wind.cc
       Cal_ProfileHorizontalDrift.h
-      Cal_ProfileHorizontalDrift.cc
+      Cal_ProfileHorizontalDrift.cc 
+      Cal_QNHtoQFEpressure.h
+      Cal_QNHtoQFEpressure.cc
+      Cal_PStar.h
+      Cal_PStar.cc
+      Cal_PotentialTFromT.h
+      Cal_PotentialTFromT.cc
       LookupTable.h
       TransformBase.cc
       TransformBase.h

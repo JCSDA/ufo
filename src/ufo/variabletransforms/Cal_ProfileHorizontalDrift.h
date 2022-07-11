@@ -13,10 +13,18 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
+
+/// Configuration parameters for the profile horizontal drift calculation.
+class Cal_ProfileHorizontalDriftParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_ProfileHorizontalDriftParameters, VariableTransformParametersBase);
+
+ public:
+  /// Height coordinate name.
+  oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
+};
 
 /*!
 * \brief Profile horizontal drift calculation.
@@ -35,15 +43,22 @@ namespace ufo {
 *   Transform: ["ProfileHorizontalDrift"]
 * \endcode
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_ProfileHorizontalDrift : public TransformBase {
  public:
-  Cal_ProfileHorizontalDrift(const VariableTransformsParameters &options,
+  typedef Cal_ProfileHorizontalDriftParameters Parameters_;
+
+  Cal_ProfileHorizontalDrift(const Parameters_ &options,
                              const ObsFilterData &data,
-                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                             const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Height coordinate name.
+  std::string heightCoord_;
 };
 }  // namespace ufo
 

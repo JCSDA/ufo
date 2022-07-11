@@ -25,44 +25,26 @@ namespace ufo {
     oops::Log::debug() << " Time check" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     const std::vector <int> &ObsType =
       profileDataHandler.get<int>(ufo::VariableNames::ObsType);
-    const std::vector <float> &level_time =
-       profileDataHandler.get<float>(ufo::VariableNames::obs_level_time);
     const std::vector <float> &pressures =
        profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     std::vector <int> &uFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (!oops::allVectorsSameNonZeroSize(ObsType, pressures, uFlags, vFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Time checks will not be performed." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(ObsType, pressures, uFlags, vFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Time checks will not be performed." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(ObsType, pressures, uFlags, vFlags)
+                         << std::endl;
       return;
-    }
-
-    // Flag any observations that appear outside of the current time window.
-    // The variable level_time is equal to the number of seconds relative to
-    // the middle of the time window. level_time is compared to half of the
-    // assimilation window length.
-    const float halfWindowLength = 0.5 * (profileDataHandler.getObsdb().windowEnd() -
-                                          profileDataHandler.getObsdb().windowStart()).toSeconds();
-    // Time QC flags. A value of true indicates an observation
-    // lies outside the time window.
-    // These flags are used in subsequent background checks.
-    std::vector <int> timeFlags(numProfileLevels, false);
-    if (!level_time.empty() && !ModelLevels) {
-      for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
-        const float leveltime = level_time[jlev];
-        if (leveltime == missingValueFloat) continue;
-        timeFlags[jlev] = (leveltime < (-halfWindowLength - 0.5) ||
-                           leveltime > (halfWindowLength - 0.5));
-      }
     }
 
     // Reject sonde wind values for short period after launch.
@@ -97,8 +79,5 @@ namespace ufo {
                          << "Psurf = " << PSurf * 0.01 << " hPa, "
                          << "NWindRej = " << NWindRej << std::endl;
     }
-
-    // Store the time flags for use in later checks.
-    profileDataHandler.set<int>(ufo::VariableNames::qcflags_time, std::move(timeFlags));
   }
 }  // namespace ufo

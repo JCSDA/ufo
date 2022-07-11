@@ -1,0 +1,21 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: ADT
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/Jason-2-2018-04-15.nc
+    simulated variables: [absolute_dynamic_topography]
+#   obsdataout:
+#     obsfile: Data/Jason-2-2018-04-15_adt_out.nc
+  obs operator:
+    name: ADT
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-10
+    tolerance AD: 1.0e-12
+  geovals:
+    filename: Data/ufo/testinput_tier_1/Jason-2-2018-04-15_geovals.nc
+  rms ref: 0.21685900483627527  # for testing with bogus geoval data
+  tolerance: 1.0e-10

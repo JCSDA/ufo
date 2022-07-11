@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "eckit/container/KDTree.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -150,6 +149,17 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
   oops::Log::debug() << "PoissonDiskThinning: config = " << options_ << std::endl;
+  if (options_.sortVertical.value() != boost::none &&
+      options_.minVerticalSpacing.value() == boost::none) {
+    throw eckit::UserError(
+      ": 'sort_vertical' can only be specified if 'min_vertical_spacing' is specified.", Here());
+  } else if (options_.sortVertical.value() != boost::none &&
+            (options_.sortVertical.value().value() != "ascending" &&
+             options_.sortVertical.value().value() != "descending")) {
+    throw eckit::UserError(
+      ": 'sort_vertical' can only take on string values 'ascending' or 'descending' "
+      "(with respect to the pressure coordinate values).", Here());
+  }
 }
 
 // Required for the correct destruction of options_.
@@ -196,12 +206,23 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
 
     // Within each category, sort points by descending priority and then (if requested)
-    // randomly shuffle points of equal priority.
+    // randomly shuffle points of equal priority. Otherwise, if 'min_vertical_spacing'
+    // and 'sort_vertical' are specified, sort according to pressure coordinate.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
     groupObservationsByPriority(obsIdsInCategory, obsAccessor, prioritySplitter);
-    if (options_.shuffle)
+    if (options_.shuffle) {
       prioritySplitter.shuffleGroups();
-
+    } else if (options_.sortVertical.value() != boost::none &&
+               obsData.minVerticalSpacings != boost::none) {
+      const std::vector<float> pressures = *obsData.pressures;
+      if (options_.sortVertical.value().value() == "ascending") {
+        prioritySplitter.sortGroupsBy([&pressures, &obsIdsInCategory](size_t ind)
+                                      {return pressures[obsIdsInCategory[ind]];});
+      } else if (options_.sortVertical.value().value() == "descending") {
+        prioritySplitter.sortGroupsBy([&pressures, &obsIdsInCategory](size_t ind)
+                                      {return -1.0*pressures[obsIdsInCategory[ind]];});
+      }
+    }
     // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
                  isThinned);
@@ -238,14 +259,15 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   obsData.minVerticalSpacings = options_.minVerticalSpacing.value();
   if (obsData.minVerticalSpacings != boost::none) {
     validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
-    obsData.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+    obsData.pressures =
+      obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup, options_.pressureCoord);
     ++numNonspatialDims;
   }
 
   obsData.minTimeSpacings = options_.minTimeSpacing.value();
   if (obsData.minTimeSpacings != boost::none) {
     validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
-    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "datetime");
+    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "dateTime");
     ++numNonspatialDims;
   }
 

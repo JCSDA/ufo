@@ -12,7 +12,6 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/Parameters.h"
 
 #include "ufo/predictors/PredictorBase.h"
 
@@ -56,6 +55,7 @@ class ScanAngle : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
+               const ObsBias &,
                ioda::ObsVector &) const override;
 
  private:

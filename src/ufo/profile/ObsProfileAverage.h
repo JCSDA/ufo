@@ -22,10 +22,6 @@
 #include "ufo/profile/ObsProfileAverageParameters.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -65,7 +61,7 @@ namespace ufo {
 ///
 /// - obs space:
 ///    extension:
-///      average profiles onto model levels: 71
+///      allocate companion records with length: 71
 ///
 /// (where 71 can be replaced by the length of the air_pressure_levels GeoVaL).
 /// The H(x) values are placed in the extended section of the ObsSpace.
@@ -86,8 +82,9 @@ class ObsProfileAverage : public ObsOperatorBase,
   private util::ObjectCounter<ObsProfileAverage> {
  public:
   static const std::string classname() {return "ufo::ObsProfileAverage";}
+  typedef ObsProfileAverageParameters Parameters_;
 
-  ObsProfileAverage(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsProfileAverage(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsProfileAverage() override;
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;

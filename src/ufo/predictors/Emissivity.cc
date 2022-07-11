@@ -11,7 +11,7 @@
 #include "ufo/predictors/Emissivity.h"
 
 #include "ioda/ObsSpace.h"
-
+#include "ioda/ObsVector.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
@@ -43,6 +43,7 @@ Emissivity::Emissivity(const Parameters_ & parameters, const oops::Variables & v
 void Emissivity::compute(const ioda::ObsSpace & odb,
                          const GeoVaLs & geovals,
                          const ObsDiagnostics & ydiags,
+                         const ObsBias &,
                          ioda::ObsVector & out) const {
   const std::size_t nvars = out.nvars();
   const std::size_t nlocs = out.nlocs();

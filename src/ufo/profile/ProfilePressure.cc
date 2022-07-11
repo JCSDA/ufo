@@ -5,7 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <utility>
+
 #include "ufo/profile/ProfilePressure.h"
+
+#include "ufo/utils/PiecewiseLinearInterpolation.h"
 
 namespace ufo {
 
@@ -32,32 +36,34 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (!oops::allVectorsSameNonZeroSize(zObs, ObsType, ReportFlags)) {
-      oops::Log::warning() << "At least one vector is the wrong size. "
-                           << "Profile pressure routine will not run." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(zObs, ObsType, ReportFlags)
-                           << std::endl;
+      oops::Log::debug() << "At least one vector is the wrong size. "
+                         << "Profile pressure routine will not run." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(zObs, ObsType, ReportFlags)
+                         << std::endl;
       return;
     }
 
     // Retrieve the model background fields.
-    const std::vector <float> &orogGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_orog);
     const std::vector <float> &pressureGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
+    const std::vector <float> &heightGeoVaLs =
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho);
 
-    if (!oops::allVectorsSameNonZeroSize(orogGeoVaLs, pressureGeoVaLs)) {
-      oops::Log::warning() << "At least one GeoVaLs vector is the wrong size. "
-                           << "Profile pressure routine will not run." << std::endl;
-      oops::Log::warning() << "Vector sizes: "
-                           << oops::listOfVectorSizes(orogGeoVaLs, pressureGeoVaLs)
-                           << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
+                                         heightGeoVaLs)) {
+      oops::Log::debug() << "At least one GeoVaLs vector is the wrong size. "
+                         << "Profile pressure routine will not run." << std::endl;
+      oops::Log::debug() << "Vector sizes: "
+                         << oops::listOfVectorSizes(pressureGeoVaLs,
+                                                    heightGeoVaLs)
+                         << std::endl;
       return;
     }
 
     // Retrive the vector of observed pressures.
     std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_derived_air_pressure);
     // If pressures have not been recorded, initialise the vector with missing values.
     if (pressures.empty())
       pressures.assign(numProfileLevels, missingValueFloat);
@@ -112,20 +118,21 @@ namespace ufo {
     // In all other cases assume pressure is already fine.
     if (ObsHasNoPressureSensor &&
         !AllLevelsHaveValidP) {
-      // Compute model heights on rho and theta levels.
-      // todo(ctgh): This could be performed when retrieving the GeoVaLs.
-      // zThetaGeoVaLs are not used further in this routine but do appear elsewhere in the code.
-      std::vector <float> zRhoGeoVaLs;
-      std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options_.DHParameters.ModParameters,
-                                orogGeoVaLs[0],
-                                zRhoGeoVaLs,
-                                zThetaGeoVaLs);
       // Compute observation pressures based on vertical interpolation from model heights.
-      ufo::profileVerticalInterpolation(zRhoGeoVaLs,
-                                        pressureGeoVaLs,
-                                        zObs,
-                                        pressures);
+      ufo::PiecewiseLinearInterpolation interpolate
+        (std::vector<double>(heightGeoVaLs.begin(), heightGeoVaLs.end()),
+         std::vector<double>(pressureGeoVaLs.begin(), pressureGeoVaLs.end()));
+      for (size_t jloc = 0; jloc < pressures.size(); ++jloc) {
+        if (zObs[jloc] != missingValueFloat)
+          pressures[jloc] = interpolate(static_cast<double>(zObs[jloc]));
+      }
     }
+  }
+
+  void ProfilePressure::fillValidationData(ProfileDataHandler &profileDataHandler)
+  {
+    profileDataHandler.set(ufo::VariableNames::obs_air_pressure,
+                           std::move(profileDataHandler.get<float>
+                                     (ufo::VariableNames::obs_derived_air_pressure)));
   }
 }  // namespace ufo

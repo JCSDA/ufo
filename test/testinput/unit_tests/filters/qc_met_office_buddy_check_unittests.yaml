@@ -1,0 +1,67 @@
+# The purpose of this test is to:
+# - very quickly validate buddy check results for a single pair of observations against
+#   values produced by the Met Office OPS system
+# - test both damping_factor_* parameters (which is not done elsewhere).
+Pair of observations:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature, eastward_wind, northward_wind]
+    generate:
+      list:
+        lats: [ 20, 21 ]
+        lons: [ 31, 32 ]
+        dateTimes: [ 240, 240 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0, 1.0, 1.0]
+  FloatVariables:
+    air_temperature@ObsValue:              [ 290, 291]
+    air_temperature@ObsError:              [   1,   2]
+    air_temperature@GrossErrorProbability: [0.05, 0.1]
+    air_temperature@HofX:                  [ 289, 293]
+
+    eastward_wind@ObsValue:                [  20,   21]
+    eastward_wind@ObsError:                [ 0.5,  1.0]
+    eastward_wind@GrossErrorProbability:   [0.07, 0.12]
+    eastward_wind@HofX:                    [  19,   23]
+
+    northward_wind@ObsValue:               [ -30,  -31]
+    northward_wind@ObsError:               [ 0.5,  1.0]
+    northward_wind@GrossErrorProbability:  [0.07, 0.12]
+    northward_wind@HofX:                   [ -29,  -33]
+  IntVariables:
+    station_id@MetaData:                   [   1,   2]
+  obs diagnostics:
+    air_temperature_background_error:      [   2,    1]
+    eastward_wind_background_error:        [   1,  0.5]
+    northward_wind_background_error:       [   1,  0.5]
+  Met Office Buddy Check:
+    filter variables:
+    - name: eastward_wind
+      options:
+        first_component_of_two: true
+    - name: northward_wind
+    - name: air_temperature
+    horizontal_correlation_scale: {"90": 150, "30": 150, "20": 200,
+                                   "-20": 200, "-30": 250, "-90": 250}
+    temporal_correlation_scale: PT1H
+    num_zonal_bands: 12
+    search_radius: 500 # km
+    max_total_num_buddies: 15
+    max_num_buddies_from_single_band: 10
+    max_num_buddies_with_same_station_id: 10
+    damping_factor_1: 0.8
+    damping_factor_2: 0.6
+    non_divergence_constraint: 1.0
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+    station_id_variable:
+      name: station_id@MetaData
+  ExpectedGrossErrorProbabilities:
+    air_temperature@GrossErrorProbability: [0.053149, 0.106297]
+    eastward_wind@GrossErrorProbability:   [0.073023, 0.125183]
+    northward_wind@GrossErrorProbability:  [0.073023, 0.125183]

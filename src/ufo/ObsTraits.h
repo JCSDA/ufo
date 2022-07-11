@@ -13,12 +13,12 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "AnalyticInit.h"
 #include "Locations.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsBiasCovariance.h"
 #include "ObsBiasIncrement.h"
+#include "ObsBiasPreconditioner.h"
 #include "ObsDiagnostics.h"
 #include "ObsOperator.h"
 #include "LinearObsOperator.h"
@@ -28,20 +28,20 @@ namespace ufo {
 struct ObsTraits {
   static std::string name() {return "UFO and IODA observations";}
 
-  typedef ufo::AnalyticInit        AnalyticInit;
-  typedef ufo::GeoVaLs             GeoVaLs;
-  typedef ufo::ObsDiagnostics      ObsDiagnostics;
-  typedef ufo::Locations           Locations;
-  typedef ioda::ObsSpace           ObsSpace;
-  typedef ioda::ObsVector          ObsVector;
+  typedef ufo::GeoVaLs               GeoVaLs;
+  typedef ufo::ObsDiagnostics        ObsDiagnostics;
+  typedef ufo::Locations             Locations;
+  typedef ioda::ObsSpace             ObsSpace;
+  typedef ioda::ObsVector            ObsVector;
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
 
-  typedef ufo::ObsOperator         ObsOperator;
-  typedef ufo::LinearObsOperator   LinearObsOperator;
+  typedef ufo::ObsOperator           ObsOperator;
+  typedef ufo::LinearObsOperator     LinearObsOperator;
 
-  typedef ufo::ObsBias             ObsAuxControl;
-  typedef ufo::ObsBiasIncrement    ObsAuxIncrement;
-  typedef ufo::ObsBiasCovariance   ObsAuxCovariance;
+  typedef ufo::ObsBias               ObsAuxControl;
+  typedef ufo::ObsBiasIncrement      ObsAuxIncrement;
+  typedef ufo::ObsBiasCovariance     ObsAuxCovariance;
+  typedef ufo::ObsBiasPreconditioner ObsAuxPreconditioner;
 };
 
 }  // namespace ufo

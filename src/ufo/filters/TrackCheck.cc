@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -38,12 +37,13 @@ TrackCheck::TrackObservation::TrackObservation(float latitude, float longitude,
     numNeighborsVisitedInPreviousSweep_{NO_PREVIOUS_SWEEP, NO_PREVIOUS_SWEEP}
 {}
 
-TrackCheck::CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
+void TrackCheck::TrackObservation::checkAgainstBuddy(
     const TrackObservation &buddyObs,
     const TrackCheckParameters &options,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-    float referencePressure) const {
-  CheckResults results;
+    float referencePressure,
+    CheckResults & results) const {
+  results = CheckResults();
   util::Duration temporalDistance = abs(buddyObs.obsLocationTime_.time() -
                                         this->obsLocationTime_.time());
   const float spatialDistance = TrackCheckUtils::distance(this->obsLocationTime_.location(),
@@ -71,7 +71,7 @@ TrackCheck::CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
       temporalDistance > resolutionMultiplier * options.temporalResolution &&
       spatialDistance > resolutionMultiplier * options.spatialResolution;
 
-  return results;
+  return;
 }
 
 void TrackCheck::TrackObservation::registerCheckResults(const CheckResults &results) {
@@ -109,7 +109,10 @@ TrackCheck::~TrackCheck()
 void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable, obsdb_);
+  // 3rd arg: recordsAreSingleObs = false for Track Check.
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
+                                                               obsdb_,
+                                                               false);
 
   const std::vector<size_t> validObsIds
                                    = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
@@ -132,7 +135,8 @@ TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocation
     const ObsAccessor &obsAccessor) const {
   ObsGroupPressureLocationTime obsPressureLoc;
   obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
-  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
+                                                                      options_.pressureCoord);
   return obsPressureLoc;
 }
 
@@ -165,8 +169,8 @@ void TrackCheck::identifyRejectedObservationsInTrack(
 
   std::vector<TrackObservation> trackObservations = collectTrackObservations(
         trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsPressureLoc);
-  std::vector<float> workspace;
 
+  std::vector<float> workspace;
   while (sweepOverObservations(trackObservations, maxValidSpeedAtPressure, workspace) ==
          TrackCheckUtils::SweepResult::ANOTHER_SWEEP_REQUIRED) {
     // can't exit the loop yet
@@ -198,6 +202,8 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
     std::vector<TrackObservation> &trackObservations,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<float> &workspace) const {
+
+  TrackCheck::CheckResults results;
 
   std::vector<float> &failedChecksFraction = workspace;
   failedChecksFraction.assign(trackObservations.size(), 0.0f);
@@ -232,8 +238,8 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
         // need to "undo" checks against rejected observations.
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (neighborObs->rejectedInPreviousSweep()) {
-          CheckResults results = obs.checkAgainstBuddy(*neighborObs, options_,
-                                                       maxValidSpeedAtPressure, minPressureBetween);
+          obs.checkAgainstBuddy(*neighborObs, options_, maxValidSpeedAtPressure,
+                                minPressureBetween, results);
           obs.unregisterCheckResults(results);
           if (results.isBuddyDistinct) {
             // The rejected distinct buddy needs to be replaced with another
@@ -246,8 +252,8 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
            neighborObs = getNthNeighbor(++neighborIdx)) {
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (!neighborObs->rejected()) {
-          CheckResults results = obs.checkAgainstBuddy(*neighborObs, options_,
-                                                       maxValidSpeedAtPressure, minPressureBetween);
+          obs.checkAgainstBuddy(*neighborObs, options_, maxValidSpeedAtPressure,
+                                minPressureBetween, results);
           obs.registerCheckResults(results);
           if (results.isBuddyDistinct)
             --numNewDistinctBuddiesToVisit;

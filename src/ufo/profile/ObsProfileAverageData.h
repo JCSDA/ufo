@@ -20,17 +20,13 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/ObsProfileAverageParameters.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
   /// \brief Data handling class for the ProfileAverage observation operator and TL/AD code.
   class ObsProfileAverageData {
    public:
     ObsProfileAverageData(const ioda::ObsSpace & odb,
-                          const eckit::Configuration & config);
+                          const ObsProfileAverageParameters & parameters);
 
     /// Return required variables for the operator.
     const oops::Variables & requiredVars() const;
@@ -52,6 +48,9 @@ namespace ufo {
 
     /// Print operator configuration options.
     void print(std::ostream & os) const;
+
+    /// Get the name of the model vertical coordinate.
+    std::string getModelVerticalCoord() const {return modelVerticalCoord_;}
 
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.

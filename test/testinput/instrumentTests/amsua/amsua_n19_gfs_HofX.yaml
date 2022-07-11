@@ -8,7 +8,6 @@ observations:
     Clouds: [Water, Ice]
     Cloud_Fraction: 1.0
     obs options:
-      inspectProfile: 1
       Sensor_ID: amsua_n19
       EndianType: little_endian
       CoefficientPath: Data/

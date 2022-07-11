@@ -29,29 +29,45 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 FilterBase::FilterBase(ioda::ObsSpace & os,
-                       const FilterParametersBaseWithAbstractAction & parameters,
+                       const FilterParametersBaseWithAbstractActions & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
-    config_(parameters.toConfiguration()),
     filtervars_(),
     whereParameters_(parameters.where),
-    actionParameters_(parameters.action().clone())
+    whereOperator_(parameters.whereOperator),
+    actionsParameters_(parameters.actions())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
-  allvars_ += getAllWhereVariables(parameters.where);
 
+  // Identify filter variables
   if (parameters.filterVariables.value() != boost::none) {
   // read filter variables
-    for (const Variable &var : *parameters.filterVariables.value())
+    for (const Variable &var : *parameters.filterVariables.value()) {
       filtervars_ += var;
+      filtersimvars_ += var;
+    }
   } else {
   // if no filter variables explicitly specified, filter out all variables
     filtervars_ += Variables(obsdb_.obsvariables());
+    filtersimvars_ += Variables(obsdb_.assimvariables());
   }
 
-  FilterAction action(*actionParameters_);
-  allvars_ += action.requiredVariables();
+  // Identify input variables required by the filter and notify user if any action except the last
+  // modifies QC flags
+  allvars_ += getAllWhereVariables(whereParameters_);
+
+  const size_t numActions = actionsParameters_.size();
+  for (size_t i = 0; i < numActions; ++i) {
+    const std::unique_ptr<FilterActionParametersBase> &actionParameters = actionsParameters_[i];
+    FilterAction action(*actionParameters);
+    if (i < numActions - 1 && action.modifiesQCFlags()) {
+      throw eckit::UserError("Actions modifying QC flags, such as '" +
+                             actionParameters->name.value().value() + "', must not be followed by "
+                             "any other actions performed by the same filter", Here());
+    }
+    allvars_ += action.requiredVariables();
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -77,19 +93,39 @@ void FilterBase::doFilter() const {
   oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
 
 // Select locations to which the filter will be applied
-  std::vector<bool> apply = processWhere(whereParameters_, data_);
+  std::vector<bool> apply = processWhere(whereParameters_, data_, whereOperator_);
+
+  ufo::Variables vars;
+  if (post_) {
+    oops::Variables oopsfiltersimvars = filtersimvars_.toOopsVariables();
+    vars += filtersimvars_;
+    if (allvars_.hasGroup("HofX")) {
+      for (size_t jv = 0; jv < filtersimvars_.toOopsVariables().size(); ++jv) {
+        if (!obsdb_.assimvariables().has(filtersimvars_.toOopsVariables()[jv])) {
+          throw eckit::UserError("Filter variable '"
+                                 + filtersimvars_.toOopsVariables()[jv] +
+                                 "' is not a simulated variable,"
+                                 " but an HofX is required", Here());
+        }
+      }
+    }
+  } else {
+    vars += filtervars_;
+  }
 
 // Allocate flagged obs indicator (false by default)
-  const size_t nvars = filtervars_.nvars();
+  const size_t nvars = vars.nvars();
   std::vector<std::vector<bool>> flagged(nvars);
   for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
 
 // Apply filter
-  this->applyFilter(apply, filtervars_, flagged);
+  this->applyFilter(apply, vars, flagged);
 
-// Take action
-  FilterAction action(*actionParameters_);
-  action.apply(filtervars_, flagged, data_, this->qcFlag(), *flags_, *obserr_);
+// Take actions
+  for (const std::unique_ptr<FilterActionParametersBase> &actionParameters : actionsParameters_) {
+    FilterAction action(*actionParameters);
+    action.apply(vars, flagged, data_, this->qcFlag(), *flags_, *obserr_);
+  }
 
 // Done
   oops::Log::trace() << "FilterBase doFilter end" << std::endl;

@@ -8,13 +8,15 @@
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
 
+#include <Eigen/Core>
+
 #include <string>
 #include <vector>
 
+#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsBiasParameters.h"
-#include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;

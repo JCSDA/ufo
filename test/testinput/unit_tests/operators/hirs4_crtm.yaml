@@ -1,0 +1,30 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: hirs4_metop-a
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: hirs4_metop-a
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/hirs4_metop-a_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+#   obsdataout:
+#     obsfile: Data/hirs4_metop-a_obs_2018041500_m_opr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/hirs4_metop-a_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-5
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11

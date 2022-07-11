@@ -5,10 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "eckit/utils/StringTools.h"
+
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileDataHandler.h"
@@ -18,26 +19,41 @@
 
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(const ObsFilterData &data,
+                                         ioda::ObsDataVector<int> &flags,
                                          const DataHandlerParameters &options,
                                          const std::vector <bool> &apply,
                                          const Variables &filtervars,
                                          std::vector<std::vector<bool>> &flagged)
     : obsdb_(data.obsspace()),
-      geovals_(data.getGeoVaLs()),
-      obsdiags_(data.getObsDiags()),
+      flags_(flags),
       options_(options),
       filtervars_(filtervars),
       flagged_(flagged)
   {
+    if (data.getGeoVaLs() && data.getGeoVaLs()->nlocs() > 0) {
+      geovals_.reset(new GeoVaLs(*(data.getGeoVaLs())));
+      if (geovals_->has(ufo::VariableNames::geovals_pressure)) {
+        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure));
+        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure, 0);
+        if (vec_gv.front() > vec_gv.back())
+          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
+      } else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho)) {
+        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure_rho));
+        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure_rho, 0);
+        if (vec_gv.front() > vec_gv.back())
+          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
+      } else {
+        throw eckit::BadValue("GeoVaLs must contain a pressure coordinate");
+      }
+    }
     profileIndices_.reset(new ProfileIndices(obsdb_, options, apply));
-    entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb_, options));
+    entireSampleDataHandler_.reset(new EntireSampleDataHandler(data, options));
   }
 
   void ProfileDataHandler::resetProfileInformation()
   {
     profileData_.clear();
     GeoVaLData_.clear();
-    obsDiagData_.clear();
   }
 
   void ProfileDataHandler::initialiseNextProfile()
@@ -91,9 +107,6 @@ namespace ufo {
       ufo::splitVarGroup(fullname, varname, groupname);
 
       if (groupname == "QCFlags" ||
-          groupname == "ModelLevelsFlags" ||
-          groupname == "ModelLevelsQCFlags" ||
-          groupname == "ModelRhoLevelsFlags" ||
           groupname == "Counters") {
         const std::vector <int>& profileData = get<int>(fullname);
         getProfileIndicesInEntireSample(groupname);
@@ -104,15 +117,23 @@ namespace ufo {
           idx++;
         }
       } else if (groupname == "Corrections" ||
-                 groupname == "DerivedValue" ||
+                 groupname == "DerivedObsValue" ||
+                 groupname == "DerivedMetaData" ||
+                 groupname == "DerivedModelValue" ||
                  groupname == "GrossErrorProbability" ||
-                 groupname == "GrossErrorProbabilityBuddyCheck" ||
-                 groupname == "ModelLevelsDerivedValue" ||
-                 groupname == "ModelRhoLevelsDerivedValue" ||
                  fullname == ufo::VariableNames::obs_air_pressure) {
         const std::vector <float>& profileData = get<float>(fullname);
         getProfileIndicesInEntireSample(groupname);
         std::vector <float>& entireSampleData = entireSampleDataHandler_->get<float>(fullname);
+        size_t idx = 0;
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
+          updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
+          idx++;
+        }
+      } else if (eckit::StringTools::startsWith(groupname, "DiagnosticFlags")) {
+        const std::vector <bool>& profileData = get<bool>(fullname);
+        getProfileIndicesInEntireSample(groupname);
+        std::vector <bool>& entireSampleData = entireSampleDataHandler_->get<bool>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
@@ -137,7 +158,7 @@ namespace ufo {
 
   void ProfileDataHandler::setFlagged()
   {
-    oops::Log::debug() << "Flagging observations" << std::endl;
+    oops::Log::debug() << "   Flagging observations" << std::endl;
 
     for (const auto& it_profile : profileData_) {
       std::string fullname = it_profile.first;
@@ -146,7 +167,7 @@ namespace ufo {
       ufo::splitVarGroup(fullname, varname, groupname);
 
       if (groupname == "QCFlags") {
-        oops::Log::debug() << " " << fullname << std::endl;
+        oops::Log::debug() << "    " << fullname << std::endl;
 
         // Obtain QC flags
         const std::vector <int> &Flags = get<int>(fullname);
@@ -173,7 +194,7 @@ namespace ufo {
           // Flag all filter variables if the whole observation has been rejected.
           if (isObservationReport &&
               Flags[idxprof] & ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport) {
-            oops::Log::debug() << "  Reject all variables, index " << profileIndex << std::endl;
+            oops::Log::debug() << "     Reject all variables, index " << profileIndex << std::endl;
             for (size_t jvar = 0; jvar < filtervars_.size(); ++jvar)
               flagged_[jvar][profileIndex] = true;
             // Move to next element in the profile.
@@ -183,7 +204,7 @@ namespace ufo {
           // Flag variable if its specific value has been rejected.
           if (idxvar < filtervars_.size() &&
               Flags[idxprof] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) {
-            oops::Log::debug() << "  Reject " << varname
+            oops::Log::debug() << "     Reject " << varname
                                << ", index " << profileIndex << std::endl;
             flagged_[idxvar][profileIndex] = true;
           }
@@ -226,6 +247,7 @@ namespace ufo {
           ufo::getSlantPathLocations(obsdb_,
                                      *geovals_,
                                      profileIndices_->getProfileIndices(),
+                                     ufo::VariableNames::obs_air_pressure,
                                      this->getAssociatedVerticalCoordinate(variableName));
         // Vector storing GeoVaL data for current profile.
         vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);
@@ -241,12 +263,13 @@ namespace ufo {
           for (std::size_t mlev = 0; mlev < slant_path_location.size(); ++mlev) {
             const std::size_t jloc = slant_path_location[mlev];
             geovals_->getAtLocation(vec_GeoVaL_loc, variableName, jloc);
-            vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[mlev];
+            vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[slant_path_location.size() - 1 - mlev];
           }
         } else {
           // Take the GeoVaL at the first location.
           const std::size_t jloc = profileIndices_->getProfileIndices()[0];
           geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
+          std::reverse(vec_GeoVaL_column.begin(), vec_GeoVaL_column.end());
         }
       }
       // Add GeoVaL vector to map (even if it is empty).
@@ -255,60 +278,22 @@ namespace ufo {
     }
   }
 
-  std::vector <float>& ProfileDataHandler::getObsDiag(const std::string &fullname)
-  {
-    auto it_obsDiagData = obsDiagData_.find(fullname);
-    if (it_obsDiagData != obsDiagData_.end()) {
-      // If the ObsDiag vector is already present, return it.
-      return it_obsDiagData->second;
-    } else {
-      std::string varname;
-      std::string groupname;
-      ufo::splitVarGroup(fullname, varname, groupname);
-      std::vector <float> vec_ObsDiag;
-      // Attempt to retrieve variable vector from entire sample.
-      // If it is not present, the vector will remain empty.
-      std::vector <float> &vec_all = entireSampleDataHandler_->get<float>(fullname);
-      // If the vector is empty, attempt to fill it from the ObsDiags
-      // (if they are present and have the required variable).
-      if (vec_all.empty() &&
-          obsdiags_ &&
-          obsdb_.nlocs() > 0 &&
-          obsdiags_->has(varname)) {
-        vec_all.assign(obsdb_.nlocs(), util::missingValue(1.0f));
-        obsdiags_->get(vec_all, varname);
-      }
-      // If the ObsDiags vector for the entire sample is not empty,
-      // fill the values for this profile.
-      if (!vec_all.empty()) {
-        getProfileIndicesInEntireSample(groupname);
-        for (const auto& profileIndex : profileIndicesInEntireSample_)
-          vec_ObsDiag.emplace_back(vec_all[profileIndex]);
-      }
-      // Add ObsDiag vector to map (even if it is empty).
-      obsDiagData_.emplace(fullname, std::move(vec_ObsDiag));
-      return obsDiagData_[fullname];
-    }
-  }
-
   std::vector <ProfileDataHolder> ProfileDataHandler::produceProfileVector
   (const std::vector <std::string> &variableNamesInt,
    const std::vector <std::string> &variableNamesFloat,
    const std::vector <std::string> &variableNamesString,
-   const std::vector <std::string> &variableNamesGeoVaLs,
-   const std::vector <std::string> &variableNamesObsDiags)
+   const std::vector <std::string> &variableNamesGeoVaLs)
   {
     profileIndices_->reset();
     std::vector <ProfileDataHolder> profiles;
-    oops::Log::debug() << "Filling vector of profiles" << std::endl;
+    oops::Log::debug() << "  Filling vector of profiles" << std::endl;
     for (size_t jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
       initialiseNextProfile();
       ProfileDataHolder profile(*this);
       profile.fill(variableNamesInt,
                    variableNamesFloat,
                    variableNamesString,
-                   variableNamesGeoVaLs,
-                   variableNamesObsDiags);
+                   variableNamesGeoVaLs);
       profiles.emplace_back(profile);
     }
     return profiles;

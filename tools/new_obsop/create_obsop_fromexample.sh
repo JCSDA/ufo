@@ -33,6 +33,7 @@ cp example/Obs${example}TLAD.interface.F90  ${generate_dir}/Obs${generate}TLAD.i
 cp example/Obs${example}TLAD.interface.h    ${generate_dir}/Obs${generate}TLAD.interface.h
 cp example/ufo_${example_lc}_mod.F90        ${generate_dir}/ufo_${generate_lc}_mod.F90
 cp example/ufo_${example_lc}_tlad_mod.F90   ${generate_dir}/ufo_${generate_lc}_tlad_mod.F90
+cp example/Obs${example}Parameters.h ${generate_dir}/Obs${generate}Parameters.h
 
 # replace the defines in *h files
 perl -p -i -e "s/${example_cpp_define}/${generate_cpp_define}/g" ${generate_dir}/Obs*.h

@@ -10,20 +10,14 @@
 
 #include <memory>
 #include <ostream>
-#include <string>
+#include <vector>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilterBase.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/Variables.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsTraits.h"
-
-namespace eckit {
-  class Configuration;
-  class LocalConfiguration;
-}
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -34,26 +28,43 @@ namespace ioda {
 namespace ufo {
 class GeoVaLs;
 
+/// \brief Parameters controlling ObsDiagnosticsWriter
+class ObsDiagnosticsWriterParameters : public oops::ObsFilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsDiagnosticsWriterParameters, oops::ObsFilterParametersBase)
+  // ObsDiagnosticsWriter uses ObsDiagnostics Parameters (used in I/O)
+  typedef typename ObsDiagnostics::Parameters_   ObsDiagnosticsParameters_;
+ public:
+  oops::OptionalParameter<std::vector<Variable>> filterVariables{
+    "filter variables", this};
+
+  ObsDiagnosticsParameters_ diags{this};
+};
+
+
 class ObsDiagnosticsWriter : public oops::interface::ObsFilterBase<ObsTraits> {
  public:
-  ObsDiagnosticsWriter(ioda::ObsSpace &, const eckit::Configuration &,
+  typedef ObsDiagnosticsWriterParameters Parameters_;
+  ObsDiagnosticsWriter(ioda::ObsSpace &, const Parameters_ &,
                        std::shared_ptr<ioda::ObsDataVector<int> >,
                        std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDiagnosticsWriter() {}
 
   void preProcess() override {}
   void priorFilter(const GeoVaLs &) override {}
-  void postFilter(const ioda::ObsVector &, const ioda::ObsVector &,
+  void postFilter(const GeoVaLs &,
+                  const ioda::ObsVector &,
+                  const ioda::ObsVector &,
                   const ObsDiagnostics & diags) override {
-    diags.write(config_);
+    diags.write(params_.diags);
   }
+  void checkFilterData(const oops::FilterStage filterStage) override {}
 
   oops::Variables requiredVars() const override {return nogeovals_;}
   oops::Variables requiredHdiagnostics() const override {return extradiagvars_;}
 
  private:
   void print(std::ostream &) const override;
-  const eckit::LocalConfiguration config_;
+  Parameters_ params_;
   const oops::Variables nogeovals_;
   oops::Variables extradiagvars_;
 };

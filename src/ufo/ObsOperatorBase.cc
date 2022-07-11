@@ -25,14 +25,14 @@ std::unique_ptr<Locations> ObsOperatorBase::locations() const {
   std::vector<util::DateTime> times(odb_.nlocs());
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
-  odb_.get_db("MetaData", "datetime", times);
+  odb_.get_db("MetaData", "dateTime", times);
   return std::unique_ptr<Locations>(new Locations(lons, lats, times, odb_.distribution()));
 }
 
 // -----------------------------------------------------------------------------
 
 oops::Variables ObsOperatorBase::simulatedVars() const {
-  return odb_.obsvariables();
+  return odb_.assimvariables();
 }
 
 // -----------------------------------------------------------------------------

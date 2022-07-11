@@ -45,6 +45,8 @@ set ( utils_files
       ProbabilityOfGrossError.cc
       ProbabilityOfGrossError.h
       ProbabilityOfGrossErrorParameters.h
+      RecordHandler.cc
+      RecordHandler.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
       RefractivityCalculator.F90

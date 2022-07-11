@@ -1,0 +1,147 @@
+window begin: 2021-07-01T09:00:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Debug: false
+    Absorbers: &rttov_absorbers [CLW, CIW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: &UseRHwaterForQC true # default
+      UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default but reqd for PS44
+      Do_MW_Scatt: true
+      RTTOV_clw_data: &rttovclwdata false
+      Platform_Name: &platform_name Metop
+      Sat_ID: &sat_id 1
+      Instrument_Name: &inst_name AMSUAMHS
+      CoefficientPath: &coef_path Data/
+      QtSplitRain: &qtsplitrain false
+  obs space:
+    name: ATOVS
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/obs_atovs_transmittance_20210701T1200Z.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-20
+#   obsdataout:
+#     obsfile: Data/obs_atovs_transmittance_20210701T1200Z_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_transmittance_20210701T1200Z.nc4
+  obs prior filters:
+#---------------------------------------------------
+#set surface type
+#---------------------------------------------------
+  - filter: Variable Assignment
+    assignments:
+    - name: surface_type@MetaData
+      type: int
+      function:
+        name: SetSurfaceType@ObsFunction
+        options:
+          UseReportSurface: false
+#---------------------------------------------------
+# Reject observations outside valid range
+#---------------------------------------------------
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature@ObsValue
+      channels: *all_channels
+    minvalue: 70.0
+    maxvalue: 340.0
+#--------------------------------------------------
+#Reject broken and difficult channels from 1D-Var
+#--------------------------------------------------
+  - filter: RejectList
+    filter variables:
+    - name: brightness_temperature@ObsValue
+      channels: 7,15-17
+#---------------------------------------------------
+#Surface channels rejected over land,sea-ice
+#---------------------------------------------------
+  - filter: RejectList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5,18-20
+    where:
+    - variable:
+        name: surface_type@MetaData
+      is_not_in: 1
+#-------------------------------------------------
+# 1DVar
+#-------------------------------------------------
+  obs post filters:
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false
+        RTTOV_GasUnitConv: true 
+        UseRHwaterForQC: false
+        UseColdSurfaceCheck: false
+        Do_MW_Scatt: true
+        RTTOV_clw_data: *rttovclwdata
+        Platform_Name: *platform_name
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        QtSplitRain: *qtsplitrain
+        CoefficientPath: Data/
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat   #using atms to ignore emiss for now
+    RMatrix: ../resources/rmatrix/rttov/atovs_metopb_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    retrieval variables from geovals:
+    - air_temperature # 1
+    - specific_humidity  # 10
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - surface_pressure # 6
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: false
+    UseJforConvergence: true
+    JConvergenceOption: 2
+    CostConvergenceFactor: 0.05
+    Max1DVarIterations: 20
+    MaxLWPForCloudyCheck: 6.0
+    MaxIWPForCloudyCheck: 6.0
+    RTTOVMWScattSwitch: true
+    UseRHwaterForQC: *UseRHwaterForQC
+    UseColdSurfaceCheck: *UseColdSurfaceCheck
+    Store1DVarLWP: true
+    Store1DVarIWP: true
+    Store1DVarTransmittance: true
+#---------------------------------------------------------------
+# test on transmittance to check storage and provide benchmark
+#---------------------------------------------------------------
+  - filter: Bounds Check
+    where:
+    - variable:
+        name: surface_type@MetaData
+      is_in: 0-2
+    filter variables:
+    - name: brightness_temperature
+      channels: &humidity_chans 18-20
+    test variables:
+    - name: transmittance@OneDVar
+      channels: *humidity_chans
+    maxvalue: 0.1
+    minvalue: 0.0
+  passedBenchmark: 1546
+  compareVariables:
+    - reference:
+        name: transmittance@TestReferenceOneDVar
+      test:
+        name: transmittance@OneDVar
+      absTol: 1.0e-5

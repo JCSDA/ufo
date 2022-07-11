@@ -1,0 +1,35 @@
+#
+#=== Profile average pressure ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_pressure_obs_extended.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_pressure_obsfilter_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_pressure_geovals_extended.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    Checks: ["Basic", "AveragePressure"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+  HofX: HofX
+  passedBenchmark: 18
+  benchmarkFlag: 24
+  flaggedBenchmark: 132

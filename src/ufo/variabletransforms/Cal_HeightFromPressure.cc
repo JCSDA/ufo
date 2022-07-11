@@ -16,10 +16,16 @@ static TransformMaker<Cal_HeightFromPressure>
     makerCal_HeightFromPressure_("HeightFromPressure");
 
 Cal_HeightFromPressure::Cal_HeightFromPressure(
-    const VariableTransformsParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    : TransformBase(options, data, flags, obserr),
+      heightCoord_(options.heightCoord),
+      heightGroup_(options.heightGroup),
+      pressureCoord_(options.pressureCoord),
+      pressureGroup_(options.pressureGroup)
+{}
 
 /************************************************************************************/
 
@@ -35,31 +41,18 @@ void Cal_HeightFromPressure::runTransform(const std::vector<bool> &apply) {
   ioda::ObsSpace::RecIdxIter irec;
 
   // 1. Obtain air pressure from the ObsSpace.
-  // Two possible pressure variables are searched for:
-  // - air_pressure,
-  // - air_pressure_levels.
-  // If neither is present an exception is thrown.
 
-  // Do the pressure, and derived height, lie on staggered levels?
-  bool staggeredLevels = false;
+  getObservation(pressureGroup_, pressureCoord_, airPressure);
 
-  getObservation("MetaData", "air_pressure", airPressure);
   if (airPressure.empty()) {
-    getObservation("MetaData", "air_pressure_levels", airPressure);
-    if (airPressure.empty()) {
-      oops::Log::warning() << "Air pressure vector is empty. "
-                           << "Check will not be performed." << std::endl;
-      throw eckit::BadValue("Air pressure vector is empty ", Here());
-    }
-    staggeredLevels = true;
+    oops::Log::warning() << "Air pressure vector is empty. "
+                         << "Check will not be performed." << std::endl;
+    throw eckit::BadValue("Air pressure vector is empty ", Here());
   }
 
   // 2. Initialise the output array
   // -------------------------------------------------------------------------------
-  if (staggeredLevels)
-    getObservation("MetaData", "geopotential_height_levels", geopotentialHeight);
-  else
-    getObservation("MetaData", "geopotential_height", geopotentialHeight);
+  getObservation(heightGroup_, heightCoord_, geopotentialHeight);
 
   if (geopotentialHeight.empty()) {
     geopotentialHeight = std::vector<float>(nlocs_);
@@ -89,10 +82,7 @@ void Cal_HeightFromPressure::runTransform(const std::vector<bool> &apply) {
 
   if (hasBeenUpdated) {
     // If the geopotential height was updated, save it as a DerivedValue.
-    if (staggeredLevels)
-      obsdb_.put_db(outputTag, "geopotential_height_levels", geopotentialHeight);
-    else
-      obsdb_.put_db(outputTag, "geopotential_height", geopotentialHeight);
+    obsdb_.put_db(getDerivedGroup(heightGroup_), heightCoord_, geopotentialHeight);
   }
 }
 }  // namespace ufo

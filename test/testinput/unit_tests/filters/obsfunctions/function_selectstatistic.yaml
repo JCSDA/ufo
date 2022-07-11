@@ -1,0 +1,127 @@
+window begin: 2017-12-31T21:00:00Z
+window end: 2030-01-01T03:00:00Z
+
+observations:
+- obs space:
+    name: Select min depth in each profile
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    simulated variables: [ocean_temperature]
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [ocean_surface]
+    options:
+      variable: 
+      - name: ocean_depth@MetaData
+      select minimum: true
+    tolerance: 1.0e-6
+    expect missing value locations to match: true
+- obs space:
+    name: Select max depth in each profile, only if QC pass, force select true
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    simulated variables: [ocean_temperature]
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [ocean_bottom]
+    options:
+      variable:
+      - name: MetaData/ocean_depth
+      select maximum: true
+      force select: true
+      where:
+        - variable:
+            name: QCflagsData/ocean_temperature
+          is_in: 0
+    tolerance: 1.0e-6
+    expect missing value locations to match: true
+- obs space:
+    name: Select mean depth in each profile, skip missing ocean T
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    simulated variables: [ocean_temperature]
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [ocean_mean]
+    options:
+      variable:
+      - name: MetaData/ocean_depth
+      select mean: true
+      where:
+        - variable:
+            name: ObsValue/ocean_temperature
+          is_defined:
+    tolerance: 1.0e-6
+    expect missing value locations to match: true
+- obs space:
+    name: Select median depth in each profile, out of depths <=250m
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    simulated variables: [ocean_temperature]
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [ocean_median]
+    options:
+      variable:
+      - name: MetaData/ocean_depth
+      select median: true
+      where:
+        - variable:
+            name: MetaData/ocean_depth
+          maxvalue: 250
+    tolerance: 1.0e-6
+    expect missing value locations to match: true
+- obs space:
+    name: Select min and mean T in whole set (not grouped into records)
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+    simulated variables: [ocean_temperature]
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [temp_mean_and_min]
+    options:
+      variable:
+      - name: ocean_temperature@ObsValue
+      select minimum: true
+      select mean: true
+    tolerance: 1.0e-6
+    expect missing value locations to match: true
+- obs space:
+    name: Select min and mean depth in each profile, with channels, force select true
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime"]
+        sort variable: "ocean_depth"
+        sort order: "ascending"
+    simulated variables: [channel_data]
+    channels: 1-3
+  obs function:
+    name: SelectStatistic@IntObsFunction
+    variables: [channel_data]
+    channels: 1-3
+    options:
+      variable:
+      - name: channel_data@ObsValue
+        channels: 1-3
+      select minimum: true
+      select mean: true
+      force select: true
+    tolerance: 1.0e-6
+    expect missing value locations to match: true

@@ -7,8 +7,10 @@
 
 #include <cmath>
 #include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
-#include "oops/util/Logger.h"
+#include "ioda/ObsVector.h"
 #include "ufo/predictors/OrbitalAngle.h"
 #include "ufo/utils/Constants.h"
 
@@ -37,6 +39,7 @@ OrbitalAngle::OrbitalAngle(const Parameters_ & parameters, const oops::Variables
 void OrbitalAngle::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
+                        const ObsBias &,
                         ioda::ObsVector & out) const {
   const size_t nlocs = out.nlocs();
   const size_t nvars = out.nvars();

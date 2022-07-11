@@ -13,23 +13,54 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
 
+/// Configuration parameters for the pressure to height conversion.
+class Cal_HeightFromPressureParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_HeightFromPressureParameters, VariableTransformParametersBase);
+
+ public:
+  /// Height coordinate name.
+  oops::RequiredParameter<std::string> heightCoord{"height coordinate", this};
+
+  /// Height coordinate group.
+  oops::RequiredParameter<std::string> heightGroup{"height group", this};
+
+  /// Pressure coordinate name.
+  oops::RequiredParameter<std::string> pressureCoord{"pressure coordinate", this};
+
+  /// Pressure coordinate group.
+  oops::RequiredParameter<std::string> pressureGroup{"pressure group", this};
+};
+
 /*!
 * \brief Converts pressures to heights.
-*
-* See VariableTransformsParameters for filter setup.
 */
 class Cal_HeightFromPressure : public TransformBase {
  public:
-  Cal_HeightFromPressure(const VariableTransformsParameters &options,
+  typedef Cal_HeightFromPressureParameters Parameters_;
+
+  Cal_HeightFromPressure(const Parameters_ &options,
                          const ObsFilterData &data,
-                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                         const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Height coordinate name.
+  std::string heightCoord_;
+
+  /// Height group name.
+  std::string heightGroup_;
+
+  /// Pressure coordinate name.
+  std::string pressureCoord_;
+
+  /// Pressure group name.
+  std::string pressureGroup_;
 };
 }  // namespace ufo
 

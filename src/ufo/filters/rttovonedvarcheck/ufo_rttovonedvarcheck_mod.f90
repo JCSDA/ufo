@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_mod
 
+use ufo_constants_mod, only: zero
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use iso_c_binding
@@ -24,9 +25,9 @@ use ufo_rttovonedvarcheck_minimize_newton_mod
 use ufo_rttovonedvarcheck_minimize_ml_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_obs_mod
-use ufo_rttovonedvarcheck_pcemis_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
+use ufo_rttovonedvarcheck_setup_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_vars_mod
 
@@ -106,25 +107,26 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
-  type(ufo_rttovonedvarcheck_obs)        :: obs            ! data for all observations read from db
-  type(ufo_metoffice_bmatrixstatic)      :: full_bmatrix   ! full bmatrix read from file
-  type(ufo_geovals)                      :: local_geovals  ! geoval for one observation
-  type(ufo_rttovonedvarcheck_ob)         :: ob             ! observation data for a single observation
-  type(ufo_rttovonedvarcheck_profindex)  :: prof_index     ! index for mapping geovals to 1d-var state profile
-  type(ufo_metoffice_rmatrixradiance)    :: full_rmatrix   ! full r_matrix read from file
-  type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix    ! r_submatrix object
-  type(ufo_geovals)                      :: hofxdiags      ! hofxdiags containing jacobian
-  type(ufo_rttovonedvarcheck_pcemis), target :: IR_pcemis  ! Infrared principal components object
+  type(ufo_rttovonedvarcheck_obs)        :: obs             ! data for all observations read from db
+  type(ufo_metoffice_bmatrixstatic)      :: full_bmatrix    ! full bmatrix read from file
+  type(ufo_geovals)                      :: local_geovals   ! geoval for one observation
+  type(ufo_rttovonedvarcheck_ob)         :: ob              ! observation data for a single observation
+  type(ufo_rttovonedvarcheck_profindex)  :: prof_index      ! index for mapping geovals to 1d-var state profile
+  type(ufo_rttovonedvarcheck_profindex)  :: local_profindex ! local copy of prof_index needed since the intro. of mwemiss
+  type(ufo_metoffice_rmatrixradiance)    :: full_rmatrix    ! full r_matrix read from file
+  type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix     ! r_submatrix object
+  type(ufo_geovals)                      :: hofxdiags       ! hofxdiags containing jacobian
   type(ufo_geoval), pointer          :: geoval
-  character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
-  integer                            :: jvar, ivar, jobs, band, ii ! counters
+  integer                            :: jvar, ivar, jobs, band, ii, irej, jnew ! counters
   integer                            :: nchans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
-  integer                            :: apply_count
+  integer                            :: apply_count ! number of profiles that the 1dvar has been applied to
+  integer                            :: failed_1dvar_count ! number of profiles that failed to converge
+  integer                            :: failed_retrievedBTcheck_count ! number of profiles with retrieved BTs outside error
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   integer, allocatable               :: fields_in(:)
   real(kind_real)                    :: missing         ! missing value
@@ -135,7 +137,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   real(kind_real), allocatable       :: max_error(:)    ! max_error = error(stdev) * factor
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
-  logical                            :: cloud_retrieval = .false.
+  logical                            :: reject_profile
   type(ufo_radiancerttov)            :: rttov_simobs
   integer(c_size_t), allocatable     :: ret_nlevs(:)
 
@@ -147,15 +149,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! Setup rttov simobs
   call rttov_simobs % setup(f_conf, self % channels)
 
-  ! Setup IR emissivity - if needed
-  if (self % pcemiss) then
-    if (len(self % EmisAtlas) > 4) then
-      call IR_pcemis % setup(self % EmisEigVecPath, self % EmisAtlas)
-    else
-      call IR_pcemis % setup(self % EmisEigVecPath)
-    end if
-  end if
-
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
                             self % qtotal)
@@ -163,19 +156,28 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! Setup full R matrix object
   call full_rmatrix % setup(self % r_matrix_path)
 
-  ! Check if cloud retrievals needed
-  do ii = 1, size(self % retrieval_variables)
-    if (cmp_strings(self % retrieval_variables(ii), "cloud_top_pressure")) then
-      write(*,*) "Simple cloud is part of the state vector"
-      cloud_retrieval = .true.
-    end if
-  end do
-
   ! Create profile index for mapping 1d-var profile to b-matrix
-  call prof_index % setup(full_bmatrix, self%nlevels)
+  call prof_index % setup(full_bmatrix, self % nlevels)
+  if (prof_index % mwemiss(1) > 0 .and. .not. self % mwEmissRetrieval) then
+    write(message, *) "MWemiss is in the b-matrix but the mw retrieval flag, ", &
+                      "retrieve mw emissivity, is false.  Set this to true in ", &
+                      "the surface emissivty configuration to allow the correct arrays ", &
+                      "to be loaded => aborting."
+    call abor1_ftn(message)
+  end if
 
+  ! sanity check on clw storage - only store to obs space
+  ! if qtotal or ql is present in retrieval vector
+  if (self % Store1DVarCLW) then
+    if ((prof_index % qt(1) == 0) .and. (prof_index % ql(1) == 0)) then
+      write(message,*) "Info: as qtotal or ql are not part of the state vector resetting Store1DVarCLW to false"
+      self % Store1DVarCLW = .false.
+    end if
+  end if
+  
   ! Read in observation data from obsspace
-  call obs % setup(self, prof_index % nprofelements, geovals, vars, IR_pcemis)
+  ! geovals are only providing surface information
+  call obs % setup(self, prof_index, geovals, vars)
 
   ! Initialize data arrays
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
@@ -199,23 +201,36 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! ------------------------------------------
   write(*,*) "Beginning loop over observations: ",trim(self%qcname)
   apply_count = 0
+  failed_1dvar_count = 0
+  failed_retrievedBTcheck_count = 0
   obs_loop: do jobs = self % StartOb, self % FinishOb
     if (apply(jobs)) then
 
+      obs % output_to_db(jobs) = .true.
       apply_count = apply_count + 1
       write(message, *) "starting obs number    ",jobs
       call fckit_log % debug(message)
+
+      ! Needs copying for each ob since mwemiss introduced
+      call local_profindex % copy(prof_index)
       !---------------------------------------------------
       ! 2.1 Setup Jb terms
       !---------------------------------------------------
-      ! create one ob geovals from full all obs geovals
+      ! create one ob geovals from full obs geovals and check
+      ! to make sure the values are within sensible bounds.
       call ufo_geovals_copy_one(local_geovals, geovals, jobs)
       call ufo_rttovonedvarcheck_check_geovals(self, local_geovals, &
-              prof_index, obs % surface_type(jobs))
+              local_profindex, obs % surface_type(jobs))
 
       ! create b matrix arrays for this single observation location
       call full_bmatrix % reset( obs % lat(jobs), & ! in
                     b_matrix, b_inverse, b_sigma  ) ! out
+
+      ! adjust b matrix based on tskin error and if mwemiss is in local_profindex
+      ! check that we are over land
+      call ufo_rttovonedvarcheck_adjust_bmatrix(local_profindex, & ! inout
+           obs, jobs, self,                                      & ! in
+           b_matrix, b_inverse, b_sigma)                           ! inout
 
       !---------------------------------------------------
       ! 2.2 Setup Jo terms
@@ -235,7 +250,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used, self %  nlevels, prof_index % nprofelements, self % nchans)
+      call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans, &
+           self % Store1DVarCLW, self % Store1DVarTransmittance)
+      
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -246,24 +263,37 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
       ob % channels_all = self % channels
       ob % surface_type = obs % surface_type(jobs)
-      ob % retrievecloud = cloud_retrieval
-      ob % pcemis => IR_pcemis
       ob % calc_emiss = obs % calc_emiss(jobs)
+      ob % emiss(:) = obs % emiss(:, jobs)
+      if(self % cloud_retrieval) ob % retrievecloud = .true.
+      if(self % cloud_retrieval) ob % cloudtopp = obs % cloudtopp(jobs)
+      if(self % cloud_retrieval) ob % cloudfrac = obs % cloudfrac(jobs)
       if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
+      if(associated(obs % pcemiss_object)) then
+        ob % pcemiss_object => obs % pcemiss_object
+        allocate(ob % pcemiss(size(obs % pcemiss, 1)))
+        ob % pcemiss(:) = obs % pcemiss(:, jobs)
+      end if
+
+      ! Check if ctp very close to model pressure level.  If so
+      ! make them exactly equal to match OPS behaviour for RTTOV
+      ! jacobian calculation.
+      if(self % cloud_retrieval) then
+        call ufo_rttovonedvarcheck_check_ctp(ob % cloudtopp, local_geovals, self %  nlevels)
+      end if
 
       ! Store background T in ob data space
       call ufo_geovals_get_var(local_geovals, var_ts, geoval)
       ob % background_T(:) = geoval%vals(:, 1) ! K
 
-      ! Create obs vector and r matrix
+      ! Create ob vector and r matrix
       jchans_used = 0
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == self % passflag ) then
           jchans_used = jchans_used + 1
           ob % yobs(jchans_used) = obs % yobs(jvar, jobs)
           ob % channels_used(jchans_used) = self % channels(jvar)
-          ob % emiss(jchans_used) = obs % emiss(jvar, jobs)
         end if
       end do
       call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
@@ -281,6 +311,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         write(*,'(15I5)') ob % channels_used
         write(*,*) "All Channels = "
         write(*,'(15I5)') ob % channels_all
+        call local_profindex % info()
       end if
 
       !---------------------------------------------------
@@ -290,23 +321,30 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         call ufo_rttovonedvarcheck_minimize_ml(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, hofxdiags, rttov_simobs, &
-                                      prof_index, onedvar_success)
+                                      local_profindex, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, hofxdiags, rttov_simobs, &
-                                      prof_index, onedvar_success)
+                                      local_profindex, onedvar_success)
       end if
 
       obs % output_BT(:, jobs) = ob % output_BT(:)
       obs % background_BT(:, jobs) = ob % background_BT(:)
       obs % output_profile(:,jobs) = ob % output_profile(:)
+      obs % emiss(:, jobs) = ob % emiss(:)
       obs % final_cost(jobs) = ob % final_cost
       obs % LWP(jobs) = ob % LWP
+      obs % IWP(jobs) = ob % IWP
+      if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
+      if (self % store1dvartransmittance) obs % transmittance(:, jobs) = ob % transmittance(:)
+      if(self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
+      if(self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
       obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
+        failed_1dvar_count = failed_1dvar_count + 1
         do jvar = 1, self%nchans
           if( obs % QCflags(jvar,jobs) == 0 ) then
             obs % QCflags(jvar,jobs) = self % onedvarflag
@@ -314,13 +352,47 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         end do
       end if
 
-      ! Check the BTs are within a factor of the error
-      if (self % RetrievedErrorFactor > 0.0 .and. any(obs % QCflags(:,jobs) == 0)) then
+      ! Remove channels that have been removed because of slow convergence
+      if (ob % QC_SlowConvChans) then
+        do jvar = 1, self % nchans
+          if( obs % QCflags(jvar,jobs) == 0 .and. &
+              any( self % ConvergeCheckChans == obs % channels(jvar) ) ) then
+            obs % QCflags(jvar,jobs) = self % onedvarflag
+          end if
+        end do
+      end if
+
+      ! Reject channels that have failed the ctp check
+      if (allocated(ob % rejected_channels_ctp)) then
+        jnew = 1
+        rejected: do irej = 1, size(ob % rejected_channels_ctp)
+          jvar = jnew
+          do while ( jvar <= size(obs % channels) )
+            if (ob % rejected_channels_ctp(irej) == obs % channels(jvar)) then
+              obs % QCflags(jvar, jobs) = self % onedvarflag
+              cycle rejected
+            end if
+            jvar = jvar + 1
+          end do
+        end do rejected
+      end if
+
+      ! Check the BTs are within a factor of the error.  This only applies to channels that are still
+      ! active.
+      if (self % RetrievedErrorFactor > zero .and. any(obs % QCflags(:,jobs) == self % passflag)) then
         allocate(max_error(size(ob % channels_used)))
         call r_submatrix % multiply_factor_by_stdev(self % RetrievedErrorFactor, max_error)
-        if (any(abs(ob % final_bt_diff(:)) > max_error(:))) then
+        reject_profile = .false.
+        chanloop: do jvar = 1, size(ob % channels_used)
+          if (allocated(ob % rejected_channels_ctp)) then
+            if(any(ob % rejected_channels_ctp == ob % channels_used(jvar))) cycle chanloop
+          end if
+          if (abs(ob % final_bt_diff(jvar)) > max_error(jvar)) reject_profile = .true.
+        end do chanloop
+        if (reject_profile) then
+          failed_retrievedBTcheck_count = failed_retrievedBTcheck_count + 1
           do jvar = 1, self % nchans
-            if( obs % QCflags(jvar,jobs) == 0 ) then
+            if( obs % QCflags(jvar,jobs) == self % passflag ) then
               obs % QCflags(jvar,jobs) = self % onedvarflag
             end if
           end do
@@ -335,7 +407,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       call r_submatrix % delete()
 
     else
-      call fckit_log % info("Final 1Dvar cost, apply = F")
+      call fckit_log % debug("Final 1Dvar cost, apply = F")
 
     endif
   end do obs_loop
@@ -348,6 +420,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   call fckit_log % info(message)
   write(message, *) "Number tested by 1dvar = ", apply_count
   call fckit_log % info(message)
+  write(message, *) "Number that failed to converge = ",failed_1dvar_count
+  call fckit_log % info(message)
+  write(message, *) "Number that failed the retrieved BT check = ",failed_retrievedBTcheck_count
+  call fckit_log % info(message)
 
   ! Put qcflags and output variables into observation space
   call obs % output(self % obsdb, prof_index, vars, self % nchans)
@@ -356,7 +432,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   call full_bmatrix % delete()
   call full_rmatrix % delete()
   call obs % delete()
-  if (self % pcemiss) call IR_pcemis % delete()
   if (allocated(b_matrix))  deallocate(b_matrix)
   if (allocated(b_inverse)) deallocate(b_inverse)
   if (allocated(b_sigma))   deallocate(b_sigma)

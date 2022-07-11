@@ -1,0 +1,30 @@
+window begin: 2021-01-14T09:00:00Z
+window end: 2021-01-15T15:00:00Z
+
+observations:
+- obs space:
+    name: metop_1_amsua_mhs
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_seaice.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-20
+#   obsdataout:
+#     obsfile: Data/atovs_metopb_obs_2021011512_seaice_emiss_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_seaice.nc4
+  obs function:
+    name: SetSeaIceEmiss@ObsFunction
+    channels: *channels
+    options:
+      channels: *channels
+      polarization index: [1, 1, 1, 1, 2,
+                           2, 1, 2, 2, 2,
+                           2, 2, 2, 2, 1,
+                           1, 1, 1, 1, 1]
+      channel frequency: [23.8,  31.4,  50.3,   52.8,   53.596,
+                          54.4,  54.94, 55.5,   57.29,  57.29,
+                          57.29, 57.29, 57.29,  57.29,  89.0,
+                          89.0, 150.0,  183.31, 183.31, 183.31]
+      orbit height: 827.0 #RTTOV coefficient nominal satellite height (km)
+    variables: [emissivity]
+    tolerance: 1.0e-7

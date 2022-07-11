@@ -9,13 +9,13 @@
 #define TEST_UFO_OBSFILTERS_H_
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
-#include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "oops/base/ObsFilters.h"
 #include "oops/interface/GeoVaLs.h"
@@ -94,8 +94,7 @@ class ObsTypeParameters : public oops::Parameters {
   oops::Parameter<ioda::ObsTopLevelParameters> obsSpace{"obs space", {}, this};
 
   /// Options used to configure observation filters.
-  oops::Parameter<std::vector<oops::ObsFilterParametersWrapper<ObsTraits>>> obsFilters{
-    "obs filters", {}, this};
+  oops::ObsFiltersParameters<ObsTraits> filtersParams{this};
 
   /// Options passed to the observation operator that will be applied during the test. If not set,
   /// no observation operator will be applied. To speed up tests of filters that depend on the
@@ -111,11 +110,11 @@ class ObsTypeParameters : public oops::Parameters {
 
   /// Options used to load GeoVaLs from a file. Required if any observation filters depend on
   /// GeoVaLs or of the `obs operator` option is set.
-  oops::OptionalParameter<eckit::LocalConfiguration> geovals{"geovals", this};
+  oops::Parameter<GeoVaLsParameters> geovals{"geovals", {}, this};
 
   /// Options used to load observation diagnostics from a file. Required if any observation filters
   /// depend on observation diagnostics.
-  oops::OptionalParameter<eckit::LocalConfiguration> obsDiagnostics{"obs diagnostics", this};
+  oops::Parameter<GeoVaLsParameters> obsDiagnostics{"obs diagnostics", {}, this};
 
   /// Options used to configure the observation bias.
   oops::Parameter<ObsBiasParameters> obsBias{"obs bias", {}, this};
@@ -152,6 +151,10 @@ class ObsTypeParameters : public oops::Parameters {
   oops::OptionalParameter<std::vector<CompareVariablesParameters>> compareVariables{
     "compareVariables", this};
 
+  /// A list of names of variables expected not to exist after all filters finish operation.
+  oops::OptionalParameter<std::vector<Variable>> expectVariablesNotToExist{
+    "expectVariablesNotToExist", this};
+
   /// If set to a string, the test will pass only if the filters produce an exception whose message
   /// contains that string.
   oops::OptionalParameter<std::string> expectExceptionWithMessage{
@@ -184,10 +187,10 @@ class ObsFiltersParameters : public oops::Parameters {
 //!
 void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
                    oops::ObsDataVector<ufo::ObsTraits, int> &qcflags,
-                   oops::ObsVector<ufo::ObsTraits> &obserr) {
+                   oops::ObsDataVector<ufo::ObsTraits, float> &obserr) {
   FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
                         qcflags.obsdatavectorptr(),
-                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsvector()));
+                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsdatavector()));
   finalCheck.doFilter();
 }
 
@@ -390,16 +393,18 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   typedef oops::ObsOperator<ufo::ObsTraits>       ObsOperator_;
   typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
+  typedef oops::ObsDataVector<ufo::ObsTraits, float> ObsDataVector_;
 
 /// init QC and error
-  ObsVector_ obserr(obspace, "ObsError");
+  ObsDataVector_ obserrfilter(obspace, obspace.obsvariables(), "ObsError");
   std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
     qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
-  ObsFilters_ filters(obspace, params.obsFilters, qcflags, obserr);
+  ObsFilters_ filters(obspace,
+                      params.filtersParams,
+                      qcflags, obserrfilter);
   filters.preProcess();
-
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
   oops::Variables diagvars = filters.requiredHdiagnostics();
@@ -410,32 +415,26 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 
   if (params.hofx.value() != boost::none) {
 ///   read GeoVaLs from file if required
-    std::unique_ptr<const GeoVaLs_> gval;
+    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
     if (geovars.size() > 0) {
-      if (params.geovals.value() == boost::none)
-        throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                               " of the 'observations' list requires a 'geovals' section", Here());
-      gval.reset(new GeoVaLs_(*params.geovals.value(), obspace, geovars));
-      filters.priorFilter(*gval);
-    } else {
+      filters.priorFilter(gval);
+      } else {
       oops::Log::info() << "Filters don't require geovals, priorFilter not called" << std::endl;
     }
 ///   read H(x) and ObsDiags from file
     oops::Log::info() << "HofX section specified, reading HofX from file" << std::endl;
     const std::string &hofxgroup = *params.hofx.value();
     ObsVector_ hofx(obspace, hofxgroup);
-    eckit::LocalConfiguration obsdiagconf;
     if (diagvars.size() > 0) {
-      if (params.obsDiagnostics.value() == boost::none)
+      if (params.obsDiagnostics.value().filename.value() == boost::none)
         throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                               " of the 'observations' list requires an 'obs diagnostics' section",
-                               Here());
-      obsdiagconf = *params.obsDiagnostics.value();
+                     " of the 'observations' list requires an 'obs diagnostics.filename' section",
+                     Here());
       oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
                         << std::endl;
     }
-    const ObsDiags_ diags(obsdiagconf, obspace, diagvars);
-    filters.postFilter(hofx, bias, diags);
+    const ObsDiags_ diags(params.obsDiagnostics.value(), obspace, diagvars);
+    filters.postFilter(gval, hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
@@ -446,40 +445,34 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     vars += hop.requiredVars();
     vars += filters.requiredVars();
     vars += ybias.requiredVars();
-    if (params.geovals.value() == boost::none)
-      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                             " of the 'observations' list requires a 'geovals' section", Here());
-    const GeoVaLs_ gval(*params.geovals.value(), obspace, vars);
+    const GeoVaLs_ gval(params.geovals.value(), obspace, vars);
     oops::Variables diagvars;
     diagvars += filters.requiredHdiagnostics();
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
     hop.simulateObs(gval, hofx, ybias, bias, diags);
+    filters.postFilter(gval, hofx, bias, diags);
     hofx.save("hofx");
-    filters.postFilter(hofx, bias, diags);
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
-    if (params.geovals.value() == boost::none)
-      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
-                             " of the 'observations' list requires a 'geovals' section", Here());
-    const GeoVaLs_ gval(*params.geovals.value(), obspace, geovars);
+    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserr);
+    runFinalCheck(obspace, *qcflags, obserrfilter);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserr);
+    runFinalCheck(obspace, *qcflags, obserrfilter);
   }
 
   qcflags->save("EffectiveQC");
   const std::string errname = "EffectiveError";
-  obserr.save(errname);
+  obserrfilter.save(errname);
 
 //  Compare with known results
   bool atLeastOneBenchmarkFound = false;
@@ -551,11 +544,27 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       case ioda::ObsDtype::Integer:
         expectVariablesEqual<int>(ufoObsSpace, referenceVariable, testVariable);
         break;
+      case ioda::ObsDtype::Integer_64:
+        // If this variable contains epoch metadata, that means it is a DateTime represented as
+        // seconds from epoch, so we reinterpret and compare the int64 as a DateTime. Otherwise,
+        // fall back to comparing as int64s.
+        try {
+          const std::string varname = referenceVariable.fullName();
+          const ioda::Variable &iodavar = ufoObsSpace.getObsGroup().vars.open(varname);
+          const util::DateTime epoch = ioda::getEpochAsDtime(iodavar);
+          expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
+        } catch (ioda::Exception&) {
+          expectVariablesEqual<int64_t>(ufoObsSpace, referenceVariable, testVariable);
+        }
+        break;
       case ioda::ObsDtype::String:
         expectVariablesEqual<std::string>(ufoObsSpace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::DateTime:
         expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
+        break;
+      case ioda::ObsDtype::Bool:
+        expectVariablesEqual<bool>(ufoObsSpace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::Float:
         if (compareVariablesParams.absTol.value() == boost::none &&
@@ -574,6 +583,13 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       case ioda::ObsDtype::None:
         ASSERT_MSG(false, "Reference variable not found in observation space");
       }
+    }
+  }
+
+  if (params.expectVariablesNotToExist.value() != boost::none) {
+    for (const Variable &var : *params.expectVariablesNotToExist.value()) {
+      atLeastOneBenchmarkFound = true;
+      EXPECT_NOT(ufoObsSpace.has(var.group(), var.variable()));
     }
   }
 

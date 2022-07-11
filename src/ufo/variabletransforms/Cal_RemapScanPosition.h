@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/ObjectCounter.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -29,13 +28,14 @@ namespace ufo {
 *  require scan_position@MetaData to be renumbered as 1, 2, 3, ..., 32.
 ///
 *
-* See VariableTransformsParameters for filter setup.
+* See VariableTransformParametersBase for filter setup.
 */
 class Cal_RemapScanPosition : public TransformBase {
  public:
-  Cal_RemapScanPosition(const VariableTransformsParameters &options,
+  Cal_RemapScanPosition(const GenericVariableTransformParameters &options,
                         const ObsFilterData &data,
-                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
+                        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                        const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 };

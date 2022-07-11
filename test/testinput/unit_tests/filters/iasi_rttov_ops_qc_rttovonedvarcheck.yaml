@@ -1,0 +1,158 @@
+_: &all_channels 16, 38, 49, 51, 55, 57, 59, 61, 63, 66, 70, 72, 74, 79, 81,
+                 83, 85, 87, 89, 92, 95, 97, 99, 101, 104, 106, 109, 111, 113, 116,
+                 119, 122, 125, 128, 131, 133, 135, 138, 141, 144, 146, 148, 151, 154, 157,
+                 159, 161, 163, 167, 170, 173, 176, 179, 180, 185, 187, 193, 199, 205, 207,
+                 210, 212, 214, 217, 219, 222, 224, 226, 230, 232, 236, 239, 242, 243, 246,
+                 249, 252, 254, 260, 262, 265, 267, 269, 275, 280, 282, 294, 296, 299, 303,
+                 306, 323, 327, 329, 335, 345, 347, 350, 354, 356, 360, 366, 371, 373, 375,
+                 377, 379, 381, 383, 386, 389, 398, 401, 404, 407, 410, 414, 416, 426, 428,
+                 432, 434, 439, 445, 457, 515, 546, 552, 559, 566, 571, 573, 646, 662, 668,
+                 756, 867, 906, 921, 1027, 1046, 1121, 1133, 1191, 1194, 1271, 1479, 1509, 1513, 1521,
+                 1536, 1574, 1579, 1585, 1587, 1626, 1639, 1643, 1652, 1658, 1671, 1786, 1805, 1884, 1991,
+                 2019, 2094, 2119, 2213, 2239, 2245, 2271, 2321, 2398, 2701, 2741, 2819, 2889, 2907, 2910,
+                 2919, 2939, 2944, 2948, 2951, 2958, 2977, 2985, 2988, 2991, 2993, 3002, 3008, 3014, 3027,
+                 3029, 3036, 3047, 3049, 3053, 3058, 3064, 3069, 3087, 3093, 3098, 3105, 3107, 3110, 3127,
+                 3136, 3151, 3160, 3165, 3168, 3175, 3178, 3207, 3228, 3244, 3248, 3252, 3256, 3263, 3281,
+                 3303, 3309, 3312, 3322, 3339, 3375, 3378, 3411, 3438, 3440, 3442, 3444, 3446, 3448, 3450,
+                 3452, 3454, 3458, 3467, 3476, 3484, 3491, 3497, 3499, 3504, 3506, 3509, 3518, 3522, 3527,
+                 3540, 3555, 3575, 3577, 3580, 3582, 3586, 3589, 3599, 3653, 3658, 3661, 3943, 4032, 5130,
+                 5368, 5371, 5379, 5381, 5383, 5397, 5399, 5401, 5403, 5405, 5455, 5480, 5483, 5485, 5492,
+                 5502, 5507, 5509, 5517, 5558, 5988, 5992, 5994, 6003, 6350, 6463, 6601, 6962, 6980, 6982,
+                 6985, 6987, 6989, 6991, 6993, 6995, 6997, 7267, 7269, 7424, 7426, 7428, 7885, 8007
+
+_: &1dvarchannels 16, 38, 49, 51, 55, 57, 59, 61, 63, 66, 70, 72, 74, 79, 81,
+                  83, 85, 87, 89, 95, 97, 99, 101, 104, 106, 109, 111, 113, 116, 119,
+                  122, 125, 128, 131, 133, 135, 138, 141, 144, 146, 148, 151, 154, 157, 159,
+                  161, 163, 167, 170, 173, 176, 179, 180, 185, 187, 193, 199, 205, 207, 210,
+                  212, 214, 217, 219, 222, 224, 226, 230, 232, 236, 239, 242, 243, 246, 249,
+                  252, 254, 260, 262, 265, 267, 275, 280, 282, 294, 296, 299, 303, 306, 323,
+                  327, 329, 335, 345, 347, 350, 354, 356, 360, 366, 371, 373, 375, 377, 379,
+                  381, 383, 386, 389, 398, 401, 404, 407, 410, 414, 416, 426, 428, 432, 434,
+                  439, 445, 457, 515, 546, 552, 566, 571, 573, 646, 662, 668, 756, 867, 906,
+                  921, 1027, 1046, 1121, 1133, 1191, 1194, 1271, 1786, 1805, 1884, 1991, 2019, 2094, 2119,
+                  2239, 2245, 2889, 2907, 2944, 2948, 2951, 2958, 2988, 3027, 3029, 3053, 3058, 3064, 5130,
+                  5368, 5371, 5379, 5381, 5383, 5397, 5399, 5401, 5403, 5405
+
+_: &1dvar_not_used 92,  269,  559, 1479, 1509, 1513, 1521, 1536, 1574, 1579, 1585, 1587, 1626, 1639, 1643,
+                   1652, 1658, 1671, 2213, 2271, 2321, 2398, 2701, 2741, 2819, 2910, 2919, 2939, 2977, 2985,
+                   2991, 2993, 3002, 3008, 3014, 3036, 3047, 3049, 3069, 3087, 3093, 3098, 3105, 3107, 3110,
+                   3127, 3136, 3151, 3160, 3165, 3168, 3175, 3178, 3207, 3228, 3244, 3248, 3252, 3256, 3263,
+                   3281, 3303, 3309, 3312, 3322, 3339, 3375, 3378, 3411, 3438, 3440, 3442, 3444, 3446, 3448,
+                   3450, 3452, 3454, 3458, 3467, 3476, 3484, 3491, 3497, 3499, 3504, 3506, 3509, 3518, 3522,
+                   3527, 3540, 3555, 3575, 3577, 3580, 3582, 3586, 3589, 3599, 3653, 3658, 3661, 3943, 4032,
+                   5455, 5480, 5483, 5485, 5492, 5502, 5507, 5509, 5517, 5558, 5988, 5992, 5994, 6003, 6350,
+                   6463, 6601, 6962, 6980, 6982, 6985, 6987, 6989, 6991, 6993, 6995, 6997, 7267, 7269, 7424,
+                   7426, 7428, 7885, 8007
+
+_: &land_not_used 265, 280, 327, 345, 347, 350, 356, 371, 373, 375, 377, 379, 381, 383, 386, 389,
+                  398, 401, 404, 407, 410, 414, 416, 426, 428, 432, 434, 439, 445, 457, 515, 546,
+                  552, 566, 571, 573, 646, 662, 668, 1786, 1805, 1884, 1991, 2019, 2094, 2119,
+                  2239, 2245, 2889, 2907, 2944, 2948, 2951, 2958, 2988, 3027, 3029, 3053, 3058,
+                  3064, 5130, 5368, 5371, 5379, 5381, 5383, 5397, 5399, 5401, 5403, 5405
+
+window begin: 2021-01-14T21:00:00Z
+window end: 2021-01-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [Ozone]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      Platform_Name: &platform_id METOP
+      Sat_ID: &satellite_id 1
+      Instrument_Name: &instrument_id IASI
+      CoefficientPath: &coefpath Data/
+      RTTOV_GasUnitConv: &gasunitconv true
+      UseRHwaterForQC: &UseRHwaterForQC true
+      UseColdSurfaceCheck: &UseColdSurfaceCheck false
+      RTTOV_clw_data: false
+      RTTOV_profile_checkinput: true
+  obs space:
+    name: Test the hyperspectral retrievals
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+    simulated variables: [brightness_temperature]
+    channels: *all_channels
+#   obsdataout:
+#     obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
+  obs filters:
+### No Channels ###
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    where:
+    - variable:
+        name: qcf_NoChannels@MetaData
+      is_in: 1
+### BlackList ###
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: *1dvar_not_used
+### Remove channels over land
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: *land_not_used
+    where:
+    - variable:
+        name: surface_type@MetaData
+      is_in: 0
+### 1D-Var check ###
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: *gasunitconv
+        UseRHwaterForQC: false
+        UseColdSurfaceCheck: false
+        Platform_Name: *platform_id
+        Sat_ID: *satellite_id
+        Instrument_Name: *instrument_id
+        CoefficientPath: *coefpath
+        RTTOV_clw_data: false
+    BMatrix: ../resources/bmatrix/rttov/iasi_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *1dvarchannels
+    retrieval variables from geovals:
+    - air_temperature # 1
+    - specific_humidity  # 2
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - surface_pressure # 6
+    retrieval variables not from geovals:
+    - cloud_top_pressure # 16
+    - cloud_fraction # 17
+    - emissivity_pc # 18
+    nlevels: 70
+    UseMLMinimization: true
+    defer to post: true
+    obs bias group for testing: ObsBias
+    Max1DVarIterations: 10
+    MaxMLIterations: 10
+    SkinTempErrorLand: 5.0
+    surface emissivity:
+      type: principalcomponent
+      EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
+  passedBenchmark: 537
+  compareVariables:
+    - reference:
+        name: n_iterations@TestReference
+      test:
+        name: n_iterations@OneDVar
+  compareVariables:
+    - reference:
+        name: cloud_top_pressure@TestReference
+      test:
+        name: cloud_top_pressure@OneDVar
+      absTol: 1.0e-4

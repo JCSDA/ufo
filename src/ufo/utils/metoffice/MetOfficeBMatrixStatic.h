@@ -42,6 +42,7 @@ class MetOfficeBMatrixStatic : public util::Printable,
   size_t getindex(const float) const;
   size_t getsize(void) const;
   void multiply(const float, const Eigen::MatrixXf &, Eigen::MatrixXf &) const;
+  void scale(const size_t elem, const float stdev);
 
  private:
   void print(std::ostream &) const override;

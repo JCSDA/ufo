@@ -5,9 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+
 #include "ioda/ObsDataVector.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/parameters/Parameter.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/Conditional.h"
 #include "ufo/filters/Variable.h"
 
@@ -45,7 +47,7 @@ void Conditional<FunctionValue>::compute(const ObsFilterData & in,
   // if firstmatchingcase is false, the last matching case will assign the value.
   std::vector<bool> applied(out.nlocs(), false);
   for (const LocalConditionalParameters<FunctionValue> &lcp : options_.cases.value()) {
-    std::vector<bool> apply = processWhere(lcp.where, in);
+    std::vector<bool> apply = processWhere(lcp.where, in, lcp.whereOperator);
     for (size_t iloc = 0; iloc < out.nlocs(); ++iloc) {
       if (apply[iloc] && applied[iloc] == false) {
         for (size_t ivar = 0; ivar < out.nvars(); ++ivar)

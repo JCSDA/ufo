@@ -37,10 +37,12 @@ namespace ufo {
     // (Some might be empty; that is checked before they are used.)
     std::vector <int> &tFlags = profileDataHandler.get<int>
       (ufo::VariableNames::qcflags_air_temperature);
-    std::vector <int> &zFlags = profileDataHandler.get<int>
-      (ufo::VariableNames::qcflags_geopotential_height);
     std::vector <int> &uFlags = profileDataHandler.get<int>
       (ufo::VariableNames::qcflags_eastward_wind);
+    std::vector <int> &vFlags = profileDataHandler.get<int>
+      (ufo::VariableNames::qcflags_northward_wind);
+    std::vector <int> &rhFlags = profileDataHandler.get<int>
+      (ufo::VariableNames::qcflags_relative_humidity);
 
     // Warn and exit if pressures vector is empty
     if (pressures.empty()) {
@@ -48,6 +50,8 @@ namespace ufo {
       oops::Log::debug() << "Pressures vector is empty" << std::endl;
       return;
      }
+
+    // Apply a series of basic checks and print the results to the debug stream.
 
     // Is the number of levels to check OK?
     bool numProfileLevelsOK = (numProfileLevels > 0);
@@ -74,16 +78,24 @@ namespace ufo {
     oops::Log::debug() << " -> maxPressOK: " << maxPressOK << std::endl;
     oops::Log::debug() << " -> minPressOK: " << minPressOK << std::endl;
 
+    // If `result_` is true then no further profile QC checks instantiated by this filter will run.
     result_ = numProfileLevelsOK && pressOrderOK && maxPressOK && minPressOK;
     oops::Log::debug() << " -> basicResult: " << result_ << std::endl;
 
-    // If the basic checks are failed, set reject flags
-    // This is not done in the OPS sonde consistency checks, but is done in Ops_SondeAverage.inc
-    if (options_.flagBasicChecksFail.value() && !result_) {
+    // Flag any failing levels if required.
+    if (options_.flagBasicChecksFail) {
+      // Starting value of pressure (Pa).
+      float pressure_current = options_.BChecks_maxValidP.value();
       for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
-        if (!tFlags.empty()) tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
-        if (!zFlags.empty()) zFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
-        if (!uFlags.empty()) uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+        if (pressures[jlev] == missingValueFloat) continue;
+        if (pressures[jlev] > pressure_current ||
+            pressures[jlev] <= options_.BChecks_minValidP.value()) {
+          if (!tFlags.empty()) tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+          if (!uFlags.empty()) uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+          if (!vFlags.empty()) vFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+          if (!rhFlags.empty()) rhFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+        }
+        pressure_current = pressures[jlev];
       }
     }
   }

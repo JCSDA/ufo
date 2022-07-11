@@ -13,7 +13,6 @@
 #include <utility>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "eckit/geometry/Point2.h"
 #include "eckit/geometry/Sphere.h"
 
@@ -28,12 +27,13 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDerivativeCheck::ObsDerivativeCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+ObsDerivativeCheck::ObsDerivativeCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr),
+    parameters_(parameters)
 {
-  oops::Log::debug() << "ObsDerivativeCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDerivativeCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -101,15 +101,16 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
   const double radiusEarth = Constants::mean_earth_rad*1000.0;
 
   // first we want to get the config of the two vars to use in computing the derivative
-  const std::string strInd_ = config_.getString("independent", "");
-  const std::string strDep_ = config_.getString("dependent", "");
-  size_t i1 = config_.getInt("i1", 0);  // specified indices to use if not local derivatives
-  size_t i2 = config_.getInt("i2", 0);
+  const std::string strInd_ = parameters_.independent;
+  const std::string strDep_ = parameters_.dependent;
+  // specified indices to use if not local derivatives
+  const size_t i1 = parameters_.i1;
+  const size_t i2 = parameters_.i2;
   size_t ii1 = 0;  // indices that will be used to compute derivativs
   size_t ii2 = 0;
   // min/max value setup
-  float minddx = config_.getFloat("minvalue", missing);
-  float maxddx = config_.getFloat("maxvalue", missing);
+  const float minddx = parameters_.minvalue;
+  const float maxddx = parameters_.maxvalue;
 
   oops::Log::debug() << "ObsDerivativeCheck: Independent Var = " << strInd_ << std::endl;
   oops::Log::debug() << "ObsDerivativeCheck: Dependent Var = " << strDep_ << std::endl;
@@ -129,7 +130,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
   // when x is distance:
   //       longitude and latitude are used to compute great circle distances
   //       for denominator
-  if ( strInd_ == "datetime" ) {  // special case for datetime
+  if ( strInd_ == "dateTime" ) {  // special case for datetime
       std::vector<util::DateTime> varIndT_(nlocs_);
       obsdb_.get_db("MetaData", strInd_, varIndT_);
       ioda::ObsSpace::RecIdxIter irec;
@@ -239,7 +240,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void ObsDerivativeCheck::print(std::ostream & os) const {
-  os << "ObsDerivativeCheck: config = " << config_ << std::endl;
+  os << "ObsDerivativeCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

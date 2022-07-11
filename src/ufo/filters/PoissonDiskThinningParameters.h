@@ -20,10 +20,6 @@
 #include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
 
 enum class ExclusionVolumeShape {
@@ -161,11 +157,27 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// prevents that from happening).
   oops::Parameter<bool> shuffle{"shuffle", true, this};
 
+  /// Instead of randomly shuffling obs, sort by the pressure coordinate.
+  /// Must be "ascending" or "descending" wrt to pressure coordinate values.
+  oops::OptionalParameter<std::string> sortVertical{"sort_vertical", this};
+
   /// Seed with which to initialize the random number generator used to shuffle the observations
   /// if \p shuffle is set to true.
   ///
   /// If omitted, a seed will be generated based on the current (calendar) time.
   oops::OptionalParameter<int> randomSeed{"random_seed", this};
+
+  /// Name of air pressure coordinate
+  oops::Parameter<std::string> pressureCoord{"pressure_coordinate",
+                                             "Name of air pressure coordinate",
+                                             "pressure",
+                                             this};
+
+  /// Name of air pressure group
+  oops::Parameter<std::string> pressureGroup{"pressure_group",
+                                             "Name of air pressure group",
+                                             "ObsValue",
+                                             this};
 };
 
 }  // namespace ufo

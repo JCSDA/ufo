@@ -6,7 +6,10 @@
  */
 
 #include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/predictors/Thickness.h"
 #include "ufo/utils/Constants.h"
@@ -37,6 +40,7 @@ Thickness::Thickness(const Parameters_ & parameters, const oops::Variables & var
 void Thickness::compute(const ioda::ObsSpace & odb,
                        const GeoVaLs & geovals,
                        const ObsDiagnostics &,
+                       const ObsBias &,
                        ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
   const std::size_t nvars = out.nvars();
@@ -58,8 +62,9 @@ void Thickness::compute(const ioda::ObsSpace & odb,
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     geovals.getAtLocation(p_prof, "air_pressure", jl);
     geovals.getAtLocation(t_prof, "air_temperature", jl);
-    std::reverse(p_prof.begin(), p_prof.end());
-    std::reverse(t_prof.begin(), t_prof.end());
+
+    if (p_prof.front() > p_prof.back())
+      throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
 
     // Check that layer top is within pressure levels
     if (p_high > p_prof.back()) {

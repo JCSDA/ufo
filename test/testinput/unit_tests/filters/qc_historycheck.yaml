@@ -1,0 +1,149 @@
+window begin: 2010-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+# Observations grouped into profiles.
+- obs space: &obsspace
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_history_check_out.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: History Check
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: &shiptrackcheck
+      temporal resolution: PT1S
+      spatial resolution (km): 0.0000001
+      max speed (m/s): 5.0
+      rejection threshold: 0.5
+      early break check: false
+    stuck check parameters: &stuckcheck
+      number stuck tolerance: 2
+      time stuck tolerance: PT45M
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: &obsspacewide
+      name: Ship, wide time window
+      simulated variables: [air_temperature]
+      obsdatain:
+        obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
+#     obsdataout:
+#       obsfile: Data/met_office_history_check_wide_out.nc4
+        obsgrouping:
+          group variables: [ "station_id" ]
+  passedBenchmark: 6
+  benchmarkFlag: 28
+  flaggedBenchmark: 2
+# Observations grouped into profiles, only apply filter when station_id@MetaData == 1.
+- obs space: *obsspace
+  obs filters:
+  - filter: History Check
+    where:
+    - variable:
+        name: station_id@MetaData
+      is_in: [1]
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: *shiptrackcheck
+    stuck check parameters: *stuckcheck
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: *obsspacewide
+  passedBenchmark: 6
+  benchmarkFlag: 28
+  flaggedBenchmark: 2
+# Observations grouped into profiles, only apply filter when station_id@MetaData == 2.
+- obs space: *obsspace
+  obs filters:
+  - filter: History Check
+    where:
+    - variable:
+        name: station_id@MetaData
+      is_in: [2]
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: *shiptrackcheck
+    stuck check parameters: *stuckcheck
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: *obsspacewide
+  passedBenchmark: 8
+  benchmarkFlag: 28
+  flaggedBenchmark: 0
+# No observation grouping.
+- obs space: &obsspace_nogroup
+    name: Ship
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
+#   obsdataout:
+#     obsfile: Data/met_office_history_check_noobsgrouping_out.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: History Check
+    where:
+    - variable:
+        name: station_id@MetaData
+      is_in: [1]
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: *shiptrackcheck
+    stuck check parameters: *stuckcheck
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: &obsspacewide_nogroup
+      name: Ship, wide time window
+      simulated variables: [air_temperature]
+      obsdatain:
+        obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
+#     obsdataout:
+#       obsfile: Data/met_office_history_check_wide_noobsgrouping_out.nc4
+  passedBenchmark: 6
+  benchmarkFlag: 28
+  flaggedBenchmark: 2
+# No observation grouping, only apply filter when station_id@MetaData == 1.
+- obs space: *obsspace_nogroup
+  obs filters:
+  - filter: History Check
+    where:
+    - variable:
+        name: station_id@MetaData
+      is_in: [1]
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: *shiptrackcheck
+    stuck check parameters: *stuckcheck
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: *obsspacewide_nogroup
+  passedBenchmark: 6
+  benchmarkFlag: 28
+  flaggedBenchmark: 2
+# No observation grouping, only apply filter when station_id@MetaData == 2.
+- obs space: *obsspace_nogroup
+  obs filters:
+  - filter: History Check
+    where:
+    - variable:
+        name: station_id@MetaData
+      is_in: [2]
+    input category: 'OPENROAD'
+    time before start of window: PT1H1M
+    filter variables: [air_temperature]
+    ship track check parameters: *shiptrackcheck
+    stuck check parameters: *stuckcheck
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: *obsspacewide_nogroup
+  passedBenchmark: 8
+  benchmarkFlag: 28
+  flaggedBenchmark: 0

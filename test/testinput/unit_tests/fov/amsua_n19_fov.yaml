@@ -1,0 +1,99 @@
+field of view:
+  # Parameters defining the field of view of an observation. Note that while each of these
+  # inputs should be within reasonable bounds, they need not (for this test) correspond to
+  # a physically realizable observation. In other words, it does not matter if the satellite
+  # is able to view the indicated lat/lon with the indicated scan position + azimuth angle.
+  sensor: amsua
+  satellite: n19
+  scan position: 1.0
+  sensor azimuth angle: 80.0
+  longitude: 213.0
+  latitude: 38.0
+
+  # Points within and near the field of view ellipse where the antenna power is measured
+  # for comparisons to GSI.
+  sample longitudes:
+    - 213.0
+    - 213.1
+    - 214.7
+    - 213.0
+  sample latitudes:
+    - 38.0
+    - 37.6
+    - 38.0
+    - 36.8
+
+  abs tol: 1.0e-7
+
+  # Reference lat/lon coordinates of the points defining the polygon that approximates the
+  # field of view ellipse. These coordinates come from calling GSI's fov_ellipse_crosstrk.
+  reference ellipse longitudes:
+    - 215.59488471655663
+    - 215.47192358824978
+    - 215.08529357995283
+    - 214.65186021428494
+    - 214.25858016877078
+    - 213.91336862182905
+    - 213.60235159076626
+    - 213.30880702405872
+    - 213.01652682918493
+    - 212.70894289546675
+    - 212.36741471256576
+    - 211.97066139298491
+    - 211.50125215221786
+    - 210.97844877859401
+    - 210.53868748404560
+    - 210.42749002319997
+    - 210.68735548475038
+    - 211.10465154538042
+    - 211.52081175394497
+    - 211.89283762132848
+    - 212.22503213328889
+    - 212.53255389668979
+    - 212.83159115317395
+    - 213.13838822434658
+    - 213.47055385142190
+    - 213.84831793662167
+    - 214.29226539769780
+    - 214.80555135434162
+    - 215.31344323636665
+    - 215.59488471655663
+  reference ellipse latitudes:
+    - 38.330427869960651
+    - 37.891889703500247
+    - 37.543870403959296
+    - 37.312016238840890
+    - 37.161870705295016
+    - 37.061203277302603
+    - 36.990502078884091
+    - 36.939172261957907
+    - 36.902022368801802
+    - 36.877694804278569
+    - 36.868891328480530
+    - 36.884895933485424
+    - 36.947941726651969
+    - 37.102828310959147
+    - 37.406036283746296
+    - 37.837273000896076
+    - 38.252692957241457
+    - 38.554794558106309
+    - 38.752791997616356
+    - 38.883033402748666
+    - 38.972120994546223
+    - 39.035361803252421
+    - 39.080773531810806
+    - 39.111644986423222
+    - 39.127204440620012
+    - 39.121274514362938
+    - 39.077904952467286
+    - 38.963011814248190
+    - 38.721832676748861
+    - 38.330427869960651
+
+  # Reference antenna powers at the sample points selected above. These values come from calling
+  # GSI's inside_fov_crosstrk.
+  reference sample powers:
+    - 0.95001405015714202
+    - 0.30949493869898320
+    - 0.092015969735382244
+    - 0.0

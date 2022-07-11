@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <memory>
 
-#include "eckit/mpi/Comm.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBias.h"
@@ -21,7 +20,7 @@ namespace ufo {
 
 ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
-  : vars_(odb.obsvariables()) {
+  : vars_(odb.assimvariables()) {
   oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
 
   // Predictor factory
@@ -123,17 +122,20 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::serialize(std::vector<double> & vect) const {
-  if (this->serialSize() > 0) {
-    throw eckit::NotImplemented("ufo::ObsBiasIncrement::serialize not implemented", Here());
-  }
+  std::vector<double> vec_obs(biascoeffsinc_.data(),
+                              biascoeffsinc_.data() + biascoeffsinc_.size());
+  vect.insert(vect.end(), vec_obs.begin(), vec_obs.end());
+  oops::Log::trace() << "ObsBiasIncrement::serialize done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::deserialize(const std::vector<double> & vect, std::size_t & index) {
-  if (this->serialSize() > 0) {
-    throw eckit::NotImplemented("ufo::ObsBiasIncrement::deserialize not implemented", Here());
+  for (unsigned int jj = 0; jj < biascoeffsinc_.size(); ++jj) {
+    biascoeffsinc_[jj] = vect[index];
+    ++index;
   }
+  oops::Log::trace() << "ObsBiasIncrement::deserialize done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -147,12 +149,9 @@ void ObsBiasIncrement::print(std::ostream & os) const {
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < prednames_.size(); ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
-         << ":  Min= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).minCoeff()
-         << ",  Max= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).maxCoeff()
-         << ",  Norm= " << std::setw(15) << std::setprecision(8)
-         << coeffs.row(p).norm()
+         << ":  Min= " << std::setw(15) << coeffs.row(p).minCoeff()
+         << ",  Max= " << std::setw(15) << coeffs.row(p).maxCoeff()
+         << ",  Norm= " << std::setw(15) << coeffs.row(p).norm()
          << std::endl;
     }
     os << "---------------------------------------------------------------" << std::endl;

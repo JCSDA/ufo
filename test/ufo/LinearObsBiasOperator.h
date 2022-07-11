@@ -58,10 +58,12 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
 
     // read geovals from the file
     const eckit::LocalConfiguration gconf(conf, "geovals");
+    GeoVaLsParameters geovalsparams;
+    geovalsparams.validateAndDeserialize(gconf);
     oops::Variables requiredVars = odb.obsvariables();
     requiredVars += bias.requiredVars();
     requiredVars += targetBias.requiredVars();
-    const GeoVaLs geovals(gconf, odb, requiredVars);
+    const GeoVaLs geovals(geovalsparams, odb, requiredVars);
 
     // set up obs diagnostics
     oops::Variables requiredHdiagnostics;
@@ -71,7 +73,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     std::vector<util::DateTime> times(odb.nlocs());
     odb.get_db("MetaData", "latitude", lats);
     odb.get_db("MetaData", "longitude", lons);
-    odb.get_db("MetaData", "datetime", times);
+    odb.get_db("MetaData", "dateTime", times);
     ObsDiagnostics ydiags(odb, Locations(lons, lats, times, odb.distribution()),
                           requiredHdiagnostics);
 

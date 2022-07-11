@@ -15,12 +15,9 @@
 #include <boost/make_unique.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsDataVector.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/PolymorphicParameter.h"
 
 namespace ioda {
 template <typename T> class ObsDataVector;
@@ -60,6 +57,8 @@ class FilterActionBase : private boost::noncopyable {
   FilterActionBase() {}
   virtual ~FilterActionBase() {}
 
+  /// \brief Perform the action.
+  ///
   /// \param vars
   ///   The list of filter variables.
   /// \param flagged
@@ -78,7 +77,17 @@ class FilterActionBase : private boost::noncopyable {
                      const ObsFilterData &data, int filterQCflag,
                      ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const = 0;
 
+  /// \brief Return the list of variables required by the action.
+  ///
+  /// This list must in particular contain any required variables that become available to
+  /// filters only after FilterBase::priorFilter() or FilterBase::postFilter() is called; this
+  /// includes `GeoVaLs`, `HofX` and `ObsDiag`.
   virtual const Variables & requiredVariables() const = 0;
+
+  /// \brief Return true if this action modifies QC flags.
+  ///
+  /// When a filter executes multiple actions, only the last is allowed to modify QC flags.
+  virtual bool modifiesQCFlags() const = 0;
 };
 
 // -----------------------------------------------------------------------------

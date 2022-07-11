@@ -38,7 +38,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsDiagnostics;
   class ProfileDataHolder;
 }
 
@@ -50,6 +49,7 @@ namespace ufo {
   class ProfileDataHandler {
    public:
     ProfileDataHandler(const ObsFilterData &data,
+                       ioda::ObsDataVector<int> &flags,
                        const DataHandlerParameters &options,
                        const std::vector <bool> &apply,
                        const Variables &filtervars,
@@ -153,8 +153,8 @@ namespace ufo {
     /// Get GeoVaLs for a particular profile.
     std::vector <float>& getGeoVaLVector(const std::string &variableName);
 
-    /// Get ObsDiags for a particular profile.
-    std::vector <float>& getObsDiag(const std::string &variableName);
+    /// Get filter flags
+    ioda::ObsDataVector<int>& getFilterFlags() const {return flags_;}
 
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
@@ -165,8 +165,7 @@ namespace ufo {
       (const std::vector <std::string> &variableNamesInt,
        const std::vector <std::string> &variableNamesFloat,
        const std::vector <std::string> &variableNamesString,
-       const std::vector <std::string> &variableNamesGeoVaLs,
-       const std::vector <std::string> &variableNamesObsDiags);
+       const std::vector <std::string> &variableNamesGeoVaLs);
 
     /// Read values from a collection of profiles and update information related to each one.
     void updateAllProfiles(std::vector <ProfileDataHolder> &profiles);
@@ -210,22 +209,22 @@ namespace ufo {
    private:  // members
     /// Container of each variable in the current profile.
     std::unordered_map <std::string, boost::variant
-      <std::vector <int>, std::vector <float>, std::vector <std::string>>> profileData_;
+                        <std::vector <int>,
+                         std::vector <float>,
+                         std::vector <std::string>,
+                         std::vector <bool>>> profileData_;
 
     /// Container of GeoVaLs in the current profile.
     std::unordered_map <std::string, std::vector <float>> GeoVaLData_;
 
-    /// Container of ObsDiags in the current profile.
-    std::unordered_map <std::string, std::vector <float>> obsDiagData_;
-
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 
-    /// GeoVaLs loaded by the filter.
-    const GeoVaLs* const geovals_;
+    /// GeoVaLs.
+    std::unique_ptr<GeoVaLs> geovals_;
 
-    /// ObsDiags loaded by the filter.
-    const ObsDiagnostics* const obsdiags_;
+    /// Filter flags
+    ioda::ObsDataVector<int> &flags_;
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;

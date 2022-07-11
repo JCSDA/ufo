@@ -17,6 +17,16 @@ function(CREATE_SYMLINK_FILENAME src dst)
         endforeach(FILENAME)
 endfunction(CREATE_SYMLINK_FILENAME)
 
+# macro to prepend a prefix with relative path
+# can this be added to ecbuild for use elsewhere?
+function(PREPEND var prefix )
+    set ( listVar "" )
+    foreach (f ${ARGN})
+        list (APPEND listVar "${prefix}/${f}")
+    endforeach(f)
+    set ( ${var} "${listVar}" PARENT_SCOPE )
+endfunction(PREPEND)
+
 # -----------------------------------------------------------------------------
 
 # The following is a wrapper to simplify the generation of tests.

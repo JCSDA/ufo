@@ -19,6 +19,8 @@
 #include "oops/util/missingValues.h"
 #include "oops/util/PropertiesOfNVectors.h"
 
+#include "ufo/filters/ObsFilterData.h"
+
 namespace ufo {
 
 static ObsFunctionMaker<ObsErrorModelStepwiseLinear> makerSteps_("ObsErrorModelStepwiseLinear");

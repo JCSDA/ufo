@@ -12,9 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "eckit/exception/Exceptions.h"
-
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
@@ -25,10 +22,6 @@
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ufo {
 
@@ -45,9 +38,6 @@ namespace ufo {
 
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
-
-    /// Have the observation and model values been averaged onto model levels?
-    oops::Parameter<bool> modellevels {"ModelLevels", false, this};
 
     /// @}
 

@@ -21,6 +21,7 @@ namespace formulas {
 
 MethodFormulation resolveMethods(const std::string& input) {
   // Met Centers
+  if (input == "UKMOmixingratio") return UKMOmixingratio;
   if (input == "UKMO") return UKMO;
   if (input == "NCAR") return NCAR;
   if (input == "NOAA") return NOAA;
@@ -64,6 +65,7 @@ float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
       }
       break;
     }
+    case formulas::MethodFormulation::UKMOmixingratio:
     case formulas::MethodFormulation::LandoltBornstein: {
       /* Returns a saturation mixing ratio given a temperature and pressure
          using saturation vapour pressures caluclated using the Goff-Gratch
@@ -136,6 +138,7 @@ float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
   switch (formulation) {
     case formulas::MethodFormulation::NCAR:
     case formulas::MethodFormulation::NOAA:
+    case formulas::MethodFormulation::UKMOmixingratio:
     case formulas::MethodFormulation::UKMO:
     case formulas::MethodFormulation::Sonntag: {
       /* e_sub_s is the saturation vapour pressure of pure water vapour.FsubW (~ 1.005
@@ -167,6 +170,7 @@ float Qsat_From_Psat(float Psat, float P, MethodFormulation formulation) {
   switch (formulation) {
     case formulas::MethodFormulation::NCAR:
     case formulas::MethodFormulation::NOAA:
+    case formulas::MethodFormulation::UKMOmixingratio:
     case formulas::MethodFormulation::UKMO:
     default: {
       // Calculation using the Sonntag (1994) formula. (With fix at low
@@ -484,6 +488,17 @@ void horizontalDrift
     break;
   }
   }
+}
+
+/* -------------------------------------------------------------------------------------*/
+
+float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
+  float BkP = util::missingValue(1.0f);
+  double ToRaise =  (PSurfParamA - height)/PSurfParamB;
+  if (ToRaise > 0.0) {
+    BkP = pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
+  }
+  return BkP;
 }
 }  // namespace formulas
 }  // namespace ufo

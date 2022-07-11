@@ -35,6 +35,7 @@ class TestParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(TestParameters, Parameters);
  public:
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
+  oops::Parameter<WhereOperator> whereOperator{"where operator", WhereOperator::AND, this};
   oops::RequiredParameter<int> sizeWhereTrue{"size where true", this};
 };
 
@@ -61,9 +62,9 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
     TestParameters params;
     params.validateAndDeserialize(config);
     if (is_in_usererror) {
-      EXPECT_THROWS(processWhere(params.where, data));
+      EXPECT_THROWS(processWhere(params.where, data, params.whereOperator));
     } else {
-      std::vector<bool> result = processWhere(params.where, data);
+      std::vector<bool> result = processWhere(params.where, data, params.whereOperator);
       const int size_ref = params.sizeWhereTrue;
       const int size = std::count(result.begin(), result.end(), true);
       oops::Log::info() << "reference: " << size_ref << ", compare with " << size << std::endl;
@@ -78,6 +79,7 @@ class ProcessWhere : public oops::Test {
  public:
   ProcessWhere() {}
   virtual ~ProcessWhere() {}
+
  private:
   std::string testid() const override {return "ufo::test::ProcessWhere";}
 
@@ -87,6 +89,11 @@ class ProcessWhere : public oops::Test {
     ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_successful") {
       testProcessWhere(eckit::LocalConfiguration(::test::TestEnvironment::config(),
                                                 "successful"));
+    });
+
+    ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_operator") {
+      testProcessWhere(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                "operator"));
     });
 
     ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_isin_usererror") {

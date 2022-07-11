@@ -95,6 +95,13 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   oops::Parameter<bool> comparisonTesting {
     "comparison test", false, this
   };
+
+  /// Treat each record as a single observation. If this option is set to true then the records
+  /// on all MPI ranks are considered together (in contrast to treating each record in isolation).
+  ///
+  /// The variable used to group observations into records can be set with the
+  /// `obs space.obsdatain.obsgrouping.group` variable YAML option.
+  oops::Parameter<bool> recordsAreSingleObs{"records_are_single_obs", false, this};
 };
 
 }  // namespace ufo

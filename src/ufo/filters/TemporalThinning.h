@@ -15,15 +15,10 @@
 
 #include <boost/optional.hpp>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/TemporalThinningParameters.h"
-
-namespace eckit {
-  class Configuration;
-}
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;

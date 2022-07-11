@@ -25,7 +25,7 @@ namespace ufo
 class RoundingEquispacedBinSelector : public EquispacedBinSelectorBase {
  public:
   // If necessary, these could be made template parameters.
-  typedef float ValueType;
+  typedef double ValueType;
   typedef int IndexType;
 
   /// \brief Partition the real axis into bins of width \p binWidth, with the center of bin 0

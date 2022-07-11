@@ -16,7 +16,6 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"

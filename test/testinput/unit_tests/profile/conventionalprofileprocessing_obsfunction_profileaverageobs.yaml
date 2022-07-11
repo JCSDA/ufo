@@ -1,0 +1,110 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_profileaverageobs_out1.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: air_pressure@DerivedMetaData
+        type: float
+        function:
+          name: ProfileAverageObsPressure@ObsFunction
+          options:
+            observation vertical coordinate: MetaData/air_pressure
+            model vertical coordinate: air_pressure_levels
+  compareVariables:
+  - test:
+      name: air_pressure@DerivedMetaData
+    reference:
+      name: air_pressure@TestReference
+    relTol: 1.0e-8
+
+- obs space:
+    name: Observations are not grouped into records, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+    simulated variables: [air_temperature]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_profileaverageobs_out2.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: air_pressure@DerivedMetaData
+        type: float
+        function:
+          name: ProfileAverageObsPressure@ObsFunction
+          options:
+            observation vertical coordinate: MetaData/air_pressure
+            model vertical coordinate: air_pressure_levels
+  expectExceptionWithMessage: Group variables configuration is empty
+
+- obs space:
+    name: Extended ObsSpace is not used, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_profileaverageobs_out3.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: air_pressure@DerivedMetaData
+        type: float
+        function:
+          name: ProfileAverageObsPressure@ObsFunction
+          options:
+            observation vertical coordinate: MetaData/air_pressure
+            model vertical coordinate: air_pressure_levels
+  expectExceptionWithMessage: The extended obs space has not been produced
+
+- obs space:
+    name: GeoVaLs are in the wrong order, throwing an exception
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature]
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_profileaverageobs_out4.nc4
+    extension:
+      allocate companion records with length: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals_reversed.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: air_pressure@DerivedMetaData
+        type: float
+        function:
+          name: ProfileAverageObsPressure@ObsFunction
+          options:
+            observation vertical coordinate: MetaData/air_pressure
+            model vertical coordinate: air_pressure_levels
+  expectExceptionWithMessage: GeoVaLs are in the wrong order

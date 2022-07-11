@@ -13,7 +13,9 @@
 
 #include "ioda/distribution/InefficientDistribution.h"
 #include "ioda/ObsSpace.h"
+#include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {
@@ -65,6 +67,10 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
                          boost::optional<Variable> categoryVariable)
   : obsdb_(&obsdb), groupBy_(groupBy), categoryVariable_(categoryVariable)
 {
+  // If the observations are to be grouped by a category variable, and that variable was
+  // also used to divide the ObsSpace into records, change the value of `groupBy_`.
+  // This is not done if the records are treated as single observations (for which
+  // `groupBy_` is equal to `GroupBy::SINGLE_OBS`).
   if (groupBy_ == GroupBy::VARIABLE && wereRecordsGroupedByCategoryVariable())
     groupBy_ = GroupBy::RECORD_ID;
 
@@ -72,9 +78,8 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
     // Each record is held by a single process, so there's no need to exchange data between
     // processes and we can use an InefficientDistribution rather than the distribution taken from
     // obsdb_. Which in this case is *efficient*!
-    eckit::LocalConfiguration emptyConfig;
     obsDistribution_ = std::make_shared<ioda::InefficientDistribution>(obsdb_->comm(),
-                                                        emptyConfig);
+                                                        ioda::EmptyDistributionParameters());
     oops::Log::trace() << "ObservationAccessor: no MPI communication necessary" << std::endl;
   } else {
     obsDistribution_ = obsdb.distribution();
@@ -96,27 +101,35 @@ ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
   return ObsAccessor(obsdb, GroupBy::VARIABLE, variable);
 }
 
+ObsAccessor ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(
+    const ioda::ObsSpace &obsdb, const Variable &variable) {
+  return ObsAccessor(obsdb, GroupBy::SINGLE_OBS, variable);
+}
+
+std::vector<bool> ObsAccessor::getGlobalApply(
+    const std::vector<bool> &apply) const {
+  std::vector<int> globalApply(apply.begin(), apply.end());
+  obsDistribution_->allGatherv(globalApply);
+  return std::vector<bool>(globalApply.begin(), globalApply.end());
+}
+
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
-        const ufo::Variables &filtervars, bool validIfAnyFilterVariablePassedQC) const {
+    const ufo::Variables &filtervars, bool candidateForRetentionIfAnyFilterVariablesPassedQC)
+    const {
+  std::vector<bool> isValid = apply;
+  const UnselectLocationIf mode = candidateForRetentionIfAnyFilterVariablesPassedQC ?
+        UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED :
+        UnselectLocationIf::ANY_FILTER_VARIABLE_REJECTED;
+  unselectRejectedLocations(isValid, filtervars, flags, mode);
+
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
-  std::vector<int> globalApply(apply.size());
-  std::vector<ioda::ObsDataRow<int>> filterVariableFlags;
-  // Select flags for respective filtervars
-  for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
-    std::string filterVariableName = filtervars.variable(ivar).variable();
-    auto it = std::find(flags.varnames().variables().begin(), flags.varnames().variables().end(),
-                        filterVariableName);
-    filterVariableFlags.push_back(flags[*it]);
-  }
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    globalApply[obsId] = apply[obsId]
-                           && isValid(filterVariableFlags, obsId, validIfAnyFilterVariablePassedQC);
-  obsDistribution_->allGatherv(globalApply);
+  std::vector<int> globalIsValid(isValid.begin(), isValid.end());
+  obsDistribution_->allGatherv(globalIsValid);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
-    if (globalApply[obsId])
+  for (size_t obsId = 0; obsId < globalIsValid.size(); ++obsId)
+    if (globalIsValid[obsId])
       validObsIds.push_back(obsId);
 
   return validObsIds;
@@ -125,12 +138,12 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
 std::vector<size_t> ObsAccessor::getValidObservationIds(
     const std::vector<bool> &apply) const {
   // TODO(wsmigaj): use std::vector<unsigned char> to save space
-  std::vector<int> globalApply(apply.begin(), apply.end());
-  obsDistribution_->allGatherv(globalApply);
+  std::vector<int> globalIsValid(apply.begin(), apply.end());
+  obsDistribution_->allGatherv(globalIsValid);
 
   std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
-    if (globalApply[obsId])
+  for (size_t obsId = 0; obsId < globalIsValid.size(); ++obsId)
+    if (globalIsValid[obsId])
       validObsIds.push_back(obsId);
 
   return validObsIds;
@@ -171,29 +184,6 @@ size_t ObsAccessor::totalNumObservations() const {
   return obsdb_->globalNumLocs();
 }
 
-bool ObsAccessor::isValid(const std::vector<ioda::ObsDataRow<int>> &flags, size_t obsId,
-                          bool validIfAnyFilterVariablePassedQC) const {
-  bool obIsNotFlagged;
-  if (validIfAnyFilterVariablePassedQC) {
-    obIsNotFlagged = false;
-    for (size_t irow = 0; irow < flags.size(); ++irow) {
-      if (flags[irow][obsId] == QCflags::pass) {
-        obIsNotFlagged = true;
-        break;
-      }
-    }
-  } else {
-    obIsNotFlagged = true;
-    for (size_t irow = 0; irow < flags.size(); ++irow) {
-      if (flags[irow][obsId] != QCflags::pass) {
-        obIsNotFlagged = false;
-        break;
-      }
-    }
-  }
-  return obIsNotFlagged;
-}
-
 RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
     const std::vector<size_t> &validObsIds, bool opsCompatibilityMode) const {
   RecursiveSplitter splitter(validObsIds.size(), opsCompatibilityMode);
@@ -205,6 +195,9 @@ RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
     groupObservationsByRecordNumber(validObsIds, splitter);
     break;
   case GroupBy::VARIABLE:
+    groupObservationsByCategoryVariable(validObsIds, splitter);
+    break;
+  case GroupBy::SINGLE_OBS:
     groupObservationsByCategoryVariable(validObsIds, splitter);
     break;
   }
@@ -252,6 +245,31 @@ void ObsAccessor::flagRejectedObservations(
     if (isRejected[globalObsId]) {
       for (std::vector<bool> & variableFlagged : flagged)
         variableFlagged[localObsId] = true;
+    }
+  }
+}
+
+void ObsAccessor::flagObservationsForAnyFilterVariableFailingQC(
+    const std::vector<bool> &apply, const ioda::ObsDataVector<int> &flags,
+    const ufo::Variables &filtervars, std::vector<std::vector<bool> > &flagged) const {
+  std::vector<size_t> indexOfFilterVariableInFlags;
+  for (size_t ivar = 0; ivar < flagged.size(); ++ivar) {
+    std::string filterVariableName = filtervars.variable(ivar).variable();
+    indexOfFilterVariableInFlags.push_back(flags.varnames().find(filterVariableName));
+  }
+  for (size_t iloc = 0; iloc < obsdb_->nlocs(); ++iloc) {
+    if (apply[iloc]) {
+      bool atLeastOneFilterVariableFailsQC = false;
+      for (size_t ivar = 0; ivar < flagged.size(); ++ivar) {
+        if (QCflags::isRejected(flags[indexOfFilterVariableInFlags[ivar]][iloc])) {
+          atLeastOneFilterVariableFailsQC = true;
+          break;
+        }
+      }
+      if (atLeastOneFilterVariableFailsQC) {
+        for (size_t ivar = 0; ivar < flagged.size(); ++ivar)
+          flagged[ivar][iloc] = true;
+      }
     }
   }
 }

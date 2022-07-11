@@ -15,11 +15,8 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
-#include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -38,6 +35,9 @@ class InterChannelConsistencyCheckParameters : public oops::Parameters {
 
   /// Useflag (-1: not used; 0: monitoring; 1: used) for each channel in channelList
   oops::RequiredParameter<std::vector<int>> useflagChannel{"use_flag", this};
+
+  /// Configure passive bias correction
+  oops::Parameter<bool> passiveBC{"use passive_bc", false, this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};

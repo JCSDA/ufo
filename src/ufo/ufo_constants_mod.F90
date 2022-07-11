@@ -68,6 +68,12 @@ real(kind_real), parameter, public :: min_q = 3.0e-6_kind_real
 real(kind_real), parameter, public :: ZeroDegC = 273.15_kind_real
 real(kind_real), parameter, public :: epsilon = 0.62198_kind_real ! molecular mass ratio of water (18.01528) to dry air (28.9645)
 
+real(kind_real), parameter, public :: M_dryair = 0.0289645_kind_real ! molecular weight of dry air (kg.mol-1)
+real(kind_real), parameter, public :: M_no2 = 0.0460055_kind_real ! molecular weight of nitrogen dioxide (kg.mol-1)
+real(kind_real), parameter, public :: M_co = 0.0280101_kind_real ! molecular weight of carbon monoxide (kg.mol-1)
+real(kind_real), parameter, public :: M_o3 = 0.047997_kind_real ! molecular weight of ozone (kg.mol-1)
+real(kind_real), parameter, public :: M_hcho = 0.030031_kind_real ! molecular weight of formaldehyde (kg.mol-1)
+
 real(kind_real), parameter, public :: q_mixratio_to_ppmv  = 1.60771704e+6_kind_real
 real(kind_real), parameter, public :: o3_mixratio_to_ppmv = 6.03504e+5_kind_real
 real(kind_real), parameter, public :: co2_mixratio_to_ppmv = 6.58114e+5_kind_real
@@ -77,6 +83,8 @@ real(kind_real), parameter, public :: ch4_mixratio_to_ppmv = 1.80548e+6_kind_rea
 real(kind_real), parameter, public :: so2_mixratio_to_ppmv = 4.52118e+5_kind_real ! determined using same method as used in RTTOV but this
                                                                                   ! constant was never explicitly calculated 
                                                                                   ! mso2 = 32.065 + 2 * 15.9994 = 64.0638
+
+real(kind_real), parameter, public :: RTTOV_ToA = 0.0001_kind_real ! hPa 
 
 
 end module ufo_constants_mod

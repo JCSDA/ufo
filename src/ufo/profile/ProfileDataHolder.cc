@@ -20,14 +20,12 @@ namespace ufo {
   void ProfileDataHolder::fill(const std::vector <std::string> &variableNamesInt,
                                const std::vector <std::string> &variableNamesFloat,
                                const std::vector <std::string> &variableNamesString,
-                               const std::vector <std::string> &variableNamesGeoVaLs,
-                               const std::vector <std::string> &variableNamesObsDiags)
+                               const std::vector <std::string> &variableNamesGeoVaLs)
   {
     variableNamesInt_ = variableNamesInt;
     variableNamesFloat_ = variableNamesFloat;
     variableNamesString_ = variableNamesString;
     variableNamesGeoVaLs_ = variableNamesGeoVaLs;
-    variableNamesObsDiags_ = variableNamesObsDiags;
 
     for (const auto& variable : variableNamesInt_)
       profileData_.emplace(variable, profileDataHandler_.get<int>(variable));
@@ -37,8 +35,6 @@ namespace ufo {
       profileData_.emplace(variable, profileDataHandler_.get<std::string>(variable));
     for (const auto& variable : variableNamesGeoVaLs_)
       profileGeoVaLs_.emplace(variable, profileDataHandler_.getGeoVaLVector(variable));
-    for (const auto& variable : variableNamesObsDiags_)
-      profileObsDiags_.emplace(variable, profileDataHandler_.getObsDiag(variable));
   }
 
   std::vector <float>& ProfileDataHolder::getGeoVaLVector(const std::string &fullname)
@@ -53,26 +49,22 @@ namespace ufo {
     }
   }
 
-  std::vector <float>& ProfileDataHolder::getObsDiagVector(const std::string &fullname)
-  {
-    auto it_profileObsDiags = profileObsDiags_.find(fullname);
-    if (it_profileObsDiags != profileObsDiags_.end()) {
-      return it_profileObsDiags->second;
-    } else {
-      throw eckit::BadValue("ObsDiag " + fullname + " not present in profile. "
-                            "Please add it to the relevant argument in the call "
-                            "to produceProfileVector()", Here());
-    }
-  }
-
   void ProfileDataHolder::moveValuesToHandler()
   {
-    for (const auto& variable : variableNamesInt_)
+    oops::Log::debug() << "  Moving values to ProfileDataHandler" << std::endl;
+    for (const auto& variable : variableNamesInt_) {
+      oops::Log::debug() << "   " << variable << std::endl;
       profileDataHandler_.set<int>(variable, std::move(this->get<int>(variable)));
-    for (const auto& variable : variableNamesFloat_)
+    }
+    for (const auto& variable : variableNamesFloat_) {
+      oops::Log::debug() << "   " << variable << std::endl;
       profileDataHandler_.set<float>(variable, std::move(this->get<float>(variable)));
-    for (const auto& variable : variableNamesString_)
+    }
+    for (const auto& variable : variableNamesString_) {
+      oops::Log::debug() << "   " << variable << std::endl;
       profileDataHandler_.set<std::string>(variable, std::move(this->get<std::string>(variable)));
+    }
+    oops::Log::debug() << std::endl;
     profileData_.clear();
   }
 

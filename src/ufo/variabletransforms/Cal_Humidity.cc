@@ -17,10 +17,24 @@ static TransformMaker<Cal_RelativeHumidity>
     makerCal_RelativeHumidity_("RelativeHumidity");
 
 Cal_RelativeHumidity::Cal_RelativeHumidity(
-    const VariableTransformsParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+  : TransformBase(options, data, flags, obserr),
+      allowSuperSaturation_(options.AllowSuperSaturation),
+      specifichumidityvariable_(options.SpecificHumidityVariable),
+      pressurevariable_(options.PressureVariable),
+      pressureat2mvariable_(options.PressureAt2MVariable),
+      pressuregroupvariable_(options.PressureGroupVariable),
+      temperaturevariable_(options.TemperatureVariable),
+      temperatureat2mvariable_(options.TemperatureAt2MVariable),
+      relativehumidityvariable_(options.RelativeHumidityVariable),
+      relativehumidityat2mvariable_(options.RelativeHumidityAt2MVariable),
+      watervapormixingratiovariable_(options.WaterVaporMixingRatioVariable),
+      dewpointtemperaturevariable_(options.DewPointTemperatureVariable),
+      dewpointtemperatureat2mvariable_(options.DewPointTemperature2MVariable)
+      {}
 
 /**************************************************************************************************/
 
@@ -35,6 +49,10 @@ void Cal_RelativeHumidity::runTransform(const std::vector<bool> &apply) {
   switch (method()) {
     case formulas::MethodFormulation::UKMO: {
       methodUKMO(apply);
+      break;
+    }
+    case formulas::MethodFormulation::UKMOmixingratio: {
+      methodUKMOmixingratio(apply);
       break;
     }
     case formulas::MethodFormulation::NCAR:
@@ -67,10 +85,6 @@ Method: -
 */
 void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
   const size_t nlocs_ = obsdb_.nlocs();
-  // return if no data
-  if (obsdb_.nlocs() == 0) {
-    return;
-  }
 
   float Q_sub_s_ice, Q_sub_s_w;
   float pressure, temperature, dewPoint;
@@ -93,25 +107,25 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
   // Compulsory surface observation
   //     First looking for surface observation
   //     Then looking for upperair data
-  if (obsdb_.has("ObsValue", "pressure_surface") &&
-      obsdb_.has("ObsValue", "air_temperature_surface") &&
-      obsdb_.has("ObsValue", "dew_point_temperature_surface")) {
-    getObservation("ObsValue", "pressure_surface",
+  if (obsdb_.has("ObsValue", pressureat2mvariable_) &&
+      obsdb_.has("ObsValue", temperatureat2mvariable_) &&
+      obsdb_.has("ObsValue", dewpointtemperatureat2mvariable_)) {
+    getObservation("ObsValue", pressureat2mvariable_,
                    airPressure, true);
-    getObservation("ObsValue", "air_temperature_surface",
+    getObservation("ObsValue", temperatureat2mvariable_,
                    airTemperature, true);
-    getObservation("ObsValue", "dew_point_temperature_surface",
+    getObservation("ObsValue", dewpointtemperatureat2mvariable_,
                    dewPointTemperature, true);
-    getObservation("ObsValue", "relative_humidity_surface",
+    getObservation("ObsValue", relativehumidityat2mvariable_,
                    relativeHumidity);
   } else {
-    getObservation("ObsValue", "air_pressure",
+    getObservation(pressuregroupvariable_, pressurevariable_,
                    airPressure, true);
-    getObservation("ObsValue", "air_temperature",
+    getObservation("ObsValue", temperaturevariable_,
                    airTemperature, true);
-    getObservation("ObsValue", "dew_point_temperature",
+    getObservation("ObsValue", dewpointtemperaturevariable_,
                    dewPointTemperature, true);
-    getObservation("ObsValue", "relative_humidity",
+    getObservation("ObsValue", relativehumidityvariable_,
                    relativeHumidity);
     surfaceData = false;
   }
@@ -194,7 +208,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         // calculate relative humidity
         if (Q_sub_s_w > 0 && Q_sub_s_ice > 0) {
           relativeHumidity[iloc] = (Q_sub_s_w / Q_sub_s_ice) * 100.0;
-          if (!AllowSuperSaturation())
+          if (!allowSuperSaturation_)
             relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
           hasBeenUpdated = true;
         }
@@ -206,7 +220,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         evaluateSatSpecHumidity(temperature, temperature);
         // update from Rh wrt water to Rh wrt ice for temperatures below freezing
         relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
-        if (!AllowSuperSaturation())
+        if (!allowSuperSaturation_)
           relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
 
         hasBeenUpdated = true;
@@ -217,10 +231,120 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
   // assign the derived relative humidity as DerivedObsValue
   if (hasBeenUpdated) {
     if (surfaceData) {
-      putObservation("relative_humidity_surface", relativeHumidity);
+      putObservation(relativehumidityat2mvariable_, relativeHumidity);
     } else {
-      putObservation("relative_humidity", relativeHumidity);
+      putObservation(relativehumidityvariable_, relativeHumidity);
     }
+  }
+}
+
+/**************************************************************************************************/
+/*
+Calculates relative humidity (RH_ice) from mixing ratio
+
+Method: -
+  Saturated specific humidity (w.r.t ice) at the air temperature is obtained
+  above water for temperatures greater than 0 and above ice below zero.
+  Relative humidity is then calculated using :
+
+    RH = (Mixing_Ratio/QSAT(DRY BULB))*100
+
+  The option AllowSuperSaturation (false by default) controls whether upper air relative humidity
+  is capped at 100%.
+
+  Example:
+  \code{.unparsed}
+  obs filter:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMOmixingratio
+    AllowSuperSaturation: false
+  \endcode
+*/
+void Cal_RelativeHumidity::methodUKMOmixingratio(const std::vector<bool> &apply) {
+  const size_t nlocs_ = obsdb_.nlocs();
+  // Return if no data
+  if (obsdb_.nlocs() == 0) {
+    return;
+  }
+
+  std::vector<float> airTemperature;
+  std::vector<float> mixingRatio;
+  std::vector<float> relativeHumidity;
+  std::vector<float> airPressure;
+  bool hasBeenUpdated = false;
+
+  // Here we can only use data that has not been rejected by quality control
+  // so making sure UseValidDataOnly_ is set to True
+  SetUseValidDataOnly(true);
+
+  // Get variables
+  getObservation(pressuregroupvariable_, pressurevariable_,
+                 airPressure, true);
+  getObservation("ObsValue", temperaturevariable_,
+                 airTemperature, true);
+  getObservation("ObsValue", watervapormixingratiovariable_,
+                 mixingRatio, true);
+  getObservation("ObsValue", relativehumidityvariable_,
+                 relativeHumidity);
+
+  if (relativeHumidity.empty()) {
+    relativeHumidity.assign(nlocs_, missingValueFloat);
+  }
+
+  if (!oops::allVectorsSameNonZeroSize(airPressure, airTemperature, mixingRatio)) {
+    oops::Log::warning() << "Vector sizes: "
+                         << oops::listOfVectorSizes(airPressure, airTemperature,
+                                                    mixingRatio)
+                         << std::endl;
+    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+                          "P, T and MixingRatio", Here());
+  }
+
+  for (ioda::ObsSpace::RecIdxIter irec = obsdb_.recidx_begin();
+       irec != obsdb_.recidx_end(); ++irec) {
+    const std::vector<std::size_t> &rSort = obsdb_.recidx_vector(irec);
+
+    // Loop over each record
+    for (size_t iloc : rSort) {
+      if (!apply[iloc]) continue;
+
+      // Store some variables
+      const float pressure = airPressure[iloc];
+      const float temperature = airTemperature[iloc];
+      const float mixRatio = mixingRatio[iloc];
+
+      if (pressure > 0  &&
+          pressure != missingValueFloat &&
+          temperature != missingValueFloat &&
+          mixRatio != missingValueFloat) {
+        // Sat. vapor pressure from Drybulb temperature  - wrt ice
+        float e_sub_s_ice = formulas::SatVaporPres_fromTemp(temperature,
+                                                            formulation());
+        e_sub_s_ice = formulas::SatVaporPres_correction(e_sub_s_ice,
+                                                        temperature,
+                                                        pressure,
+                                                        formulation());
+        // Convert sat. vapor pressure (wrt ice) to saturated specific humidity (ice)
+        const float Q_sub_s_ice = formulas::Qsat_From_Psat(e_sub_s_ice, pressure);
+
+        // Calculate RH
+        if (mixRatio >= 0 && Q_sub_s_ice > 0) {
+          relativeHumidity[iloc] = (mixRatio / Q_sub_s_ice) * 100.0f;
+        } else {
+          relativeHumidity[iloc] = missingValueFloat;
+        }
+        hasBeenUpdated = true;
+        if (relativeHumidity[iloc] != missingValueFloat &&
+            !allowSuperSaturation_) {
+          relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+        }
+      }
+    }
+  }
+  // Assign the derived relative humidity as DerivedObsValue
+  if (hasBeenUpdated) {
+    putObservation(relativehumidityvariable_, relativeHumidity);
   }
 }
 
@@ -236,14 +360,14 @@ void Cal_RelativeHumidity::methodDEFAULT(const std::vector<bool> &apply) {
   std::vector<float> pressure;
   std::vector<float> relativeHumidity(nlocs);
 
-  getObservation("ObsValue", "specific_humidity",
+  getObservation("ObsValue", specifichumidityvariable_,
                  specificHumidity, true);
-  getObservation("ObsValue", "air_temperature",
+  getObservation("ObsValue", temperaturevariable_,
                  airTemperature, true);
-  getObservation("MetaData", "air_pressure",
+  getObservation(pressuregroupvariable_, pressurevariable_,
                  pressure, false);
   if (pressure.empty()) {
-    getObservation("ObsValue", "surface_pressure",
+    getObservation("ObsValue", pressureat2mvariable_,
                    pressure, true);
   }
 
@@ -282,7 +406,7 @@ void Cal_RelativeHumidity::methodDEFAULT(const std::vector<bool> &apply) {
     }
   }
 
-  putObservation("relative_humidity", relativeHumidity);
+  putObservation(relativehumidityvariable_, relativeHumidity);
 }
 
 /************************************************************************************/
@@ -292,10 +416,19 @@ static TransformMaker<Cal_SpecificHumidity>
     makerCal_SpecificHumidity_("SpecificHumidity");
 
 Cal_SpecificHumidity::Cal_SpecificHumidity(
-    const VariableTransformsParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags)
-    : TransformBase(options, data, flags) {}
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    : TransformBase(options, data, flags, obserr),
+      specifichumidityvariable_(options.SpecificHumidityVariable),
+      pressurevariable_(options.PressureVariable),
+      pressureat2mvariable_(options.PressureAt2MVariable),
+      pressuregroupvariable_(options.PressureGroupVariable),
+      temperaturevariable_(options.TemperatureVariable),
+      dewpointtemperaturevariable_(options.DewPointTemperatureVariable),
+      relativehumidityvariable_(options.RelativeHumidityVariable)
+{}
 
 /************************************************************************************/
 
@@ -318,57 +451,90 @@ void Cal_SpecificHumidity::runTransform(const std::vector<bool> &apply) {
 }
 /************************************************************************************/
 
-void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &apply) {
+void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &) {
   const size_t nlocs = obsdb_.nlocs();
   float esat, qvs, qv, satVaporPres;
   std::vector<float> relativeHumidity;
+  std::vector<float> dewPointTemperature;
   std::vector<float> airTemperature;
   std::vector<float> pressure;
   std::vector<float> specificHumidity(nlocs);
+  bool have_dewpoint = false;
 
-  getObservation("ObsValue", "relative_humidity",
-                 relativeHumidity, true);
-  getObservation("ObsValue", "air_temperature",
+  if (obsdb_.has("ObsValue", relativehumidityvariable_)) {
+    getObservation("ObsValue", relativehumidityvariable_,
+                   relativeHumidity, true);
+  } else {
+    oops::Log::debug() << "Looks like relative humidity is not present, "
+                       << "so looking for dewpoint instead: "
+                       << dewpointtemperaturevariable_ << std::endl;
+    getObservation("ObsValue", dewpointtemperaturevariable_,
+                   dewPointTemperature, true);
+    if (dewPointTemperature.empty()) {
+      oops::Log::warning() << "Neither relative humidity or dewpoint temperature exists. "
+                           << "Must have one or the other." << std::endl;
+      throw eckit::BadValue("Must have either relative humidity or dewpoint temperature"
+                            " to calculate specific humidity", Here());
+    }
+    have_dewpoint = true;
+  }
+  getObservation("ObsValue", temperaturevariable_,
                  airTemperature, true);
-  getObservation("MetaData", "air_pressure",
+  getObservation(pressuregroupvariable_, pressurevariable_,
                  pressure, false);
   if (pressure.empty()) {
-    getObservation("ObsValue", "surface_pressure",
+    getObservation("ObsValue", pressureat2mvariable_,
                    pressure, true);
   }
 
-  if (!oops::allVectorsSameNonZeroSize(relativeHumidity, airTemperature, pressure)) {
-    oops::Log::warning() << "Vector sizes: "
-                         << oops::listOfVectorSizes(relativeHumidity, airTemperature,
-                                                    pressure)
-                         << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
-                          "relative_humidity, air_temperature and pressure", Here());
+  if (have_dewpoint) {
+    if (!oops::allVectorsSameNonZeroSize(dewPointTemperature, pressure)) {
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(dewPointTemperature, pressure) << std::endl;
+      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+                            "dewPointTemperature and pressure", Here());
+    }
+  } else {
+    if (!oops::allVectorsSameNonZeroSize(relativeHumidity, airTemperature, pressure)) {
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(relativeHumidity, airTemperature,
+                                                      pressure)
+                           << std::endl;
+      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+                            "relative_humidity, air_temperature and pressure", Here());
+    }
   }
 
   // Initialise this vector with missing value
   specificHumidity.assign(nlocs, missingValueFloat);
 
-  // Loop over all obs
-  for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-    if (relativeHumidity[jobs] != missingValueFloat &&
-        airTemperature[jobs] != missingValueFloat && pressure[jobs] != missingValueFloat) {
-      // Calculate saturation vapor pressure from temperature according to requested formulation
-      // Double-check result is always lower than 15% of incoming pressure.
-      satVaporPres = formulas::SatVaporPres_fromTemp(airTemperature[jobs], formulation());
-      esat = std::min(pressure[jobs]*0.15f, satVaporPres);
+  // From dewpoint and pressure, we get vapor pressure that easily converts to mixing ratio
+  // then to final answer of specific humidity.  Otherwise, with RH, we must have temp
+  // to compute saturated vapor pressure, convert this to mixing ratio using relative
+  // humidity, then end up with final conversion of mixing ratio to specific humdity.
 
-      // Convert sat. vapor pressure to sat water vapor mixing ratio
-      qvs = 0.622 * esat/(pressure[jobs]-esat);
-
-      // Using RH, calculate water vapor mixing ratio
-      qv = std::max(1.0e-12f, relativeHumidity[jobs]*qvs);
-
-      // Final RH (which can be greater than 100%) is q/qsat, but set sensible lowest limit
-      specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
+  if (have_dewpoint) {
+    for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+      if (pressure[jobs] != missingValueFloat && dewPointTemperature[jobs] != missingValueFloat) {
+        satVaporPres = formulas::SatVaporPres_fromTemp(dewPointTemperature[jobs], formulation());
+        esat = std::min(pressure[jobs]*0.15f, satVaporPres);
+        qv = 0.622 * esat/(pressure[jobs]-esat);
+        specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
+      }
+    }
+  } else {
+    for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+      if (pressure[jobs] != missingValueFloat && airTemperature[jobs] != missingValueFloat &&
+                relativeHumidity[jobs] != missingValueFloat) {
+        satVaporPres = formulas::SatVaporPres_fromTemp(airTemperature[jobs], formulation());
+        esat = std::min(pressure[jobs]*0.15f, satVaporPres);
+        qvs = 0.622 * esat/(pressure[jobs]-esat);
+        qv = std::max(1.0e-12f, relativeHumidity[jobs]*qvs);
+        specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
+      }
     }
   }
-  putObservation("specific_humidity", specificHumidity);
+
+  putObservation(specifichumidityvariable_, specificHumidity);
 }
 }  // namespace ufo
-

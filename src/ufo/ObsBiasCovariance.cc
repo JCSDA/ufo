@@ -16,6 +16,7 @@
 
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/Engines/Factory.h"
+#include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
 #include "ioda/ObsSpace.h"
@@ -27,6 +28,7 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsBiasPreconditioner.h"
 #include "ufo/predictors/PredictorBase.h"
 #include "ufo/utils/IodaGroupIndices.h"
 
@@ -36,9 +38,10 @@ namespace ufo {
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                      const Parameters_ & params)
-  : odb_(odb), prednames_(0), vars_(odb.obsvariables()), variances_(),
+  : odb_(odb), prednames_(0), vars_(odb.assimvariables()), variances_(),
     preconditioner_(0),
-    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
+    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0),
+    rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
@@ -172,15 +175,72 @@ void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
       }
     }
   }
-
   oops::Log::trace() << "ObsBiasCovariance::read is done " << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::write(const eckit::Configuration & conf) {
+void ObsBiasCovariance::write(const Parameters_ & params) {
+  // only write files out on the task with MPI rank 0
+  if (rank_ != 0) return;
+
   oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
-  oops::Log::trace() << "ObsBiasCovariance::write is not implemented " << std::endl;
+  const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
+
+  if (biasCovParams.outputFile.value() != boost::none) {
+    // FIXME: only implemented for channels currently
+    if (vars_.channels().size() == 0) {
+      throw eckit::NotImplemented("ObsBiasCovariance::write not implemented for without channels",
+                                  Here());
+    }
+    // Create a file, overwrite if exists
+    const std::string output_filename = *biasCovParams.outputFile.value();
+    ioda::Group group = ioda::Engines::HH::createFile(output_filename,
+                        ioda::Engines::BackendCreateModes::Truncate_If_Exists);
+
+    // put only variable bias predictors into the predictors vector
+    std::vector<std::string> predictors(prednames_.begin(), prednames_.end());
+    // map coefficients to 2D for saving
+    Eigen::Map<const Eigen::MatrixXd>
+        allbcerrors(variances_.data(), prednames_.size(), vars_.size());
+    const std::vector<int> channels = vars_.channels();
+    std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
+
+    // dimensions
+    ioda::NewDimensionScales_t dims {
+        ioda::NewDimensionScale<int>("npredictors", predictors.size()),
+        ioda::NewDimensionScale<int>("nchannels", channels.size())
+    };
+    // new ObsGroup
+    ioda::ObsGroup ogrp = ioda::ObsGroup::generate(group, dims);
+
+    // save the predictors
+    ioda::Variable predsVar = ogrp.vars.createWithScales<std::string>(
+                              "predictors", {ogrp.vars["npredictors"]});
+    predsVar.write(predictors);
+    // and the variables
+    ioda::Variable chansVar = ogrp.vars.createWithScales<int>(
+                              "channels", {ogrp.vars["nchannels"]});
+    chansVar.write(channels);
+
+    // and the number_obs_assimilated
+    ioda::Variable nobsVar = ogrp.vars.createWithScales<int>(
+                             "number_obs_assimilated", {ogrp.vars["nchannels"]});
+    nobsVar.write(obs_assimilated);
+
+    // Set up the creation parameters for the bias covariance coefficients variable
+    ioda::VariableCreationParameters float_params;
+    float_params.chunk = true;               // allow chunking
+    float_params.compressWithGZIP();         // compress using gzip
+    float missing_value = util::missingValue(missing_value);
+    float_params.setFillValue<float>(missing_value);
+
+    // Create a variable for bias covariance coefficients,
+    // save bias covariance coeffs to the variable
+    ioda::Variable anvarVar = ogrp.vars.createWithScales<float>("bias_coeff_errors",
+                       {ogrp.vars["npredictors"], ogrp.vars["nchannels"]}, float_params);
+    anvarVar.writeWithEigenRegular(allbcerrors);
+  }
   oops::Log::trace() << "ObsBiasCovariance::write is done " << std::endl;
 }
 
@@ -319,6 +379,12 @@ void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;
 }
+// -----------------------------------------------------------------------------
+
+std::unique_ptr<ObsBiasPreconditioner> ObsBiasCovariance::preconditioner() const {
+    return std::make_unique<ObsBiasPreconditioner> (preconditioner_);
+}
+
 
 // -----------------------------------------------------------------------------
 

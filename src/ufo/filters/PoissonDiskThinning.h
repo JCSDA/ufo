@@ -22,17 +22,12 @@
 #include "ufo/filters/PoissonDiskThinningParameters.h"
 #include "ufo/filters/QCflags.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
 }
 
 namespace util {
-  class DateTime;
   template <typename Key, typename Value> class ScalarOrMap;
 }
 

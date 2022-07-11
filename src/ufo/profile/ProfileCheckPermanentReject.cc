@@ -22,7 +22,6 @@ namespace ufo {
     oops::Log::debug() << " Permanent rejection check" << std::endl;
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const bool ModelLevels = options_.modellevels.value();
     std::vector <int> &tFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
@@ -35,6 +34,10 @@ namespace ufo {
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     std::vector <int> &ReportFlags =
       profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
+    const std::vector <int> &extended_obs_space =
+      profileDataHandler.get<int>(ufo::VariableNames::extended_obs_space);
+    const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
+      != extended_obs_space.end();
 
     if (ReportFlags.empty()) {
       oops::Log::debug() << "ReportFlags vector is empty. "

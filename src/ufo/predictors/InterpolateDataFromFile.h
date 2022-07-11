@@ -80,7 +80,8 @@ class InterpolateDataFromFile : public PredictorBase {
   InterpolateDataFromFile(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &, const GeoVaLs &,
-               const ObsDiagnostics &, ioda::ObsVector &) const override;
+               const ObsDiagnostics &, const ObsBias &,
+               ioda::ObsVector &) const override;
 
  private:
   /// `obsFunctions_[varName]` is the ObsFunction that will calculate the predictions for variable

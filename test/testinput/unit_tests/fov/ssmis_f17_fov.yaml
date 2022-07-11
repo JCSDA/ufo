@@ -1,0 +1,98 @@
+field of view:
+  # Parameters defining the field of view of an observation. Note that while each of these
+  # inputs should be within reasonable bounds, they need not (for this test) correspond to
+  # a physically realizable observation. In other words, it does not matter if the satellite
+  # is able to view the indicated lat/lon with the indicated scan position + azimuth angle.
+  sensor: ssmis
+  satellite: f17
+  sensor azimuth angle: -15.0
+  longitude: 7.0
+  latitude: -23.0
+
+  # Points within and near the field of view ellipse where the antenna power is measured
+  # for comparisons to GSI.
+  sample longitudes:
+    - 7.0
+    - 6.9
+    - 7.2
+    - 7.3
+  sample latitudes:
+    - -23.0
+    - -23.0
+    - -22.9
+    - -23.0
+
+  abs tol: 1.0e-7
+
+  # Reference lat/lon coordinates of the points defining the polygon that approximates the
+  # field of view ellipse. These coordinates come from calling GSI's fov_ellipse_conical.
+  reference ellipse longitudes:
+    - 6.8940624019368917
+    - 6.9822421557425924
+    - 7.0610133922139635
+    - 7.1207711118315258
+    - 7.1636305602725683
+    - 7.1945053900285139
+    - 7.2173131599008995
+    - 7.2345251133597888
+    - 7.2474584375912761
+    - 7.2564719724614761
+    - 7.2608647780234215
+    - 7.2583490255072460
+    - 7.2440157517220571
+    - 7.2096132060468685
+    - 7.1473319770878003
+    - 7.0622710307679375
+    - 6.9760824317298926
+    - 6.9062976755667780
+    - 6.8554748774284882
+    - 6.8192009500607700
+    - 6.7928318659576448
+    - 6.7731707213023862
+    - 6.7583500838253441
+    - 6.7475374198677196
+    - 6.7408684654523503
+    - 6.7397373499846562
+    - 6.7475729934740309
+    - 6.7709312595930715
+    - 6.8187519146497149
+    - 6.8940624019368917
+  reference ellipse latitudes:
+    - -22.635050892311881
+    - -22.637137636723139
+    - -22.674992134776033
+    - -22.727554320414256
+    - -22.781673862653378
+    - -22.833117996047449
+    - -22.881836497396961
+    - -22.929215163881352
+    - -22.977109391294988
+    - -23.027622090417466
+    - -23.083064518937562
+    - -23.145658911644261
+    - -23.216114533189469
+    - -23.289422728949546
+    - -23.348548730842936
+    - -23.369532939869757
+    - -23.347032556637245
+    - -23.299423578451567
+    - -23.245037383136847
+    - -23.192007947250858
+    - -23.141983054258901
+    - -23.094093592459956
+    - -23.046661892518216
+    - -22.997701914587466
+    - -22.944999961485038
+    - -22.886217040606013
+    - -22.819591895818363
+    - -22.746529474141411
+    - -22.677454979624159
+    - -22.635050892311881
+
+  # Reference antenna powers at the sample points selected above. These values come from calling
+  # GSI's inside_fov_conical.
+  reference sample powers:
+    - 1.0
+    - 0.40751896218368761
+    - 0.0011356160598947661
+    - 0.0

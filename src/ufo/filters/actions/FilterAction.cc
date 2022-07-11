@@ -7,12 +7,7 @@
 
 #include "ufo/filters/actions/FilterAction.h"
 
-#include <vector>
-
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsDataVector.h"
-#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/actions/FilterActionBase.h"
 
 namespace ufo {
 
@@ -38,6 +33,12 @@ void FilterAction::apply(const Variables & vars, const std::vector<std::vector<b
 
 const ufo::Variables & FilterAction::requiredVariables() const {
   return action_->requiredVariables();
+}
+
+// -----------------------------------------------------------------------------
+
+bool FilterAction::modifiesQCFlags() const {
+  return action_->modifiesQCFlags();
 }
 
 // -----------------------------------------------------------------------------

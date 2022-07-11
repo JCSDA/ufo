@@ -13,7 +13,7 @@
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::instantiateObsErrorFactory<ufo::ObsTraits>();
+  ufo::instantiateObsErrorFactory();
   test::ObsErrorCovariance<ufo::ObsTraits> tests;
   return run.execute(tests);
 }

@@ -1,0 +1,37 @@
+window begin: 2019-12-30T03:00:00Z
+window end: 2019-12-30T09:00:00Z
+
+observations: 
+- obs operator: 
+    name: GroundgnssMetOffice
+    min_temp_grad: 1.0e-6
+  obs space: 
+    name: Groundgnss
+    obsdatain: 
+      obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+    simulated variables: [ZTD] 
+#   obsdataout:
+#     obsfile: Data/groundgnss_obs_2019123006_ukmo_opr_out.nc
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/groundgnss_geovals_20191230T0600Z.nc4
+  norm ref: HofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14
+
+- obs operator:
+    name: GroundgnssMetOffice
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: Groundgnss
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+    simulated variables: [ZTD]
+#   obsdataout:
+#     obsfile: Data/groundgnss_obs_2019123006_ukmo_opr_reversed_geovals_out.nc
+  geovals:
+    filename: Data/ufo/testinput_tier_1/groundgnss_geovals_reversed_20191230T0600Z.nc4
+  expect simulateObs to throw exception with message: Geovals should be ordered top to bottom
