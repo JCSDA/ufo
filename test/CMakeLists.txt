@@ -37,8 +37,8 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1.tar.gz)
-set(crtm_test_data crtm_coefficients.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.3.0.tar.gz)
+set(crtm_test_data crtm_coefficients_2.3.0.tar.gz)
 
 #############################################
 # macro for downloading test data
@@ -103,7 +103,7 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
     if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL} )
       set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL}/${repo}/${GIT_TAG_FUNC}" )
     else()
-      set( ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/api/v1/dataset/147b_jcsda/version/1.0.0/file )
+      set( ECBUILD_DOWNLOAD_BASE_URL https://gdex.ucar.edu/dataset/jedi-skylab/file )
     endif()
 
     if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL_CRTM} )
@@ -457,7 +457,7 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
 
 file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tgz
                      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
-                     
+
 endif( ${rttov_FOUND} )
 
 ######
