@@ -208,6 +208,9 @@ contains
     nlevels = geoval_temp % nval
     nullify(geoval_temp)
 
+    ! Sanity checks
+    if (nprofiles == 0) return
+
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,'(A, A, I0, A, I0, A)')                                              &
       trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
@@ -342,7 +345,8 @@ contains
               ! if the channel number for this channel * profile == channel number needed
               ! chanprof(ichan) % chan refers to the index in the coefficient file
               if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
-                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, chanprof(ichan) % prof)
+                iprof = prof_start + chanprof(ichan) % prof - 1
+                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
                 if (self % RTprof % emissivity(ichan) % emis_in == 0.0) then
                   self % RTprof % calcemis(ichan) = .true.
                 end if

@@ -204,6 +204,9 @@ contains
     self % nlevels = geoval_temp % nval
     nullify(geoval_temp)
 
+    ! Sanity checks
+    if (self % nprofiles == 0) return
+
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,'(A, A, I0, A, I0, A)') &
       trim(routine_name), ': Allocating ', self % nprofiles, ' profiles with ', self % nlevels, ' levels'
@@ -328,7 +331,8 @@ contains
             ! if the channel number for this channel * profile == channel number needed
             ! chanprof(ichan) % chan refers to the index in the coefficient file
             if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
-              self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(jchan, chanprof(ichan) % prof)
+              iprof = prof_start + chanprof(ichan) % prof - 1
+              self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
               if (self % RTprof_K % emissivity(ichan) % emis_in == 0.0) then
                 self % RTprof_K % calcemis(ichan) = .true.
               end if
@@ -343,7 +347,7 @@ contains
       ! Write out emissivity if checking profile
       if(size(self % conf % inspect) > 0) then
         do ichan = 1, ichan_sim, nchan_inst
-          iprof = chanprof(ichan) % prof
+          iprof = prof_start + chanprof(ichan) % prof - 1
           if(any(self % conf % inspect == iprof)) then
             write(*,*) "calcemiss = ",self % RTprof_K % calcemis(ichan:ichan+nchan_inst-1)
             write(*,*) "emissivity in = ",self % RTprof_K % emissivity(ichan:ichan+nchan_inst-1) % emis_in

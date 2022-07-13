@@ -41,6 +41,7 @@ observations:
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
       surface emissivity group: SurfEmiss
+      max_channels_per_batch: 10
   obs space:
     name: Test the forward and linear model with read in emissivity
     obsdatain:
