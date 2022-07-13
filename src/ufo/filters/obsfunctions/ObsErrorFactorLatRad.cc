@@ -44,12 +44,19 @@ void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
   const size_t nlocs = in.nlocs();
   std::vector<float> lats;
   in.get(Variable("latitude@MetaData"), lats);
-  for (size_t jj = 0; jj < nlocs; ++jj) {
-    out[0][jj] = 1.0;
-    if ( std::abs(lats[jj]) < params[0] ) {
-      out[0][jj] = params[1] *(std::abs(lats[jj]) * params[2] + params[3]);
+  if (params[0] > 0.0) {
+    for (size_t jj = 0; jj < nlocs; ++jj) {
+      out[0][jj] = 1.0;
+      if ( std::abs(lats[jj]) < params[0] ) {
+        out[0][jj] = params[1] *(std::abs(lats[jj]) * params[2] + params[3]);
+      }
+      out[0][jj] = sqrt(1.0 / out[0][jj]);
     }
-    out[0][jj] = sqrt(1.0 / out[0][jj]);
+  } else {
+    // Skip checking each latitude when latitudinal bound is 0, which means no inflation is wanted.
+    for (size_t jj = 0; jj < nlocs; ++jj) {
+      out[0][jj] = 1.0;
+    }
   }
 }
 
