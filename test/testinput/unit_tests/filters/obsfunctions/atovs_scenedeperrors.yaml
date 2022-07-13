@@ -48,4 +48,9 @@ observations:
           UseEmissivityAtlas: true
           maxiwp: 3.0
 
-  passedBenchmark: 198246
+  compareVariables:
+  - test:
+      name: brightness_temperature@ObsError
+    reference:
+      name: scene_dependent_errors@TestReference
+    relTol: 1e-6

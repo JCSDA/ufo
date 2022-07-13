@@ -51,7 +51,7 @@ MetOfficeAllSkyErrorModel::MetOfficeAllSkyErrorModel(const eckit::LocalConfigura
   invars_ += Variable("surface_type@MetaData");
   invars_ += Variable("instrument_noise@MetaDataError", channels_);
   invars_ += Variable("surface_emissivity_error@SurfEmiss", channels_);
-  invars_ += Variable("brightness_temperature@EffectiveQC", channels_);
+  invars_ += Variable("brightness_temperature@QCflagsData", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -113,7 +113,7 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
   std::vector<float> ob_instr_noise(nlocs);
   std::vector<float> surf_emiss_error(nlocs);  // should be error on surface emissivity
   std::vector<float> tausurf(nlocs);
-  std::vector<int> effQC(nlocs);
+  std::vector<int> flagsQC(nlocs);
   float VarErrorScaling;
 
   RTTOV_surftype surftype;
@@ -149,19 +149,21 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
                            << std::endl;
     }
 
-    if (in.has(Variable("brightness_temperature@EffectiveQC", channels_)[ich])) {
-      in.get(Variable("brightness_temperature@EffectiveQC", channels_)[ich], effQC);
+    if (in.has(Variable("brightness_temperature@QCflagsData", channels_)[ich])) {
+      in.get(Variable("brightness_temperature@QCflagsData", channels_)[ich], flagsQC);
     } else {
-      std::fill(effQC.begin(), effQC.end(), missingValueInt);
+      std::fill(flagsQC.begin(), flagsQC.end(), missingValueInt);
     }
 
     for (size_t iloc=0; iloc < nlocs; ++iloc) {
-        out[ich][iloc] = 0.0f;
         VarErrorScaling = missing;
 
         // skip adding to obs error when the the ob is rejected at location loc and channel ich
-        if (effQC[iloc] != 0) {
+        if (flagsQC[iloc] != 0) {
+          out[ich][iloc] = missing;
           continue;
+        } else {
+          out[ich][iloc] = 0.0f;
         }
 
         // mandatory NEDT for all channels
