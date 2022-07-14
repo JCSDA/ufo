@@ -49,7 +49,7 @@ namespace ufo {
     }
 
     if (options_.UseSurfaceWaterFraction.value()) {
-      invars_ += Variable("water_area_fraction@MetaData");
+      invars_ += Variable("water_fraction@MetaData");
     }
   }
 
@@ -120,13 +120,13 @@ namespace ufo {
       }
     }
 
-    // if available and requested, set closest appropriate surface type using water_area_frac
-    if (options_.UseSurfaceWaterFraction.value() && in.has(Variable("water_area_frac@MetaData"))) {
-      std::vector<float> water_area_frac(nlocs);
-      in.get(Variable("water_area_frac@MetaData"), water_area_frac);
+    // if available and requested, set closest appropriate surface type using water_fraction
+    if (options_.UseSurfaceWaterFraction.value() && in.has(Variable("water_fraction@MetaData"))) {
+      std::vector<float> water_fraction(nlocs);
+      in.get(Variable("water_fraction@MetaData"), water_fraction);
 
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        if (water_area_frac[iloc] > options_.MinWaterFrac.value()) {
+        if (water_fraction[iloc] > options_.MinWaterFrac.value()) {
           surftype[iloc] = surftype_sea_;
         } else {
           surftype[iloc] = surftype_land_;
