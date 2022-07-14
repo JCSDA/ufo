@@ -47,7 +47,7 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
   SetUseValidDataOnly(true);
 
   const size_t nlocs = obsdb_.nlocs();
-  const float kappa = Constants::rspec_over_cp;
+  const float kappa = Constants::rd_over_cp;
 
   // Get all required data
   std::vector<float> pressure;
