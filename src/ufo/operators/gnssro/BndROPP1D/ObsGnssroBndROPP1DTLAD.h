@@ -15,13 +15,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/gnssro/BndROPP1D/ObsGnssroBndROPP1D.h"
 #include "ufo/operators/gnssro/BndROPP1D/ObsGnssroBndROPP1DTLAD.interface.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -36,9 +33,11 @@ namespace ufo {
 class ObsGnssroBndROPP1DTLAD : public LinearObsOperatorBase,
                           private util::ObjectCounter<ObsGnssroBndROPP1DTLAD> {
  public:
+  typedef GnssroBndROPP1DParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroBndROPP1DTLAD";}
 
-  ObsGnssroBndROPP1DTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroBndROPP1DTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroBndROPP1DTLAD();
 
   // Obs Operators

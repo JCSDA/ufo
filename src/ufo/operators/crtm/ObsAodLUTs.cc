@@ -22,15 +22,16 @@ static ObsOperatorMaker<ObsAodLUTs> makerAOD_("AodLUTs");
 // -----------------------------------------------------------------------------
 
 ObsAodLUTs::ObsAodLUTs(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAodLUTs_(0), odb_(odb), varin_()
+                       const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperAodLUTs_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
-  ufo_aodluts_setup_f90(keyOperAodLUTs_, config, channels_list.size(), channels_list[0], varin_);
+  ufo_aodluts_setup_f90(keyOperAodLUTs_, params.toConfiguration(),
+                        channels_list.size(), channels_list[0], varin_);
   oops::Log::info() << "ObsAodLUTs variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodLUTs channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsAodLUTs created." << std::endl;

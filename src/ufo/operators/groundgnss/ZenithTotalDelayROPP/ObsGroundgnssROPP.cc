@@ -26,14 +26,14 @@ static ObsOperatorMaker<ObsGroundgnssROPP> makerGroundgnssROPP_("GroundgnssROPP"
 // -----------------------------------------------------------------------------
 
 ObsGroundgnssROPP::ObsGroundgnssROPP(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGroundgnssROPP_(0), odb_(odb), varin_()
+                                     const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperGroundgnssROPP_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "surface_altitude"};
   varin_.reset(new oops::Variables(vv));
 
-  ufo_groundgnss_ropp_setup_f90(keyOperGroundgnssROPP_, config);
+  ufo_groundgnss_ropp_setup_f90(keyOperGroundgnssROPP_, params.toConfiguration());
   oops::Log::trace() << "ObsGroundgnssROPP created." << std::endl;
 }
 

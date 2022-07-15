@@ -6,7 +6,7 @@ observations:
     name: AodLUTs
     obs options:
       AerosolOption: aerosols_gocart_merra_2
-      RCFile: [geosaod.rc]
+      RCFile: geosaod.rc
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian
       CoefficientPath: Data/

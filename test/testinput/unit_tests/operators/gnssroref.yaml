@@ -4,7 +4,6 @@ window end: 2018-04-15T03:00:00Z
 observations:
 - obs operator:
    name: GnssroRefNCEP
-   obs options:
   obs space:
    name: GnssroRef
    obsdatain:

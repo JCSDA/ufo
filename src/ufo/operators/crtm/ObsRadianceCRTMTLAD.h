@@ -15,12 +15,9 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/crtm/crtmParameters/ObsRadianceCRTMParameters.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -35,9 +32,11 @@ namespace ufo {
 class ObsRadianceCRTMTLAD : public LinearObsOperatorBase,
                         private util::ObjectCounter<ObsRadianceCRTMTLAD> {
  public:
+  typedef ObsRadianceCRTMParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsRadianceCRTMTLAD";}
 
-  ObsRadianceCRTMTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsRadianceCRTMTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsRadianceCRTMTLAD();
 
   // Obs Operators

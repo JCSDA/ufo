@@ -24,7 +24,6 @@ observations:
   passedBenchmark: 668
 - obs operator:
     name: GnssroBndNBAM
-    obs options:
   obs space:
     name: GnssroBnd
     obsdatain:
@@ -62,7 +61,6 @@ observations:
   passedBenchmark: 668
 - obs operator:
    name: GnssroRefNCEP
-   obs options:
   obs space:
    name: GnssroRef
    obsdatain:

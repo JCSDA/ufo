@@ -15,6 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/gnssro/RefNCEP/ObsGnssroRefNCEP.h"
 #include "ufo/operators/gnssro/RefNCEP/ObsGnssroRefNCEPTLAD.interface.h"
 
 // Forward declarations
@@ -36,9 +37,11 @@ namespace ufo {
 class ObsGnssroRefNCEPTLAD : public LinearObsOperatorBase,
                           private util::ObjectCounter<ObsGnssroRefNCEPTLAD> {
  public:
+  typedef GnssroRefNCEPParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroRefNCEPTLAD";}
 
-  ObsGnssroRefNCEPTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroRefNCEPTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroRefNCEPTLAD();
 
   // Obs Operators

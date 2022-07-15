@@ -5,7 +5,6 @@ window end: 2017-04-15T03:00:00Z
 observations:
 - obs operator:
    name: GnssroBndNBAM
-   obs options:
   obs space:
    name: GnssroBndNBAM
    obsdatain:

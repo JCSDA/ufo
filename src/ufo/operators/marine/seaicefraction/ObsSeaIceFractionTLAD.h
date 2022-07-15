@@ -16,12 +16,9 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/marine/seaicefraction/ObsSeaIceFraction.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -36,9 +33,10 @@ namespace ufo {
 class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
                               private util::ObjectCounter<ObsSeaIceFractionTLAD> {
  public:
+  typedef ObsSeaIceFractionParameters Parameters_;
   static const std::string classname() {return "ufo::ObsSeaIceFractionTLAD";}
 
-  ObsSeaIceFractionTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsSeaIceFractionTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsSeaIceFractionTLAD();
 
   // Obs Operators

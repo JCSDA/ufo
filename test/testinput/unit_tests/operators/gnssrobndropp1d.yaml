@@ -4,7 +4,6 @@ window end: 2018-04-15T03:00:00Z
 observations:
 - obs operator:
     name: GnssroBndROPP1D
-    obs options:
   obs space:
     name: GnssroBnd
     obsdatain:

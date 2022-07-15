@@ -10,7 +10,6 @@
 
 #include <string>
 
-#include "oops/util/parameters/ConfigurationParameter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 
@@ -36,23 +35,6 @@ class ObsOperatorParametersBase : public oops::Parameters {
   /// operator in mind). ObsOperatorParametersWrapper will throw an exception if this parameter
   /// is not provided.
   oops::OptionalParameter<std::string> name{"name", this};
-};
-
-// -----------------------------------------------------------------------------
-
-/// \brief A subclass of ObsOperatorParametersBase storing the values of all options in a
-/// single Configuration object.
-///
-/// This object can be accessed by calling the value() method of the \p config member variable.
-///
-/// The ConfigurationParameter class does not perform any parameter validation; operators using
-/// GenericObsOperatorParameters should therefore ideally be refactored, replacing this
-/// class with a dedicated subclass of ObsOperatorParametersBase storing each parameter in
-/// a separate (Optional/Required)Parameter object.
-class GenericObsOperatorParameters : public ObsOperatorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(GenericObsOperatorParameters, ObsOperatorParametersBase)
- public:
-  oops::ConfigurationParameter config{this};
 };
 
 // -----------------------------------------------------------------------------

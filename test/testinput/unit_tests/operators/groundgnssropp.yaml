@@ -4,7 +4,6 @@ window end: 2019-12-30T09:00:00Z
 observations: 
 - obs operator: 
     name: GroundgnssROPP
-    obs options:
   obs space: 
     name: Groundgnss
     obsdatain: 
