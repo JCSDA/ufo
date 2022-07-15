@@ -220,7 +220,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                              ModelLevels,
                              qcflags1_reduced,
                              PGE1_reduced,
-                             -1,
+                             parameters_.ErrVarMax,
                              previousVariableWasFirstComponentOfTwo?
                              &secondComponentObVal_reduced : nullptr,
                              previousVariableWasFirstComponentOfTwo?
