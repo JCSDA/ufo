@@ -15,13 +15,25 @@
 
 #include "ufo/variabletransforms/TransformBase.h"
 
+#include "oops/util/parameters/Parameter.h"
+
 namespace ufo {
+
+/// Configuration parameters for the satellite scan position variable transformation
+class Cal_RemapScanPositionParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_RemapScanPositionParameters, VariableTransformParametersBase);
+
+ public:
+  /// The number of fields of view to remap the current scan position from.  For ATMS this
+  /// is 3 and so to preserve backwards compatibility this is the default.
+  oops::Parameter<int> numFOV{"number of fields of view", 3, this};
+};
 
 /*!
 * \brief Renumber satellite scan position
 *
 * \details  Within the Variable Transforms filter, apply the transform "RemapScanPosition"
-*  in order to renumber satellite scan position. At the Met Office ATMS observations are
+*  in order to renumber the satellite scan position. At the Met Office ATMS observations are
 *  spatially resampled, resulting in 32 fields of view per record sampled from the raw
 *  96 FOVs. From the initial observation data the values of scan_position@MetaData are 
 *  2, 5, 8, ..., 92, 95 (integers). However, in the calculation of observation bias we 
@@ -32,12 +44,16 @@ namespace ufo {
 */
 class Cal_RemapScanPosition : public TransformBase {
  public:
-  Cal_RemapScanPosition(const GenericVariableTransformParameters &options,
+  typedef Cal_RemapScanPositionParameters Parameters_;
+
+  Cal_RemapScanPosition(const Parameters_ &options,
                         const ObsFilterData &data,
                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
                         const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
+ private:
+  Parameters_ parameters_;
 };
 }  // namespace ufo
 

@@ -17,11 +17,11 @@ static TransformMaker<Cal_RemapScanPosition>
     makerCal_RemapScanPosition_("RemapScanPosition");
 
 Cal_RemapScanPosition::Cal_RemapScanPosition(
-    const GenericVariableTransformParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
-    : TransformBase(options, data, flags, obserr) {}
+    : TransformBase(options, data, flags, obserr), parameters_(options) {}
 
 /************************************************************************************/
 
@@ -46,7 +46,8 @@ void Cal_RemapScanPosition::runTransform(const std::vector<bool> &apply) {
 
     // Calculate wind vector
     if (original_scan_position[jobs] != missingValueInt) {
-       remapped_scan_position[jobs] = formulas::RenumberScanPosition(original_scan_position[jobs]);
+       remapped_scan_position[jobs] = formulas::RenumberScanPosition(original_scan_position[jobs],
+                                                                     parameters_.numFOV.value());
     }
   }
   // Overwrite variable at existing locations

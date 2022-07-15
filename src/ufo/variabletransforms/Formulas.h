@@ -255,16 +255,36 @@ float GetWind_U(float windSpeed, float windFromDirection);
 */
 float GetWind_V(float windSpeed, float windFromDirection);
 
+// -------------------------------------------------------------------------------------------
+/*!
+* \brief Calculate the brightness temperature for an input radiance.  To minimize
+*        differences this is done in double precision.
+*
+* \param radiance
+*     The input satellite radiance in (W / (m^2 sr m^-1)).
+* \param wavenumber
+*     The input wavenumber in m^-1
+* \return
+*     Brightness temperature in K.
+*/
+double inversePlanck(const double radiance, const double wavenumber);
+
 // -------------------------------------------------------------------------------------
 /*!
 * \brief Get renumbered scan position 1,2,3,... for satellite instrument
-* which has been spatially resampled and for which scan position is 2,5,8,...
+* which has been spatially resampled using the ceiling method of the number of fields
+* of view:
+*        numpos = std::ceil(scanpos/numFOV)
+* where std::ceil calculates the maximum integer from a float calculation.
 *
 * \param scanpos
 *     satellite instrument scan position
+* \param numFOV
+*     satellite instrument number of fields of fov for an instrument.  For IASI
+*     this is 4 as an example.
 * \return newpos
 */
-int RenumberScanPosition(int scanpos);
+int RenumberScanPosition(int scanpos, int numFOV);
 
 // -------------------------------------------------------------------------------------
 /*!
