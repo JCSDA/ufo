@@ -184,6 +184,8 @@ if (idx_geop.gt.0) then
                            geometricZ=obs_height(iobs), &
                            geopotentialH=obs_height_geop(iobs))
          endif
+      else
+        if (trim(self%da_psfc_scheme) == "UKMO") H2000_geop(iobs) = missing
       endif
    enddo
 endif
