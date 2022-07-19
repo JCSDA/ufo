@@ -23,7 +23,8 @@ Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
  const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
  const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
   : TransformBase(options, data, flags, obserr),
-    heightCoord_(options.HeightCoord)
+    heightCoord_(options.HeightCoord),
+    requireDescendingPressureSort_(options.RequireDescendingPressureSort)
 {}
 
 /************************************************************************************/
@@ -37,10 +38,19 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
     throw eckit::UserError("Group variables configuration is empty", Here());
 
   // Ensure observations have been sorted by air pressure in descending order.
-  if (obsdb_.obs_sort_var() != "air_pressure")
-    throw eckit::UserError("Sort variable must be air_pressure", Here());
-  if (obsdb_.obs_sort_order() != "descending")
-    throw eckit::UserError("Profiles must be sorted in descending order", Here());
+  if (requireDescendingPressureSort_) {
+    if (obsdb_.obs_sort_var() != "air_pressure")
+      throw eckit::UserError("Sort variable must be air_pressure", Here());
+    if (obsdb_.obs_sort_order() != "descending")
+      throw eckit::UserError("Profiles must be sorted in descending order", Here());
+  } else {
+    oops::Log::warning() << "Warning: the requirement that pressures are sorted in "
+                         << "descending order has been disabled for this transform. "
+                         << "This could lead to incorrect behaviour. "
+                         << "If you did not intend to do this, ensure that the option "
+                         << "'require descending pressure sort' is set to 'true'."
+                         << std::endl;
+  }
 
   // Obtain values from ObsSpace.
   std::vector<float> latitude_in, longitude_in, wind_speed, wind_from_direction, height;

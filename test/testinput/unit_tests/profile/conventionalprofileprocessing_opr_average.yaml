@@ -366,3 +366,35 @@ observations:
     tolerance AD: 1.0e-13
   vector ref: MetOfficeHofX
   tolerance: 1.0e-06
+
+# Do not require pressures to be sorted in descending order.
+# (Still perform the sort, which allows the same test data set to be used.)
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
+  obs operator:
+    name: ProfileAverage
+    model vertical coordinate: "air_pressure_levels"
+    pressure coordinate: "air_pressure"
+    pressure group: "MetaData"
+    number of intersection iterations: 3
+    compare with OPS: true
+    require descending pressure sort: false
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-06

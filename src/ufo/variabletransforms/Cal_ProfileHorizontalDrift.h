@@ -24,6 +24,10 @@ class Cal_ProfileHorizontalDriftParameters: public VariableTransformParametersBa
  public:
   /// Height coordinate name.
   oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
+
+  /// Require pressure to be sorted in descending order.
+  oops::Parameter<bool> RequireDescendingPressureSort
+    {"require descending pressure sort", true, this};
 };
 
 /*!
@@ -59,6 +63,9 @@ class Cal_ProfileHorizontalDrift : public TransformBase {
  private:
   /// Height coordinate name.
   std::string heightCoord_;
+
+  /// Require pressure to be sorted in descending order.
+  bool requireDescendingPressureSort_;
 };
 }  // namespace ufo
 
