@@ -97,7 +97,8 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
 
       if (pres == missingValueFloat ||
           pres <= 0.0f ||
-          temp == missingValueFloat) continue;
+          temp == missingValueFloat ||
+          terr == missingValueFloat) continue;
 
       const float conversion = std::pow((Constants::pref / pres), kappa);
       potTemp[iloc] = conversion * temp;
