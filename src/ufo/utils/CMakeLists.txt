@@ -60,6 +60,8 @@ set ( utils_files
       ufo_utils_mod.F90
       ufo_utils.interface.F90
       ufo_utils.interface.h
+      VariableNameMap.h
+      VariableNameMap.cc
       VertInterp.interface.F90
       VertInterp.interface.h
       vert_interp.F90

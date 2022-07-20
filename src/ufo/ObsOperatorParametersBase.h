@@ -11,6 +11,7 @@
 #include <string>
 
 #include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
 namespace ioda {
@@ -35,6 +36,9 @@ class ObsOperatorParametersBase : public oops::Parameters {
   /// operator in mind). ObsOperatorParametersWrapper will throw an exception if this parameter
   /// is not provided.
   oops::OptionalParameter<std::string> name{"name", this};
+
+  /// \brief Parameter specifying path to yaml file containing Observation to GeoVaL name mapping
+  oops::OptionalParameter<std::string> AliasFile{"observation alias file", this};
 };
 
 // -----------------------------------------------------------------------------
