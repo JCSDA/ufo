@@ -46,6 +46,11 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // constant background error term (optional):
   oops::OptionalParameter<float> BkgErr{"bg error", this};
 
+  // parameter to determine if squared departure/ErrVar check applied (optional, default true):
+  // note that the threshold for this check (PGE_SDiffCrit) is defined as one of the PGE input
+  // parameters
+  oops::Parameter<bool> PerformSDiffCheck{"perform obs minus BG threshold check", true, this};
+
   // switch to save total (combined) probability density (optional, default false):
   oops::Parameter<bool> SaveTotalPd{"save total pd", false, this};
 

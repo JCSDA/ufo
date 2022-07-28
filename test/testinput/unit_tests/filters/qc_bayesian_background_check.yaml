@@ -70,7 +70,7 @@ observations:
                        # wind: [2] missing, [0:2,3:6,12:18,21] fail,
                        #   [6:12,18:20] pass, [14,21] not filtered  == 11 each
                        # 19 + 11 + 11 = 41 pass altogether
-# Checking the constant bg error term works:
+# Checking the constant bg error term and non-default max error variance work:
 - obs space:
     name: Sea Ice
     obsdatain:
@@ -101,3 +101,53 @@ observations:
     PGE threshold: 0.07
     bg error: 0.7
   passedBenchmark: 8
+# Check the SDiff check works by applying a low threshold (default 225 is too high)
+# 1. check the default works (sdiff on) with a low sdiff threshold
+- obs space:
+    name: Sea Ice
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/bayesianbgcheck_filter_testdata.nc4
+    simulated variables: [ice_area_fraction]
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/background_errors_for_bayesianbgcheck_test.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: ice_area_fraction@GrossErrorProbability
+      type: float
+      value: 0.04
+  - filter: Bayesian Background Check
+    filter variables:
+    - name: ice_area_fraction
+    prob density bad obs: 1.0
+    PGE threshold: 0.07
+    bg error: 0.7
+    obs minus BG threshold: 0.0002    
+  passedBenchmark: 8   # [11,12,13,16] missing, [2,5,6,9,10,18,19] fail pge,
+                        # [17,20,21] fail sdiff,[0,1,3,4,7,8,14,15] pass  ==  8 pass
+# 2. check turning off SDiff check works with a low sdiff threshold
+- obs space:
+    name: Sea Ice
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/bayesianbgcheck_filter_testdata.nc4
+    simulated variables: [ice_area_fraction]
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/background_errors_for_bayesianbgcheck_test.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: ice_area_fraction@GrossErrorProbability
+      type: float
+      value: 0.04
+  - filter: Bayesian Background Check
+    filter variables:
+    - name: ice_area_fraction
+    prob density bad obs: 1.0
+    PGE threshold: 0.07
+    bg error: 0.7
+    perform obs minus BG threshold check: false
+    obs minus BG threshold: 0.0002    
+  passedBenchmark: 11   # [11,12,13,16] missing, [2,5,6,9,10,18,19] fail pge,
+                        # [0,1,3,4,7,8,14,15,17,20,21] pass  ==  11 pass

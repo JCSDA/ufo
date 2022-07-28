@@ -14,7 +14,7 @@ namespace ufo {
                          const std::vector<float> &bkgVal,
                          const std::vector<float> &bkgErr,
                          const std::vector<float> &PdBad,
-                         const bool ModelLevels,
+                         const bool PerformSDiffCheck,
                          std::vector<int> &flags,
                          std::vector<float> &PGE,
                          float ErrVarMax,
@@ -103,8 +103,9 @@ namespace ufo {
         PGE[jloc] = PGEMDI;
       }
 
-      // Model-level data may have additional processing.
-      if (ModelLevels &&
+      // Apply squared difference check if required:
+      // reject (o - b)**2/errvar >= SDiffCrit
+      if (PerformSDiffCheck &&
           (SDiff >= SDiffCrit ||
            flags[jloc] & ufo::MetOfficeQCFlags::Elem::PermRejectFlag ||
            flags[jloc] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag)) {
