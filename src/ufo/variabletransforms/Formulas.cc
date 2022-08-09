@@ -413,7 +413,8 @@ void horizontalDrift
  std::vector<float> & lat_out,
  std::vector<float> & lon_out,
  std::vector<util::DateTime> & time_out,
- MethodFormulation formulation) {
+ MethodFormulation formulation,
+ const util::DateTime * const window_end) {
   const float missingValueFloat = util::missingValue(1.0f);
 
   switch (formulation) {
@@ -486,7 +487,12 @@ void horizontalDrift
       lon_out[loc_next] = lon_out[loc_current] + dlon;
       // Convert the cumulative change in time to a util::Duration.
       dt_cumul += dt;
-      time_out[loc_next] = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+      // Calculate the level datetime, keeping it within the assimilation window if required.
+      const util::DateTime t_cumul = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+      if (window_end)
+        time_out[loc_next] = t_cumul > *window_end ? *window_end : t_cumul;
+      else
+        time_out[loc_next] = t_cumul;
     }
 
     // Copy latitude, longitude and time at each valid location to all invalid

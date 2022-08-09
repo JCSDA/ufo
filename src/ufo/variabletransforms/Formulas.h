@@ -330,8 +330,11 @@ int RenumberScanPosition(int scanpos, int numFOV);
 *     Vector of output longitudes in the entire sample [degress].
 * \param [out] time_out
 *     Vector of output datetimes in the entire sample [ISO 8601 format].
-* \param formulation
+* \param [in, optional] formulation
 *     Method used to determine the horizontal drift positions.
+* \param [in, optional] window_end
+*     DateTime at the end of the observation window. If set, computed DateTimes that
+*     are larger than this value are set to this value.
 */
 void horizontalDrift
 (const std::vector<size_t> & locs,
@@ -345,7 +348,8 @@ void horizontalDrift
  std::vector<float> & lat_out,
  std::vector<float> & lon_out,
  std::vector<util::DateTime> & time_out,
- MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
+ MethodFormulation formulation = formulas::MethodFormulation::DEFAULT,
+ const util::DateTime * const window_end = nullptr);
 
 // -------------------------------------------------------------------------------------
 /*!

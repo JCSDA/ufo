@@ -25,6 +25,9 @@ class Cal_ProfileHorizontalDriftParameters: public VariableTransformParametersBa
   /// Height coordinate name.
   oops::RequiredParameter<std::string> HeightCoord{"height coordinate", this};
 
+  /// Ensure calculated DateTimes lie within the observation window.
+  oops::Parameter<bool> keep_in_window{"keep in window", false, this};
+
   /// Require pressure to be sorted in descending order.
   oops::Parameter<bool> RequireDescendingPressureSort
     {"require descending pressure sort", true, this};
@@ -63,6 +66,9 @@ class Cal_ProfileHorizontalDrift : public TransformBase {
  private:
   /// Height coordinate name.
   std::string heightCoord_;
+
+  /// Keep observations in window:
+  bool keep_in_window_;
 
   /// Require pressure to be sorted in descending order.
   bool requireDescendingPressureSort_;

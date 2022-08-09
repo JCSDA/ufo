@@ -50,6 +50,17 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_zero_ob
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_keepinwindow
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_profilehorizontaldrift_keepinwindow.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests variabletransforms
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_variabletransforms_pstar
               TIER    1
               ECBUILD
