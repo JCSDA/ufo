@@ -4,9 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 obs space:
-  name: viirs_npp_aod-thinned # thinned observations 10%
-  #name: viirs_npp_aod # full res observations can be quite slow
-  _source: noaa 
+  name: modis_terra_aod
+  _source: nasa
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]
   channels: 4
@@ -14,6 +13,6 @@ obs operator:
   name: AodCRTM
   Absorbers: [H2O,O3]
   obs options:
-    Sensor_ID: v.viirs-m_npp
+    Sensor_ID: v.modis_terra
     EndianType: little_endian
     AerosolOption: aerosols_gocart_default
