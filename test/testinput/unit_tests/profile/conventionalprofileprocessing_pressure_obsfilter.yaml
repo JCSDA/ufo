@@ -26,6 +26,8 @@ observations:
     BChecks_Skip: true
     flagBasicChecksFail: false
     PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "height_levels_minus_one": "air_pressure_levels_minus_one"}
   HofX: HofX
   passedBenchmark: 21
   benchmarkFlag: 24
@@ -50,5 +52,7 @@ observations:
     BChecks_Skip: true
     flagBasicChecksFail: false
     PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "height_levels_minus_one": "air_pressure_levels_minus_one"}
   HofX: HofX
   expectExceptionWithMessage: GeoVaLs are in the wrong order

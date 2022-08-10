@@ -25,4 +25,5 @@ Sondes:
     flagBasicChecksFail: true
     PrintStationID: true
     Comparison_Tol: 0.1
-
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}

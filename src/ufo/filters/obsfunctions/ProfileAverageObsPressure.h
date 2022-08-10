@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/NumericConstraints.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
@@ -35,6 +37,14 @@ class ProfileAverageObsPressureParameters : public oops::Parameters {
     {"observation vertical coordinate",
      "Name of the observation vertical coordinate.",
      this};
+
+  oops::Parameter<int> numIntersectionIterations{
+    "number of intersection iterations",
+    "Number of iterations that are used to find the intersection between "
+    "the observed profile and each model level",
+     3,
+     this,
+     {oops::minConstraint(1)}};
 };
 
 // -----------------------------------------------------------------------------

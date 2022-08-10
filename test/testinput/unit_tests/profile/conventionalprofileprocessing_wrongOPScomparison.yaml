@@ -212,6 +212,8 @@ Wrong number of entries per profile, pressure transformation:
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
     groups_singlevalue: ["QCFlags"]
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}
   BypassMismatchComparison: true
   ExpectThrowDuringPriorFilter: true
 

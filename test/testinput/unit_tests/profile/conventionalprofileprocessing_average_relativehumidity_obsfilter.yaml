@@ -30,6 +30,7 @@ observations:
     compareWithOPS: false
     flagBasicChecksFail: true
     PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one"}
   HofX: HofX
   passedBenchmark: 3179
   benchmarkFlag: 24
