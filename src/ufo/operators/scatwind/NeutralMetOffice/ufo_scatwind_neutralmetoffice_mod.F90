@@ -68,7 +68,8 @@ subroutine ufo_scatwind_neutralmetoffice_setup(self, channels)
 
   ! save channels
   allocate(self%channels(size(channels)))
-  self%channels(:) = channels(:)
+
+  if (size(channels) > 0) self%channels(:) = channels(:)
 
 end subroutine ufo_scatwind_neutralmetoffice_setup
 
