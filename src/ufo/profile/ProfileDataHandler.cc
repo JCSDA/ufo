@@ -37,9 +37,10 @@ namespace ufo {
         geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure, 0);
         if (vec_gv.front() > vec_gv.back())
           throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
-      } else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho)) {
-        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure_rho));
-        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure_rho, 0);
+      } else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho_minus_one)) {
+        std::vector<float> vec_gv
+          (geovals_->nlevs(ufo::VariableNames::geovals_pressure_rho_minus_one));
+        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure_rho_minus_one, 0);
         if (vec_gv.front() > vec_gv.back())
           throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
       } else {
@@ -253,9 +254,7 @@ namespace ufo {
         vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);
         // Check the number of entries in the slant path location vector is equal
         // to the number of entries in the GeoVaL for this variable.
-        // If not, the GeoVaL at the first location in the profile is used;
-        // in other words, drift is not accounted for.
-        // todo(ctgh): revisit this choice in a future PR.
+        // If not, throw an exception if the number of levels is greater than one.
         if (slant_path_location.size() == vec_GeoVaL_column.size()) {
           std::vector<float> vec_GeoVaL_loc(geovals_->nlevs(variableName));
           // Take the GeoVaL at each slant path location and copy the relevant
@@ -266,7 +265,12 @@ namespace ufo {
             vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[slant_path_location.size() - 1 - mlev];
           }
         } else {
-          // Take the GeoVaL at the first location.
+          // Upper-air variables must be the correct length. Throw an exception if not.
+          if (vec_GeoVaL_column.size() > 1)
+            throw eckit::UserError(std::string("Incorrect GeoVaL length for ") + variableName,
+                                   Here());
+
+          // Take the GeoVaL at the first location for surface variables.
           const std::size_t jloc = profileIndices_->getProfileIndices()[0];
           geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
           std::reverse(vec_GeoVaL_column.begin(), vec_GeoVaL_column.end());

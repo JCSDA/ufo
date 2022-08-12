@@ -1,0 +1,37 @@
+#
+#=== Profile average relative humidity ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs_extended.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_relativehumidity_obsfilter_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one"}
+  HofX: HofX
+  passedBenchmark: 3179
+  benchmarkFlag: 24
+  flaggedBenchmark: 213

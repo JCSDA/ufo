@@ -15,6 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/radarradialvelocity/ObsRadarRadialVelocity.h"
 #include "ufo/operators/radarradialvelocity/ObsRadarRadialVelocityTLAD.interface.h"
 
 // Forward declarations
@@ -32,9 +33,11 @@ namespace ufo {
 class ObsRadarRadialVelocityTLAD : public LinearObsOperatorBase,
                           private util::ObjectCounter<ObsRadarRadialVelocityTLAD> {
  public:
+  typedef ObsRadarRadialVelocityParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsRadarRadialVelocityTLAD";}
 
-  ObsRadarRadialVelocityTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsRadarRadialVelocityTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsRadarRadialVelocityTLAD();
 
   // Obs Operators

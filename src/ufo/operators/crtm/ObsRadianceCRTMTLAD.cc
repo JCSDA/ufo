@@ -23,7 +23,7 @@ static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
-                                         const eckit::Configuration & config)
+                                         const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperRadianceCRTM_(0), varin_()
 {
   // parse channels from the config and create variable names
@@ -31,7 +31,7 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
-  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, config,
+  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, params.toConfiguration(),
                                   channels_list.size(), channels_list[0], varin_);
 
   oops::Log::trace() << "ObsRadianceCRTMTLAD created" << std::endl;

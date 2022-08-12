@@ -872,9 +872,9 @@ contains
     else
       nlocs_total = obsspace_get_nlocs(obss)
     end if
+    if (nlocs_total == 0) return
 
     nprofiles = min(size(profiles), geovals%nlocs)
-
     nlevels = size(profiles(1)%p)
 
     ! Assume that the pressure profile coming from the geovals is increasing in pressure (ToA->surface)...

@@ -21,10 +21,12 @@ static TransformMaker<Cal_WindSpeedAndDirection>
     makerCal_WindSpeedAndDirection_("WindSpeedAndDirection");
 
 Cal_WindSpeedAndDirection::Cal_WindSpeedAndDirection(
-    const GenericVariableTransformParameters &options, const ObsFilterData &data,
+    const Parameters_ &options,
+    const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
-    : TransformBase(options, data, flags, obserr) {
+    : TransformBase(options, data, flags, obserr),
+      group_(options.group) {
 }
 
 /************************************************************************************/
@@ -38,9 +40,9 @@ void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
   const size_t nlocs = obsdb_.nlocs();
 
   std::vector<float> u, v;
-  getObservation("ObsValue", "eastward_wind",
+  getObservation(group_, "eastward_wind",
                  u, true);
-  getObservation("ObsValue", "northward_wind",
+  getObservation(group_, "northward_wind",
                  v, true);
 
   if (!oops::allVectorsSameNonZeroSize(u, v)) {
@@ -67,8 +69,8 @@ void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
     }
   }
   // put new variable at existing locations
-  putObservation("wind_speed", windSpeed);
-  putObservation("wind_from_direction", windFromDirection);
+  putObservation("wind_speed", windSpeed, getDerivedGroup(group_));
+  putObservation("wind_from_direction", windFromDirection, getDerivedGroup(group_));
 }
 
 /************************************************************************************/
@@ -78,11 +80,13 @@ static TransformMaker<Cal_WindComponents>
     makerCal_WindComponents_("WindComponents");
 
 Cal_WindComponents::Cal_WindComponents(
-    const GenericVariableTransformParameters &options,
+    const Parameters_ &options,
     const ObsFilterData &data,
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
-  : TransformBase(options, data, flags, obserr) {}
+  : TransformBase(options, data, flags, obserr),
+    group_(options.group) {
+}
 
 /************************************************************************************/
 
@@ -99,13 +103,13 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
 
   if (nchans == 0) {
     std::vector<float> windSpeed, windFromDirection;
-    getObservation("ObsValue", "wind_speed",
+    getObservation(group_, "wind_speed",
                      windSpeed, true);
-    if (data_.has(Variable("wind_from_direction@ObsValue"))) {
-      getObservation("ObsValue", "wind_from_direction",
+    if (data_.has(Variable(group_ + "/wind_from_direction"))) {
+      getObservation(group_, "wind_from_direction",
                       windFromDirection, true);
     } else {
-      getObservation("ObsValue", "wind_direction",
+      getObservation(group_, "wind_direction",
                      windFromDirection, true);
     }
 
@@ -129,8 +133,8 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
         v[jobs] = formulas::GetWind_V(windSpeed[jobs], windFromDirection[jobs]);
       }
     }
-    putObservation("eastward_wind", u);
-    putObservation("northward_wind", v);
+    putObservation("eastward_wind", u, getDerivedGroup(group_));
+    putObservation("northward_wind", v, getDerivedGroup(group_));
 
   } else if (nchans > 0) {
     std::vector<int> channels(nchans);
@@ -139,13 +143,13 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
     std::vector<std::vector<float>> windSpeed(nchans, std::vector<float>(nlocs));
     std::vector<std::vector<float>> windFromDirection(nchans, std::vector<float>(nlocs));
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
-      data_.get(Variable("wind_speed@ObsValue", channels)[ichan],
+      data_.get(Variable(group_ + "/wind_speed", channels)[ichan],
                 windSpeed[ichan]);
-      if (data_.has(Variable("wind_from_direction@ObsValue"))) {
-        data_.get(Variable("wind_from_direction@ObsValue", channels)[ichan],
+      if (data_.has(Variable(group_ + "/wind_from_direction"))) {
+        data_.get(Variable(group_ + "/wind_from_direction", channels)[ichan],
                   windFromDirection[ichan]);
       } else {
-        data_.get(Variable("wind_direction@ObsValue", channels)[ichan],
+        data_.get(Variable(group_ + "/wind_direction", channels)[ichan],
                   windFromDirection[ichan]);
       }
     }
@@ -181,9 +185,9 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
       std::vector<float> u_chan = u[jchan];
       std::vector<float> v_chan = v[jchan];
       putObservation("eastward_wind", std::to_string(channels[jchan]), u_chan,
-                     {"nlocs", "nchans"});
+                     {"nlocs", "nchans"}, getDerivedGroup(group_));
       putObservation("northward_wind", std::to_string(channels[jchan]), v_chan,
-                     {"nlocs", "nchans"});
+                     {"nlocs", "nchans"}, getDerivedGroup(group_));
     }
   } else {
     throw eckit::Exception("nchans cannot be negative", Here());

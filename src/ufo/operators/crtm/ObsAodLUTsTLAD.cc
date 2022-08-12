@@ -24,14 +24,14 @@ static LinearObsOperatorMaker<ObsAodLUTsTLAD> makerAodTL_("AodLUTs");
 // -----------------------------------------------------------------------------
 
 ObsAodLUTsTLAD::ObsAodLUTsTLAD(const ioda::ObsSpace & odb,
-                               const eckit::Configuration & config)
+                               const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperAodLUTs_(0), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  ufo_aodluts_tlad_setup_f90(keyOperAodLUTs_, config,
+  ufo_aodluts_tlad_setup_f90(keyOperAodLUTs_, params.toConfiguration(),
                              channels_list.size(), channels_list[0], varin_);
   oops::Log::info() << "ObsAodLUTsTLAD variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodLUTsTLAD channels: " << channels_list << std::endl;

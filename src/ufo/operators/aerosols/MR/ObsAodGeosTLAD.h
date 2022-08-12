@@ -15,13 +15,10 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/aerosols/MR/ObsAodGeos.h"
 #include "ufo/operators/aerosols/MR/ObsAodGeosTLAD.interface.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -35,9 +32,10 @@ namespace ufo {
 class ObsAodGeosTLAD : public LinearObsOperatorBase,
                        private util::ObjectCounter<ObsAodGeosTLAD> {
  public:
+  typedef ObsAodGeosParameters Parameters_;
   static const std::string classname() {return "ufo::ObsAodGeosTLAD";}
 
-  ObsAodGeosTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAodGeosTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodGeosTLAD();
 
   // Obs Operators

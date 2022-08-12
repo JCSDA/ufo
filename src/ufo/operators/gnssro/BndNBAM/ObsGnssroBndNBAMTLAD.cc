@@ -27,19 +27,12 @@ static LinearObsOperatorMaker<ObsGnssroBndNBAMTLAD> makerGnssroBndNBAMTL_("Gnssr
 // -----------------------------------------------------------------------------
 
 ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
+                                           const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-
-  std::string vertlayer;
-
-//---- get vertical coordinate from config ------------------------
-  vertlayer = obsOptions.getString("vertlayer", "full");
-
-  if ( vertlayer == "mass" ) {
+  if ( params.options.value().vertLayer.value() == "mass" ) {
     vv.push_back("air_pressure");
   } else {
     vv.push_back("air_pressure_levels");
@@ -47,7 +40,8 @@ ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
 
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssro_bndnbam_tlad_setup_f90(keyOperGnssroBndNBAM_, obsOptions);
+  ufo_gnssro_bndnbam_tlad_setup_f90(keyOperGnssroBndNBAM_,
+                                    params.options.value().toConfiguration());
 
   oops::Log::info() << "ObsGnssroBndNBAMTLAD vars: " << *varin_ << std::endl;
   oops::Log::trace() << "ObsGnssroBndNBAMTLAD created" << std::endl;

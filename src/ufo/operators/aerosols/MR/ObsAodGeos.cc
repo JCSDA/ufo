@@ -28,10 +28,11 @@ static ObsOperatorMaker<ObsAodGeos> makerAodGeos_("AodGeos");
 // -----------------------------------------------------------------------------
 
 ObsAodGeos::ObsAodGeos(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+                       const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_aodgeos_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_aodgeos_setup_f90(keyOper_, params.toConfiguration(),
+                        odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAodGeos created." << std::endl;
 }

@@ -51,6 +51,12 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
     false,
     this};
 
+  oops::Parameter<bool> requireDescendingPressureSort{
+    "require descending pressure sort",
+    "Require pressures to be sorted in descending order",
+    true,
+    this};
+
   oops::Parameter<std::string> pressureCoord{"pressure coordinate",
                                              "Name of air pressure coordinate",
                                              "pressure",

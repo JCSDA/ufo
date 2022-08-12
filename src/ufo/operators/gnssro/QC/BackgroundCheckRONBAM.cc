@@ -74,10 +74,9 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
-        size_t iobs = observed.size() * jobs + iv;
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
-        ASSERT(impactparameter[0][iobs] != util::missingValue(impactparameter[0][iobs]));
+        ASSERT(impactparameter[0][jobs] != util::missingValue(impactparameter[0][jobs]));
 
         float imp = impactparameter[0][jobs]/1000.0 - earthradius[0][jobs]/1000.0;
         float lat = latitude[0][jobs]*0.01745329251;  // deg2rad

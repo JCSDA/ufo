@@ -21,6 +21,7 @@ struct Constants {
   static constexpr double deg2rad        = M_PI / 180.;
   static constexpr double rad2deg        = 180. * M_1_PI;
   static constexpr double grav           = 9.80665e+0;
+  static constexpr double speedOfLight   = 299792458;     // m / s
   static constexpr double t0c            = 2.7315e+2;    // temperature at zero celsius (K)
   static constexpr double ttp            = 2.7316e+2;    // temperature at h2o triple point (K)
   static constexpr double rd             = 2.8705e2;

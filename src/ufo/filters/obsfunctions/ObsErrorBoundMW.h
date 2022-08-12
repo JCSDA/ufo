@@ -48,6 +48,9 @@ class ObsErrorBoundMWParameters : public oops::Parameters {
   /// Function to set the observation bound based on terrain height
   oops::RequiredParameter<Variable> obserrBoundTopo{"obserr_bound_topo", this};
 
+  /// Factor applied to the derived top bound. It is 3.0 by default;
+  oops::OptionalParameter<float> thresholdfactor{"threshold", this};
+
   /// Function to estimate observation error based on symmetric cloud amount
   // oops::RequiredParameter<Variable> obserrFunction{"obserr_function", this};
   oops::OptionalParameter<Variable> obserrFunction{"obserr_function", this};

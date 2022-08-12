@@ -23,12 +23,12 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsADTTLAD> makerADTTL_("ADT");
 // -----------------------------------------------------------------------------
 
-ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vv));
-  ufo_adt_tlad_setup_f90(keyOper_, config);
+  ufo_adt_tlad_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsADTTLAD created" << std::endl;
 }
 

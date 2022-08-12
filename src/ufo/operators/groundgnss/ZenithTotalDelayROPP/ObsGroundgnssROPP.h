@@ -17,10 +17,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/groundgnss/ZenithTotalDelayROPP/ObsGroundgnssROPP.interface.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -30,15 +26,22 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class GroundgnssROPPParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GroundgnssROPPParameters, ObsOperatorParametersBase)
+ public:
+  // no parameters
+};
+
 // -----------------------------------------------------------------------------
 
 /// GroundgnssROPP observation operator
 class ObsGroundgnssROPP : public ObsOperatorBase,
-                        private util::ObjectCounter<ObsGroundgnssROPP> {
+                          private util::ObjectCounter<ObsGroundgnssROPP> {
  public:
+  typedef GroundgnssROPPParameters Parameters_;
   static const std::string classname() {return "ufo::ObsGroundgnssROPP";}
 
-  ObsGroundgnssROPP(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGroundgnssROPP(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGroundgnssROPP();
 
 // Obs Operator

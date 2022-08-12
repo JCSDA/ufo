@@ -1,0 +1,33 @@
+window begin: 2020-11-30T21:00:00Z
+window end: 2020-12-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice, Rain, Snow]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: amsr2_gcom-w1
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsr2_gcom-w1
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020120100_m.nc4
+#    obsdataout:
+#      obsfile: Data/amsr2_gcom-w1_obs_2020120100_m_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-14
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020120100_m.nc4
+  rms ref: 168.98922412145518
+# rms_ref: 172.16660000870766
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-2
+    tolerance AD: 1.0e-11

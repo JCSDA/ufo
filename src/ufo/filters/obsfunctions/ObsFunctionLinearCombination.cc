@@ -46,6 +46,18 @@ void LinearCombination<FunctionValue>::compute(const ObsFilterData & in,
   // get coefs for linear combination
   const std::vector<FunctionValue> coefs = options_.coefs.value();
 
+  // set intercept
+  FunctionValue intercept = static_cast<FunctionValue>(0);
+  if (options_.intercept.value() != boost::none)
+    intercept = options_.intercept.value().get();
+
+  // use channels not obs
+  std::vector<int> channels;
+  if (options_.useChannelNumber) {
+    channels = invars_[0].channels();
+    ASSERT(channels.size() > 0);
+  }
+
   // sanity checks / initialize
   ASSERT(coefs.size() == nv);
   out.zero();
@@ -61,7 +73,12 @@ void LinearCombination<FunctionValue>::compute(const ObsFilterData & in,
         if ( varin[ichan][iloc] == missing || out[ichan][iloc] == missing ) {
           out[ichan][iloc] = missing;
         } else {
-          out[ichan][iloc] += coefs[ivar] * varin[ichan][iloc];
+          if (ivar == 0) out[ichan][iloc] = intercept;
+          if (options_.useChannelNumber) {
+            out[ichan][iloc] += coefs[ivar] * channels[ichan];
+          } else {
+            out[ichan][iloc] += coefs[ivar] * varin[ichan][iloc];
+          }
         }
       }  // ichan
     }  // nlocs

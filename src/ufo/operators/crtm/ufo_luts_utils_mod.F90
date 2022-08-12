@@ -80,7 +80,7 @@ CONTAINS
     ENDIF
 
     IF (f_confOpts%has("AbsorptionAod")) THEN
-       conf%aaod=.TRUE.
+       CALL f_confopts%get_or_die("AbsorptionAod", conf%aaod)
     ELSE
        conf%aaod=.FALSE.
     ENDIF

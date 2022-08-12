@@ -1,0 +1,219 @@
+_: &all_channels 16, 38, 49, 51, 55, 57, 59, 61, 63, 66, 70, 72, 74, 79, 81
+
+window begin: 2021-07-01T09:00:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations:
+- obs space:
+    name: Test scaled radiance to radiance with multiple scaling arrays
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+    observed variables: [scaledRadiance]
+    simulated variables: [brightness_temperature]
+    derived variables: [brightness_temperature]
+    channels: *all_channels
+  obs pre filters:
+### Assign channel wavenumbers in m-1
+  - filter: Variable Assignment
+    assignments:
+    - name: VarMetaData/wavenumber
+      type: float
+      channels: *all_channels
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables:
+          - name: ObsValue/scaledRadiance
+            channels: *all_channels
+          coefs: [25.0]
+          intercept: 64475.0
+          use channel numbers: true
+### Scaled radiance to spectral radiance
+### creates a spectral radiance in (W / (m^2.sr.m^-1))
+  - filter: Variable Transforms
+    Transform: SatRadianceFromScaledRadiance
+    transform from:
+      name: ObsValue/scaledRadiance
+      channels: *all_channels
+    number of scale factors: 10
+    scale factor variable: MetaData/channel_scale_factor
+    scale factor start: MetaData/start_channel_scale
+    scale factor end: MetaData/end_channel_scale
+    get scaling factors from multiple arrays: true
+### Radiance to BT
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: ObsValue/radiance
+      channels: *all_channels
+    spectral variable:
+      name: VarMetaData/wavenumber
+      channels: *all_channels
+    radiance units: wavenumber
+### Compare variables output
+  compareVariables:
+  - reference:
+      name: radianceWavenumber@TestReference
+    test:
+      name: radiance@DerivedObsValue
+    absTol: 1.0e-5
+  - reference:
+      name: brightness_temperature@TestReference
+    test:
+      name: brightness_temperature@DerivedObsValue
+    absTol: 1.0e-4
+
+- obs space:
+    name: Test single scaling arrays and min max values for BT
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+    observed variables: [scaledRadiance]
+    simulated variables: [brightness_temperature]
+    derived variables: [brightness_temperature]
+    channels: *all_channels
+  obs pre filters:
+### Assign channel wave numbers in m-1
+  - filter: Variable Assignment
+    assignments:
+    - name: VarMetaData/wavenumber
+      type: float
+      channels: *all_channels
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables:
+          - name: ObsValue/scaledRadiance
+            channels: *all_channels
+          coefs: [25.0]
+          intercept: 64475.0
+          use channel numbers: true
+### Scaled radiance to radiance
+### creates a radiance in (W / (m^2.sr.m^-1))
+  - filter: Variable Transforms
+    Transform: SatRadianceFromScaledRadiance
+    transform from:
+      name: ObsValue/scaledRadiance
+      channels: *all_channels
+    number of scale factors: 10
+    scale factor variable: MetaData/channelScaleFactor
+    scale factor start: MetaData/startChannelScale
+    scale factor end: MetaData/endChannelScale
+### Radiance to BT
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: ObsValue/radiance
+      channels: *all_channels
+    spectral variable:
+      name: VarMetaData/wavenumber
+      channels: *all_channels
+    minimum value: 208.0
+    maximum value: 210.0
+    radiance units: wavenumber
+### Assign nominal error (ensure not missing values)
+  - filter: Perform Action
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    action:
+      name: assign error
+      error parameter: 10.0
+  passedBenchmark: 92
+
+- obs space:
+    name: Test radiance to BT for wavenumber conversion
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+    observed variables: [radianceWavenumber]
+    simulated variables: [brightness_temperature]
+    derived variables: [brightness_temperature]
+    channels: *all_channels
+  obs pre filters:
+### Assign channel wavenumbers in m-1
+  - filter: Variable Assignment
+    assignments:
+    - name: VarMetaData/wavenumber
+      type: float
+      channels: *all_channels
+      function:
+        name: LinearCombination@ObsFunction
+        options:
+          variables:
+          - name: ObsValue/radianceWavenumber
+            channels: *all_channels
+          coefs: [25.0]
+          intercept: 64475.0
+          use channel numbers: true
+### Radiance to BT
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: ObsValue/radianceWavenumber
+      channels: *all_channels
+    spectral variable:
+      name: VarMetaData/wavenumber
+      channels: *all_channels
+    radiance units: wavenumber
+### Compare variables output
+  compareVariables:
+  - reference:
+      name: brightness_temperature@TestReference
+    test:
+      name: brightness_temperature@DerivedObsValue
+    absTol: 1.0e-4
+
+- obs space:
+    name: Test radiance to BT for freqency conversion
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+    observed variables: [radianceFrequency]
+    simulated variables: [brightness_temperature]
+    derived variables: [brightness_temperature]
+    channels: *all_channels
+  obs pre filters:
+### Radiance to BT - frequency is in Hz hence spectral radiance is
+### (W / (m^2.sr.Hz)) in JEDI
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: ObsValue/radianceFrequency
+      channels: *all_channels
+    spectral variable:
+      name: VarMetaData/frequency
+      channels: *all_channels
+    radiance units: frequency
+### Compare variables output
+  compareVariables:
+  - reference:
+      name: brightness_temperature@TestReference
+    test:
+      name: brightness_temperature@DerivedObsValue
+    absTol: 1.0e-4
+
+- obs space:
+    name: Test radiance to BT for wavelength conversion
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+    observed variables: [radianceWavelength]
+    simulated variables: [brightness_temperature]
+    derived variables: [brightness_temperature]
+    channels: *all_channels
+  obs pre filters:
+### Radiance to BT - wavelength is in microns hence spectral radiance is
+### (W / (m^2.sr.microns)) in JEDI
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: ObsValue/radianceWavelength
+      channels: *all_channels
+    spectral variable:
+      name: VarMetaData/wavelength
+      channels: *all_channels
+    radiance units: wavelength
+### Compare variables output
+  compareVariables:
+  - reference:
+      name: brightness_temperature@TestReference
+    test:
+      name: brightness_temperature@DerivedObsValue
+    absTol: 1.0e-4

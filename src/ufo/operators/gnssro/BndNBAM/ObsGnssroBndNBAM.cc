@@ -25,19 +25,13 @@ namespace ufo {
 static ObsOperatorMaker<ObsGnssroBndNBAM> makerGnssroBndNBAM_("GnssroBndNBAM");
 // -----------------------------------------------------------------------------
 
-ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
+ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity",
                               "surface_altitude"};
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-
-  std::string vertlayer;
-
-  vertlayer = obsOptions.getString("vertlayer", "full");
-
-  if ( vertlayer == "mass" ) {
+  if ( params.options.value().vertLayer.value() == "mass" ) {
     vv.push_back("air_pressure");
     vv.push_back("geopotential_height");
   } else {
@@ -47,7 +41,7 @@ ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Conf
 
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssro_bndnbam_setup_f90(keyOperGnssroBndNBAM_, obsOptions);
+  ufo_gnssro_bndnbam_setup_f90(keyOperGnssroBndNBAM_, params.options.value().toConfiguration());
   oops::Log::trace() << "ObsGnssroBndNBAM created." << std::endl;
 }
 

@@ -9,7 +9,6 @@
 
 #include <vector>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"

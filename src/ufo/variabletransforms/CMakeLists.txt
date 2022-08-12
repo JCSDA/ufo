@@ -12,6 +12,10 @@ set ( variabletransforms_files
       Cal_Humidity.cc
       Cal_RemapScanPosition.h
       Cal_RemapScanPosition.cc
+      Cal_SatBrightnessTempFromRad.h
+      Cal_SatBrightnessTempFromRad.cc
+      Cal_SatRadianceFromScaledRadiance.h
+      Cal_SatRadianceFromScaledRadiance.cc
       Cal_SatZenithAngleCorrection.h
       Cal_SatZenithAngleCorrection.cc
       Cal_Wind.h

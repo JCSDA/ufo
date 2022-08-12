@@ -18,6 +18,24 @@
 
 namespace ufo {
 
+/// Configuration parameters for the wind components transform.
+class Cal_WindComponentsParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_WindComponentsParameters, VariableTransformParametersBase);
+
+ public:
+  /// Observation group name. Default is ObsValue.
+  oops::Parameter<std::string> group{"group", "ObsValue", this};
+};
+
+/// Configuration parameters for the wind speed and direction transform.
+class Cal_WindSpeedAndDirectionParameters: public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(Cal_WindSpeedAndDirectionParameters, VariableTransformParametersBase);
+
+ public:
+  /// Observation group name. Default is ObsValue.
+  oops::Parameter<std::string> group{"group", "ObsValue", this};
+};
+
 /*!
 * \brief Wind Speed And Direction filter
 *
@@ -30,12 +48,18 @@ namespace ufo {
 */
 class Cal_WindSpeedAndDirection : public TransformBase {
  public:
-  Cal_WindSpeedAndDirection(const GenericVariableTransformParameters &options,
+  typedef Cal_WindSpeedAndDirectionParameters Parameters_;
+
+  Cal_WindSpeedAndDirection(const Parameters_ &options,
                             const ObsFilterData &data,
                             const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
                             const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Group name.
+  std::string group_;
 };
 
 /*!
@@ -52,12 +76,18 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 */
 class Cal_WindComponents : public TransformBase {
  public:
-  Cal_WindComponents(const GenericVariableTransformParameters &options,
+  typedef Cal_WindComponentsParameters Parameters_;
+
+  Cal_WindComponents(const Parameters_ &options,
                      const ObsFilterData &data,
                      const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
                      const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
-  // Run check
+  // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  /// Group name.
+  std::string group_;
 };
 }  // namespace ufo
 

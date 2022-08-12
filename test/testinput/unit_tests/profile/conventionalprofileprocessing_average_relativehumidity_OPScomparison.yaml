@@ -1,0 +1,30 @@
+#
+#=== Profile average relative humidity: comparison with OPS values ===#
+#
+
+Sondes:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs_extended.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulated variables: [air_temperature, relative_humidity]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     obsfile: Data/met_office_conventional_profile_processing_average_relativehumidity_ops_comparison_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}
+

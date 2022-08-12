@@ -1,0 +1,666 @@
+#
+#=== Profile processing: OPS comparison with deliberately wrong values ===#
+#
+#This is used to cover code paths that would otherwise be missed.
+#It is recommended to run this test with OOPS_DEBUG=0 due to the large amount of output generated.
+
+#Some of the OPS variables have been given wrong values, and
+#one of the variables is missing. These changes are designed to fail
+#the checks that (1) the code values are the same as the OPS equivalents,
+#and (2) all required variables are present.
+Incorrect and missing values, RH:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh_wrong.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, relative_humidity]
+  Conventional Profile Processing:
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+
+#One of the variables is missing in a different sample (for completeness).
+Incorrect and missing values:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_wrong.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  Conventional Profile Processing:
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+
+#One of the variables is missing in a different sample (for completeness). Expect an exception to be thrown during the averaging.
+Incorrect and missing values, averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_wrong.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  Conventional Profile Processing:
+    Checks: ["AverageTemperature", "AverageWindSpeed", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#One of the variables is missing, basic check is run.
+Incorrect and missing values, Basic:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_wrong.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  Conventional Profile Processing:
+    Checks: ["Basic"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+
+#All ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["SamePDiffT", "Basic", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue"]
+  BypassMismatchComparison: true
+
+#UInterp: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, UInterp:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_uinterp.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  Conventional Profile Processing:
+    Checks: ["UInterp"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue"]
+  BypassMismatchComparison: true
+
+#UInterpAlternative: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, UInterpAlternative:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_uinterp.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  Conventional Profile Processing:
+    Checks: ["UInterpAlternative"]
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue"]
+
+#RH: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, RH:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, relative_humidity]
+  Conventional Profile Processing:
+    Checks: ["RH"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue"]
+  BypassMismatchComparison: true
+
+#Background: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, background:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
+  Conventional Profile Processing:
+    Checks: ["Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue", "MetaData"]
+  BypassMismatchComparison: true
+
+#Pressure transformation: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, pressure transformation:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AveragePressure"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["QCFlags"]
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}
+  BypassMismatchComparison: true
+  ExpectThrowDuringPriorFilter: true
+
+#Temperature averaging: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, temperature averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageTemperature"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["ObsValue"]
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#Wind speed averaging: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageWindSpeed"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["ObsValue"]
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#Relative humidity averaging: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["ObsValue"]
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#A group variable is not chosen, throwing an exception
+No group variable chosen:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
+    simulated variables: [air_temperature, relative_humidity]
+  Conventional Profile Processing:
+    Checks: ["RH"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowOnInstantiation: true
+
+#An ascending sort order is chosen, throwing an exception
+Ascending sort order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "ascending"
+    simulated variables: [air_temperature, relative_humidity]
+  Conventional Profile Processing:
+    Checks: ["RH"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringPostFilter: true
+
+#An invalid check is requested, throwing an exception
+Invalid check requested:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_rh.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, relative_humidity]
+  Conventional Profile Processing:
+    Checks: ["WrongCheck"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowOnInstantiation: true
+
+#A duplicate check is requested, throwing an exception
+Duplicate check requested:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Sign"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  AddDuplicateCheck: true
+
+#An incorrect type is used in the 'get' function, throwing an exception
+Incorrect type in get:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Sign"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  GetWrongType: true
+
+#The standard levels (for the hydrostatic check) are out of order, throwing an exception
+Standard levels out of order:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, height]
+  Conventional Profile Processing:
+    Checks: ["Hydrostatic"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    StandardLevels: [1, 1000]
+  BypassMismatchComparison: true
+  ExpectThrowDuringPostFilter: true
+
+#Time: set SondeLaunchWindRej to a nonzero value
+Background SondeLaunchWindRej:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  Conventional Profile Processing:
+    Checks: ["Time"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    TimeCheck_SondeLaunchWindRej: 100.0
+  BypassMismatchComparison: true
+
+#Manually set QC flags
+Background manual QC flags:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
+  Conventional Profile Processing:
+    Checks: ["Time"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ManualFlagModification: true
+
+#Do not run profile pressure routine before temperature averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
+Profile pressure not run before temperature averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "Sign", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringPostFilter: true
+
+#GeoVaLs missing for pressure calculation (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for pressure calculation:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [height]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "Pressure"]
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+
+#GeoVaLs missing for temperature averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for temperature averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageTemperature"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#Do not run profile pressure routine before wind speed averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
+Profile pressure not run before wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "Sign", "AverageWindSpeed"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringPostFilter: true
+
+#GeoVaLs missing for wind speed averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for wind speed averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_windspeed.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageWindSpeed"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#Do not run profile pressure routine before relative humidity averaging
+#The Sign check ensures that pressure GeoVaLs are loaded, avoiding
+#triggering the exception related to reorderzdir.
+Profile pressure not run before relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "Sign", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringPostFilter: true
+
+#Do not run profile pressure routine before relative humidity averaging
+#This triggers the exception related to reorderzdir in ProfileDataHandled.
+Exception in ProfileDataHandler due to reorderzdir:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ExpectThrowDuringPriorFilter: true
+
+#GeoVaLs missing for relative humidity averaging (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for relative humidity averaging:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [relative_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity.nc4
+  Conventional Profile Processing:
+    Checks: ["Basic", "AverageRelativeHumidity"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPriorFilter: true
+
+#GeoVaLs missing for sign check (because set IgnoreGeoVaLs to true):
+Missing GeoVaLs for sign check:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+    simulated variables: [air_temperature]
+  Conventional Profile Processing:
+    Checks: ["Basic", "Sign"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
+  ExpectThrowDuringPostFilter: true

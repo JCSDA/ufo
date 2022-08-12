@@ -174,6 +174,11 @@ void ObsVertLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
                             +options_.localizationFunction.value();
       throw eckit::BadParameter(message);
   }
+
+  // make sure that locvector has the same missing value as on input
+  for (size_t jj = 0; jj < locvector.size(); ++jj) {
+    if (locvectorTmp[jj] == missing) {locvector[jj] = missing;}
+  }
 }
 
 template<typename MODEL>

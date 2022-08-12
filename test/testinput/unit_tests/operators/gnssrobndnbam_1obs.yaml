@@ -1,0 +1,17 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+   name: GnssroBndNBAM
+  obs space:
+   name: GnssroBndNBAM
+   obsdatain:
+    obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
+   simulated variables: [bending_angle]
+#   obsdataout:
+#     obsfile: Data/gnssro_obs_2018041500_1obs_bending_angle_1obstest_out.nc4
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-7

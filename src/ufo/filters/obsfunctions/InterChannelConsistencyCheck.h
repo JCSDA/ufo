@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -38,7 +37,7 @@ class InterChannelConsistencyCheckParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<int>> useflagChannel{"use_flag", this};
 
   /// Configure passive bias correction
-  oops::OptionalParameter<bool> passiveBC{"use passive_bc", this};
+  oops::Parameter<bool> passiveBC{"use passive_bc", false, this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};

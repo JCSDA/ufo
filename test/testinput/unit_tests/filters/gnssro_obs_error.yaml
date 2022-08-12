@@ -1,0 +1,78 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      use_compress: 1
+      vertlayer: full
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM_out.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NBAM
+  passedBenchmark: 668
+- obs operator:
+    name: GnssroBndNBAM
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF_out.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: ECMWF
+  passedBenchmark: 668
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      use_compress: 1
+      vertlayer: full
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+#   obsdataout:
+#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL_out.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+  passedBenchmark: 668
+- obs operator:
+   name: GnssroRefNCEP
+  obs space:
+   name: GnssroRef
+   obsdatain:
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+#  obsdataout:
+#    obsfile: Data/gnssro_ref_2018041500_s_errNCEP_out.nc4
+   simulated variables: [refractivity]
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name:  refractivity
+    errmodel: NCEP
+  passedBenchmark: 20

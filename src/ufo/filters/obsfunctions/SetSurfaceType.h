@@ -60,7 +60,7 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   oops::Parameter<bool> UseAAPPSurfaceClass{"UseAAPPSurfaceClass", false, this};
 
   /// Use reported Surface Water Fraction (default false)
-  /// Example: To use reported Surface Water Fraction set
+  /// Example: To use reported Surface Water Fraction (which is water_fraction@MetaData) set
   ///          UseSurfaceWaterFraction: true
   oops::Parameter<bool> UseSurfaceWaterFraction{"UseSurfaceWaterFraction", false, this};
 

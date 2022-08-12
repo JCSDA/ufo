@@ -284,14 +284,14 @@ case ("refractivity")
 
   select case (trim(self%errmodel))
 
-  case ("NBAM")
+  case ("NCEP")
 
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "altitude",  obsZ) 
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags, missing)
-    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NBAM method" 
+    call refractivity_obserr_NCEP(obsLat, obsZ, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NCEP method" 
     call fckit_log%debug(err_msg)
     deallocate(obsZ)
     deallocate(obsLat)  
@@ -303,7 +303,7 @@ case ("refractivity")
      call fckit_log%info(err_msg)
 
   case default
-     write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is available now"
+     write(err_msg,*) "ufo_roobserror_mod: only NCEP refractivity model is available now"
      call abor1_ftn(err_msg)
   end select
 

@@ -1,0 +1,21 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+# One simulated variable where geoval names must be mapped to obs names.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_namemap.nc4
+    simulated variables: [airTemperature]
+  obs operator:
+    name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 294.79799709699643
+  tolerance: 1.0e-06

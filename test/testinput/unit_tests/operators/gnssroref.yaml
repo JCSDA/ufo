@@ -1,0 +1,21 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+   name: GnssroRefNCEP
+  obs space:
+   name: GnssroRef
+   obsdatain:
+     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+   simulated variables: [refractivity]
+#  obsdataout:
+#    obsfile: Data/gnssro_obs_2018041500_s_refncep_opr_out.nc4
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
+  rms ref: 128.48077739761979
+  tolerance: 1.0e-13
+  linear obs operator test:
+    coef TL:  1.0e-6
+    tolerance TL: 1.0e-4
+    tolerance AD: 1.0e-13

@@ -77,7 +77,7 @@ namespace ufo {
        ufo::VariableNames::modellevels_ExnerP_derived};
     std::vector <std::string> variableNamesGeoVaLs =
       {ufo::VariableNames::geovals_pressure,
-       ufo::VariableNames::geovals_pressure_rho};
+       ufo::VariableNames::geovals_pressure_rho_minus_one};
 
     if (options_.compareWithOPS.value()) {
       variableNamesFloat.insert
@@ -181,7 +181,7 @@ namespace ufo {
 
       // Calculate log(P) and Exner pressure for GeoVaLs on rho levels.
       const std::vector <float> &geovals_pressure_rho =
-        profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
+        profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho_minus_one);
       logPressure(geovals_pressure_rho, geovals_testreference_logP_rho);
       ExnerPressure(geovals_pressure_rho, geovals_testreference_ExnerP_rho);
 

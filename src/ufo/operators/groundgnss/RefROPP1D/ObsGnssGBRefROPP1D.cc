@@ -26,14 +26,14 @@ static ObsOperatorMaker<ObsGnssGBRefROPP1D> makerGnssGBRefROPP1D_("GnssGBRefROPP
 // -----------------------------------------------------------------------------
 
 ObsGnssGBRefROPP1D::ObsGnssGBRefROPP1D(const ioda::ObsSpace & odb,
-                                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssGBRefROPP1D_(0), odb_(odb), varin_()
+                                       const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperGnssGBRefROPP1D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "surface_altitude"};
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssgb_refropp1d_setup_f90(keyOperGnssGBRefROPP1D_, config);
+  ufo_gnssgb_refropp1d_setup_f90(keyOperGnssGBRefROPP1D_, params.toConfiguration());
   oops::Log::trace() << "ObsGnssGBRefROPP1D created." << std::endl;
 }
 
