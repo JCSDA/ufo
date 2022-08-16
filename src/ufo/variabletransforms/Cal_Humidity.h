@@ -39,6 +39,8 @@ class Cal_HumidityParameters: public VariableTransformParametersBase {
                                                      "ObsValue", this};
   oops::Parameter<std::string> TemperatureVariable{"temperature variable",
                                                    "airTemperature", this};
+  oops::Parameter<std::string> VirtualTempVariable{"virtual temperature variable",
+                                                   "virtualTemperature", this};
   oops::Parameter<std::string> TemperatureAt2MVariable{"temperature at 2m variable",
                                                        "airTemperatureAt2M", this};
   oops::Parameter<std::string> RelativeHumidityVariable{"relative humidity variable",
@@ -95,6 +97,7 @@ class Cal_RelativeHumidity : public TransformBase {
   std::string watervapormixingratiovariable_;
   std::string dewpointtemperaturevariable_;
   std::string dewpointtemperatureat2mvariable_;
+  std::string virtualtempvariable_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
   void methodUKMOmixingratio(const std::vector<bool> &apply);
@@ -140,6 +143,41 @@ class Cal_SpecificHumidity : public TransformBase {
   std::string temperaturevariable_;
   std::string relativehumidityvariable_;
   std::string dewpointtemperaturevariable_;
+  // list of specific implementation(s) - This is controlled by "method"
+  void methodDEFAULT(const std::vector<bool> &apply);
+};
+
+/*!
+* \brief Virtual Temperature filter
+*
+* Performs a variable conversion from temperature and specific humidity to virtual temperature.
+* The newly calculated variable is included in the same obs space.
+*
+* Example:
+*
+* \code{.yaml}
+* obs filters:
+* - filter: Variables Transform
+*   Transform: "VirtualTemperature"
+* \endcode
+*
+* See VariableTransformParametersBase for filter setup.
+*/
+class Cal_VirtualTemperature : public TransformBase {
+ public:
+  typedef Cal_HumidityParameters Parameters_;
+
+  Cal_VirtualTemperature(const Parameters_ &options,
+                         const ObsFilterData &data,
+                         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                         const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+  // Run check
+  void runTransform(const std::vector<bool> &apply) override;
+
+ private:
+  std::string specifichumidityvariable_;
+  std::string temperaturevariable_;
+  std::string virtualtempvariable_;
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply);
 };
