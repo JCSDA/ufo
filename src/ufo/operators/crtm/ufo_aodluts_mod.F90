@@ -188,7 +188,7 @@ CONTAINS
 
        self%conf%wavelengths=wavelengths_all(self%channels)
 
-       CALL calculate_aero_layers(self%conf%aerosol_option,&
+       CALL calculate_aero_layers(self%conf,&
             &n_aerosols, n_profiles, n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh)
  
@@ -208,7 +208,7 @@ CONTAINS
 !    name: AodLUTs
 !    obs options:
 !      Sensor_ID: aeronet
-!      AerosolOption: aerosols_gocart_merra_2
+!      AerosolOption: aerosols_gocart_1
 !      RCFile: [geosaod_aeronet.rc]
 !      AbsorptionAod: true
 
@@ -233,7 +233,7 @@ CONTAINS
        ENDIF
 
        DEALLOCATE(aero_layers,rh,wavelengths_all)
-       
+
        IF (rc /= 0) THEN
           message = 'error on exit from get_cf_aod'
           CALL display_message( program_name, message, failure )

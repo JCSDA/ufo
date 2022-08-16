@@ -34,6 +34,8 @@ class AodLUTsOptionsParameters: public oops::Parameters {
   oops::OptionalParameter<std::string> coeffPath{"CoefficientPath", this};
   oops::OptionalParameter<std::string> endian{"EndianType", this};
   oops::Parameter<bool> absorptionAOD{"AbsorptionAod", false, this};
+  oops::Parameter<double> modelunitscoeff{"model units coeff", 1, this};
+  oops::Parameter<bool> drymixratio{"dry mix ratio", false, this};
 };
 
 class AodLUTsParameters: public ObsOperatorParametersBase {
