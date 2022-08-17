@@ -75,12 +75,6 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
      "Conversion between model units",
      1.0,
      this};
-
-  oops::Parameter <double> hofxUnitsCoeff
-    {"hofx units coeff",
-     "Conversion between H(x) units",
-     1.0,
-     this};
 };
 
 }  // namespace ufo

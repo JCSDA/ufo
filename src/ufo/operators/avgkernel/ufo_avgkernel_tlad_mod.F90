@@ -27,7 +27,7 @@ module ufo_avgkernel_tlad_mod
    integer :: nlocs, nvars, nval
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
    logical :: troposphere, totalcolumn
-   real(kind_real) :: convert_factor_model, convert_factor_hofx
+   real(kind_real) :: convert_factor_model
    real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
    real(kind_real), allocatable, dimension(:,:) :: prsi
    real(kind_real), allocatable, dimension(:) :: airmass_tot, airmass_trop
@@ -82,7 +82,6 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
 
   ! do we need a conversion factor, say between ppmv and unity?
   call f_conf%get_or_die("model units coeff", self%convert_factor_model)
-  call f_conf%get_or_die("hofx units coeff", self%convert_factor_hofx)
 
   ! add variables to geovars that are needed
   ! specified tracers
@@ -146,7 +145,7 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obskernelvar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), &
+    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
             self%avgkernel_obs(self%nlayers_kernel+1-ilev, :))
   end do
 
@@ -156,7 +155,7 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obspressurevar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), &
+    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
             self%prsi_obs(self%nlayers_kernel+2-ilev, :))
   end do
   !last vertices should be always TOA (0 hPa)
@@ -167,9 +166,9 @@ subroutine avgkernel_tlad_settraj_(self, geovals_in, obss)
     allocate(self%troplev_obs(self%nlocs))
     allocate(self%airmass_trop(self%nlocs))
     allocate(self%airmass_tot(self%nlocs))
-    call obsspace_get_db(obss, "MetaData", "troposphere_layer_index", self%troplev_obs)
-    call obsspace_get_db(obss, "MetaData", "air_mass_factor_troposphere", self%airmass_trop)
-    call obsspace_get_db(obss, "MetaData", "air_mass_factor_total", self%airmass_tot)
+    call obsspace_get_db(obss, "RtrvlAncData", "troposphere_layer_index", self%troplev_obs)
+    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_troposphere", self%airmass_trop)
+    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_total", self%airmass_tot)
   end if
 
 end subroutine avgkernel_tlad_settraj_
@@ -215,7 +214,7 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
                                      tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp)
         end if
-        hofx(ivar,iobs) = hofx_tmp  * self%convert_factor_hofx
+        hofx(ivar,iobs) = hofx_tmp
       else
         hofx(ivar,iobs) = missing
       end if
@@ -255,7 +254,7 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
 
     do iobs = 1, nlocs
       if (hofx(ivar,iobs) /= missing) then ! take care of missing obs
-        hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
+        hofx_tmp = hofx(ivar,iobs)
         if (self%troposphere) then
           call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
                                      self%prsi_obs(:,iobs), self%prsi(:,iobs),&
