@@ -12,7 +12,8 @@ private
 public :: ufo_vars_read, ufo_vars_getindex
 
 integer, parameter, public :: n_aerosols_gocart_default=14,&
-     &n_aerosols_gocart_merra_2=15,n_aerosols_other=1
+     &n_aerosols_gocart_1=15,n_aerosols_gocart_2=18,&
+     &n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=100
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
@@ -162,12 +163,20 @@ character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, paramete
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004]
 
-character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
-     &var_aerosols_gocart_merra_2 = [&
+character(len=maxvarlen), dimension(n_aerosols_gocart_1), public, parameter :: &
+     &var_aerosols_gocart_1 = [&
      &var_sulfate,&
      &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005]
+
+character(len=maxvarlen), dimension(n_aerosols_gocart_2), public, parameter :: &
+     &var_aerosols_gocart_2 = [&
+     &var_sulfate,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005,&
+     &var_no3an1,var_no3an2,var_no3an3]
 
 character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
      &var_aerosols_other = [&

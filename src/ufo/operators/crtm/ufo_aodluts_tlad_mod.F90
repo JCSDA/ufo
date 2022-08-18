@@ -185,7 +185,7 @@ CONTAINS
 
        self%conf%wavelengths=wavelengths_all(self%channels)
 
-       CALL calculate_aero_layers(self%conf%aerosol_option,&
+       CALL calculate_aero_layers(self%conf,&
             &self%n_aerosols, self%n_profiles, self%n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh, &
             &layer_factors=self%layer_factors)

@@ -869,6 +869,18 @@ if( crtm_FOUND )
                   LABELS  filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+#
+    ufo_add_test( NAME    test_ufo_atms_n20_qc_filters_geos
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_qc_filters_geos.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_cris_qc
                   TIER    1

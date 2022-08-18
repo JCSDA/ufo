@@ -516,12 +516,9 @@ void TrackCheckShip::removeFaultyObservation(
       diagnostics_->storeFirstIterativeRemovalInfo(
             std::make_pair(observationNumbersAroundFastest, errorCategory));
     }
-    if (rejectedObservation == observationAfterFastestSegment) {
-      fail(observationAfterFastestSegment - 1);
-    } else {
-      fail(observationAfterFastestSegment);
-    }
-    track.erase(observationAfterFastestSegment - 1, observationAfterFastestSegment);
+    fail(observationAfterFastestSegment - 1);
+    fail(observationAfterFastestSegment);
+    track.erase(observationAfterFastestSegment - 1, observationAfterFastestSegment + 1);
   } else {
     if (options_.testingMode.value() && firstIterativeRemoval) {
       std::vector<size_t> rejectedObservationNumber{rejectedObservation->get().

@@ -537,4 +537,86 @@ void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &) {
 
   putObservation(specifichumidityvariable_, specificHumidity);
 }
+
+/**************************************************************************************************/
+//  Cal_VirtualTemperature
+/**************************************************************************************************/
+
+static TransformMaker<Cal_VirtualTemperature>
+    makerCal_VirtualTemperature_("VirtualTemperature");
+
+Cal_VirtualTemperature::Cal_VirtualTemperature(
+    const Parameters_ &options,
+    const ObsFilterData &data,
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+  : TransformBase(options, data, flags, obserr),
+      temperaturevariable_(options.TemperatureVariable),
+      specifichumidityvariable_(options.SpecificHumidityVariable),
+      virtualtempvariable_(options.VirtualTempVariable)
+{}
+
+/**************************************************************************************************/
+
+void Cal_VirtualTemperature::runTransform(const std::vector<bool> &apply) {
+  oops::Log::trace() << " --> Retrieve Virtual Temperature"
+            << std::endl;
+  oops::Log::trace() << "      --> method: " << method() << std::endl;
+  oops::Log::trace() << "      --> formulation: " << formulation() << std::endl;
+  oops::Log::trace() << "      --> obsName: " << obsName() << std::endl;
+
+  // Get the right method
+  switch (method()) {
+    case formulas::MethodFormulation::UKMO:
+    case formulas::MethodFormulation::NCAR:
+    case formulas::MethodFormulation::NOAA:
+    default: {
+      methodDEFAULT(apply);
+      break;
+    }
+  }
+}
+
+/**************************************************************************************************/
+
+void Cal_VirtualTemperature::methodDEFAULT(const std::vector<bool> &apply) {
+  const size_t nlocs = obsdb_.nlocs();
+
+  float qv;
+
+  std::vector<float> specificHumidity;
+  std::vector<float> airTemperature;
+  std::vector<float> virtualTemperature(nlocs);
+
+  getObservation("ObsValue", specifichumidityvariable_, specificHumidity, true);
+  getObservation("ObsValue", temperaturevariable_, airTemperature, true);
+
+  if (!oops::allVectorsSameNonZeroSize(specificHumidity, airTemperature)) {
+    oops::Log::warning() << "Vector sizes: "
+                         << oops::listOfVectorSizes(specificHumidity, airTemperature)
+                         << std::endl;
+    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+                          "specific_humidity and air_temperature", Here());
+  }
+
+  // Initialise this vector with missing value
+  virtualTemperature.assign(nlocs, missingValueFloat);
+
+  // Loop over all obs
+  for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    // if the data have been excluded by the where statement
+    if (!apply[jobs]) continue;
+
+    if (specificHumidity[jobs] != missingValueFloat && airTemperature[jobs] != missingValueFloat) {
+      // Convert specific humidity to water vapor mixing ratio
+      qv = std::max(1.0e-12f, specificHumidity[jobs]/(1.0f-specificHumidity[jobs]));
+      virtualTemperature[jobs] = airTemperature[jobs]*(1.0f + 0.61f*qv);
+    }
+  }
+
+  putObservation(virtualtempvariable_, virtualTemperature);
+}
+
+/**************************************************************************************************/
+
 }  // namespace ufo

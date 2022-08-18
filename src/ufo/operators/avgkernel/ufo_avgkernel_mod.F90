@@ -25,7 +25,7 @@ module ufo_avgkernel_mod
    integer :: nlayers_kernel
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
    logical :: troposphere, totalcolumn, apriori
-   real(kind_real) :: convert_factor_model, convert_factor_hofx
+   real(kind_real) :: convert_factor_model
  contains
    procedure :: setup  => ufo_avgkernel_setup
    procedure :: simobs => ufo_avgkernel_simobs
@@ -75,7 +75,6 @@ subroutine ufo_avgkernel_setup(self, f_conf)
 
   ! do we need a conversion factor, say between ppmv and unity?
   call f_conf%get_or_die("model units coeff", self%convert_factor_model)
-  call f_conf%get_or_die("hofx units coeff", self%convert_factor_hofx)
 
   ! add variables to geovars that are needed
   ! specified tracers
@@ -140,7 +139,7 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obskernelvar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), avgkernel_obs(self%nlayers_kernel+1-ilev, :))
+    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), avgkernel_obs(self%nlayers_kernel+1-ilev, :))
   end do
 
   ! get prsi_obs
@@ -149,26 +148,26 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obspressurevar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "MetaData", trim(varstring), prsi_obs(self%nlayers_kernel+2-ilev, :))
+    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), prsi_obs(self%nlayers_kernel+2-ilev, :))
   end do
 
-  !last vertice should be always TOA (0 hPa)
+  !!top obs vertice should be TOA (0 hPa) for now
   prsi_obs(1,:) = zero
   prsi%vals(1,:) = zero
 
   ! getting the apriori term if applicable
   if (self%apriori) then
     allocate(apriori_term(nlocs))
-    call obsspace_get_db(obss, "MetaData", "apriori_term", apriori_term)
+    call obsspace_get_db(obss, "RtrvlAncData", "apriori_term", apriori_term)
   end if
 
   if (self%troposphere) then
     allocate(troplev_obs(nlocs))
     allocate(airmass_trop(nlocs))
     allocate(airmass_tot(nlocs))
-    call obsspace_get_db(obss, "MetaData", "troposphere_layer_index", troplev_obs)
-    call obsspace_get_db(obss, "MetaData", "air_mass_factor_troposphere", airmass_trop)
-    call obsspace_get_db(obss, "MetaData", "air_mass_factor_total", airmass_tot)
+    call obsspace_get_db(obss, "RtrvlAncData", "troposphere_layer_index", troplev_obs)
+    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_troposphere", airmass_trop)
+    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_total", airmass_tot)
   end if
   ! loop through all variables
   do ivar = 1, nvars
@@ -188,9 +187,9 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
                                   hofx_tmp)
         end if
         if (self%apriori) then
-          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs)) !* self%convert_factor_hofx
+          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs))
         else
-          hofx(ivar,iobs) = hofx_tmp !* self%convert_factor_hofx
+          hofx(ivar,iobs) = hofx_tmp
         endif
       else
         hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel

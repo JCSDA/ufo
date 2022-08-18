@@ -5,9 +5,11 @@ observations:
 - obs operator:
     name: AodLUTs
     obs options:
-      AerosolOption: aerosols_gocart_merra_2
+      AerosolOption: aerosols_gocart_1
       RCFile: [geosaod_aeronet.rc]
       Sensor_ID: aeronet
+      model units coeff: 1.e-9
+#      dry mix ratio: true
   obs space:
     name: Aod
     obsdatain:
@@ -18,8 +20,7 @@ observations:
 #     obsfile: Data/aod_obs_2018041500_m_aodluts_aeronet_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
-  #temporary to replace with NasaBench
-  vector ref: GsiHofX
+  vector ref: HofX_1
   tolerance: 1.0e-02
   linear obs operator test:
     coef TL: 1.0e-3

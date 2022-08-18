@@ -80,7 +80,7 @@ type crtm_conf
  integer :: inspect
  character(len=MAXVARLEN) :: aerosol_option
  character(len=255) :: salinity_option
-  character(len=MAXVARLEN) :: sfc_wind_geovars
+ character(len=MAXVARLEN) :: sfc_wind_geovars
 end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
@@ -1005,148 +1005,180 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
     INTEGER :: ivar
 
-    IF (cmp_strings(aerosol_option, "aerosols_gocart_default")) THEN
-       varname=var_rh
-       CALL ufo_geovals_get_var(geovals, varname, geoval)
-       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
-       WHERE (rh > 1_kind_real) rh=1_kind_real
-       CALL assign_gocart_default
-    ELSEIF (cmp_strings(aerosol_option, "aerosols_gocart_merra_2")) THEN
-       varname=var_rh
-       CALL ufo_geovals_get_var(geovals, varname, geoval)
-       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
-       WHERE (rh > 1_kind_real) rh=1_kind_real
-       CALL assign_gocart_merra_2
-    ELSEIF (cmp_strings(aerosol_option, "aerosols_other")) THEN
-       CALL assign_other
-    ELSE
-       message = 'this aerosol not implemented - check later'
-       CALL Display_Message( aerosol_option, message, FAILURE )
-       STOP
-    ENDIF
+    CALL assign_aerosols(aerosol_option)
 
   CONTAINS 
 
-    SUBROUTINE assign_gocart_default
+    SUBROUTINE assign_aerosols(aerosol_option)
 
+      CHARACTER(*), INTENT(in) :: aerosol_option
+
+      CONTINUE
+
+      IF (cmp_strings(aerosol_option,"aerosols_gocart_default")) THEN
+         CALL assign_gocart_default
+      ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_1")) THEN
+         CALL assign_gocart_1
+      ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_2")) THEN
+         CALL assign_gocart_2
+      ELSE
+         CALL assign_other
+      ENDIF
+
+    END SUBROUTINE assign_aerosols
+
+    SUBROUTINE assign_gocart_default
+      
+!this is the original version of GOCART parameterization that exists 
+!in CRTM (bc1,bc2,oc1,oc2,sulf,dust1-5,seas1-4)
+      
       INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
       REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
            &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
       
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
-
+      
       REAL(kind_real), DIMENSION(n_layers) :: layer_factors
       
       INTEGER :: i,k,m
-
+      
       CHARACTER(len=MAXVARLEN) :: varname
 
+      varname=var_rh
+      CALL ufo_geovals_get_var(geovals, varname, geoval)
+      rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+      WHERE (rh > 1_kind_real) rh=1_kind_real
+      
       DO m=1,n_profiles
-
+         
          CALL calculate_aero_layer_factor(atm(m),layer_factors)
- 
+         
          DO i=1,n_aerosols_gocart_default
-
+            
             varname=var_aerosols_gocart_default(i)
             CALL ufo_geovals_get_var(geovals,varname, geoval)
-
+            
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
                  &MAX(geoval%vals(:,m)*layer_factors,aerosol_concentration_minvalue_layer)
-
+                 
             SELECT CASE (TRIM(varname))
             CASE (var_sulfate)
-               atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
+               atm(m)%aerosol(i)%TYPE  = SULFATE_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                       &gocart_aerosol_size(atm(m)%aerosol(i)%TYPE, &
                        &rh(k,m))
                ENDDO
-
+               
             CASE (var_bcphobic)
-               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+               atm(m)%aerosol(i)%TYPE  = BLACK_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
-                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+                    &AeroC%Reff(1,atm(m)%aerosol(i)%TYPE)
             CASE (var_bcphilic)
-               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+               atm(m)%aerosol(i)%TYPE  = BLACK_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       &gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
-
+               
             CASE (var_ocphobic)
-               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=&
-                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+               atm(m)%aerosol(i)%TYPE  = ORGANIC_CARBON_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)= AeroC&
+                    &%Reff(1,atm(m)%aerosol(i)%TYPE)
             CASE (var_ocphilic)
-               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+               atm(m)%aerosol(i)%TYPE  = ORGANIC_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       & gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
-
+               
             CASE (var_du001)
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
+               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)&
+                    &=dust_radii(1)
             CASE (var_du002)
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
+               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)&
+                    &=dust_radii(2)
             CASE (var_du003)
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
+               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)&
+                    &=dust_radii(3)
             CASE (var_du004)
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
+               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)&
+                    &=dust_radii(4)
             CASE (var_du005)
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
-
+               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
+               atm(m)%aerosol(i)%effective_radius(:)&
+                    &=dust_radii(5)
+               
             CASE (var_ss001)
-               atm(m)%aerosol(i)%type  = seas_types(1)
+               atm(m)%aerosol(i)%TYPE  = seas_types(1)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       & gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
             CASE (var_ss002)
-               atm(m)%aerosol(i)%type  = seas_types(2)
+               atm(m)%aerosol(i)%TYPE  = seas_types(2)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       & gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
             CASE (var_ss003)
-               atm(m)%aerosol(i)%type  = seas_types(3)
+               atm(m)%aerosol(i)%TYPE  = seas_types(3)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       & gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
             CASE (var_ss004)
-               atm(m)%aerosol(i)%type  = seas_types(4)
+               atm(m)%aerosol(i)%TYPE  = seas_types(4)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k,m))
+                       & gocart_aerosol_size(atm(m)%aerosol(i)&
+                       &%TYPE, rh(k,m))
                ENDDO
             END SELECT
-
+            
          ENDDO
-
+              
       ENDDO
-
-
+      
+           
     END SUBROUTINE assign_gocart_default
+         
+    SUBROUTINE assign_gocart_1
+ 
+!this is a version of GOCART parameterization
+!(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
+!in NOAA's GEFS-Aerosols model
+      
+      message = 'this aerosol not implemented in the CRTM - check&
+           & later'
+      CALL Display_Message( aerosol_option, message, FAILURE )
+      STOP
+      
+    END SUBROUTINE assign_gocart_1
+    
+    SUBROUTINE assign_gocart_2
+!this is a version of GOCART parameterization 
+!(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
+!in NOAA's UFS-Aerosols model
 
-    SUBROUTINE assign_gocart_merra_2
 
-      message = 'this aerosol not implemented in the CRTM - check later'
+      message = 'this aerosol not implemented in the CRTM - check&
+           & later'
       CALL Display_Message( aerosol_option, message, FAILURE )
       STOP
 
-    END SUBROUTINE assign_gocart_merra_2
+    END SUBROUTINE assign_gocart_2
+
 
     SUBROUTINE assign_other
 
@@ -1156,6 +1188,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     END SUBROUTINE assign_other
     
+
   END SUBROUTINE load_aerosol_data
 
   SUBROUTINE assign_aerosol_names(aerosol_option,var_aerosols)
@@ -1165,13 +1198,16 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     CHARACTER(max_string) :: err_msg
 
-    IF (aerosol_option == "aerosols_gocart_default") THEN
+    IF (cmp_strings(aerosol_option,"aerosols_gocart_default")) THEN
        ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_default)))
        var_aerosols=var_aerosols_gocart_default
-    ELSEIF (aerosol_option == "aerosols_gocart_merra_2") THEN
-       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_merra_2)))
-       var_aerosols=var_aerosols_gocart_merra_2
-    ELSEIF (aerosol_option == "var_aerosols_other") THEN
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_1")) THEN
+       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_1)))
+       var_aerosols=var_aerosols_gocart_1
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_2")) THEN
+       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_2)))
+       var_aerosols=var_aerosols_gocart_2
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_other")) THEN
        ALLOCATE(var_aerosols(SIZE(var_aerosols_other)))
        var_aerosols=var_aerosols_other
     ELSE
