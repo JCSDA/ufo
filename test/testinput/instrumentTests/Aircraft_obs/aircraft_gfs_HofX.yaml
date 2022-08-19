@@ -20,7 +20,8 @@ observations:
     simulated variables: [eastward_wind,northward_wind]
   obs operator:
     name: VertInterp
+    apply near surface wind scaling: true
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   vector ref: GsiHofX
-  tolerance: 0.01
+  tolerance: 1.0e-5
