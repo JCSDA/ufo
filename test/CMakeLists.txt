@@ -36,9 +36,13 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
+
+# Currently only use jedi_release_2.4.0 CRTM coefficients
+set( CRTM_COEFFS_BRANCH "jedi_release_2.4.0" )
+
 # Test data filenames
 set(ufo_test_data  ufo_testinput_tier_1_1.3.0.tar.gz)
-set(crtm_test_data crtm_coefficients_2.3.0.tar.gz)
+set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
 # macro for downloading test data
@@ -51,8 +55,6 @@ set(crtm_test_data crtm_coefficients_2.3.0.tar.gz)
 #        test_data: test data filename (archive)
 # output: output_data_path: path to data on local machine after download
 
-# Currently only use 2.3.0 CRTM coefficients
-set( CRTM_COEFFS_BRANCH "2.3.0" )
 
 function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   # If REPO branch is being built set GIT_BRANCH_FUNC to REPO's current branch.
@@ -413,6 +415,12 @@ SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
+SpcCoeff/Little_Endian/v.viirs-m_j1.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.viirs-m_j1.TauCoeff.bin
+SpcCoeff/Little_Endian/v.modis_aqua.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.modis_aqua.TauCoeff.bin
+SpcCoeff/Little_Endian/v.modis_terra.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.modis_terra.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_g16.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g16.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_gr.SpcCoeff.bin
