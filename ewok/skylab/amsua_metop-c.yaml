@@ -11,24 +11,34 @@ obs operator:
   obs options:
     Sensor_ID: amsua_metop-c
     EndianType: little_endian
-#obs bias:
-#  input file: $(experiment_dir)/{{current_cycle}}/amsua_metop-c.{{background_time}}.satbias.nc4
-#  variational bc:
-#    predictors:
-#    - name: constant
-#    - name: lapse_rate
-#      order: 2
-#      tlapse: &amsua_metop-c_tlapse $(experiment_dir)/{{current_cycle}}/amsua_metop-c.{{background_time}}.tlapse.txt
-#    - name: lapse_rate
-#      tlapse: *amsua_metop-c_tlapse
-#    - name: emissivity
-#    - name: scan_angle
-#      order: 4
-#    - name: scan_angle
-#      order: 3
-#    - name: scan_angle
-#      order: 2
-#    - name: scan_angle
+obs bias:
+  variational bc:
+    predictors:
+    - name: constant
+    - name: cloud_liquid_water
+      sensor: AMSUA
+      clwdif_ch238: 1
+      clwdif_ch314: 2
+    - name: lapse_rate
+      order: 2
+    - name: lapse_rate
+    - name: emissivity
+    - name: scan_angle
+      order: 4
+    - name: scan_angle
+      order: 3
+    - name: scan_angle
+      order: 2
+    - name: scan_angle
+  covariance:
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.0]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0
+    prior:
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
 obs filters:
 - filter: BlackList
   filter variables:
@@ -87,51 +97,51 @@ obs filters:
   maxvalue: 999.0
   action:
     name: reject
-##  Hydrometeor Check (cloud/precipitation affected chanels)
-#- filter: Bounds Check
-#  filter variables:
-#  - name: brightness_temperature
-#    channels: *amsua_metop-c_channels
-#  test variables:
-#  - name: HydrometeorCheckAMSUA@ObsFunction
-#    channels: *amsua_metop-c_channels
-#    options:
-#      channels: *amsua_metop-c_channels
-#      obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
-#                         0.230, 0.230, 0.250, 0.250, 0.350,
-#                         0.400, 0.550, 0.800, 3.000, 3.500]
-#      clwret_function:
-#        name: CLWRetMW@ObsFunction
-#        options:
-#          clwret_ch238: 1
-#          clwret_ch314: 2
-#          clwret_types: [ObsValue]
-#      obserr_function:
-#        name: ObsErrorModelRamp@ObsFunction
-#        channels: *amsua_metop-c_channels
-#        options:
-#          channels: *amsua_metop-c_channels
-#          xvar:
-#            name: CLWRetSymmetricMW@ObsFunction
-#            options:
-#              clwret_ch238: 1
-#              clwret_ch314: 2
-#              clwret_types: [ObsValue, HofX]
-#          x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
-#                   0.100,  0.000,  0.000,  0.000,  0.000,
-#                   0.000,  0.000,  0.000,  0.000,  0.030]
-#          x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
-#                   1.500,  0.000,  0.000,  0.000,  0.000,
-#                   0.000,  0.000,  0.000,  0.000,  0.200]
-#          err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
-#                   0.230,  0.230,  0.250,  0.250,  0.350,
-#                   0.400,  0.550,  0.800,  3.000,  3.500]
-#          err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
-#                   0.300,  0.230,  0.250,  0.250,  0.350,
-#                   0.400,  0.550,  0.800,  3.000, 18.000]
-#  maxvalue: 0.0
-#  action:
-#    name: reject
+#  Hydrometeor Check (cloud/precipitation affected channels)
+- filter: Bounds Check
+  filter variables:
+  - name: brightness_temperature
+    channels: *amsua_metop-c_channels
+  test variables:
+  - name: HydrometeorCheckAMSUA@ObsFunction
+    channels: *amsua_metop-c_channels
+    options:
+      channels: *amsua_metop-c_channels
+      obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
+                         0.230, 0.230, 0.250, 0.250, 0.350,
+                         0.400, 0.550, 0.800, 3.000, 3.500]
+      clwret_function:
+        name: CLWRetMW@ObsFunction
+        options:
+          clwret_ch238: 1
+          clwret_ch314: 2
+          clwret_types: [ObsValue]
+      obserr_function:
+        name: ObsErrorModelRamp@ObsFunction
+        channels: *amsua_metop-c_channels
+        options:
+          channels: *amsua_metop-c_channels
+          xvar:
+            name: CLWRetSymmetricMW@ObsFunction
+            options:
+              clwret_ch238: 1
+              clwret_ch314: 2
+              clwret_types: [ObsValue, HofX]
+          x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                   0.100,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.030]
+          x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                   1.500,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.200]
+          err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                   0.230,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000,  3.500]
+          err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                   0.300,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000, 18.000]
+  maxvalue: 0.0
+  action:
+    name: reject
 #  Topography check
 - filter: BlackList
   filter variables:
@@ -145,7 +155,7 @@ obs filters:
       options:
         sensor: amsua_metop-c
         channels: *amsua_metop-c_channels
-#  Transmittnace Top Check
+#  Transmittance Top Check
 - filter: BlackList
   filter variables:
   - name: brightness_temperature
