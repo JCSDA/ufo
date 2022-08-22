@@ -42,23 +42,12 @@ integer(kind=c_int), allocatable :: nlevels(:)
 integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
 
 ! Check configurations
-if (conf%has("geovals")) then
-  ngvars = conf%get_size("geovals")
-  call conf%get_or_die("geovals", gvars)
-  ! add to geovars list
-  do ivar = 1, ngvars
-    call self%geovars%push_back(gvars(ivar))
-  enddo
-endif
-
-nvars = self%obsvars%nvars()
-if (ngvars == 0 .and. nvars > 0) then
-  allocate(self%coefficients(nvars))
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-    self%coefficients(ivar) = 1.0
-  enddo
-endif
+ngvars = conf%get_size("geovals")
+call conf%get_or_die("geovals", gvars)
+! add to geovars list
+do ivar = 1, ngvars
+  call self%geovars%push_back(gvars(ivar))
+enddo
 
 ncoefs = conf%get_size("coefficients")
 call conf%get_or_die("coefficients", coefficients)
