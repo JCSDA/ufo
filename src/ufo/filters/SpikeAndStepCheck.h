@@ -47,6 +47,10 @@ class SpikeAndStepToleranceParameters : public oops::Parameters {
   oops::Parameter<float> threshold{"threshold", 0.5, this,
                                   {oops::exclusiveMinConstraint(0.0f)}};
 
+  /// For conditions checking for small spike.
+  oops::Parameter<float> smallThreshold{"small spike threshold", 0.25, this,
+                                       {oops::exclusiveMinConstraint(0.0f)}};
+
   /// dy/dx tolerance, for checking for small spikes.
   oops::Parameter<float> gradientTolerance{"gradient", std::numeric_limits<float>::max(),
                                            this, {oops::exclusiveMinConstraint(0.0f)}};
@@ -138,6 +142,7 @@ class SpikeAndStepCheckParameters : public FilterParametersBase {
 ///     - gradient x resolution # precision to which dx can be known (otherwise dy/dx undefined).
 ///     - threshold  # use in combination with nominal tolerance for checking
 ///                  # spike/step conditions
+///     - small spike threshold  # like 'threshold' but for small spikes
 ///     - factors      # tolerance (boundaries, factors) define variation of tolerance(x),
 ///     - x boundaries #  such that tolerance(x) = nominal * tolerance factor at x.
 ///   * boundary layer:
@@ -189,7 +194,6 @@ class SpikeAndStepCheck : public FilterBase,
   ///  set x, y, dx, dy and dy/dx for the given record (group).
   void set_xyrec(const std::vector<float> &x,
                  const std::vector<float> &y,
-                 const std::vector<size_t> &validObsIds,
                  const std::vector<size_t> &obs_indices,
                  xyStruct &xy,
                  const Parameters_ &parameters_) const;
@@ -201,14 +205,13 @@ class SpikeAndStepCheck : public FilterBase,
                                     const Parameters_ &parameters_) const;
 
   /// \brief Go through the obs in the record (group), finding which are spikes and steps,
-  ///  according to given conditions, flag as appropriate, and increment respective counters.
+  ///  according to given conditions, flag as appropriate.
   void identifyThinnedObservations(std::vector<bool> &isThinned,
                                    std::vector<bool> &spikeFlag,
                                    std::vector<bool> &stepFlag,
                                    xyStruct &xy,
                                    const std::vector<float> &tolerances,
                                    const std::vector<size_t> &obs_indices,
-                                   const std::vector<size_t> &validObsIds,
                                    const Parameters_ &parameters_) const;
 
   /// Reimplemented to detect incompatible options.

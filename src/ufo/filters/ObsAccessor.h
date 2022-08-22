@@ -146,6 +146,39 @@ class ObsAccessor {
   /// denotes the number of locations held on ith rank.
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
 
+  /// \brief Get valid (non-missing, where-included) obs indices for a given profile.
+  ///
+  /// \param iProfile
+  ///   Profile index, e.g. from looping through the vector returned by
+  ///   \c ioda::ObsSpace::recidx_all_recnums()
+  ///
+  /// \param apply
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  ///
+  /// \param flags
+  ///   An ObsDataVector holding the QC flags (set by any filters run previously)
+  ///   of observations held on the current MPI rank.
+  ///
+  /// \param filtervars
+  ///   List of filter variables.
+  ///
+  /// \param retentionCandidateIfAnyFilterVariablePassedQC
+  ///   Boolean switch to treat an observation as a candidate for retention if any filter variable
+  ///   has not been rejected. By default this is true; if false, the observation is only treated
+  ///   as a candidate for retention if all filter variables have passed QC.
+  ///
+  /// An observation location is treated as valid if (a) it has been selected by the \c where
+  /// clause and (b) its QC flag(s) for (some/all) filtered variable(s) are set to \c pass
+  /// (see below). This function is only appropriate for observations that are grouped into
+  /// records. Thus the returned vector contains local IDs of valid observation locations held
+  /// on the current rank only.
+  const std::vector<size_t> getValidObsIdsInProfile(const size_t & iProfile,
+                                    const std::vector<bool> & apply,
+                                    const ioda::ObsDataVector<int> &flags,
+                                    const Variables & filtervars,
+                                    bool retentionCandidateIfAnyFilterVariablePassedQC) const;
+
   /// \brief Return a boolean vector indicating whether each location was selected by the
   /// \c where clause in the filter's configuration.
   /// If each independent group of observations is stored entirely on a single MPI rank

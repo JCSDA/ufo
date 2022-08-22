@@ -11,8 +11,8 @@ observations:
         sort variable: "ocean_depth"
         sort group: "MetaData"
         sort order: "ascending" # surface to depth
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out1.nc4
+    obsdataout:
+      obsfile: Data/spikestep_testout.nc4
     simulated variables: [ocean_temperature, ocean_salinity]
     observed variables: [ocean_temperature, ocean_salinity]
   obs filters:
@@ -163,13 +163,70 @@ observations:
                         # rejection threshold for both T and S), minus 2 [64-65]:
                         #  146 -1 -66 -2 = 77
 - obs space:
+    name: Ocean Profile, where T >= 1 deg.C
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      obsgrouping:
+        group variables: [ "station_id", "dateTime" ]
+        sort variable: "ocean_depth"
+        sort group: "MetaData"
+        sort order: "descending" # depth to surface
+    obsdataout:
+      obsfile: Data/spikestep_testout2.nc4
+    simulated variables: [ocean_temperature]
+    observed variables: [ocean_temperature]
+  obs pre filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: ocean_temperature
+    flags:
+    - name: spike
+      initial value: false
+    - name: step
+      initial value: false
+  - filter: Spike and Step Check
+    where:
+    - variable:
+        name: ObsValue/ocean_temperature
+      minvalue: 1
+    filter variables:
+      - name: ObsValue/ocean_temperature
+    dependent: ObsValue/ocean_temperature  # dy/
+    independent: MetaData/ocean_depth      # dx
+    count spikes: true
+    count steps: true
+    tolerance:
+      nominal value: 10  # K nominal, in the case of temperature (not really)
+      gradient: 0.1 # K/m - if dy/dx greater, could be a spike
+      gradient x resolution: 10 # m - can't know dx to better precision
+      factors: [1,1,0.5,0.5,0.1]     # multiply tolerance, for ranges bounded by...
+      x boundaries: [0,200,300,600,600] # ...these values of x (depth in m)
+    boundary layer:
+      x range: [0.0,300.0] # when bounded by these x values (depth in m)...
+      step tolerance range: [0.0,2.0]   # ...relax tolerance for steps in boundary layer...
+      maximum x interval: [50.0,100.0]  # ...and ignore level if dx greater than this
+    action:
+      name: reject
+  flaggedObservationsBenchmark:
+      # - 13  # not T step but thermocline
+      - 18  # temperature small spike
+      # - 27  # temperature large spike but OPS bug
+      # [30-31]  # temperature consistent large gradient, not flagged
+      # 32 where-excluded
+      #- 43  # temperature step at smaller tolerance, but where-excluded
+      #- 44  # ""
+      # - 65  # no temperature small spike as dx too large at this depth
+      # - 71  # temperature bottom step but OPS bug
+  benchmarkFlag: 21 # track
+  failedBenchmark: 1   # only 1 small temperature spike at [18]
+- obs space:
     name: Nonsense test against air pressure
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out2.nc4
+    obsdataout:
+      obsfile: Data/spikestep_testout3.nc4
     simulated variables: [ocean_temperature, ocean_salinity]
     observed variables: [ocean_temperature, ocean_salinity]
   obs filters:
@@ -228,8 +285,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out3.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
@@ -259,8 +314,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out4.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
@@ -289,8 +342,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out5.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
@@ -320,8 +371,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out6.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
@@ -349,8 +398,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out7.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
@@ -378,8 +425,6 @@ observations:
       obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-#   obsdataout:
-#     obsfile: Data/spikestep_test_out8.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs filters:
