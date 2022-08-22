@@ -40,21 +40,49 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
   // Get all required obs, metadata and geovals
   // Obs
   std::vector<float> PStn, Pmsl;
-  getObservation("ObsValue", "station_pressure",
+  getObservation("ObsValue", "stationPressure",
                  PStn);
-  getObservation("ObsValue", "mean_sea_level_pressure",
+  getObservation("ObsValue", "pressureReducedToMeanSeaLevel",
                  Pmsl);
 
   // MetaData
   std::vector<float> ZStn, PStn_error;
-  getObservation("MetaData", "station_elevation",
-                 ZStn);
-  data_.get(Variable("ObsError/station_pressure"),
+  if (data_.has(Variable("MetaData/correctedStationAltitude"))) {
+    getObservation("MetaData", "correctedStationAltitude",
+                     ZStn);
+  } else {
+    getObservation("MetaData", "stationAltitude",
+                     ZStn);
+  }
+  data_.get(Variable("ObsError/stationPressure"),
             PStn_error);
-  std::vector<int> PStn_flag;
+  // Flags
+  std::vector<bool> notRounded_flag;
+  std::vector<bool> QNHinHg_flag;
+  std::vector<bool> QNHhPa_flag;
 
-  getObservation("QCFlags", "station_pressure",
-                 PStn_flag);
+  // get diagnostic flags from ObsSpace (warn if they have not yet been created)
+  if (obsdb_.has("DiagnosticFlags/notRounded", "stationPressure")) {
+    obsdb_.get_db("DiagnosticFlags/notRounded", "stationPressure", notRounded_flag);
+  } else {
+    throw eckit::UserError("Variable 'DiagnosticFlags/notRounded/stationPressure' does not "
+                           "exist yet. It needs to be set up with the 'Create Diagnostic "
+                           "Flags' filter prior to using the 'set' or 'unset' action.");
+  }
+  if (obsdb_.has("DiagnosticFlags/QNHinHg", "stationPressure")) {
+    obsdb_.get_db("DiagnosticFlags/QNHinHg", "stationPressure", QNHinHg_flag);
+  } else {
+    throw eckit::UserError("Variable 'DiagnosticFlags/QNHinHg/stationPressure' does not exist yet. "
+                           "It needs to be set up with the 'Create Diagnostic Flags' filter "
+                           "prior to using the 'set' or 'unset' action.");
+  }
+  if (obsdb_.has("DiagnosticFlags/QNHhPa", "stationPressure")) {
+    obsdb_.get_db("DiagnosticFlags/QNHhPa", "stationPressure", QNHhPa_flag);
+  } else {
+    throw eckit::UserError("Variable 'DiagnosticFlags/QNHhPa/stationPressure' does not exist yet. "
+                           "It needs to be set up with the 'Create Diagnostic Flags' filter "
+                           "prior to using the 'set' or 'unset' action.");
+  }
 
   if (!oops::allVectorsSameNonZeroSize(Pmsl, PStn)) {
     oops::Log::warning() << "Vector sizes: " << oops::listOfVectorSizes(Pmsl, PStn)
@@ -76,13 +104,12 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
     if (!apply[jj]) continue;
     if (ZStn[jj] != missing && Pmsl[jj] > 0.0) {
       float Palt = Pmsl[jj];  // Altimeter pressure (QNH)
-      if ((!(PStn_flag[jj] & MetOfficeQCFlags::Surface::notRoundedFlag))
-           && (std::fmod(Palt, 100.0) == 0.0)) {
+      if ((!notRounded_flag[jj]) && (std::fmod(Palt, 100.0) == 0.0)) {
         Palt += 50.0;  // To avoid systematic bias add 0.5hPa to values that have been rounded down.
         PStn_error[jj] = std::sqrt(std::pow(PStn_error[jj], 2) + RoundErr);
-        PStn_flag[jj] |= ufo::MetOfficeQCFlags::Surface::QNHhPaFlag;
+        QNHhPa_flag[jj] = true;
       } else {
-        PStn_flag[jj] |= ufo::MetOfficeQCFlags::Surface::QNHinHgFlag;
+        QNHinHg_flag[jj] = true;
       }
       const float H = Constants::icao_temp_surface
                 *(1.0 - std::pow(Palt/(100.0*Constants::icao_pressure_surface), ExpQFE1))
@@ -91,9 +118,10 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
     }
   }
 
-  putObservation("station_pressure", PStn);
-  obsdb_.put_db("DerivedQCFlags", "station_pressure", PStn_flag);
-  obsdb_.put_db("DerivedObsError", "station_pressure", PStn_error);
+  putObservation("stationPressure", PStn);
+  obsdb_.put_db("DiagnosticFlags/QNHhPa", "stationPressure", QNHhPa_flag);
+  obsdb_.put_db("DiagnosticFlags/QNHinHg", "stationPressure", QNHinHg_flag);
+  obsdb_.put_db("DerivedObsError", "stationPressure", PStn_error);
 }
 }  // namespace ufo
 
