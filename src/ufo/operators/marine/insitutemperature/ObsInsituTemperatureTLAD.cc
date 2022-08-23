@@ -30,8 +30,7 @@ ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_water_potential_temperature",
-                                    "sea_water_salinity",
-                                    "sea_water_cell_thickness"};
+                                    "sea_water_salinity"};
   varin_.reset(new oops::Variables(vv));
   ufo_insitutemperature_tlad_setup_f90(keyOper_, params.toConfiguration());
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;

@@ -26,16 +26,16 @@ module ufo_insitutemperature_tlad_mod
  type, extends(ufo_basis_tlad), public :: ufo_insitutemperature_tlad
  private
      integer                            :: nlocs       !< Number of observations
-     integer                            :: nval       !< Number of level in model's profiles 
-     type(ufo_geoval)                   :: temp       !< Temperature (traj)     ] Model vertical 
-     type(ufo_geoval)                   :: salt       !< Salinity (traj)        ] profile at 
+     integer                            :: nval       !< Number of level in model's profiles
+     type(ufo_geoval)                   :: temp       !< Temperature (traj)     ] Model vertical
+     type(ufo_geoval)                   :: salt       !< Salinity (traj)        ] profile at
      type(ufo_geoval)                   :: h          !< Layer thickness (traj) ] obs locations
-     real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nlocs]     
+     real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nlocs]
      real (kind=kind_real), allocatable :: lono(:)    !< Observation location
      real (kind=kind_real), allocatable :: lato(:)    !< Observation location
      real (kind=kind_real), allocatable :: deptho(:)  !< Observation location
      real (kind=kind_real), allocatable :: tempo(:)   !< temp interpolated at observation location
-     real (kind=kind_real), allocatable :: salto(:)   !< salt interpolated at observation location     
+     real (kind=kind_real), allocatable :: salto(:)   !< salt interpolated at observation location
      real(kind_real), allocatable       :: wf(:)      !< Vertical interpolation weights
      integer, allocatable               :: wi(:)      !< Vertical interpolation indices
      real (kind=kind_real), allocatable :: jac(:,:)   !< Jacobian     [2 x nlocs]
@@ -73,7 +73,7 @@ class(ufo_insitutemperature_tlad), intent(inout) :: self
     if (allocated(self%salt%vals)) deallocate(self%salt%vals)
     if (allocated(self%h%vals)) deallocate(self%h%vals)
     if (allocated(self%tempo)) deallocate(self%tempo)
-    if (allocated(self%salto)) deallocate(self%salto)    
+    if (allocated(self%salto)) deallocate(self%salto)
     self%ltraj = .false.
 
 end subroutine ufo_insitutemperature_tlad_delete
@@ -82,7 +82,7 @@ end subroutine ufo_insitutemperature_tlad_delete
 subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     use vert_interp_mod
     use ufo_tpsp2ti_mod
-        
+
     implicit none
     class(ufo_insitutemperature_tlad), intent(inout)  :: self    !< Complete trajectory needed by the operator
     type(ufo_geovals), intent(in)                    :: geovals !< Model background
@@ -112,10 +112,10 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
 
     nlocs = h%nlocs
     nlev = h%nval
-    
+
     self%nlocs = nlocs
     self%nval = nlev
-    
+
     self%temp = temp
     self%salt = salt
     self%h    = h
@@ -140,7 +140,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     !< Depth from layer thickness
     allocate(self%depth(nlev,nlocs))
     do iobs = 1, nlocs
-       self%depth(1,iobs)=0.5*self%h%vals(1,iobs)       
+       self%depth(1,iobs)=0.5*self%h%vals(1,iobs)
        do ilev = 2, nlev
           self%depth(ilev,iobs)=sum(self%h%vals(1:ilev-1,iobs))+0.5*self%h%vals(ilev,iobs)
        end do
@@ -148,7 +148,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
 
     !< Interpolation weight
     allocate(self%wi(nlocs),self%wf(nlocs))
-    do iobs = 1, nlocs    
+    do iobs = 1, nlocs
        call vert_interp_weights(nlev,self%deptho(iobs),self%depth(:,iobs),self%wi(iobs),self%wf(iobs))
        if (self%deptho(iobs).ge.maxval(self%depth(:,iobs))) then
           self%wi(iobs)=nlev-1
@@ -163,7 +163,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
        ! Interpolate background do obs depth and save in traj
        call vert_interp_apply(nlev, self%temp%vals(:,iobs), self%tempo(iobs), self%wi(iobs), self%wf(iobs))
        call vert_interp_apply(nlev, self%salt%vals(:,iobs), self%salto(iobs), self%wi(iobs), self%wf(iobs))
-       
+
        ! Compute jacobian
        call insitu_t_jac(self%jac(:,iobs), self%tempo(iobs), self%salto(iobs), self%lono(iobs), self%lato(iobs), self%deptho(iobs))
     end do
@@ -190,7 +190,7 @@ subroutine ufo_insitutemperature_simobs_tl(self, geovals, hofx, obss)
 
     integer :: iobs, ilev, nlev, nlocs
 
-    type(ufo_geoval), pointer :: temp_d, salt_d, dlayerthick !< Increments from geovals
+    type(ufo_geoval), pointer :: temp_d, salt_d !< Increments from geovals
     real (kind=kind_real) :: lono, lato, deptho !< Observation location
 
     ! Vertical interpolation
@@ -214,13 +214,8 @@ subroutine ufo_insitutemperature_simobs_tl(self, geovals, hofx, obss)
     ! check if sea salinity profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_salt, salt_d)
 
-    ! check if sea layer thickness variable is in geovals get it and zero it out
-    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
-    ! Make sure thickness is not perturbed
-    dlayerthick%vals=0.0
-    
     nlev = temp_d%nval
-    nlocs = temp_d%nlocs        
+    nlocs = temp_d%nlocs
 
     ! linear sea temperature profile obs operator
     hofx = 0.0
@@ -245,7 +240,7 @@ end subroutine ufo_insitutemperature_simobs_tl
 subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
-    use vert_interp_mod      
+    use vert_interp_mod
     implicit none
     class(ufo_insitutemperature_tlad), intent(in)    :: self
     type(ufo_geovals),       intent(inout) :: geovals
@@ -256,15 +251,15 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     character(max_string) :: err_msg
 
     real (kind=kind_real) :: lono, lato, deptho !< Observation location
-        
+
     integer :: iobs, nlocs, ilev, nlev
-    type(ufo_geoval), pointer :: dtemp, dsalt, dlayerthick
+    type(ufo_geoval), pointer :: dtemp, dsalt
     real (kind_real) :: dtp, dsp
     real(c_double) :: missing
 
     !> Set missing value
     missing = missing_value(missing)
-    
+
     ! check if trajectory was set
     if (.not. self%ltraj) then
        write(err_msg,*) myname_, ' trajectory wasnt set!'
@@ -278,15 +273,12 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     endif
 
     if (.not. geovals%linit ) geovals%linit=.true.
-    
+
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, dtemp)
 
     ! check if sea salinity profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_salt, dsalt)
-
-    ! check if sea layer thickness variable is in geovals get it and zero it out
-    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
 
     nlev = self%nval
     nlocs = self%nlocs
