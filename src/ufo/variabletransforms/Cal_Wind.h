@@ -25,6 +25,10 @@ class Cal_WindComponentsParameters: public VariableTransformParametersBase {
  public:
   /// Observation group name. Default is ObsValue.
   oops::Parameter<std::string> group{"group", "ObsValue", this};
+  oops::Parameter<std::string> WindDirectionVariable{"wind direction variable",
+                                                     "wind_from_direction", this};
+  oops::Parameter<std::string> WindSpeedVariable{"wind speed variable",
+                                                "wind_speed", this};
 };
 
 /// Configuration parameters for the wind speed and direction transform.
@@ -34,6 +38,10 @@ class Cal_WindSpeedAndDirectionParameters: public VariableTransformParametersBas
  public:
   /// Observation group name. Default is ObsValue.
   oops::Parameter<std::string> group{"group", "ObsValue", this};
+  oops::Parameter<std::string> EastwardWindVariable{"eastward wind variable",
+                                                    "eastward_wind", this};
+  oops::Parameter<std::string> NorthwardWindVariable{"northward wind variable",
+                                                     "northward_wind", this};
 };
 
 /*!
@@ -58,6 +66,8 @@ class Cal_WindSpeedAndDirection : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  std::string eastwardwindvariable_;
+  std::string northwardwindvariable_;
   /// Group name.
   std::string group_;
 };
@@ -86,6 +96,8 @@ class Cal_WindComponents : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  std::string windspeedvariable_;
+  std::string winddirectionvariable_;
   /// Group name.
   std::string group_;
 };

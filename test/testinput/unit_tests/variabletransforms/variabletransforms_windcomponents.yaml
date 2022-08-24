@@ -46,3 +46,25 @@ observations:
       test:
         name: northward_wind@DerivedObsValue
       absTol: 5.0e-5
+
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_surface.nc4
+    simulated variables: [windEastwardAt10M, windNorthwardAt10M]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: WindComponents
+    wind speed variable: windSpeedAt10M
+    wind direction variable: windDirectionAt10M
+  compareVariables:                #  test output matches precalculated values
+    - reference:
+        name: windEastwardAt10M@TestReference
+      test:
+        name: windEastwardAt10M@DerivedObsValue
+      absTol: 5.0e-5
+    - reference:
+        name: windNorthwardAt10M@TestReference
+      test:
+        name: windNorthwardAt10M@DerivedObsValue
+      absTol: 5.0e-5

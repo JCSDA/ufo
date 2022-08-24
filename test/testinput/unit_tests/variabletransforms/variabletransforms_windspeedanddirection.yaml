@@ -44,3 +44,25 @@ observations:
       name: assign error
       error parameter: 1
   failedBenchmark: 50  # there should be 25 missing values in each of the two simulated variables
+
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_surface.nc4
+    simulated variables: [windSpeedAt10M,windDirectionAt10M]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: WindSpeedAndDirection
+      eastward wind variable: windEastwardAt10M
+      northward wind variable: windNorthwardAt10M
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: windSpeedAt10M@TestReference
+      test:
+        name: windSpeedAt10M@DerivedObsValue
+      absTol: 5.0e-6
+    - reference:
+        name: windDirectionAt10M@TestReference
+      test:
+        name: windDirectionAt10M@DerivedObsValue
+      absTol: 5.0e-5
