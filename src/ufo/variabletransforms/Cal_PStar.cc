@@ -47,41 +47,40 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   // Get all required obs, metadata and geovals
   // Obs
   std::vector<float> PStn, PStd, Pmsl, ZStn, ZStd;
-  getObservation("ObsValue", "station_pressure",
+  getObservation("ObsValue", "stationPressure",
                  PStn, true);
-  getObservation("ObsValue", "air_pressure",
+  getObservation("ObsValue", "standardPressure",
                  PStd, true);
-  getObservation("ObsValue", "mean_sea_level_pressure",
+  getObservation("ObsValue", "pressureReducedToMeanSeaLevel",
                  Pmsl, true);
 
   // MetaData
-  getObservation("MetaData", "station_elevation",
-                 ZStn, true);
-  getObservation("MetaData", "standard_elevation",
+  if (data_.has(Variable("MetaData/correctedStationAltitude"))) {
+    getObservation("MetaData", "correctedStationAltitude",
+                     ZStn);
+  } else {
+    getObservation("MetaData", "stationAltitude",
+                     ZStn);
+  }
+  getObservation("MetaData", "standardAltitude",
                  ZStd, true);
 
-  std::vector<int> PStn_flag, PStd_flag, Pmsl_flag;
-  getObservation("QCFlags", "station_pressure",
-                 PStn_flag, true);
-  getObservation("QCFlags", "air_pressure",
-                 PStd_flag, true);
-  getObservation("QCFlags", "mean_sea_level_pressure",
-                 Pmsl_flag, true);
-
+  // Errors
   std::vector<float> PStn_error, PStd_error, Pmsl_error;
-  getObservation("ObsError", "station_pressure",
+  getObservation("ObsError", "stationPressure",
                  PStn_error, true);
-  getObservation("ObsError", "air_pressure",
+  getObservation("ObsError", "standardPressure",
                  PStd_error, true);
-  getObservation("ObsError", "mean_sea_level_pressure",
+  getObservation("ObsError", "pressureReducedToMeanSeaLevel",
                  Pmsl_error, true);
 
+  // PGEs
   std::vector<float> PStn_PGE, PStd_PGE, Pmsl_PGE;
-  getObservation("GrossErrorProbability", "station_pressure",
+  getObservation("GrossErrorProbability", "stationPressure",
                  PStn_PGE, true);
-  getObservation("GrossErrorProbability", "air_pressure",
+  getObservation("GrossErrorProbability", "standardPressure",
                  PStd_PGE, true);
-  getObservation("GrossErrorProbability", "mean_sea_level_pressure",
+  getObservation("GrossErrorProbability", "pressureReducedToMeanSeaLevel",
                  Pmsl_PGE, true);
 
   // Geovals
@@ -99,6 +98,7 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
                           "Station pressure, Standard pressure and PMSL", Here());
   }
 
+  // Assign vectors to write obs/flags/errors/PGEs to
   std::vector<float> PStar(nlocs), PStar_error(nlocs), PStar_PGE;
   PStar.assign(nlocs, missing);
   PStar_error.assign(nlocs, missing);
@@ -112,6 +112,20 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   BkPStd.assign(nlocs, missing);
   BkPmsl.assign(nlocs, missing);
 
+  std::vector<bool> PreferredVariable_flag;
+  std::vector<bool> PmslUsed_flag(nlocs, false);
+  std::vector<bool> PstdUsed_flag(nlocs, false);
+  std::vector<bool> PstnUsed_flag(nlocs, false);
+
+  // get diagnostic flags from ObsSpace (warn if they have not yet been created)
+  if (obsdb_.has("DiagnosticFlags/PreferredVariable", "stationPressure")) {
+    obsdb_.get_db("DiagnosticFlags/PreferredVariable", "stationPressure", PreferredVariable_flag);
+  } else {
+    throw eckit::UserError("Variable 'DiagnosticFlags/PreferredVariable/stationPressure' does not "
+                           "exist yet. It needs to be set up with the 'Create Diagnostic "
+                           "Flags' filter prior to using the 'set' or 'unset' action.");
+  }
+
   // Loop over all obs to calculate PStar
   for (size_t jj = 0; jj < nlocs; ++jj) {
     if (!apply[jj]) continue;
@@ -120,42 +134,38 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
     int IvPStn = 0, IvPStd = 0, IvPmsl = 0;
     if (ZStn[jj] != missing && PStn[jj] != missing) {
       IvPStn = 2;
-      if (PStn_flag[jj] & MetOfficeQCFlags::Elem::PermRejectFlag) {IvPStn = 1;}
+      if ((flags_)["stationPressure"][jj] != QCflags::pass) {IvPStn = 1;}
       BkPStn[jj] = formulas::BackgroundPressure(PSurfParamA[jj], PSurfParamB[jj], ZStn[jj]);
     }
 
     if (ZStd[jj] != missing && PStd[jj] != missing) {
       IvPStd = 2;
-      if (PStd_flag[jj] & MetOfficeQCFlags::Elem::PermRejectFlag) {IvPStd = 1;}
+      if ((flags_)["standardPressure"][jj] != QCflags::pass) {IvPStd = 1;}
       BkPStd[jj] = formulas::BackgroundPressure(PSurfParamA[jj], PSurfParamB[jj], ZStd[jj]);
     }
 
     if (Pmsl[jj] != missing) {
       IvPmsl = 2;
-      if (Pmsl_flag[jj] & MetOfficeQCFlags::Elem::PermRejectFlag) {IvPmsl = 1;}
+      if ((flags_)["pressureReducedToMeanSeaLevel"][jj] != QCflags::pass) {IvPmsl = 1;}
       BkPmsl[jj] = formulas::BackgroundPressure(PSurfParamA[jj], PSurfParamB[jj], 0.0);
     }
 
     int IvPmax = std::max(IvPStn, std::max(IvPStd, IvPmsl));
 
     if (IvPmax == 0) continue;
-    if (IvPStn == IvPmax && BkPStn[jj] != missing && PStn_flag[jj]
-        & MetOfficeQCFlags::Surface::PstnPrefFlag) {
+    if (IvPStn == IvPmax && BkPStn[jj] != missing && PreferredVariable_flag[jj]) {
       PStar[jj] = (BkPStar[jj]*PStn[jj])/BkPStn[jj];
-      PStar_flag[jj] = PStn_flag[jj];
-      PStar_flag[jj] |= ufo::MetOfficeQCFlags::Surface::PstnUsedFlag;
+      PstnUsed_flag[jj] = true;
       PStar_error[jj] = PStn_error[jj];
       PStar_PGE[jj] = PStn_PGE[jj];
     } else if (BkPStd[jj] != missing && BkPmsl[jj] == missing) {
       PStar[jj] = (BkPStar[jj]*PStd[jj])/BkPStd[jj];
-      PStar_flag[jj] = PStd_flag[jj];
-      PStar_flag[jj] |= ufo::MetOfficeQCFlags::Surface::PstdUsedFlag;
+      PstdUsed_flag[jj] = true;
       PStar_error[jj] = PStd_error[jj];
       PStar_PGE[jj] = PStd_PGE[jj];
     } else if (BkPmsl[jj] != missing) {
       PStar[jj] = BkPStar[jj]*Pmsl[jj]/BkPmsl[jj];
-      PStar_flag[jj] = Pmsl_flag[jj];
-      PStar_flag[jj] |= ufo::MetOfficeQCFlags::Surface::PmslUsedFlag;
+      PmslUsed_flag[jj] = true;
       PStar_error[jj] = Pmsl_error[jj];
       PStar_PGE[jj] = Pmsl_PGE[jj];
     } else {
@@ -163,10 +173,12 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
     }
   }
 
-  putObservation("PStar", PStar);
-  obsdb_.put_db("DerivedQCFlags", "PStar", PStar_flag);
-  obsdb_.put_db("DerivedObsError", "PStar", PStar_error);
-  obsdb_.put_db("DerivedGrossErrorProbability", "PStar", PStar_PGE);
+  putObservation("surface_pressure", PStar);
+  obsdb_.put_db("DerivedObsError", "surface_pressure", PStar_error);
+  obsdb_.put_db("GrossErrorProbability", "surface_pressure", PStar_PGE);
+  obsdb_.put_db("DiagnosticFlags/PmslUsed", "surface_pressure", PmslUsed_flag);
+  obsdb_.put_db("DiagnosticFlags/PstdUsed", "surface_pressure", PstdUsed_flag);
+  obsdb_.put_db("DiagnosticFlags/PstnUsed", "surface_pressure", PstnUsed_flag);
 }
 }  // namespace ufo
 

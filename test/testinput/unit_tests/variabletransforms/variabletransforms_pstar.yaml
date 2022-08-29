@@ -11,26 +11,78 @@ observations:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
 
   obs filters:
+
+  - filter: BlackList
+    filter variables:
+    - name: stationPressure
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/stationPressure
+      is_true:
+
+  - filter: BlackList
+    filter variables:
+    - name: standardPressure
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/standardPressure
+      is_true:
+
+  - filter: BlackList
+    filter variables:
+    - name: pressureReducedToMeanSeaLevel
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/pressureReducedToMeanSeaLevel
+      is_true:
+
   - filter: Variable Transforms
     Transform: PStar
+    UseValidDataOnly: false
 
-  compareVariables:                 # test output matches precalculated values
-    - reference:
-        name: PStarFlags@TestReference
-      test:
-        name: PStar@DerivedQCFlags
+  compareVariables:
     - reference:
         name: PStarErr@TestReference
       test:
-        name: PStar@DerivedObsError
+        name: surface_pressure@DerivedObsError
       absTol: 1.0e-5
     - reference:
         name: PStar_PGE@TestReference
       test:
-        name: PStar@DerivedGrossErrorProbability
+        name: surface_pressure@GrossErrorProbability
       absTol: 1.0e-5
     - reference:
         name: PStar@TestReference
       test:
-        name: PStar@DerivedObsValue
+        name: surface_pressure@DerivedObsValue
       relTol: 1.0e-5
+    - reference:
+        name: PmslUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PmslUsed/surface_pressure
+    - reference:
+        name: PstdUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PstdUsed/surface_pressure
+    - reference:
+        name: PstnUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PstnUsed/surface_pressure
+
+
+- obs space:
+    name: Surface
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z_noflag.nc4
+    obsdataout:
+      obsfile: Data/ufo/PStar.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
+
+  obs filters:
+  - filter: Variable Transforms
+    Transform: PStar
+    UseValidDataOnly: false
+
+  expectExceptionWithMessage: "Variable 'DiagnosticFlags/PreferredVariable/stationPressure' does not exist yet. It needs to be set up with the 'Create Diagnostic Flags' filter prior to using the 'set' or 'unset' action."
