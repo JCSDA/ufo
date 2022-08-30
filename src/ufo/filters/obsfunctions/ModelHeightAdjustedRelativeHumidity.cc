@@ -26,7 +26,7 @@ static ObsFunctionMaker<ModelHeightAdjustedRelativeHumidity>
 ModelHeightAdjustedRelativeHumidity::ModelHeightAdjustedRelativeHumidity(
         const eckit::LocalConfiguration & conf): invars_() {
   // Retrieve observation data  // Required observation data
-  invars_ += Variable("relative_humidity_at_2m@ObsValue");
+  invars_ += Variable("relativeHumidityAt2M@ObsValue");
   // Required model surface altitude
   invars_ += Variable("surface_altitude@GeoVaLs");
 
@@ -48,7 +48,7 @@ void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
   std::vector<float> ModelHeight(nlocs);
   std::vector<float> StationHeight(nlocs);
 
-  in.get(Variable("relative_humidity_at_2m@ObsValue"), rh);
+  in.get(Variable("relativeHumidityAt2M@ObsValue"), rh);
   in.get(parameters_.temperature.value(), T);
   in.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);

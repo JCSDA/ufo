@@ -6,7 +6,7 @@ observations:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
-    simulated variables: [relative_humidity_at_2m]
+    simulated variables: [relativeHumidityAt2M]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
@@ -16,7 +16,7 @@ observations:
       elevation:
         name: station_elevation@MetaData
       temperature:
-        name: air_temperature_at_2m@TestReference
-    variables: [relative_humidity_at_2m]
+        name: airTemperatureAt2M@TestReference
+    variables: [relativeHumidityAt2M]
     tolerance: 1.0e-6
 

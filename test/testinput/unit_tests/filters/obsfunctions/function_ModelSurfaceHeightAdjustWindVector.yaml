@@ -6,7 +6,7 @@ observations:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastwardAt10M]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
@@ -15,14 +15,14 @@ observations:
     options:
       elevation:
         name: station_elevation@MetaData
-    variables: [eastward_wind]
+    variables: [windEastwardAt10M]
     tolerance: 1.0e-6
 
 - obs space:
     name: Surface
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
-    simulated variables: [northward_wind]
+    simulated variables: [windNorthwardAt10M]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
@@ -31,6 +31,6 @@ observations:
     options:
       elevation:
         name: station_elevation@MetaData
-    variables: [northward_wind]
+    variables: [windNorthwardAt10M]
     tolerance: 1.0e-6
 
