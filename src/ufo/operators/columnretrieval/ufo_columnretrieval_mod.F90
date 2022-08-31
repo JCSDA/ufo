@@ -1,11 +1,11 @@
-! (C) Copyright 2017-2020 UCAR
+! (C) Copyright 2017-2022 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module for averaging kernel observation operator
 
-module ufo_avgkernel_mod
+module ufo_columnretrieval_mod
 
  use oops_variables_mod
  use ufo_vars_mod
@@ -18,36 +18,35 @@ module ufo_avgkernel_mod
  integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
- type, public :: ufo_avgkernel
+ type, public :: ufo_columnretrieval
  private
    type(oops_variables), public :: obsvars
    type(oops_variables), public :: geovars
-   integer :: nlayers_kernel
-   character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar, tracervars(:)
-   logical :: troposphere, totalcolumn, apriori
+   integer :: nlayers_retrieval
+   character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar
+   character(kind=c_char,len=:), allocatable :: tracervars(:), stretch
+   logical :: isapriori, isaveragingkernel
    real(kind_real) :: convert_factor_model
  contains
-   procedure :: setup  => ufo_avgkernel_setup
-   procedure :: simobs => ufo_avgkernel_simobs
+   procedure :: setup  => ufo_columnretrieval_setup
+   procedure :: simobs => ufo_columnretrieval_simobs
    final :: destructor
- end type ufo_avgkernel
+ end type ufo_columnretrieval
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_avgkernel_setup(self, f_conf)
+subroutine ufo_columnretrieval_setup(self, f_conf)
   use fckit_configuration_module, only: fckit_configuration
-  use ufo_constants_mod, only: one
   implicit none
-  class(ufo_avgkernel), intent(inout)     :: self
+  class(ufo_columnretrieval), intent(inout)     :: self
   type(fckit_configuration), intent(in) :: f_conf
   integer :: nlevs_yaml
   integer :: ivar, nvars
   character(len=max_string) :: err_msg
-  character(len=:), allocatable :: str_array(:)
 
   ! get configuration for the averaging kernel operator
-  call f_conf%get_or_die("nlayers_kernel", self%nlayers_kernel)
+  call f_conf%get_or_die("nlayers_retrieval", self%nlayers_retrieval)
 
   ! get variable name from IODA for observation averaging kernel
   call f_conf%get_or_die("AvgKernelVar", self%obskernelvar)
@@ -56,55 +55,50 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   call f_conf%get_or_die("PresLevVar", self%obspressurevar)
 
   ! get name of geoval/tracer to use from the model
-  nvars = self%obsvars%nvars()
-  call f_conf%get_or_die("tracer variables", str_array)
-  self%tracervars = str_array
+  call f_conf%get_or_die("tracer variables", self%tracervars)
 
   ! determine if the apriori term is needed
-  call f_conf%get_or_die("apriori", self%apriori)
+  call f_conf%get_or_die("isApriori", self%isapriori)
 
-  ! determine if this is a total column or troposphere calculation
-  call f_conf%get_or_die("tropospheric column", self%troposphere)
-  call f_conf%get_or_die("total column", self%totalcolumn)
+  ! determine if the averaging kernel is needed
+  call f_conf%get_or_die("isAveragingKernel", self%isaveragingkernel)
 
-  ! both of these cannot be true
-  if (self%troposphere .and. self%totalcolumn) then
-    write(err_msg, *) "ufo_avgkernel_setup error: both tropospheric and total column set to TRUE, only one can be TRUE"
-    call abor1_ftn(err_msg)
-  end if
+  ! determine wht kind of vertice stretching we need
+  call f_conf%get_or_die("stretchVertices", self%stretch)
 
   ! do we need a conversion factor, say between ppmv and unity?
   call f_conf%get_or_die("model units coeff", self%convert_factor_model)
 
   ! add variables to geovars that are needed
   ! specified tracers
+  nvars = self%obsvars%nvars()
   do ivar = 1, nvars
     call self%geovars%push_back(self%tracervars(ivar))
   end do
   ! column pressure at interface
   call self%geovars%push_back(var_prsi)
 
-end subroutine ufo_avgkernel_setup
+end subroutine ufo_columnretrieval_setup
 
 ! ------------------------------------------------------------------------------
 subroutine destructor(self)
   implicit none
-  type(ufo_avgkernel), intent(inout) :: self
+  type(ufo_columnretrieval), intent(inout) :: self
 
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 ! averaging kernel observation operator
-subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
+subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   use kinds
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, &
                              ufo_geovals_reorderzdir, ufo_geovals_copy
-  use ufo_constants_mod, only: half, zero
+  use ufo_constants_mod, only: zero, one
   use satcolumn_mod, only: simulate_column_ob
   use iso_c_binding
   use obsspace_mod
   implicit none
-  class(ufo_avgkernel), intent(in)    :: self
+  class(ufo_columnretrieval), intent(in)    :: self
   integer, intent(in)               :: nvars, nlocs
   type(ufo_geovals),  intent(in)    :: geovals_in
   real(c_double),     intent(inout) :: hofx(nvars, nlocs)
@@ -116,9 +110,7 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   character(len=MAXVARLEN) :: geovar, varstring
   character(len=4) :: levstr
   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
-  real(kind_real), allocatable, dimension(:) :: airmass_tot, airmass_trop
   real(kind_real), allocatable, dimension(:) :: apriori_term
-  integer, allocatable, dimension(:) :: troplev_obs
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
   real(c_double) :: missing
@@ -134,63 +126,48 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   ! once 2D arrays are allowed, rewrite/simplify this part
   ! TEMPORARY: reverse do loops to make sure we follow the convention
   ! TEMPORARY: top->bottom; increasing pressure 
-  allocate(avgkernel_obs(self%nlayers_kernel, nlocs))
-  do ilev = self%nlayers_kernel, 1, -1
-    write(levstr, fmt = "(I3)") ilev
-    levstr = adjustl(levstr)
-    varstring = trim(self%obskernelvar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), avgkernel_obs(self%nlayers_kernel+1-ilev, :))
-  end do
+
+  allocate(avgkernel_obs(self%nlayers_retrieval, nlocs))
+  ! set to 1.0 if no ak provided
+  avgkernel_obs = one
+  if (self%isaveragingkernel) then
+    do ilev = self%nlayers_retrieval, 1, -1
+      write(levstr, fmt = "(I3)") ilev
+      levstr = adjustl(levstr)
+      varstring = trim(self%obskernelvar)//"_"//trim(levstr)
+      call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
+                           avgkernel_obs(self%nlayers_retrieval+1-ilev, :))
+    end do
+  end if
 
   ! get prsi_obs
-  allocate(prsi_obs(self%nlayers_kernel+1, nlocs))
-  do ilev = self%nlayers_kernel, 1, -1
+  allocate(prsi_obs(self%nlayers_retrieval+1, nlocs))
+  do ilev = self%nlayers_retrieval+1, 1, -1
     write(levstr, fmt = "(I3)") ilev
     levstr = adjustl(levstr)
     varstring = trim(self%obspressurevar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), prsi_obs(self%nlayers_kernel+2-ilev, :))
+    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
+                         prsi_obs(self%nlayers_retrieval+2-ilev, :))
   end do
 
-  !!top obs vertice should be TOA (0 hPa) for now
-  prsi_obs(1,:) = zero
-  prsi%vals(1,:) = zero
-
   ! getting the apriori term if applicable
-  if (self%apriori) then
-    allocate(apriori_term(nlocs))
+  allocate(apriori_term(nlocs))
+  apriori_term = zero
+  if (self%isapriori) then
     call obsspace_get_db(obss, "RtrvlAncData", "apriori_term", apriori_term)
   end if
 
-  if (self%troposphere) then
-    allocate(troplev_obs(nlocs))
-    allocate(airmass_trop(nlocs))
-    allocate(airmass_tot(nlocs))
-    call obsspace_get_db(obss, "RtrvlAncData", "troposphere_layer_index", troplev_obs)
-    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_troposphere", airmass_trop)
-    call obsspace_get_db(obss, "RtrvlAncData", "air_mass_factor_total", airmass_tot)
-  end if
   ! loop through all variables
   do ivar = 1, nvars
     geovar = self%tracervars(ivar)
     call ufo_geovals_get_var(geovals, geovar, tracer)
     do iobs = 1, nlocs
       if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
-        if (self%troposphere) then
-          call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
-                                  prsi_obs(:,iobs), prsi%vals(:,iobs), &
-                                  tracer%vals(:,iobs)*self%convert_factor_model, &
-                                  hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
-        else if (self%totalcolumn) then
-          call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
-                                  prsi_obs(:,iobs), prsi%vals(:,iobs), &
-                                  tracer%vals(:,iobs)*self%convert_factor_model, &
-                                  hofx_tmp)
-        end if
-        if (self%apriori) then
-          hofx(ivar,iobs) = (hofx_tmp + apriori_term(iobs))
-        else
-          hofx(ivar,iobs) = hofx_tmp
-        endif
+        call simulate_column_ob(self%nlayers_retrieval, tracer%nval, avgkernel_obs(:,iobs), &
+                                prsi_obs(:,iobs), prsi%vals(:,iobs), &
+                                tracer%vals(:,iobs)*self%convert_factor_model, &
+                                hofx_tmp, self%stretch)
+        hofx(ivar,iobs) = hofx_tmp + apriori_term(iobs)
       else
         hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel
       end if
@@ -198,9 +175,9 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   end do
 
 
-end subroutine ufo_avgkernel_simobs
+end subroutine ufo_columnretrieval_simobs
 
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_avgkernel_mod
+end module ufo_columnretrieval_mod

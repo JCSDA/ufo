@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2017-2020 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_AVGKERNEL_OBSAVGKERNEL_H_
-#define UFO_OPERATORS_AVGKERNEL_OBSAVGKERNEL_H_
+#ifndef UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVAL_H_
+#define UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVAL_H_
 
 #include <ostream>
 #include <string>
@@ -15,8 +15,8 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/avgkernel/ObsAvgKernel.interface.h"
-#include "ufo/operators/avgkernel/ObsAvgKernelParameters.h"
+#include "ufo/operators/columnretrieval/ObsColumnRetrieval.interface.h"
+#include "ufo/operators/columnretrieval/ObsColumnRetrievalParameters.h"
 
 /// Forward declarations
 namespace ioda {
@@ -29,18 +29,18 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// AvgKernel observation operator class
-class ObsAvgKernel : public ObsOperatorBase,
-                   private util::ObjectCounter<ObsAvgKernel> {
+/// ColumnRetrieval observation operator class
+class ObsColumnRetrieval : public ObsOperatorBase,
+                   private util::ObjectCounter<ObsColumnRetrieval> {
  public:
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
-  typedef ObsAvgKernelParameters Parameters_;
+  typedef ObsColumnRetrievalParameters Parameters_;
 
-  static const std::string classname() {return "ufo::ObsAvgKernel";}
+  static const std::string classname() {return "ufo::ObsColumnRetrieval";}
 
-  ObsAvgKernel(const ioda::ObsSpace &, const Parameters_ &);
-  virtual ~ObsAvgKernel();
+  ObsColumnRetrieval(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsColumnRetrieval();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
@@ -61,4 +61,4 @@ class ObsAvgKernel : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AVGKERNEL_OBSAVGKERNEL_H_
+#endif  // UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVAL_H_

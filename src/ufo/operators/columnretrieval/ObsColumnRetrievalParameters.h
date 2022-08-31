@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2021 UK Met Office
+ * (C) Copyright 2022 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELPARAMETERS_H_
-#define UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELPARAMETERS_H_
+#ifndef UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALPARAMETERS_H_
+#define UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALPARAMETERS_H_
 
 #include <string>
 #include <vector>
@@ -17,14 +17,15 @@
 
 namespace ufo {
 
-/// Configuration options recognized by the AvgKernel operator.
-class ObsAvgKernelParameters : public ObsOperatorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsAvgKernelParameters, ObsOperatorParametersBase)
+/// Configuration options recognized by the ColumnRetrieval operator.
+class ObsColumnRetrievalParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsColumnRetrievalParameters, ObsOperatorParametersBase)
 
  public:
-  oops::RequiredParameter <int> nlayers_kernel
-    {"nlayers_kernel",
-     "Number of layers in the averaging kernel",
+  oops::Parameter <int> nlayers_retrieval
+    {"nlayers_retrieval",
+     "Number of layers in the retrieval kernel",
+     1,
      this};
 
   oops::Parameter <std::string> AvgKernelVar
@@ -50,24 +51,22 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
      "Names of model tracer variables",
      this};
 
-  oops::Parameter <bool> troposphericColumn
-    {"tropospheric column",
-     "Perform calculation in troposphere. "
-     "An error will be thrown if both this and 'total column' are true.",
-     false,
-     this};
-
-  oops::Parameter <bool> totalColumn
-    {"total column",
-     "Perform calculation in total column. "
-     "An error will be thrown if both this and 'tropospheric column' are true.",
-     false,
-     this};
-
-  oops::Parameter <bool> apriori
-    {"apriori",
+  oops::Parameter <bool> isApriori
+    {"isApriori",
      "Add the a priori retrieval term to the AK smoothed model profile",
      false,
+     this};
+
+  oops::Parameter <bool> isAveragingKernel
+    {"isAveragingKernel",
+     "Add the AK to smooth the model profile",
+     false,
+     this};
+
+  oops::Parameter <std::string> stretchVertices
+    {"stretchVertices",
+     "match Obs and Bkg vertices, options: top, bottom, topbottom and none (default)",
+     "none",
      this};
 
   oops::Parameter <double> modelUnitsCoeff
@@ -78,4 +77,4 @@ class ObsAvgKernelParameters : public ObsOperatorParametersBase {
 };
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELPARAMETERS_H_
+#endif  // UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALPARAMETERS_H_

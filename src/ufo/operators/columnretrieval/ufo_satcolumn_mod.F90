@@ -4,10 +4,37 @@ use ufo_constants_mod, only: zero, one, gas_constant, avogadro, M_dryair, grav
 use vert_interp_mod, only: vert_interp_weights
 contains
 
+subroutine stretch_vertices(nzobs, nzmod, pobsin, pobsout, pmodin, pmodout, &
+                            stretch)
+  implicit none
+  integer, intent(in   ) :: nzobs, nzmod
+  real(kind_real), intent(in   ), dimension(nzobs+1) :: pobsin
+  real(kind_real), intent(in   ), dimension(nzmod+1) :: pmodin
+  real(kind_real), intent(inout), dimension(nzobs+1) :: pobsout
+  real(kind_real), intent(inout), dimension(nzmod+1) :: pmodout
+  character(len=:), intent(in   ), allocatable :: stretch
+
+  ! stretch "bottom" makes sure we use the highest surface pressure
+  ! (do not miss surface values or interpolate below surface)
+  ! stretch "top" makes sure we use the lowest pressure of top vertice
+  pobsout = pobsin
+  pmodout = pmodin
+
+  if (trim(stretch) == "bottom" .or. &
+      trim(stretch) == "topbottom" ) then
+     pmodout(nzmod+1) = max(pmodin(nzmod+1), pobsin(nzobs+1))
+     pobsout(nzobs+1) = max(pmodin(nzmod+1), pobsin(nzobs+1))
+  end if
+  if (trim(stretch) == "top" .or. &
+      trim(stretch) == "topbottom" ) then
+     pmodout(1) = min(pmodin(1), pobsin(1))
+     pobsout(1) = min(pmodin(1), pobsin(1))
+  end if
+end subroutine stretch_vertices
+
 subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
-                              prsi_obs, prsi_model, &
-                              profile_model, hofx, &
-                              troplev_obs, airmass_tot, airmass_trop)
+                              prsi_obs, prsi_model, profile_model, hofx, &
+                              stretch)
   implicit none
   integer, intent(in   ) :: nlayers_obs, nlayers_model
   real(kind_real), intent(in   ), dimension(nlayers_obs) :: avgkernel_obs
@@ -15,42 +42,17 @@ subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
   real(kind_real), intent(in   ), dimension(nlayers_model+1) :: prsi_model
   real(kind_real), intent(in   ), dimension(nlayers_model) :: profile_model
   real(kind_real), intent(  out) :: hofx
-  real(kind_real), intent(in   ), optional :: airmass_tot, airmass_trop
-  integer, intent(in   ), optional :: troplev_obs
   real(kind_real) :: airmass_ratio, wf_a, wf_b
-  real(kind_real), dimension(nlayers_obs) :: avgkernel_use, profile_obslayers
+  real(kind_real), dimension(nlayers_obs) :: profile_obslayers
   real(kind_real), dimension(nlayers_obs+1) :: pobs
   real(kind_real), dimension(nlayers_model+1) :: pmod
   integer, parameter :: max_string=800
   character(len=max_string) :: err_msg
+  character(len=:), intent(in   ), allocatable :: stretch
   integer :: k, j, wi_a, wi_b
-  logical :: troposphere
-  troposphere = .false.
-  ! determine if we are computing a total column or just tropospheric column
-  if (present(airmass_tot) .and. present(airmass_trop) .and. present(troplev_obs)) then
-     troposphere = .true.
-  end if
 
-  if (troposphere) then
-    ! compute air mass ratio and apply it to the averaging kernel
-    airmass_ratio = airmass_tot / airmass_trop
-    avgkernel_use = avgkernel_obs * airmass_ratio
-
-    ! set all layers to zero above tropopause layer
-    avgkernel_use(1:troplev_obs) = zero
-  else
-    avgkernel_use = avgkernel_obs
-  end if
-
-  ! make sure we use the highest surface pressure 
-  !(do not miss surface values or interpolate below surface)
-  pobs = prsi_obs
-  pmod = prsi_model
-  if (pmod(nlayers_model+1) > pobs(nlayers_obs+1)) then
-     pobs(nlayers_obs+1) = pmod(nlayers_model+1)
-  else
-     pmod(nlayers_model+1) = pobs(nlayers_obs+1)
-  end if
+  call stretch_vertices(nlayers_obs, nlayers_model, prsi_obs, pobs, prsi_model, &
+                        pmod, stretch)
 
   hofx = zero
   profile_obslayers = zero
@@ -83,14 +85,13 @@ subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
         call abor1_ftn(err_msg)
      end if
      ! compute A.x
-     hofx = hofx + (avgkernel_use(k) * profile_obslayers(k))
+     hofx = hofx + (avgkernel_obs(k) * profile_obslayers(k))
   end do
 end subroutine simulate_column_ob
 
 subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
-                              prsi_obs, prsi_model, &
-                              profile_model, hofx, &
-                              troplev_obs, airmass_tot, airmass_trop)
+                              prsi_obs, prsi_model, profile_model, hofx, &
+                              stretch)
   implicit none
   integer, intent(in   ) :: nlayers_obs, nlayers_model
   real(kind_real), intent(in   ), dimension(nlayers_obs) :: avgkernel_obs
@@ -98,43 +99,17 @@ subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
   real(kind_real), intent(in   ), dimension(nlayers_model+1) :: prsi_model
   real(kind_real), intent(in   ), dimension(nlayers_model) :: profile_model
   real(kind_real), intent(  out) :: hofx
-  real(kind_real), intent(in   ), optional :: airmass_tot, airmass_trop
-  integer, intent(in   ), optional :: troplev_obs
   real(kind_real) :: airmass_ratio, wf_a, wf_b
-  real(kind_real), dimension(nlayers_obs) :: avgkernel_use, profile_obslayers
+  real(kind_real), dimension(nlayers_obs) :: profile_obslayers
   integer, parameter :: max_string=800
   real(kind_real), dimension(nlayers_obs+1) :: pobs
-  real(kind_real), dimension(nlayers_model+1) :: pmod
+  real(kind_real), dimension(nlayers_model+1) :: pmod 
   character(len=max_string) :: err_msg
+  character(len=:), intent(in   ), allocatable :: stretch
   integer :: k, j, wi_a, wi_b
-  logical :: troposphere
 
-  troposphere = .false.
-  ! determine if we are computing a total column or just tropospheric column
-  if (present(airmass_tot) .and. present(airmass_trop) .and. present(troplev_obs)) then
-     troposphere = .true.
-  end if
-
-  if (troposphere) then
-    ! compute air mass ratio and apply it to the averaging kernel
-    airmass_ratio = airmass_tot / airmass_trop
-    avgkernel_use = avgkernel_obs * airmass_ratio
-
-    ! set all layers to zero above tropopause layer
-    avgkernel_use(troplev_obs+1:nlayers_obs) = zero
-  else
-    avgkernel_use = avgkernel_obs
-  end if
-
-  ! make sure we use the highest surface pressure
-  !(do not miss surface values or interpolate below surface)
-  pobs = prsi_obs
-  pmod = prsi_model
-  if (pmod(nlayers_model+1) > pobs(nlayers_obs+1)) then
-     pobs(nlayers_obs+1) = pmod(nlayers_model+1)
-  else
-     pmod(nlayers_model+1) = pobs(nlayers_obs+1)
-  end if
+  call stretch_vertices(nlayers_obs, nlayers_model, prsi_obs, pobs, prsi_model, &
+                        pmod, stretch)
 
   hofx = zero
   profile_obslayers = zero
@@ -167,14 +142,13 @@ subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
         call abor1_ftn(err_msg)
      end if
      ! compute A.x
-     hofx = hofx + (avgkernel_use(k) * profile_obslayers(k))
+     hofx = hofx + (avgkernel_obs(k) * profile_obslayers(k))
   end do
 end subroutine simulate_column_ob_tl
 
 subroutine simulate_column_ob_ad(nlayers_obs, nlayers_model, avgkernel_obs, &
-                              prsi_obs, prsi_model, &
-                              profile_model_ad, hofx_ad, &
-                              troplev_obs, airmass_tot, airmass_trop)
+                              prsi_obs, prsi_model, profile_model_ad, hofx_ad, &
+                              stretch)
   implicit none
   integer, intent(in   ) :: nlayers_obs, nlayers_model
   real(kind_real), intent(in   ), dimension(nlayers_obs) :: avgkernel_obs
@@ -182,48 +156,22 @@ subroutine simulate_column_ob_ad(nlayers_obs, nlayers_model, avgkernel_obs, &
   real(kind_real), intent(in   ), dimension(nlayers_model+1) :: prsi_model
   real(kind_real), intent(inout), dimension(nlayers_model) :: profile_model_ad
   real(kind_real), intent(in   ) :: hofx_ad
-  real(kind_real), intent(in   ), optional :: airmass_tot, airmass_trop
-  integer, intent(in   ), optional :: troplev_obs
   real(kind_real) :: airmass_ratio, wf_a, wf_b
-  real(kind_real), dimension(nlayers_obs) :: avgkernel_use, profile_obslayers_ad
+  real(kind_real), dimension(nlayers_obs) :: profile_obslayers_ad
   real(kind_real), dimension(nlayers_obs+1) :: pobs
   real(kind_real), dimension(nlayers_model+1) :: pmod
   integer, parameter :: max_string=800
   character(len=max_string) :: err_msg
+  character(len=:), intent(in   ), allocatable :: stretch
   integer :: k, j, wi_a, wi_b
-  logical :: troposphere
 
-  troposphere = .false.
-  ! determine if we are computing a total column or just tropospheric column
-  if (present(airmass_tot) .and. present(airmass_trop) .and. present(troplev_obs)) then
-     troposphere = .true.
-  end if
-
-  if (troposphere) then
-    ! compute air mass ratio and apply it to the averaging kernel
-    airmass_ratio = airmass_tot / airmass_trop
-    avgkernel_use = avgkernel_obs * airmass_ratio
-
-    ! set all layers to zero above tropopause layer
-    avgkernel_use(troplev_obs+1:nlayers_obs) = zero
-  else
-    avgkernel_use = avgkernel_obs
-  end if
-
-  ! make sure we use the highest surface pressure
-  !(do not miss surface values or interpolate below surface)
-  pobs = prsi_obs
-  pmod = prsi_model
-  if (pmod(nlayers_model+1) > pobs(nlayers_obs+1)) then
-     pobs(nlayers_obs+1) = pmod(nlayers_model+1)
-  else
-     pmod(nlayers_model+1) = pobs(nlayers_obs+1)
-  end if
+  call stretch_vertices(nlayers_obs, nlayers_model, prsi_obs, pobs, prsi_model, &
+                        pmod, stretch)
 
   profile_obslayers_ad = zero
   do k=1,nlayers_obs
      !A.x ad
-     profile_obslayers_ad(k) = profile_obslayers_ad(k) + avgkernel_use(k) * hofx_ad
+     profile_obslayers_ad(k) = profile_obslayers_ad(k) + avgkernel_obs(k) * hofx_ad
 
      ! get obs layer bound model indexes and weights for staggered
      ! obs and geoval levels

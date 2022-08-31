@@ -19,7 +19,7 @@ add_subdirectory( operators/aerosols )
 add_subdirectory( operators/atmvertinterp )
 add_subdirectory( operators/atmvertinterplay )
 add_subdirectory( operators/atmsfcinterp )
-add_subdirectory( operators/avgkernel )
+add_subdirectory( operators/columnretrieval )
 add_subdirectory( operators/backgrounderroridentity )
 add_subdirectory( operators/backgrounderrorvertinterp )
 add_subdirectory( operators/categoricaloper )
@@ -106,7 +106,7 @@ list( APPEND ufo_src_files
     ${atmvertinterp_src_files}
     ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
-    ${avgkernel_src_files}
+    ${columnretrieval_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
     ${rttovcpp_src_files}

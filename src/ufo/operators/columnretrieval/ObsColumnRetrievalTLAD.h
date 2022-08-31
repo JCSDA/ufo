@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2017-2020 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELTLAD_H_
-#define UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELTLAD_H_
+#ifndef UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALTLAD_H_
+#define UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,8 +14,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/avgkernel/ObsAvgKernelParameters.h"
-#include "ufo/operators/avgkernel/ObsAvgKernelTLAD.interface.h"
+#include "ufo/operators/columnretrieval/ObsColumnRetrievalParameters.h"
+#include "ufo/operators/columnretrieval/ObsColumnRetrievalTLAD.interface.h"
 
 // Forward declarations
 namespace ioda {
@@ -27,18 +27,18 @@ namespace ufo {
   class GeoVaLs;
 
 // -----------------------------------------------------------------------------
-/// AvgKernel TL/AD observation operator class
-class ObsAvgKernelTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsAvgKernelTLAD> {
+/// ColumnRetrieval TL/AD observation operator class
+class ObsColumnRetrievalTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsColumnRetrievalTLAD> {
  public:
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the LinearObsOperatorFactory.
-  typedef ObsAvgKernelParameters Parameters_;
+  typedef ObsColumnRetrievalParameters Parameters_;
 
-  static const std::string classname() {return "ufo::ObsAvgKernelTLAD";}
+  static const std::string classname() {return "ufo::ObsColumnRetrievalTLAD";}
 
-  ObsAvgKernelTLAD(const ioda::ObsSpace &, const Parameters_ &);
-  virtual ~ObsAvgKernelTLAD();
+  ObsColumnRetrievalTLAD(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsColumnRetrievalTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -48,16 +48,16 @@ class ObsAvgKernelTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
-  int & toFortran() {return keyOperAvgKernel_;}
-  const int & toFortran() const {return keyOperAvgKernel_;}
+  int & toFortran() {return keyOperColumnRetrieval_;}
+  const int & toFortran() const {return keyOperColumnRetrieval_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperAvgKernel_;
+  F90hop keyOperColumnRetrieval_;
   oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AVGKERNEL_OBSAVGKERNELTLAD_H_
+#endif  // UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALTLAD_H_

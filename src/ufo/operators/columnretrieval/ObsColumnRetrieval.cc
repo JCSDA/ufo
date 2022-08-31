@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2017-2020 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/avgkernel/ObsAvgKernel.h"
+#include "ufo/operators/columnretrieval/ObsColumnRetrieval.h"
 
 #include <ostream>
 
@@ -19,37 +19,38 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAvgKernel> makerAvgKernel_("AvgKernel");
+static ObsOperatorMaker<ObsColumnRetrieval> makerColumnRetrieval_("ColumnRetrieval");
 // -----------------------------------------------------------------------------
 
-ObsAvgKernel::ObsAvgKernel(const ioda::ObsSpace & odb,
+ObsColumnRetrieval::ObsColumnRetrieval(const ioda::ObsSpace & odb,
                        const Parameters_ & parameters)
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_avgkernel_setup_f90(keyOper_, parameters.toConfiguration(), odb.assimvariables(), varin_);
-  oops::Log::trace() << "ObsAvgKernel created." << std::endl;
+  ufo_columnretrieval_setup_f90(keyOper_, parameters.toConfiguration(),
+                                odb.assimvariables(), varin_);
+  oops::Log::trace() << "ObsColumnRetrieval created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsAvgKernel::~ObsAvgKernel() {
-  ufo_avgkernel_delete_f90(keyOper_);
-  oops::Log::trace() << "ObsAvgKernel destructed" << std::endl;
+ObsColumnRetrieval::~ObsColumnRetrieval() {
+  ufo_columnretrieval_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsColumnRetrieval destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAvgKernel::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+void ObsColumnRetrieval::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                              ObsDiagnostics &) const {
-  ufo_avgkernel_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
+  ufo_columnretrieval_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
-  oops::Log::trace() << "ObsAvgKernel: observation operator run" << std::endl;
+  oops::Log::trace() << "ObsColumnRetrieval: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAvgKernel::print(std::ostream & os) const {
-  os << "ObsAvgKernel::print not implemented";
+void ObsColumnRetrieval::print(std::ostream & os) const {
+  os << "ObsColumnRetrieval::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

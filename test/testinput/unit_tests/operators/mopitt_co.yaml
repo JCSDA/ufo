@@ -9,14 +9,14 @@ observations:
 #     obsfile: Data/mopitt_co_2020090318_m_opr_out.nc4
     simulated variables: [carbon_monoxide_in_total_column]
   obs operator:
-    name: AvgKernel
-    nlayers_kernel: 10
+    name: ColumnRetrieval
+    nlayers_retrieval: 10
     AvgKernelVar: averaging_kernel_level
     PresLevVar: pressure_level
     tracer variables: [co]
-    tropospheric column: false
-    total column: true
-    apriori: true
+    isApriori: true
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
     model units coeff: 1e-6 # ppmv to 1/1
   linear obs operator test:
     coef TL: 1.0e-9
