@@ -1,4 +1,5 @@
-! (C) Copyright 2017-2020 UCAR
+! (C) Copyright 2017-2022 UCAR
+! (C) Copyright 2022 NOAA NWS NCEP EMC
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -93,7 +94,8 @@ integer                           :: wi
 logical                           :: variable_present, variable_present_t, variable_present_q
 real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_lat, obs_tv
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
-real(kind_real), dimension(:), allocatable :: H2000_geop, obs_height_geop
+real(kind_real), dimension(:), allocatable :: H2000_geop
+real(kind_real), dimension(:), allocatable :: avg_tv
 real(kind_real)                   :: model_znew
 
 missing = missing_value(missing)
@@ -167,7 +169,6 @@ if (idx_geop.gt.0) then
       endif
    endif
    if (trim(self%da_psfc_scheme) == "UKMO") allocate(H2000_geop(nobs))
-   if (trim(self%da_psfc_scheme) == "GSI") allocate(obs_height_geop(nobs))
    do iobs = 1, nlocs
       if (obs_psfc(iobs).ne.missing) then
          call geop2geometric(latitude=obs_lat(iobs),              &
@@ -178,11 +179,6 @@ if (idx_geop.gt.0) then
             call geometric2geop(latitude=obs_lat(iobs), &
                            geometricZ=H2000, &
                            geopotentialH=H2000_geop(iobs))
-         endif
-         if (trim(self%da_psfc_scheme) == "GSI") then
-            call geometric2geop(latitude=obs_lat(iobs), &
-                           geometricZ=obs_height(iobs), &
-                           geopotentialH=obs_height_geop(iobs))
          endif
       else
         if (trim(self%da_psfc_scheme) == "UKMO") H2000_geop(iobs) = missing
@@ -286,9 +282,9 @@ case ("UKMO")
 
 case ("GSI")
 
-   ! get model surface temperature
+   ! get model temperature at model surface pressure
    allocate(model_tvs(nobs))
-   model_tvs = model_tv%vals(kbot,:) + Lclr * ( model_level1 - model_zs )  !Lclr = 0.0065 K/m
+   model_tvs = model_tv%vals(kbot,:)
 
    ! get observed surface temperature (if exist) OR model temperature at obs_height
    allocate(obs_tv(nobs))
@@ -304,28 +300,27 @@ case ("GSI")
       end where
       deallocate(obs_t)
    end if
+   allocate(avg_tv(nobs))
+   avg_tv = (model_tvs + obs_tv) / 2.0_kind_real
    do iobs = 1, nobs
       if (obs_psfc(iobs) /= missing .and. obs_height(iobs) /= missing .and. obs_tv(iobs) == missing) then
-         ! interpolate model temperature to obs_height
-         if (obs_height(iobs) > model_level1(iobs)) then
-            if (allocated(obs_height_geop)) then
-               call vert_interp_weights(model_geomz%nval, obs_height_geop(iobs), model_geomz%vals(:,iobs), wi, wf)
-            else
-               call vert_interp_weights(model_geomz%nval, obs_height(iobs), model_geomz%vals(:,iobs), wi, wf)
-            end if
-            call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), obs_tv(iobs), wi, wf)
+         ! If observed temperature is missing,
          ! extrapolate model temperature to obs_height
-         else
-            obs_tv(iobs) = model_tvs(iobs) + Lclr * ( model_zs(iobs) - obs_height(iobs))
+         call vert_interp_weights(model_p%nval, log(obs_psfc(iobs)), log(model_p%vals(:,iobs)), wi, wf)
+         call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), obs_tv(iobs), wi, wf)
+         avg_tv(iobs) = (model_tvs(iobs) + obs_tv(iobs)) / 2.0_kind_real
+         if (obs_height(iobs) < model_level1(iobs)) then
+            ! extrapolate to surface if ob is below lowest model layer
+            avg_tv(iobs) = avg_tv(iobs) - ((Lclr/2.0_kind_real) * (obs_height(iobs) - model_zs(iobs)))
          end if
       end if
    end do
-   if (allocated(obs_height_geop)) deallocate(obs_height_geop)
 
    ! correction
-   call da_intpsfc_prs_gsi(nobs, missing, cor_psfc, obs_height, model_zs, model_psfc, model_tvs, obs_tv)
+   call da_intpsfc_prs_gsi(nobs, missing, cor_psfc, obs_height, model_zs, model_psfc, avg_tv)
 
    deallocate(obs_tv)
+   deallocate(avg_tv)
    deallocate(model_tvs)
 
 case default
@@ -489,26 +484,21 @@ end subroutine da_intpsfc_prs_ukmo
 
 ! ------------------------------------------------------------------------------
 
-subroutine da_intpsfc_prs_gsi (nobs, missing, P_m2o, H_o, H_m, P_m, TV_m, TV_o)
+subroutine da_intpsfc_prs_gsi (nobs, missing, P_m2o, H_o, H_m, P_m, TV_avg)
 implicit none
 integer,                          intent (in)           :: nobs !<total observation number
 real(c_double),                   intent (in)           :: missing
 real(kind_real), dimension(nobs), intent (out)          :: P_m2o !<model PS at observation height
 real(kind_real), dimension(nobs), intent (in)           :: H_o !<observed Height
-real(kind_real), dimension(nobs), intent (in)           :: H_m, P_m, TV_m !<model sfc height, PS and TV
-real(kind_real), dimension(nobs), intent (in)           :: TV_o  !<observed TV
-real(kind_real), dimension(nobs)                        :: TV
+real(kind_real), dimension(nobs), intent (in)           :: H_m, P_m !<model sfc height and PS
+real(kind_real), dimension(nobs), intent (in)           :: TV_avg  !<average of modeled/observed TV
 
-! 1.  model and observation virtual temperature
-! ---------------------------------------------
 
-TV = 0.5_kind_real * (TV_o + TV_m)
-
-! 2.  extrapolate pressure from model surface to observation height
+! extrapolate pressure from model surface to observation height
 ! --------------------------------------------------------------------
 
 where ( H_o /= missing )
-   P_m2o = P_m * exp ( (H_m - H_o) * grav / (rd * TV) )
+   P_m2o = exp(log(P_m) - ((H_o - H_m) * (grav/rd) / TV_avg))
 elsewhere
    P_m2o = P_m
 end where
