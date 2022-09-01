@@ -43,7 +43,7 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
     "the observed profile and each model level",
      3,
      this,
-     {oops::minConstraint(1)}};
+     {oops::minConstraint(0)}};
 
   oops::Parameter<bool> compareWithOPS{
     "compare with OPS",
