@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
-#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONARITHMETIC_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONARITHMETIC_H_
 
 #include <vector>
 
@@ -24,16 +24,22 @@ namespace ufo {
 
 class ObsFilterData;
 
-/// \brief Options controlling ObsFunctionLinearCombination ObsFunction
+/// \brief Options controlling ObsFunctionArithmetic ObsFunction
 template <typename FunctionValue>
-class LinearCombinationParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(LinearCombinationParameters, Parameters)
+class ArithmeticParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ArithmeticParameters, Parameters)
 
  public:
   /// Input variables of the linear combination
   oops::RequiredParameter<std::vector<Variable>> variables{"variables", this};
   /// coefficient associated with the above variables
-  oops::RequiredParameter<std::vector<FunctionValue>> coefs{"coefs", this};
+  oops::OptionalParameter<std::vector<FunctionValue>> coefs{"coefs", this};
+  /// exponent associated with the above variables
+  oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents", this};
+  /// total exponent
+  oops::OptionalParameter<FunctionValue> total_exponent{"total exponent", this};
+  /// total multiplicative coefficeint
+  oops::OptionalParameter<FunctionValue> total_coeff{"total coefficient", this};
   /// Adds the option to add an intercept or initial value
   oops::OptionalParameter<FunctionValue> intercept{"intercept", this};
   /// Use channel number in the calculation not the value from the variable
@@ -42,7 +48,28 @@ class LinearCombinationParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-/// \brief Outputs a linear combination of variables
+/// \brief Outputs an arithmetic combination of variables
+///
+/// Example
+///
+///  obs function:
+///    name: Arithmetic@ObsFunction
+///    options:
+///      variables: [variable1@ObsValue,
+///                  variable2@ObsValue,
+///                  variable3@ObsValue]
+///      coefficients: [0.1, 0.2, 0.3]
+///      exponents: [1, 2, 3]
+///      total coefficient: 4
+///      total exponent: 5
+///      additive constant: 6
+///
+/// will return 4 * (0.1 * (variable1@ObsValue)^1 +
+///                  0.2 * (variable2@ObsValue)^2 +
+///                  0.3 * (variable3@ObsValue)^3)^5 + 6
+///
+/// Can be also be used with the name LinearCombination
+/// to output a linear combination of variables
 ///
 /// Example 1
 ///
@@ -88,17 +115,18 @@ class LinearCombinationParameters : public oops::Parameters {
 /// will return 3.6 +
 ///             0.5 * channels
 ///
-
+///
 template <typename FunctionValue>
-class LinearCombination : public ObsFunctionBase<FunctionValue> {
+class Arithmetic : public ObsFunctionBase<FunctionValue> {
  public:
-  explicit LinearCombination(const eckit::LocalConfiguration &);
+  explicit Arithmetic(const eckit::LocalConfiguration &);
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<FunctionValue> &) const;
+  FunctionValue power(FunctionValue, FunctionValue) const;
   const ufo::Variables & requiredVariables() const;
  private:
-  LinearCombinationParameters<FunctionValue> options_;
+  ArithmeticParameters<FunctionValue> options_;
   ufo::Variables invars_;
 };
 
@@ -106,4 +134,4 @@ class LinearCombination : public ObsFunctionBase<FunctionValue> {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONLINEARCOMBINATION_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONARITHMETIC_H_

@@ -203,6 +203,8 @@ set ( filters_files
       obsfunctions/ObsErrorModelQuad.h
       obsfunctions/ObsFunction.cc
       obsfunctions/ObsFunction.h
+      obsfunctions/ObsFunctionArithmetic.cc
+      obsfunctions/ObsFunctionArithmetic.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
       obsfunctions/CloudCostFunction.cc
@@ -249,8 +251,6 @@ set ( filters_files
       obsfunctions/NearSSTRetCheckIR.h
       obsfunctions/ObsFunctionExponential.cc
       obsfunctions/ObsFunctionExponential.h
-      obsfunctions/ObsFunctionLinearCombination.cc
-      obsfunctions/ObsFunctionLinearCombination.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionSelectStatistic.cc

@@ -41,6 +41,17 @@ ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_function_arithmetic
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_arithmetic.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_function_bennartzscatindex
               TIER    1
               ECBUILD
