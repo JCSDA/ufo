@@ -37,7 +37,7 @@ CloudFirstGuessMinimumResidual::CloudFirstGuessMinimumResidual(
 
   // List of required data
   invars_ += Variable("ObsValue/brightness_temperature", channels_);
-  invars_ += Variable("ObsError/brightness_temperature", channels_);
+  invars_ += Variable("ObsErrorData/brightness_temperature", channels_);
   invars_ += Variable(options_.obsBiasGroup.value() + "/brightness_temperature", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_from_atmosphere_layer_to_toa", channels_);
@@ -71,6 +71,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> cloudFraction(nlevs, std::vector<float>(nlocs, missing));
   std::vector<std::vector<float>> airPressure(nlevs, std::vector<float>(nlocs));
   std::vector<std::vector<float>> costFunction(nlocs, std::vector<float>(nlevs, 0.0f));
+  std::vector<bool> writeoutdata(nlocs, true);
   ioda::ObsDataVector<float> obsVal(in.obsspace(), oops::Variables(vars, channels_));
   ioda::ObsDataVector<float> obsError(in.obsspace(), oops::Variables(vars, channels_));
   ioda::ObsDataVector<float> obsBias(in.obsspace(), oops::Variables(vars, channels_));
@@ -81,7 +82,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   const Variable clearVarName("ObsDiag/" + clearSkyName[0], channels_);
   const Variable obsBiasName(options_.obsBiasGroup.value() + "/" + vars[0], channels_);
   const Variable obsValName("ObsValue/" + vars[0], channels_);
-  const Variable obsErrorName("ObsError/" + vars[0], channels_);
+  const Variable obsErrorName("ObsErrorData/" + vars[0], channels_);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(obsValName[ichan], obsVal);
     in.get(obsErrorName[ichan], obsError);
@@ -107,6 +108,10 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
       in.get(Variable(btOvercastName, channels_)[ichan], ilev, obsCloudyVal[ichan]);
 
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        if (obsError[ichan][iloc] == missing) {
+            writeoutdata[iloc] = false;
+            continue;
+        }
         float errorWeightedCloudyMinusClear =
                    (obsCloudyVal[ichan][iloc] - obsClearVal[ichan][iloc]) /
                       (obsError[ichan][iloc] * obsError[ichan][iloc]);
@@ -126,6 +131,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
     /// This finds the cost function (residual) at each level
     /// Equation 5 of Eyra and Menzel (1989)
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      if (!writeoutdata[iloc]) continue;
       if (airPressure[ilev][iloc] < options_.minCloudPressure.value()) {
         costFunction[iloc][ilev] = 1.0e9;
         continue;
@@ -148,15 +154,21 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
 
   /// Use the minimum cost in a profile to evaluate the first guess cloud top pressure
   /// and effective cloud amount and save these to the ObsSpace.
-  const std::vector<std::string> firstGuessNames = {"initial_cloud_top_pressure",
-                                                    "initial_cloud_fraction"};
+  const std::vector<std::string> firstGuessNames = {options_.cloudTopPressureName.value(),
+                                                    options_.cloudFractionName.value()};
   ioda::ObsDataVector<float> firstGuessValues(in.obsspace(), oops::Variables(firstGuessNames));
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    size_t MinLevelIndex = std::min_element(costFunction[iloc].begin(), costFunction[iloc].end()) -
-                           costFunction[iloc].begin();
-    out[0][iloc] = costFunction[iloc][MinLevelIndex];
-    firstGuessValues[firstGuessNames[0]][iloc] = airPressure[MinLevelIndex][iloc];
-    firstGuessValues[firstGuessNames[1]][iloc] = cloudFraction[MinLevelIndex][iloc];
+    if (writeoutdata[iloc]) {
+      size_t MinLevelIndex = std::min_element(costFunction[iloc].begin(), costFunction[iloc].end())
+                             - costFunction[iloc].begin();
+      out[0][iloc] = costFunction[iloc][MinLevelIndex];
+      firstGuessValues[firstGuessNames[0]][iloc] = airPressure[MinLevelIndex][iloc];
+      firstGuessValues[firstGuessNames[1]][iloc] = cloudFraction[MinLevelIndex][iloc];
+    } else {
+      out[0][iloc] = missing;
+      firstGuessValues[firstGuessNames[0]][iloc] = missing;
+      firstGuessValues[firstGuessNames[1]][iloc] = missing;
+    }
   }
   firstGuessValues.save(options_.outputGroup.value());
   oops::Log::trace() << "CloudFirstGuessMinimumResidual compute end" << std::endl;

@@ -144,7 +144,7 @@ observations:
     surface emissivity:
       type: principalcomponent
       EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
-  passedBenchmark: 537
+  passedBenchmark: 536
   compareVariables:
     - reference:
         name: n_iterations@TestReference
