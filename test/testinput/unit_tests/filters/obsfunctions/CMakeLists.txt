@@ -803,6 +803,19 @@ ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+	      
+# Test for the string manipulation obsfucntion
+ufo_add_test( NAME    test_ufo_function_stringmanipulation
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_stringmanipulation.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )	      
+	      
 #
 ufo_add_test( NAME    test_ufo_function_tropo_estimate
               TIER    1

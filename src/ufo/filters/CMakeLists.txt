@@ -255,6 +255,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionSelectStatistic.cc
       obsfunctions/ObsFunctionSelectStatistic.h
+      obsfunctions/ObsFunctionStringManipulation.cc
+      obsfunctions/ObsFunctionStringManipulation.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
       obsfunctions/OceanPressureToDepth.cc
