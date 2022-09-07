@@ -880,6 +880,7 @@ observations:
     name: Aircraft
     distribution:
       name: Halo
+      halo size: 0
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]

@@ -18,6 +18,7 @@ observations:
     name: amsr2_gcom-w1
     distribution:
       name: Halo
+      halo size: 0
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020111500.nc4
 #   obsdataout:

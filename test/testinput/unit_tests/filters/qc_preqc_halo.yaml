@@ -9,6 +9,7 @@ observations:
     name: Radiosonde
     distribution:
       name: Halo
+      halo size: 0
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_m.nc4
 #   obsdataout:
@@ -24,6 +25,7 @@ observations:
     name: amsua_n19
     distribution:
       name: Halo
+      halo size: 0
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
 #   obsdataout:
