@@ -424,6 +424,16 @@ enum class ExtrapolationMode {
   MISSING
 };
 
+/// \brief Equidistance choice used by the DataExtractor to determine whether to use the first
+/// or last index in the case where a value is equidistant between two lookup values.
+///
+enum class EquidistantChoice {
+  /// \brief Select the first matching index in the case of a tiebreak.
+  FIRST,
+
+  /// \brief Select the last matching index in the case of a tiebreak.
+  LAST
+};
 
 /// \brief This class makes it possible to extract and interpolate data loaded from a file.
 ///
@@ -486,11 +496,14 @@ class DataExtractor
   /// \param[in] method is the interpolation/extraction method to use for this coordinate.
   /// \param[in] extrapMode is the extrapolation mode which applies when the value to be
   /// extracted is out-of-bounds.
+  /// \ param[in] equidistantChoice is the choice of index when a value is equidistant between
+  /// two indices.
   /// \internal This member function call corresponds to a RecursiveSplitter.groupBy call, useful
   /// to sort according to nearesr/exact match variables.  In the special case of float type,
   /// RecursiveSplitter.sortGroupsBy is used.
   void scheduleSort(const std::string &varName, const InterpMethod &method,
-                    const ExtrapolationMode &extrapMode);
+                    const ExtrapolationMode &extrapMode,
+                    const EquidistantChoice &equidistantChoice);
 
   /// \brief Finalise the sort, sorting each of the coordinates indexing the axes of the array to
   /// be interpolated, as well as that array itself.
@@ -661,6 +674,8 @@ class DataExtractor
     InterpMethod method;
     /// Extrapolation mode to use
     ExtrapolationMode extrapMode;
+    /// Equidistant choice to use
+    EquidistantChoice equidistantChoice;
     /// Axis of the payload array indexed by the coordinate (0 or 1)
     int payloadDim;
   };

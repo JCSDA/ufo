@@ -41,6 +41,39 @@ observations:
 
 - obs space: &ObsSpace
     <<: *ObsSpace
+    name: Demonstrate the default nearest behaviour with first for equidistant choice.
+  obs function:
+    name: DrawValueFromFile@IntObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_simple.csv
+      group: IntResult
+      interpolation:
+      # [3.0, 4.5, 6.0, 7.5, 9.0]
+      - name: float_variable_1@MetaData
+        method: nearest
+    # Variable from the TestReference group storing the reference result,
+    # [1, 75, 75, 75, 5]
+    variables: [assigned_int_variable_1]
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
+    name: Demonstrate the nearest behaviour when highest tiebreak match is selected
+  obs function:
+    name: DrawValueFromFile@IntObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_simple.csv
+      group: IntResult
+      interpolation:
+      # [3.0, 4.5, 6.0, 7.5, 9.0]
+      - name: float_variable_1@MetaData
+        method: nearest
+        equidistant choice: last
+    # Variable from the TestReference group storing the reference result,
+    # [75, 75, 75, 5, 5]
+    variables: [assigned_int_variable_5]
+
+- obs space: &ObsSpace
+    <<: *ObsSpace
     name: Map a float variable to an int result by least-upper-bound matching, CSV
   obs function:
     name: DrawValueFromFile@IntObsFunction
