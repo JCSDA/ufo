@@ -8,6 +8,7 @@
 #ifndef UFO_PREDICTORS_CLOUDLIQUIDWATER_H_
 #define UFO_PREDICTORS_CLOUDLIQUIDWATER_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,12 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
     /// List below is solely for AMSU-A and ATMS data
     oops::OptionalParameter<int> ch238d{"clwdif_ch238", this};
     oops::OptionalParameter<int> ch314d{"clwdif_ch314", this};
+    /// In case the inputs for 37v/h are clwret_ch37v and clwret_ch37h
+    oops::OptionalParameter<int> clwret_ch37v{"clwret_ch37v", this};
+    oops::OptionalParameter<int> clwret_ch37h{"clwret_ch37h", this};
+    oops::OptionalParameter<int> order{"order", this};
+    /// Path to an tlapse rate file for GMI only.
+    oops::OptionalParameter<std::string> tlapse{"tlapse", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -73,10 +80,30 @@ class CloudLiquidWater : public PredictorBase {
                            const std::vector<float> &,
                            const std::vector<float> &,
                            std::vector<float> &);
+  static void clw_bias_correction_gmi(const ObsBias &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
+                                      const std::vector<std::vector<std::vector<float>>> &,
+                                      const std::vector<std::vector<float>> &,
+                                      const std::vector<float> &,
+                                      const std::vector<int> &,
+                                      const  int &,
+                                      std::vector<float> &,
+                                      std::vector<float> &);
 
  private:
   CloudLiquidWaterParameters options_;
   std::vector<int> channels_;
+  int order_;
+  std::map<int, float> tlapmean_;  // <channel, tlaps>
+  static constexpr float bad_clwret_value_ = 1000.f;
 };
 
 // -----------------------------------------------------------------------------

@@ -18,6 +18,8 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
