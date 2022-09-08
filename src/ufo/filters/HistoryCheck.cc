@@ -56,19 +56,20 @@ HistoryCheck::HistoryCheck(ioda::ObsSpace &obsdb,
 }
 
 /// This filter runs the ship track check and stuck check filters consecutively over an auxiliary
-/// obs space (which is assumed to be a superset of \p obsdb_ with an earlier starting time),
-/// before checking which observations have both been (1) flagged by either of the sub-filters
-/// from the superset obs space and (2) are located within \p obsdb_
+/// obs space (which is assumed to be a superset of \p obsdb_ with an earlier starting time, and
+/// possibly a later ending time), before checking which observations have both been (1) flagged
+/// by either of the sub-filters from the superset obs space and (2) are located within \p obsdb_
 void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool> > & flagged) const {
   util::DateTime widerWindowStart = obsdb_.windowStart() - options_.timeBeforeStartOfWindow.value();
+  util::DateTime widerWindowEnd = obsdb_.windowEnd() - options_.timeAfterEndOfWindow.value();
   // In order to prevent the MPI from distributing the aux spaces's observations to different
   // ranks from the distribution used for obsdb_, widerObsSpace uses the myself communicator
   // for both time and spatial communicators, ensuring that all observations in widerObsSpace
   // are saved to all ranks
   ioda::ObsSpace widerObsSpace(options_.largerObsSpace, oops::mpi::myself(), widerWindowStart,
-                               obsdb_.windowEnd(), oops::mpi::myself());
+                               widerWindowEnd, oops::mpi::myself());
   if (options_.resetLargerObsSpaceVariables) {  // used for unit testing
     if (unitTestConfig_.has("station_ids_wide")) {
       const std::vector<int> stationIds = unitTestConfig_.getIntVector("station_ids_wide");

@@ -545,3 +545,34 @@ String-labelled station ids:
     obs space: *identicalObservations
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3]
+Ship track check future data:
+  window begin: 2010-01-01T00:00:00Z
+  window end: 2030-01-01T00:01:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -37.00999832 ]
+        lons: [ 82.5 ]
+        dateTimes: [ 0 ]
+        epoch: "seconds since 2010-01-01T00:00:00Z"
+      obs errors: [1.0]
+  station_ids: [ 1 ]
+  station_ids_wide: [ 1, 1, 1, 1, 1 ]
+  History Check:
+    input category: 'TEMP'
+    time before start of window: PT0S
+    time after end of window: PT6H
+    filter variables: [air_temperature]
+    ship track check parameters:
+      temporal resolution: PT1S
+      spatial resolution (km): 0.0000001
+      max speed (m/s): 0.01
+      rejection threshold: 0.5
+      early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+    obs space: *trackCheckShipObsSpace
+    reset larger obs space variables: true
+  expected rejected obs indices: [0]
