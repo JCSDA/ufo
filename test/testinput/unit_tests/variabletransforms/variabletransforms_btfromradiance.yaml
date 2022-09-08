@@ -50,6 +50,8 @@ observations:
       name: VarMetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -154,6 +156,8 @@ observations:
       name: VarMetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -182,6 +186,8 @@ observations:
       name: VarMetaData/frequency
       channels: *all_channels
     radiance units: frequency
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -210,6 +216,8 @@ observations:
       name: VarMetaData/wavelength
       channels: *all_channels
     radiance units: wavelength
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:

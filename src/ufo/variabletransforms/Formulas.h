@@ -264,10 +264,18 @@ float GetWind_V(float windSpeed, float windFromDirection);
 *     The input satellite radiance in (W / (m^2 sr m^-1)).
 * \param wavenumber
 *     The input wavenumber in m^-1
+* \param planck1
+*     2*h*c*c - (1.191042972e-16 W / (m^2.sr.m-4)) - this has been made optional
+*     to allow for rounding differences when porting.
+* \param planck2
+*     (h*c / T_b) - (1.4387769e-2 m.K) - this has been made optional
+*     to allow for rounding differences when porting.
 * \return
 *     Brightness temperature in K.
 */
-double inversePlanck(const double radiance, const double wavenumber);
+double inversePlanck(const double radiance, const double wavenumber,
+                     double planck1 = 1.191042972e-16,  // (W / (m^2.sr.m-4))
+                     double planck2 = 1.4387769e-2);    // (m.K)
 
 // -------------------------------------------------------------------------------------
 /*!
