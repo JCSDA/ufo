@@ -393,6 +393,8 @@ SpcCoeff/Little_Endian/iasi_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/iasi_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/iasi_metop-b.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/iasi_metop-b.TauCoeff.bin
+SpcCoeff/Little_Endian/iasi_metop-c.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/iasi_metop-c.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_metop-b.SpcCoeff.bin
