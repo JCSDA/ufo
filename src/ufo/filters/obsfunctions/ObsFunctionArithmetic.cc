@@ -128,7 +128,6 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                         "exponent. Output for " << invars_[ivar] <<
                                         " at location " << iloc << " set to missing." << std::endl;
             } else {
-                std::cout << "The total exponent is" << total_exponent << std::endl;
                 out[ichan][iloc] = total_coeff*power(out[ichan][iloc], total_exponent)
                                  + intercept;
             }
