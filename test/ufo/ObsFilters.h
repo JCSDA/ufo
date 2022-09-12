@@ -462,12 +462,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
                          "postFilter not called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
     runFinalCheck(obspace, *qcflags, obserrfilter);
+    obserrfilter.mask(*qcflags);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
     runFinalCheck(obspace, *qcflags, obserrfilter);
+    obserrfilter.mask(*qcflags);
   }
 
   qcflags->save("EffectiveQC");
