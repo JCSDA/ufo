@@ -144,6 +144,7 @@ observations:
     surface emissivity:
       type: principalcomponent
       EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
+    RecalculateBT: true
   passedBenchmark: 536
   compareVariables:
     - reference:

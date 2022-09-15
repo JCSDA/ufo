@@ -156,6 +156,10 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// Output the surface to space transmittance if the profile converges
   oops::Parameter<bool> Store1DVarTransmittance{"Store1DVarTransmittance", false, this};
 
+  /// Recalculate the brightness temperature using retrieval values if the
+  /// profile has converged
+  oops::Parameter<bool> RecalculateBT{"RecalculateBT", false, this};
+
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};
 

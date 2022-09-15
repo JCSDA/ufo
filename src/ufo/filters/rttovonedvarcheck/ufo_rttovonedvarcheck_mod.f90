@@ -109,7 +109,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
 
   type(ufo_rttovonedvarcheck_obs)        :: obs             ! data for all observations read from db
   type(ufo_metoffice_bmatrixstatic)      :: full_bmatrix    ! full bmatrix read from file
-  type(ufo_geovals)                      :: local_geovals   ! geoval for one observation
+  type(ufo_geovals)                      :: firstguess_geovals ! geoval for one observation
   type(ufo_rttovonedvarcheck_ob)         :: ob              ! observation data for a single observation
   type(ufo_rttovonedvarcheck_profindex)  :: prof_index      ! index for mapping geovals to 1d-var state profile
   type(ufo_rttovonedvarcheck_profindex)  :: local_profindex ! local copy of prof_index needed since the intro. of mwemiss
@@ -218,8 +218,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       !---------------------------------------------------
       ! create one ob geovals from full obs geovals and check
       ! to make sure the values are within sensible bounds.
-      call ufo_geovals_copy_one(local_geovals, geovals, jobs)
-      call ufo_rttovonedvarcheck_check_geovals(self, local_geovals, &
+      call ufo_geovals_copy_one(firstguess_geovals, geovals, jobs)
+      call ufo_rttovonedvarcheck_check_geovals(self, firstguess_geovals, &
               local_profindex, obs % surface_type(jobs))
 
       ! create b matrix arrays for this single observation location
@@ -280,11 +280,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ! make them exactly equal to match OPS behaviour for RTTOV
       ! jacobian calculation.
       if(self % cloud_retrieval) then
-        call ufo_rttovonedvarcheck_check_ctp(ob % cloudtopp, local_geovals, self %  nlevels)
+        call ufo_rttovonedvarcheck_check_ctp(ob % cloudtopp, firstguess_geovals, self %  nlevels)
       end if
 
       ! Store background T in ob data space
-      call ufo_geovals_get_var(local_geovals, var_ts, geoval)
+      call ufo_geovals_get_var(firstguess_geovals, var_ts, geoval)
       ob % background_T(:) = geoval%vals(:, 1) ! K
 
       ! Create ob vector and r matrix
@@ -320,12 +320,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, hofxdiags, rttov_simobs, &
+                                      firstguess_geovals, hofxdiags, rttov_simobs, &
                                       local_profindex, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, hofxdiags, rttov_simobs, &
+                                      firstguess_geovals, hofxdiags, rttov_simobs, &
                                       local_profindex, onedvar_success)
       end if
 
@@ -338,8 +338,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       obs % IWP(jobs) = ob % IWP
       if (self % store1dvarclw) obs % CLW(:,jobs) = ob % CLW(:)
       if (self % store1dvartransmittance) obs % transmittance(:, jobs) = ob % transmittance(:)
-      if(self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
-      if(self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
+      if (self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
+      if (self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
+      if (self % RecalculateBT) obs % recalc_BT(:, jobs) = ob % recalc_BT(:)
       obs % niter(jobs) = ob % niter
 
       ! Set QCflags based on output from minimization
@@ -401,7 +402,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       end if
 
       ! Tidy up memory specific to a single observation
-      call ufo_geovals_delete(local_geovals)
+      call ufo_geovals_delete(firstguess_geovals)
       call ufo_geovals_delete(hofxdiags)
       call ob % delete()
       call r_submatrix % delete()
@@ -420,9 +421,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   call fckit_log % info(message)
   write(message, *) "Number tested by 1dvar = ", apply_count
   call fckit_log % info(message)
-  write(message, *) "Number that failed to converge = ",failed_1dvar_count
+  write(message, *) "Number that failed to converge = ", failed_1dvar_count
   call fckit_log % info(message)
-  write(message, *) "Number that failed the retrieved BT check = ",failed_retrievedBTcheck_count
+  write(message, *) "Number that failed the retrieved BT check = ", failed_retrievedBTcheck_count
   call fckit_log % info(message)
 
   ! Put qcflags and output variables into observation space

@@ -139,4 +139,5 @@ observations:
     Store1DVarLWP: true
     Store1DVarCLW: true
     defer to post: true
+    RecalculateBT: true
   passedBenchmark: 261  # dummy value
