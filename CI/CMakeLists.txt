@@ -32,7 +32,7 @@ ecbuild_bundle( PROJECT atlas GIT "https://github.com/ecmwf/atlas.git" TAG 0.24.
 
 ecbuild_bundle( PROJECT oops GIT "https://github.com/JCSDA-internal/oops.git" )
 ecbuild_bundle( PROJECT saber GIT "https://github.com/JCSDA-internal/saber.git" )
-#ecbuild_bundle( PROJECT gsw  GIT "https://github.com/JCSDA-internal/GSW-Fortran.git" )
+ecbuild_bundle( PROJECT gsw  GIT "https://github.com/JCSDA-internal/GSW-Fortran.git" )
 ecbuild_bundle( PROJECT crtm GIT "https://github.com/JCSDA-internal/crtm.git" )
 ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA-internal/ioda.git" )
 ecbuild_bundle( PROJECT rttov  GIT "https://github.com/JCSDA-internal/rttov.git" )
