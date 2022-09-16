@@ -1,5 +1,12 @@
 obs space:
   name: amsua_metop-c
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: noaa
   simulated variables: [brightness_temperature]
   channels: &amsua_metop-c_channels 1-15

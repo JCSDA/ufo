@@ -6,9 +6,13 @@ observations:
     name: Satwind
     #  Ioda file we want to apply the filter to
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_2018041500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_2018041500.nc4
 #    obsdataout:
-#      obsfile: Data/windcomponents_2018041500_output.nc4
+#      engine:
+#        type: H5File
+#        obsfile: Data/windcomponents_2018041500_output.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
   - filter: Variable Transforms
@@ -29,7 +33,9 @@ observations:
 - obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_missing_values_2018041500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_missing_values_2018041500.nc4
     simulated variables: [wind_speed, wind_from_direction]
   obs filters:
   - filter: Variable Transforms
@@ -50,7 +56,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_surface.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_surface.nc4
     simulated variables: [windEastwardAt10M, windNorthwardAt10M]
   obs filters:
   - filter: Variable Transforms

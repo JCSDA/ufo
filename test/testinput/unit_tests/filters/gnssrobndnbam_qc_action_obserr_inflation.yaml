@@ -10,13 +10,17 @@ observations:
   obs space:
     name: GnssroBndNBAM
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "impact_height"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/gnssro_bndnbam_2018041500_m_obserr_inflation_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_bndnbam_2018041500_m_obserr_inflation_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_m.nc4

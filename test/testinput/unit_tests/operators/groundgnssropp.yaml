@@ -7,10 +7,14 @@ observations:
   obs space: 
     name: Groundgnss
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
     simulated variables: [ZTD] 
 #   obsdataout:
-#     obsfile: Data/groundgnss_obs_2019123006_ropp_opr_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/groundgnss_obs_2019123006_ropp_opr_out.nc
   geovals: 
     filename: Data/ufo/testinput_tier_1/groundgnss_geovals_20191230T0600Z.nc4
   norm ref: HofX

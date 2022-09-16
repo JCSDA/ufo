@@ -20,9 +20,13 @@ observations:
   obs space:
     name: radiometer_smap
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/smap_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/smap_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/smap_obs_2018041500_m_crtm_opr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/smap_obs_2018041500_m_crtm_opr_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-2
   geovals:

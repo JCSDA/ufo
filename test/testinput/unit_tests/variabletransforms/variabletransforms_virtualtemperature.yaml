@@ -7,9 +7,13 @@ observations:
 - obs space:
     name: test_virtual_temperature
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
     # obsdataout:
-    #   obsfile: Data/metar_test.nc
+#       engine:
+#         type: H5File
+#         obsfile: Data/metar_test.nc
     simulated variables: [air_temperature, specific_humidity, virtual_temperature]
     derived variables: [virtual_temperature]
     observed variables: [air_temperature, specific_humidity]
@@ -41,9 +45,13 @@ observations:
 - obs space:
     name: test_virttemperature2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
     obsdataout:
-      obsfile: Data/metar_test2.nc
+      engine:
+        type: H5File
+        obsfile: Data/metar_test2.nc
     simulated variables: [air_temperature, relative_humidity, specific_humidity, virtual_temperature, surface_pressure]
     derived variables: [specific_humidity, virtual_temperature]
     observed variables: [air_temperature, relative_humidity, surface_pressure]

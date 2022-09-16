@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
     simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:
@@ -16,7 +18,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
     simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:

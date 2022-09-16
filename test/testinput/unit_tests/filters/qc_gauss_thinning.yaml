@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -15,7 +17,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -27,7 +31,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -38,7 +44,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -153,7 +161,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -628,7 +638,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -798,7 +810,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
         group variables: [ "round" ]
     simulated variables: [air_temperature]
@@ -825,7 +839,9 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
         group variables: [ "priority" ]
     simulated variables: [air_temperature]
@@ -854,7 +870,9 @@ observations:
     distribution:
       name: InefficientDistribution
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:
@@ -882,7 +900,9 @@ observations:
       name: Halo
       halo size: 0
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
   obs filters:

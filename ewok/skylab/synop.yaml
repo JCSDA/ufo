@@ -1,5 +1,12 @@
 obs space:
   name: synop
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: noaa
   simulated variables: [surface_pressure, air_temperature]
 obs operator:

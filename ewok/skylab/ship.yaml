@@ -1,5 +1,12 @@
 obs space:
   name: ship
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: ldm
   simulated variables: [surface_pressure, air_temperature]
 obs operator:

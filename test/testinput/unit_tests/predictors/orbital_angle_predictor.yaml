@@ -6,9 +6,13 @@ observations:
 - obs space:
     name: f17_ssmis
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/ssmis_obs_20191230T0000Z_orbital_angle.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ssmis_obs_20191230T0000Z_orbital_angle.nc4
 #   obsdataout:
-#     obsfile: Data/ssmis_obs_20191230T0000Z_orbital_angle_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/ssmis_obs_20191230T0000Z_orbital_angle_out.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-24
   geovals:

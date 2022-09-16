@@ -1,5 +1,12 @@
 obs space:
   name: atms_npp
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: nasa
   simulated variables: [brightness_temperature]
   channels: &atms_npp_channels 1-22

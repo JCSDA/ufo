@@ -6,7 +6,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_namemap.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_namemap.nc4
     simulated variables: [airTemperature]
   obs operator:
     name: Identity

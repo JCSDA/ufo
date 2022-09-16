@@ -6,9 +6,13 @@ observations:
 - obs space: &obsspace
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_history_check_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_history_check_out.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -32,9 +36,13 @@ observations:
       name: Ship, wide time window
       simulated variables: [air_temperature]
       obsdatain:
-        obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
 #     obsdataout:
-#       obsfile: Data/met_office_history_check_wide_out.nc4
+#       engine:
+#         type: H5File
+#         obsfile: Data/met_office_history_check_wide_out.nc4
         obsgrouping:
           group variables: [ "station_id" ]
   passedBenchmark: 6
@@ -82,9 +90,13 @@ observations:
 - obs space: &obsspace_nogroup
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_history_check.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_history_check_noobsgrouping_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_history_check_noobsgrouping_out.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: History Check
@@ -103,9 +115,13 @@ observations:
       name: Ship, wide time window
       simulated variables: [air_temperature]
       obsdatain:
-        obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/met_office_history_check_wide.nc4
 #     obsdataout:
-#       obsfile: Data/met_office_history_check_wide_noobsgrouping_out.nc4
+#       engine:
+#         type: H5File
+#         obsfile: Data/met_office_history_check_wide_noobsgrouping_out.nc4
   passedBenchmark: 6
   benchmarkFlag: 28
   flaggedBenchmark: 2

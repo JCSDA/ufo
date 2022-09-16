@@ -20,9 +20,13 @@ observations:
   obs space:
     name: SSMIS
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/obs_ssmis_onedvar_20210701T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs_ssmis_onedvar_20210701T1200Z.nc4
 #   obsdataout:
-#     obsfile: Data/obs_ssmis_onedvar_20210701T1200Z_rrtov_onedvarcheck_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/obs_ssmis_onedvar_20210701T1200Z_rrtov_onedvarcheck_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-24
   geovals:

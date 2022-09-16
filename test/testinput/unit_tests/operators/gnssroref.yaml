@@ -7,10 +7,14 @@ observations:
   obs space:
    name: GnssroRef
    obsdatain:
-     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+     engine:
+       type: H5File
+       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
    simulated variables: [refractivity]
 #  obsdataout:
-#    obsfile: Data/gnssro_obs_2018041500_s_refncep_opr_out.nc4
+#    engine:
+#      type: H5File
+#      obsfile: Data/gnssro_obs_2018041500_s_refncep_opr_out.nc4
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
   rms ref: 128.48077739761979

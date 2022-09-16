@@ -4,9 +4,13 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_tropo_2020090318_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_tropo_2020090318_m.nc4
 #   obsdataout:
-#     obsfile: Data/tropomi_no2_2020090318_m_opr_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/tropomi_no2_2020090318_m_opr_out1.nc4
     simulated variables: [nitrogen_dioxide_in_tropospheric_column]
   obs operator:
     name: ColumnRetrieval
@@ -29,9 +33,13 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
 #   obsdataout:
-#     obsfile: Data/tropomi_no2_2020090318_m_opr_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/tropomi_no2_2020090318_m_opr_out2.nc4
     simulated variables: [nitrogen_dioxide_in_total_column]
   obs operator:
     name: ColumnRetrieval

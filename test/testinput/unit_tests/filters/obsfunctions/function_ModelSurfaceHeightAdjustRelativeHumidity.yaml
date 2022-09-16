@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
     simulated variables: [relativeHumidityAt2M]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4

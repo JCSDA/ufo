@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check    # test minvalue with one var (compare var3-var4 with min)
@@ -16,7 +18,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Difference Check     # test same minvalue with three vars (compare var3-var4 with min)
@@ -27,7 +31,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check     # test maxvalue (compare var3-var4 with max)
@@ -40,7 +46,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check        # test min and maxvalue (compare var3-var4 with min and max)
@@ -54,7 +62,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check         # test threshold (compare abs(variable2 - variable1) with threshold)
@@ -67,7 +77,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test
@@ -81,7 +93,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
   obs filters:
   - filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test

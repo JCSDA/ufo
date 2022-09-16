@@ -4,9 +4,13 @@ obs filter data:
 - obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/satwind_obs_2018041500_m_filterdata_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_2018041500_m_filterdata_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   test data:
     datetime variables:
@@ -74,7 +78,9 @@ obs filter data:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_with_diag_flags.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_with_diag_flags.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
   test data:
@@ -121,7 +127,9 @@ obs filter data:
 - obs space:
     name: skipDerived false
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
     simulated variables: [air_temperature]
   skipDerived: false
   test data:
@@ -136,7 +144,9 @@ obs filter data:
 - obs space:
     name: skipDerived true
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/derived_variables.nc4
     simulated variables: [air_temperature]
   skipDerived: true
   test data:

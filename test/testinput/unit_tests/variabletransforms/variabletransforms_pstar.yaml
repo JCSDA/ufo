@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
@@ -73,9 +75,13 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z_noflag.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z_noflag.nc4
     obsdataout:
-      obsfile: Data/ufo/PStar.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/PStar.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4

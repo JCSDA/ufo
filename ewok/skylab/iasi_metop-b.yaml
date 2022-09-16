@@ -1,5 +1,12 @@
 obs space:
   name: iasi_metop-b
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: gdas
   simulated variables: [brightness_temperature]
   channels: &iasi_metop-b_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,

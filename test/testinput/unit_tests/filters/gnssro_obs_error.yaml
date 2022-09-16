@@ -10,9 +10,13 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
 #   obsdataout:
-#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -27,9 +31,13 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
 #   obsdataout:
-#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -47,9 +55,13 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
 #   obsdataout:
-#     obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL_out.nc4
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
@@ -64,9 +76,13 @@ observations:
   obs space:
    name: GnssroRef
    obsdatain:
-     obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+     engine:
+       type: H5File
+       obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
 #  obsdataout:
-#    obsfile: Data/gnssro_ref_2018041500_s_errNCEP_out.nc4
+#    engine:
+#      type: H5File
+#      obsfile: Data/gnssro_ref_2018041500_s_errNCEP_out.nc4
    simulated variables: [refractivity]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4

@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
     observed variables: [variable1, variable2, variable3]
   obs filters:

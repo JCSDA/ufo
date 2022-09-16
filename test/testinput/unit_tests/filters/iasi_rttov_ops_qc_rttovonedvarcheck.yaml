@@ -72,11 +72,15 @@ observations:
   obs space:
     name: Test the hyperspectral retrievals
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
     simulated variables: [brightness_temperature]
     channels: *all_channels
 #   obsdataout:
-#     obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs filters:

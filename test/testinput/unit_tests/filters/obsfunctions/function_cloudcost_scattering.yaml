@@ -22,9 +22,13 @@ observations:
   obs space:
     name: metop_1_amsua_mhs
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt.nc4
 #   obsdataout:
-#     obsfile: Data/delete.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/delete.nc4
     simulated variables: [brightness_temperature]
     channels: 1-20
   geovals:

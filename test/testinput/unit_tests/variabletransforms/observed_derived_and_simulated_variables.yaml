@@ -8,7 +8,9 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
     observed variables: [stationPressure, pressureReducedToMeanSeaLevel, standardPressure]
     derived variables: [surface_pressure]
     simulated variables: [surface_pressure]

@@ -4,14 +4,15 @@ Only valid observations:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -34,14 +35,15 @@ One observation with excessive speed:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 359, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -64,14 +66,15 @@ One observation with excessive climb rate:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -94,14 +97,15 @@ Climb rate checks disabled:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]   
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -123,14 +127,15 @@ Where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 1e20, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -157,8 +162,9 @@ Multiple clusters of observations with excessive speed:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
                 90, 0, 0, 0, 0, 0, 0, 0, 45, -90,
                 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
@@ -200,7 +206,7 @@ Multiple clusters of observations with excessive speed:
           - 3480
           - 3600
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [ 1.0]
+        obs errors: [ 1.0]
   air_pressures: [ 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
@@ -229,8 +235,9 @@ Multiple station ids:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]   
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -2, -1, -1, 0, 0, 1, 1, 2, 2 ]
         lons: [ 178, 88, 179, 89, 359, 269, 181, 91, 182, 92 ]
         dateTimes: [ 0, 0,
@@ -239,7 +246,7 @@ Multiple station ids:
                      10800, 10800,
                      14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 100000, 90000, 90000, 80000, 80000, 90000, 90000, 100000, 100000]
   station_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
   Track Check:
@@ -262,14 +269,15 @@ No station id variable, no observation grouping:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 359, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   Track Check:
     temporal_resolution: PT4S

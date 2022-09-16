@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Relative humidity calculation, surface variables
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -29,7 +31,9 @@ observations:
 - obs space:
     name: Relative humidity calculation, upper-air variables
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -54,7 +58,9 @@ observations:
 - obs space:
     name: Relative humidity calculation, RH initially missing
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"

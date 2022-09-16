@@ -17,9 +17,13 @@ observations:
   obs space:
     name: mhs_metop-b
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/geos.mhs_metop-b_obs.2020121500_m.nc4
-    obsdataout:
-      obsfile: Data/geos.mhs_metop-b_obs_2020121500_out_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos.mhs_metop-b_obs.2020121500_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/geos.mhs_metop-b_obs_2020121500_out_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-5
   geovals:

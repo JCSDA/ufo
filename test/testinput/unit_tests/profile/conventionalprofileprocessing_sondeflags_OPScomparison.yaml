@@ -8,13 +8,17 @@ Sondes:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_sondeflags.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_sondeflags.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
     simulated variables: [eastward_wind]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_sondeflags_ops_comparison_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_sondeflags_ops_comparison_out.nc4
   Conventional Profile Processing:
     Checks: ["Basic", "SondeFlags"]
     compareWithOPS: true

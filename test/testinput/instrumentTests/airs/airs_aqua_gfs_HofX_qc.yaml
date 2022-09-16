@@ -12,7 +12,9 @@ observations:
   obs space:
     name: airs_aqua
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               1, 6, 7, 10, 11, 15, 16, 17, 20, 21, 22, 24,

@@ -10,7 +10,9 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
     simulated variables: [bending_angle]
     channels: 1-375
   geovals:

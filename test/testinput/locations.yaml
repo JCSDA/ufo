@@ -3,8 +3,9 @@ window end: 2018-04-15T03:00:00Z
 obs space:
   name: test data
   simulated variables: [test]
-  generate:
-    list:
+  obsdatain:
+    engine:
+      type: GenList
       lons: [ 0.0, 10.0, 20.0, 50.0, 90.0, 100.0, 200.0, 300.0, 359.0, 0.0 ]
       lats: [ 0.0, 10.0, 20.0, 80.0, 90.0, -10.0, -20.0, -80.0, -90.0, 0.0 ]
       dateTimes:
@@ -19,7 +20,7 @@ obs space:
       - 9000
       - -1
       epoch: "seconds since 2018-04-15T00:00:00Z"
-    obs errors: [1.0]
+      obs errors: [1.0]
 
 locations test:
   reference lons: [ 0.0, 10.0, 20.0, 50.0, 90.0, 100.0, 200.0, 300.0, 359.0, 0.0 ]

@@ -5,7 +5,9 @@ observations:
 - obs space: &ObsSpace
     name: Zenith 1
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
     simulated variables: [air_temperature, surface_pressure]
   obs function: &ObsFunction
     name: SolarZenith@ObsFunction

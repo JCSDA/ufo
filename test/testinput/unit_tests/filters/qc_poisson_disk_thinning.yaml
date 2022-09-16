@@ -8,9 +8,13 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_poisson_disk_thinning_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_poisson_disk_thinning_out1.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Domain Check
@@ -68,9 +72,13 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_poisson_disk_thinning_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_poisson_disk_thinning_out2.nc4
       obsgrouping:
         group variables: [ "scan_index" ]
     simulated variables: [air_temperature]
@@ -96,9 +104,13 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_poisson_disk_thinning_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_poisson_disk_thinning_out3.nc4
       obsgrouping:
         group variables: [ "priority" ]
     simulated variables: [air_temperature]
@@ -123,13 +135,17 @@ observations:
 - obs space:
     name: Ocean Profile, sort vertical descending (bottom to surface)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
         sort order: "ascending"
-    obsdataout:
-      obsfile: oceanprofile_levelsubsample_testout.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/oceanprofile_levelsubsample_testout.nc4
     simulated variables: [ocean_temperature]
   obs pre filters:
   - filter: Poisson Disk Thinning # Thinning bottom to surface on data sorted surface to bottom
@@ -161,13 +177,17 @@ observations:
 - obs space:
     name: Ocean Profile, sort vertical ascending (surface to bottom)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
         sort order: "ascending"
-    obsdataout:
-      obsfile: oceanprofile_levelsubsample_ascending_testout.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/oceanprofile_levelsubsample_ascending_testout.nc4
     simulated variables: [ocean_temperature]
   obs pre filters:
   - filter: Poisson Disk Thinning # Thinning in same vertical order as sorting, >50m depth

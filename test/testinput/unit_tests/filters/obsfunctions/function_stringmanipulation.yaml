@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Ground GNSS Cut Site_name to station name
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
     simulated variables: [ZTD]
     
   obs filters:  
@@ -32,7 +34,9 @@ observations:
 - obs space:
     name: Ground GNSS Cut Site_name to station name
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
     simulated variables: [ZTD]
     
   obs filters: 

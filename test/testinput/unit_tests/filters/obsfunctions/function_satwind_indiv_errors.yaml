@@ -9,7 +9,9 @@ observations:
   obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
@@ -108,7 +110,9 @@ observations:
   obs space:
     name: GeoVaLs are in the wrong order, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
@@ -150,7 +154,9 @@ observations:
   obs space:
     name: Incorrect vertical coordinate
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
@@ -192,7 +198,9 @@ observations:
   obs space:
     name: Invalid pressure error input
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
@@ -234,7 +242,9 @@ observations:
   obs space:
     name: Invalid wind component specified
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4

@@ -3,9 +3,13 @@ window end: 2018-04-15T03:00:00Z
 obs space:
   name: atms_npp
   obsdatain:
-    obsfile: Data/ufo/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+    engine:
+      type: H5File
+      obsfile: Data/ufo/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
 # obsdataout:
-#   obsfile: Data/atms_npp_obs_2018041500_m_qc_jacobian_out.nc4
+#   engine:
+#     type: H5File
+#     obsfile: Data/atms_npp_obs_2018041500_m_qc_jacobian_out.nc4
   simulated variables: [brightness_temperature]
   channels: &all_channels 1-22
 obs operator:

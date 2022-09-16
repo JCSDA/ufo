@@ -5,13 +5,17 @@ observations:
 - obs space:
     name: OzoneLayer
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_obs_2020121500.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_obs_2020121500.nc
       obsgrouping:
         group variables: ["latitude"]
         sort variable: "air_pressure"
         sort order: "ascending"
 #    obsdataout:
-#      obsfile: Data/ompsnp_npp_hofx_2020121500.nc
+#      engine:
+#        type: H5File
+#        obsfile: Data/ompsnp_npp_hofx_2020121500.nc
     simulated variables: [integrated_layer_ozone_in_air]
   obs operator:
     name: AtmVertInterpLay

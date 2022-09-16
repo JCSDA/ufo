@@ -5,9 +5,13 @@ observations:
 - obs space:
    name: test_specific_humidity
    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/buoy_wmo_multi.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/buoy_wmo_multi.nc
 #   obsdataout:
-#      obsfile: Data/buoy_wmo_multi.nc
+#      engine:
+#        type: H5File
+#        obsfile: Data/buoy_wmo_multi.nc
    simulated variables: [dewpoint_temperature, air_temperature, surface_pressure, specific_humidity]
    derived variables: [specific_humidity]
    observed variables: [dewpoint_temperature, air_temperature, surface_pressure]

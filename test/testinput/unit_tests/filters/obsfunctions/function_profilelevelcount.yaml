@@ -5,14 +5,18 @@ observations:
 - obs space:
     name: Profile level count
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/function_profilelevelcount_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_profilelevelcount_out1.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -34,14 +38,18 @@ observations:
 - obs space:
     name: Profile level count, where clause not used
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/function_profilelevelcount_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_profilelevelcount_out2.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -58,10 +66,14 @@ observations:
 - obs space:
     name: Grouping not performed, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/function_profilelevelcount_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_profilelevelcount_out3.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -79,14 +91,18 @@ observations:
 - obs space:
     name: Profile level count, where clause using logical `or`
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/function_profilelevelcount_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_profilelevelcount_out4.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:

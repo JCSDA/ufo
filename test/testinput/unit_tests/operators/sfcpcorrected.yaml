@@ -8,9 +8,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_UKMOS_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_UKMOS_out.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
@@ -26,9 +30,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_WRFDA_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_WRFDA_out.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
@@ -44,9 +52,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_GSI_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_GSI_out.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
@@ -66,9 +78,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_UKMOS_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_UKMOS_out2.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
@@ -82,9 +98,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_WRFDA_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_WRFDA_out2.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
@@ -98,9 +118,13 @@ observations:
   obs space:
     name: SfcPCorrected
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
 #   obsdataout:
-#     obsfile: Data/sfc_2018041500_m_GSI_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_GSI_out2.nc4
     simulated variables: [surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4

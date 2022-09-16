@@ -10,14 +10,15 @@ All observations' number and time stuck tolerated:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 7200, 10800,
                      18000, 21600, 28800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 281.0, 281.0, 282.0, 282.0, 283.0, 283.0]
   air_temperatures_wide: [ 281.0, 281.0, 282.0, 282.0, 283.0, 283.0]
   History Check: &referenceStuckFilterArguments
@@ -39,14 +40,15 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 1800, 1860,
                      10800, 10860, 10920 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0]
   air_temperatures_wide: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0]
   History Check:
@@ -68,14 +70,15 @@ Time stuck tolerated, number stuck untolerated, 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 1, 2,
                      3, 4, 5 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 282.0, 282.0 ]
   air_temperatures_wide: [ 282.0, 282.0, 282.0, 282.0, 282.0, 282.0 ]
   History Check:
@@ -97,13 +100,14 @@ Time stuck tolerated, number stuck tolerated, 1 value:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1 ]
         lons: [ 0, 1 ]
         dateTimes: [ 0, 1 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0 ]
   air_temperatures_wide: [ 282.0, 282.0 ]
   History Check:
@@ -125,14 +129,15 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 7200, 14400,
                      21600, 28800, 43200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 283.0, 283.0 ]
   air_temperatures_wide: [ 282.0, 282.0, 282.0, 282.0, 283.0, 283.0 ]
   History Check:
@@ -154,14 +159,15 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 1, 2,
                      21600, 28800, 43200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0 ]
   air_temperatures_wide: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0 ]
   History Check:
@@ -181,14 +187,15 @@ Stuck check historical data:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [4, 5, 6, 7]
         lons: [4, 5, 6, 7]
         dateTimes: [ 14400, 18000, 21600,
                      25200]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 282.0, 282.0, 283.0, 284.0]
   air_temperatures_wide: [ 282.0, 282.0, 282.0, 283.0, 284.0]
   History Check:
@@ -204,15 +211,16 @@ Stuck check historical data:
       distribution:
         name: InefficientDistribution
       simulated variables: [air_temperature]
-      generate:
-        list:
+      obsdatain:
+        engine:
+          type: GenList
           lats: [3, 4, 5, 6, 7]
           lons: [3, 4, 5, 6, 7]
           dateTimes: [ 7200,
                        14400, 18000, 21600,
                        25200]
           epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
+          obs errors: [1.0]
   expected rejected obs indices: [ 0, 1 ]
 
 All temperatures different:
@@ -223,14 +231,15 @@ All temperatures different:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2, 3, 4, 5 ]
         lons: [ 0, 1, 2, 3, 4, 5 ]
         dateTimes: [ 0, 1, 2,
                      21600, 28800, 43200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 284.0, 285.0]
   air_temperatures_wide: [ 280.0, 281.0, 282.0, 283.0, 284.0, 285.0]
   History Check:
@@ -256,14 +265,15 @@ Ship Track Segment from Comparison Test early break false:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -37.00999832, -37.00999832, -37.02000046, -37.02000046, -37.02000046]
         lons: [ 82.5, 82.51000214, 82.52999878,  82.55999756,  82.56999969]
         dateTimes: [ 0, 3600, 7200,
                      14400, 18000]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1 ]
   station_ids_wide: [ 1, 1, 1, 1, 1 ]
   History Check: 
@@ -289,14 +299,15 @@ Ship Track Segment from Comparison Test early break true:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -4.94999981, -4.94999981, -4.94999981, -4.96000004, -4.96000004, -4.96000004]
         lons: [ 94.98000336,  94.98000336,  94.98000336,  94.98000336, 94.98000336,  94.98000336 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 18000]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1, 1 ]
   station_ids_wide: [ 1, 1, 1, 1, 1, 1]
   History Check:
@@ -320,13 +331,14 @@ Ship track check historical data:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -37.02000046 ]
         lons: [ 82.56999969 ]
         dateTimes: [ 18000 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1 ]
   station_ids_wide: [ 1, 1, 1, 1, 1 ]
   History Check:
@@ -352,14 +364,15 @@ Only ship track check, compatible with stuck check (no historical data):
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0.0, .05, 0.1, 0.2, 2.0, 0.3]
         lons: [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0 ]
         dateTimes: [ 0, 1800, 3600,
                      7200, 9000, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 281.0, 281.0, 281.0, 282.0, 283.0, 284.0 ]
   air_temperatures_wide: [ 281.0, 281.0, 281.0, 282.0, 283.0, 284.0 ]
   station_ids: [ 1, 1, 1, 1, 1, 1 ]
@@ -431,14 +444,15 @@ Both checks (with historical data):
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0.1, 0.2, 2.0, 0.3]
         lons: [ 0.0,  0.0,  0.0,  0.0 ]
         dateTimes: [ 3600,
                      7200, 9000, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 281.0, 282.0, 283.0, 284.0 ]
   air_temperatures_wide: [ 281.0, 281.0, 281.0, 282.0, 283.0, 284.0 ]
   station_ids: [ 1, 1, 1, 1 ]
@@ -469,8 +483,9 @@ Identical observations stuck check:
     distribution:
       name: InefficientDistribution
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0 ]
         lons: [ 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0 ]
         dateTimes: [ 3600,
@@ -485,7 +500,7 @@ Identical observations stuck check:
                      10800,
                      13560 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_temperatures: [ 281.0, 281.0, 281.0, 281.0, 281.0, 282.0, 283.0, 283.0, 283.0, 283.0, 283.0 ]
   air_temperatures_wide: [ 281.0, 281.0, 281.0, 281.0, 281.0, 282.0, 283.0, 283.0, 283.0,
                            283.0, 283.0 ]
@@ -551,13 +566,14 @@ Ship track check future data:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -37.00999832 ]
         lons: [ 82.5 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1 ]
   station_ids_wide: [ 1, 1, 1, 1, 1 ]
   History Check:

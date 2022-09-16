@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/filters_testdata_perform_action_and_actions_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/filters_testdata_perform_action_and_actions_out.nc4
     simulated variables: [variable1, variable2]
   obs filters:
   - filter: Perform Action

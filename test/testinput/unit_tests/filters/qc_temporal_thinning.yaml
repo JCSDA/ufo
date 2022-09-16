@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_surface.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_surface.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_temporal_thinning_surface_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_temporal_thinning_surface_out.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
@@ -73,9 +77,13 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
 #   obsdataout:
-#     obsfile: Data/met_office_temporal_thinning_sonde_nogrouping_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_temporal_thinning_sonde_nogrouping_out.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
@@ -189,11 +197,15 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
       obsgrouping:
         group variables: [ "call_sign" ]
 #   obsdataout:
-#     obsfile: Data/met_office_temporal_thinning_sonde_grouping1_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_temporal_thinning_sonde_grouping1_out.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
@@ -214,11 +226,15 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
       obsgrouping:
         group variables: [ "num_levels" ]
 #   obsdataout:
-#     obsfile: Data/met_office_temporal_thinning_sonde_grouping2_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_temporal_thinning_sonde_grouping2_out.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning

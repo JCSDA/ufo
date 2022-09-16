@@ -5,6 +5,13 @@
 
 obs space:
   name: modis_terra_aod
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: nasa
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]

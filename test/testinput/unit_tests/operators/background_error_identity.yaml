@@ -8,10 +8,14 @@ observations:
 - obs space:
     name: Sondes
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [surface_pressure]
 #   obsdataout:
-#     obsfile: Data/sondes_obs_2018041500_s_bkgerror_identity_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_s_bkgerror_identity_out.nc4
   obs operator:
     name: Composite
     components:

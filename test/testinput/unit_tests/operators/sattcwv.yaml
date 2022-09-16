@@ -8,9 +8,13 @@ observations:
   obs space: 
     name: SatTCWV
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
 #   obsdataout:
-#     obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_out.nc4
     simulated variables: [precipitableWater] 
   geovals: 
     filename: Data/ufo/testinput_tier_1/sattcwv_geovals_20201230T0600Z.nc4
@@ -27,9 +31,13 @@ observations:
   obs space: 
     name: SatTCWV
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sattcwv_obs_20201230T0600Z.nc4
 #   obsdataout:
-#     obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_reversed_geovals_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sattcwv_obs_20201230T0600Z_sattcwv_reversed_geovals_out.nc4
     simulated variables: [precipitableWater]   
   geovals: 
     filename: Data/ufo/testinput_tier_1/sattcwv_geovals_reversed_20201230T0600Z.nc4

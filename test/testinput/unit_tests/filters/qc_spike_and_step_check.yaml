@@ -5,14 +5,18 @@ observations:
 - obs space:
     name: Ocean Profile
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
         sort variable: "ocean_depth"
         sort group: "MetaData"
         sort order: "ascending" # surface to depth
-    obsdataout:
-      obsfile: Data/spikestep_testout.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/spikestep_testout.nc4
     simulated variables: [ocean_temperature, ocean_salinity]
     observed variables: [ocean_temperature, ocean_salinity]
   obs filters:
@@ -165,14 +169,18 @@ observations:
 - obs space:
     name: Ocean Profile, where T >= 1 deg.C
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
         sort variable: "ocean_depth"
         sort group: "MetaData"
         sort order: "descending" # depth to surface
-    obsdataout:
-      obsfile: Data/spikestep_testout2.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/spikestep_testout2.nc4
     simulated variables: [ocean_temperature]
     observed variables: [ocean_temperature]
   obs pre filters:
@@ -222,11 +230,15 @@ observations:
 - obs space:
     name: Nonsense test against air pressure
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
-    obsdataout:
-      obsfile: Data/spikestep_testout3.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/spikestep_testout3.nc4
     simulated variables: [ocean_temperature, ocean_salinity]
     observed variables: [ocean_temperature, ocean_salinity]
   obs filters:
@@ -282,7 +294,9 @@ observations:
 - obs space:
     name: Parameter validation - non-matching number of tolerance factors and boundaries
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]
@@ -311,7 +325,9 @@ observations:
 - obs space:
     name: Parameter validation - tolerance factors but no boundaries
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]
@@ -339,7 +355,9 @@ observations:
 - obs space:
     name: Parameter validation - tolerance boundaries decreasing
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]
@@ -368,7 +386,9 @@ observations:
 - obs space:
     name: Parameter validation - boundary layer range wrong
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]
@@ -395,7 +415,9 @@ observations:
 - obs space:
     name: Parameter validation - step tolerance range wrong
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]
@@ -422,7 +444,9 @@ observations:
 - obs space:
     name: Parameter validation - maximum x interval wrong
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
     simulated variables: [ocean_temperature]

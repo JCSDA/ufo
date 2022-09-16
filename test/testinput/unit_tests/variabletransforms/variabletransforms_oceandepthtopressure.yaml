@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: Ocean depth to pressure conversion
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
     obsdataout:
-      obsfile: Data/ocean_depthtopressure_out.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ocean_depthtopressure_out.nc4
     simulated variables: [ocean_pressure]
     observed variables: []
     derived variables: [ocean_pressure]

@@ -6,7 +6,9 @@ observations:
 - obs space: &ObsSpace
     name: Floating-point result, with default value
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: Conditional@ObsFunction
@@ -98,7 +100,9 @@ observations:
 - obs space: &ObsSpace
     name: Integer result, with default value
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: Conditional@IntObsFunction
@@ -140,7 +144,9 @@ observations:
 - obs space: &ObsSpace
     name: String result, with default value
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: Conditional@StringObsFunction
@@ -182,7 +188,9 @@ observations:
 - obs space: &ObsSpace
     name: Datetime result, with default value
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: Conditional@DateTimeObsFunction

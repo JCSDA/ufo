@@ -1,5 +1,12 @@
 obs space:
   name: buoy
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true  
   _source: ldm
   simulated variables: [surface_pressure, air_temperature, sea_surface_temperature]
 obs operator:

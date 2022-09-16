@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Ocean pressure to depth conversion
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/ocean_pressure_depth_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ocean_pressure_depth_testdata.nc4
     simulated variables: [air_temperature, ocean_pressure]
   obs function:
     name: OceanPressureToDepth@ObsFunction

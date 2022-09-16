@@ -7,7 +7,9 @@
     distribution:
       name: InefficientDistribution
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
@@ -23,7 +25,9 @@
     distribution:
       name: InefficientDistribution
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
@@ -41,7 +45,9 @@
     distribution:
       name: InefficientDistribution
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
         group variables: [ round ]
     simulated variables: [air_temperature]
@@ -59,7 +65,9 @@
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
@@ -73,7 +81,9 @@
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 1000
@@ -89,7 +99,9 @@
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
         group variables: [ round ]
     simulated variables: [air_temperature]
@@ -107,7 +119,9 @@
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 1000

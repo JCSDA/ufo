@@ -8,7 +8,9 @@ observations:
 - obs space: &ObsSpace
     name: Map a string variable to an int result by exact matching (with a fallback value), CSV
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@IntObsFunction
@@ -140,7 +142,9 @@ observations:
 - obs space: &ObsSpace
     name: Map a string variable to a string result by exact matching (with a fallback value), CSV
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@StringObsFunction
@@ -238,7 +242,9 @@ observations:
 - obs space: &ObsSpace
     name: Map a string variable to an int result by exact matching (with a fallback value), NetCDF
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@IntObsFunction
@@ -319,7 +325,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use bilinear interpolation involving an int payload
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@IntObsFunction
@@ -337,7 +345,9 @@ observations:
 - obs space: &ObsSpace
     name: Payload array with scalar coordinates.
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@IntObsFunction
@@ -359,7 +369,9 @@ observations:
 - obs space: &ObsSpace
     name: Map a string variable to a string result by exact matching (with a fallback value), NetCDF
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@StringObsFunction
@@ -440,7 +452,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use bilinear interpolation involving a string payload
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@StringObsFunction
@@ -460,7 +474,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use bilinear interpolation to extract a float variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -478,7 +494,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use bilinear interpolation not as the final calls
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -496,7 +514,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use bilinear interpolation with only one variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -514,7 +534,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use linear interpolation not as the final argument
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -532,7 +554,9 @@ observations:
 - obs space: &ObsSpace
     name: Attempt to use linear interpolation more than one variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -550,7 +574,9 @@ observations:
 - obs space: &ObsSpace
     name: 3D payload array with bilinear interpolation
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -570,7 +596,9 @@ observations:
 - obs space: &ObsSpace
     name: 3D payload array with bilinear interpolation alt. mapping
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -590,7 +618,9 @@ observations:
 - obs space: &ObsSpace
     name: 3D payload array with linear interpolation
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -610,7 +640,9 @@ observations:
 - obs space: &ObsSpace
     name: 3D payload array with linear interpolation coordinate mapped to the final dimension
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -630,7 +662,9 @@ observations:
 - obs space: &ObsSpace
     name: 3D payload array with bilinear interpolation coords mapped to the final two dimensions
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -652,7 +686,9 @@ observations:
 - obs space: &ObsSpace
     name: "'exact' method with default extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -669,7 +705,9 @@ observations:
 - obs space: &ObsSpace
     name: "'exact' method with 'error' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -687,7 +725,9 @@ observations:
 - obs space: &ObsSpace
     name: "Unrecognised extrapolation mode"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -705,7 +745,9 @@ observations:
 - obs space: &ObsSpace
     name: "'exact' method with 'nearest' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -723,7 +765,9 @@ observations:
 - obs space: &ObsSpace
     name: "'exact' method with 'missing' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -741,7 +785,9 @@ observations:
 - obs space: &ObsSpace
     name: "'nearest' method with default extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -758,7 +804,9 @@ observations:
 - obs space: &ObsSpace
     name: "'nearest' method with 'error' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -776,7 +824,9 @@ observations:
 - obs space: &ObsSpace
     name: "'nearest' method with 'nearest' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -796,7 +846,9 @@ observations:
 - obs space: &ObsSpace
     name: "'nearest' method with 'missing' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -816,7 +868,9 @@ observations:
 - obs space: &ObsSpace
     name: "'linear' method with default extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -834,7 +888,9 @@ observations:
 - obs space: &ObsSpace
     name: "'linear' method with 'error' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -853,7 +909,9 @@ observations:
 - obs space: &ObsSpace
     name: "'linear' method with 'nearest' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -873,7 +931,9 @@ observations:
 - obs space: &ObsSpace
     name: "'linear' method with 'missing' extrapolation"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -893,7 +953,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with default extrapolation, first var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -913,7 +975,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with 'error' extrapolation, first var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -934,7 +998,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with default extrapolation, second var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -954,7 +1020,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with 'nearest' extrapolation second var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -975,7 +1043,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with 'missing' extrapolation second var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -996,7 +1066,9 @@ observations:
 - obs space: &ObsSpace
     name: "'bilinear' method with 'missing' extrapolation, first var"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction
@@ -1017,7 +1089,9 @@ observations:
 - obs space: &ObsSpace
     name: match based approach, early return of missing (extrapolation missing).
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs function:
     name: DrawValueFromFile@ObsFunction

@@ -6,9 +6,13 @@ No thinning:
     obsdatain:
       # This file contains observations taken at locations forming a 3x3x3x3 grid of points
       # in the 4D space (latitude, longitude, pressure, time).
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out1.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     exclusion_volume_shape: ellipsoid
@@ -23,9 +27,13 @@ Horizontal thinning, min spacing smaller than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out2.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 999
@@ -48,9 +56,13 @@ Horizontal thinning, min spacing larger than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out3.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
@@ -74,9 +86,13 @@ Vertical thinning, min spacing smaller than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out4.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 9999
@@ -100,9 +116,13 @@ Vertical thinning, min spacing larger than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out5.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
@@ -126,9 +146,13 @@ Vertical thinning, where clause:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out6.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
@@ -153,9 +177,13 @@ Time thinning, min spacing equal to nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out7.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out7.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_time_spacing: PT01H
@@ -179,9 +207,13 @@ Time thinning, min spacing larger than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out8.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out8.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_time_spacing: PT01H01S
@@ -205,9 +237,13 @@ Horizontal and vertical thinning, min spacing larger than nearest neighbor spaci
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out9.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out9.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
@@ -232,9 +268,13 @@ Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out10.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out10.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
@@ -259,9 +299,13 @@ Vertical and time thinning, min spacing larger than nearest neighbor spacing:
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out11.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out11.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_vertical_spacing: 10001
@@ -286,9 +330,13 @@ Horizontal, vertical and time thinning, min spacing larger than nearest neighbor
   obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 #   obsdataout:
-#     obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out12.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/poisson_disk_thinning_3x3x3x3_regular_grid_out12.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
     min_horizontal_spacing: 1100
@@ -314,14 +362,15 @@ Priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0 ]
         dateTimes: [ 240, 252, 264,
                      276, 288 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 10000, 20000, 30000, 40000, 50000 ]
   priority: [0, 1, 1, 0, 0]
   Poisson Disk Thinning:
@@ -340,14 +389,15 @@ Int-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0 ]
         dateTimes: [ 240, 252, 264,
                      276, 288, 300 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   category: [0, 1, 0, 1, 0, 1]
   Poisson Disk Thinning:
@@ -366,14 +416,15 @@ String-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0 ]
         dateTimes: [ 240, 252, 264,
                      276, 288, 300 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   string_category: ["a", "b", "a", "b", "a", "b"]
   Poisson Disk Thinning:
@@ -392,8 +443,9 @@ Variable min spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         dateTimes: [ 240, 252, 264,
@@ -401,7 +453,7 @@ Variable min spacings:
                      312, 324, 336,
                      348, 360 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
   Poisson Disk Thinning:
@@ -420,8 +472,9 @@ Variable min spacings, shuffling:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         lons: [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
         dateTimes: [ 240, 252, 264,
@@ -429,7 +482,7 @@ Variable min spacings, shuffling:
                      312, 324, 336,
                      348, 360 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
   Poisson Disk Thinning:
@@ -449,14 +502,15 @@ Cylindrical exclusion volumes:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  1,  2,  3,  4 ]
         lons: [ 0,  1,  2,  3,  4 ]
         dateTimes: [ 240, 252, 264,
                      276, 288 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
     min_vertical_spacing: 21
@@ -473,14 +527,15 @@ Ellipsoidal exclusion volumes:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  1,  2,  3,  4 ]
         lons: [ 0,  1,  2,  3,  4 ]
         dateTimes: [ 240, 252, 264,
                      276, 288 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
     min_vertical_spacing: 21
@@ -497,13 +552,14 @@ Incorrectly ordered min horizontal spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
         dateTimes: [ 240, 252, 264 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:
@@ -522,13 +578,14 @@ Incorrectly ordered min vertical spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
         dateTimes: [ 240, 252, 264 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:
@@ -547,13 +604,14 @@ Incorrectly ordered min time spacings:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0,  0,  0 ]
         lons: [ 0,  0,  0 ]
         dateTimes: [ 240, 252, 264 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:

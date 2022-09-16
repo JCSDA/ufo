@@ -4,8 +4,9 @@ Min_spacing below observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -17,7 +18,7 @@ Min_spacing below observation spacing:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT9S
   expected_thinned_obs_indices: []
@@ -28,8 +29,9 @@ Min spacing equal to observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -41,7 +43,7 @@ Min spacing equal to observation spacing:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT10S
   expected_thinned_obs_indices: []
@@ -52,8 +54,9 @@ Min spacing above observation spacing:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -65,7 +68,7 @@ Min spacing above observation spacing:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT11S
   expected_thinned_obs_indices: [1, 3, 5]
@@ -76,8 +79,9 @@ Int-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -89,7 +93,7 @@ Int-valued categories:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   category: [0, 0, 0, 1, 1, 1, 1]
   TemporalThinning:
     min_spacing: PT15S
@@ -103,8 +107,9 @@ String-valued categories:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -116,7 +121,7 @@ String-valued categories:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   string_category: [a, a, a, b, b, b, b]
   TemporalThinning:
     min_spacing: PT15S
@@ -130,8 +135,9 @@ Categories, observations sorted in descending order:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -143,7 +149,7 @@ Categories, observations sorted in descending order:
           - 250
           - 240
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
     min_spacing: PT15S
@@ -157,8 +163,9 @@ Categories, where clause:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1, 0, 0, 0, 0, 0, 1 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -170,7 +177,7 @@ Categories, where clause:
           - 250
           - 240
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
     min_spacing: PT15S
@@ -188,8 +195,9 @@ Tolerance and priorities, first observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -221,7 +229,7 @@ Tolerance and priorities, first observation in each group to be retained:
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   priority: [0, 0, 0,   0, 0, 0,
              0, 0, 0,   0, 0, 0,
              0, 0, 0,   0, 0, 0,
@@ -242,8 +250,9 @@ Tolerance and priorities, second observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -275,7 +284,7 @@ Tolerance and priorities, second observation in each group to be retained:
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   priority: [0, 1, 1,   0, 1, 1,
              0, 1, 1,   0, 1, 1,
              0, 1, 1,   0, 1, 1,
@@ -296,8 +305,9 @@ Tolerance and priorities, third observation in each group to be retained:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -329,7 +339,7 @@ Tolerance and priorities, third observation in each group to be retained:
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -350,8 +360,9 @@ Tolerance but no priorities:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -383,7 +394,7 @@ Tolerance but no priorities:
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     tolerance:   PT05S
@@ -398,8 +409,9 @@ Seed time inside observation time range (should pick preceding observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -411,7 +423,7 @@ Seed time inside observation time range (should pick preceding observation):
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:34Z
@@ -423,8 +435,9 @@ Seed time inside observation time range (should pick following observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -436,7 +449,7 @@ Seed time inside observation time range (should pick following observation):
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:36Z
@@ -448,8 +461,9 @@ Seed time midway between two observations (should pick following observation):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -461,7 +475,7 @@ Seed time midway between two observations (should pick following observation):
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:25Z
@@ -473,8 +487,9 @@ Seed time at earliest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -486,7 +501,7 @@ Seed time at earliest observation:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:04:00Z
@@ -498,8 +513,9 @@ Seed time before earliest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -511,7 +527,7 @@ Seed time before earliest observation:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:03:00Z
@@ -523,8 +539,9 @@ Seed time at latest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -536,7 +553,7 @@ Seed time at latest observation:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:06:00Z
@@ -548,8 +565,9 @@ Seed time after latest observation:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         dateTimes:
@@ -561,7 +579,7 @@ Seed time after latest observation:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   TemporalThinning:
     min_spacing: PT15S
     seed_time: 2010-01-01T00:06:00Z
@@ -573,8 +591,9 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -606,7 +625,7 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -628,8 +647,9 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -661,7 +681,7 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
           - 301
           - 302
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   priority: [1, 0, 0,   1, 0, 0,
              1, 0, 0,   1, 0, 0,
              1, 0, 0,   1, 0, 0,
@@ -690,8 +710,9 @@ Records are single obs, priority variable:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1, 1 ]
         dateTimes:
@@ -703,7 +724,7 @@ Records are single obs, priority variable:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   priority: [3, 3, 3, 4, 4, 4, 4]
@@ -729,8 +750,9 @@ Records are single obs, no priority variable:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1, 1 ]
         dateTimes:
@@ -742,7 +764,7 @@ Records are single obs, no priority variable:
           - 290
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   air_temperature: [280, 280, 280, 280, 280, 280, 280]
@@ -765,8 +787,9 @@ Records are single obs, no priority variable, category variable set to category:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]
         lons: [ 0, 0, 0, 0, 1, 1, 1, 1 ]
         dateTimes:
@@ -779,7 +802,7 @@ Records are single obs, no priority variable, category variable set to category:
           - 300
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]
@@ -805,8 +828,9 @@ Records are single obs, priority variable, category variable set to category:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 1, 1, 2, 2, 3, 3 ]
         lons: [ 0, 0, 0, 0, 1, 1, 1, 1 ]
         dateTimes:
@@ -819,7 +843,7 @@ Records are single obs, priority variable, category variable set to category:
           - 300
           - 300
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]

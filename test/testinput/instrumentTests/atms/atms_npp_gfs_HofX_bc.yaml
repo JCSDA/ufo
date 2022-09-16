@@ -14,7 +14,9 @@ observations:
   obs space:
     name: atms_npp
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-22
   geovals:

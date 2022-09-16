@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/satwind_obs_2018041500_m_velocity_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_2018041500_m_velocity_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   # can have GeoVaLs section like below
   #geovals:

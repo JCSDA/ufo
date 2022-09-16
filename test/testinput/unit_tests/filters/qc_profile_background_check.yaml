@@ -5,13 +5,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out1.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:
@@ -23,13 +27,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out2.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:
@@ -41,13 +49,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out3.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:
@@ -59,13 +71,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out4.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:
@@ -77,13 +93,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out5.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:
@@ -95,13 +115,17 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
       obsgrouping:
         group variables: [ "record_number" ]
         sort variable: "latitude"
         sort order: "descending"
 #   obsdataout:
-#     obsfile: Data/profile_filter_backgroundcheck_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_backgroundcheck_out6.nc4
     simulated variables: [variable]
   HofX: HofX
   obs filters:

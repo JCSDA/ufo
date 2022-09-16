@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Sondes (cross-var corr, one var)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [air_temperature]
   obs error:
     covariance model: cross variable covariances
@@ -14,7 +16,9 @@ observations:
 - obs space:
     name: Sondes (cross-var corr, two vars)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs error:
     covariance model: cross variable covariances
@@ -23,7 +27,9 @@ observations:
 - obs space:
     name: Sondes (cross-var corr, three vars)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs error:
     covariance model: cross variable covariances
@@ -32,7 +38,9 @@ observations:
 - obs space:
     name: Sondes (cross-var corr, four vars, one is missing from the corr file)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind, specific_humidity]
   obs error:
     covariance model: cross variable covariances

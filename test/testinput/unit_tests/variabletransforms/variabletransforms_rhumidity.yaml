@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: test_relative_humidity1
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
@@ -28,7 +30,9 @@ observations:
 - obs space:
     name: test_relative_humidity2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
@@ -51,7 +55,9 @@ observations:
 - obs space:
     name: test_relative_humidity3
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
@@ -74,7 +80,9 @@ observations:
 - obs space:
     name: test_relative_humidity4
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [specific_humidity, air_temperature, surface_pressure]
   obs filters:
   - filter: Variable Transforms
