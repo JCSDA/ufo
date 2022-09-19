@@ -3,16 +3,15 @@ obs space:
   obsdatain:
     engine:
       type: H5File
+    obsgrouping:
+      group variables: [ 'record_number' ]
+      sort variable: 'impact_height'
+      sort order: 'ascending'
   obsdataout:
     engine:
       type: H5File
       overwrite: true
   _source: gdas
-  obsdatain:
-    obsgrouping:
-      group variables: [ 'record_number' ]
-      sort variable: 'impact_height'
-      sort order: 'ascending'
   simulated variables: [bending_angle]
 obs operator:
   name: GnssroBndNBAM
