@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true  
+      overwrite: true
   _source: noaa
   simulated variables: [brightness_temperature]
   channels: &amsua_n19_channels 1-15

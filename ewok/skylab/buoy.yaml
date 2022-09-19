@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true  
+      overwrite: true
   _source: ldm
   simulated variables: [surface_pressure, air_temperature, sea_surface_temperature]
 obs operator:
@@ -30,7 +30,7 @@ obs filters:
     minvalue: 37499
     maxvalue: 106999
     action:
-      name: reject 
+      name: reject
   #
   - filter: Bounds Check
     filter variables:

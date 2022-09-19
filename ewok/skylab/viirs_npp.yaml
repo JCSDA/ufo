@@ -12,8 +12,8 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true  
-  _source: noaa 
+      overwrite: true
+  _source: noaa
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]
   channels: 4

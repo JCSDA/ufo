@@ -1,0 +1,81 @@
+obs space:
+  name: scatwind
+  _source: gdas
+  simulated variables: [eastward_wind, northward_wind]
+#
+obs operator:
+  name: GSISfcModel
+  use_fact10: true
+#
+linear obs operator:
+  name: Identity
+#
+obs filters:
+  #
+  # Reject all obs with PreQC mark already set above 3
+  # - filter: PreQC
+  #   maxvalue: 3
+  #   action:
+  #     name: reject
+  #
+  # WindSat (289), ASCAT (290), or OSCAT (291) either wind component or velocity greater than 20 m/s, then reject.
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    minvalue: -20
+    maxvalue: 20
+  #
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: Velocity@ObsFunction
+    maxvalue: 20.0
+  # Assign the initial observation error (constant value, 3.5 m/s right now).
+  - filter: Perform Action
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    action:
+      name: assign error
+      error parameter: 3.5
+  # Reject when difference of wind direction is more than 50 degrees.
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: WindDirAngleDiff@ObsFunction
+      options:
+        minimum_uv: 3.5
+    maxvalue: 50.0
+    action:
+      name: reject
+    defer to post: true
+  # Difference check surface_pressure and ObsValue/air_pressure, if more than 10 hPa, reject.
+  - filter: Difference Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    reference: GeoVaLs/surface_pressure
+    value: MetaData/air_pressure
+    maxvalue: 1000
+  # LNVD check.
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: SatWindsLNVDCheck@ObsFunction
+    maxvalue: 3
+  #
+  - filter: Background Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    threshold: 6.0
+    absolute threshold: 6.0
+    action:
+      name: reject
