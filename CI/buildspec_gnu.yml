@@ -128,7 +128,7 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
-      - su - jedi -c "cd /home/jedi
+      - su - nonroot -c "cd /home/nonroot
         && echo $CC
         && echo $CXX
         && echo $FC
@@ -137,13 +137,13 @@ phases:
 
 
       # configure and build
-      - su - jedi -c "cd /home/jedi/ufo
+      - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
         && cp ../DartConfiguration.tcl .
         && sed -i 's/ufo-bundle/ufo-bundle\/ufo/' DartConfiguration.tcl
-        && sed -i 's/jedi/jedi\/ufo/' DartConfiguration.tcl
+        && sed -i 's/nonroot/nonroot\/ufo/' DartConfiguration.tcl
         && cat DartConfiguration.tcl
         && make -j4"
 
@@ -155,13 +155,13 @@ phases:
       - echo $BUILD_STATUS
 
       # run ctest
-      - su - jedi -c "CC=mpicc CXX=mpicxx FC=mpifort
-        && cd /home/jedi/ufo
+      - su - nonroot -c "CC=mpicc CXX=mpicxx FC=mpifort
+        && cd /home/nonroot/ufo
         && ctest -C RelWithDebInfo -D ExperimentalTest"
 
     finally:
       # upload ctest report to CDASH
-      - su - jedi -c "cd /home/jedi/ufo
+      - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
@@ -176,7 +176,7 @@ phases:
       # upload find cdash url and upload it as CodeBuild artifact to S3
       - if [ "$BUILD_STATUS" = "1" ];
         then echo "Build & tests passed, find cdash url";
-        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing $CDASH_URL);
+        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/nonroot/ufo/Testing $CDASH_URL);
         echo $url;
         echo ${url} > /jcsda/artifacts/cdash-url.txt;
         cat /jcsda/artifacts/cdash-url.txt;
@@ -184,7 +184,7 @@ phases:
         fi
 
       - echo 'Connect to CodeCov'
-      - cd /home/jedi/ufo
+      - cd /home/nonroot/ufo
       - pwd
       - ls
       - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh
