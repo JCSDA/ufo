@@ -1,5 +1,12 @@
 obs space:
   name: scatwind
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: gdas
   simulated variables: [eastward_wind, northward_wind]
 #
