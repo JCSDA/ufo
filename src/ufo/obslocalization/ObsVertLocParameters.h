@@ -56,7 +56,7 @@ class ObsVertLocParameters : public oops::ObsLocalizationParametersBase {
 
   oops::Parameter<float> constantVcoordValue{"constant vertical coordinate value",
                        "value of the constant vertical coordinate",
-                       util::missingValue(double()), this};
+                       util::missingValue(float()), this};
 
   /// returns distance between points \p p1 and \p p2
   double distance(const double & vCoord1, const double & vCoord2) const {
