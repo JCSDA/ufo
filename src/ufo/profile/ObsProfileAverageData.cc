@@ -50,6 +50,7 @@ namespace ufo {
     // This GeoVaL is used to determine the slant path locations.
     modelVerticalCoord_ = options_.modelVerticalCoordinate;
     requiredVars_ += oops::Variables({modelVerticalCoord_});
+    geovalsObsSameDir_ = options_.geovalsObsSameDir;
 
     // Add any simulated variables to the list of variables used in this operator.
     getOperatorVariables(parameters.variables.value(), odb_.assimvariables(),

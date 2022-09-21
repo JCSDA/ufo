@@ -86,7 +86,12 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
         const std::size_t jloc = slant_path_location[mlev];
         gv.getAtLocation(var_gv, variable, jloc);
-        ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        if (data_.geovalsObsSameDir()) {  // geovals and observations are the same way round:
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[mlev];
+        } else {  // reverse geovals so they're the same way round in extended space as
+          // observations / H(x) in original space:
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        }
       }
     }
   }

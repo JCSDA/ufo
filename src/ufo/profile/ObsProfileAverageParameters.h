@@ -57,6 +57,12 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
     true,
     this};
 
+  oops::Parameter<bool> geovalsObsSameDir{
+    "geovals and observations in same direction",
+    "Whether GeoVaLs and observations are oriented in the same vertical direction",
+    false,
+    this};
+
   oops::Parameter<std::string> pressureCoord{"pressure coordinate",
                                              "Name of air pressure coordinate",
                                              "pressure",
