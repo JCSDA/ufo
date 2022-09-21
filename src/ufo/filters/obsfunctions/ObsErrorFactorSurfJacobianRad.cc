@@ -20,6 +20,7 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -71,20 +72,23 @@ ObsErrorFactorSurfJacobianRad::~ObsErrorFactorSurfJacobianRad() {}
 
 void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  // Get sensor information from options
+  const std::string &sensor = options_.sensor.value();
+
+  // Get instrument and satellite from sensor
+  std::string inst, sat;
+  splitInstSat(sensor, inst, sat);
+
   // Get options from configuration
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
 
-  // Get instrument and satellite from sensor
-  std::string inst;
   size_t ich536, ich890;
-  if (nchans <= 15) {
-    inst = "amsua";
+  if (inst == "amsua") {
     ich536 = 5;
     ich890 = 15;
-  } else {
-    inst = "atms";
+  } else if (inst == "atms") {
     ich536 = 6;
     ich890 = 16;
   }
@@ -173,9 +177,11 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
         float vaux = demisf[iloc] * std::fabs(dbtdes[iloc]) +
                dtempf[iloc] * std::fabs(dbtdts[iloc]);
         float term = pow(vaux, 2);
-        if (ichan <= ich536 - 1 || ichan == ich890 - 1) term += 0.2 * pow(clwbias[iloc], 2);
+        if (inst == "amsua" || inst == "atms") {
+          if (ichan <= ich536 - 1 || ichan == ich890 - 1) term += 0.2 * pow(clwbias[iloc], 2);
+        }
         if (term > 0.0) {
-          out[ichan][iloc] = sqrt(1.0 / (1.0 / (1.0 + varinv * term)));
+          out[ichan][iloc] = sqrt(1.0 + varinv * term);
         }
       }
     }

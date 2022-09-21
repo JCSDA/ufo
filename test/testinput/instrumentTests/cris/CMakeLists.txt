@@ -41,6 +41,17 @@ if( crtm_FOUND )
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
+    ufo_add_test( NAME    test_ufo_cris-fsr_n20_geos_qc
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_geos_qc_filters.yaml"
+        MPI     1
+        LABELS  cris-fsr n20 geos bc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
     ufo_add_test( NAME  instrument_cris-fsr_npp_gfs_HofX_bc
         TIER    2
         ECBUILD

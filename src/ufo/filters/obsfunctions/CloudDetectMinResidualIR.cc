@@ -146,7 +146,8 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
-      if (use_flag_clddet[ichan] > 0) varinv_use[ichan][iloc] = values[iloc];
+      if (use_flag_clddet[ichan] > 0 && use_flag_clddet[ichan]%2 == 1)
+          varinv_use[ichan][iloc] = values[iloc];
     }
   }
 
@@ -243,7 +244,6 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // std::vector<int> cloud_lev(nlocs);
 
   // Loop through locations
-  const float btmax = 550.f, btmin = 50.f;
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     // Initialize at each location
     // cloud_lev[iloc] = 0;

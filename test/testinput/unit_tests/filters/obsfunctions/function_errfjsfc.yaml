@@ -3,7 +3,7 @@ window end: 2018-04-15T03:00:00Z
 
 observations:
 - obs space:
-    name: iasi_metop-a
+    name: &Sensor_ID iasi_metop-a
     obsdatain:
       engine:
         type: H5File
@@ -72,6 +72,7 @@ observations:
     name: ObsErrorFactorSurfJacobianRad@ObsFunction
     options:
       channels: *all_channels
+      sensor: *Sensor_ID
       obserr_demisf: [0.01, 0.02, 0.03, 0.02, 0.03]
       obserr_dtempf: [0.50, 2.00, 4.00, 2.00, 4.00]
       test_qcflag: PreQC

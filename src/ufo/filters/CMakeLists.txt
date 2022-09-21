@@ -277,6 +277,8 @@ set ( filters_files
       obsfunctions/SolarZenith.h
       obsfunctions/SunGlintAngle.cc
       obsfunctions/SunGlintAngle.h
+      obsfunctions/SurfTypeCheckRad.cc
+      obsfunctions/SurfTypeCheckRad.h
       obsfunctions/TropopauseEstimate.cc
       obsfunctions/TropopauseEstimate.h
       obsfunctions/WindDirAngleDiff.cc
