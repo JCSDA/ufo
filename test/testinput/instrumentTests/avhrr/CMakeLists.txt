@@ -14,7 +14,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_metop-a_gfs_HofX.yaml"
         MPI     1
-        LABELS  avhrr metop-a HofX instrument
+        LABELS  crtm avhrr metop-a HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -25,7 +25,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_n18_gfs_HofX.yaml"
         MPI     1
-        LABELS  avhrr n18 HofX instrument
+        LABELS  crtm avhrr n18 HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -37,7 +37,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_metop-a_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  avhrr metop-a HofX instrument
+        LABELS  crtm avhrr metop-a HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -48,7 +48,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_n18_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  avhrr n18 HofX instrument
+        LABELS  crtm avhrr n18 HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -60,7 +60,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_metop-a_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  avhrr metop-a qc instrument
+        LABELS  crtm avhrr metop-a qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -71,7 +71,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/avhrr_n18_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  avhrr n18 qc instrument
+        LABELS  crtm avhrr n18 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )

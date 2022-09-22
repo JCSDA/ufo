@@ -14,7 +14,7 @@ if( crtm_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_clw_ret.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  crtm filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 endif( crtm_FOUND )
@@ -82,7 +82,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -93,7 +93,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_scattering.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( rttov_FOUND )
@@ -139,7 +139,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudfirstguess.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( rttov_FOUND )
@@ -869,7 +869,7 @@ if( crtm_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_clw_ret.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  crtm filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )

@@ -14,7 +14,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_HofX.yaml"
         MPI     1
-        LABELS  ssmis f17 HofX instrument
+        LABELS  crtm ssmis f17 HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -26,7 +26,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  ssmis f17 bc instrument
+        LABELS  crtm ssmis f17 bc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
@@ -38,7 +38,7 @@ if( crtm_FOUND )
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  ssmis f17 qc instrument
+        LABELS  crtm ssmis f17 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
