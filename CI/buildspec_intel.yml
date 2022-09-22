@@ -97,9 +97,6 @@ phases:
       # oops
       - ./clone.sh jcsda-internal/oops $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle oops ${GIT_BASE_BRANCH} develop
 
-      # jedi-cmake
-      - ./clone.sh jcsda-internal/jedi-cmake $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle jedicmake ${GIT_BASE_BRANCH} develop
-
       # rttov
       - ./clone.sh jcsda-internal/rttov $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle rttov ${GIT_BASE_BRANCH} develop
 
