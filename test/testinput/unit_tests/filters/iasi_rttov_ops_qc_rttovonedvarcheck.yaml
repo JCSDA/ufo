@@ -67,6 +67,7 @@ observations:
       RTTOV_GasUnitConv: &gasunitconv true
       UseRHwaterForQC: &UseRHwaterForQC true
       UseColdSurfaceCheck: &UseColdSurfaceCheck false
+      RTTOV_ScaleRefOzone: &RTTOV_ScaleRefOzone true
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
   obs space:
@@ -117,6 +118,7 @@ observations:
         RTTOV_GasUnitConv: *gasunitconv
         UseRHwaterForQC: false
         UseColdSurfaceCheck: false
+        RTTOV_ScaleRefOzone: *RTTOV_ScaleRefOzone
         Platform_Name: *platform_id
         Sat_ID: *satellite_id
         Instrument_Name: *instrument_id
@@ -160,4 +162,4 @@ observations:
         name: cloud_top_pressure@TestReference
       test:
         name: cloud_top_pressure@OneDVar
-      absTol: 1.0e-4
+      absTol: 1.0e-3

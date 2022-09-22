@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_ob_mod
 
+use datetime_mod
 use kinds
 use missing_values_mod
 use ufo_constants_mod, only: zero
@@ -29,6 +30,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   integer, allocatable :: rejected_channels_ctp(:) !< a list of channels rejected based on the retrieved ctp
   real(kind_real)      :: latitude !< latitude of observation
   real(kind_real)      :: longitude !< longitude of observation
+  type(datetime)       :: date !< date and time of observation
   real(kind_real)      :: elevation  !< elevation above sea level of observation
   real(kind_real)      :: sensor_zenith_angle  !< sensor zenith of observation
   real(kind_real)      :: sensor_azimuth_angle  !< sensor azimuth of observation
@@ -44,6 +46,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real), allocatable :: final_bt_diff(:) !< final bt difference if converged
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
   real(kind_real), allocatable :: background_T(:) !< background temperature used by qsplit
+  real(kind_real), allocatable :: background_ozone(:) ! profile of ozone
   real(kind_real), allocatable :: output_profile(:) !< retrieved state at converge as profile vector
   real(kind_real), allocatable :: output_BT(:) !< Brightness temperatures using retrieved state
   real(kind_real), allocatable :: recalc_BT(:) !< Brightness temperatures using original profile and retrieved surface variables
@@ -104,6 +107,7 @@ allocate(self % channels_used(nchans))
 allocate(self % channels_all(nchans_all))
 allocate(self % emiss(nchans_all))
 allocate(self % background_T(nlevels))
+allocate(self % background_ozone(nlevels))
 allocate(self % output_profile(nprofelements))
 allocate(self % output_BT(nchans_all))
 allocate(self % recalc_BT(nchans_all))
@@ -121,6 +125,7 @@ self % yobs(:) = missing
 self % final_bt_diff(:) = missing
 self % emiss(:) = missing
 self % background_T(:) = missing
+self % background_ozone(:) = missing
 self % output_profile(:) = missing
 self % output_BT(:) = missing
 self % recalc_BT(:) = missing
@@ -175,6 +180,7 @@ if (allocated(self % channels_used))    deallocate(self % channels_used)
 if (allocated(self % channels_all))     deallocate(self % channels_all)
 if (allocated(self % emiss))            deallocate(self % emiss)
 if (allocated(self % background_T))     deallocate(self % background_T)
+if (allocated(self % background_ozone)) deallocate(self % background_ozone)
 if (allocated(self % output_profile))   deallocate(self % output_profile)
 if (allocated(self % output_BT))        deallocate(self % output_BT)
 if (allocated(self % recalc_BT))        deallocate(self % recalc_BT)

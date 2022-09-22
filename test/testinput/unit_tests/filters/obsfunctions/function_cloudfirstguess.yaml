@@ -20,6 +20,7 @@ observations:
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
       surface emissivity group: SurfEmiss
+      RTTOV_ScaleRefOzone: false
   obs space: &ObsSpace
     name: Test the hyperspectral retrievals
     obsdatain:

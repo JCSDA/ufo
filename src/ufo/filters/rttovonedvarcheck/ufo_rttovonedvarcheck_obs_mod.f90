@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_obs_mod
 
+use datetime_mod, only: datetime
 use kinds
 use iso_c_binding
 use missing_values_mod
@@ -32,6 +33,7 @@ real(kind_real), allocatable :: yobs(:,:)       ! observation value from obs fil
 real(kind_real), allocatable :: ybias(:,:)      ! observation bias from obs files
 real(kind_real), allocatable :: lat(:)          ! observation latitude
 real(kind_real), allocatable :: lon(:)          ! observation longitude
+type(datetime), allocatable  :: date(:)         ! read in the date and time which is needed for ozone
 real(kind_real), allocatable :: elevation(:)    ! observation elevation
 real(kind_real), allocatable :: sat_zen(:)      ! observation satellite zenith angle
 real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth angle
@@ -118,6 +120,7 @@ allocate(self % ybias(config % nchans, self % iloc))
 allocate(self % QCflags(config % nchans, self % iloc))
 allocate(self % lat(self % iloc))
 allocate(self % lon(self % iloc))
+allocate(self % date(self % iloc))
 allocate(self % elevation(self % iloc))
 allocate(self % sat_zen(self % iloc))
 allocate(self % sat_azi(self % iloc))
@@ -200,6 +203,7 @@ self % yobs = self % yobs - self % ybias
 ! Read in prerequisites
 call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))
 call obsspace_get_db(config % obsdb, "MetaData", "longitude", self % lon(:))
+call obsspace_get_db(config % obsdb, "MetaData", "dateTime", self % date(:))
 call obsspace_get_db(config % obsdb, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
 
 ! Read in optional angles
@@ -331,6 +335,7 @@ if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % ybias))          deallocate(self % ybias)
 if (allocated(self % lat))            deallocate(self % lat)
 if (allocated(self % lon))            deallocate(self % lon)
+if (allocated(self % date))           deallocate(self % date)
 if (allocated(self % elevation))      deallocate(self % elevation)
 if (allocated(self % sat_zen))        deallocate(self % sat_zen)
 if (allocated(self % sat_azi))        deallocate(self % sat_azi)

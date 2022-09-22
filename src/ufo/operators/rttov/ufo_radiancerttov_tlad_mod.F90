@@ -211,12 +211,12 @@ contains
     write(message,'(A, A, I0, A, I0, A)') &
       trim(routine_name), ': Allocating ', self % nprofiles, ' profiles with ', self % nlevels, ' levels'
     call fckit_log%debug(message)
-    call self % RTprof_K % alloc_profs(errorstatus, self % conf, self % nprofiles, self % nlevels, init=.true., asw=1)
+    call self % RTprof_K % alloc_profiles(errorstatus, self % conf, self % nprofiles, self % nlevels, init=.true., asw=1)
 
     !Assign the atmospheric and surface data from the GeoVaLs
     write(message,'(A, A, I0, A, I0, A)') trim(routine_name), ': Creating RTTOV profiles from geovals'
     call fckit_log%debug(message)
-    call self % RTprof_K % setup(geovals,obss,self % conf)
+    call self % RTprof_K % setup_rtprof(geovals,obss,self % conf)
 
     !DAR: Removing sensor_loop until it's demonstrated to be needed and properly tested
     ! at the moment self % channels is a single 1D array so cannot adequately contain more than one set of channels
@@ -236,7 +236,7 @@ contains
     ! Allocate memory for *ALL* RTTOV_K channels
     write(message,'(A,A,I0,A)') &
       trim(routine_name), ': Allocating Trajectory resources for RTTOV K: ', self % nprofiles * nchan_inst, ' total channels'
-    call self % RTprof_K % alloc_profs_K(errorstatus, self % conf, self % nprofiles * nchan_inst, self % nlevels, init=.true., asw=1)
+    call self % RTprof_K % alloc_profiles_k(errorstatus, self % conf, self % nprofiles * nchan_inst, self % nlevels, init=.true., asw=1)
 
     ! Used for keeping track of profiles for setting emissivity
     allocate(self % RTprof_K % chanprof ( self % nprofiles * nchan_inst )) 
@@ -295,10 +295,10 @@ contains
         iprof = prof_start + iprof_rttov - 1
 
         ! print profile information if requested
-        if(any(self % conf % inspect == iprof)) call self % RTprof_K % print(self % conf, iprof, i_inst)
+        if(any(self % conf % inspect == iprof)) call self % RTprof_K % print_rtprof(self % conf, iprof, i_inst)
 
         ! check RTTOV profile and flag it if it fails the check
-        if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check(self % conf, iprof, i_inst, errorstatus)
+        if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check_rtprof(self % conf, iprof, i_inst, errorstatus)
 
         if (errorstatus == errorstatus_success) then 
           ! check sfc_emiss valid if read in
@@ -398,7 +398,7 @@ contains
     ! Deallocate structures for rttov_direct
     call self % RTprof_K % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
     call self % RTprof_K % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
-    call self % RTprof_K % alloc_profs(errorstatus, self % conf, -1, -1, asw=0)
+    call self % RTprof_K % alloc_profiles(errorstatus, self % conf, -1, -1, asw=0)
     
  
     ! Set flag that the tracectory was set

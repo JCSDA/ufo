@@ -256,6 +256,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
+      ob % date = obs % date(jobs)
       ob % elevation = obs % elevation(jobs)
       ob % sensor_zenith_angle = obs % sat_zen(jobs)
       ob % sensor_azimuth_angle = obs % sat_azi(jobs)
