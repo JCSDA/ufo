@@ -56,5 +56,5 @@ observations:
         order: 2
       - name: scan_angle
         var_name: scan_position
-  vector ref: GsiHofXBc
-  tolerance: 1.e-5
+  vector ref: ObsValue
+  tolerance: 1.5e-1

@@ -29,4 +29,4 @@ obs diagnostics:
   channels: *all_channels 
 reference obs diagnostics:
   filename: Data/ufo/testinput_tier_1/atms_npp_obsdiag_2018041500_m_qc.nc4
-tolerance: 1.e-6
+tolerance: 7.e-1

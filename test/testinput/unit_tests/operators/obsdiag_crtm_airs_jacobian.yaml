@@ -49,4 +49,4 @@ obs diagnostics:
   channels: *all_channels
 reference obs diagnostics:
   filename: Data/ufo/testinput_tier_1/airs_aqua_obsdiag_2018041500_m_unittest.nc4
-tolerance: 1.e-6
+tolerance: 1.5e-1

@@ -65,4 +65,5 @@ observations:
     absolute threshold: 3.5
     action:
       name: reject
-  passedBenchmark: 1776
+  passedBenchmark: 1776 # crtm v2.3
+# passedBenchmark: 1781 # crtm v2.4

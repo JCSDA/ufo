@@ -272,4 +272,5 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 440   #(m_unittest)
+  passedBenchmark: 440 # crtm v2.3
+# passedBenchmark: 437 # crtm v2.4

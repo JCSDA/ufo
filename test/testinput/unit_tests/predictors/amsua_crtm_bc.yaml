@@ -57,8 +57,8 @@ observations:
         inflation:
           ratio: 1.1
           ratio for small dataset: 2.0
-  vector ref: GsiHofXBc
-  tolerance: 1.e-7
+  vector ref: ObsValue
+  tolerance: 1.e-1
   linear obs operator test:
     iterations TL: 2
     coef TL: 1.e-3

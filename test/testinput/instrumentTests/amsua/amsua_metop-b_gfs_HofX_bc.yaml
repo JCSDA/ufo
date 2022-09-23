@@ -39,5 +39,5 @@ observations:
       - name: scan_angle
         order: 2
       - name: scan_angle
-  vector ref: GsiHofXBc
-  tolerance: 1.e-7
+  vector ref: ObsValue
+  tolerance: 1.e-1

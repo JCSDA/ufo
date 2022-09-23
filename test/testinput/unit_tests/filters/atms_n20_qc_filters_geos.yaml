@@ -217,4 +217,5 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 1011     # number of passed obs
+  passedBenchmark: 1011 # crtm v2.3
+# passedBenchmark: 1028 # crtm v2.4
