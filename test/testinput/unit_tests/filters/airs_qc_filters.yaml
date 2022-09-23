@@ -359,5 +359,5 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 439 # crtm v2.3
-# passedBenchmark: 445 # crtm v2.4
+# passedBenchmark: 439 # crtm v2.3
+  passedBenchmark: 445 # crtm v2.4
