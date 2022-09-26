@@ -272,7 +272,7 @@ std::vector<float> SpikeAndStepCheck::set_tolerances(const std::vector<float> &x
   if (nSections > 0) {
     for (size_t ind = 0; ind < obs_indices.size(); ++ind) {
       size_t iSec = 0;
-      while (iSec < nSections+1) {
+      while (iSec < nSections) {
         if (xrec[ind] <= toleranceBoundaries[iSec]) {
           if (iSec == 0) {
             tolerances.push_back(tolerance);  // below lowest boundary
@@ -285,6 +285,7 @@ std::vector<float> SpikeAndStepCheck::set_tolerances(const std::vector<float> &x
         } else {  // xrec[ind] > toleranceBoundaries[iSec]
           if (iSec == nSections-1) {
             tolerances.push_back(tolerance*(toleranceFactors[iSec]));  // above final boundary
+            break;  // next obs index
           }
           iSec++;
         }
