@@ -65,7 +65,9 @@ void AssignError::apply(const Variables & vars,
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (mask[jv][jobs] && qcFlags[kv][jobs] == QCflags::pass) obserr[iv][jobs] = error;
+        if (mask[jv][jobs] && error != missing) {
+            obserr[iv][jobs] = error;
+        }
       }
     }
     // If variable is specified
@@ -75,7 +77,7 @@ void AssignError::apply(const Variables & vars,
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (mask[jv][jobs] && qcFlags[kv][jobs] == QCflags::pass) {
+        if (mask[jv][jobs] && errorvector[iv] != missing) {
           obserr[iv][jobs] = errorvector[iv];
         }
       }
@@ -97,16 +99,15 @@ void AssignError::apply(const Variables & vars,
     if (errorvar.size() == vars.nvars()) {
       std::iota(error_jv.begin(), error_jv.end(), 0);
     }
-
     // loop over all variables to update
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       // find current variable index in obserr
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (mask[jv][jobs] && qcFlags[kv][jobs] == QCflags::pass
-                              && errors[error_jv[jv]][jobs] != missing)
-          obserr[iv][jobs] = errors[error_jv[jv]][jobs];
+        if (mask[jv][jobs] && errors[error_jv[jv]][jobs] != missing) {
+           obserr[iv][jobs] = errors[error_jv[jv]][jobs];
+        }
       }
     }
   }

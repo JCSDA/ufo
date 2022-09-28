@@ -99,6 +99,9 @@ namespace ufo {
         }
       } else {
         // Deal with missing data.
+        if (TotalPd) {
+          (*TotalPd)[jloc] = PdBad[jloc];
+        }
         SDiff = SDiffCrit;
         PGE[jloc] = PGEMDI;
       }
