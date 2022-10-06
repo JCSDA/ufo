@@ -93,6 +93,7 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
   allocate(x%shum(x%n_lev))
   allocate(x%pres(x%n_lev))
   allocate(x%geop(x%n_lev))
+
 !----------------------------------------------------
 ! ROPP FM requires vertical height profile to be of the ascending order.
 ! (see ropp_io_ascend ( ROdata )). So we need to flip the data.
@@ -121,40 +122,11 @@ end if
   x%geop_sfc = real(phi_sfc,kind=wp)
   write(record,'("geop_sfc",f15.2)') x%geop_sfc
 !------------------------------------------------
-! covariance matrix, is this used by ROPP FM?
-!------------------------------------------------
-  x%cov_ok = .TRUE.
-
-! Allocate memory
-! For ECMWF example, Covariance matrix for temperature sigma and
-! specific humidity sigma, and surface pressure. There the
-! size of covariance matrix is 2 * nlevel + 1.
-
-  n = (2*x%n_lev)+1  ! Number of elements in the state vector
-
+! make sure to deallocate all in memory
   if (associated(x%cov%d)) deallocate(x%cov%d)
-  call callocate(x%cov%d, n*(n+1)/2)    ! From ROPP utility library
-
-  do i = 1, x%n_lev
-     x%cov%d(i + i*(i-1)/2) = 1.0_wp
-  end do
-
-  do i = 1, x%n_lev
-     j = x%n_lev + i
-     x%cov%d(j + j*(j-1)/2) = 1.0_wp
-  enddo
-
-  x%cov%d(n + n*(n-1)/2) = 1.0_wp
-
-!------------------------------
-! Rest of the covariance marix
-!------------------------------
   if (associated(x%cov%e)) deallocate(x%cov%e)
   if (associated(x%cov%f)) deallocate(x%cov%f)
   if (associated(x%cov%s)) deallocate(x%cov%s)
-
-  x%cov%fact_chol = .FALSE.
-  x%cov%equi_chol = 'N'
 
 end subroutine init_ropp_1d_statevec
 
@@ -309,9 +281,6 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
   write(record,'(a9,2a11,3a15)') 'ROPPyvec:','lat', 'lon', 'g_sfc', 'roc', 'r_earth_eff'
   write(record,'(9x,2f11.2,f15.6,2f15.2)')   y%lat, y%lon, y%g_sfc, y%r_curve, y%r_earth
 
-!---------------------------------------------
-! covariance matrix, is this used by ROPP FM?
-!--------------------------------------------
   y%obs_ok = .TRUE.
 
 end subroutine init_ropp_1d_obvec                                                    
@@ -383,9 +352,11 @@ subroutine ropp_tidy_up_1d(x,y)
   if (associated(x%shum)) deallocate(x%shum)
   if (associated(x%pres)) deallocate(x%pres)
   if (associated(x%geop)) deallocate(x%geop)
+
 ! y
   if (associated(y%impact)) deallocate(y%impact)
   if (associated(y%bangle)) deallocate(y%bangle)
+  if (associated(y%weights))  deallocate(y%weights)
 
 end subroutine ropp_tidy_up_1d
 
@@ -405,13 +376,14 @@ subroutine ropp_tidy_up_tlad_1d(x,x_p,y,y_p)
   deallocate(x_p%shum)
   deallocate(x_p%pres)
   deallocate(x_p%geop)
+
 ! y
   deallocate(y%impact)
   deallocate(y%bangle)
+  deallocate(y%weights)
+
   deallocate(y_p%impact)
   deallocate(y_p%bangle)
-
-  deallocate(y%weights)
   deallocate(y_p%weights)
 
 end subroutine ropp_tidy_up_tlad_1d
