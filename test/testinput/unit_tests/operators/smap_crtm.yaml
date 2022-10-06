@@ -32,7 +32,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/smap_geoval_2018041500_m.nc4
   rms ref: 216.57286586298164
-  tolerance: 1.e-6
+  tolerance: 1.e-2
   linear obs operator test:
     coef TL: 1.e-3
     tolerance TL: 1.0e-3
