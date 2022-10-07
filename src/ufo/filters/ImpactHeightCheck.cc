@@ -64,6 +64,17 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   const oops::Variables observed = obsdb_.assimvariables();
   const float missingFloat = util::missingValue(missingFloat);
 
+  // Check that we have the same number of variables as vertical levels
+  const size_t nchans = std::max(obsdb_.nchans(), 1LU);
+  if (filtervars.nvars() != nchans) {
+    throw eckit::BadValue(
+      "ImpactHeightCheck: Input must have same number of variables and channels nvars=" +
+      std::to_string(filtervars.nvars()) + " nchans=" + std::to_string(nchans));
+  } else {
+    oops::Log::debug() << "ImpactHeightCheck: nchans = " << nchans << std::endl;
+    oops::Log::debug() << "ImpactHeightCheck: nvars = " << filtervars.nvars() << std::endl;
+  }
+
   // Get the refractivity from the obs diagnostics, including the number of
   // vertical levels on which the refractivity has been calculated (nRefLevels)
   Variable refractivityVariable = Variable("ObsDiag/refractivity");
@@ -110,10 +121,20 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   }
   oops::Log::debug() << std::endl;
 
-  // Read in the observation impact parameter for each observation
-  Variable impactVariable = Variable("MetaData/impact_parameter");
-  std::vector<float> impactParameter;
-  data_.get(impactVariable, impactParameter);
+  // Read in the observation impact parameter for each observation and level
+  std::vector<std::vector<float>> impactParameter;
+  for (size_t ichan=1; ichan <= nchans; ++ichan) {
+      const Variable impactVariable = Variable("MetaData/impact_parameter_" +
+                                               std::to_string(ichan));
+      std::vector<float> tempVar;
+      data_.get(impactVariable, tempVar);
+      impactParameter.push_back(tempVar);
+  }
+  oops::Log::debug() << "Impact parameter for first observation..." << std::endl;
+  for (size_t ichan=0; ichan < nchans; ++ichan) {
+    oops::Log::debug() << impactParameter[ichan][0] << "  ";
+  }
+  oops::Log::debug() << std::endl;
 
   // Read in the earth's radius of curvature for each observation
   Variable radiusCurvatureParameter = Variable("MetaData/earth_radius_of_curvature");
@@ -128,85 +149,102 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
     oops::Log::debug() << iProfile << ' ';
   oops::Log::debug() << std::endl;
 
-  // For each variable, perform the filter
-  for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
-    const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+  // Loop over the unique profiles
+  for (size_t iProfile : record_numbers) {
+    const std::vector<size_t> & obs_numbers = obsdb_.recidx_vector(iProfile);
 
-    // Loop over the unique profiles
-    for (size_t iProfile : record_numbers) {
-      const std::vector<size_t> & obs_numbers = obsdb_.recidx_vector(iProfile);
-
-      // Find the observation with the smallest impact parameter (i.e. the
-      // bottom of the profile).  If all impactParameters are missing, then this
-      // should choose the first observation.
-      auto it_nonmissing = std::min_element(obs_numbers.begin(), obs_numbers.end(),
-                                            [missingFloat, &impactParameter]
-                                            (const size_t & a, const size_t & b)
-                                            {return impactParameter[a] == missingFloat ?
-                                                    false :
-                                                    (impactParameter[b] == missingFloat ?
-                                                     true :
-                                                     impactParameter[a] < impactParameter[b]);});
-      const size_t bottomOb = *it_nonmissing;
-
-      // Load the refractivity profile and the associated model heights for this observation,
-      // cleansing any missing data
-      std::vector<float> refracProfile;
-      std::vector<float> heightProfile;
-      for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel)
-        if (refractivity[iLevel][bottomOb] != missingFloat &&
-            modelHeights[iLevel][bottomOb] != missingFloat) {
-          refracProfile.push_back(refractivity[iLevel][bottomOb]);
-          heightProfile.push_back(modelHeights[iLevel][bottomOb]);
+    // Find the observation with the smallest impact parameter (i.e. the
+    // bottom of the profile).  If all impactParameters are missing, then this
+    // should choose the first observation.
+    int bottomOb = -1;
+    int bottomVar = -1;
+    for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
+      const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+      for (size_t iobs : obs_numbers) {
+        if (impactParameter[iVar][iobs] > 0 && impactParameter[iVar][iobs] != missingFloat) {
+          if (bottomOb < 0) {
+            bottomOb = iobs;
+            bottomVar = iVar;
+          } else if (impactParameter[iVar][iobs] < impactParameter[bottomVar][bottomOb]) {
+            bottomOb = iobs;
+            bottomVar = iVar;
+          }
         }
+      }
+    }
+    if (bottomOb == -1) {
+      oops::Log::warning() << "Have not found any valid impact parameters, defaulting to first ob"
+                           << std::endl;
+      bottomVar = observed.find(filtervars.variable(0).variable());
+      bottomOb = obs_numbers[0];
+    }
+    if (parameters_.verboseOutput.value()) {
+      oops::Log::debug() << "Lowest observation found at iobs=" << bottomOb
+                         << " iVar=" << bottomVar << std::endl;
+    }
 
-      if (refracProfile.size() < 2) {
-        oops::Log::error() << "Should have at least two valid points in every profile:" <<
-                              std::endl << "size = " << refracProfile.size() << "  " <<
-                              "bottomOb = " << bottomOb << std::endl;
+    // Load the refractivity profile and the associated model heights for this observation,
+    // cleansing any missing data
+    std::vector<float> refracProfile;
+    std::vector<float> heightProfile;
+    for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel)
+      if (refractivity[iLevel][bottomOb] != missingFloat &&
+          modelHeights[iLevel][bottomOb] != missingFloat) {
+        refracProfile.push_back(refractivity[iLevel][bottomOb]);
+        heightProfile.push_back(modelHeights[iLevel][bottomOb]);
+      }
+
+    if (refracProfile.size() < 2) {
+      oops::Log::error() << "Should have at least two valid model points in every profile:" <<
+                            std::endl << "size = " << refracProfile.size() << "  " <<
+                            "bottomOb = " << bottomOb << std::endl;
+      for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
         flagged[iFilterVar][bottomOb] = true;
-        continue;
       }
+      continue;
+    }
 
-      oops::Log::debug() << "Top and bottom refrac for profile " << iProfile <<
-                            " is " << refracProfile.front() << " to " << refracProfile.back() <<
-                            std::endl;
+    oops::Log::debug() << "Top and bottom refrac for profile " << iProfile <<
+                          " is " << refracProfile.front() << " to " << refracProfile.back() <<
+                          std::endl;
 
-      const std::vector<float> & gradient = calcVerticalGradient(refracProfile, heightProfile);
-      // Output the calculated refractivity gradient for the first profile
-      if (iProfile == record_numbers[0]) {
-          oops::Log::debug() << "Gradient found to be" << std::endl;
-          for (float grad : gradient)
-              oops::Log::debug() << grad << "  ";
-          oops::Log::debug() << std::endl;
+    const std::vector<float> & gradient = calcVerticalGradient(refracProfile, heightProfile);
+    // Output the calculated refractivity gradient for the first profile
+    if (iProfile == record_numbers[0]) {
+        oops::Log::debug() << "Gradient found to be" << std::endl;
+        for (float grad : gradient)
+            oops::Log::debug() << grad << "  ";
+        oops::Log::debug() << std::endl;
+    }
+
+    float sharpGradientImpact = std::numeric_limits<float>::lowest();
+    // Search for sharp gradients (super-refraction) starting at the top of the profile
+    for (size_t iLevel=0; iLevel < nRefLevels-1; ++iLevel) {
+      if (gradient[iLevel] != missingFloat &&
+          gradient[iLevel] < parameters_.gradientThreshold.value()) {
+        // Note: The sharp gradient is ascribed to the level below where the gradient
+        // is found
+        sharpGradientImpact = calcImpactHeight(refracProfile[iLevel+1],
+                                               heightProfile[iLevel+1],
+                                               radiusCurvature[bottomOb]);
+        oops::Log::info() << "Sharp refractivity gradient of " << gradient[iLevel] <<
+                             " found at " << iLevel << "  " << sharpGradientImpact <<
+                             std::endl;
+        oops::Log::debug() << iLevel << "   " << refracProfile[iLevel] << "   " <<
+                              heightProfile[iLevel] << "   " <<
+                              radiusCurvature[iLevel] << std::endl;
+        break;
       }
+    }
 
-      float sharpGradientImpact = std::numeric_limits<float>::lowest();
-      // Search for sharp gradients (super-refraction) starting at the top of the profile
-      for (size_t iLevel=0; iLevel < nRefLevels-1; ++iLevel) {
-        if (gradient[iLevel] != missingFloat &&
-            gradient[iLevel] < parameters_.gradientThreshold.value()) {
-          // Note: The sharp gradient is ascribed to the level below where the gradient
-          // is found
-          sharpGradientImpact = calcImpactHeight(refracProfile[iLevel+1],
-                                                 heightProfile[iLevel+1],
-                                                 radiusCurvature[bottomOb]);
-          oops::Log::info() << "Sharp refractivity gradient of " << gradient[iLevel] <<
-                               " found at " << iLevel << "  " << sharpGradientImpact <<
-                               std::endl;
-          oops::Log::debug() << iLevel << "   " << refracProfile[iLevel] << "   " <<
-                                heightProfile[iLevel] << "   " <<
-                                radiusCurvature[iLevel] << std::endl;
-          break;
-        }
-      }
-
+    for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
+      const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
       // Loop over all observations in the profile
       for (size_t jobs : obs_numbers) {
         // Check that this observation should be considered in this routine
         if (apply[jobs] && (*flags_)[iVar][jobs] == QCflags::pass) {
           // Reject observation if it is below the minimum (either surface or sharp gradient)
-          const float obsImpactHeight = impactParameter[jobs] - radiusCurvature[jobs];
+          const float obsImpactHeight = impactParameter[iVar][jobs] - radiusCurvature[jobs];
           if (parameters_.verboseOutput.value())
             oops::Log::debug() << "Checking minimum height " << obsImpactHeight << "   " <<
                                   sharpGradientImpact + parameters_.sharpGradientOffset.value() <<
@@ -229,10 +267,12 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
           if (parameters_.verboseOutput.value())
             oops::Log::debug() << "Checking maximum height " << obsImpactHeight << "   " <<
                                   calcImpactHeight(refracProfile.front(), heightProfile.front(),
-                                                   radiusCurvature[jobs]) << std::endl;
+                                                   radiusCurvature[jobs]) << "  " <<
+                                  parameters_.maximumHeight << std::endl;
           // Reject observation if it is above the maximum
           if (obsImpactHeight > calcImpactHeight(refracProfile.front(), heightProfile.front(),
-                                                 radiusCurvature[jobs]))
+                                                 radiusCurvature[jobs]) ||
+              obsImpactHeight > parameters_.maximumHeight)
             flagged[iFilterVar][jobs] = true;
         }
       }

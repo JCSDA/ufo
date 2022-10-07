@@ -51,7 +51,6 @@ ObsErrorModelStepwiseLinear::ObsErrorModelStepwiseLinear(const eckit::LocalConfi
   const Variable &xvar = options_.xvar.value();
   ASSERT(xvar.size() == 1);
   invars_ += xvar;
-
   // In the case of using a multiply operator, load it into invars as well.
   if (options_.scale_factor_var.value() != boost::none) {
     multiplicative_ = true;
@@ -104,7 +103,6 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
   const std::vector<float> &errors = options_.errors.value();
   oops::Log::debug() << "  ObsErrorModelStepwiseLinear, x-variable name: " << xvar.variable()
                      << "  and group: " << xvar.group() << std::endl;
-
   // Populate the testdata array.  xstar is just the 0..nloc-1 value of testvar[iv]
   // At each nloc, find matching (x0,x1) and (y0,y1) pair for linear interp.
   ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsVariables());
@@ -162,7 +160,12 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
     // TODO(gthompsn):  probably need this next line for when filtervariable is flagged missing
     // if (!flagged_[jv][jobs]) obserr[jv][jobs] = error;
     if (multiplicative_) {
-      obserr[iv][jobs] = error*(*obvalues)[iv][jobs];
+      // Only apply the scaling factor to non-missing obsvalue to avoid overflow.
+      if ((*obvalues)[iv][jobs] != missing) {
+         obserr[iv][jobs] = error * (*obvalues)[iv][jobs];
+      } else {
+         obserr[iv][jobs] = missing;
+      }
     } else {
       obserr[iv][jobs] = error;
     }
