@@ -51,7 +51,7 @@ phases:
       - source /opt/intel/oneapi/mpi/latest/env/vars.sh
 
       #  Set crtm branch name
-      - export CRTM_JEDI_BRANCH="release/crtm_jedi"
+      - export CRTM_JEDI_BRANCH="release/crtm_jedi_v2.4.0"
 
       - if [ "$CODEBUILD_GIT_BRANCH" = "develop" ];
         then export CODEBUILD_GIT_BRANCH_CRTM=${CRTM_JEDI_BRANCH};
