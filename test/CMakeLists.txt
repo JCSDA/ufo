@@ -36,12 +36,10 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
-
-# Currently only use jedi_release_2.4.0 CRTM coefficients
-set( CRTM_COEFFS_BRANCH "jedi_release_2.4.0" )
+set( CRTM_COEFFS_BRANCH "2.4.0_skylab_2.0" )
 
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.3.0.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.4.0.tar.gz)
 set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
