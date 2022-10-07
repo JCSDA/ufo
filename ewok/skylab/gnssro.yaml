@@ -1,11 +1,17 @@
 obs space:
   name: gnssro
-  _source: gdas
   obsdatain:
+    engine:
+      type: H5File
     obsgrouping:
       group variables: [ 'record_number' ]
       sort variable: 'impact_height'
       sort order: 'ascending'
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: gdas
   simulated variables: [bending_angle]
 obs operator:
   name: GnssroBndNBAM
@@ -22,7 +28,7 @@ obs filters:
   - variable:
       name: impact_height@MetaData
     minvalue: 0
-    maxvalue: 50000
+    maxvalue: 60000
 - filter: Bounds Check
   filter variables:
   - name: bending_angle

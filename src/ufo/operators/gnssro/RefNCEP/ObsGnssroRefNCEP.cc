@@ -25,16 +25,15 @@ namespace ufo {
 static ObsOperatorMaker<ObsGnssroRefNCEP> makerGnssroRefNCEP_("GnssroRefNCEP");
 // -----------------------------------------------------------------------------
 
-ObsGnssroRefNCEP::ObsGnssroRefNCEP(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroRefNCEP_(0), odb_(odb), varin_()
+ObsGnssroRefNCEP::ObsGnssroRefNCEP(const ioda::ObsSpace & odb, const Parameters_ & params)
+  : ObsOperatorBase(odb), keyOperGnssroRefNCEP_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-
-  ufo_gnssro_refncep_setup_f90(keyOperGnssroRefNCEP_, obsOptions);
+  ufo_gnssro_refncep_setup_f90(keyOperGnssroRefNCEP_,
+                               params.options.value().toConfiguration());
   oops::Log::trace() << "ObsGnssroRefNCEP created." << std::endl;
 }
 

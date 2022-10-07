@@ -5,7 +5,9 @@ observations:
 - obs space: # Comparison against Met Office OPS system (multi-level)
     name: Sonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level.nc
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -58,7 +60,9 @@ observations:
 - obs space: # Comparison against Met Office OPS system (multi-level extended obs space)
     name: Sonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level_extended.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level_extended.nc
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -113,7 +117,9 @@ observations:
 - obs space: # Comparison against Met Office OPS system (multi-level non-consecutive records)
     name: Sonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level_nonconsec.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level_nonconsec.nc
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -166,7 +172,9 @@ observations:
 - obs space: # Comparison against Met Office OPS system (single-level: num_levels == 1)
     name: Sonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_single_level.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_single_level.nc
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -228,7 +236,9 @@ observations:
 - obs space: # Comparison against Met Office OPS system (surface data)
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -284,7 +294,9 @@ observations:
 - obs space: # Test of the sort_by_pressure option
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -341,7 +353,9 @@ observations:
 - obs space: # Test of the 'where' clause handler
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -402,7 +416,9 @@ observations:
             # (rather than record numbers)
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs operator:
     name: Composite
@@ -460,7 +476,9 @@ observations:
              # are copied to the BkgError group, which is used as input to the buddy check.
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs operator:
     name: Composite

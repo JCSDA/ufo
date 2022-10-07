@@ -74,7 +74,12 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
         const std::size_t jloc = slant_path_location[mlev];
         dx.getAtLocation(var_gv, variable, jloc);
-        dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        if (data_.geovalsObsSameDir()) {  // geovals and observations are the same way round:
+          dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[mlev];
+        } else {  // reverse geovals so they're the same way round in extended space as
+          // observations / H(x) in original space:
+          dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        }
       }
     }
   }
@@ -113,8 +118,16 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
         // Get the current value of dx.
         dx.getAtLocation(var_gv, variable, jloc);
         const std::size_t idx = locsExtended[mlev] * dy.nvars() + jvar;
-        if (dy[idx] != missing)
-          var_gv[nlevs_var - 1 - mlev] += dy[idx];
+        if (dy[idx] != missing) {
+          if (data_.geovalsObsSameDir()) {
+            // geovals and observations are the same way round:
+            var_gv[mlev] += dy[idx];
+          } else {
+            // geovals reversed relative to obs
+            // write dy into correct index of geoval
+            var_gv[nlevs_var - 1 - mlev] += dy[idx];
+          }
+        }
         // Store the new value of dx.
         dx.putAtLocation(var_gv, variable, jloc);
       }

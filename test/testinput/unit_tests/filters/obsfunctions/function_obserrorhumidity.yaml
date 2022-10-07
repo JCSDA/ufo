@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: test_humidity_obserror_singular
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_singular.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_singular.nc4
     simulated variables: [specific_humidity]
 #   obsdataout:
-#     obsfile: Data/sondes_q_obs_2020121500_singular_obserr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_q_obs_2020121500_singular_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
@@ -26,10 +30,14 @@ observations:
 - obs space:
     name: test_humidity_obserror_vector
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_vector.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_vector.nc4
     simulated variables: [specific_humidity]
 #   obsdataout:
-#     obsfile: Data/sondes_q_obs_2020121500_vector_obserr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_q_obs_2020121500_vector_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
@@ -47,10 +55,14 @@ observations:
 - obs space:
     name: test_humidity_obserror_UKMO
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_UKMO.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_UKMO.nc4
     simulated variables: [specific_humidity]
 #   obsdataout:
-#     obsfile: Data/sondes_q_obs_2020121500_UKMO_obserr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_q_obs_2020121500_UKMO_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:

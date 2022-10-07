@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <set>
 
-#include "ioda/Engines/Factory.h"
+#include "ioda/Engines/EngineUtils.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"

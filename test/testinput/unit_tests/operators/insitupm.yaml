@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: PM25
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/airnow-v2a-2020081306-sub.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/airnow-v2a-2020081306-sub.nc
     simulated variables: [pm25]
 #   obsdataout:
-#     obsfile: Data/airnow-v2a-2020081306-sub_insitupm_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/airnow-v2a-2020081306-sub_insitupm_out.nc
   obs operator:
     name: InsituPM
     tracer_geovals: [aso4i,ano3i,anh4i,anai,acli,aeci,aothri,alvpo1i,asvpo1i,asvpo2i,alvoo1i,alvoo2i,asvoo1i,asvoo2i,

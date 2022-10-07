@@ -1,0 +1,9 @@
+variable maps:
+  - name: airTemperature
+    alias: air_temperature
+  - name: windEastward
+    alias: eastward_wind
+  - name: windNorthward
+    alias: northward_wind
+  - name: specificHumidity
+    alias: specific_humidity

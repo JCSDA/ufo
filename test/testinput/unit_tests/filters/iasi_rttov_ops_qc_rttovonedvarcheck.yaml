@@ -67,16 +67,21 @@ observations:
       RTTOV_GasUnitConv: &gasunitconv true
       UseRHwaterForQC: &UseRHwaterForQC true
       UseColdSurfaceCheck: &UseColdSurfaceCheck false
+      RTTOV_ScaleRefOzone: &RTTOV_ScaleRefOzone true
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
   obs space:
     name: Test the hyperspectral retrievals
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
     simulated variables: [brightness_temperature]
     channels: *all_channels
 #   obsdataout:
-#     obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs filters:
@@ -113,6 +118,7 @@ observations:
         RTTOV_GasUnitConv: *gasunitconv
         UseRHwaterForQC: false
         UseColdSurfaceCheck: false
+        RTTOV_ScaleRefOzone: *RTTOV_ScaleRefOzone
         Platform_Name: *platform_id
         Sat_ID: *satellite_id
         Instrument_Name: *instrument_id
@@ -144,7 +150,8 @@ observations:
     surface emissivity:
       type: principalcomponent
       EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
-  passedBenchmark: 537
+    RecalculateBT: true
+  passedBenchmark: 536
   compareVariables:
     - reference:
         name: n_iterations@TestReference
@@ -155,4 +162,4 @@ observations:
         name: cloud_top_pressure@TestReference
       test:
         name: cloud_top_pressure@OneDVar
-      absTol: 1.0e-4
+      absTol: 1.0e-3

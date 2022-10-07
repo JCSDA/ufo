@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Potential Temperature from Temperature
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/T2potentialT_conversion_aircraft.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/T2potentialT_conversion_aircraft.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"

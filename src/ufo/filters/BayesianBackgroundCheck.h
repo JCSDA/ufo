@@ -46,8 +46,18 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // constant background error term (optional):
   oops::OptionalParameter<float> BkgErr{"bg error", this};
 
+  // parameter to determine if squared departure/ErrVar check applied (optional, default true):
+  // note that the threshold for this check (PGE_SDiffCrit) is defined as one of the PGE input
+  // parameters
+  oops::Parameter<bool> PerformSDiffCheck{"perform obs minus BG threshold check", true, this};
+
   // switch to save total (combined) probability density (optional, default false):
   oops::Parameter<bool> SaveTotalPd{"save total pd", false, this};
+
+  // set maximum error variance.
+  // If this parameter is <= 0.0 it will be ignored in processing
+  // (optional, default -1.0):
+  oops::Parameter<float> ErrVarMax{"max error variance", -1.0, this};
 };
 
 /// \brief BayesianBackgroundCheck: check observation closeness to background, accounting
@@ -83,9 +93,11 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 /// in the Probability of Gross Error calculation. If not the real background errors
 /// will be used,
 ///
-/// or the optional logical parameter (default false):
-///   * save total pd: save the total (combined) probability distribution to the ObsSpace.
+/// the optional logical parameter (default false):
+///   * save total pd: save the total (combined) probability distribution to the ObsSpace,
 ///
+/// or the optional float parameter (default -1.0):
+///   * max error variance: set a maximum for the error variance.
 class BayesianBackgroundCheck : public FilterBase,
                         private util::ObjectCounter<BayesianBackgroundCheck> {
  public:

@@ -30,15 +30,28 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class GnssroRefNCEPOptionsParameters: public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GnssroRefNCEPOptionsParameters, Parameters)
+ public:
+  oops::Parameter<int> useCompress{"use_compress", 1, this};
+};
+
+class GnssroRefNCEPParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GnssroRefNCEPParameters, ObsOperatorParametersBase)
+ public:
+  oops::Parameter<GnssroRefNCEPOptionsParameters> options{"obs options", {}, this};
+};
+
 // -----------------------------------------------------------------------------
 
 /// GnssroRefNCEP observation operator
 class ObsGnssroRefNCEP : public ObsOperatorBase,
-                      private util::ObjectCounter<ObsGnssroRefNCEP> {
+                         private util::ObjectCounter<ObsGnssroRefNCEP> {
  public:
+  typedef GnssroRefNCEPParameters Parameters_;
   static const std::string classname() {return "ufo::ObsGnssroRefNCEP";}
 
-  ObsGnssroRefNCEP(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroRefNCEP(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroRefNCEP();
 
 // Obs Operator

@@ -6,7 +6,14 @@
 obs space:
   name: viirs_npp_aod-thinned # thinned observations 10%
   #name: viirs_npp_aod # full res observations can be quite slow
-  _source: noaa 
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: noaa
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]
   channels: 4
@@ -16,6 +23,4 @@ obs operator:
   obs options:
     Sensor_ID: v.viirs-m_npp
     EndianType: little_endian
-    CoefficientPath: ${JEDI_BUILD}/fv3-jedi/test/Data/crtm/
     AerosolOption: aerosols_gocart_default
-    #RCFile: [geosaod.rc]

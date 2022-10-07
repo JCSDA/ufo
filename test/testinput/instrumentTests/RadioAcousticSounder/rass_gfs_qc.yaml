@@ -5,13 +5,17 @@ observations:
 - obs space:
     name: rass_tv_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "air_pressure"
         sort order: "descending"
 #   obsdataout: 
-#     obsfile: Data/rass_tv_obs_2020121500_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/rass_tv_obs_2020121500_out.nc
     simulated variables: [virtual_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc

@@ -4,14 +4,15 @@ Two records, input true everywhere:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]
@@ -26,14 +27,15 @@ Two records, input true at earliest datetime in each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 0, 0, 1, 0, 0]
@@ -48,14 +50,15 @@ Two records, input true at latest datetime in each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 0, 0, 1, 0, 0, 1]
@@ -70,14 +73,15 @@ Two records, input true at earliest datetime in each, dateTimes out of order:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 2, 1, 0,
                      62, 61, 60 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 0, 0, 1, 0, 0, 1]
@@ -92,14 +96,15 @@ Two records, input true at latest datetime in each, dateTimes out of order:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 2, 1, 0,
                      62, 61, 60 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 0, 0, 1, 0, 0]
@@ -114,14 +119,15 @@ Two records, missing dateTime at start of each:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 252018950097, 0, 1,
                      252018950097, 60, 61 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 0, 0, 0, 1, 0]
@@ -136,14 +142,15 @@ Two records, all dateTimes missing:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 252018950097, 252018950097, 252018950097,
                      252018950097, 252018950097, 252018950097 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 0, 0, 0, 1, 0]
@@ -158,14 +165,15 @@ Two records, no grouping:
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 2, 1, 0,
                      62, 61, 60 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
   input: [ 1, 0, 1, 1, 0, 1 ]
   air_temperature: [280, 280, 280, 280, 280, 280]
   eastward_wind: [10, 10, 10, 10, 10, 10]
@@ -179,14 +187,15 @@ Two records, input true everywhere, air_temperature missing at first location in
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]
@@ -202,14 +211,15 @@ Two records, input true everywhere, air_temperature missing at first two locatio
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]
@@ -225,14 +235,15 @@ Two records, input true everywhere, air_temperature missing everywhere, retain i
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]
@@ -247,14 +258,15 @@ Two records, input true everywhere, air_temperature missing everywhere, eastward
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 0, 1, 2,
                      60, 61, 62 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]
@@ -269,14 +281,15 @@ Two records, input true everywhere, dateTimes out of order, air_temperature miss
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 1, 1, 1 ]
         lons: [ 0, 0, 0, 1, 1, 1 ]
         dateTimes: [ 2, 1, 0,
                      62, 61, 60 ]
         epoch: "seconds since 2010-01-01T00:04:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
       obsgrouping:
         group variables: [ "latitude" ]
   input: [ 1, 1, 1, 1, 1, 1]

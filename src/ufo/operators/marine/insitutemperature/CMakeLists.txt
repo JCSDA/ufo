@@ -12,6 +12,7 @@ set ( insitutemperature_files
     ObsInsituTemperature.interface.h
     ObsInsituTemperatureTLAD.interface.F90
     ObsInsituTemperatureTLAD.interface.h
+    ObsInsituTemperatureParameters.h
     ufo_insitutemperature_mod.F90
     ufo_insitutemperature_tlad_mod.F90
     PARENT_SCOPE

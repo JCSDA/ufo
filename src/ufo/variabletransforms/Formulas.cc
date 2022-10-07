@@ -371,11 +371,32 @@ float GetWind_V(float windSpeed, float windFromDirection) {
   return v;
 }
 
+/* -------------------------------------------------------------------------------------
+This formula takes a radiance (W / (m^2.sr.m^-1)) and a wavenumber (m^-1) and outputs
+a brightness temperature. where:
+h - planck constant (m2kgs-1)
+c - speed of light (ms-1)
+t_b - boltzman constant (m2kgs-2K-1)
+planck1 = (2*h*c*c)    - (1.191042972e-16 W / (m^2.sr.m-4)) - forward declaration has the default
+                         arguments to allow for rounding differences in porting.
+planck2 = (h*c / T_b)  - (1.4387769e-2 m.K) - forward declaration has the default arguments
+                         to allow for rounding differences in porting.
+*/
+double inversePlanck(const double radiance, const double wavenumber,
+                     const double planck1, const double planck2) {
+  const double p1 = planck1 * wavenumber * wavenumber * wavenumber;
+  const double p2 = planck2 * wavenumber;
+  double BT = p2 / std::log(1.0 + p1 / radiance);
+  return BT;
+}
+
 /* -------------------------------------------------------------------------------------*/
 
-int RenumberScanPosition(int scanpos) {
-  // Renumber from 2,5,8,... to 1,2,3,...
-  int newpos = (scanpos + 1)/3;
+int RenumberScanPosition(const int scanpos, const int numFOV) {
+  // std::ceil has floats as input and output
+  // therefore static casts required
+  const float scanpos_numFOV = static_cast<float>(scanpos)/static_cast<float>(numFOV);
+  int newpos = static_cast<int>(std::ceil(scanpos_numFOV));
   return newpos;
 }
 
@@ -393,7 +414,8 @@ void horizontalDrift
  std::vector<float> & lat_out,
  std::vector<float> & lon_out,
  std::vector<util::DateTime> & time_out,
- MethodFormulation formulation) {
+ MethodFormulation formulation,
+ const util::DateTime * const window_end) {
   const float missingValueFloat = util::missingValue(1.0f);
 
   switch (formulation) {
@@ -466,7 +488,12 @@ void horizontalDrift
       lon_out[loc_next] = lon_out[loc_current] + dlon;
       // Convert the cumulative change in time to a util::Duration.
       dt_cumul += dt;
-      time_out[loc_next] = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+      // Calculate the level datetime, keeping it within the assimilation window if required.
+      const util::DateTime t_cumul = time0 + util::Duration(static_cast<int64_t>(dt_cumul));
+      if (window_end)
+        time_out[loc_next] = t_cumul > *window_end ? *window_end : t_cumul;
+      else
+        time_out[loc_next] = t_cumul;
     }
 
     // Copy latitude, longitude and time at each valid location to all invalid

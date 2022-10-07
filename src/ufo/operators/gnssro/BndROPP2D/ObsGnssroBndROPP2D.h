@@ -17,10 +17,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/gnssro/BndROPP2D/ObsGnssroBndROPP2D.interface.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -31,15 +27,31 @@ namespace ufo {
   class Locations;
   class ObsDiagnostics;
 
+class GnssroBndROPP2DOptionsParameters: public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GnssroBndROPP2DOptionsParameters, Parameters)
+ public:
+  oops::Parameter<size_t> nHoriz{"n_horiz", 31, this};
+  oops::Parameter<double> res{"res", 40.0, this};
+  oops::Parameter<double> top2D{"top_2d", 20.0, this};
+};
+
+class GnssroBndROPP2DParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GnssroBndROPP2DParameters, ObsOperatorParametersBase)
+ public:
+  oops::Parameter<GnssroBndROPP2DOptionsParameters> options{"obs options", {}, this};
+};
+
 // -----------------------------------------------------------------------------
 
 /// GnssroBndROPP2D observation operator
 class ObsGnssroBndROPP2D : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGnssroBndROPP2D> {
  public:
+  typedef GnssroBndROPP2DParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroBndROPP2D";}
 
-  ObsGnssroBndROPP2D(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroBndROPP2D(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroBndROPP2D();
 
 // Obs Operator

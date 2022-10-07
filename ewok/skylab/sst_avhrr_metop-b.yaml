@@ -1,5 +1,12 @@
 obs space:
   name: sst_avhrr_metop-b
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: noaa_so025
   simulated variables: [sea_surface_temperature]
 obs operator:

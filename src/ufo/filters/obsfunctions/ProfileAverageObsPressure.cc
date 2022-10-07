@@ -13,6 +13,7 @@
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/profile/SlantPathLocations.h"
 
 namespace ufo {
 
@@ -91,11 +92,15 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
     const std::vector<std::size_t> &locsOriginal = obsdb.recidx_vector(recnums[jprof]);
     const std::vector<std::size_t> &locsExtended = obsdb.recidx_vector(recnums[jprof + nprofs]);
 
-    // GeoVaL vector for this variable at the first location in the original profile.
-    gv->getAtLocation(var_gv, model_vertical_coordinate, locsOriginal[0]);
-    // The GeoVaLs must be ordered from bottom to top for this algorithm to work.
-    if (var_gv.front() > var_gv.back())
-      throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
+    // Retrieve slant path locations.
+    // This function ensures the GeoVaLs are in the correct order.
+    const std::vector<std::size_t> slant_path_location =
+      ufo::getSlantPathLocations(obsdb,
+                                 *gv,
+                                 locsOriginal,
+                                 options_.observation_vertical_coordinate,
+                                 options_.model_vertical_coordinate,
+                                 options_.numIntersectionIterations.value() - 1);
 
     // Write out values to output vector
     // Pressures in original profile.
@@ -103,8 +108,12 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
       out[0][loc] = vert_coord_obs[loc];
 
     // Pressures in averaged profile.
-    for (size_t idx = 0; idx < locsExtended.size() && idx < var_gv.size(); ++idx)
+    for (size_t idx = 0; idx < locsExtended.size() && idx < var_gv.size(); ++idx) {
+      // GeoVaL vector for this variable at the slant location.
+      gv->getAtLocation(var_gv, model_vertical_coordinate, slant_path_location[idx]);
+      // Transfer value into averaged profile.
       out[0][locsExtended[idx]] = var_gv[var_gv.size() - 1 - idx];
+    }
   }
 
   oops::Log::trace() << "ProfileAverageObsPressure::compute finished" << std::endl;

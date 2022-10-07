@@ -9,9 +9,13 @@ observations:
   obs space:
     name: SeaSurfaceTemp
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sst_obs-2018-04-15.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sst_obs-2018-04-15.nc4
 #   obsdataout:
-#     obsfile: Data/sst_obs-2018-04-15_opr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sst_obs-2018-04-15_opr_out.nc4
     simulated variables: [sea_surface_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sst_obs-2018-04-15_geovals.nc

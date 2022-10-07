@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -18,13 +18,10 @@
 #include "ufo/ObsOperatorParametersBase.h"
 
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/operators/marine/insitutemperature/ObsInsituTemperatureParameters.h"
 #include "ufo/operators/marine/insitutemperature/ObsInsituTemperatureTLAD.interface.h"
 
 // Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -35,19 +32,16 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-class ObsInsituTemperatureTLADParameters : public ObsOperatorParametersBase  {
-  OOPS_CONCRETE_PARAMETERS(ObsInsituTemperatureTLADParameters, ObsOperatorParametersBase )
-};
 
 /// InsituTemperature for observation operator TL and AD class
 class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
                                  private util::ObjectCounter<ObsInsituTemperatureTLAD> {
  public:
-  typedef ObsInsituTemperatureTLADParameters Parameters_;
+  typedef ObsInsituTemperatureParameters Parameters_;
   static const std::string classname() {return "ufo::ObsInsituTemperatureTLAD";}
 
-  ObsInsituTemperatureTLAD(const ioda::ObsSpace &, const ObsInsituTemperatureTLADParameters &);
-  virtual ~ObsInsituTemperatureTLAD();
+  ObsInsituTemperatureTLAD(const ioda::ObsSpace &, const ObsInsituTemperatureParameters &);
+  ~ObsInsituTemperatureTLAD() override;
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -55,15 +49,14 @@ class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & requiredVars() const override {return *varin_;}
-
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  const oops::Variables & requiredVars() const override {return varin_;}
+  oops::Variables simulatedVars() const override { return operatorVars_; }
 
  private:
   void print(std::ostream &) const override;
   F90hop keyOper_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
+  oops::Variables operatorVars_;
 };
 
 // -----------------------------------------------------------------------------

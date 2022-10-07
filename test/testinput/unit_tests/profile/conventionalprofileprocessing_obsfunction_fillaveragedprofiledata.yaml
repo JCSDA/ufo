@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -14,7 +16,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out1.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -38,12 +42,16 @@ observations:
 - obs space:
     name: Observations are not grouped into records, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
     simulated variables: [air_temperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out2.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -62,14 +70,18 @@ observations:
 - obs space:
     name: Extended ObsSpace is not used, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out3.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:
@@ -88,7 +100,9 @@ observations:
 - obs space:
     name: A non-pressure variable is used as the model vertical coordinate, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -97,7 +111,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_fillaveragedprofiledata_out4.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals.nc4
   obs filters:

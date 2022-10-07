@@ -255,16 +255,44 @@ float GetWind_U(float windSpeed, float windFromDirection);
 */
 float GetWind_V(float windSpeed, float windFromDirection);
 
+// -------------------------------------------------------------------------------------------
+/*!
+* \brief Calculate the brightness temperature for an input radiance.  To minimize
+*        differences this is done in double precision.
+*
+* \param radiance
+*     The input satellite radiance in (W / (m^2 sr m^-1)).
+* \param wavenumber
+*     The input wavenumber in m^-1
+* \param planck1
+*     2*h*c*c - (1.191042972e-16 W / (m^2.sr.m-4)) - this has been made optional
+*     to allow for rounding differences when porting.
+* \param planck2
+*     (h*c / T_b) - (1.4387769e-2 m.K) - this has been made optional
+*     to allow for rounding differences when porting.
+* \return
+*     Brightness temperature in K.
+*/
+double inversePlanck(const double radiance, const double wavenumber,
+                     double planck1 = 1.191042972e-16,  // (W / (m^2.sr.m-4))
+                     double planck2 = 1.4387769e-2);    // (m.K)
+
 // -------------------------------------------------------------------------------------
 /*!
 * \brief Get renumbered scan position 1,2,3,... for satellite instrument
-* which has been spatially resampled and for which scan position is 2,5,8,...
+* which has been spatially resampled using the ceiling method of the number of fields
+* of view:
+*        numpos = std::ceil(scanpos/numFOV)
+* where std::ceil calculates the maximum integer from a float calculation.
 *
 * \param scanpos
 *     satellite instrument scan position
+* \param numFOV
+*     satellite instrument number of fields of fov for an instrument.  For IASI
+*     this is 4 as an example.
 * \return newpos
 */
-int RenumberScanPosition(int scanpos);
+int RenumberScanPosition(int scanpos, int numFOV);
 
 // -------------------------------------------------------------------------------------
 /*!
@@ -310,8 +338,11 @@ int RenumberScanPosition(int scanpos);
 *     Vector of output longitudes in the entire sample [degress].
 * \param [out] time_out
 *     Vector of output datetimes in the entire sample [ISO 8601 format].
-* \param formulation
+* \param [in, optional] formulation
 *     Method used to determine the horizontal drift positions.
+* \param [in, optional] window_end
+*     DateTime at the end of the observation window. If set, computed DateTimes that
+*     are larger than this value are set to this value.
 */
 void horizontalDrift
 (const std::vector<size_t> & locs,
@@ -325,7 +356,8 @@ void horizontalDrift
  std::vector<float> & lat_out,
  std::vector<float> & lon_out,
  std::vector<util::DateTime> & time_out,
- MethodFormulation formulation = formulas::MethodFormulation::DEFAULT);
+ MethodFormulation formulation = formulas::MethodFormulation::DEFAULT,
+ const util::DateTime * const window_end = nullptr);
 
 // -------------------------------------------------------------------------------------
 /*!

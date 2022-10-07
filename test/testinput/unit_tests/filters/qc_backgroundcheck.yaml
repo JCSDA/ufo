@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -26,7 +28,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -45,7 +49,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -69,7 +75,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -90,7 +98,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -115,7 +125,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -144,9 +156,13 @@ observations:
 - obs space:
     name: Altimeter
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sataltimeter_sla_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sataltimeter_sla_testdata.nc4
 #    obsdataout:
-#      obsfile: Data/altimeter_testout.nc4
+#      engine:
+#        type: H5File
+#        obsfile: Data/altimeter_testout.nc4
     simulated variables: [sea_surface_height]
   HofX: HofX
   obs diagnostics:
@@ -161,7 +177,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
     observed variables: [variable1, variable2, variable3, variable4]
   HofX: HofX
@@ -183,7 +201,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
     observed variables: [variable1, variable2, variable3, variable4]
   HofX: HofX

@@ -44,6 +44,8 @@ MODULE ufo_luts_utils_mod
      LOGICAL :: use_crtm
      CHARACTER(len=255) :: endian_type
      CHARACTER(len=255) :: coefficient_path
+     REAL(kind_real) :: convert_factor_model
+     LOGICAL :: dry_mixr_model
   END TYPE luts_conf
 
 CONTAINS
@@ -79,10 +81,16 @@ CONTAINS
        conf%use_crtm=.FALSE.
     ENDIF
 
+    IF (f_confOpts%has("model units coeff")) THEN
+       CALL f_confopts%get_or_die("model units coeff",conf%convert_factor_model)
+    ENDIF
+
+    IF (f_confOpts%has("dry mix ratio")) THEN
+       CALL f_confopts%get_or_die("dry mix ratio",conf%dry_mixr_model)
+    ENDIF
+
     IF (f_confOpts%has("AbsorptionAod")) THEN
-       conf%aaod=.TRUE.
-    ELSE
-       conf%aaod=.FALSE.
+       CALL f_confopts%get_or_die("AbsorptionAod", conf%aaod)
     ENDIF
 
     DEALLOCATE(str)
@@ -102,21 +110,19 @@ CONTAINS
 
 ! ------------------------------------------------------------------------------
 
-  SUBROUTINE calculate_aero_layers(aerosol_option,&
+  SUBROUTINE calculate_aero_layers(conf,&
        &n_aerosols, n_profiles, n_layers, &
        &geovals, aero_layers, rh, layer_factors)
 
     IMPLICIT NONE
 
-    CHARACTER(*), INTENT(in) :: aerosol_option
+    TYPE(luts_conf), INTENT(in) :: conf
     INTEGER, INTENT(in) :: n_aerosols, n_profiles, n_layers
     TYPE(ufo_geovals), INTENT(in) :: geovals
     REAL(kind_real), OPTIONAL, INTENT(out) :: &
          &aero_layers(n_aerosols,n_layers,n_profiles)
     REAL(kind_real), OPTIONAL, INTENT(out) :: rh(n_layers,n_profiles)
     REAL(kind_real), OPTIONAL, INTENT(out) :: layer_factors(n_layers,n_profiles)
-
-    TYPE(luts_conf) :: conf
 
 ! local variables
     INTEGER :: m, ivar,k
@@ -144,27 +150,53 @@ CONTAINS
     CALL ufo_geovals_get_var(geovals, var_q, geoval)
     sphum=geoval%vals
 
-    IF (TRIM(aerosol_option) /= "aerosols_gocart_merra_2") THEN
+!three versions of GOCART:
+
+!1) the original GOCART parameterization that exists
+!   in CRTM (bc1-2,oc1-2,sulf,dust1-5,seas1-4)
+
+!2) GOCART parameterization
+!(bc1-2,oc1-2,sulf,dust1-5,seas1-5) that was implemented
+!in NOAA's GEFS-Aerosols model
+
+!3) GOCART parameterization
+!(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
+!in NOAA's UFS-Aerosols model
+
+    IF (TRIM(conf%aerosol_option) /= "aerosols_gocart_1" .AND. &
+         &TRIM(conf%aerosol_option) /= "aerosols_gocart_2") THEN
        WRITE(err_msg,*) 'this aerosol not implemented - check later'
        CALL abor1_ftn(err_msg)
     ENDIF
 
-    CALL assign_aerosol_names(aerosol_option,var_aerosols)
+    CALL assign_aerosol_names(conf%aerosol_option,var_aerosols)
 
-    DO k=1,n_layers
-       DO m = 1, n_profiles
-!correct for mixing ratio factor ugkg_kgm2
+    IF (conf%dry_mixr_model) THEN
+
+       DO k=1,n_layers
+          DO m = 1, n_profiles
+!correct for mixing ratio factor 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+r_v/r_d*mixing_ratio)
-          factors(k,m)=1e-9_kind_real*(pint(k+1,m)-pint(k,m))/grav/&
-               &(1_kind_real+rv_rd*sphum(k,m)/(1_kind_real-sphum(k,m)))
+             factors(k,m)=(pint(k+1,m)-pint(k,m))/grav/&
+                  &(1_kind_real+rv_rd*sphum(k,m)/(1_kind_real-sphum(k,m)))
+          ENDDO
        ENDDO
-    ENDDO
+
+    ELSE
+   
+       DO k=1,n_layers
+          DO m = 1, n_profiles
+             factors(k,m)=(pint(k+1,m)-pint(k,m))/grav
+          ENDDO
+       ENDDO
+
+    ENDIF
 
     IF ( PRESENT(aero_layers) ) THEN
        DO ivar=1,n_aerosols
           CALL ufo_geovals_get_var(geovals, var_aerosols(ivar), geoval)
-          aero_layers(ivar,:,:)=geoval%vals*factors
+          aero_layers(ivar,:,:)=conf%convert_factor_model*geoval%vals*factors
        ENDDO
     ENDIF
 
@@ -173,7 +205,7 @@ CONTAINS
        WHERE (rh > 1_kind_real) rh=1_kind_real
     ENDIF
 
-    IF ( PRESENT(layer_factors) ) layer_factors=factors
+    IF ( PRESENT(layer_factors) ) layer_factors=conf%convert_factor_model*factors
 
   END SUBROUTINE calculate_aero_layers
 

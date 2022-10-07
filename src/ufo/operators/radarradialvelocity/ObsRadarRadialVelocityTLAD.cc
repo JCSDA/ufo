@@ -25,11 +25,11 @@ static LinearObsOperatorMaker<ObsRadarRadialVelocityTLAD>
 // -----------------------------------------------------------------------------
 
 ObsRadarRadialVelocityTLAD::ObsRadarRadialVelocityTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                           const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperRadarRadialVelocity_(0), varin_()
 {
   ufo_radarradialvelocity_tlad_setup_f90(keyOperRadarRadialVelocity_,
-                                            config, odb.assimvariables(), varin_);
+                                         params.toConfiguration(), odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD created" << std::endl;
 }

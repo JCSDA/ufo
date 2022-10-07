@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: cris-fsr_npp
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,

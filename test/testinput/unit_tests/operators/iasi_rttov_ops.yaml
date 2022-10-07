@@ -40,15 +40,21 @@ observations:
       UseColdSurfaceCheck: &UseColdSurfaceCheck false
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
+      RTTOV_ScaleRefOzone: false
       surface emissivity group: SurfEmiss
+      max_channels_per_batch: 10
   obs space:
     name: Test the forward and linear model with read in emissivity
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
     simulated variables: [brightness_temperature]
     channels: *all_channels
 #   obsdataout:
-#     obsfile: Data/iasi_metopb_obs_2021011500_opr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   rms ref: 245.93588588866368

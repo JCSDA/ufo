@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Bayesian background QC flags
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
     simulated variables: [air_temperature, eastward_wind, northward_wind, geopotential_height]
   obs filters:
   - filter: Bayesian Background QC Flags
@@ -35,7 +37,9 @@ observations:
 - obs space:
     name: Missing QC flags
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Bayesian Background QC Flags
@@ -46,7 +50,9 @@ observations:
 - obs space:
     name: Missing PGE
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
     simulated variables: [eastward_wind]
   obs filters:
   - filter: Bayesian Background QC Flags
@@ -56,7 +62,9 @@ observations:
 - obs space:
     name: Bayesian background QC flags with where clause
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Bayesian Background QC Flags

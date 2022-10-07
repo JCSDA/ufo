@@ -107,7 +107,7 @@ void ObsErrorModelRamp::compute(const ObsFilterData & in,
   float slope2 = missing;
   if (options_.x2.value() != boost::none && options_.err2.value() != boost::none) {
     x2 = options_.x2.value().get();
-    err2 = options_.x2.value().get();
+    err2 = options_.err2.value().get();
     cal_err2_x2 = true;
   }
   // Loop over selected variables

@@ -17,10 +17,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/groundgnss/RefROPP1D/ObsGnssGBRefROPP1D.interface.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -30,15 +26,23 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class GnssGBRefROPP1DParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GnssGBRefROPP1DParameters, ObsOperatorParametersBase)
+ public:
+  // no options
+};
+
 // -----------------------------------------------------------------------------
 
 /// GnssGBRefROPP1D observation operator
 class ObsGnssGBRefROPP1D : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGnssGBRefROPP1D> {
  public:
+  typedef GnssGBRefROPP1DParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssGBRefROPP1D";}
 
-  ObsGnssGBRefROPP1D(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssGBRefROPP1D(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssGBRefROPP1D();
 
 // Obs Operator

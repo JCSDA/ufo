@@ -20,10 +20,6 @@
 #include "ufo/operators/aerosols/MR/ObsAodGeos.interface.h"
 
 /// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -33,14 +29,27 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class ObsAodGeosParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsAodGeosParameters, ObsOperatorParametersBase)
+
+ public:
+  oops::RequiredParameter<std::vector<std::string>> tracerGeovals{
+        "tracer_geovals", this};
+  oops::RequiredParameter<std::vector<double>> wavelengths{
+        "wavelengths", this};
+  oops::RequiredParameter<std::string> rcfile{"RCFile", this};
+};
+
 // -----------------------------------------------------------------------------
 /// AodGeos observation operator class
 class ObsAodGeos : public ObsOperatorBase,
                    private util::ObjectCounter<ObsAodGeos> {
  public:
+  typedef ObsAodGeosParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsAodGeos";}
 
-  ObsAodGeos(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAodGeos(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodGeos();
 
 // Obs Operator

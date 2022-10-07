@@ -132,7 +132,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   nobs  = obsspace_get_nlocs(obss)
   allocate(zStation(nobs))
 
-  call obsspace_get_db(obss, "MetaData", "station_height", zStation)
+  call obsspace_get_db(obss, "MetaData", "station_altitude", zStation)
 
   nstate = prs % nval + q % nval
   ALLOCATE(self % K(1:self%nlocs, 1:nstate))

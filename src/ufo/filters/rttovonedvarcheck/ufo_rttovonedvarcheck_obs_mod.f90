@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_obs_mod
 
+use datetime_mod, only: datetime
 use kinds
 use iso_c_binding
 use missing_values_mod
@@ -32,6 +33,7 @@ real(kind_real), allocatable :: yobs(:,:)       ! observation value from obs fil
 real(kind_real), allocatable :: ybias(:,:)      ! observation bias from obs files
 real(kind_real), allocatable :: lat(:)          ! observation latitude
 real(kind_real), allocatable :: lon(:)          ! observation longitude
+type(datetime), allocatable  :: date(:)         ! read in the date and time which is needed for ozone
 real(kind_real), allocatable :: elevation(:)    ! observation elevation
 real(kind_real), allocatable :: sat_zen(:)      ! observation satellite zenith angle
 real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth angle
@@ -49,6 +51,7 @@ real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile fro
 real(kind_real), allocatable :: transmittance(:,:) ! surface to space transmittance for each channel
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
+real(kind_real), allocatable :: recalc_BT(:,:)   ! recalculate BT using retrieved variables for surface
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
 logical                      :: Store1DVarIWP   ! flag to output the IWP if the profile converges
@@ -117,6 +120,7 @@ allocate(self % ybias(config % nchans, self % iloc))
 allocate(self % QCflags(config % nchans, self % iloc))
 allocate(self % lat(self % iloc))
 allocate(self % lon(self % iloc))
+allocate(self % date(self % iloc))
 allocate(self % elevation(self % iloc))
 allocate(self % sat_zen(self % iloc))
 allocate(self % sat_azi(self % iloc))
@@ -132,6 +136,7 @@ if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
 if (config % Store1DVarTransmittance) allocate(self % transmittance(config % nchans, self % iloc))
 allocate(self % output_profile(prof_index % nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
+if (config % RecalculateBT) allocate(self % recalc_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
 allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
@@ -161,6 +166,7 @@ self % emiss(:,:) = missing
 self % mwemisserr(:,:) = missing
 self % output_profile(:,:) = missing
 self % output_BT(:,:) = missing
+if (allocated(self % recalc_BT)) self % recalc_BT(:,:) = missing
 self % background_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
@@ -197,6 +203,7 @@ self % yobs = self % yobs - self % ybias
 ! Read in prerequisites
 call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))
 call obsspace_get_db(config % obsdb, "MetaData", "longitude", self % lon(:))
+call obsspace_get_db(config % obsdb, "MetaData", "dateTime", self % date(:))
 call obsspace_get_db(config % obsdb, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
 
 ! Read in optional angles
@@ -225,6 +232,7 @@ if (config % cloud_retrieval) then
   variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_top_pressure")
   if (variable_present) then
     call obsspace_get_db(config % obsdb, "MetaData", "initial_cloud_top_pressure", self % cloudtopp(:))
+    self % cloudtopp(:) = self % cloudtopp(:) * Pa_to_hPa
   end if
 
   variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_fraction")
@@ -327,6 +335,7 @@ if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % ybias))          deallocate(self % ybias)
 if (allocated(self % lat))            deallocate(self % lat)
 if (allocated(self % lon))            deallocate(self % lon)
+if (allocated(self % date))           deallocate(self % date)
 if (allocated(self % elevation))      deallocate(self % elevation)
 if (allocated(self % sat_zen))        deallocate(self % sat_zen)
 if (allocated(self % sat_azi))        deallocate(self % sat_azi)
@@ -345,6 +354,7 @@ if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
+if (allocated(self % recalc_BT))      deallocate(self % recalc_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 if (associated(self % pcemiss_object)) then
@@ -534,7 +544,10 @@ do jvar = 1, nchans
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
-  write(var,"(A19,I0)") "surface_emissivity_",self % channels(jvar)
+  if (allocated(self % recalc_BT)) then
+    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:))
+  end if
+  write(var,"(A19,I0)") "surface_emissivity_", self % channels(jvar)
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)

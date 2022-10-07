@@ -24,13 +24,14 @@ static LinearObsOperatorMaker<ObsSeaIceThicknessTLAD> makerSeaIceThicknessTL_("S
 // -----------------------------------------------------------------------------
 
 ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
+                                               const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
   const std::vector<std::string> vv{"sea_ice_category_area_fraction",
                                     "sea_ice_category_thickness"};
   varin_.reset(new oops::Variables(vv));
-  ufo_seaicethickness_tlad_setup_f90(keyOper_, config, odb.assimvariables());
+  ufo_seaicethickness_tlad_setup_f90(keyOper_, params.toConfiguration(),
+                                     odb.assimvariables());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD created" << std::endl;
 }
 

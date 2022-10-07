@@ -30,11 +30,6 @@ namespace ufo {
     std::string obsVar, obsGroup;
     splitVarGroup(obsVerticalCoord, obsVar, obsGroup);
     odb.get_db(obsGroup, obsVar, pressure_obs);
-
-    // If the pressure GeoVaL is not present, return an empty vector.
-    // todo(ctgh): eventually throw an exception here.
-    // This will be dealt with in a future PR.
-    if (!gv.has(modelVerticalCoord)) return {};
     // Number of levels for model pressure.
     const std::size_t nlevs_p = gv.nlevs(modelVerticalCoord);
     // Vector storing location for each level along the slant path.

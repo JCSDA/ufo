@@ -56,6 +56,15 @@ struct ExtrapolationModeParameterTraitsHelper {
   };
 };
 
+struct EquidistantChoiceParameterTraitsHelper {
+  typedef EquidistantChoice EnumType;
+  static constexpr char enumTypeName[] = "EquidistantChoice";
+  static constexpr util::NamedEnumerator<EquidistantChoice> namedValues[] = {
+    { EquidistantChoice::FIRST, "first" },
+    { EquidistantChoice::LAST, "last" }
+  };
+};
+
 }  // namespace ufo
 
 
@@ -69,6 +78,11 @@ struct ParameterTraits<ufo::InterpMethod> :
 template <>
 struct ParameterTraits<ufo::ExtrapolationMode> :
     public EnumParameterTraits<ufo::ExtrapolationModeParameterTraitsHelper>
+{};
+
+template <>
+struct ParameterTraits<ufo::EquidistantChoice> :
+    public EnumParameterTraits<ufo::EquidistantChoiceParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -94,9 +108,17 @@ class InterpolationParameters : public oops::Parameters {
   /// Extrapolation mode for the given variable and interpolation method i.e. behaviour for
   /// out-of-bounds extract.
   ///
-  /// \sea ExtrapolationMode for a list of supported modes.
+  /// \see ExtrapolationMode for a list of supported modes.
   oops::Parameter<ExtrapolationMode> extrapMode{
     "extrapolation mode", ExtrapolationMode::ERROR, this};
+
+  /// Equidistant choice allows the user to select the first or last index when
+  /// there is a value which is equidistant to two lookup indices.
+  /// e.g. latitude = 30.0; lookup latitude has values of 29.0 and 31.0.
+  ///
+  /// \see EquidistantChoice for a list of supported choices.
+  oops::Parameter<EquidistantChoice> equidistanceChoice{
+    "equidistant choice", EquidistantChoice::FIRST, this};
 };
 
 
@@ -176,6 +198,7 @@ class DrawValueFromFile : public ObsFunctionBase<T> {
   Variables allvars_;
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::unordered_map<std::string, ExtrapolationMode> extrapMode_;
+  std::unordered_map<std::string, EquidistantChoice> equidistantChoice_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
   std::vector<int> channels_;

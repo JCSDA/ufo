@@ -8,7 +8,9 @@ Sondes:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs_extended.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs_extended.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
@@ -16,7 +18,9 @@ Sondes:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_average_temperature_ops_comparison_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_average_temperature_ops_comparison_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
   Conventional Profile Processing:
@@ -25,4 +29,6 @@ Sondes:
     flagBasicChecksFail: true
     PrintStationID: true
     Comparison_Tol: 0.1
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}
 

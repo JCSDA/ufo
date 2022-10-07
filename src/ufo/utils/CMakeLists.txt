@@ -60,15 +60,27 @@ set ( utils_files
       ufo_utils_mod.F90
       ufo_utils.interface.F90
       ufo_utils.interface.h
+      VariableNameMap.h
+      VariableNameMap.cc
       VertInterp.interface.F90
       VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
 )
 
+if( ${gsw_FOUND} )
+      set ( utils_oceanfiles
+            OceanConversions/OceanConversions.interface.F90
+            OceanConversions/OceanConversions.interface.h
+      )
+
+      PREPEND( _p_utils_oceanfiles       "utils"       ${utils_oceanfiles} )
+endif( ${gsw_FOUND} )
+
 PREPEND( _p_utils_files       "utils"       ${utils_files} )
 
 set ( utils_src_files
       ${_p_utils_files}
+      ${_p_utils_oceanfiles}
       PARENT_SCOPE
 )

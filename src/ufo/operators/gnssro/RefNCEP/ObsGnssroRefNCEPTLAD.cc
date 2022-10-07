@@ -27,12 +27,11 @@ static LinearObsOperatorMaker<ObsGnssroRefNCEPTLAD> makerGnssroRefNCEPTL_("Gnssr
 // ----------------------------------------------------------------------------------------
 
 ObsGnssroRefNCEPTLAD::ObsGnssroRefNCEPTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                           const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperGnssroRefNCEP_(0), varin_()
 {
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-
-  ufo_gnssro_refncep_tlad_setup_f90(keyOperGnssroRefNCEP_, obsOptions);
+  ufo_gnssro_refncep_tlad_setup_f90(keyOperGnssroRefNCEP_,
+                                    params.options.value().toConfiguration());
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};
 
   varin_.reset(new oops::Variables(vv));

@@ -14,9 +14,13 @@ observations:
   obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500.nc4
 #   obsdataout:
-#     obsfile: Data/geos_amsua_n19_obs_2020121500_crtm_channel_bc_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/geos_amsua_n19_obs_2020121500_crtm_channel_bc_out.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:
@@ -44,8 +48,8 @@ observations:
       - name: scan_angle
         order: 2
       - name: scan_angle
-  vector ref: GsiHofXBc
-  tolerance: 1.e-5
+  vector ref: ObsValue
+  tolerance: 1.e-1
   linear obs operator test:
 #   iterations TL: 2
     coef TL: 1.e-3

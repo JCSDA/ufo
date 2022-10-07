@@ -40,14 +40,14 @@ class ModelHeightAdjustedMarineWindComponent : public ObsFunctionBase<float> {
 class ModelHeightAdjustedEastwardMarineWind : public ModelHeightAdjustedMarineWindComponent {
  public:
     explicit ModelHeightAdjustedEastwardMarineWind(const eckit::LocalConfiguration &conf)
-    : ModelHeightAdjustedMarineWindComponent(conf, Variable("eastward_wind@ObsValue"))
+    : ModelHeightAdjustedMarineWindComponent(conf, Variable("windEastwardAt10M@ObsValue"))
     {}
 };
 
 class ModelHeightAdjustedNorthwardMarineWind : public ModelHeightAdjustedMarineWindComponent {
  public:
     explicit ModelHeightAdjustedNorthwardMarineWind(const eckit::LocalConfiguration &conf)
-    : ModelHeightAdjustedMarineWindComponent(conf, Variable("northward_wind@ObsValue"))
+    : ModelHeightAdjustedMarineWindComponent(conf, Variable("windNorthwardAt10M@ObsValue"))
     {}
 };
 

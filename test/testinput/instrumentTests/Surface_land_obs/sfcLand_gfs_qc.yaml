@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: surface_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020121500_m.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfc_obs_2020121500_m.nc
 #   obsdataout:
-#     obsfile: Data/sfc_obs_2020121500_m_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind, virtual_temperature, air_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020121500_m.nc

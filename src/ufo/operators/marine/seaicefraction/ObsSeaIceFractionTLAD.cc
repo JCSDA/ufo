@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsSeaIceFractionTLAD> makerSeaIceFractionTL_("Sea
 // -----------------------------------------------------------------------------
 
 ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb,
-                                             const eckit::Configuration & config)
+                                             const Parameters_ & params)
   : LinearObsOperatorBase(odb), varin_()
 {
   const std::vector<std::string> vv{"sea_ice_category_area_fraction"};

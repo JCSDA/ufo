@@ -4,18 +4,23 @@ observations:
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_tropo_2020090318_m.nc4
 #   obsdataout:
-#     obsfile: Data/tropomi_no2_2020090318_m_opr_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/tropomi_no2_2020090318_m_opr_out1.nc4
     simulated variables: [nitrogen_dioxide_in_tropospheric_column]
   obs operator:
-    name: AvgKernel
-    nlayers_kernel: 34
+    name: ColumnRetrieval
+    nlayers_retrieval: 34
     AvgKernelVar: averaging_kernel_level
     PresLevVar: pressure_level
     tracer variables: [no2]
-    tropospheric column: true
-    total column: false
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
     model units coeff: 1e-6 # ppmv to 1/1
   linear obs operator test:
     coef TL: 1.0e-8
@@ -23,23 +28,28 @@ observations:
     tolerance AD: 1.0e-13
   geovals:
     filename: Data/ufo/testinput_tier_1/tropomi_no2_geoval_2020090318_m.nc4
-  rms ref: 0.00010376342178382124
+  rms ref: 0.00010376434640269363
   tolerance: 1.0e-7
 - obs space:
     name: NO2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/tropomi_no2_2020090318_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
 #   obsdataout:
-#     obsfile: Data/tropomi_no2_2020090318_m_opr_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/tropomi_no2_2020090318_m_opr_out2.nc4
     simulated variables: [nitrogen_dioxide_in_total_column]
   obs operator:
-    name: AvgKernel
-    nlayers_kernel: 34
+    name: ColumnRetrieval
+    nlayers_retrieval: 34
     AvgKernelVar: averaging_kernel_level
     PresLevVar: pressure_level
     tracer variables: [no2]
-    tropospheric column: false
-    total column: true
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
     model units coeff: 1e-6 # ppmv to 1/1
   linear obs operator test:
     coef TL: 1.0e-8

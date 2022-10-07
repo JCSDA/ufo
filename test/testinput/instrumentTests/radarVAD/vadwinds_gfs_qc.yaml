@@ -5,13 +5,17 @@ observations:
 - obs space:
     name: vadwinds_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "air_pressure"
         sort order: "descending"  
 #   obsdataout:
-#     obsfile: Data/vadwind_obs-output_2020120112.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/vadwind_obs-output_2020120112.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_geoval_2020121500.nc

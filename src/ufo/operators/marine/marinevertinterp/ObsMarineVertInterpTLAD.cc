@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2019 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,12 +8,14 @@
 #include "ufo/operators/marine/marinevertinterp/ObsMarineVertInterpTLAD.h"
 
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -22,11 +24,16 @@ static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_(
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
-                                                 const ObsMarineVertInterpTLADParameters & params)
+                                                 const ObsMarineVertInterpParameters & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(params.variables.value(), odb.assimvariables(),
+    operatorVars_, operatorVarIndices);
+
   ufo_marinevertinterp_tlad_setup_f90(keyOper_, params.toConfiguration(),
-                                      odb.assimvariables(), varin_);
+    operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(), varin_);
+
   oops::Log::trace() << "ObsMarineVertInterpTLAD created" << std::endl;
 }
 
@@ -48,7 +55,7 @@ void ObsMarineVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnost
 
 void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_marinevertinterp_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
-                                      ovec.size(), ovec.toFortran());
+                                     ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: TL observation operator run" << std::endl;
 }
 
@@ -56,7 +63,7 @@ void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVe
 
 void ObsMarineVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_marinevertinterp_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
-                                      ovec.size(), ovec.toFortran());
+                                     ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: adjoint observation operator run" << std::endl;
 }
 

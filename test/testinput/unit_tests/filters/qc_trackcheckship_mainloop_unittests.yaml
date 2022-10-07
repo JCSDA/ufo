@@ -4,13 +4,14 @@ Normal ship track:
   obs space:
     name: Ship
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 2 ]
         lons: [ 0, 0, 0 ]
         dateTimes: [ 0, 3600, 7200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -33,14 +34,15 @@ Ship track error first segment category 2:
   obs space:
     name: Ship
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 1.1, 1.1 ]
         lons: [ 0, 0, 0, 0.1 ]
         dateTimes: [ 0, 3600,
         7200, 10800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -59,14 +61,15 @@ Ship track error first segment category 1:
   obs space:
     name: Ship
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 1, 1.5]
         lons: [ 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -85,14 +88,15 @@ Ship track error last segment category 2:
   obs space:
     name: Ship
     simulated variables: [air_temperature] 
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.5, 0, 1 ]
         lons: [ 0, 0, 0, 0 ]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -111,14 +115,15 @@ Ship track error last segment category 1:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 1 ]
         lons: [ 0, 0, 0 ]
         dateTimes: [ 0, 3600,
                      7200]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -137,14 +142,15 @@ Ship track error middle segment prev fast category 4:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.999, -0.001, -0.002]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -163,14 +169,15 @@ Ship track error middle segment prev fast category 104:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.999, 1.999, 2.5 ]
         lons: [ 0, 0, 0, 0 ]
         dateTimes: [ 0, 3600,
                      7200, 10800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [ 1.0 ]
+        obs errors: [ 1.0 ]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -189,14 +196,15 @@ Ship track error middle segment next fast category 4:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.5, 1.5, 0.501]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -217,14 +225,15 @@ Ship track error middle segment next fast category 104:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.5, 1.5, 2.499]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -243,14 +252,15 @@ Ship track error middle segment average fast category 5: #uses time res to contr
   obs space:
     name: Ship
     simulated variables: [air_temperature]  
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.1, 1.1, 1.1]
         lons: [ 0, 0, 0, 0.5]
         dateTimes: [ 0, 3600,
                      7200, 7200]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -269,14 +279,15 @@ Ship track error middle segment prev average fast category 5:
   obs space:
     name: Ship
     simulated variables: [air_temperature]  
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.5, 1.5, 0.6 ]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      3600, 7200]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -295,14 +306,15 @@ Ship track error middle segment prev average fast category 105:
   obs space:
     name: Ship
     simulated variables: [air_temperature]   
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.5, 1.5, 2.0 ]
         lons: [ 0, 0, 0, 0 ]
         dateTimes: [ 0, 3600,
                      3600, 7200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [ 1.0 ]
+        obs errors: [ 1.0 ]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
@@ -321,14 +333,15 @@ Ship track error middle segment prev angle large category 6:
   obs space:
     name: Ship
     simulated variables: [air_temperature]   
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.1, 0.1, 0.1]
         lons: [ 0, 0, 1, 1.5]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -347,14 +360,15 @@ Ship track error middle segment angle large category 6:
   obs space:
     name: Ship
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.1, 1.1, 1.1]
         lons: [ 0, 0, 0, 0.1]
         dateTimes: [ 0, 3600,
                      7200, 10800]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -373,15 +387,16 @@ Ship track error middle segment previous previous angle large category 7:
   obs space:
     name: Ship
     simulated variables: [air_temperature]  
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0.1, 1.1, 1.1]
         lons: [ 0, 0.1, 0.1, 0.1, 0.1]
         dateTimes: [ 0, 3600,
                      7200, 10800,
                      14400]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -400,15 +415,16 @@ Ship track error middle segment next angle large category 7:
   obs space:
     name: Ship
     simulated variables: [air_temperature]   
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.1, 1.1, 1.2, 1.2]
         lons: [ 0, 0, 0, 0, 0.1]
         dateTimes: [ 0, 3600,
                      7200, 10800,
                      14400]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -427,14 +443,15 @@ Ship track error middle segment prev speed < half next speed category 8:
   obs space:
     name: Ship
     simulated variables: [air_temperature]  
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 1.0, 1.2]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200, 10800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -453,14 +470,15 @@ Ship track error middle segment next speed < half prev speed category 8:
   obs space:
     name: Ship
     simulated variables: [air_temperature]  
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.2, 1.2, 1.2]
         lons: [ 0, 0, 0, 0]
         dateTimes: [ 0, 3600,
                      7200, 10800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
@@ -479,14 +497,15 @@ Ship track error middle segment category 100:
   obs space:
     name: Ship
     simulated variables: [air_temperature]    
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0.1, 1.1, 1.2 ]
         lons: [ 0, 0, 0, 0 ]
         dateTimes: [ 0, 3600,
                      7200, 10800 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true

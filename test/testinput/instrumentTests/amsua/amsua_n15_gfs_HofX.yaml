@@ -14,7 +14,9 @@ observations:
   obs space:
     name: amsua_n15
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n15_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n15_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:

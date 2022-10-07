@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-       obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+       engine:
+         type: H5File
+         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
 #   obsdataout:
-#     obsfile:  Data/satwind_obs_1d_2020100106_noinv_satellitename_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_1d_2020100106_noinv_satellitename_out.nc4
     simulated variables: [eastward_wind]
   obs filters:
   - filter: satname

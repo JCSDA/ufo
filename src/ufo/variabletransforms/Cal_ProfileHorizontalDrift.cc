@@ -23,7 +23,9 @@ Cal_ProfileHorizontalDrift::Cal_ProfileHorizontalDrift
  const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
  const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
   : TransformBase(options, data, flags, obserr),
-    heightCoord_(options.HeightCoord)
+    heightCoord_(options.HeightCoord),
+    keep_in_window_(options.keep_in_window),
+    requireDescendingPressureSort_(options.RequireDescendingPressureSort)
 {}
 
 /************************************************************************************/
@@ -37,10 +39,19 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
     throw eckit::UserError("Group variables configuration is empty", Here());
 
   // Ensure observations have been sorted by air pressure in descending order.
-  if (obsdb_.obs_sort_var() != "air_pressure")
-    throw eckit::UserError("Sort variable must be air_pressure", Here());
-  if (obsdb_.obs_sort_order() != "descending")
-    throw eckit::UserError("Profiles must be sorted in descending order", Here());
+  if (requireDescendingPressureSort_) {
+    if (obsdb_.obs_sort_var() != "air_pressure")
+      throw eckit::UserError("Sort variable must be air_pressure", Here());
+    if (obsdb_.obs_sort_order() != "descending")
+      throw eckit::UserError("Profiles must be sorted in descending order", Here());
+  } else {
+    oops::Log::warning() << "Warning: the requirement that pressures are sorted in "
+                         << "descending order has been disabled for this transform. "
+                         << "This could lead to incorrect behaviour. "
+                         << "If you did not intend to do this, ensure that the option "
+                         << "'require descending pressure sort' is set to 'true'."
+                         << std::endl;
+  }
 
   // Obtain values from ObsSpace.
   std::vector<float> latitude_in, longitude_in, wind_speed, wind_from_direction, height;
@@ -81,13 +92,15 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
     formulas::horizontalDrift(locs, apply,
                               latitude_in, longitude_in, datetime_in,
                               height, wind_speed, wind_from_direction,
-                              latitude_out, longitude_out, datetime_out);
+                              latitude_out, longitude_out, datetime_out,
+                              formulas::MethodFormulation::UKMO,
+                              keep_in_window_ ? &(obsdb_.windowEnd()) : nullptr);
   }
 
   // Save output values.
-  obsdb_.put_db("DerivedMetaData", "latitude", latitude_out);
-  obsdb_.put_db("DerivedMetaData", "longitude", longitude_out);
-  obsdb_.put_db("DerivedMetaData", "dateTime", datetime_out);
+  obsdb_.put_db("MetaData", "latitude", latitude_out);
+  obsdb_.put_db("MetaData", "longitude", longitude_out);
+  obsdb_.put_db("MetaData", "dateTime", datetime_out);
 }
 }  // namespace ufo
 

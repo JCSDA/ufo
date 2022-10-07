@@ -145,8 +145,8 @@ class GeoVaLs : public util::Printable,
   void write(const Parameters_ &) const;
   size_t nlocs() const;
 
-  void fill(const std::vector<size_t> &, const std::vector<double> &);
-  void fillAD(const std::vector<size_t> &, std::vector<double> &) const;
+  void fill(const std::vector<size_t> &, const std::vector<double> &, const bool);
+  void fillAD(const std::vector<size_t> &, std::vector<double> &, const bool) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}

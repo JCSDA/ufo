@@ -5,11 +5,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out1.nc4
   obs bias:  # test reading coefficients for 2 predictors; coeffs are zero for all channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test1.nc4
@@ -24,11 +28,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out2.nc4
   obs bias:  # test reading coefficients for 1 predictor (all channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test2.nc4
@@ -42,11 +50,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 7-9, 12
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out3.nc4
   obs bias:  # test reading coefficients for 1 predictor (subset of channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test3.nc4
@@ -60,11 +72,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 7-9, 12
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out4.nc4
   obs bias:  # test reading coefficients for 2 predictors and subset of channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test4.nc4
@@ -79,11 +95,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 7-9, 12
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out5.nc4
   obs bias:  # test reading coefficients for 1 predictor and subset of channels
              # and static (==1) coefficients for another predictor
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
@@ -101,11 +121,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_out6.nc4
   obs bias:  # test reading all channels and most predictors
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test6.nc4

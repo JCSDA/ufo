@@ -5,11 +5,15 @@ Duplicates, constraints on buddy counts, legacy pair collector:
     name: Aircraft
     simulated variables: [air_temperature]
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/met_office_buddy_check_pair_finder_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_buddy_check_pair_finder_out.nc4
   Met Office Buddy Check, modern:
     use_legacy_buddy_collector: false
     num_zonal_bands: 12

@@ -5,24 +5,59 @@ observations:
 - obs operator:
     name: AodLUTs
     obs options:
-      AerosolOption: aerosols_gocart_merra_2
-      RCFile: [geosaod.rc]
+      AerosolOption: aerosols_gocart_1
+      RCFile: geosaod.rc
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian
       CoefficientPath: Data/
+      model units coeff: 1.e-9
+#      dry mix ratio: true
   obs space:
     name: Aod
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
     simulated variables: [aerosol_optical_depth]
     channels: 4
 #   obsdataout:
-#     obsfile: Data/aod_obs_2018041500_m_aodluts_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aod_obs_2018041500_m_aodluts_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
-  #temporary to replace with NasaBench
-  vector ref: GsiHofX
-  tolerance: 1.0e-02
+  vector ref: HofX_1
+  tolerance: 1.0e-06
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-13
+- obs operator:
+    name: AodLUTs
+    obs options:
+      AerosolOption: aerosols_gocart_2
+      RCFile: geosaod.rc
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      model units coeff: 1.e-9
+#      dry mix ratio: true
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosol_optical_depth]
+    channels: 4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aod_obs_2018041500_m_aodluts_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: HofX_2
+  tolerance: 1.0e-06
   linear obs operator test:
     coef TL: 1.0e-3
     tolerance TL: 1.0e-5

@@ -7,7 +7,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -36,7 +38,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -64,7 +68,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -95,7 +101,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -122,7 +130,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2]
   HofX: HofX
   obs filters:
@@ -151,7 +161,9 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2]
   HofX: HofX
   obs filters:
@@ -171,7 +183,9 @@ observations:
 - obs space:
     name: "Test data for 'set' with 'ignore: none'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   # reject all observations (this should have no effect on the behaviour of subsequent filters)
@@ -211,7 +225,9 @@ observations:
 - obs space:
     name: "Test data for 'set' with 'ignore: rejected observations'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   # reject observations taken at latitude <= -1
@@ -244,7 +260,9 @@ observations:
 - obs space:
     name: "Test data for 'set' with 'ignore: defective observations'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
   obs filters:
   # set the diagnostic flag FlagA for all non-defective observations (in this case, those with
@@ -264,7 +282,9 @@ observations:
 - obs space:
     name: "Test data for 'set' of a non-existing flag"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   - filter: Perform Action
@@ -277,7 +297,9 @@ observations:
 - obs space:
     name:  "Test data for 'unset' with 'ignore: none'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   # reject all observations (this should have no effect on the behaviour of subsequent filters)
@@ -322,7 +344,9 @@ observations:
 - obs space:
     name:  "Test data for 'unset' with 'ignore: rejected observations'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   # set the diagnostic flag FlagA everywhere
@@ -360,7 +384,9 @@ observations:
 - obs space:
     name:  "Test data for 'unset' with 'ignore: defective observations'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
   obs filters:
   # set the diagnostic flag FlagA everywhere
@@ -385,7 +411,9 @@ observations:
 - obs space:
     name: "Test data for 'unset' of a non-existing flag"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
   - filter: Perform Action
@@ -398,7 +426,9 @@ observations:
 - obs space:
     name: "Test data for 'set' followed by 'reject'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   # reject observations with temperatures below 303 K
@@ -427,7 +457,9 @@ observations:
 - obs space:
     name: "Test data for 'set' followed by 'reject'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   # reject observations with temperatures below 303 K
@@ -456,7 +488,9 @@ observations:
 - obs space:
     name: "Test data for 'reject' followed by 'set'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Perform Action
@@ -472,7 +506,9 @@ observations:
 - obs space:
     name: "Test data for 'set' followed by 'accept'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [surface_pressure]  # ObsValues at the first two locations are missing
   obs filters:
   # initially reject all observations
@@ -499,7 +535,9 @@ observations:
 - obs space:
     name: "Test data for 'accept' followed by 'set'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   # initially reject all observations
@@ -525,7 +563,9 @@ observations:
 - obs space:
     name: "Test data for 'flag original and averaged profiles'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
       obsgrouping:
         group variables: ["intvar3"]
     simulated variables: [variable1]
@@ -549,7 +589,9 @@ observations:
 - obs space:
     name: "Test data for 'flag original and averaged profiles', just one profile flagged"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
       obsgrouping:
         group variables: ["intvar3"]
     simulated variables: [variable1]
@@ -571,7 +613,9 @@ observations:
 - obs space:
     name: "Test data for 'flag original and averaged profiles'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
     extension:
       allocate companion records with length: 71
@@ -590,7 +634,9 @@ observations:
 - obs space:
     name: "Test data for 'flag original and averaged profiles'"
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
       obsgrouping:
         group variables: ["intvar3"]
     simulated variables: [variable1]

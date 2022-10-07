@@ -44,6 +44,9 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// RTTOV can handle either but the output BTs obtained can be slightly different
   oops::Parameter<bool> RTTOVGasUnitConv{"RTTOV_GasUnitConv", false, this};
 
+  /// Should RTTOV scale the reference Ozone profile according to the 70 hPa temperature
+  oops::Parameter<bool> RTTOVScaleRefOzone{"RTTOV_ScaleRefOzone", true, this};
+
   /// The default option to setup the code for a particular version of RTTOV
   oops::Parameter<std::string> RTTOVDefaultOpts{"RTTOV_default_opts", "RTTOV", this};
 

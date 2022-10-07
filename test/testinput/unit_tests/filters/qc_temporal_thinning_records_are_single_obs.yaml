@@ -26,7 +26,9 @@ observations:
 - obs space:
     name: Records are not single obs, no category variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -47,7 +49,9 @@ observations:
 - obs space:
     name: Records are not single obs, category variable station_id
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -69,7 +73,9 @@ observations:
 - obs space:
     name: Records are not single obs, category variable category
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -91,7 +97,9 @@ observations:
 - obs space:
     name: Records are single obs, no category variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -114,7 +122,9 @@ observations:
 - obs space:
     name: Records are single obs, category variable station_id
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -137,7 +147,9 @@ observations:
 - obs space:
     name: Records are single obs, category variable category
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -161,7 +173,9 @@ observations:
 - obs space:
     name: Records are single obs, category variable category, prority variable used
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]
@@ -187,7 +201,9 @@ observations:
 - obs space:
     name: Records are single obs, grouped by category and station_id, category variable category
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "category", "station_id" ]
     simulated variables: [air_temperature]
@@ -213,7 +229,9 @@ observations:
 - obs space:
     name: Records are single obs, grouped by category and station_id, category variable category, prority variable used
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "category", "station_id" ]
     simulated variables: [air_temperature]
@@ -237,7 +255,9 @@ observations:
 - obs space:
     name: Bad category used
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/thinning_records.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature]

@@ -12,7 +12,9 @@ observations:
   obs space:
     name: avhrr3_n18
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_n18_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 3,4,5
   geovals:

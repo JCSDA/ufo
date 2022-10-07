@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2022 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
@@ -25,15 +26,25 @@ static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
 // -----------------------------------------------------------------------------
 
 ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
-                                                   const ObsInsituTemperatureTLADParameters &
+                                                   const ObsInsituTemperatureParameters &
                                                    params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  const std::vector<std::string> vv{"sea_water_potential_temperature",
-                                    "sea_water_salinity",
-                                    "sea_water_cell_thickness"};
-  varin_.reset(new oops::Variables(vv));
-  ufo_insitutemperature_tlad_setup_f90(keyOper_, params.toConfiguration());
+  // get optional list of variables to operate on (to be consistent with other
+  // operators that work under "composite") eventhough we assume on the Fortran
+  // side that this operator will operate on just a single variable (sea_water_temperature)
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(params.variables.value(), odb.assimvariables(),
+    operatorVars_, operatorVarIndices);
+
+  // sanity check to make sure sea_water_temperature is the ONLY variable
+  ASSERT_MSG(
+    operatorVars_.size() == 1 && operatorVars_[0] == "sea_water_temperature",
+    "InsituTemperature can only work on variable \"sea_water_temperature\"");
+
+  ufo_insitutemperature_tlad_setup_f90(keyOper_, params.toConfiguration(),
+    operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(), varin_);
+
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;
 }
 
@@ -56,7 +67,7 @@ void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnos
 void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
                                              ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
-                                      ovec.size(), ovec.toFortran());
+                                      ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: TL observation operator run" << std::endl;
 }
 
@@ -65,7 +76,7 @@ void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
 void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals,
                                              const ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
-                                      ovec.size(), ovec.toFortran());
+                                      ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: adjoint observation operator run" << std::endl;
 }
 

@@ -17,10 +17,6 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/gnssro/BndNBAM/ObsGnssroBndNBAM.interface.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -30,15 +26,33 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class GnssroBndNBAMOptionsParameters: public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GnssroBndNBAMOptionsParameters, Parameters)
+ public:
+  oops::Parameter<int> useCompress{"use_compress", 1, this};
+  oops::Parameter<std::string> vertLayer{"vertlayer", "full", this};
+  oops::Parameter<int> srSteps{"sr_steps", 2, this};
+  oops::Parameter<std::string> superRefQC{"super_ref_qc", "NBAM", this};
+  oops::Parameter<std::string> outputDiags{"output_diags", "false", this};
+};
+
+class GnssroBndNBAMParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GnssroBndNBAMParameters, ObsOperatorParametersBase)
+ public:
+  oops::Parameter<GnssroBndNBAMOptionsParameters> options{"obs options", {}, this};
+};
+
 // -----------------------------------------------------------------------------
 // Gnssro BndNBAM observation operator
 //   -- to reproduce exactly the operational (2019) NBAM
 class ObsGnssroBndNBAM : public ObsOperatorBase,
                         private util::ObjectCounter<ObsGnssroBndNBAM> {
  public:
+  typedef GnssroBndNBAMParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsGnssroBndNBAM";}
 
-  ObsGnssroBndNBAM(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsGnssroBndNBAM(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGnssroBndNBAM();
 
 // Obs Operator

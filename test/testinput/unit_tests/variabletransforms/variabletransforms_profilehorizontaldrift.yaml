@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -24,23 +26,25 @@ observations:
     - reference:
         name: latitude@TestReference
       test:
-        name: latitude@DerivedMetaData
+        name: latitude@MetaData
       absTol: 1.0e-4
     - reference:
         name: longitude@TestReference
       test:
-        name: longitude@DerivedMetaData
+        name: longitude@MetaData
       absTol: 1.0e-4
     - reference:
         name: dateTime@TestReference
       test:
-        name: dateTime@DerivedMetaData
+        name: dateTime@MetaData
 
 # The same test using 'height' as the vertical coordinate.
 - obs space:
     name: Radiosonde, height as vertical coordinate
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -59,23 +63,25 @@ observations:
     - reference:
         name: latitude@TestReference
       test:
-        name: latitude@DerivedMetaData
+        name: latitude@MetaData
       absTol: 1.0e-4
     - reference:
         name: longitude@TestReference
       test:
-        name: longitude@DerivedMetaData
+        name: longitude@MetaData
       absTol: 1.0e-4
     - reference:
         name: dateTime@TestReference
       test:
-        name: dateTime@DerivedMetaData
+        name: dateTime@MetaData
 
 # The sample is not grouped into profiles, throwing an exception.
 - obs space:
     name: Sample not grouped into profiles
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
         sort variable: "air_pressure"
         sort order: "descending"
@@ -90,7 +96,9 @@ observations:
 - obs space:
     name: Profiles not sorted by air pressure
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort order: "descending"
@@ -105,7 +113,9 @@ observations:
 - obs space:
     name: Profiles not sorted in descending order
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -116,3 +126,42 @@ observations:
       Transform: ProfileHorizontalDrift
       height coordinate: height
   expectExceptionWithMessage: Profiles must be sorted in descending order
+
+# Do not require pressures to be sorted in descending order.
+# (Still perform the sort, which allows the same test data set to be used.)
+- obs space:
+    name: Do not require pressures to be sorted in descending order
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [geopotential_height, wind_speed, wind_from_direction]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: ProfileHorizontalDrift
+      height coordinate: height
+      require descending pressure sort: false
+      # Exclude BUFR sondes, whose position has already been measured.
+      where:
+      - variable:
+          name: ObsType@MetaData
+        is_not_in: 50500
+  compareVariables:
+    - reference:
+        name: latitude@TestReference
+      test:
+        name: latitude@MetaData
+      absTol: 1.0e-4
+    - reference:
+        name: longitude@TestReference
+      test:
+        name: longitude@MetaData
+      absTol: 1.0e-4
+    - reference:
+        name: dateTime@TestReference
+      test:
+        name: dateTime@MetaData

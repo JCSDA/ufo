@@ -1,0 +1,48 @@
+# EMC's ice concentration retrievals from SSMIS
+
+obs space:
+  name: icec_ssmis_f17
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: noaa
+  simulated variables: [sea_ice_area_fraction]
+obs operator:
+  name: Identity
+obs error:
+  covariance model: diagonal
+obs filters:
+
+  - filter: Domain Check
+    where:
+    - variable: {name: sea_area_fraction@GeoVaLs}
+      minvalue: 0.5
+
+  - filter: Domain Check
+    where:
+    - variable: {name: distance_from_coast@GeoVaLs}
+      minvalue: 100e3
+
+  - filter: Bounds Check
+    minvalue: 0.0
+    maxvalue: 1.0
+
+  - filter: Background Check
+    threshold: 5.0
+
+  - filter: Domain Check
+    where:
+    - variable: { name: sea_surface_temperature@GeoVaLs}
+      maxvalue: 2.0
+
+  - filter: Domain Check
+    where:
+    - variable: { name: sea_surface_temperature@GeoVaLs}
+      maxvalue: 0.0
+    action:
+      name: inflate error
+      inflation factor: 2.0

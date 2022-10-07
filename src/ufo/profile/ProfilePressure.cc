@@ -46,9 +46,9 @@ namespace ufo {
 
     // Retrieve the model background fields.
     const std::vector <float> &pressureGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure_rho_minus_one);
     const std::vector <float> &heightGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_height_rho_minus_one);
 
     if (!oops::allVectorsSameNonZeroSize(pressureGeoVaLs,
                                          heightGeoVaLs)) {

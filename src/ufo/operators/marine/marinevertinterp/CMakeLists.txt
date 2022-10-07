@@ -12,6 +12,7 @@ set ( marinevertinterp_files
     ObsMarineVertInterp.interface.h
     ObsMarineVertInterpTLAD.interface.F90
     ObsMarineVertInterpTLAD.interface.h
+    ObsMarineVertInterpParameters.h
     ufo_marinevertinterp_mod.F90
     ufo_marinevertinterp_tlad_mod.F90
     PARENT_SCOPE

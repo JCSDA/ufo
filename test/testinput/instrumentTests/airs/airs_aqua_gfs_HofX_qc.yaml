@@ -12,7 +12,9 @@ observations:
   obs space:
     name: airs_aqua
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/airs_aqua_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               1, 6, 7, 10, 11, 15, 16, 17, 20, 21, 22, 24,
@@ -247,6 +249,7 @@ observations:
         channels: *all_channels
         options:
           channels: *all_channels
+          sensor: *Sensor_ID
           obserr_demisf: [0.01, 0.02, 0.03, 0.02, 0.03]
           obserr_dtempf: [0.50, 2.00, 4.00, 2.00, 4.00]
 #  Gross check
@@ -341,4 +344,4 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 805
+  passedBenchmark: 807

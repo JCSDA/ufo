@@ -27,12 +27,11 @@ static LinearObsOperatorMaker<ObsGnssroBndROPP2DTLAD> makerGnssroBndROPP2DTL_("G
 // -----------------------------------------------------------------------------
 
 ObsGnssroBndROPP2DTLAD::ObsGnssroBndROPP2DTLAD(const ioda::ObsSpace & odb,
-                                               const eckit::Configuration & config)
+                                               const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperGnssroBndROPP2D_(0), varin_()
 {
-  const eckit::LocalConfiguration obsOptions(config, "obs options");
-
-  ufo_gnssro_bndropp2d_tlad_setup_f90(keyOperGnssroBndROPP2D_, obsOptions);
+  ufo_gnssro_bndropp2d_tlad_setup_f90(keyOperGnssroBndROPP2D_,
+                                      params.options.value().toConfiguration());
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};
 
   varin_.reset(new oops::Variables(vv));

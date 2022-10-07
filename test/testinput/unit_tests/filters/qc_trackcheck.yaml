@@ -12,11 +12,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out1.nc4
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -71,11 +75,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out2.nc4
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -141,11 +149,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out3.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out3.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -214,11 +226,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out4.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out4.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -319,11 +335,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out5.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out5.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -376,11 +396,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out6.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out6.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -401,11 +425,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out7.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out7.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -458,11 +486,15 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out8.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out8.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -513,9 +545,13 @@ observations:
 - obs space: # No grouping into records
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out9.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out9.nc
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -536,11 +572,15 @@ observations:
 - obs space: # Group into records (perversely) by something else than the station ID
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "latitude" ]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out10.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out10.nc4
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check

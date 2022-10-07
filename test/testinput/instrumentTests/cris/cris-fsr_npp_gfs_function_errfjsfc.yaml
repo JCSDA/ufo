@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: cris-fsr_npp
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
@@ -50,6 +52,7 @@ observations:
     name: ObsErrorFactorSurfJacobianRad@ObsFunction
     options:
       channels: *all_channels
+      sensor: *Sensor_ID
       obserr_demisf: [0.01, 0.02, 0.03, 0.02, 0.03]
       obserr_dtempf: [0.50, 2.00, 4.00, 2.00, 4.00]
       test_qcflag: PreQC

@@ -12,7 +12,9 @@ observations:
   obs space:
     name: cris-fsr_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_n20_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_n20_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
@@ -67,5 +69,5 @@ observations:
       - name: scan_angle
         order: 2
       - name: scan_angle
-  vector ref: GsiHofXBc
-  tolerance: 1.e-7
+  vector ref: ObsValue
+  tolerance: 1.e-1

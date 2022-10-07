@@ -106,8 +106,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
   // Probability density of bad observations, PdBad:
   const std::vector<float> PdBad(obsdb_.nlocs(), parameters_.PdBad.value());
-  // NOT profiles averaged to model levels (single-level anyway):
-  const bool ModelLevels = false;
 
   bool previousVariableWasFirstComponentOfTwo = false;
   // Loop through all filter variables. .yaml will say if it's 2-component.
@@ -217,10 +215,10 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                              hofx1_reduced,
                              hofxerr_reduced,
                              PdBad_reduced,
-                             ModelLevels,
+                             parameters_.PerformSDiffCheck.value(),
                              qcflags1_reduced,
                              PGE1_reduced,
-                             -1,
+                             parameters_.ErrVarMax,
                              previousVariableWasFirstComponentOfTwo?
                              &secondComponentObVal_reduced : nullptr,
                              previousVariableWasFirstComponentOfTwo?
@@ -268,7 +266,8 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       } else {
         // Set flagged, for scalar:
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::BackRejectFlag) {
+          if (qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::BackRejectFlag ||
+              qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) {
             flagged[filterVarIndex][jobs] = true;
           }
           oops::Log::debug() << "flagged[" << jobs << "]: "

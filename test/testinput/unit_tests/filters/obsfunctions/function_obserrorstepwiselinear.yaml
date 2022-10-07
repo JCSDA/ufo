@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: TestObsError
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
     simulated variables: [eastward_wind]
 #   obsdataout:
-#     obsfile: Data/sfc_obs_2018041500_metars_small_obserr_stepwiselinear_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_obs_2018041500_metars_small_obserr_stepwiselinear_out.nc
   obs function:
     name: ObsErrorModelStepwiseLinear@ObsFunction
     options:
@@ -22,7 +26,9 @@ observations:
 #- obs space:
 #    name: TestObsError
 #    obsdatain:
-#      obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+#      engine:
+#        type: H5File
+#        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
 #    simulated variables: [air_temperature]
 #  obs function:
 #    name: ObsErrorModelStepwiseLinear@ObsFunction

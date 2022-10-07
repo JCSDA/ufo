@@ -162,7 +162,7 @@ contains
     real(c_double),        intent(inout)    :: hofx(nvars,nlocs)
     type(ufo_geovals),     intent(inout)    :: hofxdiags    !non-h(x) diagnostics
     type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
-    
+
     real(c_double)                          :: missing
     type(fckit_mpi_comm)                    :: f_comm
 
@@ -208,21 +208,24 @@ contains
     nlevels = geoval_temp % nval
     nullify(geoval_temp)
 
+    ! Sanity checks
+    if (nprofiles == 0) return
+
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,'(A, A, I0, A, I0, A)')                                              &
       trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
     call fckit_log%debug(message)
 
-    call self % RTprof % alloc_profs(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
+    call self % RTprof % alloc_profiles(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
     !Assign the atmospheric and surface data from the GeoVaLs
     write(message,'(A, A, I0, A, I0, A)')                                              &
       trim(routine_name), ': Creating RTTOV profiles from geovals'
     call fckit_log%debug(message)
     if(present(ob_info)) then
-      call self % RTprof % setup(geovals,obss,self % conf,ob_info=ob_info)
+      call self % RTprof % setup_rtprof(geovals,obss,self % conf,ob_info=ob_info)
     else
-      call self % RTprof % setup(geovals,obss,self % conf)
+      call self % RTprof % setup_rtprof(geovals,obss,self % conf)
     end if
 
     !DAR: Removing sensor_loop until it's demonstrated to be needed and properly tested
@@ -262,7 +265,7 @@ contains
         trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
       call fckit_log%debug(message)
 
-      call self % RTprof % alloc_profs_k(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
+      call self % RTprof % alloc_profiles_k(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
       call self % RTprof % alloc_k(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
     end if
 
@@ -301,10 +304,10 @@ contains
         iprof = prof_start + iprof_rttov - 1
 
         ! print profile information if requested
-        if(any(self % conf % inspect == iprof)) call self % RTprof % print(self % conf, iprof, i_inst)
+        if(any(self % conf % inspect == iprof)) call self % RTprof % print_rtprof(self % conf, iprof, i_inst)
 
         ! check RTTOV profile and flag it if it fails the check
-        if(self % conf % RTTOV_profile_checkinput) call self % RTprof % check(self % conf, iprof, i_inst, errorstatus)
+        if(self % conf % RTTOV_profile_checkinput) call self % RTprof % check_rtprof(self % conf, iprof, i_inst, errorstatus)
 
         ! check sfc_emiss valid if read in
         if(errorstatus == errorstatus_success) then
@@ -342,7 +345,8 @@ contains
               ! if the channel number for this channel * profile == channel number needed
               ! chanprof(ichan) % chan refers to the index in the coefficient file
               if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
-                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, chanprof(ichan) % prof)
+                iprof = prof_start + chanprof(ichan) % prof - 1
+                self % RTprof % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
                 if (self % RTprof % emissivity(ichan) % emis_in == 0.0) then
                   self % RTprof % calcemis(ichan) = .true.
                 end if
@@ -511,14 +515,14 @@ contains
     ! Deallocate structures for rttov_direct
     if(jacobian_needed) then
       call self % RTprof % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
-      call self % RTprof % alloc_profs_k(errorstatus, self % conf, size(self % RTprof % profiles_k), -1, asw=0)
+      call self % RTprof % alloc_profiles_k(errorstatus, self % conf, size(self % RTprof % profiles_k), -1, asw=0)
       ! deallocation of profiles_k isn't done by default in alloc_profs_k because it can contain the trajectory 
       ! which is currently used for the TL/AD but the 1dvar doesn't use it so it can be safely done here
       deallocate (self % RTprof % profiles_k)
       if (self % conf % do_mw_scatt) deallocate(self % RTProf % mw_scatt % profiles_k)
     endif
     call self % RTprof % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
-    call self % RTprof % alloc_profs(errorstatus, self % conf, size(self % RTprof % profiles), -1, asw=0)
+    call self % RTprof % alloc_profiles(errorstatus, self % conf, size(self % RTprof % profiles), -1, asw=0)
 
     deallocate(self % RTprof % chanprof)
     

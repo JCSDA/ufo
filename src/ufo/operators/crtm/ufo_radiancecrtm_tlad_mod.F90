@@ -195,6 +195,8 @@ real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
 real(kind_real), allocatable :: Wfunc(:)
+! For gmi_gpm geophysical angles at channels 10-13.
+character(len=1) :: angle_hf
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -482,6 +484,13 @@ real(kind_real), allocatable :: Wfunc(:)
       if (allocated(hofxdiags%geovals(jvar)%vals)) &
          deallocate(hofxdiags%geovals(jvar)%vals)
 
+      angle_hf=achar(0)
+      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+         if (ch_diags(jvar) > 9) then
+            angle_hf="1"
+         endif
+      endif
+
       !============================================
       ! Diagnostics used for QC and bias correction
       !============================================
@@ -520,7 +529,7 @@ real(kind_real), allocatable :: Wfunc(:)
               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
               hofxdiags%geovals(jvar)%vals = missing
               allocate(TmpVar(self%n_Profiles))
-              call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+              call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
               do jprofile = 1, self%n_Profiles
                  if (.not.self%Skip_Profiles(jprofile)) then
                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
@@ -541,7 +550,7 @@ real(kind_real), allocatable :: Wfunc(:)
                hofxdiags%geovals(jvar)%vals = missing
                allocate(TmpVar(self%n_Profiles))
                allocate(Tao(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
                      ! get layer-to-space transmittance
@@ -573,7 +582,7 @@ real(kind_real), allocatable :: Wfunc(:)
                allocate(TmpVar(self%n_Profiles))
                allocate(Tao(self%n_Layers))
                allocate(Wfunc(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
                      ! get layer-to-space transmittance

@@ -12,7 +12,9 @@ observations:
   obs space:
     name: seviri_m11
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/seviri_m11_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 4-11
   geovals:
@@ -121,6 +123,7 @@ observations:
         channels: *all_channels
         options:
           channels: *all_channels
+          sensor: *Sensor_ID
           obserr_demisf: [0.01, 0.02, 0.02, 0.02, 0.02]
           obserr_dtempf: [0.50, 2.00, 3.00, 3.00, 5.00]
 # Useflag Check

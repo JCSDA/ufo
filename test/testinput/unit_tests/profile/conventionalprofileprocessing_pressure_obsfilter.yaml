@@ -9,12 +9,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_pressure_obsfilter_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_pressure_obsfilter_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals.nc4
   obs filters:
@@ -26,6 +30,8 @@ observations:
     BChecks_Skip: true
     flagBasicChecksFail: false
     PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "height_levels_minus_one": "air_pressure_levels_minus_one"}
   HofX: HofX
   passedBenchmark: 21
   benchmarkFlag: 24
@@ -33,12 +39,16 @@ observations:
 - obs space:
     name: GeoVaLs are in the wrong order, throwing an exception
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_pressure_obsfilter_reversed_geovals_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_pressure_obsfilter_reversed_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals_reversed.nc4
   obs filters:
@@ -50,5 +60,7 @@ observations:
     BChecks_Skip: true
     flagBasicChecksFail: false
     PrintStationID: true
+    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
+    "height_levels_minus_one": "air_pressure_levels_minus_one"}
   HofX: HofX
   expectExceptionWithMessage: GeoVaLs are in the wrong order

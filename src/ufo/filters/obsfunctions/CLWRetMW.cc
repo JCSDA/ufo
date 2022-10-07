@@ -16,6 +16,8 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
@@ -68,6 +70,8 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
     invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
     // Include list of required data from ObsDiag
     invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
+    invars_ += Variable("cloud_liquid_water@ObsDiag" , channels);
+    invars_ += Variable("cloud_liquid_water_order_2@ObsDiag" , channels);
 
     // Include list of required data from GeoVaLs
     invars_ += Variable("water_area_fraction@GeoVaLs");
@@ -180,11 +184,65 @@ void CLWRetMW::compute(const ObsFilterData & in,
     // Indices of data at channeles 37v and 37h in the above array "channels"
     const int jch37v = 0;
     const int jch37h = 1;
-    std::vector<float> bt_clr_37v(nlocs), bt_clr_37h(nlocs);
+
+    std::vector<float> bt_clr_37v(nlocs);
+    std::vector<float> bt_clr_37v_wobc(nlocs);
+    std::vector<float> bc_cloud_liquid_water_37v(nlocs);
+    std::vector<float> bc_cloud_liquid_water_order_2_37v(nlocs);
+
+    std::vector<float> bt_clr_37h(nlocs);
+    std::vector<float> bt_clr_37h_wobc(nlocs);
+    std::vector<float> bc_cloud_liquid_water_37h(nlocs);
+    std::vector<float> bc_cloud_liquid_water_order_2_37h(nlocs);
+
     in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
-           [jch37v], bt_clr_37v);
+           [jch37v], bt_clr_37v_wobc);
     in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
-           [jch37h], bt_clr_37h);
+           [jch37h], bt_clr_37h_wobc);
+
+//  Add bias correction to "brightness_temperature_assuming_clear_sky"
+    std::vector<float> bias37v(nlocs), bias37h(nlocs);
+    const float missing = util::missingValue(missing);
+    bool bc_cloud_terms = false;
+    if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+        [jch37v])) {
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+             [jch37v], bias37v);
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+             [jch37h], bias37h);
+      in.get(Variable("cloud_liquid_water@ObsDiag" , channels)
+             [jch37v], bc_cloud_liquid_water_37v);
+      in.get(Variable("cloud_liquid_water_order_2@ObsDiag" , channels)
+             [jch37v], bc_cloud_liquid_water_order_2_37v);
+      in.get(Variable("cloud_liquid_water@ObsDiag" , channels)
+             [jch37h], bc_cloud_liquid_water_37h);
+      in.get(Variable("cloud_liquid_water_order_2@ObsDiag" , channels)
+             [jch37h], bc_cloud_liquid_water_order_2_37h);
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        if (bc_cloud_liquid_water_37v[0] != missing &&
+            bc_cloud_liquid_water_order_2_37v[0] != missing) {
+           bc_cloud_terms = true;
+           break;
+        }
+      }
+    } else {
+      bias37v.assign(nlocs, 0.0f);
+      bias37h.assign(nlocs, 0.0f);
+    }
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+//    Since cloud_BC predictors are added, bias37v and bias37h should be subtracted by those terms.
+      bt_clr_37v[iloc] = bt_clr_37v_wobc[iloc] + bias37v[iloc];
+      bt_clr_37h[iloc] = bt_clr_37h_wobc[iloc] + bias37h[iloc];
+    }
+    if (bc_cloud_terms) {
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        bt_clr_37v[iloc] -= bc_cloud_liquid_water_37v[iloc];
+        bt_clr_37v[iloc] -= bc_cloud_liquid_water_order_2_37v[iloc];
+        bt_clr_37h[iloc] -= bc_cloud_liquid_water_37h[iloc];
+        bt_clr_37h[iloc] -= bc_cloud_liquid_water_order_2_37h[iloc];
+      }
+    }
+
     // Calculate retrieved cloud liquid water
     std::vector<float> bt37v(nlocs), bt37h(nlocs);
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
@@ -193,17 +251,6 @@ void CLWRetMW::compute(const ObsFilterData & in,
       in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch37h], bt37h);
       // Get bias based on group type
       if (options_.addBias.value() == vargrp[igrp]) {
-        std::vector<float> bias37v(nlocs), bias37h(nlocs);
-        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
-            [jch37v])) {
-          in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
-                 [jch37v], bias37v);
-          in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
-                 [jch37h], bias37h);
-        } else {
-        bias37v.assign(nlocs, 0.0f);
-        bias37h.assign(nlocs, 0.0f);
-        }
         // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
         // correction
         if (options_.addBias.value() == "ObsValue") {
@@ -213,10 +260,28 @@ void CLWRetMW::compute(const ObsFilterData & in,
           }
         }
       }
-
+      if (vargrp[igrp] == "HofX" && bc_cloud_terms) {
+        // HofX used for cloud calculation is not corrected with clouds.
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          bt37v[iloc] -= bc_cloud_liquid_water_37v[iloc];
+          bt37v[iloc] -= bc_cloud_liquid_water_order_2_37v[iloc];
+          bt37h[iloc] -= bc_cloud_liquid_water_37h[iloc];
+          bt37h[iloc] -= bc_cloud_liquid_water_order_2_37h[iloc];
+        }
+      }
 
       // Compute cloud index
       CIret_37v37h_diff(bt_clr_37v, bt_clr_37h, water_frac, bt37v, bt37h, out[igrp]);
+
+      if (vargrp[igrp] == "HofX" && bc_cloud_terms) {
+        // Add bias corrections with the cloud bias correction terms in corrected HofX.
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          bt37v[iloc] += bc_cloud_liquid_water_37v[iloc];
+          bt37v[iloc] += bc_cloud_liquid_water_order_2_37v[iloc];
+          bt37h[iloc] += bc_cloud_liquid_water_37h[iloc];
+          bt37h[iloc] += bc_cloud_liquid_water_order_2_37h[iloc];
+        }
+      }
     }
   // -------------------- MHS ---------------------------
   } else if (options_.ch89v.value() != boost::none && options_.ch166v.value() != boost::none) {

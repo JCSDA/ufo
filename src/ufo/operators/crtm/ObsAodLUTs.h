@@ -16,10 +16,6 @@
 #include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
 
-namespace eckit {
-  class Configuration;
-}
-
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -29,14 +25,35 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class AodLUTsOptionsParameters: public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(AodLUTsOptionsParameters, Parameters)
+ public:
+  oops::RequiredParameter<std::string> option{"AerosolOption", this};
+  oops::RequiredParameter<std::string> file{"RCFile", this};
+  oops::RequiredParameter<std::string> sensorID{"Sensor_ID", this};
+  oops::OptionalParameter<std::string> coeffPath{"CoefficientPath", this};
+  oops::OptionalParameter<std::string> endian{"EndianType", this};
+  oops::Parameter<bool> absorptionAOD{"AbsorptionAod", false, this};
+  oops::Parameter<double> modelunitscoeff{"model units coeff", 1, this};
+  oops::Parameter<bool> drymixratio{"dry mix ratio", false, this};
+};
+
+class AodLUTsParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(AodLUTsParameters, ObsOperatorParametersBase)
+ public:
+  oops::RequiredParameter<AodLUTsOptionsParameters> options{"obs options", this};
+};
+
 // -----------------------------------------------------------------------------
 /// AodLUTs observation for UFO.
 class ObsAodLUTs : public ObsOperatorBase,
                     private util::ObjectCounter<ObsAodLUTs> {
  public:
+  typedef AodLUTsParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsAodLUTs";}
 
-  ObsAodLUTs(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsAodLUTs(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsAodLUTs();
 
 // Obs Operator

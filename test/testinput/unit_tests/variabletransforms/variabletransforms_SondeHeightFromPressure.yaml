@@ -10,7 +10,9 @@ observations:
 - obs space:
     name: Radiosonde, UKMO method
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -35,7 +37,9 @@ observations:
 - obs space:
     name: Radiosonde, NCAR-RAL method
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -60,7 +64,9 @@ observations:
 - obs space:
     name: Radiosonde (air_pressure, height)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -85,7 +91,9 @@ observations:
 - obs space:
     name: Radiosonde (air_pressure_levels, geopotential_height_levels)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"
@@ -110,7 +118,9 @@ observations:
 - obs space:
     name: Radiosonde (air_pressure_levels, height_levels)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_pressure2height_levels.nc4
       obsgrouping:
         group variables: ["station_id"]
         sort variable: "dateTime"

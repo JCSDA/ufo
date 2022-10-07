@@ -21,9 +21,13 @@ observations:
 - obs space:
     name: Median super-obbing for Satellite SST only
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/superob_test_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_test_out1.nc4
     simulated variables: [sea_surface_temperature]
   obs filters:
   - filter: Gaussian Thinning
@@ -56,9 +60,13 @@ observations:
 - obs space:
     name: Median super-obbing for Satellite SST with extra variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/superob_test_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_test_out2.nc4
     simulated variables: [sea_surface_temperature, other_variable]
   obs filters:
   - filter: Gaussian Thinning
@@ -78,9 +86,13 @@ observations:
 - obs space:
     name: Median super-obbing for Satellite SST only
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/superob_test_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_test_out3.nc4
     simulated variables: [sea_surface_temperature]
   obs filters:
   - filter: Gaussian Thinning
@@ -101,9 +113,13 @@ observations:
 - obs space:
     name: Median super-obbing for Satellite SST, default min 5 obs per bin, derived obs value
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/superob_test_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_test_out4.nc4
     simulated variables: [sea_surface_temperature]
     derived variables: [sea_surface_temperature]
     observed variables: []

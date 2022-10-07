@@ -24,12 +24,21 @@ namespace ufo {
       throw eckit::UserError("Group variables configuration is empty", Here());
 
     // Ensure observations have been sorted by air pressure in descending order.
-    if (odb_.obs_sort_var() != parameters.pressureCoord.value())
-      throw eckit::UserError(std::string("Sort variable must be ") +
-                             parameters.pressureCoord.value(),
-                             Here());
-    if (odb_.obs_sort_order() != "descending")
-      throw eckit::UserError("Profiles must be sorted in descending order", Here());
+    if (options_.requireDescendingPressureSort) {
+      if (odb_.obs_sort_var() != parameters.pressureCoord.value())
+        throw eckit::UserError(std::string("Sort variable must be ") +
+                               parameters.pressureCoord.value(),
+                               Here());
+      if (odb_.obs_sort_order() != "descending")
+        throw eckit::UserError("Profiles must be sorted in descending order", Here());
+    } else {
+      oops::Log::warning() << "Warning: the requirement that pressures are sorted in "
+                           << "descending order has been disabled for this operator. "
+                           << "This could lead to incorrect behaviour. "
+                           << "If you did not intend to do this, ensure that the option "
+                           << "'require descending pressure sort' is set to 'true'."
+                           << std::endl;
+    }
 
     // Check the ObsSpace has been extended. If this is not the case
     // then it will not be possible to access profiles in the original and
@@ -41,6 +50,7 @@ namespace ufo {
     // This GeoVaL is used to determine the slant path locations.
     modelVerticalCoord_ = options_.modelVerticalCoordinate;
     requiredVars_ += oops::Variables({modelVerticalCoord_});
+    geovalsObsSameDir_ = options_.geovalsObsSameDir;
 
     // Add any simulated variables to the list of variables used in this operator.
     getOperatorVariables(parameters.variables.value(), odb_.assimvariables(),

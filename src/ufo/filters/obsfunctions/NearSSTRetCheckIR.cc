@@ -223,6 +223,8 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
           a12 = a12 + w_rad * dbtdts[ichan][iloc] * tb_ta[ichan];
           a13 = a13 + w_rad * dbtdts[ichan][iloc] * tb_qa[ichan];
           a22 = a22 + w_rad * tb_ta[ichan] * tb_ta[ichan];
+          a23 = a23 + w_rad * tb_ta[ichan] * tb_qa[ichan];
+          a33 = a33 + w_rad * tb_qa[ichan] * tb_qa[ichan];
           float varrad = w_rad * innovation[ichan][iloc];
           c1x = c1x + varrad * dbtdts[ichan][iloc];
           c2x = c2x + varrad * tb_ta[ichan];

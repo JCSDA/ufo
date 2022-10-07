@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_interpolate_data_from_file_predictors.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_interpolate_data_from_file_predictors.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind, specific_humidity]
 #   obsdataout:
-#     obsfile: Data/sondes_obs_2018041500_s_interpolate_data_from_file_predictors_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_s_interpolate_data_from_file_predictors_out.nc4
   obs bias:
     static bc:
       predictors:
@@ -28,11 +32,15 @@ observations:
 - obs space:
     name: Satellite
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/mhs_metop-b_obs_2018041500_m_interpolate_date_from_file_predictors.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/mhs_metop-b_obs_2018041500_m_interpolate_date_from_file_predictors.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 2-4
 #   obsdataout:
-#     obsfile: Data/mhs_metop-b_obs_2018041500_m_interpolate_date_from_file_predictors_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/mhs_metop-b_obs_2018041500_m_interpolate_date_from_file_predictors_out.nc4
   obs bias:
     static bc:
       predictors:

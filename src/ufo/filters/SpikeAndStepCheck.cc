@@ -97,19 +97,12 @@ void SpikeAndStepCheck::validateParameters() const {
 /// Apply the spike and step check filter.
 
 void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
-                                  const Variables & filtervars,
-                                  std::vector<std::vector<bool>> & flagged) const {
+                                    const Variables & filtervars,
+                                    std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "SpikeAndStepCheck filter" << std::endl;
-  if (!std::all_of(apply.begin(), apply.end(), [](bool applyAllTrue) { return applyAllTrue; })) {
-    throw eckit::UserError(
-        ": This filter does not yet accept 'where' conditions. Please raise "
-        "a GitHub issue if it is needed.", Here());
-  }
 
   ObsAccessor obsAccessor =
     ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
-  std::vector<size_t> validObsIds =
-    obsAccessor.getValidObservationIds(apply, *flags_, filtervars, false);
   const size_t totalNumObs = obsAccessor.totalNumObservations();
 
   const std::string yVarName = parameters_.yVar.value().variable();
@@ -122,10 +115,10 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
                                              xVarName);
 
   std::vector<bool> isThinned(totalNumObs, false);
-  std::vector<bool> spikeFlag;
-  std::vector<bool> stepFlag;
+  std::vector<bool> spikeFlag(totalNumObs, false);
+  std::vector<bool> stepFlag(totalNumObs, false);
   // get diagnostic flags from ObsSpace (can't create them in the code, must do in YAML...
-  //  ...must be there when ObsSpace constructed?)
+  //  ...must be there when ObsSpace constructed)
   if (obsdb_.has("DiagnosticFlags/spike", yVarName)) {
     obsdb_.get_db("DiagnosticFlags/spike", yVarName, spikeFlag);
   } else {
@@ -144,15 +137,20 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
   const std::vector<size_t> & record_numbers = obsdb_.recidx_all_recnums();
   // Loop over record numbers (i.e. profile to profile):
   for (size_t iProfile : record_numbers) {
-    // Get vector of obs within a profile:
-    const std::vector<size_t> & obs_indices = obsdb_.recidx_vector(iProfile);
+    // Get non-missing where-included obs indices for this profile
+    // (candidateForRetentionIfAnyFilterVariablesPassedQC false - i.e. unselect location
+    //  if any filter variable fails QC):
+    const std::vector<size_t> obs_indices = obsAccessor.getValidObsIdsInProfile(iProfile,
+                                                                                apply,
+                                                                                *flags_,
+                                                                                filtervars,
+                                                                                false);
     // Struct of y, x, dy, dx, dy/dx:
     xyStruct xy;
 
     // set ydiff and dydx for this record:
     set_xyrec(x,
               y,
-              validObsIds,
               obs_indices,
               xy,
               parameters_);
@@ -169,7 +167,6 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
                                 xy,
                                 tolerances,
                                 obs_indices,
-                                validObsIds,
                                 parameters_);
   }  // for each record
   obsAccessor.flagRejectedObservations(isThinned, flagged);
@@ -183,7 +180,6 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
 
 void SpikeAndStepCheck::set_xyrec(const std::vector<float> &x,
                                   const std::vector<float> &y,
-                                  const std::vector<size_t> &validObsIds,
                                   const std::vector<size_t> &obs_indices,
                                   xyStruct &xy,
                                   const Parameters_ &parameters_) const {
@@ -211,8 +207,8 @@ void SpikeAndStepCheck::set_xyrec(const std::vector<float> &x,
     maxDx = parameters_.boundaryOptions.value().value().maxDx.value();
   }
   for (size_t ind = 0; ind < obs_indices.size(); ++ind) {
-    xy.yrec.push_back(y[validObsIds[obs_indices[ind]]]);
-    xy.xrec.push_back(x[validObsIds[obs_indices[ind]]]);
+    xy.yrec.push_back(y[obs_indices[ind]]);
+    xy.xrec.push_back(x[obs_indices[ind]]);
     if (ind > 0) {
       xy.ydiff.push_back(missingValueFloat);  // defaults
       xy.xdiff.push_back(missingValueFloat);
@@ -276,7 +272,7 @@ std::vector<float> SpikeAndStepCheck::set_tolerances(const std::vector<float> &x
   if (nSections > 0) {
     for (size_t ind = 0; ind < obs_indices.size(); ++ind) {
       size_t iSec = 0;
-      while (iSec < nSections+1) {
+      while (iSec < nSections) {
         if (xrec[ind] <= toleranceBoundaries[iSec]) {
           if (iSec == 0) {
             tolerances.push_back(tolerance);  // below lowest boundary
@@ -289,6 +285,7 @@ std::vector<float> SpikeAndStepCheck::set_tolerances(const std::vector<float> &x
         } else {  // xrec[ind] > toleranceBoundaries[iSec]
           if (iSec == nSections-1) {
             tolerances.push_back(tolerance*(toleranceFactors[iSec]));  // above final boundary
+            break;  // next obs index
           }
           iSec++;
         }
@@ -312,7 +309,6 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
                                           xyStruct &xy,
                                           const std::vector<float> &tolerances,
                                           const std::vector<size_t> &obs_indices,
-                                          const std::vector<size_t> &validObsIds,
                                           const Parameters_ &parameters_) const {
   if (xy.ydiff.size() < 2) {
     return;  // don't do anything if record is <=2 obs long (can't tell spike or step)
@@ -323,6 +319,7 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
   const float gradientTolerance =
     parameters_.toleranceOptions.value().gradientTolerance.value();
   const float threshold = parameters_.toleranceOptions.value().threshold.value();
+  const float smallThreshold = parameters_.toleranceOptions.value().smallThreshold.value();
   std::vector<float> boundaryRange;
   std::vector<float> stepTolRange;
   if (parameters_.boundaryOptions.value() == boost::none) {
@@ -342,8 +339,8 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
       if (std::abs(xy.ydiff[ind]) > tolerances[ind+1] ||
           std::abs(xy.ydiff[ind+1]) > tolerances[ind+1]) {
         if (std::abs(xy.ydiff[ind]+xy.ydiff[ind+1]) < threshold*tolerances[ind+1]) {
-          isThinned[validObsIds[obs_indices[ind+1]]] = true;  // spike
-          spikeFlag[validObsIds[obs_indices[ind+1]]] = true;
+          isThinned[obs_indices[ind+1]] = true;  // spike
+          spikeFlag[obs_indices[ind+1]] = true;
           lastChecked = ind+1;
           oops::Log::debug() << "Large spike at " << obs_indices[ind+1] << std::endl;
         } else {  // if (dx[i]+dx[i+1]) can be a denominator:
@@ -362,8 +359,8 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
                                 xy.xdiff[ind]*xy.ydiff[ind+1])/
                                 (xy.xdiff[ind] + xy.xdiff[ind+1]);
             if (std::abs(yInterpDiff) < threshold*tolerances[ind+1]) {
-              isThinned[validObsIds[obs_indices[ind+1]]] = false;  // not a spike after all
-              spikeFlag[validObsIds[obs_indices[ind+1]]] = false;
+              isThinned[obs_indices[ind+1]] = false;  // not a spike after all
+              spikeFlag[obs_indices[ind+1]] = false;
               lastChecked = ind+1;  // OPS bug - should be lastChecked = ind;
               oops::Log::debug() << "Not spike at " << obs_indices[ind+1] << std::endl;
             }  // not a spike after all
@@ -374,9 +371,9 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
                  (std::abs(xy.dydx[ind]) > gradientTolerance ||
                   std::abs(xy.dydx[ind+1]) > gradientTolerance) &&
                  (std::abs(xy.ydiff[ind]+xy.ydiff[ind+1]) <
-                  0.25*std::abs(xy.ydiff[ind]-xy.ydiff[ind+1]))) {
-        isThinned[validObsIds[obs_indices[ind+1]]] = true;  // smaller spike
-        spikeFlag[validObsIds[obs_indices[ind+1]]] = true;
+                  smallThreshold*std::abs(xy.ydiff[ind]-xy.ydiff[ind+1]))) {
+        isThinned[obs_indices[ind+1]] = true;  // smaller spike
+        spikeFlag[obs_indices[ind+1]] = true;
         lastChecked = ind+1;
         oops::Log::debug() << "Small spike at " << obs_indices[ind+1] << std::endl;
       }  // spike or not
@@ -386,11 +383,11 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
        (ind > lastChecked) &&
        (xy.ydiff[ind] != missingValueFloat)) {
       if (std::abs(xy.ydiff[ind]) > tolerances[ind]) {
-        isThinned[validObsIds[obs_indices[ind+1]]] = true;  // end of step
-        stepFlag[validObsIds[obs_indices[ind+1]]] = true;
+        isThinned[obs_indices[ind+1]] = true;  // end of step
+        stepFlag[obs_indices[ind+1]] = true;
         lastChecked = ind+1;
         if (ind < xy.ydiff.size()-1) {  // only flag start of step if not final level
-          isThinned[validObsIds[obs_indices[ind]]] = true;  // start of step
+          isThinned[obs_indices[ind]] = true;  // start of step
         }
         oops::Log::debug() << "Step at " << obs_indices[ind] << " and " <<
                               obs_indices[ind+1] << std::endl;
@@ -401,11 +398,11 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
                             std::min(stepTolRange[0], stepTolRange[1]) &&
             xy.ydiff[ind] < tolerances[ind]*
                             std::max(stepTolRange[0], stepTolRange[1])) {
-          isThinned[validObsIds[obs_indices[ind+1]]] = false;  // not step after all
-          stepFlag[validObsIds[obs_indices[ind+1]]] = false;
+          isThinned[obs_indices[ind+1]] = false;  // not step after all
+          stepFlag[obs_indices[ind+1]] = false;
           lastChecked = ind+1;
           if (ind < xy.ydiff.size()-1) {  // only unflag start of step if not final level
-            isThinned[validObsIds[obs_indices[ind]]] = false;  // not step after all
+            isThinned[obs_indices[ind]] = false;  // not step after all
           }
           oops::Log::debug() << "Not step after all at " << obs_indices[ind] <<
                                 " and " << obs_indices[ind+1] << std::endl;

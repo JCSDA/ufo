@@ -15,16 +15,14 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/AssociativeContainers.h"
-#include "oops/util/parameters/ConfigurationParameter.h"
-#include "oops/util/parameters/HasParameters_.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/ParametersOrConfiguration.h"
 #include "oops/util/parameters/RequiredPolymorphicParameter.h"
 #include "oops/util/Printable.h"
 #include "ufo/ObsOperatorParametersBase.h"
+
+#include "ufo/utils/VariableNameMap.h"
 
 namespace oops {
   class Variables;
@@ -42,14 +40,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /// Base class for observation operators
 ///
-/// Note: subclasses can opt to extract their settings either from
-/// a Configuration object or from a subclass of ObsOperatorParametersBase.
-///
-/// In the former case, they should provide a constructor with the following signature:
-///
-///    SubclassName(const ioda::ObsSpace &, const eckit::Configuration &);
-///
-/// In the latter case, the implementer should first define a subclass of ObsOperatorParametersBase
+/// The implementer should first define a subclass of ObsOperatorParametersBase
 /// holding the settings of the operator in question. The ObsOperatorBase subclass should then
 /// typedef `Parameters_` to the name of the ObsOperatorParametersBase subclass and provide a
 /// constructor with the following signature:
@@ -58,10 +49,9 @@ namespace ufo {
 class ObsOperatorBase : public util::Printable,
                         private boost::noncopyable {
  public:
-  // The second parameter is unused and at some point will be removed.
   explicit ObsOperatorBase(const ioda::ObsSpace & odb,
-                           const eckit::Configuration & = eckit::LocalConfiguration())
-     : odb_(odb) {}
+                           const VariableNameMap & nameMap = VariableNameMap(boost::none))
+     : odb_(odb), nameMap_(nameMap) {}
   virtual ~ObsOperatorBase() {}
 
 /// Obs Operator
@@ -81,6 +71,8 @@ class ObsOperatorBase : public util::Printable,
  private:
   virtual void print(std::ostream &) const = 0;
   const ioda::ObsSpace & odb_;
+ protected:
+  mutable VariableNameMap nameMap_;
 };
 
 // -----------------------------------------------------------------------------
@@ -145,17 +137,12 @@ class ObsOperatorFactory {
 
 template<class T>
 class ObsOperatorMaker : public ObsOperatorFactory {
-  /// Defined as T::Parameters_ if T defines a Parameters_ type; otherwise as
-  /// GenericObsOperatorParameters.
-  typedef oops::TParameters_IfAvailableElseFallbackType_t<T, GenericObsOperatorParameters>
-    Parameters_;
+  typedef typename T::Parameters_   Parameters_;
 
   ObsOperatorBase * make(const ioda::ObsSpace & odb,
                          const ObsOperatorParametersBase & params) override {
     const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(params);
-    return new T(odb,
-                 oops::parametersOrConfiguration<oops::HasParameters_<T>::value>(
-                   stronglyTypedParams));
+    return new T(odb, stronglyTypedParams);
   }
 
   std::unique_ptr<ObsOperatorParametersBase> makeParameters() const override {

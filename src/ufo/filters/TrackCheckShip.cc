@@ -86,7 +86,9 @@ float TrackCheckShip::angle(const TrackCheckShip::TrackObservation &a,
   auto locC = c.getLocation();
   Eigen::Vector3f disp1{locB[0]-locA[0], locB[1]-locA[1], locB[2]-locA[2]};
   Eigen::Vector3f disp2{locC[0]-locB[0], locC[1]-locB[1], locC[2]-locB[2]};
-  auto retValue = std::acos(disp1.dot(disp2) / (disp1.norm() * disp2.norm()));
+  auto CosAngle = disp1.dot(disp2) / (disp1.norm() * disp2.norm());
+  CosAngle = std::max(-1.0f, (std::min(1.0f, CosAngle)));
+  auto retValue = std::acos(CosAngle);
   retValue *= static_cast<float>(Constants::rad2deg);
   return std::round(retValue * 10.0f) * 0.1f;
 }
@@ -514,12 +516,9 @@ void TrackCheckShip::removeFaultyObservation(
       diagnostics_->storeFirstIterativeRemovalInfo(
             std::make_pair(observationNumbersAroundFastest, errorCategory));
     }
-    if (rejectedObservation == observationAfterFastestSegment) {
-      fail(observationAfterFastestSegment - 1);
-    } else {
-      fail(observationAfterFastestSegment);
-    }
-    track.erase(observationAfterFastestSegment - 1, observationAfterFastestSegment);
+    fail(observationAfterFastestSegment - 1);
+    fail(observationAfterFastestSegment);
+    track.erase(observationAfterFastestSegment - 1, observationAfterFastestSegment + 1);
   } else {
     if (options_.testingMode.value() && firstIterativeRemoval) {
       std::vector<size_t> rejectedObservationNumber{rejectedObservation->get().

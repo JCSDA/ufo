@@ -1,0 +1,21 @@
+obs space:
+  name: windborne
+  _source: windborne
+  obsdatain:
+    engine:
+      type: H5File
+    obsgrouping:
+      group variables: ["flight_name"]
+      sort variable: "air_pressure"
+      sort order: "descending"
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  simulated variables: [air_temperature, eastward_wind, northward_wind]
+obs operator:
+  name: VertInterp
+  variables:
+  - name: air_temperature
+  - name: eastward_wind
+  - name: northward_wind

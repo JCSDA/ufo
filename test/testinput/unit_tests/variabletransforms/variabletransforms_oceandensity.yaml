@@ -1,0 +1,35 @@
+window begin: 2017-12-31T21:00:00Z
+window end: 2030-01-01T03:00:00Z
+
+observations:
+- obs space:
+    name: Ocean density calculation
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ocean_density_out.nc4
+    simulated variables: [ocean_temperature, ocean_salinity, ocean_density]
+    observed variables: [ocean_temperature, ocean_salinity]
+    derived variables: [ocean_density]
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: ObsValue/ocean_temperature
+      is_defined:
+    - variable:
+        name: ObsValue/ocean_salinity
+      is_defined:
+    Transform: OceanDensity
+    ocean pressure group: TestReference
+  compareVariables:
+    - reference:
+        name: TestReference/ocean_density
+      test:
+        name: DerivedObsValue/ocean_density
+      relTol: 2.0e-4
+      
