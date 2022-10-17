@@ -230,9 +230,9 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
         oops::Log::info() << "Sharp refractivity gradient of " << gradient[iLevel] <<
                              " found at " << iLevel << "  " << sharpGradientImpact <<
                              std::endl;
-        oops::Log::debug() << iLevel << "   " << refracProfile[iLevel] << "   " <<
-                              heightProfile[iLevel] << "   " <<
-                              radiusCurvature[iLevel] << std::endl;
+        oops::Log::debug() << iLevel << "   " << refracProfile[iLevel+1] << "   " <<
+                              heightProfile[iLevel+1] << "   " <<
+                              radiusCurvature[bottomOb] << std::endl;
         break;
       }
     }
