@@ -38,6 +38,7 @@
 #include "ufo/filters/PrintFilterData.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProcessAMVQI.h"
+#include "ufo/filters/ProfileAverageObsToModLevels.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
@@ -119,6 +120,8 @@ void instantiateObsFilterFactory() {
            printFilterDataMaker("Print Filter Data");
   static oops::interface::FilterMaker<ObsTraits, ProcessAMVQI>
              ProcessAMVQIMaker("Process AMV QI");
+  static oops::interface::FilterMaker<ObsTraits, ProfileAverageObsToModLevels>
+           ProfileAverageObsToModLevelsMaker("Average Observations To Model Levels");
   static oops::interface::FilterMaker<ObsTraits, ProfileBackgroundCheck>
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::interface::FilterMaker<ObsTraits, ProfileFewObsCheck>

@@ -79,6 +79,8 @@ set ( filters_files
       QCmanager.h
       PerformAction.cc
       PerformAction.h
+      ProfileAverageObsToModLevels.cc
+      ProfileAverageObsToModLevels.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc

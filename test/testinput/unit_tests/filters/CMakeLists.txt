@@ -570,6 +570,17 @@ ufo_add_test( NAME    test_ufo_qc_processamvqi
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_qc_average_obs_to_mod_levels
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_profile_average_obs_to_mod_levels.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_qc_profile_background_check
               TIER    1
               ECBUILD
