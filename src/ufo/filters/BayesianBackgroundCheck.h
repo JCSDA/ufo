@@ -46,6 +46,12 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
   // constant background error term (optional):
   oops::OptionalParameter<float> BkgErr{"bg error", this};
 
+  // suffix of background error variable:
+  oops::Parameter<std::string> BkgErrSuffix{"bg error suffix", "_background_error", this};
+
+  // background error variable group:
+  oops::Parameter<std::string> BkgErrGroup{"bg error group", "ObsDiag", this};
+
   // parameter to determine if squared departure/ErrVar check applied (optional, default true):
   // note that the threshold for this check (PGE_SDiffCrit) is defined as one of the PGE input
   // parameters

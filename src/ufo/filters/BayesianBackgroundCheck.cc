@@ -57,7 +57,8 @@ BayesianBackgroundCheck::~BayesianBackgroundCheck() {
 /// specified filter variable.
 
 Variable BayesianBackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
-  return Variable(filterVariable.variable() + "_background_error@ObsDiag");
+  return Variable(parameters_.BkgErrGroup.value() + "/" +
+                  filterVariable.variable() + parameters_.BkgErrSuffix.value());
 }
 
 // -----------------------------------------------------------------------------
