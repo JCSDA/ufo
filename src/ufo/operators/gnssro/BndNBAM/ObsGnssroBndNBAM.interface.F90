@@ -50,11 +50,9 @@ end subroutine ufo_gnssro_bndnbam_setup_c
 subroutine ufo_gnssro_bndnbam_delete_c(c_key_self) bind(c,name='ufo_gnssro_bndnbam_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_gnssro_BndNBAM), pointer :: self
 
-call ufo_gnssro_BndNBAM_registry%delete(c_key_self,self)
-    
+call ufo_gnssro_BndNBAM_registry%remove(c_key_self)
+
 end subroutine ufo_gnssro_bndnbam_delete_c
   
 ! ------------------------------------------------------------------------------

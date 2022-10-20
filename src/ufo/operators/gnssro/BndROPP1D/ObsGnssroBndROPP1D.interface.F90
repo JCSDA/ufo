@@ -48,11 +48,9 @@ end subroutine ufo_gnssro_BndROPP1D_setup_c
 subroutine ufo_gnssro_bndropp1d_delete_c(c_key_self) bind(c,name='ufo_gnssro_bndropp1d_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_gnssro_BndROPP1D), pointer :: self
 
-call ufo_gnssro_BndROPP1D_registry%delete(c_key_self,self)
-    
+call ufo_gnssro_BndROPP1D_registry%remove(c_key_self)
+
 end subroutine ufo_gnssro_bndropp1d_delete_c
   
 ! ------------------------------------------------------------------------------

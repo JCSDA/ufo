@@ -59,10 +59,11 @@ end subroutine ufo_example_setup_c
 subroutine ufo_example_delete_c(c_key_self) bind(c,name='ufo_example_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_example), pointer :: self
 
-call ufo_example_registry%delete(c_key_self, self)
+! if type ufo_example has allocatable data, it should implement a destructor
+! marked final to deallocate the data. this will be called when remove
+! deallocates the ufo_example instance from the registry.
+call ufo_example_registry%remove(c_key_self)
 
 end subroutine ufo_example_delete_c
 

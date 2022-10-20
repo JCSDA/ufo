@@ -67,8 +67,11 @@ subroutine ufo_fov_delete_c(c_key_self) bind(c, name='ufo_fov_delete_f90')
 
   type(ufo_fov), pointer :: self
 
-  call ufo_fov_registry%delete(c_key_self, self)
+  ! even though ufo_fov type itself has no allocatable data, it wraps GSI code
+  ! that does have allocated arrays, so we must delete it
+  call ufo_fov_registry%get(c_key_self, self)
   call self%delete
+  call ufo_fov_registry%remove(c_key_self)
 
 end subroutine ufo_fov_delete_c
 

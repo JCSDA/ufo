@@ -56,10 +56,11 @@ end subroutine ufo_example_tlad_setup_c
 subroutine ufo_example_tlad_delete_c(c_key_self) bind(c,name='ufo_example_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_example_tlad), pointer :: self
 
-call ufo_example_tlad_registry%delete(c_key_self, self)
+! if type ufo_example_tlad has allocatable data, it should implement a destructor
+! marked final to deallocate the data. this will be called when remove
+! deallocates the ufo_example_tlad instance from the registry.
+call ufo_example_tlad_registry%remove(c_key_self)
 
 end subroutine ufo_example_tlad_delete_c
 

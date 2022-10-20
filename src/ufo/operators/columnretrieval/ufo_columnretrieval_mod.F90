@@ -85,6 +85,11 @@ subroutine destructor(self)
   implicit none
   type(ufo_columnretrieval), intent(inout) :: self
 
+  if (allocated(self%obskernelvar)) deallocate(self%obskernelvar)
+  if (allocated(self%obspressurevar)) deallocate(self%obspressurevar)
+  if (allocated(self%tracervars)) deallocate(self%tracervars)
+  if (allocated(self%stretch)) deallocate(self%stretch)
+
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------
