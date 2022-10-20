@@ -504,6 +504,19 @@ ufo_add_test( NAME    test_ufo_qc_oceancolor_preqc
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+if( ${gsw_FOUND} )
+    ufo_add_test( NAME    test_ufo_qc_ocean_vertical_stability_check
+                TIER    1
+                ECBUILD
+                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_ocean_vertical_stability_check.yaml"
+                MPI     4
+                LIBS    ufo
+                LABELS  filters
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                TEST_DEPENDS ufo_get_ufo_test_data )
+endif( ${gsw_FOUND} )
+#
 ufo_add_test( NAME    test_ufo_qc_poisson_disk_thinning
               TIER    1
               ECBUILD

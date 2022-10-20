@@ -68,6 +68,8 @@ set ( filters_files
       ObsDomainErrCheck.h
       ObsFilterData.cc
       ObsFilterData.h
+      OceanVerticalStabilityCheck.cc
+      OceanVerticalStabilityCheck.h
       PreQC.cc
       PreQC.h
       ProbabilityGrossErrorWholeReport.cc
