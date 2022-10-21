@@ -32,7 +32,6 @@
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
-#include "ufo/filters/OceanVerticalStabilityCheck.h"
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
@@ -55,6 +54,10 @@
 #include "ufo/filters/VariableTransforms.h"
 #include "ufo/operators/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/operators/gnssro/QC/ROobserror.h"
+
+#if defined(GSW_FOUND)
+  #include "ufo/filters/OceanVerticalStabilityCheck.h"
+#endif
 
 #if defined(RTTOV_FOUND)
   #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
@@ -111,8 +114,6 @@ void instantiateObsFilterFactory() {
            ModelObThresholdMaker("ModelOb Threshold");
   static oops::interface::FilterMaker<ObsTraits, MWCLWCheck>
            MWCLWCheckMaker("MWCLW Check");
-  static oops::interface::FilterMaker<ObsTraits, OceanVerticalStabilityCheck>
-           OceanVerticalStabilityCheckMaker("Ocean Vertical Stability Check");
   static oops::interface::FilterMaker<ObsTraits, PerformAction>
            performActionMaker("Perform Action");
   static oops::interface::FilterMaker<ObsTraits, PoissonDiskThinning>
@@ -157,6 +158,12 @@ void instantiateObsFilterFactory() {
            VariableTransformsMaker("Variable Transforms");
   static oops::interface::FilterMaker<ObsTraits, ObsDiagnosticsWriter>
            YDIAGsaverMaker("YDIAGsaver");
+
+  // Only include this filter if gsw is present
+  #if defined(GSW_FOUND)
+  static oops::interface::FilterMaker<ObsTraits, OceanVerticalStabilityCheck>
+           OceanVerticalStabilityCheckMaker("Ocean Vertical Stability Check");
+  #endif
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
