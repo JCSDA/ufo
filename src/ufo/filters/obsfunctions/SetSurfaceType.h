@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/missingValues.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
@@ -76,6 +77,7 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   /// Default Obs Operator surface types to map to (RTTOV is the default here)
   /// Example: To use the RTTOV sea surface type (1) as the ObsOperator sea surface type set
   ///          SurfaceTypeSea: 1
+  oops::Parameter<int> SurfaceTypeDefault{"SurfaceTypeDefault", util::missingValue(-1) , this};
   oops::Parameter<int> SurfaceTypeLand{"SurfaceTypeLand", 0, this};
   oops::Parameter<int> SurfaceTypeSea{"SurfaceTypeSea", 1, this};
   oops::Parameter<int> SurfaceTypeSeaIce{"SurfaceTypeSeaIce", 2, this};

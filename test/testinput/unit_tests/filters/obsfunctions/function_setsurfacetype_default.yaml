@@ -1,0 +1,57 @@
+_: &rttov_surftype_land 42
+  
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+### Test user-specified default surface type ###
+- obs space:
+    name: Test user-specified default surface type
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_setsurface_default.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_n20_obs_20191230T0000_rttov_setsfctype_default_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs function:
+    name: SetSurfaceType@ObsFunction
+    options:
+      UseReportSurface: true
+      UseReportElevation: true
+      UseAAPPSurfaceClass: true
+      UseSurfaceWaterFraction: true
+      SurfaceTypeDefault: *rttov_surftype_land
+    variables: [surface_type]
+    tolerance: 1.0e-7
+### Test obsfunction hard-coded default surface type (missing integer) ###
+- obs space:
+    name: Test obsfunction hard-coded default surface type
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_setsurface_default.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_n20_obs_20191230T0000_rttov_setsfctype_default_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs function:
+    name: SetSurfaceType@ObsFunction
+    options:
+      UseReportSurface: true
+      UseReportElevation: true
+      UseAAPPSurfaceClass: true
+      UseSurfaceWaterFraction: false
+    variables: [surface_type_default]
+    tolerance: 1.0e-7
