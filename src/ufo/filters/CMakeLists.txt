@@ -68,8 +68,6 @@ set ( filters_files
       ObsDomainErrCheck.h
       ObsFilterData.cc
       ObsFilterData.h
-      OceanVerticalStabilityCheck.cc
-      OceanVerticalStabilityCheck.h
       PreQC.cc
       PreQC.h
       ProbabilityGrossErrorWholeReport.cc
@@ -303,6 +301,11 @@ set ( filters_files
       obsfunctions/MetOfficeRelativeHumidityCorrection.cc
       obsfunctions/MetOfficeRelativeHumidityCorrection.h
 )
+
+if( ${gsw_FOUND} )
+  list( APPEND filters_files OceanVerticalStabilityCheck.cc
+                             OceanVerticalStabilityCheck.h )
+endif( ${gsw_FOUND} )
 
 if( ${rttov_FOUND} )
   add_subdirectory( rttovonedvarcheck )
