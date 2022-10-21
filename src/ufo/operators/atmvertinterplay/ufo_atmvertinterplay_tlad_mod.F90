@@ -202,10 +202,13 @@ end subroutine atmvertinterplay_tlad_cleanup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine  destructor(self)
+subroutine destructor(self)
   type(ufo_atmvertinterplay_tlad), intent(inout)  :: self
 
   call self%cleanup()
+
+  if (allocated(self%nlevels)) deallocate(self%nlevels)
+  if (allocated(self%coefficients)) deallocate(self%coefficients)
 
 end subroutine destructor
 

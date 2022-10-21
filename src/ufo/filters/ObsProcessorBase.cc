@@ -119,10 +119,15 @@ void ObsProcessorBase::checkFilterData(const oops::FilterStage filterStage) {
 
   // There are no requirements on post filters (run after observation operator).
 
-  // Set both prior_ and post_ to true.
+  // Depending on filter stage set prior_ and/or post_ to true.
   // This ensures priorFilter and postFilter will run doFilter().
-  prior_ = true;
-  post_ = true;
+  if (filterStage == oops::FilterStage::POST) {
+    prior_ = true;
+    post_ = true;
+  }
+  if (filterStage == oops::FilterStage::PRIOR) {
+    prior_ = true;
+  }
 }
 
 }  // namespace ufo

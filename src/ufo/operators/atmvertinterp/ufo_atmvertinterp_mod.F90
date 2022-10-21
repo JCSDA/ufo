@@ -13,7 +13,8 @@ use ufo_vars_mod
      type(oops_variables), public :: geovars
      type(oops_variables), public :: obsvars ! Variables to be simulated
      integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
-                                                      ! simulated variables in the ObsSpace
+                                                      ! simulated variables in the ObsSpace.
+                                                      ! allocated/deallocated at interface layer
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
      character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
      character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group

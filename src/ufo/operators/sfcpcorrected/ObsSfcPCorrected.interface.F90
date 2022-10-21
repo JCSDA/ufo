@@ -64,10 +64,15 @@ end subroutine ufo_sfcpcorrected_setup_c
 subroutine ufo_sfcpcorrected_delete_c(c_key_self) bind(c,name='ufo_sfcpcorrected_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_sfcpcorrected), pointer :: self
 
-call ufo_sfcpcorrected_registry%delete(c_key_self, self)
+call ufo_sfcpcorrected_registry%get(c_key_self, self)
+
+! the obsvarindices array is allocated in the interface layer, so we deallocate here as well
+if (allocated(self%obsvarindices)) deallocate(self%obsvarindices)
+
+call ufo_sfcpcorrected_registry%remove(c_key_self)
 
 end subroutine ufo_sfcpcorrected_delete_c
 

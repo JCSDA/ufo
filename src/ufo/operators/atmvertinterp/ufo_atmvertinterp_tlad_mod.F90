@@ -18,7 +18,8 @@ module ufo_atmvertinterp_tlad_mod
   private
     type(oops_variables), public :: obsvars ! Variables to be simulated
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
-                                                     ! simulated variables in the ObsSpace
+                                                     ! simulated variables in the ObsSpace.
+                                                     ! allocated/deallocated at interface layer
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
     real(kind_real), allocatable :: wf(:)

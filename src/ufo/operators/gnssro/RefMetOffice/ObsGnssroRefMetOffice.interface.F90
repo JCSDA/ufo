@@ -56,10 +56,8 @@ end subroutine ufo_gnssro_refmetoffice_setup_c
 subroutine ufo_gnssro_refmetoffice_delete_c(c_key_self) bind(c,name='ufo_gnssro_refmetoffice_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_gnssro_RefMetOffice), pointer :: self
 
-call ufo_gnssro_RefMetOffice_registry%delete(c_key_self,self)
+call ufo_gnssro_RefMetOffice_registry%remove(c_key_self)
 
 end subroutine ufo_gnssro_refmetoffice_delete_c
   

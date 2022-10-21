@@ -64,7 +64,7 @@ type(ufo_example), pointer :: self
 
 call ufo_example_registry%get(c_self, self)
 call ufo_example_delete(self)
-call ufo_example_registry%delete(c_self, self)
+call ufo_example_registry%remove(c_self)
 
 end subroutine ufo_example_delete_c
 

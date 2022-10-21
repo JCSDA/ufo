@@ -52,11 +52,9 @@ end subroutine ufo_gnssro_BndROPP2D_setup_c
 subroutine ufo_gnssro_bndropp2d_delete_c(c_key_self) bind(c,name='ufo_gnssro_bndropp2d_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_gnssro_BndROPP2D), pointer :: self
 
-call ufo_gnssro_BndROPP2D_registry%delete(c_key_self,self)
-    
+call ufo_gnssro_BndROPP2D_registry%remove(c_key_self)
+
 end subroutine ufo_gnssro_bndropp2d_delete_c
   
 ! ------------------------------------------------------------------------------

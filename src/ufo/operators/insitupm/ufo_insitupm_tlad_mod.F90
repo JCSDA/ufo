@@ -349,6 +349,8 @@ subroutine  destructor(self)
 
   call self%cleanup()
 
+  if (allocated(self%tracer_modes_cmaq)) deallocate(self%tracer_modes_cmaq)
+
 end subroutine destructor
 
 end module ufo_insitupm_tlad_mod

@@ -44,6 +44,7 @@ type, public :: ufo_scatwind_neutralmetoffice
     integer, allocatable, public :: channels(:)
   contains
     procedure :: setup     => ufo_scatwind_neutralmetoffice_setup
+    procedure :: delete    => ufo_scatwind_neutralmetoffice_delete
     procedure :: simobs    => ufo_scatwind_neutralmetoffice_simobs
 end type ufo_scatwind_neutralmetoffice
 

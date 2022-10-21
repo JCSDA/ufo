@@ -63,9 +63,7 @@ end subroutine ufo_marinevertinterp_setup_c
 subroutine ufo_marinevertinterp_delete_c(c_key_self) bind(c,name='ufo_marinevertinterp_delete_f90')
   integer(c_int), intent(inout) :: c_key_self
 
-  type(ufo_marinevertinterp), pointer :: self
-
-  call ufo_marinevertinterp_registry%delete(c_key_self, self)
+  call ufo_marinevertinterp_registry%remove(c_key_self)
 
 end subroutine ufo_marinevertinterp_delete_c
 

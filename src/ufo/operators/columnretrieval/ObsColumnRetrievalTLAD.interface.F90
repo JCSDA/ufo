@@ -58,9 +58,9 @@ subroutine ufo_columnretrieval_tlad_delete_c(c_key_self) bind(c,name='ufo_column
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
-type(ufo_columnretrieval_tlad), pointer :: self
-
-call ufo_columnretrieval_tlad_registry%delete(c_key_self, self)
+! type ufo_columnretrieval_tlad has allocatable data, but has a destructor marked final that
+! should automatically deallocate (assuming compiler support...)
+call ufo_columnretrieval_tlad_registry%remove(c_key_self)
 
 end subroutine ufo_columnretrieval_tlad_delete_c
 

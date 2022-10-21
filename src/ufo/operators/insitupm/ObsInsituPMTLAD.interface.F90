@@ -56,10 +56,10 @@ end subroutine ufo_insitupm_tlad_setup_c
 subroutine ufo_insitupm_tlad_delete_c(c_key_self) bind(c,name='ufo_insitupm_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_insitupm_tlad), pointer :: self
 
-call ufo_insitupm_tlad_registry%delete(c_key_self, self)
+! type ufo_insitupm_tlad has allocatable data, but has a destructor marked final that
+! should automatically deallocate (assuming compiler support...)
+call ufo_insitupm_tlad_registry%remove(c_key_self)
 
 end subroutine ufo_insitupm_tlad_delete_c
 

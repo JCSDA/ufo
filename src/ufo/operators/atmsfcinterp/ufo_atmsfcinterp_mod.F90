@@ -19,7 +19,8 @@ module ufo_atmsfcinterp_mod
   private
     type(oops_variables), public :: obsvars ! Variables to be simulated
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
-                                                      ! simulated variables in the ObsSpace
+                                                     ! simulated variables in the ObsSpace.
+                                                     ! allocated/deallocated in interface layer
     type(oops_variables), public :: geovars
     logical :: use_fact10
     real(kind_real) :: magl
@@ -69,7 +70,6 @@ subroutine atmsfcinterp_setup_(self, f_conf)
 end subroutine atmsfcinterp_setup_
 
 ! ------------------------------------------------------------------------------
-
 subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
   use atmsfc_mod, only : calc_conv_vel_gsi, sfc_wind_fact_gsi, &
                          calc_psi_vars_gsi

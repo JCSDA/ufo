@@ -32,6 +32,7 @@
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
+#include "ufo/filters/OceanVerticalStabilityCheck.h"
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
@@ -110,6 +111,8 @@ void instantiateObsFilterFactory() {
            ModelObThresholdMaker("ModelOb Threshold");
   static oops::interface::FilterMaker<ObsTraits, MWCLWCheck>
            MWCLWCheckMaker("MWCLW Check");
+  static oops::interface::FilterMaker<ObsTraits, OceanVerticalStabilityCheck>
+           OceanVerticalStabilityCheckMaker("Ocean Vertical Stability Check");
   static oops::interface::FilterMaker<ObsTraits, PerformAction>
            performActionMaker("Perform Action");
   static oops::interface::FilterMaker<ObsTraits, PoissonDiskThinning>
