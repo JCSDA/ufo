@@ -160,6 +160,7 @@ endif()
 
 if(gsw_FOUND)
     target_link_libraries(ufo PUBLIC gsw)
+    target_compile_definitions(ufo PUBLIC GSW_FOUND)
 endif()
 
 if(ropp-ufo_FOUND)
