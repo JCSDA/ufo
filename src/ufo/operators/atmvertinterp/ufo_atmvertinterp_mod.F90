@@ -115,7 +115,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, ivar, iobsvar
+  integer :: ilev, iobs, ivar, iobsvar
   real(kind_real), dimension(:), allocatable :: obsvcoord
   type(ufo_geoval), pointer :: vcoordprofile, profile, fact10
   real(kind_real), allocatable :: wf(:)
@@ -155,7 +155,15 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   allocate(tmp(vcoordprofile%nval))
   do iobs = 1, nlocs
     if (self%use_ln) then
-      tmp = log(vcoordprofile%vals(:,iobs))
+      ! the lines below are computing a "missing value safe" log, that passes missing value inputs
+      ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
+      do ilev = 1, vcoordprofile%nval
+        if (vcoordprofile%vals(ilev,iobs) /= missing) then
+          tmp(ilev) = log(vcoordprofile%vals(ilev,iobs))
+        else
+          tmp(ilev) = missing
+        end if
+      end do
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
