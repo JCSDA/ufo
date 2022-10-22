@@ -184,4 +184,4 @@ observations:
     minvalue: 1.0e-12
     action:
       name: reject
-  passedBenchmark: 14
+  passedBenchmark: 12
