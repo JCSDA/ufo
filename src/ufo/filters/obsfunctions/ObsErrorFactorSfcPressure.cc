@@ -19,6 +19,10 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/utils/Constants.h"
 
+#include "ufo/GeoVaLs.h"
+#include "ufo/utils/PiecewiseLinearInterpolation.h"
+#include "ufo/variabletransforms/Formulas.h"
+
 namespace ufo {
 
 static ObsFunctionMaker<ObsErrorFactorSfcPressure> makerSteps_("ObsErrorFactorSfcPressure");
@@ -35,11 +39,6 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   options_.reset(new ObsErrorFactorSfcPressureParameters());
   options_->deserialize(config);
 
-  // Initialize error_min, max from options. Make sure they are sane.
-  const float error_min = options_->error_min.value();
-  const float error_max = options_->error_max.value();
-  ASSERT(error_min < error_max);
-
   // The starting (un-inflated) value of obserror. If running in sequence of filters,
   // then it is probably found in ObsErrorData, otherwise, it is probably ObsError.
   const std::string errgrp = options_->original_obserr.value();
@@ -47,6 +46,7 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
 
   // Include list of required data from ObsValue
   invars_ += Variable("surface_pressure@ObsValue");
+  invars_ += Variable("virtual_temperature@ObsValue");
   invars_ += Variable("air_temperature@ObsValue");
 
   // Include list of required data from MetaData
@@ -55,8 +55,9 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   // Include list of required data from GeoVaLs
   invars_ += Variable("surface_pressure@GeoVaLs");
   invars_ += Variable("air_pressure@GeoVaLs");
-  const std::string geovar_temp = options_->geovar_temp.value();
-  invars_ += Variable(geovar_temp + "@GeoVaLs");
+  invars_ += Variable("virtual_temperature@GeoVaLs");
+  const std::string geovar_geomz = options_->geovar_geomz.value();
+  invars_ += Variable(geovar_geomz + "@GeoVaLs");
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
   invars_ += Variable(geovar_sfc_geomz + "@GeoVaLs");
 }
@@ -80,113 +81,123 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   size_t nlocs = data.nlocs();
   size_t nlevs = data.nlevs(Variable("air_pressure@GeoVaLs"));
 
-  // Get min, max error values
-  const float error_min = options_->error_min.value();
-  const float error_max = options_->error_max.value();
-
   // Get MetaData of station elevation
   std::vector<float> ob_elevation(nlocs);
   data.get(Variable("station_elevation@MetaData"), ob_elevation);
 
-  // Get ObsValue of surface pressure and temperature (possibly missing).
+  // Get ObsValue of surface pressure
   std::vector<float> ob_pressure_sfc(nlocs);
   data.get(Variable("surface_pressure@ObsValue"), ob_pressure_sfc);
-  std::vector<float> ob_temperature_sfc(nlocs);
-  data.get(Variable("air_temperature@ObsValue"), ob_temperature_sfc);
+
+  // Get ObsValue of virtual temperature (optional), initialize
+  // the vector as missing value and get values only if it exists
+  std::vector<float> ob_temp_sfc(nlocs, missing);
+  if (data.has(Variable("virtual_temperature@ObsValue"))) {
+    data.get(Variable("virtual_temperature@ObsValue"), ob_temp_sfc);
+  }
+  if (data.has(Variable("air_temperature@ObsValue"))) {
+    std::vector<float> ob_temp_sfc2(nlocs);
+    data.get(Variable("air_temperature@ObsValue"), ob_temp_sfc2);
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      if (ob_temp_sfc[iloc] == missing &&
+          ob_temp_sfc2[iloc] != missing) {
+        ob_temp_sfc[iloc] =  ob_temp_sfc2[iloc];
+      }
+    }
+  }
 
   // Get original ObsError of surface pressure
   std::vector<float> currentObserr(nlocs);
   const std::string errgrp = options_->original_obserr.value();
   data.get(Variable("surface_pressure@"+errgrp), currentObserr);
 
-  // Get GeoVals of surface altitude, pressure, and temperature.
+  // Get GeoVaLs of surface altitude and pressure
   std::vector<float> model_elevation(nlocs);
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
   data.get(Variable(geovar_sfc_geomz + "@GeoVaLs"), model_elevation);
+  if (geovar_sfc_geomz.find("geopotential_height") != std::string::npos) {
+    // Transform geopotential height to geometric height
+    std::vector<float> latitude(nlocs);
+    data.get(Variable("latitude@MetaData"), latitude);
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      model_elevation[iloc] = formulas::Geopotential_to_Geometric_Height(latitude[iloc],
+                              model_elevation[iloc]);
+    }
+  }
   std::vector<float> model_pres_sfc(nlocs);
   data.get(Variable("surface_pressure@GeoVaLs"), model_pres_sfc);
 
-  // Get GeoVals of air pressure [Pa] and temperature in vertical column.
-  std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
-  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = nlevs - ilev - 1;
-    data.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
-  }
-  std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
-  const std::string geovar_temp = options_->geovar_temp.value();
-  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = nlevs - ilev - 1;
-    data.get(Variable(geovar_temp + "@GeoVaLs"), level, tair[ilev]);
-  }
+  // Get GeoVaLs pointer for retrieving vertical profiles
+  const ufo::GeoVaLs * gvals = data.getGeoVaLs();
+  std::vector<double> temperature_gval(nlevs, 0.0);
+  std::vector<double> pressure_gval(nlevs, 0.0), logp(nlevs);
 
-  // TODO(gthompsn): model temp is virtual_temp whereas obs is sensible temp.
-  // Also, for now, assigning model lowest level temp as surface temp.
-  // Lastly, need to make positive that assumption of 0th level is nearest sfc.
+  // Get index of model bottom level
+  int levbot = nlevs-1;
+  gvals->getAtLocation(pressure_gval, "air_pressure", 0);
+  if (pressure_gval[0] > pressure_gval[nlevs-1]) levbot = 0;
+
+  // Get GeoVaLs of altitude and virtual temperature at model bottom level
   std::vector<float> model_temp_sfc(nlocs);
-  model_temp_sfc = tair[0];
+  data.get(Variable("virtual_temperature@GeoVaLs"), levbot, model_temp_sfc);
+  std::vector<float> model_elevation_bot(nlocs);
+  const std::string geovar_geomz = options_->geovar_geomz.value();
+  data.get(Variable(geovar_geomz + "@GeoVaLs"), levbot, model_elevation_bot);
+  if (geovar_geomz.find("geopotential_height") != std::string::npos) {
+    // Transform geopotential height to geometric height
+    std::vector<float> latitude(nlocs);
+    data.get(Variable("latitude@MetaData"), latitude);
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      model_elevation_bot[iloc] = formulas::Geopotential_to_Geometric_Height(
+                   latitude[iloc], model_elevation_bot[iloc]);
+    }
+  }
 
-  float obserror, new_error, error_factor;
-  float rdelz, rdp, drdp, ddiff, tges, pges, tges2, pges2, psges, pgesorig, drbx;
+  // Derive error inflation based on surface pressure correction and
+  // further inflate error by sqrt(factor_dup)
+  float new_error;
+  float rdelz, drdp, tges, tges2, pges, drbx, logp_sfc;
   int iv = 0;
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    // If missing station_elevation, set error factor to something very high (for rejection).
-    if (ob_elevation[iloc] == missing) {
-       obserr[iv][iloc] = 99.9f;
+    // If missing surface pressure or station_elevation,
+    // set error factor to something very high (for rejection).
+    if (ob_elevation[iloc] == missing || ob_pressure_sfc[iloc] == missing) {
+      obserr[iv][iloc] = 99.99f;
     } else {
       rdelz = ob_elevation[iloc]-model_elevation[iloc];
-
-      // If more than a km between model and real elevation, set error factor linearly higher.
-      if (std::abs(rdelz) > 5000.0f) {
-       obserr[iv][iloc] = 50.0f;
-      } else if (std::abs(rdelz) > 1000.0f) {
-       obserr[iv][iloc] = 3.0f + 47.0f*(std::abs(rdelz)-1000.0f)/4000.0f;
+      // Calculate drbx with observed surface temperature (if not missing)
+      // OR model temperature at observed surface altitude
+      if (ob_temp_sfc[iloc] != missing) {
+        // drbx is the amount of temperature changes from temp diff & altitude diff
+        drbx = 0.5f*std::abs(model_temp_sfc[iloc]-ob_temp_sfc[iloc])
+               +0.2f+0.005f*std::abs(rdelz);
+        tges = 0.5f*(model_temp_sfc[iloc]+ob_temp_sfc[iloc]);
       } else {
-        pgesorig = model_pres_sfc[iloc]*0.001;             // Converting Pascals to cb
-        psges = log(pgesorig);
-
-        // Calculating drbx with observed temperature.
-        // If ob temperature missing, then check if model ground is above or below actual ground.
-        if (ob_temperature_sfc[iloc] != missing) {
-          drbx = 0.5f*std::abs(model_temp_sfc[iloc]-ob_temperature_sfc[iloc])
-                 +0.2f+0.005f*std::abs(rdelz);
-          tges = 0.5f*(model_temp_sfc[iloc]+ob_temperature_sfc[iloc]);
-        } else {
-          // TODO(gthompsn): If model terrain below real world, grab nearest Temp,Pres from a
-          // vertical profile. Shortcut for now is assume lapse_rate and hydrostatic assumption
-          // over rdelz. The 2.5 addition is **arbitrary** and lapse rate assumption is 5C/km.
-          if (std::abs(rdelz) < 5.0) {
-            tges = model_temp_sfc[iloc];
-            drbx = 0.1;
-          } else if (rdelz > 0.0) {
-            tges2 = model_temp_sfc[iloc] - lapse_rate*rdelz;
-            drbx = 0.5f*std::abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*std::abs(rdelz);
-            tges = 0.5f*(model_temp_sfc[iloc]+tges2);
-          } else {
-            tges = model_temp_sfc[iloc] - 0.5f*lapse_rate*rdelz;
-            tges2 = tges - lapse_rate*rdelz;
-            drbx = 0.5f*std::abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*std::abs(rdelz);
-            drbx = drbx - 0.5f*lapse_rate*rdelz;
-          }
+        // Get model temperature at obs_elevation (tges2)
+        // Interpolate GeoVaLs of virtual_temperature to obs_elevation
+        gvals->getAtLocation(pressure_gval, "air_pressure", iloc);
+        gvals->getAtLocation(temperature_gval, "virtual_temperature", iloc);
+        for (size_t ilev = 0; ilev < nlevs; ++ilev) logp[ilev] = std::log(pressure_gval[ilev]);
+        ufo::PiecewiseLinearInterpolation vert_interp_model(logp, temperature_gval);
+        logp_sfc = std::log(ob_pressure_sfc[iloc]);
+        // Adjust drbx & tges
+        tges2 = vert_interp_model(logp_sfc);
+        tges = 0.5f*(model_temp_sfc[iloc]+tges2);
+        drbx = 0.5f*std::abs(model_temp_sfc[iloc]-tges2)
+               +2.5f+0.005f*std::abs(rdelz);
+        if (rdelz < 0.0f) {
+          // Extrapolate GeoVaLs of surface virtual_temperature to obs_elevation
+          tges = tges - (lapse_rate * 0.5f * rdelz);
+          drbx = drbx - (lapse_rate * 0.5f * rdelz);
         }
-
-        rdp = g_over_rd*rdelz/tges;
-        pges = exp(log(pgesorig) - rdp);
-        drdp = pges*(g_over_rd*std::abs(rdelz)*drbx/(tges*tges));
-        ddiff = ob_pressure_sfc[iloc]*0.001f - pges;        // innovation in cb
-
-        // make adjustment to observational error (also convert to cb)
-        obserror = currentObserr[iloc]*0.001f;
-        // TODO(gthompsn): Maybe reduce obserror by 0.7 for data near sea-level and small delta-Z.
-        // if (ob_elevation[iloc] < 10.0f && rdelz < 5.0f) {
-        //   obserror = obserror*0.7;
-        // }
-        new_error = obserror + drdp;
-        new_error = std::max(error_min*0.001f, std::min(new_error, error_max*0.001f));
-        error_factor = std::max(0.7f, new_error/obserror);
-
-        obserr[iv][iloc] = error_factor;
       }
+      // Adjust model surface pressure
+      pges = std::exp(std::log(model_pres_sfc[iloc]) - (rdelz * g_over_rd / tges));
+      // Adjust observation error
+      drdp = pges * (g_over_rd * std::abs(rdelz) * drbx / (tges * tges));
+      new_error = (currentObserr[iloc] + drdp);
+      obserr[iv][iloc] = new_error / currentObserr[iloc];
     }
   }
 }

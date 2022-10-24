@@ -373,6 +373,30 @@ void horizontalDrift
 * \return BkP
 */
 float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height);
+
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Conversion from geometric heights to geopotential heights using MJ Mahoney's (2001).
+*
+* \parm latitude
+*     Vector of input latitudes
+* \parm geomH
+*     Vector of input geometric height (m)
+* \return geopotential height (m)
+*/
+float Geometric_to_Geopotential_Height(float latitude, float geomH);
+
+// -------------------------------------------------------------------------------------
+/*!
+* \brief Conversion from geopotential heights to geometric heights using MJ Mahoney's (2001).
+*
+* \parm latitude
+*     Vector of input latitudes
+* \parm geopH
+*     Vector of input geopotential height (m)
+* \return geometric height (m)
+*/
+float Geopotential_to_Geometric_Height(float latitude, float geopH);
 }  // namespace formulas
 }  // namespace ufo
 

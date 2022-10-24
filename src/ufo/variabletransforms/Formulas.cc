@@ -527,5 +527,32 @@ float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
   }
   return BkP;
 }
+
+/* -------------------------------------------------------------------------------------*/
+
+float Geometric_to_Geopotential_Height(float latitude, float geomH) {
+  float geopH = util::missingValue(1.0f);
+  double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
+  double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
+                 std::sqrt(1.0 - Constants::eccentricity_sq * sino));
+  double termr = Constants::semi_major_axis / (1.0 + Constants::flattening +
+                 Constants::grav_ratio - 2.0 * Constants::flattening * sino);
+  geopH = (termg / Constants::grav) * ((termr * geomH) / (termr + geomH));  // [m]
+  return geopH;
+}
+
+/* -------------------------------------------------------------------------------------*/
+
+float Geopotential_to_Geometric_Height(float latitude, float geopH) {
+  float geomH = util::missingValue(1.0f);
+  double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
+  double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
+                 std::sqrt(1.0 - Constants::eccentricity_sq * sino));
+  double termr = Constants::semi_major_axis / (1.0 + Constants::flattening +
+                 Constants::grav_ratio - 2.0 * Constants::flattening * sino);
+  double termrg = termg / Constants::grav * termr;
+  geomH = termr * geopH / (termrg - geopH);  // [m]
+  return geomH;
+}
 }  // namespace formulas
 }  // namespace ufo

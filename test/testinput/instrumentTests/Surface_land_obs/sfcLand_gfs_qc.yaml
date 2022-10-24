@@ -262,4 +262,4 @@ observations:
     action:
       name: reject
 
-  passedBenchmark: 8962
+  passedBenchmark: 8961
