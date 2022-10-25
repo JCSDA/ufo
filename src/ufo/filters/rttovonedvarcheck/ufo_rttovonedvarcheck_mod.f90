@@ -264,6 +264,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
       ob % channels_all = self % channels
       ob % surface_type = obs % surface_type(jobs)
+      ob % satellite_identifier = obs % satellite_identifier(jobs)
       ob % calc_emiss = obs % calc_emiss(jobs)
       ob % emiss(:) = obs % emiss(:, jobs)
       if(self % cloud_retrieval) ob % retrievecloud = .true.

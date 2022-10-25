@@ -10,8 +10,8 @@ observations:
     obs options:
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      Platform_Name: METOP
-      Sat_ID: 1
+      WMO_ID: [3]
+      Sat_ID: [metop_1]
       Instrument_Name: IASI
       CoefficientPath: Data/
       RTTOV_GasUnitConv: true

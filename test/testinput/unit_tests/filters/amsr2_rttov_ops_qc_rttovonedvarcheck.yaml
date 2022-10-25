@@ -13,8 +13,8 @@ observations:
       RTTOV_GasUnitConv: true
       UseRHwaterForQC: &UseRHwaterForQC true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default
-      Platform_Name: &platform_name GCOM-W
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [122]
+      Sat_ID: &sat_id [gcom-w_1]
       Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
   obs space: &ObsSpace
@@ -50,7 +50,7 @@ observations:
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Platform_Name: *platform_name 
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id 
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -116,7 +116,7 @@ observations:
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id 
         Instrument_Name: *inst_name
         CoefficientPath: Data/

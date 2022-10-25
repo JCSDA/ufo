@@ -176,10 +176,10 @@ contains
 
     integer(kind=jpim)                           :: errorstatus ! Return error status of RTTOV subroutine calls
 
-    integer                                      :: i_inst, nchan_total, ichan, jchan
-    integer                                      :: iprof, prof, iprof_rttov
-    integer                                      :: nprof_sim, nprof_max_sim, ichan_sim
+    integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan
+    integer                                      :: nprof_sim, nprof_max_sim, nchan_total
     integer                                      :: prof_start, prof_end
+    integer                                      :: sensor_index
 
     logical                                      :: jacobian_needed
     real(kind_real), allocatable                 :: sfc_emiss(:,:)
@@ -220,8 +220,6 @@ contains
 
     !DAR: Removing sensor_loop until it's demonstrated to be needed and properly tested
     ! at the moment self % channels is a single 1D array so cannot adequately contain more than one set of channels
-!    Sensor_Loop:do i_inst = 1, self % conf % nSensors
-    i_inst = 1
 
     ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
     nchan_inst = size(self % channels)
@@ -295,10 +293,10 @@ contains
         iprof = prof_start + iprof_rttov - 1
 
         ! print profile information if requested
-        if(any(self % conf % inspect == iprof)) call self % RTprof_K % print_rtprof(self % conf, iprof, i_inst)
+        if(any(self % conf % inspect == iprof)) call self % RTprof_K % print_rtprof(self % conf, iprof)
 
-        ! check RTTOV profile and flag it if it fails the check
-        if(self % conf % RTTOV_profile_checkinput) call self % RTprof_K % check_rtprof(self % conf, iprof, i_inst, errorstatus)
+        ! check RTTOV profile will be valid for RTTOV and flag it if it fails the check
+        call self % RTprof_K % check_rtprof(self % conf, iprof, errorstatus)
 
         if (errorstatus == errorstatus_success) then 
           ! check sfc_emiss valid if read in
@@ -320,6 +318,11 @@ contains
             self % RTprof_K % chanprof(nchan_total + ichan_sim) % chan = self % coefindex(ichan)
           end do
           nchan_sim = ichan_sim
+
+          ! Pick the last valid (unskipped) observation to get the sensor index
+          ! but it will always be the same as the first because prof_by_prof is true for nsensors > 1
+          ! This is to guard against a bad satellite identifier sneaking in when only processing one instrument.
+          sensor_index = self % RTProf_K % sensor_index_array(iprof)
         endif
 
       end do
@@ -367,7 +370,7 @@ contains
         self % conf % rttov_opts,                     &! in    options structure
         self % RTprof_K % profiles(prof_start:prof_start + nprof_sim - 1), &! in    profile array
         self % RTprof_K % profiles_k(nchan_total + 1 : nchan_total + nchan_sim), &! in    profile array
-        self % conf % rttov_coef_array(i_inst), &! in    coefficients structure
+        self % conf % rttov_coef_array(sensor_index),                &! in    coefficients structure
         self % RTprof_K % transmission,                            &! inout computed transmittances
         self % RTprof_K % transmission_k,                          &! inout computed transmittances
         self % RTprof_K % radiance,                                &! inout computed radiances
@@ -377,13 +380,12 @@ contains
         emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))!,           &! inout input/output emissivities per channel      
       
       if ( errorstatus /= errorstatus_success ) then
-        write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, i_inst, &
-                                     ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
+        write(message,'(A, A, 2I6)') trim(routine_name), 'after rttov_k: error\n', 'skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
         call fckit_log%info(message)
       else
         ! Put simulated diagnostics into hofxdiags
         ! ----------------------------------------------
-        if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
+        if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
       end if
       
       ! increment profile and channel counters

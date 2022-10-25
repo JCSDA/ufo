@@ -14,8 +14,8 @@ observations:
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default but reqd for PS44
       Do_MW_Scatt: true
       RTTOV_clw_data: &rttovclwdata false
-      Platform_Name: &platform_name Metop
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [3]
+      Sat_ID: &sat_id [metop_1]
       Instrument_Name: &inst_name AMSUAMHS
       CoefficientPath: &coef_path Data/
       QtSplitRain: &qtsplitrain false
@@ -87,7 +87,7 @@ observations:
         UseColdSurfaceCheck: false
         Do_MW_Scatt: true
         RTTOV_clw_data: *rttovclwdata
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         QtSplitRain: *qtsplitrain

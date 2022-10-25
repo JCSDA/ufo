@@ -452,10 +452,16 @@ list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
+rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
+rttov7pred54L/rtcoef_metop_3_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_15_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_18_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_19_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_1_iasi.dat
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
+rttov7pred54L/rtcoef_jpss_0_atms.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
-mietable/mietable_metop_amsuamhs.dat
+mietable/mietable_metop_amsuamhs.bin
 )
 
 # Symlink RTcoef files
@@ -463,7 +469,7 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
 
-file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tgz
+file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst
                      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
 
 endif( ${rttov_FOUND} )

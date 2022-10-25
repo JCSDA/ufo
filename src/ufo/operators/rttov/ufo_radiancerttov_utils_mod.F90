@@ -29,10 +29,10 @@ module ufo_radiancerttov_utils_mod
     errorstatus_success, errorstatus_fatal, &
     interp_rochon, interp_rochon_wfn, ir_scatt_chou, mw_clw_scheme_liebe, mw_clw_scheme_rosenkranz, &
     vis_scatt_dom, &
-    sensor_id, sensor_id_hi, sensor_id_ir, sensor_id_mw, &
+    rttov_sensor_id => sensor_id, sensor_id_hi, sensor_id_ir, sensor_id_mw, &
     surftype_land, surftype_sea, surftype_seaice, watertype_ocean_water, &
     gas_unit_ppmvdry, gas_unit_specconc, &
-    inst_name, platform_name    
+    rttov_inst_name => inst_name, rttov_platform_name => platform_name
 
   use ufo_geovals_mod, only : ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_utils_mod, only : Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat, cmp_strings, getindex, upper2lower
@@ -156,6 +156,8 @@ module ufo_radiancerttov_utils_mod
     real(kind_real), allocatable     :: ciw(:,:)        ! pointer to either ice from RTTOV-SCATT or diagnosed ice from Qsplit
     real(kind_real), allocatable     :: tc_ozone(:)     ! total column ozone
 
+    integer, allocatable             :: sensor_index_array(:)
+
   contains
 
     procedure :: alloc_direct            => ufo_rttov_alloc_direct
@@ -189,9 +191,7 @@ module ufo_radiancerttov_utils_mod
     real(kind_real)                       :: scale_fac(0:ngases_max)
     logical                               :: RTTOV_GasUnitConv
 
-    character(len=10),  allocatable       :: Platform_Name(:)
-    integer,            allocatable       :: Sat_ID(:)
-    character(len=10),  allocatable       :: Instrument_Name(:)
+    integer, allocatable                  :: wmo_id(:)
     character(len=255)                    :: COEFFICIENT_PATH
     character(len=255), allocatable       :: coeffname(:)
     integer,            allocatable       :: instrument_triplet(:,:)
@@ -246,17 +246,14 @@ contains
     character(len=:), allocatable         :: tmp_str_array(:)
     character(len=16), allocatable        :: str_array(:)
     character(len=30)                     :: absorber_name
-    
-    integer                               :: i,k,n, i_inst, ind
+
+    integer                               :: i,k,n, ind, delim
 
     logical, allocatable                  :: absorber_mask(:)
+    integer                               :: sat_id
 
     include 'rttov_user_options_checkinput.interface'
     include 'rttov_coeffname.interface'
-
-    !Number of sensors, each call to RTTOV will be for a single sensor
-    !type (zenith/scan angle will be different)
-    conf % nSensors = 1
 
     call f_confOper % get_or_die("Debug",debug)
 
@@ -331,7 +328,7 @@ contains
       conf%Absorber_Id(jspec) = RTTOV_Absorber_Id(ivar)
     end do
 
-! set scalar mixing ratio conversion if converting units prior to use in RTTOV
+    ! set scalar mixing ratio conversion if converting units prior to use in RTTOV
     call f_confOpts % get_or_die("RTTOV_GasUnitConv",conf % RTTOV_GasUnitConv)
 
     if(conf%RTTOV_GasUnitConv) then 
@@ -340,32 +337,51 @@ contains
       conf%scale_fac = one
     end if
 
-! use scaled RTTOV reference profile instead of reading from geovals if Ozone is a required Absorber 
+    ! use scaled RTTOV reference profile instead of reading from geovals if Ozone is a required Absorber 
     call f_confOpts % get_or_die("RTTOV_ScaleRefOzone",conf % RTTOV_scale_ref_ozone)
 
-!  TODO: This is where we need to support multiple instruments. Platform name should take multiple instruments somehow
-!        Probably by READing a comma separated list of conf%nsensors values for instrument_name
-!        Platform_Name and Sat_ID should be the same I think
+    ! Determine which platform and instrument will be processed by RTTOV. If WMO_ID is present then
+    ! it will be used in preference to Platform_Name/Sat_ID and enables the same instrument on
+    ! multiple platforms to be processed.
+    call f_confOpts % get_or_die("WMO_ID", conf % wmo_id)
 
-    allocate(conf%Platform_Name(conf%nsensors), conf%Sat_ID(conf%nsensors), conf%Instrument_Name(conf%nsensors))
-    allocate(conf%coeffname(conf%nsensors))
-    allocate(conf%rttov_sensor_type(conf%nsensors))
+    call f_confOpts % get_or_die ("Sat_ID", tmp_str_array) ! tmp_str_array must be deferred size
+    allocate(str_array(size(tmp_str_array)))               ! but str_array must be fixed! 
+    str_array(:) = tmp_str_array(:)                              
+
+    ! The number of sensors
+    conf % nSensors = size(str_array)
+    if (.not. (conf % nSensors == size(conf%wmo_id) .or. conf % nSensors == 1)) then
+      write(message,*) trim(routine_name),'Error. Number of Sat_IDs must match WMO_IDs or be ', &
+                                          '1 (process all obs with the same coefficient) '
+      call abor1_ftn(message)
+    end if
+
     allocate(conf%instrument_triplet(3,conf%nsensors))
 
+    ! Convert WMO identifier to RTTOV specific platform/satellite id using a lookup table.
+    ! An instrument must be added to the case statement in wmo_id_to_rttov_platform if it is to
+    ! be processed.
+    do isensor=1, conf % nSensors
+      delim = index(str_array(isensor), '_')
+      if(delim > 0) then
+        conf % instrument_triplet(1,isensor) = getindex(rttov_platform_name,upper2lower(str_array(isensor)(1:delim-1)))   
+        read(str_array(isensor)(delim+1:),*) conf % instrument_triplet(2,isensor)
+      else
+        write(message,*) trim(routine_name),'Error. Invalid format for Sat_ID: ',trim(str_array(isensor))
+        call abor1_ftn(message)
+      end if
+    end do
+
+    call f_confOpts % get_or_die("Instrument_Name",str)   
+    ! inst array starts from 0 not 1 so subtract 1
+    conf % instrument_triplet(3,:) = getindex(rttov_inst_name, upper2lower(trim(str))) - 1
+
+    allocate(conf%coeffname(conf%nsensors),conf%rttov_sensor_type(conf%nsensors))
+    
+    ! For now we only support processing with one instrument type but it would be possible to 
+    ! extend this to full generic processing
     do isensor = 1, conf%nSensors
-      
-      call f_confOpts % get_or_die("Platform_Name",str)
-
-      conf % Platform_Name(isensor) = trim(str)
-      conf % instrument_triplet(1,isensor) = getindex(platform_name,upper2lower(trim(str)))
-      
-      call f_confOpts % get_or_die("Sat_ID", conf % Sat_ID(isensor))
-      conf % instrument_triplet(2,isensor) = conf % Sat_ID(isensor)
-
-      call f_confOpts % get_or_die("Instrument_Name",str)
-      conf % Instrument_Name(isensor) = trim(str)
-      ! inst array starts from 0 not 1
-      conf % instrument_triplet(3,isensor) = getindex(inst_name,upper2lower(trim(str))) - 1
 
       ! get rtcoef name from instrument triplet 
       CALL rttov_coeffname (rttov_errorstatus,  &  ! out
@@ -374,16 +390,12 @@ contains
         coeffname = conf % coeffname(isensor))     ! out
 
       !IR=1/MW=2/HI=3/PO=4
-      conf % rttov_sensor_type(isensor) = sensor_id(conf % instrument_triplet(3,isensor))
+      conf % rttov_sensor_type(isensor) = rttov_sensor_id(conf % instrument_triplet(3,isensor))
     enddo
 
     ! Path to coefficient files
     call f_confOpts % get_or_die("CoefficientPath",str)
     conf % COEFFICIENT_PATH = str
-
-    ! Default options (e.g. UKMO_PS45)
-    call f_confOpts % get_or_die("RTTOV_default_opts",str)
-    conf % RTTOV_default_opts = str
 
     ! Set interface options
     call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
@@ -392,6 +404,18 @@ contains
     call f_confOpts % get_or_die("prof_by_prof",conf % prof_by_prof)
     call f_confOpts % get_or_die("max_channels_per_batch",conf % nchan_max_sim)
 
+    if (conf % nSensors > 1) then
+      write(message,*) 'Where more than one sensor is processed, fall back to profile-by-profile processing. Setting prof_by_prof to TRUE'
+      call fckit_log%info(message)
+      conf % prof_by_prof = .true.
+    end if
+
+    call f_confOpts % get_or_die("RTTOV_profile_checkinput", conf % RTTOV_profile_checkinput)
+
+    ! Default options (e.g. UKMO_PS45)
+    call f_confOpts % get_or_die("RTTOV_default_opts",str)
+    conf % RTTOV_default_opts = str
+    
     call f_confOpts % get_or_die("Do_MW_Scatt", conf % do_mw_scatt)
     conf % do_mw_scatt = conf % do_mw_scatt .and. any(conf % rttov_sensor_type(:) == sensor_id_mw)
 
@@ -425,21 +449,17 @@ contains
     end if
     
     ! Ensure the RTTOV options and coefficients are consistent
-    do i_inst = 1, size(conf % rttov_coef_array(:))
-      call rttov_user_options_checkinput(rttov_errorstatus, conf % rttov_opts, conf % rttov_coef_array(i_inst))
+    call rttov_user_options_checkinput(rttov_errorstatus, conf % rttov_opts, conf % rttov_coef_array(1))
 
-      if (rttov_errorstatus /= errorstatus_success) then
-        write(message,'(A, A, I6, I6)') trim(routine_name), ': Error in rttov_user_options_checkinput: ', rttov_errorstatus, i_inst
-        call abor1_ftn(message)
-      end if
-    enddo
+    if (rttov_errorstatus /= errorstatus_success) then
+      write(message,'(A)') trim(routine_name), ': Error in rttov_user_options_checkinput'
+      call abor1_ftn(message)
+    end if
 
     ! Default is false; satrad compatibility and mw default is true
     if(f_confOpts % has("QtSplitRain")) then
       call f_confOpts % get_or_die("QtSplitRain", conf % UseQtsplitRain)
     end if
-
-    call f_confOpts % get_or_die("RTTOV_profile_checkinput",conf % RTTOV_profile_checkinput)
 
     if (f_confOpts%has("InspectProfileNumber")) then
       call f_confOpts % get_or_die("InspectProfileNumber", conf % inspect)
@@ -797,34 +817,37 @@ contains
                               path = self % COEFFICIENT_PATH)
 
         if (rttov_errorstatus /= errorstatus_success) then
-            write(message,*) 'fatal error reading coefficients: ' // self % coeffname
+            write(message,*) 'fatal error reading coefficients: ' // self % coeffname(i_inst)
             call abor1_ftn(message)
         else
-            write(message,*) 'successfully read RT coefficients: ' // self % coeffname
+            write(message,*) 'successfully read RT coefficients: ' // self % coeffname(i_inst)
             call fckit_log%info(message)
-        end if
-
-
-        if (self % do_mw_scatt) then 
-          call rttov_read_scattcoeffs (rttov_errorstatus,        & ! out
-                                       self % mw_scatt % opts,    & ! in
-                                       self % rttov_coef_array(i_inst), & ! in
-                                       self % mw_scatt % coef,          & ! inout
-                                       path = self % COEFFICIENT_PATH)
-
-          if (rttov_errorstatus /= errorstatus_success) then
-            write(message,*) 'fatal error reading MWscatt coefficients: ' // self % coeffname
-            call abor1_ftn(message)
-          else
-            write(message,*) 'successfully read MWscatt coefficients: ' // self % coeffname
-            call fckit_log%info(message)
-          end if
         end if
       end do
 
+      ! Read MW scatt coefficients. Only one set of scattering coefficients may be read at the moment which
+      ! is not typically an issue because we are only dealing with one instrument and they don't currently 
+      ! have different scatt coefs
+      if (self % do_mw_scatt) then 
+        call rttov_read_scattcoeffs (rttov_errorstatus,        & ! out
+                                     self % mw_scatt % opts,    & ! in
+                                     self % rttov_coef_array(1), & ! in
+                                     self % mw_scatt % coef,          & ! inout
+                                     path = self % COEFFICIENT_PATH)
+
+        if (rttov_errorstatus /= errorstatus_success) then
+          write(message,*) 'fatal error reading compatible MWscatt coefficients for: ' // self % coeffname(1)
+          call abor1_ftn(message)
+        else
+          write(message,*) 'successfully read compatible MWscatt coefficients for: ' // self % coeffname(1)
+          call fckit_log%info(message)
+        end if
+      end if
+      
       self % rttov_is_setup =.true.
     end if
-  end subroutine ufo_rttov_setup
+      
+    end subroutine ufo_rttov_setup
 
   ! ------------------------------------------------------------------------------
 
@@ -860,7 +883,7 @@ contains
     type(ufo_geoval), pointer          :: geoval
     type(datetime), allocatable        :: date_temp(:)
 
-    integer                            :: jspec, ilev
+    integer                            :: jspec, ilev, isensor
     integer                            :: nlevels
     integer                            :: nprofiles
 
@@ -881,6 +904,8 @@ contains
 
     integer                            :: year, month, day, hour, minute, second
 
+    integer, allocatable               :: sat_id(:)
+
     missing = missing_value(missing)
 
     profiles => self % profiles
@@ -894,12 +919,31 @@ contains
     if (nlocs_total == 0) return
 
     nprofiles = min(size(profiles), geovals%nlocs)
-    nlevels = size(profiles(1)%p)
 
-    ! Assume that the pressure profile coming from the geovals is increasing in pressure (ToA->surface)...
-    top_level = 1
-    bottom_level = nlevels
-    stride=1
+    allocate(self % sensor_index_array(nprofiles))
+    self % sensor_index_array = -1
+
+    ! store which sensor we will be using to process the observation. 
+    ! Primarily for choosing an RTTOV coefficient    
+    allocate(sat_id(nprofiles))
+    if (present(ob_info)) then 
+      sat_id = ob_info % satellite_identifier
+    else
+      if (obsspace_has(obss, "MetaData", "satellite_identifier")) then
+        call obsspace_get_db(obss, "MetaData", "satellite_identifier", sat_id)
+      else
+        self % sensor_index_array = 1
+      end if
+    end if
+
+    do isensor = 1, size(conf % wmo_id)
+      where(sat_id == conf % wmo_id(isensor))
+        ! If conf%nsensors is 1 then sensor_idx will always be 1.
+        self % sensor_index_array = min(isensor, conf%nsensors)
+      end where
+    end do
+
+    deallocate(sat_id)
 
     if (present(ob_info)) then
       call datetime_to_yyyymmddhhmmss(ob_info % date, year, month, day, hour, minute, second)
@@ -921,8 +965,14 @@ contains
       end if
     end if
 
-! Get pressure levels and check they're up the right way (deprecated)
+    nlevels = size(profiles(1)%p)
 
+    ! Assume that the pressure profile coming from the geovals is increasing in pressure (ToA->surface)...
+    top_level = 1
+    bottom_level = nlevels
+    stride=1
+
+    ! Get pressure levels and check they're up the right way (deprecated)
     if (ufo_vars_getindex(geovals%variables, var_prs) > 0) then
       call ufo_geovals_get_var(geovals, var_prs, geoval)
 
@@ -1398,7 +1448,7 @@ contains
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", profiles(1:nprofiles)%azangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/sensor_azimuth_angle not in database: setting to zero'
+        write(message,'(A)') 'Warning: Optional input MetaData/sensor_azimuth_angle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%azangle = zero
       end if
@@ -1418,7 +1468,7 @@ contains
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", profiles(1:nprofiles)%sunazangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/solar_azimuth_angle not in database: setting to zero'
+        write(message,'(A)') 'Warning: Optional input MetaData/solar_azimuth_angle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunazangle = zero
       end if
@@ -1435,53 +1485,74 @@ contains
 
   end subroutine ufo_rttov_setup_rtprof
 
-  subroutine ufo_rttov_check_rtprof(self, conf, iprof, i_inst, errorstatus)
+  subroutine ufo_rttov_check_rtprof(self, conf, iprof, errorstatus)
     implicit none
     
     class(ufo_rttov_io), target,  intent(inout) :: self
     type(rttov_conf),             intent(in)    :: conf
     integer,                      intent(in)    :: iprof
-    integer,                      intent(in)    :: i_inst
     integer,                      intent(out)   :: errorstatus
 
     character(10) :: prof_str
+    integer       :: sensor_idx
 
     include 'rttov_print_profile.interface'
     include 'rttov_user_profile_checkinput.interface'
 
+    sensor_idx = self % sensor_index_array(iprof)
+
     errorstatus = errorstatus_success
 
-    call rttov_user_profile_checkinput(errorstatus, &
-      conf % rttov_opts, &
-      conf % rttov_coef_array(i_inst), &
-      self % profiles(iprof))
+    if (sensor_idx < 1) then
 
-    if (self % profiles(iprof) % azangle < zero .or. & 
-        self % profiles(iprof) % azangle > 360.0_kind_real) then
       errorstatus = errorstatus_fatal
-    endif
+      write(message, '(A,I4,A,I4,A)') &
+      'Bad sensor index (', sensor_idx, ') for profile ', iprof, &
+      ' which will not be processed and no further checking will be performed'
+      call fckit_log%info(message)
+    else
+      if(conf % RTTOV_profile_checkinput) then
+        call rttov_user_profile_checkinput(errorstatus, &
+          conf % rttov_opts, &
+          conf % rttov_coef_array(sensor_idx), &
+          self % profiles(iprof))
 
-    if (self % profiles(iprof) % longitude < -180.0_kind_real .or. & 
-        self % profiles(iprof) % longitude > 360.0_kind_real) then
-      errorstatus = errorstatus_fatal
-    endif
+        ! print erroneous profile to stderr
+        if(errorstatus /= errorstatus_success .and. debug) then
+          write(prof_str,'(i0)') iprof
+          self % profiles(iprof) % id = prof_str
+          call rttov_print_profile(self % profiles(iprof), lu = stderr)
+          write(message, *) 'Error in profile ', iprof
+          call fckit_log%info(message)
+        end if
+        
+        if ((conf % rttov_opts % rt_mw % fastem_version >= 3) .and. &
+            (conf % rttov_coef_array(sensor_idx) % coef % id_sensor == sensor_id_mw) .and. &
+            (self % profiles(iprof) % azangle < zero .or. & 
+             self % profiles(iprof) % azangle > 360.0_kind_real)) then
+          errorstatus = errorstatus_fatal
+          write(message, *) 'Bad azimuth angle for requested FASTEM version >= 3 for profile ', iprof, &
+                            ' which will not be processed'
+          call fckit_log%info(message)
+        endif
 
-    ! print erroneous profile to stderr
-    if(errorstatus /= errorstatus_success .and. debug) then
-      write(prof_str,'(i0)') iprof
-      self % profiles(iprof) % id = prof_str
-      call rttov_print_profile(self % profiles(iprof), lu = stderr)
-    end if
+        if (self % profiles(iprof) % longitude < -180.0_kind_real .or. & 
+          self % profiles(iprof) % longitude > 360.0_kind_real) then
+          errorstatus = errorstatus_fatal
+          write(message, *) 'Bad longitude when using emissivity atlas for profile ', iprof, &
+            ' which will not be processed'
+        endif
+      endif
+    endif
 
   end subroutine ufo_rttov_check_rtprof
 
-  subroutine ufo_rttov_print_rtprof(self, conf, iprof, i_inst)
+  subroutine ufo_rttov_print_rtprof(self, conf, iprof)
     implicit none
     
     class(ufo_rttov_io), target,  intent(inout) :: self
     type(rttov_conf),             intent(in)    :: conf
     integer,                      intent(in)    :: iprof
-    integer,                      intent(in)    :: i_inst
 
     character(10) :: prof_str
 
@@ -1494,7 +1565,6 @@ contains
  
     call rttov_print_profile(self % profiles(iprof), lu = stdout)
     if (conf % do_MW_scatt) call rttov_print_cld_profile(self % mw_scatt % profiles(iprof), lu = stdout)
-
 
   end subroutine ufo_rttov_print_rtprof
 

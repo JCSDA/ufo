@@ -11,8 +11,8 @@ observations:
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
       RTTOV_GasUnitConv: true
-      Platform_Name: &platform_name NOAA
-      Sat_ID: &sat_id 20
+      WMO_ID: &wmo_id [225]
+      Sat_ID: &sat_id [noaa_20]
       Instrument_Name: &inst_name ATMS
       UseRHwaterForQC: &UseRHwaterForQC1 true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck1 true # default
@@ -54,7 +54,7 @@ observations:
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
         RTTOV_GasUnitConv: true
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -121,7 +121,7 @@ observations:
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
         RTTOV_GasUnitConv: true
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -169,7 +169,7 @@ observations:
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
       RTTOV_GasUnitConv: false
-      Platform_Name: *platform_name
+      WMO_ID: *wmo_id
       Sat_ID: *sat_id
       Instrument_Name: *inst_name
       UseRHwaterForQC: &UseRHwaterForQC2 false # non-default
@@ -197,7 +197,7 @@ observations:
       obs options: 
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -257,7 +257,7 @@ observations:
       obs options: 
         RTTOV_default_opts: UKMO_PS43
         SatRad_compatibility: false # done in filter
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -319,7 +319,7 @@ observations:
       obs options: 
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -351,7 +351,7 @@ observations:
       obs options:
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -442,7 +442,7 @@ observations:
       obs options:
         RTTOV_default_opts: UKMO_PS45
         SatRad_compatibility: false # done in filter
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/

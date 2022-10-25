@@ -13,8 +13,8 @@ observations:
        QtSplitRain: false   #ssmis seems to be the only instrument to do this
        RTTOV_GasUnitConv: true
        UseColdSurfaceCheck: &UseColdSurfaceCheck false
-       Platform_Name: &platform_name DMSP
-       Sat_ID: &sat_id 17
+       WMO_ID: &wmo_id [285]
+       Sat_ID: &sat_id [dmsp_17]
        Instrument_Name: &inst_name SSMIS
        CoefficientPath: Data/
   obs space:
@@ -102,7 +102,7 @@ observations:
         RTTOV_GasUnitConv: true 
         UseRHwaterForQC: false
         UseColdSurfaceCheck: false
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id
         Instrument_Name: *inst_name
         CoefficientPath: Data/

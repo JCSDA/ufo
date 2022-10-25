@@ -12,8 +12,8 @@ observations:
      Absorbers: []
      linear model absorbers: []
      obs options:
-       Platform_Name: NOAA
-       Sat_ID: 20
+       WMO_ID: [225]
+       Sat_ID: [noaa_20]
        Instrument_Name: ATMS
        CoefficientPath: Data/
        RTTOV_GasUnitConv: false # default

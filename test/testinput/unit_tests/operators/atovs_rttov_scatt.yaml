@@ -13,8 +13,8 @@ observations:
       UseRHwaterForQC: &UseRHwaterForQC true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default but reqd for PS44
       Do_MW_Scatt: true
-      Platform_Name: &platform_name Metop
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [3]
+      Sat_ID: &sat_id [metop_1]
       Instrument_Name: &inst_name AMSUAMHS
       CoefficientPath: &coef_path Data/
       InspectProfileNumber: [1]

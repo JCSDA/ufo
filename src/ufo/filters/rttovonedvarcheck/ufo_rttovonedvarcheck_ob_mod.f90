@@ -24,6 +24,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   character(len=max_string) :: forward_mod_name !< forward model name (RTTOV only one at the moment)
   integer              :: nlocs !< number of locations = 1
   integer              :: surface_type  !< surface type of observation
+  integer              :: satellite_identifier !< WMO ID
   integer              :: niter
   integer, allocatable :: channels_used(:) !< channels used for this observation
   integer, allocatable :: channels_all(:) !< all channels used for output
@@ -95,9 +96,11 @@ integer :: nchans_all !< Size of all channels in ObsSpace
 logical, intent(in) :: storeclw
 logical, intent(in) :: storetransmittance
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
-real(kind_real) :: missing
+real(kind_real) :: missing_real
+integer :: missing_int
 
-missing = missing_value(missing)
+missing_real = missing_value(missing_real)
+missing_int = missing_value(missing_int)
 
 call self % delete()
 
@@ -115,21 +118,21 @@ allocate(self % background_BT(nchans_all))
 allocate(self % calc_emiss(nchans_all))
 if (storeclw) then
   allocate(self % clw(nlevels))
-  self % clw(:) = missing
+  self % clw(:) = missing_real
 endif
 if (storetransmittance) then
   allocate(self % transmittance(nchans_all))
-  self % transmittance(:) = missing
+  self % transmittance(:) = missing_real
 endif
-self % yobs(:) = missing
-self % final_bt_diff(:) = missing
-self % emiss(:) = missing
-self % background_T(:) = missing
-self % background_ozone(:) = missing
-self % output_profile(:) = missing
-self % output_BT(:) = missing
-self % recalc_BT(:) = missing
-self % background_BT(:) = missing
+self % yobs(:) = missing_real
+self % final_bt_diff(:) = missing_real
+self % emiss(:) = missing_real
+self % background_T(:) = missing_real
+self % background_ozone(:) = missing_real
+self % output_profile(:) = missing_real
+self % output_BT(:) = missing_real
+self % recalc_BT(:) = missing_real
+self % background_BT(:) = missing_real
 self % calc_emiss(:) = .true.
 self % QC_SlowConvChans = .false.
 
@@ -150,25 +153,28 @@ implicit none
 class(ufo_rttovonedvarcheck_ob), intent(inout) :: self !< observation metadata type
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_DeleteOb"
-real(kind_real) :: missing
+real(kind_real) :: missing_real
+integer :: missing_int
 
-missing = missing_value(missing)
+missing_real = missing_value(missing_real)
+missing_int = missing_value(missing_int)
 
 self % nlocs = 1
-self % latitude = missing
-self % longitude = missing
-self % elevation = missing
-self % surface_type = 0
+self % latitude = missing_real
+self % longitude = missing_real
+self % elevation = missing_real
+self % surface_type = missing_int
+self % satellite_identifier = missing_int
 self % niter = 0
-self % sensor_zenith_angle = missing
-self % sensor_azimuth_angle = missing
-self % solar_zenith_angle = missing
-self % solar_azimuth_angle = missing
+self % sensor_zenith_angle = missing_real
+self % sensor_azimuth_angle = missing_real
+self % solar_zenith_angle = missing_real
+self % solar_azimuth_angle = missing_real
 self % cloudtopp = 500.0_kind_real
 self % cloudfrac = zero
-self % final_cost = missing
-self % LWP = missing
-self % IWP = missing
+self % final_cost = missing_real
+self % LWP = missing_real
+self % IWP = missing_real
 self % retrievecloud = .false.
 self % mwscatt = .false.
 self % mwscatt_totalice = .false.
@@ -221,18 +227,19 @@ else
   surface_type = "unknown"
 end if
 
-write(*,"(A,2F8.2)") "Lat,Long:",self % latitude, self % longitude
-write(*,*) "Surface type for RTTOV: ",surface_type
-write(*,"(A,F8.2)") "Surface height:",self % elevation
-write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
-write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
-write(*,"(A,F8.2)") "Cloud Top Pressure",self % cloudtopp
-write(*,"(A,F8.2)") "Cloud Fraction",self % cloudfrac
+write(*,"(A,2F8.2)") "Lat,Long:", self % latitude, self % longitude
+write(*,"(A,I4)") "Satellite Identifier: ", self % satellite_identifier
+write(*,*) "Surface type for RTTOV: ", surface_type
+write(*,"(A,F8.2)") "Surface height:", self % elevation
+write(*,"(A,F8.2)") "Satellite zenith angle: ", self % sensor_zenith_angle
+write(*,"(A,F8.2)") "Solar zenith angle: ", self % solar_zenith_angle
+write(*,"(A,F8.2)") "Cloud Top Pressure: ", self % cloudtopp
+write(*,"(A,F8.2)") "Cloud Fraction: ", self % cloudfrac
 write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
 write(*,"(A)") "Emissivity: "
 write(*,"(10F8.2)") self % emiss(:)
-write(*,"(A)") "Emissivity PC : "
+write(*,"(A)") "Emissivity PC: "
 write(*,"(10F18.8)") self % pcemiss(:)
 
 end subroutine

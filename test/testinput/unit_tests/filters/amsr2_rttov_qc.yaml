@@ -9,8 +9,8 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
-      Platform_Name: &platform_name GCOM-W
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [122]
+      Sat_ID: &sat_id [gcom-w_1]
       Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
       InspectProfileNumber: [1] # optional parameter
