@@ -546,3 +546,72 @@ observations:
       test:
         name: eastward_wind@GrossErrorProbability
       absTol: 5.0e-5
+- obs space: # multi-level, 2 length scales, with anisotropy
+    name: Ocean Profile
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_oceanprofile.nc4
+      obsgrouping:
+        group variables: [ "station_id", "latitude", "longitude", "dateTime" ]
+    simulated variables: [ocean_potential_temperature, ocean_salinity]
+    observed variables: [ocean_salinity]
+    derived variables: [ocean_potential_temperature]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: met_office_buddy_check_oceanprofile_out.nc4
+  HofX: HofX
+  obs filters:
+  - filter: Met Office Buddy Check
+    where:
+    - variable:
+        name: MetaData/extended_obs_space
+      is_in: 1
+    filter variables:
+    - name: ocean_potential_temperature
+    - name: ocean_salinity
+    station_id_variable:
+      name: MetaData/station_id
+    sort_by_pressure: false  # true for sat wind and aircraft (group:4), not sonde (group:5)
+    # Maps latitudes to kms
+    horizontal_correlation_scale: {"90": 200, "45": 200, "20": 600,
+                                   "-20": 600, "-45": 200, "-90": 200}
+    horizontal_correlation_scale_2: {"90": 100, "45": 100, "20": 150,
+                                   "-20": 150, "-45": 100, "-90": 100}
+    anisotropy: {"90": 1, "45": 1, "20": 3,
+                   "-20": 3, "-45": 1, "-90": 1}
+    anisotropy_2: {"90": 1, "45": 1, "20": 3,
+                   "-20": 3, "-45": 1, "-90": 1}
+    background_error_group: "SynopticError"
+    background_error_suffix: ""
+    background_error_group_2: "MesoscaleError"
+    background_error_suffix_2: ""
+    temporal_correlation_scale: PT120H
+    num_zonal_bands: 36
+    num_levels: 2
+    search_radius: 300 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+  passedBenchmark: 16
+  compareVariables:
+    - reference:
+        name: ocean_potential_temperature@GrossErrorProbabilityAfterOpsBuddyCheck
+      test:
+        name: ocean_potential_temperature@GrossErrorProbability
+      absTol: 2.0e-4
+    - reference:
+        name: ocean_salinity@GrossErrorProbabilityAfterOpsBuddyCheck
+      test:
+        name: ocean_salinity@GrossErrorProbability
+      absTol: 2.0e-4

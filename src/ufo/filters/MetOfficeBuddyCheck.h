@@ -98,7 +98,9 @@ class MetOfficeBuddyCheck : public FilterBase,
 
   /// \brief Return the name of the variable containing the background error estimate of the
   /// specified filter variable.
-  Variable backgroundErrorVariable(const Variable &filterVariable) const;
+  Variable backgroundErrorVariable(const Variable &filterVariable,
+                                   const std::string &suffix,
+                                   const std::string &groupName) const;
 
   /// \brief Returns a vector of IDs of all observations that should be buddy-checked.
   std::vector<size_t> getValidObservationIds(
@@ -131,11 +133,14 @@ class MetOfficeBuddyCheck : public FilterBase,
   template <typename T>
   std::vector<T> getGlobalVariable(const ufo::Variable &var) const;
 
-  /// \brief Calculates and returns background error correlation scales at observation locations.
+  /// \brief Calculates and returns a piecewise linear function at observation locations, such as
+  ///  is needed for latitude-dependent background error correlation scales and anisotropies.
   ///
   /// Only elements with indices corresponding to those of valid observations are filled in.
-  std::vector<float> calcBackgroundErrorHorizontalCorrelationScales(
-      const std::vector<size_t> &validObsIds, const std::vector<float> &latitudes) const;
+  std::vector<float> calculatePiecewiseLinear(
+       const std::vector<size_t> &validObsIds,
+       const std::vector<float> &latitudes,
+       const std::map<float, float> &interpolationPoints) const;
 
   /// \brief Identifies observations whose buddy checks should be logged.
   ///
@@ -166,6 +171,13 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Whether to log buddy checks involving particular observations.
   /// \param bgErrorHorizCorrScales
   ///   Background error horizontal correlation scales (in km).
+  /// \param bgErrorHorizCorrScales2
+  ///   Background error optional 2nd horizontal correlation scale (in km).
+  /// \param anisotropy
+  ///   Anisotropy (optional), i.e. how much length scale differs according to whether the
+  /// observation pair are aligned more N-S or E-W.
+  /// \param anisotropy2
+  ///   2nd anisotropy (optional), corresponding to the 2nd horizontal correlation scale.
   /// \param stationIds
   ///   Station IDs ("call signs").
   /// \param datetimes
@@ -184,12 +196,17 @@ class MetOfficeBuddyCheck : public FilterBase,
   ///   Background values.
   /// \param bgErrors
   ///   Estimated errors of background values.
+  /// \param bgErrors2
+  ///   Optional 2nd length-scale estimated errors of background values.
   /// \param[inout] pges
   ///   Gross error probabilities. These values are updated by the buddy check.
   void checkScalarData(const std::vector<MetOfficeBuddyPair> &pairs,
                        const std::vector<int> &flags,
                        const std::vector<bool> &verbose,
                        const std::vector<float> &bgErrorHorizCorrScales,
+                       const std::vector<float> *bgErrorHorizCorrScales2,
+                       const std::vector<float> *anisotropy,
+                       const std::vector<float> *anisotropy2,
                        const std::vector<int> &stationIds,
                        const std::vector<util::DateTime> &datetimes,
                        const Eigen::ArrayXXf *pressures,
@@ -197,6 +214,7 @@ class MetOfficeBuddyCheck : public FilterBase,
                        const Eigen::ArrayXXf &obsErrors,
                        const Eigen::ArrayXXf &bgValues,
                        const Eigen::ArrayXXf &bgErrors,
+                       const Eigen::ArrayXXf *bgErrors2,
                        Eigen::ArrayXXf &pges) const;
 
   /// \brief Buddy check for vector (two-dimensional) quantities.
