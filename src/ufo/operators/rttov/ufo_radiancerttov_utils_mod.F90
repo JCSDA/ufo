@@ -2149,7 +2149,6 @@ contains
     integer                       :: nchanprof, nlevels, nprofiles
     real(kind_real), allocatable  :: od_level(:), wfunc(:), tstore(:), bt_overcast(:)
     real(kind_real)               :: planck1, planck2, ff_bco, ff_bcs
-    logical, save                 :: firsttime = .true.
 
     include 'rttov_calc_weighting_fn.interface'
 
@@ -2285,10 +2284,9 @@ contains
             hofxdiags%geovals(jvar)%vals = missing
           end if
 
-          if(firsttime) then 
-            write(message,*) 'ufo_radiancerttov_simobs: //&
-              & ObsDiagnostic is unsupported but allocating anyway, ', &
-              & hofxdiags%variables(jvar), shape(hofxdiags%geovals(jvar)%vals)
+          if(debug) then
+            write(message,*) 'ufo_radiancerttov_simobs: ObsDiagnostic is unsupported but allocating anyway, ', &
+                             hofxdiags%variables(jvar), shape(hofxdiags%geovals(jvar)%vals)
             call fckit_log%info(message)
           end if
 
@@ -2341,11 +2339,9 @@ contains
                   endif
                 else
                   hofxdiags%geovals(jvar)%vals(:,prof) = zero
-                  if (firsttime) then
-                    write(message,*) 'ufo_radiancerttov_simobs: //&
-                      & Cloud Ice Water only supported for RTTOV-SCATT'
+                  if (debug) then
+                    write(message,*) 'ufo_radiancerttov_simobs: Cloud Ice Water only supported for RTTOV-SCATT'
                     call fckit_log%info(message)
-                    firsttime = .false.
                   end if
                 end if
               end if
@@ -2399,18 +2395,16 @@ contains
           end do
 
         case default
-          if (firsttime) then
-            write(message,*) 'ufo_radiancerttov_simobs: //&
-              & Jacobian ObsDiagnostic is unsupported, ', &
-              & hofxdiags%variables(jvar)
+          if (debug) then
+            write(message,*) 'ufo_radiancerttov_simobs: Jacobian ObsDiagnostic is unsupported, ', &
+                             hofxdiags%variables(jvar)
             call fckit_log%info(message)
           end if  
         end select
       else
-        if (firsttime) then
-          write(message,*) 'ufo_radiancerttov_simobs: //&
-            & ObsDiagnostic is not recognised, ', &
-            & hofxdiags%variables(jvar)
+        if (debug) then
+          write(message,*) 'ufo_radiancerttov_simobs: ObsDiagnostic is not recognised, ', &
+                           hofxdiags%variables(jvar)
           call fckit_log%info(message)
         end if
       end if
@@ -2418,7 +2412,6 @@ contains
     enddo
 
     deallocate(od_level, wfunc, tstore, bt_overcast)
-    firsttime = .false.
   end subroutine populate_hofxdiags
 
   subroutine parse_hofxdiags(hofxdiags, jacobian_needed)

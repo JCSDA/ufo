@@ -5,6 +5,7 @@ observations:
 # Test Newton minimizer
 - obs operator: &ObsOperator
     name: RTTOV
+    Debug: true
     Absorbers: &rttov_absorbers [CLW, CIW]
     linear model absorbers: []
     obs options:
@@ -98,6 +99,7 @@ observations:
 
 - obs operator:
     <<: *ObsOperator
+    Debug: false
   obs space:
     <<: *ObsSpace
     name: Test the RTTOVOneDVarCheck throwns an error if SatRad compatibility is true

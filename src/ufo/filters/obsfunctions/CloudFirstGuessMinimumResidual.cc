@@ -62,6 +62,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   const std::vector<std::string> vars = {"brightness_temperature"};
   const std::vector<std::string> clearSkyName = {"brightness_temperature_assuming_clear_sky"};
   const float missing = util::missingValue(missing);
+  const float largeCostValue = 1.0e9f;
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable(btOvercastName, channels_)[0]);
   const size_t nchans = channels_.size();
@@ -108,7 +109,8 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
       in.get(Variable(btOvercastName, channels_)[ichan], ilev, obsCloudyVal[ichan]);
 
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        if (obsError[ichan][iloc] == missing) {
+        if (obsError[ichan][iloc] == missing | obsBias[ichan][iloc] == missing |
+            obsVal[ichan][iloc] == missing | obsClearVal[ichan][iloc] == missing) {
             writeoutdata[iloc] = false;
             continue;
         }
@@ -133,7 +135,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (!writeoutdata[iloc]) continue;
       if (airPressure[ilev][iloc] < options_.minCloudPressure.value()) {
-        costFunction[iloc][ilev] = 1.0e9;
+        costFunction[iloc][ilev] = largeCostValue;
         continue;
       }
       cloudFraction[ilev][iloc] = cloudFractionNumerator[iloc] / cloudFractionDenominator[iloc];
