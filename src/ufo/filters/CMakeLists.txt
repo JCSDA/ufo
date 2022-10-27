@@ -15,6 +15,8 @@ set ( filters_files
       ConventionalProfileProcessing.cc
       ConventionalProfileProcessing.h
       ConventionalProfileProcessingParameters.h
+      CopyFlagsFromExtendedToOriginalSpace.cc
+      CopyFlagsFromExtendedToOriginalSpace.h
       CreateDiagnosticFlags.cc
       CreateDiagnosticFlags.h
       DiagnosticFlag.h

@@ -16,6 +16,7 @@
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/ConventionalProfileProcessing.h"
+#include "ufo/filters/CopyFlagsFromExtendedToOriginalSpace.h"
 #include "ufo/filters/CreateDiagnosticFlags.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/FinalCheck.h"
@@ -87,7 +88,9 @@ void instantiateObsFilterFactory() {
   static oops::interface::FilterMaker<ObsTraits, ConventionalProfileProcessing>
            conventionalProfileProcessingMaker("Conventional Profile Processing");
   static oops::interface::FilterMaker<ObsTraits, CreateDiagnosticFlags>
-             CreateDiagnosticFlagsMaker("Create Diagnostic Flags");
+           CreateDiagnosticFlagsMaker("Create Diagnostic Flags");
+  static oops::interface::FilterMaker<ObsTraits, CopyFlagsFromExtendedToOriginalSpace>
+           CopyFlagsFromExtendedToOriginalSpaceMaker("Copy Flags From Extended To Original Space");
   static oops::interface::FilterMaker<ObsTraits, ObsDerivativeCheck>
            DerivativeCheckMaker("Derivative Check");
   static oops::interface::FilterMaker<ObsTraits, DifferenceCheck>
