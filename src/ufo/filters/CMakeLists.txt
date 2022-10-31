@@ -183,6 +183,8 @@ set ( filters_files
       obsfunctions/SIRetMW.h
       obsfunctions/SIRetSymmetricMW.cc
       obsfunctions/SIRetSymmetricMW.h
+      obsfunctions/Emissivity_Diff_GMI.cc
+      obsfunctions/Emissivity_Diff_GMI.h
       obsfunctions/HydrometeorCheckAMSUA.cc
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
