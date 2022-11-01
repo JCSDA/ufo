@@ -23,6 +23,8 @@
 #include "oops/util/Printable.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
+#include "ufo/utils/VariableNameMap.h"
+
 namespace oops {
 class Variables;
 }
@@ -47,8 +49,9 @@ class ObsDiagnostics;
 class LinearObsOperatorBase : public util::Printable,
                               private boost::noncopyable {
  public:
-  explicit LinearObsOperatorBase(const ioda::ObsSpace & odb)
-    : odb_(odb) {}
+  explicit LinearObsOperatorBase(const ioda::ObsSpace & odb,
+                                 const VariableNameMap & nameMap = VariableNameMap(boost::none))
+           : odb_(odb), nameMap_(nameMap) {}
   virtual ~LinearObsOperatorBase() {}
 
 /// Obs Operator
@@ -72,6 +75,8 @@ class LinearObsOperatorBase : public util::Printable,
 
  private:
   const ioda::ObsSpace & odb_;
+ protected:
+  mutable VariableNameMap nameMap_;
 };
 
 // -----------------------------------------------------------------------------

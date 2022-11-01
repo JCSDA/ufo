@@ -28,13 +28,13 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb)
+  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value()))
 {
   oops::Log::trace() << "ObsIdentityTLAD constructor starting" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
-  requiredVars_ += operatorVars_;
+  requiredVars_ += nameMap_.convertName(operatorVars_);
 
   // Check whether level index 0 is closest to the Earth's surface.
   levelIndexZeroAtSurface_  = parameters.levelIndex0IsClosestToSurface.value();
@@ -62,7 +62,7 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) co
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = dy.varnames().variables()[jvar];
+    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Fill dy with dx at the level closest to the Earth's surface.
     if (levelIndexZeroAtSurface_)
       dx.getAtLevel(vec, varname, 0);
@@ -86,7 +86,7 @@ void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) co
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = dy.varnames().variables()[jvar];
+    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Get current value of dx at the level closest to the Earth's surface.
     if (levelIndexZeroAtSurface_)
       dx.getAtLevel(vec, varname, 0);

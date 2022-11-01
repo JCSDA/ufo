@@ -48,7 +48,7 @@ class VariableNameMap
     ~VariableNameMap();
 
   const std::string convertName(const std::string &);
-  oops::Variables convertName(oops::Variables &);
+  oops::Variables convertName(const oops::Variables &);
 
  private:
   std::map<std::string, std::string> Aliases_;

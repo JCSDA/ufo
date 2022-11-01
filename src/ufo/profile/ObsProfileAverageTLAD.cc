@@ -28,8 +28,10 @@ static LinearObsOperatorMaker<ObsProfileAverageTLAD> obsProfileAverageMaker_("Pr
 
 ObsProfileAverageTLAD::ObsProfileAverageTLAD(const ioda::ObsSpace & odb,
                                              const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
+  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+    odb_(odb), data_(odb, parameters)
 {
+  requiredVars_ += nameMap_.convertName(data_.requiredVars());
   oops::Log::trace() << "ObsProfileAverageTLAD constructed" << std::endl;
 }
 
@@ -68,7 +70,7 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
       data_.getSlantPathLocations(locsOriginal, locsExtended);
 
     for (int jvar : data_.operatorVarIndices()) {
-      const auto& variable = dy.varnames().variables()[jvar];
+      const auto& variable = nameMap_.convertName(dy.varnames().variables()[jvar]);
       const std::size_t nlevs_var = dx.nlevs(variable);
       std::vector<double> var_gv(nlevs_var);
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
@@ -110,7 +112,7 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
       data_.getSlantPathLocations(locsOriginal, locsExtended);
 
     for (int jvar : data_.operatorVarIndices()) {
-      const auto& variable = dy.varnames().variables()[jvar];
+      const auto& variable = nameMap_.convertName(dy.varnames().variables()[jvar]);
       const std::size_t nlevs_var = dx.nlevs(variable);
       std::vector<double> var_gv(nlevs_var);
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {

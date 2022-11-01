@@ -29,8 +29,10 @@ static ObsOperatorMaker<ObsProfileAverage> obsProfileAverageMaker_("ProfileAvera
 
 ObsProfileAverage::ObsProfileAverage(const ioda::ObsSpace & odb,
                                      const Parameters_ & parameters)
-  : ObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+    odb_(odb), data_(odb, parameters)
 {
+  requiredVars_ += nameMap_.convertName(data_.requiredVars());
   oops::Log::trace() << "ObsProfileAverage constructed" << std::endl;
 }
 
@@ -74,7 +76,7 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
     // Fill H(x) vector for each variable.
     for (int jvar : data_.operatorVarIndices()) {
-      const auto& variable = ovec.varnames().variables()[jvar];
+      const auto& variable = nameMap_.convertName(ovec.varnames().variables()[jvar]);
       // Number of levels for this variable.
       const std::size_t nlevs_var = gv.nlevs(variable);
       // GeoVaL vector for this variable.
