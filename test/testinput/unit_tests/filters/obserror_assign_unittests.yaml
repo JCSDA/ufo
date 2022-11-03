@@ -4,14 +4,15 @@ Assign constant observation error value:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 100000, 90000, 80000, 90000, 100000]
   station_id: [ 1, 1, 1, 1, 1]
   ObsError assign:
@@ -30,14 +31,15 @@ Assign observation error from NetCDF variance; 1 exact; 1 linear (along the firs
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 2, 4, 6, 8, 10]
   observation_type: [0, 1, 2, 3, 4]
   ObsError assign:
@@ -61,8 +63,9 @@ Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the se
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -6, -6, -6, -4 ]
         lons: [ 30, 35, 40, 45 ]
         dateTimes: [ 0,
@@ -70,7 +73,7 @@ Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the se
                      0,
                      0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   ObsError assign:
     filter variables:
     - name: air_temperature
@@ -92,14 +95,15 @@ Assign observation error from NetCDF variance; 1 exact; 1 nearest:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 1, 2, 4, 13, 35]
   observation_type: [0, 1, 2, 3, 4]
   ObsError assign:
@@ -123,14 +127,15 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   satellite_id:      [ 0, 0,  1, 1,  1 ]
   processing_center: [ 0, 1,  0, 1,  0 ]
   latitude_band:     [ 6, 11, 4, 30, 7 ]
@@ -160,14 +165,15 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrat
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   satellite_id:      [ 0, 0,  1, 1,  1 ]
   processing_center: [ 0, 1,  0, 1,  0 ]
   latitude_band:     [ 6, 11, 4, 30, 7 ]
@@ -197,14 +203,15 @@ Assign observation error from NetCDF full matrix with ioda-v2-style variable nam
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   satellite_id:      [ 0, 0,  1, 1,  1 ]
   processing_center: [ 0, 1,  0, 1,  0 ]
   latitude_band:     [ 6, 11, 4, 30, 7 ]
@@ -234,13 +241,14 @@ Assign observation error from NetCDF full matrix 2D; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
-      obs errors: [1.0]
+        obs errors: [1.0]
   channel_number:    [ 2, 0, 4, 7, 5 ]
   ObsError assign:
     filter variables:
@@ -261,14 +269,15 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [2, 4, 6, 8, 9]
   StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
@@ -294,8 +303,9 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
     obs space:
       name: Aircraft
       simulated variables: [air_temperature]
-      generate:
-        list:
+      obsdatain:
+        engine:
+          type: GenList
           lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
           lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
           dateTimes: [ 0, 0,
@@ -303,7 +313,7 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
                        0, 0,
                        0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
+          obs errors: [1.0]
     air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
     StringVar: [south, south, south, south, north, north, north, north]
     ObsError assign:
@@ -329,14 +339,15 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [2, 4, 6, 8, 9]
   StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
@@ -358,14 +369,15 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [2, 4, 6, 8, 9]
   StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
@@ -389,14 +401,15 @@ Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 300, 300, 300, 301, 301, 301]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -420,14 +433,15 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 599, 599, 599, 600, 600, 600]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -451,14 +465,15 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 2, 4, 6, 8, 10]
   observation_type: [1000, 1, 2, 3, 4]
   ObsError assign:
@@ -482,14 +497,15 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [-99999, 300, 99999, 301, 301, 301]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -513,14 +529,15 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [99999, 599, -99999, 600, 600, 600]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -544,14 +561,15 @@ Assign observation error from NetCDF variance; attempt to use the 'least upper b
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [2, 4, 6, 8, 9]
   StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
@@ -573,14 +591,15 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [2, 4, 6, 8, 9]
   StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
@@ -602,14 +621,15 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 599, 599, 100, 600, 600, 600]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -633,14 +653,15 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2, 3 ]
         lons: [ 178, 179, 180, 181, 182, 183 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [ 599, 599, 100, 600, 600, 600]
   station_id: [0, 1, 2, 0, 1, 2]
   ObsError assign:
@@ -664,14 +685,15 @@ Assign observation error from NetCDF file; 2D array of full covariance matrices:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   channel_number:    [ 2, 0, 4, 7, 5 ]
   ObsError assign:
     filter variables:
@@ -694,14 +716,15 @@ Assign observation error from NetCDF variance; multi-channel variable support:
     simulated variables: [brightness_temperature]
     observed variables: [brightness_temperature]
     channels: &all_channels 1-2
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         dateTimes: [ 0, 3600, 7200,
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0, 1.0]
+        obs errors: [1.0, 1.0]
   satellite_id:      [ 0, 0,  1, 1,  1 ]
   processing_center: [ 0, 1,  0, 1,  0 ]
   latitude_band:     [ 6, 11, 4, 30, 7 ]
@@ -745,8 +768,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 31, 59, 31, 59, 31, 59, 31, 59 ]
         dateTimes: [ 0, 0,
@@ -754,7 +778,7 @@ Assign observation error from CSV file; data types float, int and string; payloa
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
   StringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
@@ -780,8 +804,9 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 31, 59, 31, 59, 31, 59, 31, 59 ]
         dateTimes: [ 0, 0,
@@ -789,7 +814,7 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
   StringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
@@ -815,8 +840,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 31, 59, 31, 59, 31, 59, 31, 59 ]
         dateTimes: [ 0, 0,
@@ -824,7 +850,7 @@ Assign observation error from CSV file; data types float, int and string; payloa
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
   StringVar: ["South America", "South America", "South America", "South America",
               "North America", "North America", "North America", "North America"]
@@ -851,14 +877,15 @@ Assign observation error from CSV file; data type datetime; payload of type int:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0 ]
         dateTimes: [ 28857600, 28944000,
                      216000, 259200 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   ObsError assign:
     filter variables:
     - name: air_temperature
@@ -878,8 +905,9 @@ Assign observation error from CSV file; data types float, int and string; missin
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
         dateTimes: [ 0, 0,
@@ -887,7 +915,7 @@ Assign observation error from CSV file; data types float, int and string; missin
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
   StringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
@@ -913,13 +941,14 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -941,13 +970,14 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -969,13 +999,14 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -997,13 +1028,14 @@ Assign observation error from CSV file; datetime data in column with @ErrorVaria
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1025,13 +1057,14 @@ Assign observation error from CSV file; empty file:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1053,13 +1086,14 @@ Assign observation error from CSV file; only one header line:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1081,13 +1115,14 @@ Assign observation error from CSV file; no data lines:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1109,13 +1144,14 @@ Assign observation error from CSV file; empty data line:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1137,13 +1173,14 @@ Assign observation error from CSV file; incorrect number of data types:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1165,13 +1202,14 @@ Assign observation error from CSV file; incorrect number of columns in the first
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1193,13 +1231,14 @@ Assign observation error from CSV file; unsupported data type:
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 1 ]
         lons: [ 1 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1]
   StringVar: [abc]
   ObsError assign:
@@ -1221,13 +1260,14 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ 0 ]
         lons: [ 0 ]
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [100000]
   StringVar: [south]
   ObsError assign:
@@ -1249,8 +1289,9 @@ Assign observation error from CSV file; data types float, int and string; missin
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 30, 60, 30, 60, 30, 60, 30, 60 ]
         dateTimes: [ 0, 0,
@@ -1258,7 +1299,7 @@ Assign observation error from CSV file; data types float, int and string; missin
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
   StringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
@@ -1287,8 +1328,9 @@ Assign observation error from CSV file containing errors; data types float, int 
   obs space:
     name: Aircraft
     simulated variables: [air_temperature]
-    generate:
-      list:
+    obsdatain:
+      engine:
+        type: GenList
         lats: [ -10, -10, -10, -10, 10, 10, 10, 10 ]
         lons: [ 31, 59, 31, 59, 31, 59, 31, 59 ]
         dateTimes: [ 0, 0,
@@ -1296,7 +1338,7 @@ Assign observation error from CSV file containing errors; data types float, int 
                      0, 0,
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
-      obs errors: [1.0]
+        obs errors: [1.0]
   air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
   StringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:

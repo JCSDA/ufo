@@ -1186,21 +1186,34 @@ end subroutine ufo_geovals_write_netcdf
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fill(self, c_nloc, c_indx, c_nval, c_vals)
+subroutine ufo_geovals_fill(self, c_nloc, c_indx, c_nval, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
 integer(c_int), intent(in) :: c_nval
 real(c_double), intent(in) :: c_vals(c_nval)
+logical(c_bool), intent(in) :: levels_top_down
 
 integer :: jvar, jlev, jloc, iloc, ii
+integer :: lbgn, lend, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fill: geovals not initialized")
 
+lbgn = 1
+lend = 1
 ii = 0
 do jvar = 1, self%nvar
-  do jlev = 1, self%geovals(jvar)%nval
+  ! setting loop indices to ensure geovals are filled top to bottom
+  if (levels_top_down) then
+    linc=1
+    lend=self%geovals(jvar)%nval
+  else
+    lbgn=self%geovals(jvar)%nval
+    linc=-1
+  endif
+
+  do jlev = lbgn, lend, linc
     do jloc=1, c_nloc
       ii = ii + 1
       iloc = c_indx(jloc) + 1
@@ -1215,20 +1228,33 @@ end subroutine ufo_geovals_fill
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fillad(self, c_nloc, c_indx, c_nval, c_vals)
+subroutine ufo_geovals_fillad(self, c_nloc, c_indx, c_nval, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(in) :: self
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
 integer(c_int), intent(in) :: c_nval
 real(c_double), intent(inout) :: c_vals(c_nval)
+logical(c_bool), intent(in) :: levels_top_down
 
 integer :: jvar, jlev, jloc, iloc, ii
+integer :: lbgn, lend, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fillad: geovals not initialized")
 
+lbgn = 1
+lend = 1
 ii = 0
 do jvar = 1, self%nvar
+  ! setting loop indices to ensure geovals are filled top to bottom
+  if (levels_top_down) then 
+    linc=1
+    lend=self%geovals(jvar)%nval
+  else
+    lbgn=self%geovals(jvar)%nval
+    linc=-1
+  endif
+
   do jlev = 1, self%geovals(jvar)%nval
     do jloc=1, c_nloc
       ii = ii + 1

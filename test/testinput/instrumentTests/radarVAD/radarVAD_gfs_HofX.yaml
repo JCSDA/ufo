@@ -7,7 +7,9 @@ observations:
   obs space:
     name: RadarVAD
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_geoval_2020121500.nc

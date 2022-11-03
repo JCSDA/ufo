@@ -9,14 +9,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_bkgqc_repobs_seperate_filters__out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_bkgqc_repobs_seperate_filters__out.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:

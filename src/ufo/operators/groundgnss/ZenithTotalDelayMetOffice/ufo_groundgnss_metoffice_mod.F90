@@ -119,7 +119,7 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   nobs  = obsspace_get_nlocs(obss)
   allocate(zStation(nobs))
 
-  call obsspace_get_db(obss, "MetaData", "station_height", zStation)
+  call obsspace_get_db(obss, "MetaData", "station_altitude", zStation)
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)

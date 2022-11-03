@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [eastward_wind, northward_wind]
 #   obsdataout:
-#     obsfile: Data/satwind_obs_2018041500_m_geovals_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_2018041500_m_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
   geovals test:
@@ -17,11 +21,15 @@ observations:
 - obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-10,15
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_geovals_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_geovals_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   geovals test:

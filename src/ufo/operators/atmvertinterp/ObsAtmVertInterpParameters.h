@@ -79,6 +79,11 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
      "interpolation method (options: automatic, linear, log-linear)",
      InterpolationMethod::AUTOMATIC,
      this};
+
+  oops::OptionalParameter<bool> ApplyFact10
+    {"apply near surface wind scaling",
+     "apply near surface wind scaling",
+     this};
 };
 
 }  // namespace ufo

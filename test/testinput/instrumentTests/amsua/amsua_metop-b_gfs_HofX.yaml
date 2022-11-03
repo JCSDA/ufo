@@ -14,11 +14,13 @@ observations:
   obs space:
     name: amsua_metop-b
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-b_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-b_obs_2020110112_m.nc4
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-b_geoval_2020110112_m.nc4
-  vector ref: GsiHofX
-  tolerance: 1.e-7
+  vector ref: ObsValue
+  tolerance: 1.e-1
 

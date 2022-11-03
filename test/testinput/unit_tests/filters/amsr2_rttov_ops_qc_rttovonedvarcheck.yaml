@@ -5,6 +5,7 @@ observations:
 # Test Newton minimizer
 - obs operator: &ObsOperator
     name: RTTOV
+    Debug: true
     Absorbers: &rttov_absorbers [CLW, CIW]
     linear model absorbers: []
     obs options:
@@ -13,18 +14,22 @@ observations:
       RTTOV_GasUnitConv: true
       UseRHwaterForQC: &UseRHwaterForQC true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default
-      Platform_Name: &platform_name GCOM-W
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [122]
+      Sat_ID: &sat_id [gcom-w_1]
       Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
   obs space: &ObsSpace
     name: Test RTTOVOneDVarCheck for AMSR-2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
     simulated variables: [brightness_temperature]
     channels: &ops_channels 7-12
 #   obsdataout:
-#     obsfile: Data/amsr2_obs_20191230T0000Z_100subset_rttov_onedvarcheck_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsr2_obs_20191230T0000Z_100subset_rttov_onedvarcheck_out.nc
   geovals: &GeoVaLs
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
   obs bias: &ObsBias
@@ -46,7 +51,7 @@ observations:
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Platform_Name: *platform_name 
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id 
         Instrument_Name: *inst_name
         CoefficientPath: Data/
@@ -94,6 +99,7 @@ observations:
 
 - obs operator:
     <<: *ObsOperator
+    Debug: false
   obs space:
     <<: *ObsSpace
     name: Test the RTTOVOneDVarCheck throwns an error if SatRad compatibility is true
@@ -112,7 +118,7 @@ observations:
         RTTOV_GasUnitConv: true
         UseRHwaterForQC: *UseRHwaterForQC
         UseColdSurfaceCheck: *UseColdSurfaceCheck
-        Platform_Name: *platform_name
+        WMO_ID: *wmo_id
         Sat_ID: *sat_id 
         Instrument_Name: *inst_name
         CoefficientPath: Data/

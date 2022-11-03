@@ -43,7 +43,6 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &errgrp = options_.testObserr.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
@@ -55,7 +54,6 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   // Include list of required data from ObsSpace
   invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
   invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
@@ -94,7 +92,6 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &errgrp = options_.testObserr.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Get variables from ObsDiag
@@ -149,7 +146,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
-      if (use_flag_clddet[ichan] > 0) varinv_use[ichan][iloc] = values[iloc];
+      if (use_flag_clddet[ichan] > 0 && use_flag_clddet[ichan]%2 == 1)
+          varinv_use[ichan][iloc] = values[iloc];
     }
   }
 
@@ -158,10 +156,6 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
     in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
-    }
-    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
@@ -191,35 +185,12 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   in.get(Variable("ice_area_fraction@GeoVaLs"), ice_frac);
   in.get(Variable("surface_snow_area_fraction@GeoVaLs"), snow_frac);
 
-  // Determine dominant surface type in each FOV
-  std::vector<bool> land(nlocs, false);
-  std::vector<bool> sea(nlocs, false);
-  std::vector<bool> ice(nlocs, false);
-  std::vector<bool> snow(nlocs, false);
-  std::vector<bool> mixed(nlocs, false);
-  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    sea[iloc] = water_frac[iloc] >= 0.99;
-    land[iloc] = land_frac[iloc] >= 0.99;
-    ice[iloc] = ice_frac[iloc] >= 0.99;
-    snow[iloc] = snow_frac[iloc] >= 0.99;
-    mixed[iloc] = (!sea[iloc] && !land[iloc] && !ice[iloc] && !snow[iloc]);
-  }
-
-  // Setup weight given to each surface type
-  std::vector<float> dtempf(nlocs);
-  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    if (sea[iloc]) {
-      dtempf[iloc] = dtempf_in[0];
-    } else if (land[iloc]) {
-      dtempf[iloc] = dtempf_in[1];
-    } else if (ice[iloc]) {
-      dtempf[iloc] = dtempf_in[2];
-    } else if (snow[iloc]) {
-      dtempf[iloc] = dtempf_in[3];
-    } else {
-      dtempf[iloc] = dtempf_in[4];
-    }
-  }
+  bool sea = true;
+  bool land = false;
+  bool ice = false;
+  bool snow = false;
+  bool mixed = false;
+  float dtempf;
 
   // Get air pressure [Pa]
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
@@ -244,11 +215,26 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   //         out = 2 clear channel but too sensitive to surface condition
 
   // Loop through locations
-  const float btmax = 1000.f, btmin = 0.f;
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     float sum3 = 0.0;
     float tmp = 0.0;
     float cloudp = 0.0;
+    sea = water_frac[iloc] >= 0.99;
+    land = land_frac[iloc] >= 0.99;
+    ice = ice_frac[iloc] >= 0.99;
+    snow = snow_frac[iloc] >= 0.99;
+    mixed = (!sea && !land && !ice && !snow);
+    if (sea) {
+      dtempf = dtempf_in[0];
+    } else if (land) {
+      dtempf = dtempf_in[1];
+    } else if (ice) {
+      dtempf = dtempf_in[2];
+    } else if (snow) {
+      dtempf = dtempf_in[3];
+    } else {
+      dtempf = dtempf_in[4];
+    }
     std::vector<std::vector<float>> dbt(nchans, std::vector<float>(nlevs));
     for (size_t ichan=0; ichan < nchans; ++ichan) {
       if (varinv_use[ichan][iloc] > 0) {
@@ -323,8 +309,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     dts = std::fabs(sumx / sumx2);
     float dts_save = dts;
     if (std::abs(dts) > 1.0) {
-      if (sea[iloc] == false) {
-        dts = std::min(dtempf[iloc], dts);
+      if (sea == false) {
+        dts = std::min(dtempf, dts);
       } else {
         dts = std::min(dts_threshold, dts);
       }

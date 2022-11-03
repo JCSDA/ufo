@@ -28,9 +28,17 @@ ObsGnssroBendMetOffice::ObsGnssroBendMetOffice(const ioda::ObsSpace & odb,
                                        const Parameters_ & parameters)
   : ObsOperatorBase(odb), keyOperGnssroBendMetOffice_(0), odb_(odb), varin_()
 {
+  oops::Log::trace() << "Constructing obs operator" << std::endl;
+  oops::Log::debug() << "Number of channels " << odb.assimvariables().channels() << std::endl;
+
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
+
+  oops::Log::debug() << "nlocs " << odb.nlocs() << std::endl;
+  oops::Log::debug() << "nchans " << odb.nchans() << std::endl;
+  oops::Log::debug() << "nrecs " << odb.nrecs() << std::endl;
+  oops::Log::debug() << "nvars " << odb.nvars() << std::endl;
 
   ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_,
                                      parameters.vertInterpOPS,
@@ -52,8 +60,11 @@ ObsGnssroBendMetOffice::~ObsGnssroBendMetOffice() {
 void ObsGnssroBendMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                      ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "Starting simulateObs" << std::endl;
+  oops::Log::debug() << "ObsVector: nvars = " << ovec.nvars() << "  nlocs = "
+                     << ovec.nlocs() << "  size = " << ovec.size() << std::endl;
+
   ufo_gnssro_bendmetoffice_simobs_f90(keyOperGnssroBendMetOffice_, gom.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(), ydiags.toFortran());
+                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran(), ydiags.toFortran());
   oops::Log::trace() << "Finishing simulateObs" << std::endl;
 }
 

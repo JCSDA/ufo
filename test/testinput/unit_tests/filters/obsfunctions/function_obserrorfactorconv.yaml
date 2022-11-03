@@ -7,14 +7,18 @@ observations:
   obs space:
     name: test_obserrorfactorconv
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "air_pressure"
         sort order: "descending"  
     simulated variables: [eastward_wind]
 #   obsdataout:
-#     obsfile: Data/converr_vadwind_obs_2020120112_s_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/converr_vadwind_obs_2020120112_s_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/converr_vadwind_geoval_2020120112_s.nc4
   obs function:

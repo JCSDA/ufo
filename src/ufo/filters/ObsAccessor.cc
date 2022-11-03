@@ -149,6 +149,31 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
   return validObsIds;
 }
 
+
+/// Get valid (non-missing, where-included) obs indices for a given profile.
+const std::vector<size_t> ObsAccessor::getValidObsIdsInProfile(const size_t & iProfile,
+                                      const std::vector<bool> & apply,
+                                      const ioda::ObsDataVector<int> &flags,
+                                      const Variables & filtervars,
+                                      bool candidateForRetentionIfAnyFilterVariablesPassedQC)
+                                      const {
+  // Get vector of obs within the profile:
+  const std::vector<size_t> & obs_inds = obsdb_->recidx_vector(iProfile);
+  std::vector<size_t> validObsIds;
+  std::vector<bool> isValid = apply;
+  const UnselectLocationIf mode = candidateForRetentionIfAnyFilterVariablesPassedQC ?
+        UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED :
+        UnselectLocationIf::ANY_FILTER_VARIABLE_REJECTED;
+  unselectRejectedLocations(isValid, filtervars, flags, mode);
+  for (size_t ind = 0; ind < obs_inds.size(); ++ind) {
+    if (isValid[obs_inds[ind]]) {
+      validObsIds.push_back(obs_inds[ind]);
+    }
+  }
+  return validObsIds;
+}
+
+
 std::vector<int> ObsAccessor::getIntVariableFromObsSpace(
     const std::string &group, const std::string &variable) const {
   return getVariableFromObsSpaceImpl<int>(group, variable, *obsdb_, *obsDistribution_);

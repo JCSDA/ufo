@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: Chlorophyll
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/viirs_jpss1_oc_l2_2018-04-15.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/viirs_jpss1_oc_l2_2018-04-15.nc
 #   obsdataout:
-#     obsfile: Data/viirs_jpss1_oc_l2_2018-04-15_oceancolor_preqc_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/viirs_jpss1_oc_l2_2018-04-15_oceancolor_preqc_out.nc
     simulated variables: [mass_concentration_of_chlorophyll_in_sea_water]
   obs filters:
   - filter: BlackList

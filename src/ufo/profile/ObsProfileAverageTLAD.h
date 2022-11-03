@@ -45,7 +45,7 @@ class ObsProfileAverageTLAD : public LinearObsOperatorBase,
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
-  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
+  const oops::Variables & requiredVars() const override { return requiredVars_; }
 
   oops::Variables simulatedVars() const override { return data_.simulatedVars(); }
 
@@ -58,6 +58,9 @@ class ObsProfileAverageTLAD : public LinearObsOperatorBase,
 
   /// Data handler for the ProfileAverage operator and TL/AD code.
   ObsProfileAverageData data_;
+
+  /// Required variables.
+  oops::Variables requiredVars_;
 };
 
 // -----------------------------------------------------------------------------

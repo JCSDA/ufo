@@ -377,12 +377,13 @@ a brightness temperature. where:
 h - planck constant (m2kgs-1)
 c - speed of light (ms-1)
 t_b - boltzman constant (m2kgs-2K-1)
-planck1 = (2*h*c*c)
-planck2 = (h*c / T_b)
+planck1 = (2*h*c*c)    - (1.191042972e-16 W / (m^2.sr.m-4)) - forward declaration has the default
+                         arguments to allow for rounding differences in porting.
+planck2 = (h*c / T_b)  - (1.4387769e-2 m.K) - forward declaration has the default arguments
+                         to allow for rounding differences in porting.
 */
-double inversePlanck(const double radiance, const double wavenumber) {
-  const double planck1 = 1.191042953e-16;  // (W / (m^2.sr.m-4))
-  const double planck2 = 1.4387774e-2;     // (m.K)
+double inversePlanck(const double radiance, const double wavenumber,
+                     const double planck1, const double planck2) {
   const double p1 = planck1 * wavenumber * wavenumber * wavenumber;
   const double p2 = planck2 * wavenumber;
   double BT = p2 / std::log(1.0 + p1 / radiance);
@@ -525,6 +526,33 @@ float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
     BkP = pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
   }
   return BkP;
+}
+
+/* -------------------------------------------------------------------------------------*/
+
+float Geometric_to_Geopotential_Height(float latitude, float geomH) {
+  float geopH = util::missingValue(1.0f);
+  double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
+  double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
+                 std::sqrt(1.0 - Constants::eccentricity_sq * sino));
+  double termr = Constants::semi_major_axis / (1.0 + Constants::flattening +
+                 Constants::grav_ratio - 2.0 * Constants::flattening * sino);
+  geopH = (termg / Constants::grav) * ((termr * geomH) / (termr + geomH));  // [m]
+  return geopH;
+}
+
+/* -------------------------------------------------------------------------------------*/
+
+float Geopotential_to_Geometric_Height(float latitude, float geopH) {
+  float geomH = util::missingValue(1.0f);
+  double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
+  double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
+                 std::sqrt(1.0 - Constants::eccentricity_sq * sino));
+  double termr = Constants::semi_major_axis / (1.0 + Constants::flattening +
+                 Constants::grav_ratio - 2.0 * Constants::flattening * sino);
+  double termrg = termg / Constants::grav * termr;
+  geomH = termr * geopH / (termrg - geopH);  // [m]
+  return geomH;
 }
 }  // namespace formulas
 }  // namespace ufo

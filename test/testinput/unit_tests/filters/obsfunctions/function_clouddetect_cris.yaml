@@ -5,10 +5,14 @@ observations:
 - obs space:
     name: cris-fsr_npp
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
     simulated variables: [brightness_temperature]
 #   obsdataout:
-#     obsfile: Data/cris-fsr_npp_obs_2018041500_m_unittest_clouddetect_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/cris-fsr_npp_obs_2018041500_m_unittest_clouddetect_out.nc4
     channels: &all_channels
                  19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
                  51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,

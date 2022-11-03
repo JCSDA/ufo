@@ -5,21 +5,25 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
-    simulated variables: [eastward_wind,northward_wind]
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+    simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:
     name: ModelHeightAdjustedEastwardMarineWind@ObsFunction
-    variables: [eastward_wind]
+    variables: [windEastwardAt10M]
     tolerance: 1.0e-6
 
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
-    simulated variables: [eastward_wind,northward_wind]
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_marine_obs_20210521T1200Z.nc4
+    simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:
     name: ModelHeightAdjustedNorthwardMarineWind@ObsFunction
-    variables: [northward_wind]
+    variables: [windNorthwardAt10M]
     tolerance: 1.0e-6

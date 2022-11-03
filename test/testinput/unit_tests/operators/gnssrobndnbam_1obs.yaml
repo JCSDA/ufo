@@ -7,10 +7,14 @@ observations:
   obs space:
    name: GnssroBndNBAM
    obsdatain:
-    obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
+    engine:
+      type: H5File
+      obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
    simulated variables: [bending_angle]
 #   obsdataout:
-#     obsfile: Data/gnssro_obs_2018041500_1obs_bending_angle_1obstest_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_obs_2018041500_1obs_bending_angle_1obstest_out.nc4
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4
   vector ref: GsiHofX

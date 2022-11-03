@@ -1,5 +1,12 @@
 obs space:
   name: smap_ssm-thinned
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: nasa
   simulated variables: [soilMoistureVolumetric]
 monitoring only: true

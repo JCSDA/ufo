@@ -9,8 +9,8 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      Platform_Name: NOAA
-      Sat_ID: 20
+      WMO_ID: [225]
+      Sat_ID: [noaa_20]
       Instrument_Name: ATMS
       CoefficientPath: Data/
       RTTOV_GasUnitConv: true
@@ -18,11 +18,15 @@ observations:
   obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-22
 #   obsdataout:
-#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_qc_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_n20_obs_20191230T0000_rttov_qc_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
@@ -109,8 +113,8 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      Platform_Name: NOAA
-      Sat_ID: 20
+      WMO_ID: [225]
+      Sat_ID: [noaa_20]
       Instrument_Name: ATMS
       CoefficientPath: Data/
       RTTOV_GasUnitConv: true
@@ -118,11 +122,15 @@ observations:
   obs space:
     name: atms_n20
     obsdatain: # Data from different cycle to assimilation window = 0 obs processed
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_2020040100_allsurfacetypes.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_2020040100_allsurfacetypes.nc4
     simulated variables: [brightness_temperature]
     channels: *all_channels
 #   obsdataout:
-#     obsfile: Data/atms_n20_obs_2020040100_allsurfacetypes_zeroobs_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_n20_obs_2020040100_allsurfacetypes_zeroobs_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
   obs filters:

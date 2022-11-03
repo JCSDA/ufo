@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2022 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,9 +8,11 @@
 
 module ufo_insitutemperature_mod_c
 
-  use fckit_configuration_module, only: fckit_configuration 
   use iso_c_binding
-  use ufo_insitutemperature_mod 
+  use ufo_insitutemperature_mod
+  use ufo_geovals_mod
+  use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  use oops_variables_mod
   implicit none
   private
 
@@ -33,53 +35,57 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_setup_c(c_key_self, c_conf) bind(c,name='ufo_insitutemperature_setup_f90')
-implicit none
-integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), value, intent(in) :: c_conf
+subroutine ufo_insitutemperature_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, &
+    c_nobsvars, c_geovars) bind(c,name='ufo_insitutemperature_setup_f90')
+  integer(c_int),        intent(inout) :: c_key_self
+  type(c_ptr),    value, intent(in)    :: c_conf
+  type(c_ptr),    value, intent(in)    :: c_obsvars ! variables to be simulated...
+  integer(c_int), value, intent(in)    :: c_nobsvars
+  integer(c_int),        intent(in)    :: c_obsvarindices(c_nobsvars) ! ... and their global indices
+  type(c_ptr),    value, intent(in)    :: c_geovars ! variables requested from the model
 
-type(ufo_insitutemperature), pointer :: self
-type(fckit_configuration) :: f_conf
+  type(ufo_insitutemperature), pointer :: self
 
-call ufo_insitutemperature_registry%setup(c_key_self, self)
-f_conf = fckit_configuration(c_conf)
+  call ufo_insitutemperature_registry%setup(c_key_self, self)
 
-call self%setup(f_conf)
+  ! assuming that there is only 1 variable
+  if (c_nobsvars /= 1) call abor1_ftn("InsituTemperature only works on a single variable")
+  self%obsvars = oops_variables(c_obsvars)
+  self%obsvaridx = c_obsvarindices(1) + 1
+  self%geovars = oops_variables(c_geovars)
+
+  call self%setup()
 
 end subroutine ufo_insitutemperature_setup_c
 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_insitutemperature_delete_c(c_key_self) bind(c,name='ufo_insitutemperature_delete_f90')
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_insitutemperature), pointer :: self
+  integer(c_int), intent(inout) :: c_key_self
 
-call ufo_insitutemperature_registry%get(c_key_self, self)
+  type(ufo_insitutemperature), pointer :: self
 
-call self%delete()
-
-call ufo_insitutemperature_registry%remove(c_key_self)
+  call ufo_insitutemperature_registry%delete(c_key_self, self)
 
 end subroutine ufo_insitutemperature_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
-    bind(c,name='ufo_insitutemperature_simobs_f90')
+subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, &
+                                          c_nlocs, c_hofx) &
+                                          bind(c,name='ufo_insitutemperature_simobs_f90')
+  integer(c_int),        intent(in) :: c_key_self
+  integer(c_int),        intent(in) :: c_key_geovals
+  type(c_ptr),    value, intent(in) :: c_obsspace
+  integer(c_int),        intent(in) :: c_nvars, c_nlocs
+  real(c_double),     intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
+  type(ufo_insitutemperature), pointer :: self
+  type(ufo_geovals), pointer :: geovals
 
-type(ufo_insitutemperature), pointer :: self
-
-call ufo_insitutemperature_registry%get(c_key_self, self)
-call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
+  call ufo_insitutemperature_registry%get(c_key_self, self)
+  call ufo_geovals_registry%get(c_key_geovals,geovals)
+  call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_insitutemperature_simobs_c
 

@@ -18,9 +18,13 @@ observations:
   obs space:
     name: amsua_n19
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
 #   obsdataout:
-#     obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_bc_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_bc_out.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-15
   geovals:
@@ -53,8 +57,8 @@ observations:
         inflation:
           ratio: 1.1
           ratio for small dataset: 2.0
-  vector ref: GsiHofXBc
-  tolerance: 1.e-7
+  vector ref: ObsValue
+  tolerance: 1.e-1
   linear obs operator test:
     iterations TL: 2
     coef TL: 1.e-3

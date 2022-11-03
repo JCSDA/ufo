@@ -15,7 +15,7 @@
 #include "ufo/ObsBiasCovariance.h"
 
 #include "ioda/distribution/Accumulator.h"
-#include "ioda/Engines/Factory.h"
+#include "ioda/Engines/EngineUtils.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"

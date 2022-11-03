@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: satwinds_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/satwind_obs_2020121500_m.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/satwind_obs_2020121500_m.nc
 #   obsdataout: 
-#     obsfile: Data/satwind_obs_2020121500_m_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/satwind_geoval_2020121500_m.nc

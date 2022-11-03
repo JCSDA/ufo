@@ -12,8 +12,8 @@ observations:
      Absorbers: []
      linear model absorbers: []
      obs options:
-       Platform_Name: NOAA
-       Sat_ID: 20
+       WMO_ID: [225]
+       Sat_ID: [noaa_20]
        Instrument_Name: ATMS
        CoefficientPath: Data/
        RTTOV_GasUnitConv: false # default
@@ -78,11 +78,15 @@ observations:
   obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22 
 #   obsdataout:
-#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_default_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_n20_obs_20191230T0000_rttov_default_out.nc4
   geovals:
     filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   rms ref: 228.54196297632672
@@ -100,8 +104,8 @@ observations:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility
        SatRad_compatibility: false # non-default
-       Platform_Name: NOAA
-       Sat_ID: 20
+       WMO_ID: [225]
+       Sat_ID: [noaa_20]
        Instrument_Name: ATMS
        CoefficientPath: Data/
        UseRHwaterForQC: false # non-default
@@ -110,11 +114,15 @@ observations:
   obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22 
 #   obsdataout:
-#     obsfile: Data/atms_n20_obs_20191230T0000_rttov_nondefault_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_n20_obs_20191230T0000_rttov_nondefault_out.nc4
   geovals:
     filename: *geovals
   rms ref: 227.88586699673394

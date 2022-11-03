@@ -82,6 +82,11 @@ constexpr util::NamedEnumerator<ExtrapolationMode>
   ExtrapolationModeParameterTraitsHelper::namedValues[];
 
 // -----------------------------------------------------------------------------
+constexpr char EquidistantChoiceParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<EquidistantChoice>
+  EquidistantChoiceParameterTraitsHelper::namedValues[];
+
+// -----------------------------------------------------------------------------
 static ObsFunctionMaker<DrawValueFromFile<float>> floatMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<int>> intMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<std::string>> stringMaker("DrawValueFromFile");
@@ -115,6 +120,7 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[varName] = method;
       extrapMode_[varName] = intParam->extrapMode.value();
+      equidistantChoice_[varName] = intParam->equidistanceChoice.value();
     }
     if (nlin > 0 && nlin != 2) {
       throw eckit::UserError("Bilinear interpolation requires two variables.", Here());
@@ -161,7 +167,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
   // Channel number handling
   if (options_.chlist.value() != boost::none)
     interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT,
-                              ExtrapolationMode::ERROR);
+                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST);
 
   ObData obData;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
@@ -169,7 +175,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
       " from the obsSpace" << std::endl;
 
     const std::string varName = allvars_[ind].fullName();
-    interpolator.scheduleSort(varName, interpMethod_.at(varName), extrapMode_.at(varName));
+    interpolator.scheduleSort(varName, interpMethod_.at(varName), extrapMode_.at(varName),
+                              equidistantChoice_.at(varName));
     switch (in.dtype(allvars_[ind])) {
       case ioda::ObsDtype::Integer:
         updateObData<int>(in, allvars_[ind], obData);

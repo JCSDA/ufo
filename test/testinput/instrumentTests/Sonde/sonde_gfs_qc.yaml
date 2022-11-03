@@ -5,13 +5,17 @@ observations:
 - obs space:
     name: sonde_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_obs_2020121500_m.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_obs_2020121500_m.nc
       obsgrouping:
         group variables: ["station_id", "LaunchTime"]
         sort variable: "air_pressure"
         sort order: "descending"
 #   obsdataout: 
-#     obsfile: Data/sondes_obs_2020121500_m_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind, air_temperature, virtual_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020121500_m.nc

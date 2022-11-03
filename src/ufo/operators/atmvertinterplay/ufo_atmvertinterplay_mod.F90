@@ -21,6 +21,7 @@ module ufo_atmvertinterplay_mod
    real, public, allocatable :: coefficients(:) ! unit conversion from geoval to obs
  contains
    procedure :: setup  => ufo_atmvertinterplay_setup
+   procedure :: delete => ufo_atmvertinterplay_delete
    procedure :: simobs => ufo_atmvertinterplay_simobs
  end type ufo_atmvertinterplay
 
@@ -42,23 +43,12 @@ integer(kind=c_int), allocatable :: nlevels(:)
 integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
 
 ! Check configurations
-if (conf%has("geovals")) then
-  ngvars = conf%get_size("geovals")
-  call conf%get_or_die("geovals", gvars)
-  ! add to geovars list
-  do ivar = 1, ngvars
-    call self%geovars%push_back(gvars(ivar))
-  enddo
-endif
-
-nvars = self%obsvars%nvars()
-if (ngvars == 0 .and. nvars > 0) then
-  allocate(self%coefficients(nvars))
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-    self%coefficients(ivar) = 1.0
-  enddo
-endif
+ngvars = conf%get_size("geovals")
+call conf%get_or_die("geovals", gvars)
+! add to geovars list
+do ivar = 1, ngvars
+  call self%geovars%push_back(gvars(ivar))
+enddo
 
 ncoefs = conf%get_size("coefficients")
 call conf%get_or_die("coefficients", coefficients)
@@ -75,8 +65,19 @@ call self%geovars%push_back(var_prsi)
 
 end subroutine ufo_atmvertinterplay_setup
 
+! ------------------------------------------------------------------------------
+
+subroutine ufo_atmvertinterplay_delete(self)
+implicit none
+class(ufo_atmvertinterplay), intent(inout) :: self
+
+if (allocated(self%nlevels)) deallocate(self%nlevels)
+if (allocated(self%coefficients)) deallocate(self%coefficients)
+
+end subroutine ufo_atmvertinterplay_delete
 
 ! ------------------------------------------------------------------------------
+
 subroutine ufo_atmvertinterplay_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_geovals_mod, only: ufo_geovals_delete, ufo_geovals_copy, ufo_geovals_reorderzdir

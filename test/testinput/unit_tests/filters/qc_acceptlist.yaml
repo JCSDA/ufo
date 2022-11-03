@@ -6,7 +6,9 @@ observations:
 - obs space:
     name: Standard
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2]
   HofX: HofX
   obs filters:
@@ -32,7 +34,9 @@ observations:
 - obs space:
     name: Flipped
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2]
   HofX: HofX
   obs filters:

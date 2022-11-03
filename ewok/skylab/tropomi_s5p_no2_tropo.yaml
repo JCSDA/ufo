@@ -1,0 +1,21 @@
+obs space:
+  name: tropomi_s5p_no2_tropo
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: esa
+  simulated variables: [nitrogen_dioxide_in_tropospheric_column]
+  observed variables: [nitrogen_dioxide_in_tropospheric_column]
+obs operator:
+  name: ColumnRetrieval
+  nlayers_retrieval: 34
+  AvgKernelVar: averaging_kernel_level
+  PresLevVar: pressure_level
+  tracer variables: [volume_mixing_ratio_of_no2]
+  isApriori: false
+  isAveragingKernel: true
+  stretchVertices: topbottom #options: top, bottom, topbottom, none

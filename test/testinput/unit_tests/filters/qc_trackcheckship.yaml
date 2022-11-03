@@ -8,11 +8,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out1.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -63,11 +67,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out2.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -90,9 +98,13 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
 #   obsdataout:
-#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out3.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -112,11 +124,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variables: [ "latitude" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_synthetic_airtemp_m_trackcheck_out4.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -134,13 +150,17 @@ observations:
 - obs space:
     name: Ocean Profile, records are single obs
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
       obsgrouping:
         group variables: [ "dateTime" ]
         sort variable: ocean_depth
         sort group: ObsValue
 #   obsdataout:
-#     obsfile: Data/shiptrackcheck_recordssingleobs_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/shiptrackcheck_recordssingleobs_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -189,13 +209,17 @@ observations:
 - obs space:
     name: Ocean Profile, records are single obs, no station ID var (all one track)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
       obsgrouping:
         group variables: [ "station_id", "dateTime" ]
         sort variable: ocean_depth
         sort group: ObsValue
 #   obsdataout:
-#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationid_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/shiptrackcheck_recordssingleobs_nostationid_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check
@@ -233,9 +257,13 @@ observations:
 - obs space:
     name: Ocean Profile, records are single obs but not grouped into records
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/shiptrack_recordssingleobs_testdata.nc4
 #   obsdataout:
-#     obsfile: Data/shiptrackcheck_recordssingleobs_nostationgrouping_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/shiptrackcheck_recordssingleobs_nostationgrouping_out.nc4
     simulated variables: [ocean_temperature]
   obs filters:
   - filter: Ship Track Check

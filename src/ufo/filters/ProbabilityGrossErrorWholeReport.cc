@@ -169,6 +169,8 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
   bool secondComponentOfTwo = false;
   for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
     secondComponentOfTwo = filtervars[ivar].options().getBool("second_component_of_two", false);
+    if (filtervars[ivar].options().getBool("no_pge_update", false))
+      continue;
     if (secondComponentOfTwo) {
       varPGE[ivar] = varPGE[ivar - 1];
       varQCflags[ivar] = varQCflags[ivar - 1];

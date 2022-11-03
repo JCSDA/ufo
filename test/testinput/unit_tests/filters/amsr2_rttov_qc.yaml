@@ -9,19 +9,23 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
-      Platform_Name: &platform_name GCOM-W
-      Sat_ID: &sat_id 1
+      WMO_ID: &wmo_id [122]
+      Sat_ID: &sat_id [gcom-w_1]
       Instrument_Name: &inst_name AMSR2
       CoefficientPath: Data/
       InspectProfileNumber: [1] # optional parameter
   obs space:
     name: amsr2
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
     simulated variables: [brightness_temperature]
     channels: 7-9, 11-13 
 #   obsdataout:
-#     obsfile: Data/amsr2_obs_20191230T0000Z_100subset_rttov_qc_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsr2_obs_20191230T0000Z_100subset_rttov_qc_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
   obs filters:

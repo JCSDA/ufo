@@ -68,7 +68,12 @@ integer(c_int), intent(inout) :: c_key_self
 
 type(ufo_atmvertinterp), pointer :: self
 
-call ufo_atmvertinterp_registry%delete(c_key_self, self)
+call ufo_atmvertinterp_registry%get(c_key_self, self)
+
+! the obsvarindices array is allocated in the interface layer, so we deallocate here as well
+if (allocated(self%obsvarindices)) deallocate(self%obsvarindices)
+
+call ufo_atmvertinterp_registry%remove(c_key_self)
 
 end subroutine ufo_atmvertinterp_delete_c
 

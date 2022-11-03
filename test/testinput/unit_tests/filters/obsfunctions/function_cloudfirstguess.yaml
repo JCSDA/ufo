@@ -4,14 +4,14 @@ window begin: 2021-01-14T21:00:00Z
 window end: 2021-01-15T03:00:00Z
 
 observations:
-- obs operator:
+- obs operator: &ObsOperator
     name: RTTOV
     Absorbers: [Ozone]
     obs options:
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      Platform_Name: METOP
-      Sat_ID: 1
+      WMO_ID: [3]
+      Sat_ID: [metop_1]
       Instrument_Name: IASI
       CoefficientPath: Data/
       RTTOV_GasUnitConv: true
@@ -20,15 +20,20 @@ observations:
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
       surface emissivity group: SurfEmiss
-  obs space:
+      RTTOV_ScaleRefOzone: false
+  obs space: &ObsSpace
     name: Test the hyperspectral retrievals
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
     simulated variables: [brightness_temperature]
     channels: *cloud_first_guess_channels
 #   obsdataout:
-#     obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out.nc4
-  geovals:
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out.nc4
+  geovals: &geovals
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs filters:
 ### Create first guess cloud using minimum residual
@@ -45,7 +50,36 @@ observations:
           obs bias group: ObsBias
   compareVariables:
     - reference:
-        name: initial_cloud_fraction@MetaData
+        name: initial_cloud_fraction@TestReference
       test:
         name: initial_cloud_fraction@CloudFirstGuess
+      absTol: 1.0e-4
+
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test all the options for the obs function
+  geovals:
+    <<: *geovals
+  obs filters:
+  - filter: Variable Assignment
+    defer to post: true
+    assignments:
+    - name: cloud_first_guess_cost@CloudFirstGuess
+      type: float
+      function:
+        name: CloudFirstGuessMinimumResidual@ObsFunction
+        options:
+          channels: *cloud_first_guess_channels
+          output group: CloudInit
+          output name for cloud top pressure: init_ctp
+          output name for cloud fraction: init_eca
+          minimum cloud top pressure: 10001.0
+          obs bias group: ObsBias
+  compareVariables:
+    - reference:
+        name: initial_cloud_fraction@TestReference
+      test:
+        name: init_eca@CloudInit
       absTol: 1.0e-4

@@ -120,7 +120,7 @@ type(ufo_gnssroonedvarcheck), pointer :: self
 
 call ufo_gnssroonedvarcheck_registry%get(c_self, self)
 call ufo_gnssroonedvarcheck_delete(self)
-call ufo_gnssroonedvarcheck_registry%delete(c_self, self)
+call ufo_gnssroonedvarcheck_registry%remove(c_self)
 
 end subroutine ufo_gnssroonedvarcheck_delete_c
 

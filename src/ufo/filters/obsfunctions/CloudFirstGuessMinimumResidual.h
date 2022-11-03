@@ -34,12 +34,20 @@ class CloudFirstGuessMinimumResidualParameters : public oops::Parameters {
   /// Output directory
   oops::Parameter<std::string> outputGroup{"output group", "MetaData", this};
 
-  /// The group in which the ObsBias is located - this allows for it to be provided from
-  /// the ObsSpace for testing
-  oops::Parameter<std::string> obsBiasGroup{"obs bias group", "ObsBiasData", this};
+  /// Output name for cloud top pressure
+  oops::Parameter<std::string> cloudTopPressureName{"output name for cloud top pressure",
+                                                    "initial_cloud_top_pressure", this};
+
+  /// Output name for cloud fraction
+  oops::Parameter<std::string> cloudFractionName{"output name for cloud fraction",
+                                                    "initial_cloud_fraction", this};
 
   /// Minimum pressure for the cloud in Pa
   oops::Parameter<float> minCloudPressure{"minimum cloud top pressure", 10000.0f, this};
+
+  /// The group in which the ObsBias is located - this allows for it to be provided from
+  /// the ObsSpace for testing
+  oops::Parameter<std::string> obsBiasGroup{"obs bias group", "ObsBiasData", this};
 };
 
 ///

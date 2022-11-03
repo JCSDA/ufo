@@ -9,7 +9,9 @@ observations:
 - obs space:
     name: Assign missing values to some observations
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1]
     observed variables: [variable1]
   obs filters:
@@ -39,7 +41,9 @@ observations:
 - obs space:
     name: Remove missing values from some observations
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The first two elements of ObsValue and the last two of ObsError are missing
     simulated variables: [surface_pressure]
     observed variables: [surface_pressure]
@@ -70,7 +74,9 @@ observations:
 - obs space:
     name: Derived variable not assigned
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, eastward_wind]
     derived variables: [eastward_wind]
     observed variables: [air_temperature]
@@ -79,7 +85,9 @@ observations:
 - obs space:
     name: Derived variable assigned values, but not error estimates
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, eastward_wind]
     derived variables: [eastward_wind]
     observed variables: [air_temperature]
@@ -95,7 +103,9 @@ observations:
 - obs space:
     name: Derived simulated variable assigned both values and error estimates
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature, eastward_wind]
     derived variables: [eastward_wind]
     observed variables: [air_temperature]
@@ -114,7 +124,9 @@ observations:
 - obs space:
     name: Derived simulated variable already exists
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [surface_pressure]
     # Already exists. But the first two elements of ObsValue and the last two of ObsError are missing
     derived variables: [surface_pressure]
@@ -130,7 +142,9 @@ observations:
 - obs space:
     name: Simulated variable without initial ObsErrors; errors not assigned by any filter
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The input file contains no relative_humidity@ObsError variable
     simulated variables: [relative_humidity, air_temperature]
     observed variables: [relative_humidity, air_temperature]
@@ -143,7 +157,9 @@ observations:
 - obs space:
     name: Simulated variable without initial ObsErrors; errors assigned by a filter
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The input file contains no relative_humidity@ObsError variable
     simulated variables: [relative_humidity, air_temperature]
     observed variables: [relative_humidity, air_temperature]

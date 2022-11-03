@@ -82,6 +82,14 @@ class Cal_SatBrightnessTempFromRadParameters: public VariableTransformParameters
 
   /// The maximum allowed value for the output brightness temperature
   oops::OptionalParameter<float> maxvalue{"maximum value", this};
+
+  /// The planck1 constant which equals (2*h*c*c) - (1.191042972e-16 W / (m^2.sr.m-4)).
+  /// This argument is to allow for rounding differences in porting.
+  oops::Parameter<double> planck1{"planck1", 1.191042972e-16, this};
+
+  /// The planck2 constant which equals (h*c / T_b)  - (1.4387769e-2 m.K).
+  /// This argument is to allow for rounding differences in porting.
+  oops::Parameter<double> planck2{"planck2", 1.4387769e-2, this};
 };
 
 /*!

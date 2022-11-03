@@ -7,6 +7,7 @@
 
 module ufo_rttovonedvarcheck_obs_mod
 
+use datetime_mod, only: datetime
 use kinds
 use iso_c_binding
 use missing_values_mod
@@ -32,6 +33,7 @@ real(kind_real), allocatable :: yobs(:,:)       ! observation value from obs fil
 real(kind_real), allocatable :: ybias(:,:)      ! observation bias from obs files
 real(kind_real), allocatable :: lat(:)          ! observation latitude
 real(kind_real), allocatable :: lon(:)          ! observation longitude
+type(datetime), allocatable  :: date(:)         ! read in the date and time which is needed for ozone
 real(kind_real), allocatable :: elevation(:)    ! observation elevation
 real(kind_real), allocatable :: sat_zen(:)      ! observation satellite zenith angle
 real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth angle
@@ -40,6 +42,7 @@ real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angl
 real(kind_real), allocatable :: cloudtopp(:)    !< cloud top pressure (used in if cloudy retrieval used)
 real(kind_real), allocatable :: cloudfrac(:)    !< cloud fraction (used in if cloudy retrieval used)
 integer, allocatable         :: surface_type(:) ! surface type
+integer, allocatable         :: satellite_identifier(:) ! WMO_ID
 integer, allocatable         :: niter(:)        ! number of iterations
 integer, allocatable         :: channels(:)     ! channel numbers
 real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
@@ -49,6 +52,7 @@ real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile fro
 real(kind_real), allocatable :: transmittance(:,:) ! surface to space transmittance for each channel
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
+real(kind_real), allocatable :: recalc_BT(:,:)   ! recalculate BT using retrieved variables for surface
 real(kind_real), allocatable :: background_BT(:,:)   ! 1st iteration brightness temperature
 logical                      :: Store1DVarLWP   ! flag to output the LWP if the profile converges
 logical                      :: Store1DVarIWP   ! flag to output the IWP if the profile converges
@@ -98,7 +102,8 @@ type(ufo_geovals), intent(in)                 :: geovals  !< model data at obs l
 type(oops_variables), intent(in)              :: vars     !< channels for 1D-Var
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_init"
-real(kind_real)             :: missing
+real(kind_real)             :: missing_real
+integer                     :: missing_int
 integer                     :: jvar, iloc , jobs   !< counters
 character(len=max_string)   :: var
 character(len=max_string)   :: varname
@@ -108,7 +113,8 @@ logical                     :: model_surface_present = .false.
 type(ufo_geoval), pointer   :: geoval
 integer                     :: numpc
 
-missing = missing_value(missing)
+missing_real = missing_value(missing_real)
+missing_int = missing_value(missing_int)
 self % iloc = obsspace_get_nlocs(config % obsdb)
 
 ! allocate arrays
@@ -117,12 +123,14 @@ allocate(self % ybias(config % nchans, self % iloc))
 allocate(self % QCflags(config % nchans, self % iloc))
 allocate(self % lat(self % iloc))
 allocate(self % lon(self % iloc))
+allocate(self % date(self % iloc))
 allocate(self % elevation(self % iloc))
 allocate(self % sat_zen(self % iloc))
 allocate(self % sat_azi(self % iloc))
 allocate(self % sol_zen(self % iloc))
 allocate(self % sol_azi(self % iloc))
 allocate(self % surface_type(self % iloc))
+allocate(self % satellite_identifier(self % iloc))
 allocate(self % niter(self % iloc))
 allocate(self % channels(config % nchans))
 allocate(self % final_cost(self % iloc))
@@ -132,6 +140,7 @@ if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
 if (config % Store1DVarTransmittance) allocate(self % transmittance(config % nchans, self % iloc))
 allocate(self % output_profile(prof_index % nprofelements, self % iloc))
 allocate(self % output_BT(config % nchans, self % iloc))
+if (config % RecalculateBT) allocate(self % recalc_BT(config % nchans, self % iloc))
 allocate(self % background_BT(config % nchans, self % iloc))
 allocate(self % emiss(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
@@ -139,29 +148,31 @@ allocate(self % mwemisserr(config % nchans, self % iloc))
 allocate(self % output_to_db(self % iloc))
 
 ! initialize arrays
-self % yobs(:,:) = missing
+self % yobs(:,:) = missing_real
 self % ybias(:,:) = zero
 self % QCflags(:,:) = 0
-self % lat(:) = missing
-self % lon(:) = missing
-self % elevation(:) = missing
-self % sat_zen(:) = missing
-self % sat_azi(:) = zero
-self % sol_zen(:) = zero
-self % sol_azi(:) = zero
-self % surface_type(:) = RTSea
+self % lat(:) = missing_real
+self % lon(:) = missing_real
+self % elevation(:) = missing_real
+self % sat_zen(:) = missing_real
+self % sat_azi(:) = missing_real
+self % sol_zen(:) = missing_real
+self % sol_azi(:) = missing_real
+self % surface_type(:) = missing_int
+self % satellite_identifier(:) = missing_int
 self % niter(:) = 0
 self % channels(:) = 0
-self % final_cost(:) = missing
-self % LWP(:) = missing
-self % IWP(:) = missing
-if (allocated(self % CLW)) self % CLW(:,:) = missing
-if (allocated(self % transmittance)) self % transmittance(:,:) = missing
-self % emiss(:,:) = missing
-self % mwemisserr(:,:) = missing
-self % output_profile(:,:) = missing
-self % output_BT(:,:) = missing
-self % background_BT(:,:) = missing
+self % final_cost(:) = missing_real
+self % LWP(:) = missing_real
+self % IWP(:) = missing_real
+if (allocated(self % CLW)) self % CLW(:,:) = missing_real
+if (allocated(self % transmittance)) self % transmittance(:,:) = missing_real
+self % emiss(:,:) = missing_real
+self % mwemisserr(:,:) = missing_real
+self % output_profile(:,:) = missing_real
+self % output_BT(:,:) = missing_real
+if (allocated(self % recalc_BT)) self % recalc_BT(:,:) = missing_real
+self % background_BT(:,:) = missing_real
 self % calc_emiss(:) = .true.
 self % Store1DVarLWP = config % Store1DVarLWP
 self % Store1DVarIWP = config % Store1DVarIWP
@@ -185,7 +196,7 @@ end do
 ! with zero.
 do jobs = 1, self % iloc
   do jvar = 1, config % nchans
-    if (self % ybias(jvar, jobs) == missing) then
+    if (self % ybias(jvar, jobs) == missing_real) then
       self % ybias(jvar, jobs) = zero
     endif
   enddo
@@ -197,6 +208,7 @@ self % yobs = self % yobs - self % ybias
 ! Read in prerequisites
 call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))
 call obsspace_get_db(config % obsdb, "MetaData", "longitude", self % lon(:))
+call obsspace_get_db(config % obsdb, "MetaData", "dateTime", self % date(:))
 call obsspace_get_db(config % obsdb, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
 
 ! Read in optional angles
@@ -225,6 +237,7 @@ if (config % cloud_retrieval) then
   variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_top_pressure")
   if (variable_present) then
     call obsspace_get_db(config % obsdb, "MetaData", "initial_cloud_top_pressure", self % cloudtopp(:))
+    self % cloudtopp(:) = self % cloudtopp(:) * Pa_to_hPa
   end if
 
   variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_fraction")
@@ -263,6 +276,12 @@ else
   call ufo_geovals_get_var(geovals, "surface_type", geoval)
   self % surface_type(:) = geoval%vals(1, :)
 endif
+
+! Read in satellite identifier
+if (obsspace_has(config % obsdb, "MetaData", "satellite_identifier")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "satellite_identifier", self % satellite_identifier(:))
+endif
+
 
 ! Setup surface emissivity
 ! default self % emiss = zero
@@ -327,6 +346,7 @@ if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % ybias))          deallocate(self % ybias)
 if (allocated(self % lat))            deallocate(self % lat)
 if (allocated(self % lon))            deallocate(self % lon)
+if (allocated(self % date))           deallocate(self % date)
 if (allocated(self % elevation))      deallocate(self % elevation)
 if (allocated(self % sat_zen))        deallocate(self % sat_zen)
 if (allocated(self % sat_azi))        deallocate(self % sat_azi)
@@ -335,6 +355,7 @@ if (allocated(self % sol_azi))        deallocate(self % sol_azi)
 if (allocated(self % cloudtopp))      deallocate(self % cloudtopp)
 if (allocated(self % cloudfrac))      deallocate(self % cloudfrac)
 if (allocated(self % surface_type))   deallocate(self % surface_type)
+if (allocated(self % satellite_identifier)) deallocate(self % satellite_identifier)
 if (allocated(self % niter))          deallocate(self % niter)
 if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
@@ -345,6 +366,7 @@ if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % mwemisserr))     deallocate(self % mwemisserr)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)
+if (allocated(self % recalc_BT))      deallocate(self % recalc_BT)
 if (allocated(self % background_BT))  deallocate(self % background_BT)
 if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 if (associated(self % pcemiss_object)) then
@@ -524,9 +546,9 @@ integer :: jvar ! counter
 integer :: nobs ! number of observations to be written to database
 character(len=max_string)    :: var
 real(kind_real), allocatable :: surface_pressure(:)
-real(kind_real) :: missing
+real(kind_real) :: missing_real
 
-missing = missing_value(missing)
+missing_real = missing_value(missing_real)
 
 ! Put QC flags and retrieved BT's back in database
 do jvar = 1, nchans
@@ -534,7 +556,10 @@ do jvar = 1, nchans
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:))
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
-  write(var,"(A19,I0)") "surface_emissivity_",self % channels(jvar)
+  if (allocated(self % recalc_BT)) then
+    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:))
+  end if
+  write(var,"(A19,I0)") "surface_emissivity_", self % channels(jvar)
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
@@ -580,7 +605,7 @@ end if
 if (prof_index % pstar > 0) THEN
   allocate(surface_pressure(nobs))
   surface_pressure(:) = self % output_profile(prof_index % pstar, :)
-  where (surface_pressure /= missing)
+  where (surface_pressure /= missing_real)
     surface_pressure = surface_pressure / Pa_to_hPa ! hPa to Pa
   end where
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var_ps), "OneDVar", &
@@ -656,15 +681,15 @@ character(len=*), intent(in)    :: group
 real(kind_real), intent(in)     :: outputdata(:)
 
 real(kind_real), allocatable :: tmp(:)
-real(kind_real) :: missing
+real(kind_real) :: missing_real
 logical :: array_present
 integer :: iprof, nobs
 
-missing = missing_value(missing)
+missing_real = missing_value(missing_real)
 nobs = size(outputdata)
 
 allocate(tmp(nobs))
-tmp(:) = missing
+tmp(:) = missing_real
 
 ! Get array from db if present
 array_present = obsspace_has(obsdb, group, variable)
@@ -697,15 +722,15 @@ character(len=*), intent(in)    :: group
 integer, intent(in)             :: outputdata(:)
 
 integer, allocatable :: tmp(:)
-integer :: missing
+integer :: missing_int
 logical :: array_present
 integer :: iprof, nobs
 
-missing = missing_value(missing)
+missing_int = missing_value(missing_int)
 nobs = size(outputdata)
 
 allocate(tmp(nobs))
-tmp(:) = missing
+tmp(:) = missing_int
 
 ! Get array from db if present
 array_present = obsspace_has(obsdb, group, variable)

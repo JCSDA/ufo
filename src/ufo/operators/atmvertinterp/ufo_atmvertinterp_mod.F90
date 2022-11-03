@@ -13,13 +13,15 @@ use ufo_vars_mod
      type(oops_variables), public :: geovars
      type(oops_variables), public :: obsvars ! Variables to be simulated
      integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
-                                                      ! simulated variables in the ObsSpace
+                                                      ! simulated variables in the ObsSpace.
+                                                      ! allocated/deallocated at interface layer
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
      character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
      character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
      character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
 
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
+     logical, public :: use_fact10 ! Apply scaling factor to winds below lowest model level
    contains
      procedure :: setup  => atmvertinterp_setup_
      procedure :: simobs => atmvertinterp_simobs_
@@ -67,6 +69,13 @@ subroutine atmvertinterp_setup_(self, grid_conf)
      self%use_ln = .true.
   endif
 
+  !> Apply scaling to winds below lowest model level
+  self%use_fact10 = .false.
+  if ( grid_conf%has("apply near surface wind scaling") ) then
+    call grid_conf%get_or_die("apply near surface wind scaling", self%use_fact10)
+  endif
+  if (self%use_fact10) call self%geovars%push_back("wind_reduction_factor_at_10m")
+
   !> Determine observation vertical coordinate.
   !  Use the model vertical coordinate unless the option
   !  'observation vertical coordinate' is specified.
@@ -106,9 +115,9 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, ivar, iobsvar
+  integer :: ilev, iobs, ivar, iobsvar
   real(kind_real), dimension(:), allocatable :: obsvcoord
-  type(ufo_geoval), pointer :: vcoordprofile, profile
+  type(ufo_geoval), pointer :: vcoordprofile, profile, fact10
   real(kind_real), allocatable :: wf(:)
   integer, allocatable :: wi(:)
   character(len=MAXVARLEN) :: geovar
@@ -116,6 +125,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
   real(kind_real) :: missing
+
+  real(kind_real), allocatable :: wind_scaling_factor(:)
 
   ! Get pressure profiles from geovals
   call ufo_geovals_get_var(geovals, self%v_coord, vcoordprofile)
@@ -133,11 +144,26 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   allocate(wi(nlocs))
   allocate(wf(nlocs))
 
+  ! If scaling the wind record the observation pressure and get GeoVaLs
+  if (self%use_fact10) then
+    allocate(wind_scaling_factor(nlocs))
+    wind_scaling_factor = 1.0_kind_real
+    call ufo_geovals_get_var(geovals, "wind_reduction_factor_at_10m", fact10)
+  end if
+
   ! Calculate the interpolation weights
   allocate(tmp(vcoordprofile%nval))
   do iobs = 1, nlocs
     if (self%use_ln) then
-      tmp = log(vcoordprofile%vals(:,iobs))
+      ! the lines below are computing a "missing value safe" log, that passes missing value inputs
+      ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
+      do ilev = 1, vcoordprofile%nval
+        if (vcoordprofile%vals(ilev,iobs) /= missing) then
+          tmp(ilev) = log(vcoordprofile%vals(ilev,iobs))
+        else
+          tmp(ilev) = missing
+        end if
+      end do
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
@@ -148,6 +174,11 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       tmp2 = obsvcoord(iobs)
     end if
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
+
+    ! Set scaling factor
+    if (self%use_fact10) then
+      if (tmp2 >= tmp(1)) wind_scaling_factor(iobs) = fact10%vals(1,iobs)
+    end if
   enddo
 
   do iobsvar = 1, size(self%obsvarindices)
@@ -166,12 +197,33 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
                              & hofx(ivar,iobs), wi(iobs), wf(iobs))
     enddo
   enddo
+
+  ! Apply a scaling to winds below lowest model level
+  if (self%use_fact10) then
+    ! Loop over the variables
+    do iobsvar = 1, size(self%obsvarindices)
+      ! Check that this is a typical wind variable
+      if ((trim(self%obsvars%variable(iobsvar)) == 'eastward_wind') .or. &
+          (trim(self%obsvars%variable(iobsvar)) == 'northward_wind')) then
+        ! Get the index of the row of hofx to fill
+        ivar = self%obsvarindices(iobsvar)
+        ! Loop over the observations
+        do iobs = 1, nlocs
+          ! Apply wind scaling
+          hofx(ivar,iobs) = hofx(ivar,iobs) * wind_scaling_factor(iobs)
+        enddo
+      end if
+    enddo
+  endif
+
   ! Cleanup memory
   deallocate(obsvcoord)
   deallocate(wi)
   deallocate(wf)
 
   deallocate(tmp)
+
+  if (allocated(wind_scaling_factor)) deallocate(wind_scaling_factor)
 
 end subroutine atmvertinterp_simobs_
 

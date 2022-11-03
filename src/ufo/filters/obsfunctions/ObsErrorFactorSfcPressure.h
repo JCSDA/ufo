@@ -26,12 +26,9 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsErrorFactorSfcPressureParameters, Parameters)
 
  public:
-  /// the existence of min,max error values are required
-  oops::RequiredParameter<float> error_min{"error_min", this};
-  oops::RequiredParameter<float> error_max{"error_max", this};
   oops::Parameter<std::string> original_obserr{"original_obserr", "ObsErrorData", this};
+  oops::Parameter<std::string> geovar_geomz{"geovar_geomz", "height", this};
   oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz", "surface_altitude", this};
-  oops::Parameter<std::string> geovar_temp{"geovar_temp", "virtual_temperature", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -40,16 +37,14 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///
 /// This routine was designed to mimic the GSI observer code (i.e., setupps.f90) to inflate
 /// the observation error for surface pressure using the following inputs:
-///   Observed surface pressure, station height, and temperature (possibly missing).
+///   Observed surface pressure, station height, virtual temperature or air temperature.
 ///   Model first-guess fields interpolated to the observation location.
 /// The starting obserror is then altered by this code with the "inflate error" action,
-/// constrained by the values given for error_min and error_max (Pa).  For testing
-/// purposes, the optional parameter of original_obserr group name such as ObsError to
-/// override the default ObsErrorData can be used for tolerance check of reference results.
-/// Internally, the code expects to find surface_altitude@GeoVaLs, however, some datasets
-/// may have surface_geopotential_height@GeoVaLs in its place.  Also, the model vertical
-/// profile of temperature is assumed to be virtual_temperature@GeoVaLs, but can be overriden
-/// using geovar_temp option set to air_temperature for example.
+/// For testing purposes, the optional parameter of original_obserr group name such as ObsError
+/// to override the default ObsErrorData can be used for tolerance check of reference results.
+/// Internally, the code expects to find surface_altitude@GeoVaLs and height@GeoVaLs, however,
+/// some datasets may have surface_geopotential_height@GeoVaLs and geopotential_height@GeoVaLs
+/// in its place.
 ///
 /// ~~~~
 ///
@@ -63,8 +58,7 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///         inflation variable:
 ///           name: ObsErrorFactorSfcPressure@ObsFunction
 ///           options:
-///             error_min: 100         # 1 mb
-///             error_max: 300         # 3 mb
+///             geovar_geomz: geopotential_height     # default is height
 ///             geovar_sfc_geomz: surface_geopotential_height     # default is surface_altitude
 ///
 class ObsErrorFactorSfcPressure : public ObsFunctionBase<float> {

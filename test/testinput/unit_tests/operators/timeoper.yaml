@@ -10,9 +10,13 @@ observations:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_vs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_vs.nc4
 #   obsdataout:
-#     obsfile: Data/sondes_obs_2018041500_vs_timeopr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_vs_timeopr_out.nc4
     simulated variables: [air_temperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_vs.nc4

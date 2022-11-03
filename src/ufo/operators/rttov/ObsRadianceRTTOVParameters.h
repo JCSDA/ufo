@@ -23,18 +23,21 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(RTTOVObsOptionsParameters, Parameters)
 
  public:
-  /// Platform_Name is the first part of the unique instrument triplet used to create the RTTOV
-  /// coefficient file name. This must correspond to platform name used in rttov_const.F90 but the
-  /// case needn't match as it's converted to lower case in the interface.
-  oops::RequiredParameter<std::string> platformName{"Platform_Name", this};
+  /// WMO_ID contains a list of unique IDs (e.g. '5' is Metop-c) to specify which platforms shall
+  /// be processed.
+  oops::RequiredParameter<std::vector<int>> wmoId{"WMO_ID", this};
 
-  /// Sat_ID is the second part of the instrument triplet used to create the RTTOV coefficient
-  /// file name. This is always required but is not used for reading RTTOV-SCATT hydro/mietables.
-  oops::RequiredParameter<std::string> satID{"Sat_ID", this};
+  /// Sat_ID contains a list of strings corresponding to the underscore-separated platform name and
+  /// sat_id (e.g. metop_1) as required by RTTOV to construct the RTTOV coefficient filename
+  /// (see rttov_const for details).
+  /// If more than one coefficient is being used then profile-by-profile processing is hard-coded to
+  /// true which may give a small performance hit.
+  oops::RequiredParameter<std::vector<std::string>> satID{"Sat_ID", this};
 
   /// Instrument_Name is the third part of the unique instrument triplet used to create the RTTOV
   /// coefficient file name. This must correspond to platform name used in rttov_const.F90 but the
   /// case needn't match as it's converted to lower case in the interface.
+  /// At present, the RTTOV interface can only process one instrument type per call.
   oops::RequiredParameter<std::string> instrumentName{"Instrument_Name", this};
 
   /// The path to the coefficient files.
@@ -43,6 +46,9 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// Should RTTOV convert from mixing ratio to ppmv for rttov processing
   /// RTTOV can handle either but the output BTs obtained can be slightly different
   oops::Parameter<bool> RTTOVGasUnitConv{"RTTOV_GasUnitConv", false, this};
+
+  /// Should RTTOV scale the reference Ozone profile according to the 70 hPa temperature
+  oops::Parameter<bool> RTTOVScaleRefOzone{"RTTOV_ScaleRefOzone", true, this};
 
   /// The default option to setup the code for a particular version of RTTOV
   oops::Parameter<std::string> RTTOVDefaultOpts{"RTTOV_default_opts", "RTTOV", this};
@@ -78,7 +84,7 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
 
   /// Check the rttov profile using the rttov check profile routine and flag if the check is failed.
   /// This check makes sure the values read from the geovals are within certain bounds.
-  oops::Parameter<bool> RTTOVProfileCheckInput{"RTTOV_profile_checkinput", false, this};
+  oops::Parameter<bool> RTTOVProfileCheckInput{"RTTOV_profile_checkinput", true, this};
 
   /// Use RTTOV-Scatt interface to simulate microwave radiances affected by cloud and precipitation.
   oops::Parameter<bool> doMWScatt{"Do_MW_Scatt", false, this};

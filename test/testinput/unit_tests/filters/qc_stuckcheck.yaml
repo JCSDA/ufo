@@ -7,11 +7,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
     simulated variables: [northward_wind]
     observed variables: [northward_wind]
   obs filters:
@@ -33,11 +37,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out2.nc4
     simulated variables: [northward_wind]
     observed variables: [northward_wind]
   obs filters:
@@ -50,11 +58,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out3.nc4
     simulated variables: [northward_wind]
     observed variables: [northward_wind]
   obs filters:
@@ -66,11 +78,15 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out4.nc4
     simulated variables: [northward_wind]
     observed variables: [northward_wind]
   obs filters:
@@ -83,11 +99,15 @@ observations:
 - obs space:
     name: Ship percentage stuck check
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out5.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Stuck Check
@@ -102,11 +122,15 @@ observations:
 - obs space:
     name: Ship percentage stuck check (only number stuck tolerance given)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out6.nc4
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
@@ -116,11 +140,15 @@ observations:
 - obs space:
     name: Ship percentage stuck check (all stuck tolerance options given)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out7.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out7.nc4
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
@@ -132,11 +160,15 @@ observations:
 - obs space:
     name: Ship percentage stuck check (2 vars)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
         group variables: [ "station_id" ]
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out8.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out8.nc4
     simulated variables: [air_temperature, northward_wind]
   obs filters:
   - filter: Stuck Check

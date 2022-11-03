@@ -401,10 +401,12 @@ INTEGER :: jaero
 ! Multiply by Jacobian and add to hofx (adjoint)
     DO jprofile = 1, self%n_Profiles
        DO jchannel = 1, size(self%channels)
-          DO jlevel = 1, var_p%nval
-             var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
-                  self%atm_k(self%channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(jchannel, jprofile) 
-          ENDDO
+          if (hofx(jchannel, jprofile) /= missing) then
+            DO jlevel = 1, var_p%nval
+               var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
+                    self%atm_k(self%channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(jchannel, jprofile)
+            ENDDO
+          end if
        ENDDO
     ENDDO
 

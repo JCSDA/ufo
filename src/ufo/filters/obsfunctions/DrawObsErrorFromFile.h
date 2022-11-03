@@ -10,17 +10,20 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
 enum class DispersionMeasure {
-  STDEV, VARIANCE
+  STDEV, VARIANCE, NORMALIZED, FRACTIONAL
 };
 
 struct DispersionMeasureParameterTraitsHelper {
@@ -28,7 +31,9 @@ struct DispersionMeasureParameterTraitsHelper {
   static constexpr char enumTypeName[] = "DispersionMeasure";
   static constexpr util::NamedEnumerator<DispersionMeasure> namedValues[] = {
     { DispersionMeasure::STDEV, "standard deviation" },
-    { DispersionMeasure::VARIANCE, "variance" }
+    { DispersionMeasure::VARIANCE, "variance" },
+    { DispersionMeasure::NORMALIZED, "normalized standard deviation" },
+    { DispersionMeasure::FRACTIONAL, "fractional standard deviation" },
   };
 };
 }  // namespace ufo
@@ -56,6 +61,10 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
   /// Measure of dispersion (standard deviation or variance)
   oops::Parameter<DispersionMeasure> dispersionMeasure{"dispersion measure",
       DispersionMeasure::VARIANCE, this};
+  /// Which variable to multiply, when Dispersion Measure is normalized standard deviation
+  oops::OptionalParameter<Variable> normvariable{"normalization variable", this};
+  /// Set a minimum value for the observation uncertainty (default to zero)
+  oops::Parameter<float> minValue{"minimum value", 0, this};
 };
 
 
@@ -64,6 +73,10 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
 /// or the full observation-error covariance matrix.
 /// Variances are converted to standard deviations in the ObsFunction.
 /// See DataExtractor for details on the format of the file.
+/// If the optional "normalization variable" exists and "disperson measure" is
+/// "normalized standard deviation", then the final output obserr is
+/// calculated as a result of normalized standard deviation multiplied by the observation
+/// value of the normzliation variable.
 ///
 /// ### example configurations: ###
 ///
@@ -99,8 +112,10 @@ class DrawObsErrorFromFile : public ObsFunctionBase<float> {
   const ufo::Variables & requiredVariables() const;
 
  private:
+  ufo::Variables invars_;
   std::unique_ptr<DrawValueFromFile<float>> drawValueFromFile_;
   std::unique_ptr<DrawObsErrorFromFileParameters> options_;
+  bool multiplicative_ = false;
 };
 
 }  // namespace ufo

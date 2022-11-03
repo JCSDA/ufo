@@ -68,10 +68,15 @@ end subroutine ufo_atmsfcinterp_setup_c
 subroutine ufo_atmsfcinterp_delete_c(c_key_self) bind(c,name='ufo_atmsfcinterp_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_atmsfcinterp), pointer :: self
 
-call ufo_atmsfcinterp_registry%delete(c_key_self, self)
+call ufo_atmsfcinterp_registry%get(c_key_self, self)
+
+! the obsvarindices array is allocated in the interface layer, so we deallocate here as well
+if (allocated(self%obsvarindices)) deallocate(self%obsvarindices)
+
+call ufo_atmsfcinterp_registry%remove(c_key_self)
 
 end subroutine ufo_atmsfcinterp_delete_c
 

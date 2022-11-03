@@ -2,28 +2,101 @@ window begin: 2021-05-21T00:00:00Z
 window end: 2021-05-21T23:00:00Z
 
 observations:
+# check transfom
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
     simulated variables: [surface_pressure]
-
   obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: stationPressure
+    flags:
+    - name: QNHhPa
+    - name: QNHinHg
+    - name: notRounded
   - filter: Variable Transforms
     Transform: QNHtoQFEpressure
     UseValidDataOnly: false
-  compareVariables:                 # test output matches precalculated values
+  compareVariables:
     - reference:
         name: Pstation@TestReference
       test:
-        name: station_pressure@DerivedObsValue
+        name: stationPressure@DerivedObsValue
       relTol: 1.0e-5
     - reference:
         name: PStationErr@TestReference
       test:
-        name: station_pressure@DerivedObsError
+        name: stationPressure@DerivedObsError
       absTol: 1.0e-5
     - reference:
-        name: PStationFlags@TestReference
+        name: QNHhPaFlag@TestReference
       test:
-        name: station_pressure@DerivedQCFlags
+        name: DiagnosticFlags/QNHhPa/stationPressure
+    - reference:
+        name: QNHinHgFlag@TestReference
+      test:
+        name: DiagnosticFlags/QNHinHg/stationPressure
+
+# Check for missing QNHhPa
+- obs space:
+    name: Surface
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
+    simulated variables: [surface_pressure]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: stationPressure
+    flags:
+    - name: QNHinHg
+    - name: notRounded
+  - filter: Variable Transforms
+    Transform: QNHtoQFEpressure
+    UseValidDataOnly: false
+  expectExceptionWithMessage: "Variable 'DiagnosticFlags/QNHhPa/stationPressure' does not exist yet. It needs to be set up with the 'Create Diagnostic Flags' filter prior to using the 'set' or 'unset' action."
+
+# Check for missing QNHinHg
+- obs space:
+    name: Surface
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
+    simulated variables: [surface_pressure]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: stationPressure
+    flags:
+    - name: QNHhPa
+    - name: notRounded
+  - filter: Variable Transforms
+    Transform: QNHtoQFEpressure
+    UseValidDataOnly: false
+  expectExceptionWithMessage: "Variable 'DiagnosticFlags/QNHinHg/stationPressure' does not exist yet. It needs to be set up with the 'Create Diagnostic Flags' filter prior to using the 'set' or 'unset' action."
+
+# Check for missing notRounded
+- obs space:
+    name: Surface
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/QFEtoQNH_obs_20210521T1200Z.nc4
+    simulated variables: [surface_pressure]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables:
+      - name: stationPressure
+    flags:
+    - name: QNHhPa
+    - name: QNHinHg
+  - filter: Variable Transforms
+    Transform: QNHtoQFEpressure
+    UseValidDataOnly: false
+  expectExceptionWithMessage: "Variable 'DiagnosticFlags/notRounded/stationPressure' does not exist yet. It needs to be set up with the 'Create Diagnostic Flags' filter prior to using the 'set' or 'unset' action."

@@ -1,0 +1,27 @@
+window begin: 2021-07-01T09:00:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations: 
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+    simulated variables: [bending_angle]
+    channels: 1-375
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
+  obs filters:
+  - filter: Background Check
+    filter variables:
+    - name: bending_angle
+    threshold: 3.0
+  norm ref: MetOfficeHofX
+  tolerance: 1.0e-5
+

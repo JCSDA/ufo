@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: Select min depth in each profile
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
@@ -23,7 +25,9 @@ observations:
 - obs space:
     name: Select max depth in each profile, only if QC pass, force select true
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
@@ -46,7 +50,9 @@ observations:
 - obs space:
     name: Select mean depth in each profile, skip missing ocean T
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
@@ -68,7 +74,9 @@ observations:
 - obs space:
     name: Select median depth in each profile, out of depths <=250m
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"
@@ -90,7 +98,9 @@ observations:
 - obs space:
     name: Select min and mean T in whole set (not grouped into records)
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
     simulated variables: [ocean_temperature]
   obs function:
     name: SelectStatistic@IntObsFunction
@@ -105,7 +115,9 @@ observations:
 - obs space:
     name: Select min and mean depth in each profile, with channels, force select true
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
         group variables: ["station_id", "dateTime"]
         sort variable: "ocean_depth"

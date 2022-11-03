@@ -100,6 +100,13 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 
   std::vector<bool> isThinned;
 
+  std::vector<int> priorities;
+  if (options_.priorityVariable.value() != boost::none) {
+    const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
+    priorities = obsAccessor.getIntVariableFromObsSpace(
+          priorityVariable.group(), priorityVariable.variable());
+  }
+
   if (options_.selectMedian) {
     ASSERT(filtervars.size() == 1);  // only works on one variable at a time
     const size_t filterVarIndex = 0;
@@ -112,7 +119,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                               validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
   } else {  // default function, thinning obs according to distance_norm:
     isThinned = identifyThinnedObservations(
-        validObsIds, obsAccessor, splitter, distancesToBinCenter);
+        validObsIds, obsAccessor, splitter, distancesToBinCenter, priorities);
   }
   obsAccessor.flagRejectedObservations
     (options_.recordsAreSingleObs ?
@@ -422,10 +429,11 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservations(
     const std::vector<size_t> &validObsIds,
     const ObsAccessor &obsAccessor,
     const RecursiveSplitter &splitter,
-    const std::vector<float> &distancesToBinCenter) const {
+    const std::vector<float> &distancesToBinCenter,
+    const std::vector<int> &priorities) const {
 
   std::function<bool(size_t, size_t)> comparator = makeObservationComparator(
-        validObsIds, distancesToBinCenter, obsAccessor);
+        validObsIds, distancesToBinCenter, obsAccessor, priorities);
 
   size_t totalNumObs = obsAccessor.totalNumObservations();
 
@@ -499,7 +507,8 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
 std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator(
     const std::vector<size_t> &validObsIds,
     const std::vector<float> &distancesToBinCenter,
-    const ObsAccessor &obsAccessor) const
+    const ObsAccessor &obsAccessor,
+    const std::vector<int> &priorities) const
 {
   if (options_.priorityVariable.value() == boost::none) {
     if (options_.tiebreakerPickLatest) {
@@ -522,15 +531,11 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     };
   }
 
-  const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
-  std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
-        priorityVariable.group(), priorityVariable.variable());
-
   // TODO(wsmigaj): In C++14, use move capture for 'priorities'.
   if (options_.tiebreakerPickLatest) {
     std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
           "MetaData", "dateTime");
-    return [priorities, times, &validObsIds, &distancesToBinCenter](
+    return [&priorities, times, &validObsIds, &distancesToBinCenter](
               size_t validObsIndexA, size_t validObsIndexB){
         // Prefer observations with large priorities, small distance and later time if tied.
         const size_t obsIdA = validObsIds[validObsIndexA];
@@ -543,7 +548,7 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
                                times[obsIdB]);
     };
   } else {
-  return [priorities, &validObsIds, &distancesToBinCenter]
+  return [&priorities, &validObsIds, &distancesToBinCenter]
          (size_t validObsIndexA, size_t validObsIndexB) {
       // Prefer observations with large priorities and small distances
       const size_t obsIdA = validObsIds[validObsIndexA];

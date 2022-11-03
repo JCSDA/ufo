@@ -5,7 +5,9 @@ observations:
 - obs space: &ObsSpace
     name: Assign a fixed value to a pre-existing float variable, without a where clause
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
@@ -479,7 +481,9 @@ observations:
 - obs space: &ObsSpace
     name: Assign values produced by a string-valued ObsFunction to a string variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
@@ -504,7 +508,9 @@ observations:
 - obs space: &ObsSpace
     name: Assign values produced by a datetime-valued ObsFunction to a datetime variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
@@ -531,7 +537,9 @@ observations:
 - obs space: &MultichannelObsSpace
     name: Assign a fixed value to a pre-existing multichannel float variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/multichannel_variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/multichannel_variable_assignment_testdata.nc
     simulated variables: [air_temperature]
     observed variables: [air_temperature]
     channels: 1, 2, 4
@@ -726,7 +734,9 @@ observations:
 - obs space: &ObsSpace
     name: Try to assign a string to a float variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
@@ -738,7 +748,9 @@ observations:
 - obs space: &ObsSpace
     name: Try to assign values produced by an ObsFunction to a string variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment
@@ -759,7 +771,9 @@ observations:
 - obs space: &ObsSpace
     name: Try to assign values produced by a string-valued ObsFunction to a floating-point variable
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     simulated variables: [air_temperature]
   obs filters:
   - filter: Variable Assignment

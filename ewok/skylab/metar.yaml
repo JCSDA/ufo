@@ -1,5 +1,12 @@
 obs space:
   name: metar
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: noaa
   simulated variables: [surface_pressure, air_temperature, specific_humidity, eastward_wind, northward_wind]
 obs operator:
@@ -16,7 +23,18 @@ obs operator:
      variables:
      - name: surface_pressure
      da_psfc_scheme: UKMO
-
+linear obs operator:
+  name: Composite
+  components:
+   - name: Identity
+     variables:
+     - name: air_temperature
+     - name: specific_humidity
+     - name: eastward_wind
+     - name: northward_wind
+   - name: Identity
+     variables:
+     - name: surface_pressure
 obs filters:
   # Observation Range Sanity Check
   - filter: Bounds Check
@@ -25,7 +43,7 @@ obs filters:
     minvalue: 37499
     maxvalue: 106999
     action:
-      name: reject 
+      name: reject
   #
   - filter: Bounds Check
     filter variables:

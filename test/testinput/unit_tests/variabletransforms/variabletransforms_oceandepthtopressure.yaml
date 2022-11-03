@@ -1,0 +1,31 @@
+window begin: 2017-12-31T21:00:00Z
+window end: 2030-01-01T03:00:00Z
+
+observations:
+- obs space:
+    name: Ocean depth to pressure conversion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ocean_depthtopressure_out.nc4
+    simulated variables: [ocean_pressure]
+    observed variables: []
+    derived variables: [ocean_pressure]
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: MetaData/ocean_depth
+      is_defined:
+    Transform: OceanDepthToPressure
+    # ocean depth variable: MetaData/ocean_depth
+  compareVariables:
+    - reference:
+        name: TestReference/ocean_pressure
+      test:
+        name: DerivedObsValue/ocean_pressure
+      relTol: 2.0e-5

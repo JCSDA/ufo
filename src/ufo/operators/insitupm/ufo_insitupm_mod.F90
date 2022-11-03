@@ -116,6 +116,8 @@ subroutine destructor(self)
 implicit none
 type(ufo_insitupm), intent(inout) :: self
 
+if (allocated(self%tracer_modes_cmaq)) deallocate(self%tracer_modes_cmaq)
+
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------

@@ -7,9 +7,13 @@ observations:
 - obs space:
     name: SondeComposite
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_obs_2020121500_m.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_obs_2020121500_m.nc
 #    obsdataout:
-#      obsfile: Data/sondes_obs_2020121500_out.nc
+#      engine:
+#        type: H5File
+#        obsfile: Data/sondes_obs_2020121500_out.nc
     simulated variables: [eastward_wind, northward_wind, virtual_temperature, air_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020121500_m.nc

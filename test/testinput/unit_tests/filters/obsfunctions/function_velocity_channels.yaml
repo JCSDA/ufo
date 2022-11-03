@@ -8,7 +8,9 @@ observations:
 - obs space:
     name: Scatwind channels
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
     simulated variables: [eastward_wind, northward_wind]
     observed variables: []
     derived variables: [eastward_wind, northward_wind]

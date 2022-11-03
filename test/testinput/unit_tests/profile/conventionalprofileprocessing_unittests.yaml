@@ -23,14 +23,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out1.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -51,12 +55,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out2.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -77,14 +85,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out3.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -105,14 +117,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out4.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -134,14 +150,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out5.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -163,14 +183,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out6.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -193,14 +217,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out7.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out7.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -221,14 +249,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out8.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out8.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -250,12 +282,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out9.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out9.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -277,12 +313,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out10.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out10.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -305,12 +345,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out11.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out11.nc4
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
@@ -332,12 +376,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests.nc4
       obsgrouping:
         group variables: [ "station_id" ]
     simulated variables: [air_temperature, height]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_unittests_out12.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_unittests_out12.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_geovals.nc4
   obs filters:

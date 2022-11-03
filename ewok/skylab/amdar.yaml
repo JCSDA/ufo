@@ -1,11 +1,17 @@
 obs space:
   name: amdar
-  _source: ldm
   obsdatain:
+    engine:
+      type: H5File
     obsgrouping:
       group variables: ["station_id"]
       sort variable: "dateTime"
       sort order: "ascending"
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: ldm
   simulated variables: [air_temperature, specific_humidity]
 # derived simulated variables: [eastward_wind, northward_wind]
 

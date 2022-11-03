@@ -62,7 +62,7 @@ type(ufo_roobserror), pointer :: self
 
 call ufo_roobserror_registry%get(c_self, self)
 call ufo_roobserror_delete(self)
-call ufo_roobserror_registry%delete(c_self, self)
+call ufo_roobserror_registry%remove(c_self)
 
 end subroutine ufo_roobserror_delete_c
 

@@ -39,6 +39,12 @@ class HistoryCheckParameters : public TrackCheckUtilsParameters {
       "time before start of window", this
     };
 
+    /// Amount of time (default zero) after end of assimilation window to collect
+    /// for the history check
+    oops::Parameter<util::Duration> timeAfterEndOfWindow {
+      "time after end of window", util::Duration("PT0S"), this
+    };
+
     /// The options for running the ship track check filter which can be optionally run, should the
     /// subtype not be LNDSYN/LNDSYB. These must be filled in in order for the track filter to run.
     oops::OptionalParameter<TrackCheckShipCoreParameters> trackCheckShipParameters {

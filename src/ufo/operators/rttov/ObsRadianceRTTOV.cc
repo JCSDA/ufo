@@ -40,6 +40,10 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
   ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, parameters.toConfiguration(),
                              channels_list.size(), channels_list[0], varin_);
 
+  // Remove ozone from varin_ if calculate from ref is switched on
+  if (parameters.obsOptions.value().RTTOVScaleRefOzone.value())
+      varin_ -= "mole_fraction_of_ozone_in_air";
+
   oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;
 }

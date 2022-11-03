@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: sfcship_QC
     obsdatain: 
-      obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_obs_2020121500_m.nc
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_obs_2020121500_m.nc
 #   obsdataout:
-#     obsfile: Data/sfcship_obs_2020121500_m_out.nc
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2020121500_m_out.nc
     simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_geoval_2020121500_m.nc
@@ -209,4 +213,4 @@ observations:
     action:
       name: reject
 
-  passedBenchmark: 5703
+  passedBenchmark: 5702

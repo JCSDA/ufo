@@ -147,6 +147,9 @@ void exactMatch(const std::string &varName,
 ///   Vector of values of that coordinate.
 /// \param[in] obVal
 ///   Value to match.
+/// \ param[in] equidistantChoice
+///   Choice of index (first or last) to use if there is a value which is equidistant between
+///   two lookup values.
 /// \param[inout] range
 ///   On input, the range of slices of the payload array along the dimension indexed by
 ///   `varValues` that matches all constraints considered so far. On output, the subrange of
@@ -155,6 +158,7 @@ template<typename T>
 void nearestMatch(const std::string &varName,
                   const std::vector<T> &varValues,
                   const T &obVal,
+                  const EquidistantChoice &equidistantChoice,
                   ConstrainedRange &range) {
   if (isOutOfBounds(obVal, varValues, range)) {
     std::stringstream msg;
@@ -170,12 +174,18 @@ void nearestMatch(const std::string &varName,
   if (nnIndex >= range.end())
     nnIndex = range.end() - 1;
 
-  // Now fetch the nearest neighbour index (lower index prioritised for different values with
-  // same distance)
+  // Now fetch the nearest neighbour index.  In the case of an equidistance result then
+  // either the first or last index is chosen depending on the input.
   T dist = std::abs(varValues[nnIndex] - obVal);
-  if ((varValues[nnIndex] > obVal) && (nnIndex > range.begin()) &&
-      (std::abs(varValues[nnIndex - 1] - obVal) <= dist))
-    nnIndex--;
+  if (equidistantChoice == EquidistantChoice::FIRST) {
+      if ((varValues[nnIndex] > obVal) && (nnIndex > range.begin()) &&
+          (std::abs(varValues[nnIndex - 1] - obVal) <= dist))
+      nnIndex--;
+  } else if (equidistantChoice == EquidistantChoice::LAST) {
+      if ((varValues[nnIndex] > obVal) && (nnIndex > range.begin()) &&
+          (std::abs(varValues[nnIndex - 1] - obVal) < dist))
+      nnIndex--;
+  }
 
   // Now find **same value** equidistant neighbours
   auto bounds = std::equal_range(varValues.begin() + range.begin(),
@@ -189,6 +199,7 @@ void nearestMatch(const std::string &varName,
 void nearestMatch(const std::string &varName,
                   const std::vector<std::string> &varValues,
                   const std::string &obVal,
+                  const EquidistantChoice &equidstantChoice,
                   ConstrainedRange &range) {
   throw eckit::UserError("The 'nearest' method cannot be used for string variables.", Here());
 }
@@ -302,6 +313,9 @@ void greatestLowerBoundMatch(const std::string &varName,
 ///   Vector of values of that coordinate.
 /// \param[in] obVal
 ///   Value to match.
+/// \ param[in] equidistantChoice
+///   Value to select whether first or last index is used when a value is equidistant to
+///   two lookup indices with the nearest method.
 /// \param[inout] range
 ///   On input, the range of slices of the payload array along the dimension indexed by
 ///   `varValues` that matches all constraints considered so far. On output, the subrange of
@@ -311,13 +325,14 @@ void match(const InterpMethod method,
            const std::string &varName,
            const std::vector<T> &varValues,
            const T &obVal,
+           const EquidistantChoice equidistantChoice,
            ConstrainedRange &range) {
   switch (method) {
     case InterpMethod::EXACT:
       exactMatch(varName, varValues, obVal, range);
       break;
     case InterpMethod::NEAREST:
-      nearestMatch(varName, varValues, obVal, range);
+      nearestMatch(varName, varValues, obVal, equidistantChoice, range);
       break;
     case InterpMethod::LEAST_UPPER_BOUND:
       leastUpperBoundMatch(varName, varValues, obVal, range);
@@ -498,7 +513,8 @@ void DataExtractor<ExtractedValue>::sort() {
 template <typename ExtractedValue>
 void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
                                                  const InterpMethod &method,
-                                                 const ExtrapolationMode &extrapMode) {
+                                                 const ExtrapolationMode &extrapMode,
+                                                 const EquidistantChoice &equidistantChoice) {
   if (!std::is_floating_point<ExtractedValue>::value) {
       std::string msg = "interpolation can be used when extracting floating-point values, but not "
                         "integers or strings.";
@@ -532,7 +548,8 @@ void DataExtractor<ExtractedValue>::scheduleSort(const std::string &varName,
   boost::apply_visitor(visitor, coordVal);
 
   // Update our map between coordinate (variable) and interpolation/extract method
-  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, extrapMode, dimIndex});
+  coordsToExtractBy_.emplace_back(Coordinate{varName, coordVal, method, extrapMode,
+                                             equidistantChoice, dimIndex});
 }
 
 
@@ -570,6 +587,7 @@ void DataExtractor<ExtractedValue>::extractImpl(const T &obVal) {
   else
     match(nextCoordToExtractBy_->method, nextCoordToExtractBy_->name,
           boost::get<std::vector<T>>(nextCoordToExtractBy_->values), obValN,
+          nextCoordToExtractBy_->equidistantChoice,
           constrainedRanges_[nextCoordToExtractBy_->payloadDim]);
 
   ++nextCoordToExtractBy_;

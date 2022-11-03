@@ -8,9 +8,13 @@ observations:
   obs space:
     name: OzoneLevel
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/ompslp_npp_obs_2019101700_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ompslp_npp_obs_2019101700_m.nc4
 #   obsdataout:
-#     obsfile: Data/ompslp_npp_obs_2019101700_m_opr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/ompslp_npp_obs_2019101700_m_opr_out.nc4
     simulated variables: [mole_fraction_of_ozone_in_air]
   geovals:
     filename: Data/ufo/testinput_tier_1/ompslp_npp_geoval_2019101700_m.nc4

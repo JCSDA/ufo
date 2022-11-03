@@ -7,7 +7,9 @@ observations:
 - obs space:
     name: Test scaled radiance to radiance with multiple scaling arrays
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [scaledRadiance]
     simulated variables: [brightness_temperature]
     derived variables: [brightness_temperature]
@@ -50,6 +52,8 @@ observations:
       name: VarMetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -66,7 +70,9 @@ observations:
 - obs space:
     name: Test single scaling arrays and min max values for BT
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [scaledRadiance]
     simulated variables: [brightness_temperature]
     derived variables: [brightness_temperature]
@@ -123,7 +129,9 @@ observations:
 - obs space:
     name: Test radiance to BT for wavenumber conversion
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceWavenumber]
     simulated variables: [brightness_temperature]
     derived variables: [brightness_temperature]
@@ -154,6 +162,8 @@ observations:
       name: VarMetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -165,7 +175,9 @@ observations:
 - obs space:
     name: Test radiance to BT for freqency conversion
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceFrequency]
     simulated variables: [brightness_temperature]
     derived variables: [brightness_temperature]
@@ -182,6 +194,8 @@ observations:
       name: VarMetaData/frequency
       channels: *all_channels
     radiance units: frequency
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:
@@ -193,7 +207,9 @@ observations:
 - obs space:
     name: Test radiance to BT for wavelength conversion
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceWavelength]
     simulated variables: [brightness_temperature]
     derived variables: [brightness_temperature]
@@ -210,6 +226,8 @@ observations:
       name: VarMetaData/wavelength
       channels: *all_channels
     radiance units: wavelength
+    planck1: 1.191042953e-16
+    planck2: 1.4387774e-2
 ### Compare variables output
   compareVariables:
   - reference:

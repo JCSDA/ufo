@@ -9,10 +9,14 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out1.nc4
   obs operator:
     name: VertInterp
   geovals:
@@ -36,10 +40,14 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out2.nc4
   obs operator:
     name: VertInterp
   geovals:
@@ -71,10 +79,14 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
     simulated variables: [air_temperature, specific_humidity]
 #   obsdataout:
-#     obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out3.nc4
   obs operator:
     name: VertInterp
   geovals:

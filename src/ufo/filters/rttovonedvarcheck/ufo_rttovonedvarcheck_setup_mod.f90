@@ -56,6 +56,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: Store1DVarIWP !< Output the IWP if the profile converges
   logical                          :: Store1DVarCLW !< Output the CLW profile if 1dvar converrges for later use
   logical                          :: Store1DVarTransmittance !< Output the surface to space transmittance for later use
+  logical                          :: RecalculateBT !< Recalulate BTs if retrieval successful
   logical                          :: UseColdSurfaceCheck !< flag to use cold water check to adjust starting surface parameters
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
   logical                          :: cloud_retrieval !< flag gets turned on if cloud_top_pressure in list of retrieval variables
@@ -181,6 +182,9 @@ call f_conf % get_or_die("Store1DVarCLW", self % Store1DVarCLW)
 
 ! Flag to output the surface to space transmittance if the profile converges
 call f_conf % get_or_die("Store1DVarTransmittance", self % Store1DVarTransmittance)
+
+! Flag to recalculate the brightness temperatures if 1DVar is successful
+call f_conf % get_or_die("RecalculateBT", self % RecalculateBT)
 
 ! Flag to turn on full diagnostics
 call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)

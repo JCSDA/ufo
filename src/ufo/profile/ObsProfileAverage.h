@@ -89,7 +89,7 @@ class ObsProfileAverage : public ObsOperatorBase,
 
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
+  const oops::Variables & requiredVars() const override { return requiredVars_; }
 
   oops::Variables simulatedVars() const override { return data_.simulatedVars(); }
 
@@ -102,6 +102,9 @@ class ObsProfileAverage : public ObsOperatorBase,
 
   /// Data handler for the ProfileAverage operator and TL/AD code.
   ObsProfileAverageData data_;
+
+  /// Required variables.
+  oops::Variables requiredVars_;
 };
 
 // -----------------------------------------------------------------------------

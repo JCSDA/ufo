@@ -75,9 +75,7 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !! \date 21/01/2021: Created
 !!
 subroutine ufo_rttovonedvarcheck_get_bts(config, geovals, ob, channels, &
-                                         profindex, &
-                                         prof_x, rttov_simobs, &
-                                         hofx)
+                                         rttov_simobs, hofx)
 
 implicit none
 
@@ -86,8 +84,6 @@ type(ufo_rttovonedvarcheck), intent(in)           :: config        !< configurat
 type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob            !< satellite metadata
 integer, intent(in)                               :: channels(:)   !< channels used for this calculation
-type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
-real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
 type(ufo_radiancerttov), intent(inout)            :: rttov_simobs  !< rttov simulate obs object
 real(kind_real), intent(out)                      :: hofx(:)       !< BTs
 

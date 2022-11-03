@@ -12,9 +12,13 @@ observations:
   obs space:
     name: ssmis_f17
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_obs_2020110112_m.nc4
 #   obsdataout:
-#     obsfile: Data/ssmis_f17_hofx_2020110112_crtm_opr_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/ssmis_f17_hofx_2020110112_crtm_opr_out.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-24
   geovals:
@@ -61,4 +65,5 @@ observations:
     absolute threshold: 3.5
     action:
       name: reject
-  passedBenchmark: 1776
+# passedBenchmark: 1776 # crtm v2.3
+  passedBenchmark: 1781 # crtm v2.4

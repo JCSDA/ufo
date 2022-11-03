@@ -48,6 +48,9 @@ class ImpactHeightCheckParameters : public FilterParametersBase {
   /// Reject data within this height (in m) of the surface.
   oops::Parameter<float> surfaceOffset{"surface offset", 600, this};
 
+  /// The maximum impact height (in m) at which to accept observations
+  oops::Parameter<float> maximumHeight{"maximum height", 80000, this};
+
   /// Whether to print extra verbose output from this routine.
   oops::Parameter<bool> verboseOutput{"verbose output", false, this};
 };

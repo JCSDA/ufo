@@ -1,0 +1,80 @@
+window begin: 2021-07-01T09:00:00Z
+window end: 2021-07-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [bending_angle]
+    channels: &all_levels 1-375
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_20210701T1200Z_profile_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
+  obs pre filters:
+  - filter: Domain Check
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
+  obs post filters:
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bending_angle
+      channels: *all_levels
+    gradient threshold: -0.08
+    maximum height: 60000
+    sharp gradient offset: 600
+    surface offset: 500
+    verbose output: true
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_not_in: 42, 43, 750, 751
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bending_angle
+      channels: *all_levels
+    gradient threshold: -0.08
+    maximum height: 40000
+    sharp gradient offset: 600
+    surface offset: 500
+    verbose output: true
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 42, 43, 750, 751
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bending_angle
+      channels: *all_levels
+    gradient threshold: -0.08
+    maximum height: 40000
+    sharp gradient offset: 600
+    surface offset: 500
+    verbose output: true
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 523  # Apply for FY-3D
+    - variable:
+        name: quality_flags@MetaData
+      any_bit_set_of: 13 # Apply to rising occultations
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: bending_angle
+      channels: *all_levels
+    threshold: 10
+  passedBenchmark: 1292

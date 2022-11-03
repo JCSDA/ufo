@@ -14,7 +14,7 @@ if( crtm_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_clw_ret.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  crtm filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 endif( crtm_FOUND )
@@ -35,6 +35,17 @@ ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_scenedeperrors.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
+ufo_add_test( NAME    test_ufo_function_arithmetic
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_arithmetic.yaml"
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
@@ -71,7 +82,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -82,7 +93,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_scattering.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( rttov_FOUND )
@@ -128,7 +139,7 @@ if( rttov_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudfirstguess.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( rttov_FOUND )
@@ -749,6 +760,17 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_default.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_airs
               TIER    1
               ECBUILD
@@ -792,6 +814,19 @@ ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+	      
+# Test for the string manipulation obsfucntion
+ufo_add_test( NAME    test_ufo_function_stringmanipulation
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_stringmanipulation.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )	      
+	      
 #
 ufo_add_test( NAME    test_ufo_function_tropo_estimate
               TIER    1
@@ -845,7 +880,7 @@ if( crtm_FOUND )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_clw_ret.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  filters obsfunctions
+                  LABELS  crtm filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )

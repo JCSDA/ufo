@@ -16,6 +16,7 @@
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/ConventionalProfileProcessing.h"
+#include "ufo/filters/CopyFlagsFromExtendedToOriginalSpace.h"
 #include "ufo/filters/CreateDiagnosticFlags.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/FinalCheck.h"
@@ -38,6 +39,7 @@
 #include "ufo/filters/PrintFilterData.h"
 #include "ufo/filters/ProbabilityGrossErrorWholeReport.h"
 #include "ufo/filters/ProcessAMVQI.h"
+#include "ufo/filters/ProfileAverageObsToModLevels.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/QCmanager.h"
@@ -53,6 +55,10 @@
 #include "ufo/filters/VariableTransforms.h"
 #include "ufo/operators/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/operators/gnssro/QC/ROobserror.h"
+
+#if defined(GSW_FOUND)
+  #include "ufo/filters/OceanVerticalStabilityCheck.h"
+#endif
 
 #if defined(RTTOV_FOUND)
   #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
@@ -82,7 +88,9 @@ void instantiateObsFilterFactory() {
   static oops::interface::FilterMaker<ObsTraits, ConventionalProfileProcessing>
            conventionalProfileProcessingMaker("Conventional Profile Processing");
   static oops::interface::FilterMaker<ObsTraits, CreateDiagnosticFlags>
-             CreateDiagnosticFlagsMaker("Create Diagnostic Flags");
+           CreateDiagnosticFlagsMaker("Create Diagnostic Flags");
+  static oops::interface::FilterMaker<ObsTraits, CopyFlagsFromExtendedToOriginalSpace>
+           CopyFlagsFromExtendedToOriginalSpaceMaker("Copy Flags From Extended To Original Space");
   static oops::interface::FilterMaker<ObsTraits, ObsDerivativeCheck>
            DerivativeCheckMaker("Derivative Check");
   static oops::interface::FilterMaker<ObsTraits, DifferenceCheck>
@@ -119,6 +127,8 @@ void instantiateObsFilterFactory() {
            printFilterDataMaker("Print Filter Data");
   static oops::interface::FilterMaker<ObsTraits, ProcessAMVQI>
              ProcessAMVQIMaker("Process AMV QI");
+  static oops::interface::FilterMaker<ObsTraits, ProfileAverageObsToModLevels>
+           ProfileAverageObsToModLevelsMaker("Average Observations To Model Levels");
   static oops::interface::FilterMaker<ObsTraits, ProfileBackgroundCheck>
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::interface::FilterMaker<ObsTraits, ProfileFewObsCheck>
@@ -151,6 +161,12 @@ void instantiateObsFilterFactory() {
            VariableTransformsMaker("Variable Transforms");
   static oops::interface::FilterMaker<ObsTraits, ObsDiagnosticsWriter>
            YDIAGsaverMaker("YDIAGsaver");
+
+  // Only include this filter if gsw is present
+  #if defined(GSW_FOUND)
+  static oops::interface::FilterMaker<ObsTraits, OceanVerticalStabilityCheck>
+           OceanVerticalStabilityCheckMaker("Ocean Vertical Stability Check");
+  #endif
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

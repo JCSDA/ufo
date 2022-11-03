@@ -119,6 +119,19 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   oops::Parameter<std::map<float, float>> horizontalCorrelationScaleInterpolationPoints{
     "horizontal_correlation_scale", {{-90.0f, 100.f}, {90.0f, 100.f}}, this};
 
+  /// Optional 2nd horizontal correlation scale of background errors.
+  oops::OptionalParameter<std::map<float, float>> horizontalCorrelationScale2InterpolationPoints{
+    "horizontal_correlation_scale_2", this};
+
+  /// How much the length scale differs according to whether the observation pair are aligned
+  ///  more N-S or E-W.
+  oops::OptionalParameter<std::map<float, float>> anisotropyInterpolationPoints{
+    "anisotropy", this};
+
+  /// Anisotropy corresponding to 2nd horizontal correlation scale.
+  oops::OptionalParameter<std::map<float, float>> anisotropy2InterpolationPoints{
+    "anisotropy_2", this};
+
   /// Temporal correlation scale.
   oops::Parameter<util::Duration> temporalCorrelationScale{"temporal_correlation_scale",
                                                            util::Duration("PT6H"), this};
@@ -171,10 +184,27 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
                                              "ObsValue",
                                              this};
 
+  /// Name of background error suffix
+  oops::Parameter<std::string> backgroundErrorSuffix{"background_error_suffix",
+                                                    "Background error suffix",
+                                                    "_background_error",
+                                                    this};
+
   /// Name of background error group
   oops::Parameter<std::string> backgroundErrorGroup{"background_error_group",
                                                     "Name of background error group",
                                                     "ObsDiag",
+                                                    this};
+
+  /// Name of background error suffix 2
+  oops::Parameter<std::string> backgroundErrorSuffix2{"background_error_suffix_2",
+                                                    "Background error suffix 2",
+                                                    "",
+                                                    this};
+
+  /// Name of background error group 2
+  oops::OptionalParameter<std::string> backgroundErrorGroup2{"background_error_group_2",
+                                                    "Name of background error group 2",
                                                     this};
 
   /// @}

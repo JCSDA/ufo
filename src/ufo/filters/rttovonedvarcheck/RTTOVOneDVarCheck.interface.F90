@@ -87,7 +87,7 @@ type(ufo_rttovonedvarcheck), pointer :: self
 
 call ufo_rttovonedvarcheck_registry%get(c_self, self)
 call ufo_rttovonedvarcheck_delete(self)
-call ufo_rttovonedvarcheck_registry%delete(c_self, self)
+call ufo_rttovonedvarcheck_registry%remove(c_self)
 
 end subroutine ufo_rttovonedvarcheck_delete_c
 

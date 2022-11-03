@@ -1,5 +1,12 @@
 obs space:
   name: satwinds
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: noaa
   simulated variables: [eastward_wind, northward_wind]
 #

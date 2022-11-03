@@ -5,14 +5,18 @@ observations:
 - obs space: &obsspace
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature]
 #   obsdataout:
-#     obsfile: Data/met_office_conventional_profile_processing_average_temperature_filter_stage_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_average_temperature_filter_stage_out.nc4
 
   obs operator: &obsop
     name: VertInterp

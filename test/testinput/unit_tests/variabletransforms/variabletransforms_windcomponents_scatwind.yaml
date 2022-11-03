@@ -6,9 +6,13 @@ observations:
     #  In the 2d input file, the second dimension is given the label "nchans" even though they are
     #  used to store ambiguities and not channels. This will be changed in future.
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
 #    obsdataout:
-#      obsfile: Data/windcomponents_2020100106_output.nc4
+#      engine:
+#        type: H5File
+#        obsfile: Data/windcomponents_2020100106_output.nc4
     simulated variables: [eastward_wind, northward_wind]
     observed variables: []
     derived variables: [eastward_wind, northward_wind]
@@ -17,31 +21,6 @@ observations:
   - filter: Variable Transforms
     Transform: WindComponents
   passedBenchmark: 83518           #  Passes for channels 1-4: 16462, 16366, 5580, 3351, for 2 variables
-  compareVariables:                #  test output matches precalculated values
-    - reference:
-        name: eastward_wind_derivedobsvalue@TestReference
-      test:
-        name: eastward_wind@DerivedObsValue
-      absTol: 1.0e-5
-    - reference:
-        name: northward_wind_derivedobsvalue@TestReference
-      test:
-        name: northward_wind@DerivedObsValue
-      absTol: 1.0e-5
-
-- obs space:
-    name: Scatwind
-    #  Test case when wind_direction@ObsValue is present instead of wind_from_direction@ObsValue
-    obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_wind_direction_2020100106.nc4
-    simulated variables: [eastward_wind, northward_wind]
-    observed variables: []
-    derived variables: [eastward_wind, northward_wind]
-    channels: 1-4
-  obs filters:
-  - filter: Variable Transforms
-    Transform: WindComponents
-  passedBenchmark: 44              #  Passes for channels 1-4: 10, 10, 1, 1, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
         name: eastward_wind_derivedobsvalue@TestReference

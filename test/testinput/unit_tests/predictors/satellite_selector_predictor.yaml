@@ -5,9 +5,13 @@ observations:
 - obs space:
     name: atms_n20
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
 #   obsdataout:
-#     obsfile: Data/atms_obs_20191230T0000_rttov_predictors_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_obs_20191230T0000_rttov_predictors_out.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1-22
   geovals:

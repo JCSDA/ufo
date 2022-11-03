@@ -32,6 +32,9 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
   /// List of channels to which the observation error factor applies
   oops::RequiredParameter<std::string> channelList{"channels", this};
 
+  /// Name of the sensor for which the observation error factor applies
+  oops::RequiredParameter<std::string> sensor{"sensor", this};
+
   /// Observation error scale factors applied to surface temperature jacobians
   /// over five surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorTsfc{"obserr_dtempf", this};

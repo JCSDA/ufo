@@ -1,0 +1,112 @@
+window begin: 2020-03-31T21:00:00Z
+window end: 2020-04-01T03:00:00Z
+
+observations:
+- obs operator:
+     Debug: true
+     name: RTTOV
+     Absorbers: [CLW]
+     linear model absorbers: []
+     obs options:
+       WMO_ID: [225] # Only process NOAA-20
+       Sat_ID: [noaa_20]
+       Instrument_Name: ATMS
+       CoefficientPath: Data/
+       RTTOV_GasUnitConv: true
+       RTTOV_default_opts: UKMO_PS45 
+       SatRad_compatibility: true 
+       UseRHwaterForQC: true 
+       RTTOV_profile_checkinput: true 
+       InspectProfileNumber: [1, 2] 
+  obs space:
+    name: atms
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_obs_2020040100_rttov_multiplatform_out.nc4
+  geovals:
+    filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
+  rms ref: 235.70741613145105
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11
+- obs operator:
+     Debug: true
+     name: RTTOV
+     Absorbers: [CLW]
+     linear model absorbers: []
+     obs options:
+       WMO_ID: [224,225] # Process JPSS-0/S-NPP and NOAA-20
+       Sat_ID: [noaa_20]
+       Instrument_Name: ATMS
+       CoefficientPath: Data/
+       RTTOV_GasUnitConv: true
+       RTTOV_default_opts: UKMO_PS45 
+       SatRad_compatibility: true 
+       UseRHwaterForQC: true 
+       RTTOV_profile_checkinput: true 
+       InspectProfileNumber: [1, 2] 
+  obs space:
+    name: atms
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_obs_2020040100_rttov_multiplatform_out.nc4
+  geovals:
+    filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
+  rms ref: 235.80501657017635
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11
+- obs operator:
+     Debug: true
+     name: RTTOV
+     Absorbers: [CLW]
+     linear model absorbers: []
+     obs options:
+       WMO_ID: [224,225] # Process JPSS-0/S-NPP and NOAA-20
+       Sat_ID: [jpss_0,noaa_20]
+       Instrument_Name: ATMS
+       CoefficientPath: Data/
+       RTTOV_GasUnitConv: true
+       RTTOV_default_opts: UKMO_PS45 
+       SatRad_compatibility: true 
+       UseRHwaterForQC: true 
+       RTTOV_profile_checkinput: true 
+       InspectProfileNumber: [1, 2] 
+  obs space:
+    name: atms
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_obs_2020040100_rttov_multiplatform_out.nc4
+  geovals:
+    filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20200401T0000Z_allsurfacetypes.nc4
+  rms ref: 235.80431453689877
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11

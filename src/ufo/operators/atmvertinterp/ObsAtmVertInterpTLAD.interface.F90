@@ -64,7 +64,14 @@ integer(c_int), intent(inout) :: c_key_self
 
 type(ufo_atmvertinterp_tlad), pointer :: self
 
-call ufo_atmvertinterp_tlad_registry%delete(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%get(c_key_self, self)
+
+! the obsvarindices array is allocated in the interface layer, so we deallocate here as well
+if (allocated(self%obsvarindices)) deallocate(self%obsvarindices)
+
+! type ufo_atmvertinterp_tlad has allocatable data, but has a destructor marked final that
+! should automatically deallocate (assuming compiler support...)
+call ufo_atmvertinterp_tlad_registry%remove(c_key_self)
 
 end subroutine ufo_atmvertinterp_tlad_delete_c
 

@@ -1,0 +1,272 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [eastward_wind]
+
+  obs filters:
+  # Variables to perform arithmetic on
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_1@MetaData
+      type: float
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_2@MetaData
+      type: float
+      value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_3@MetaData
+      type: float
+      value: 3
+  - filter: Variable Assignment
+    assignments:
+    - name: variable_minus_1@MetaData
+      type: float
+      value: -1
+
+ # Test variables
+  - filter: Variable Assignment
+    assignments:
+    - name: sum@TestReference
+      type: float
+      value: 6
+  - filter: Variable Assignment
+    assignments:
+    - name: exponents@TestReference
+      type: float
+      value: 12
+  - filter: Variable Assignment
+    assignments:
+    - name: coefficients@TestReference
+      type: float
+      value: 11
+  - filter: Variable Assignment
+    assignments:
+    - name: total_exponent@TestReference
+      type: float
+      value: 125
+  - filter: Variable Assignment
+    assignments:
+    - name: total_coeff@TestReference
+      type: float
+      value: 21
+  - filter: Variable Assignment
+    assignments:
+    - name: additive_const@TestReference
+      type: float
+      value: 10
+  - filter: Variable Assignment
+    assignments:
+    - name: combined_arithmetic@TestReference
+      type: float
+      value: 34395
+  - filter: Variable Assignment
+    assignments:
+    - name: large_total_exponent@TestReference
+      type: float
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: missing@TestReference
+      type: float
+      value: 1
+    where:
+    - variable:
+        name: variable_3@MetaData
+      maxvalue: 1
+
+  # Arethemtic tests
+  - filter: Variable Assignment
+    assignments:
+    - name: sum@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+
+  - filter: Variable Assignment
+    assignments:
+    - name: exponents@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+          exponents: [3,1,2]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: coefficients@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+          coefs: [2,3,1]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: total_exponent@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+          total exponent: 3
+
+  - filter: Variable Assignment
+    assignments:
+    - name: total_coeff@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          total coefficient: 7
+
+  - filter: Variable Assignment
+    assignments:
+    - name: additive_const@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+          intercept: 4
+
+  - filter: Variable Assignment
+    assignments:
+    - name: combined_arithmetic@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          - name: variable_2@MetaData
+          - name: variable_3@MetaData
+          exponents: [3,1,2]
+          coefs: [2,3,1]
+          total exponent: 3
+          total coefficient: 7
+          intercept: 4
+
+  - filter: Variable Assignment
+    assignments:
+    - name: large_total_exponent@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_1@MetaData
+          total exponent: 30
+
+  - filter: Variable Assignment
+    assignments:
+    - name: non_int_exponent@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_minus_1@MetaData
+          exponents: [0.5]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: non_int_total_exponent@MetaData
+      type: float
+      function:
+        name: Arithmetic@ObsFunction
+        options:
+          variables:
+          - name: variable_minus_1@MetaData
+          total exponent: 0.5
+
+  - filter: Print Filter Data
+    message: Printing filter data.
+    variables:
+    - variable: TestReference/missing
+    - variable: MetaData/non_int_exponent
+    - variable: MetaData/non_int_total_exponent
+    minimum location: 0
+    maximum location: 10
+
+  compareVariables:
+  - test:
+      name: sum@MetaData
+    reference:
+      name: sum@TestReference
+
+  - test:
+      name: exponents@MetaData
+    reference:
+      name: exponents@TestReference
+
+  - test:
+      name: coefficients@MetaData
+    reference:
+      name: coefficients@TestReference
+
+  - test:
+      name: total_exponent@MetaData
+    reference:
+      name: total_exponent@TestReference
+
+  - test:
+      name: total_coeff@MetaData
+    reference:
+      name: total_coeff@TestReference
+
+  - test:
+      name: additive_const@MetaData
+    reference:
+      name: additive_const@TestReference
+
+  - test:
+      name: combined_arithmetic@MetaData
+    reference:
+      name: combined_arithmetic@TestReference
+
+  - test:
+      name: large_total_exponent@MetaData
+    reference:
+      name: large_total_exponent@TestReference
+
+  - test:
+      name: non_int_exponent@MetaData
+    reference:
+      name: missing@TestReference
+
+  - test:
+      name: non_int_total_exponent@MetaData
+    reference:
+      name: missing@TestReference
+

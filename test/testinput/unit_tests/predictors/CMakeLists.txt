@@ -14,7 +14,7 @@ ufo_add_test( NAME    test_ufo_amsua_crtm_bc_channelnobc_geos
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_channelnobc_geos.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -25,7 +25,7 @@ ufo_add_test( NAME    test_ufo_amsua_crtm_bc_geos
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_geos.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -36,7 +36,7 @@ ufo_add_test( NAME    test_ufo_amsua_crtm_bc_obsoperator
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -47,7 +47,7 @@ ufo_add_test( NAME    test_ufo_amsua_crtm_bc_tlad
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )
@@ -192,7 +192,7 @@ ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_bc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_bc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
@@ -203,7 +203,7 @@ ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_nbc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_nbc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  unit_tests predictors
+              LABELS  crtm unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )

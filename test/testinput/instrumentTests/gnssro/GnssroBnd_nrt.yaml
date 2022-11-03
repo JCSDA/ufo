@@ -30,13 +30,17 @@ observations:
 - obs space:
     name: GnssroBndNBAM
     obsdatain:
-      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      engine:
+        type: H5File
+        obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
         group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
 #    obsdataout:
-#      obsfile: output/hofx/3dhofx_GnssroBndNBAM_2020100106.nc4
+#      engine:
+#        type: H5File
+#        obsfile: output/hofx/3dhofx_GnssroBndNBAM_2020100106.nc4
     simulated variables: [bending_angle]
   obs operator:
     name: GnssroBndNBAM
@@ -65,13 +69,17 @@ observations:
 - obs space:
     name: GnssroBndROPP1D
     obsdatain:
-      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      engine:
+        type: H5File
+        obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping: 
         group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
 #    obsdataout:
-#      obsfile: output/hofx/3dhofx_GnssroBndROPP1D_2020100106.nc4
+#      engine:
+#        type: H5File
+#        obsfile: output/hofx/3dhofx_GnssroBndROPP1D_2020100106.nc4
     simulated variables: [bending_angle]
   obs operator:
     name: GnssroBndROPP1D
@@ -96,13 +104,17 @@ observations:
 - obs space:
     name: GnssroBndROPP2D
     obsdatain:
-      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      engine:
+        type: H5File
+        obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
         group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
 #    obsdataout:
-#      obsfile: output/hofx/3dhofx_GnssroBndROPP2D_2020100106.nc4
+#      engine:
+#        type: H5File
+#        obsfile: output/hofx/3dhofx_GnssroBndROPP2D_2020100106.nc4
     simulated variables: [bending_angle]
   obs operator:
     name: GnssroBndROPP2D

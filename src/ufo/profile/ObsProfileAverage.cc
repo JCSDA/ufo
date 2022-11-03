@@ -29,8 +29,10 @@ static ObsOperatorMaker<ObsProfileAverage> obsProfileAverageMaker_("ProfileAvera
 
 ObsProfileAverage::ObsProfileAverage(const ioda::ObsSpace & odb,
                                      const Parameters_ & parameters)
-  : ObsOperatorBase(odb), odb_(odb), data_(odb, parameters)
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+    odb_(odb), data_(odb, parameters)
 {
+  requiredVars_ += nameMap_.convertName(data_.requiredVars());
   oops::Log::trace() << "ObsProfileAverage constructed" << std::endl;
 }
 
@@ -74,7 +76,7 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
     // Fill H(x) vector for each variable.
     for (int jvar : data_.operatorVarIndices()) {
-      const auto& variable = ovec.varnames().variables()[jvar];
+      const auto& variable = nameMap_.convertName(ovec.varnames().variables()[jvar]);
       // Number of levels for this variable.
       const std::size_t nlevs_var = gv.nlevs(variable);
       // GeoVaL vector for this variable.
@@ -86,7 +88,12 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
       for (std::size_t mlev = 0; mlev < nlevs_var; ++mlev) {
         const std::size_t jloc = slant_path_location[mlev];
         gv.getAtLocation(var_gv, variable, jloc);
-        ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        if (data_.geovalsObsSameDir()) {  // geovals and observations are the same way round:
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[mlev];
+        } else {  // reverse geovals so they're the same way round in extended space as
+          // observations / H(x) in original space:
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+        }
       }
     }
   }

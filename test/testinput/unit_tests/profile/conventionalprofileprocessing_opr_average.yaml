@@ -6,7 +6,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -15,7 +17,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -36,7 +40,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -45,7 +51,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out2.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out2.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -66,7 +74,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -75,7 +85,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out3.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out3.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -96,7 +108,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -105,7 +119,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out4.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out4.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure"
@@ -126,7 +142,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -135,7 +153,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out5.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out5.nc4
   obs operator:
     name: Composite
     components:
@@ -168,7 +188,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -177,7 +199,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out6.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out6.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -197,12 +221,16 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
     simulated variables: [eastward_wind]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out7.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out7.nc4
   expect constructor to throw exception with message: Group variables configuration is empty
   obs operator:
     name: ProfileAverage
@@ -222,7 +250,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort order: "descending"
@@ -230,7 +260,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out8.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out8.nc4
   expect constructor to throw exception with message: Sort variable must be air_pressure
   obs operator:
     name: ProfileAverage
@@ -250,7 +282,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -259,7 +293,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out9.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out9.nc4
   expect constructor to throw exception with message: Profiles must be sorted in descending order
   obs operator:
     name: ProfileAverage
@@ -279,14 +315,18 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [eastward_wind]
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out10.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out10.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -307,7 +347,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_locs_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_locs_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -316,7 +358,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out11.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out11.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -339,7 +383,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_pressure_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_wrong_slant_pressure_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -348,7 +394,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out12.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out12.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -372,7 +420,9 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs.nc4
       obsgrouping:
         group variables: [ "station_id" ]
         sort variable: "air_pressure"
@@ -381,7 +431,9 @@ observations:
     extension:
       allocate companion records with length: 71
 #   obsdataout:
-#     obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out1.nc4
   obs operator:
     name: ProfileAverage
     model vertical coordinate: "air_pressure_levels"
@@ -398,3 +450,96 @@ observations:
     tolerance AD: 1.0e-13
   vector ref: MetOfficeHofX
   tolerance: 1.0e-06
+
+# Ocean profile, geovals ordered same as observations
+- obs space:
+    name: Ocean Profile, geovals same direction as obs
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_fake_obsdata.nc4
+      obsgrouping:
+        group variables: ["station_id", "dateTime", "latitude", "longitude"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: oceanprofile_geovals_testout.nc4
+    simulated variables: [ocean_temperature, ocean_depth]
+    extension:
+      allocate companion records with length: 3  #
+      variables filled with non-missing values:
+      - "latitude"
+      - "longitude"
+      - "dateTime"
+      - "station_id"
+
+  geovals:
+    filename: Data/ufo/testinput_tier_1/oceanprofile_fake_geovals.nc4
+
+  obs operator:
+    name: Composite
+    components:
+    - name: ProfileAverage
+      variables:
+      - name: ocean_temperature
+      - name: ocean_depth
+      model vertical coordinate: "ocean_depth"
+      pressure coordinate: ocean_depth
+      pressure group: ObsValue
+      require descending pressure sort: false
+      number of intersection iterations: 0
+      geovals and observations in same direction: true
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-6
+
+# Standard case with IODA conventions: eastward_wind, northward_wind, air_temperature, and relative_humidity.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_obs_conventions.nc4
+      obsgrouping:
+        group variables: [ "station_id" ]
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [windEastward, windNorthward, airTemperature, relativeHumidity]
+    extension:
+      allocate companion records with length: 71
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_profile_cxinterpolation_opr_average_out5.nc4
+  obs operator:
+    name: Composite
+    components:
+     - name: ProfileAverage
+       observation alias file: ../resources/namemap/test_name_map.yaml
+       variables:
+       - name: windEastward
+       - name: windNorthward
+       model vertical coordinate: "air_pressure_levels"
+       pressure coordinate: "air_pressure"
+       pressure group: "MetaData"
+       number of intersection iterations: 3
+     - name: ProfileAverage
+       observation alias file: ../resources/namemap/test_name_map.yaml
+       variables:
+       - name: airTemperature
+       - name: relativeHumidity
+       model vertical coordinate: "air_pressure"
+       pressure coordinate: "air_pressure"
+       pressure group: "MetaData"
+       number of intersection iterations: 3
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_profile_cxinterpolation_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-04

@@ -91,6 +91,25 @@ struct Constants {
   static constexpr double icao_pressure_surface = 1013.25;  // Assumed surface pressure [hPa]
   static constexpr double icao_pressure_l   = 226.32;    // Assumed pressure at 11,000 gpm [hPa]
   static constexpr double icao_pressure_u   = 54.7487;   // Assumed pressure at 20,000 gpm [hPa]
+
+  // Constants used for conversion between geopotential and geometric heights
+  // using  MJ Mahoney's (2001)
+  // Originally from src/ufo/operators/gnssro/utils/gnssro_mod_transform.F90
+  static constexpr double semi_major_axis   = 6378.1370e3;     // [m]
+  static constexpr double semi_minor_axis   = 6356.7523142e3;  // [m]
+  static constexpr double grav_polar        = 9.8321849378;    // [m/s2]
+  static constexpr double grav_equator      = 9.7803253359;    // [m/s2]
+  static constexpr double earth_omega       = 7.292115e-5;     // [rad/s]
+  static constexpr double grav_constant     = 3.986004418e14;
+  static constexpr double flattening   = (semi_major_axis - semi_minor_axis) / semi_major_axis;
+  static constexpr double somigliana   = (semi_minor_axis / semi_major_axis) *
+                                         (grav_polar / grav_equator) - 1.0;
+  static constexpr double grav_ratio   = earth_omega * earth_omega *
+                                         semi_major_axis * semi_major_axis * semi_minor_axis /
+                                         grav_constant;
+  static constexpr double eccentricity_sq = (semi_major_axis * semi_major_axis -
+                                            semi_minor_axis * semi_minor_axis) /
+                                            semi_major_axis / semi_major_axis;
 };
 
 //--------------------------------------------------------------------------------------------------

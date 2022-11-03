@@ -14,9 +14,13 @@ observations:
   obs space:
     name: amsua_metop-c
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-c_obs_2020110112_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_metop-c_obs_2020110112_m.nc4
 #    obsdataout:
-#      obsfile: Data/amsua_metop-c_obs_2020110112_qc_filters_out.nc4
+#      engine:
+#        type: H5File
+#        obsfile: Data/amsua_metop-c_obs_2020110112_qc_filters_out.nc4
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-15
   geovals:
@@ -179,6 +183,7 @@ observations:
         channels: *all_channels
         options:
           channels: *all_channels
+          sensor: *Sensor_ID
           obserr_demisf: [0.010, 0.020, 0.015, 0.020, 0.200]
           obserr_dtempf: [0.500, 2.000, 1.000, 2.000, 4.500]
 #  Situation dependent Check

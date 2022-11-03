@@ -1,11 +1,17 @@
 obs space:
   name: raob
-  _source: noaa
   obsdatain:
+    engine:
+      type: H5File
     obsgrouping:
       group variables: ["station_id", "LaunchTime"]
       sort variable: "air_pressure"
       sort order: "descending"
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: noaa
   simulated variables: [air_temperature, specific_humidity, eastward_wind, northward_wind]
 obs operator:
   name: VertInterp

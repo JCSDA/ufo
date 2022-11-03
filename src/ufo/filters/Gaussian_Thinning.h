@@ -95,7 +95,8 @@ class Gaussian_Thinning : public FilterBase,
       const std::vector<size_t> &validObsIds,
       const ObsAccessor &obsAccessor,
       const RecursiveSplitter &splitter,
-      const std::vector<float> &distancesToBinCenter) const;
+      const std::vector<float> &distancesToBinCenter,
+      const std::vector<int> &priorities) const;
 
   std::vector<bool> identifyThinnedObservationsMedian(
       const std::vector<size_t> &validObsIds,
@@ -107,7 +108,8 @@ class Gaussian_Thinning : public FilterBase,
   std::function<bool(size_t, size_t)> makeObservationComparator(
       const std::vector<size_t> &validObsIds,
       const std::vector<float> &distancesToBinCenter,
-      const ObsAccessor &obsAccessor) const;
+      const ObsAccessor &obsAccessor,
+      const std::vector<int> &priorities) const;
 
   static boost::optional<SpatialBinSelector> makeSpatialBinSelector(
       const GaussianThinningParameters &options);

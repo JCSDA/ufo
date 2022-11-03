@@ -8,10 +8,10 @@ observations:
 - obs space:
     name: Surface
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
-#   obsdataout:
-#     obsfile: Data/PStar_obs_20210521T1200Z_observed_derived_simulated_variables_out.nc4
-    observed variables: [station_pressure, mean_sea_level_pressure]
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
+    observed variables: [stationPressure, pressureReducedToMeanSeaLevel, standardPressure]
     derived variables: [surface_pressure]
     simulated variables: [surface_pressure]
   geovals:
@@ -22,34 +22,66 @@ observations:
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: mean_sea_level_pressure@ObsValue
+    - name: pressureReducedToMeanSeaLevel@ObsValue
     minvalue: 0.00001
 
   - filter: Bounds Check
     filter variables:
-    - name: station_pressure@ObsValue
+    - name: stationPressure@ObsValue
     minvalue: 0.00001
+
+  - filter: BlackList
+    filter variables:
+    - name: stationPressure
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/stationPressure
+      is_true:
+
+  - filter: BlackList
+    filter variables:
+    - name: standardPressure
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/standardPressure
+      is_true:
+
+  - filter: BlackList
+    filter variables:
+    - name: pressureReducedToMeanSeaLevel
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentReject/pressureReducedToMeanSeaLevel
+      is_true:
 
   - filter: Variable Transforms
     Transform: PStar
 
-  compareVariables:                 # test output matches precalculated values
-    - reference:
-        name: PStarFlags@TestReference
-      test:
-        name: PStar@DerivedQCFlags
+  compareVariables:
     - reference:
         name: PStarErr@TestReference
       test:
-        name: PStar@DerivedObsError
+        name: surface_pressure@DerivedObsError
       absTol: 1.0e-5
     - reference:
         name: PStar_PGE@TestReference
       test:
-        name: PStar@DerivedGrossErrorProbability
+        name: surface_pressure@GrossErrorProbability
       absTol: 1.0e-5
     - reference:
         name: PStar@TestReference
       test:
-        name: PStar@DerivedObsValue
+        name: surface_pressure@DerivedObsValue
       relTol: 1.0e-5
+    - reference:
+        name: PmslUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PmslUsed/surface_pressure
+    - reference:
+        name: PstdUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PstdUsed/surface_pressure
+    - reference:
+        name: PstnUsedFlag@TestReference
+      test:
+        name: DiagnosticFlags/PstnUsed/surface_pressure

@@ -5,7 +5,9 @@ observations:
 - obs space:
     name: AIRS
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/airs_aqua_20210701T1200Z_obs_obfn_setsurface.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/airs_aqua_20210701T1200Z_obs_obfn_setsurface.nc4
     simulated variables: [brightness_temperature]
     channels: &channels 1, 6, 7, 10, 11, 15, 16, 17, 20, 21
   geovals:

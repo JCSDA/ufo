@@ -51,23 +51,13 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   !Local Variables
   integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
   ! Check configurations
-  if (grid_conf%has("geovals")) then
-    ngvars = grid_conf%get_size("geovals")
-    call grid_conf%get_or_die("geovals", gvars)
-    ! add to geovars list
-    do ivar = 1, ngvars
-      call self%geovars%push_back(gvars(ivar))
-    enddo
-  endif
+  ngvars = grid_conf%get_size("geovals")
+  call grid_conf%get_or_die("geovals", gvars)
+  ! add to geovars list
+  do ivar = 1, ngvars
+    call self%geovars%push_back(gvars(ivar))
+  enddo
   nvars = self%obsvars%nvars()
-  if (ngvars == 0 .and. nvars > 0) then
-    allocate(self%coefficients(nvars))
-    do ivar = 1, nvars
-      call self%geovars%push_back(self%obsvars%variable(ivar))
-      self%coefficients(ivar) = 1.0
-    enddo
-  endif
-
   ncoefs = grid_conf%get_size("coefficients")
   call grid_conf%get_or_die("coefficients", coefficients)
   allocate(self%coefficients(ncoefs))
@@ -212,10 +202,13 @@ end subroutine atmvertinterplay_tlad_cleanup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine  destructor(self)
+subroutine destructor(self)
   type(ufo_atmvertinterplay_tlad), intent(inout)  :: self
 
   call self%cleanup()
+
+  if (allocated(self%nlevels)) deallocate(self%nlevels)
+  if (allocated(self%coefficients)) deallocate(self%coefficients)
 
 end subroutine destructor
 

@@ -18,10 +18,14 @@ observations:
   obs space:
     name: AodGeos
     obsdatain:
-      obsfile: Data/ufo/testinput_tier_1/geos_aod_obs_2018041500_m.nc4
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos_aod_obs_2018041500_m.nc4
     simulated variables: [Total_Aerosol_Optical_Depth_550]
 #   obsdataout:
-#     obsfile: Data/geos_aod_obs_2018041500_m_out.nc4
+#     engine:
+#       type: H5File
+#       obsfile: Data/geos_aod_obs_2018041500_m_out.nc4
   obs bias: {}
   geovals:
     filename: Data/ufo/testinput_tier_1/geos_aod_geoval_2018041500_m.nc4

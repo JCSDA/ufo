@@ -51,7 +51,7 @@ phases:
       - mkdir -p /jcsda/ufo-bundle
 
       #  Set crtm branch name
-      - export CRTM_JEDI_BRANCH="release/crtm_jedi"
+      - export CRTM_JEDI_BRANCH="release/crtm_jedi_v2.4.0"
 
       - if [ "$CODEBUILD_GIT_BRANCH" = "develop" ];
         then export CODEBUILD_GIT_BRANCH_CRTM=${CRTM_JEDI_BRANCH};
@@ -93,9 +93,6 @@ phases:
       # oops
       - ./clone.sh jcsda-internal/oops $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle oops ${GIT_BASE_BRANCH} develop
 
-      # jedi-cmake
-      - ./clone.sh jcsda-internal/jedi-cmake $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle jedicmake ${GIT_BASE_BRANCH} develop
-
       # rttov
       - ./clone.sh jcsda-internal/rttov $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle rttov ${GIT_BASE_BRANCH} develop
 
@@ -128,22 +125,22 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
-      - su - jedi -c "cd /home/jedi
+      - su - nonroot -c "cd /home/nonroot
         && echo $CC
         && echo $CXX
         && echo $FC
         && CC=mpicc CXX=mpicxx FC=mpifort
-        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE -DENABLE_GPROF=ON /jcsda/ufo-bundle/"
+        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=GNUContainer -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE -DENABLE_GPROF=ON /jcsda/ufo-bundle/"
 
 
       # configure and build
-      - su - jedi -c "cd /home/jedi/ufo
+      - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
         && cp ../DartConfiguration.tcl .
         && sed -i 's/ufo-bundle/ufo-bundle\/ufo/' DartConfiguration.tcl
-        && sed -i 's/jedi/jedi\/ufo/' DartConfiguration.tcl
+        && sed -i 's/nonroot/nonroot\/ufo/' DartConfiguration.tcl
         && cat DartConfiguration.tcl
         && make -j4"
 
@@ -155,13 +152,13 @@ phases:
       - echo $BUILD_STATUS
 
       # run ctest
-      - su - jedi -c "CC=mpicc CXX=mpicxx FC=mpifort
-        && cd /home/jedi/ufo
+      - su - nonroot -c "CC=mpicc CXX=mpicxx FC=mpifort
+        && cd /home/nonroot/ufo
         && ctest -C RelWithDebInfo -D ExperimentalTest"
 
     finally:
       # upload ctest report to CDASH
-      - su - jedi -c "cd /home/jedi/ufo
+      - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
@@ -176,7 +173,7 @@ phases:
       # upload find cdash url and upload it as CodeBuild artifact to S3
       - if [ "$BUILD_STATUS" = "1" ];
         then echo "Build & tests passed, find cdash url";
-        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/jedi/ufo/Testing $CDASH_URL);
+        url=$(bash /jcsda/ufo-bundle/ufo/CI/cdash-url.sh /home/nonroot/ufo/Testing $CDASH_URL);
         echo $url;
         echo ${url} > /jcsda/artifacts/cdash-url.txt;
         cat /jcsda/artifacts/cdash-url.txt;
@@ -184,7 +181,7 @@ phases:
         fi
 
       - echo 'Connect to CodeCov'
-      - cd /home/jedi/ufo
+      - cd /home/nonroot/ufo
       - pwd
       - ls
       - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh

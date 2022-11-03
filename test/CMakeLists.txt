@@ -36,9 +36,11 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
+set( CRTM_COEFFS_BRANCH "2.4.0_skylab_2.0" )
+
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.3.0.tar.gz)
-set(crtm_test_data crtm_coefficients_2.3.0.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.4.0.tar.gz)
+set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
 # macro for downloading test data
@@ -51,8 +53,6 @@ set(crtm_test_data crtm_coefficients_2.3.0.tar.gz)
 #        test_data: test data filename (archive)
 # output: output_data_path: path to data on local machine after download
 
-# Currently only use 2.3.0 CRTM coefficients
-set( CRTM_COEFFS_BRANCH "2.3.0" )
 
 function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   # If REPO branch is being built set GIT_BRANCH_FUNC to REPO's current branch.
@@ -391,6 +391,8 @@ SpcCoeff/Little_Endian/iasi_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/iasi_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/iasi_metop-b.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/iasi_metop-b.TauCoeff.bin
+SpcCoeff/Little_Endian/iasi_metop-c.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/iasi_metop-c.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_metop-b.SpcCoeff.bin
@@ -413,6 +415,12 @@ SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
+SpcCoeff/Little_Endian/v.viirs-m_j1.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.viirs-m_j1.TauCoeff.bin
+SpcCoeff/Little_Endian/v.modis_aqua.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.modis_aqua.TauCoeff.bin
+SpcCoeff/Little_Endian/v.modis_terra.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.modis_terra.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_g16.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g16.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_gr.SpcCoeff.bin
@@ -444,10 +452,16 @@ list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
 rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
+rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
+rttov7pred54L/rtcoef_metop_3_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_15_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_18_amsuamhs.dat
+rttov7pred54L/rtcoef_noaa_19_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_1_iasi.dat
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
+rttov7pred54L/rtcoef_jpss_0_atms.dat
 rttov7pred54L/rtcoef_noaa_20_atms.dat
-mietable/mietable_metop_amsuamhs.dat
+mietable/mietable_metop_amsuamhs.bin
 )
 
 # Symlink RTcoef files
@@ -455,7 +469,7 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
 
-file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tgz
+file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst
                      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
 
 endif( ${rttov_FOUND} )

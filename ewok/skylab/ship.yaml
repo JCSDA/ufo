@@ -1,5 +1,12 @@
 obs space:
   name: ship
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
   _source: ldm
   simulated variables: [surface_pressure, air_temperature]
 obs operator:
@@ -20,7 +27,7 @@ obs filters:
     minvalue: 37499
     maxvalue: 106999
     action:
-      name: reject 
+      name: reject
   #
   - filter: Bounds Check
     filter variables:

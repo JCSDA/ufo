@@ -31,9 +31,9 @@ ModelHeightAdjustedWindVectorComponent<northwardWind>::ModelHeightAdjustedWindVe
         const eckit::LocalConfiguration & conf): invars_() {
   // Required observation data
   if (northwardWind) {
-    invars_ += Variable("northward_wind@ObsValue");
+    invars_ += Variable("windNorthwardAt10M@ObsValue");
   } else {
-    invars_ += Variable("eastward_wind@ObsValue");
+    invars_ += Variable("windEastwardAt10M@ObsValue");
   }
 
   // Required model surface altitude
@@ -56,9 +56,9 @@ void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFil
   std::vector<float> StationHeight(nlocs);
 
   if (northwardWind) {
-    in.get(Variable("northward_wind@ObsValue"), WindComponent);
+    in.get(Variable("windNorthwardAt10M@ObsValue"), WindComponent);
   } else {
-    in.get(Variable("eastward_wind@ObsValue"), WindComponent);
+    in.get(Variable("windEastwardAt10M@ObsValue"), WindComponent);
   }
   in.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
