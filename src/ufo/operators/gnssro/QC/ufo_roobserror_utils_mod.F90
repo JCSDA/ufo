@@ -242,7 +242,7 @@ IMPLICIT NONE
 ! Subroutine arguments:
 INTEGER, INTENT(IN)              :: satid                     ! The satellite identifier | These three entries will
 INTEGER, INTENT(IN)              :: origc                     ! The originating centre   | be used to find the
-REAL, INTENT(IN)                 :: av_temp                   ! The average temperature  | R matrix from the list
+REAL(kind_real), INTENT(IN)      :: av_temp                   ! The average temperature  | R matrix from the list
 INTEGER, INTENT(IN)              :: R_num_sats                ! The number of matrices in the list
 TYPE (Rmatrix_type), INTENT(IN)  :: RMatrix_list(R_num_sats)  ! The list of R matrices to select from
 TYPE (Rmatrix_type), INTENT(OUT) :: out_matrix                ! Output R matrix

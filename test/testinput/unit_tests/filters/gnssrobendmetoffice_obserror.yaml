@@ -17,10 +17,10 @@ observations:
       obsgrouping:
         group variables: ["record_number"]
     simulated variables: [bending_angle]
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
@@ -59,13 +59,22 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
     simulated variables: [bending_angle]
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/average_temperature_20km
+      type: float
+      function:
+        name: AverageTemperatureBelow@ObsFunction
+        options:
+          height limit: 20000
+          use layer thickness: false
   - filter: ROobserror
     filter variables:
     - name: bending_angle
@@ -76,6 +85,7 @@ observations:
     allow extrapolation: true
     verbose output: true
     defer to post: true
+    average temperature name: average_temperature_20km
   compareVariables:
     - reference:
         name: bending_angle@AvTempObsError

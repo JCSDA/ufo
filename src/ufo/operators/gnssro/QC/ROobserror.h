@@ -47,7 +47,6 @@ class ROobserror : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return 76;}
-  Eigen::ArrayXXf get_geovals(const std::string&) const;
   int n_horiz = 1;
 
   F90roerr key_;
