@@ -42,7 +42,8 @@ struct InterpMethodParameterTraitsHelper {
     { InterpMethod::LEAST_UPPER_BOUND, "least upper bound" },
     { InterpMethod::GREATEST_LOWER_BOUND, "greatest lower bound" },
     { InterpMethod::LINEAR, "linear" },
-    { InterpMethod::BILINEAR, "bilinear" }
+    { InterpMethod::BILINEAR, "bilinear" },
+    { InterpMethod::TRILINEAR, "trilinear" }
   };
 };
 
@@ -65,6 +66,15 @@ struct EquidistantChoiceParameterTraitsHelper {
   };
 };
 
+struct CoordinateTransformationParameterTraitsHelper {
+  typedef CoordinateTransformation EnumType;
+  static constexpr char enumTypeName[] = "CoordinateTransformation";
+  static constexpr util::NamedEnumerator<CoordinateTransformation> namedValues[] = {
+    { CoordinateTransformation::NONE, "none" },
+    { CoordinateTransformation::LOGLINEAR, "loglinear" }
+  };
+};
+
 }  // namespace ufo
 
 
@@ -83,6 +93,11 @@ struct ParameterTraits<ufo::ExtrapolationMode> :
 template <>
 struct ParameterTraits<ufo::EquidistantChoice> :
     public EnumParameterTraits<ufo::EquidistantChoiceParameterTraitsHelper>
+{};
+
+template <>
+struct ParameterTraits<ufo::CoordinateTransformation> :
+    public EnumParameterTraits<ufo::CoordinateTransformationParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -119,6 +134,14 @@ class InterpolationParameters : public oops::Parameters {
   /// \see EquidistantChoice for a list of supported choices.
   oops::Parameter<EquidistantChoice> equidistanceChoice{
     "equidistant choice", EquidistantChoice::FIRST, this};
+
+  /// Transformation applied to coordinates prior to interpolation.
+  /// For instance if a log-linear transform is used then the logarithm of both the observed
+  /// and reference values are found prior to interpolation.
+  ///
+  /// \see CoordinateTransformation for a list of supported choices.
+  oops::Parameter<CoordinateTransformation> coordinateTransformation{
+    "coordinate transformation", CoordinateTransformation::NONE, this};
 };
 
 
@@ -199,6 +222,7 @@ class DrawValueFromFile : public ObsFunctionBase<T> {
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::unordered_map<std::string, ExtrapolationMode> extrapMode_;
   std::unordered_map<std::string, EquidistantChoice> equidistantChoice_;
+  std::unordered_map<std::string, CoordinateTransformation> coordinateTransformation_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
   std::vector<int> channels_;

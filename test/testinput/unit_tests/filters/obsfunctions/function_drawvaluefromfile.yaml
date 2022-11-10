@@ -569,7 +569,7 @@ observations:
       - name: latitude@MetaData
         method: linear
     variables: [assigned_float_variable_bilin_0]
-  expect constructor to throw exception with message: Linear interpolation can only be supplied as the very last argument
+  expect constructor to throw exception with message: Linear interpolation requires one variable
 
 - obs space: &ObsSpace
     name: 3D payload array with bilinear interpolation
@@ -1108,3 +1108,240 @@ observations:
         method: nearest
     variables: [assigned_float_variable_outofbounds_missing]
     tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: air_pressure@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+    variables: [assigned_float_variable_trilin]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, log-linear in pressure
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: air_pressure@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+    variables: [assigned_float_variable_trilin_logp]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, log-linear in longitude
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: air_pressure@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+    variables: [assigned_float_variable_trilin_loglon]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, log-linear in pressure and longitude
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: air_pressure@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+    variables: [assigned_float_variable_trilin_logploglon]
+    tolerance: 1.0e-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, incorrect coordinate type
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: trilinear
+      - name: air_pressure@MetaData
+        method: trilinear
+      - name: longitude@MetaData
+        method: trilinear
+    variables: [assigned_float_variable_trilin]
+  expect compute to throw exception with message: Trilinear interpolation must be performed with float coordinates.
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, incorret number of trilinear operations
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: trilinear
+      - name: air_pressure@MetaData
+        method: trilinear
+    variables: [assigned_float_variable_trilin]
+  expect constructor to throw exception with message: Trilinear interpolation requires three variables.
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, multiple interpolation operations requested
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: int_variable_1@MetaData
+        method: trilinear
+      - name: air_pressure@MetaData
+        method: trilinear
+      - name: air_pressure@MetaData
+        method: bilinear
+    variables: [assigned_float_variable_trilin]
+  expect constructor to throw exception with message: Cannot use multiple interpolation methods.
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, trilinear does not appear at the end
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: air_pressure@MetaData
+        method: trilinear
+      - name: longitude@MetaData
+        method: trilinear
+      - name: string_variable_1@MetaData
+        method: exact
+    variables: [assigned_float_variable_trilin]
+  expect constructor to throw exception with message: Trilinear interpolation can only be supplied as the final three arguments.
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, log-linear in latitude (expect exception)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+      - name: air_pressure@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+    variables: [assigned_float_variable_trilin_logp]
+  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/latitude'. At least one value in the field to be interpolated is negative.
+
+- obs space: &ObsSpace
+    name: 3D payload array with trilinear interpolation, log-linear in pressure with data values < 0 (expect exception)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs function:
+    name: DrawValueFromFile@ObsFunction
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: latitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+      - name: air_pressure_negative@MetaData
+        method: trilinear
+        coordinate transformation: loglinear
+      - name: longitude@MetaData
+        method: trilinear
+        coordinate transformation: none
+    variables: [assigned_float_variable_trilin_logp]
+  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/air_pressure_negative'. At least one value in the data is negative.
+

@@ -87,6 +87,11 @@ constexpr util::NamedEnumerator<EquidistantChoice>
   EquidistantChoiceParameterTraitsHelper::namedValues[];
 
 // -----------------------------------------------------------------------------
+constexpr char CoordinateTransformationParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<CoordinateTransformation>
+  CoordinateTransformationParameterTraitsHelper::namedValues[];
+
+// -----------------------------------------------------------------------------
 static ObsFunctionMaker<DrawValueFromFile<float>> floatMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<int>> intMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<std::string>> stringMaker("DrawValueFromFile");
@@ -102,28 +107,64 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
     std::vector<eckit::LocalConfiguration> interpSubConfs;
     const std::vector<InterpolationParameters> &interpolationParameters =
       options_.interpolation.value();
+
     int nlin = 0;
+    int nbilin = 0;
+    int ntrilin = 0;
+    int nlintotal = 0;
     for (auto intParam = interpolationParameters.begin();
          intParam != interpolationParameters.end(); ++intParam) {
       const ufo::InterpMethod & method = intParam->method.value();
-      if (method == InterpMethod::BILINEAR) {
+      if (method == InterpMethod::TRILINEAR) {
+        ntrilin++;
+        nlintotal++;
+      } else if (method == InterpMethod::BILINEAR) {
+        nbilin++;
+        nlintotal++;
+      } else if (method == InterpMethod::LINEAR) {
         nlin++;
-      } else if (nlin > 0) {
+        nlintotal++;
+      } else if (ntrilin > 0) {
+        // if trilinear interpolation has been used at least once
+        // but the current option is not trilinear interpolation
+        throw eckit::UserError("Trilinear interpolation can only be supplied as the final three "
+                               "arguments.", Here());
+      } else if (nbilin > 0) {
+        // if bilinear interpolation has been used at least once
+        // but the current option is not bilinear interpolation
         throw eckit::UserError("Bilinear interpolation can only be supplied as the final two "
                                "arguments.", Here());
-      } else if ((method == InterpMethod::LINEAR) &&
-                 (intParam + 1 != interpolationParameters.end())) {
+      } else if (nlin > 0) {
+        // if linear interpolation has been used at least once
+        // but the current option is not linear interpolation
         throw eckit::UserError("Linear interpolation can only be supplied as the very last "
                                "argument.", Here());
       }
+      // if more than one interpolation option has been used
+      if ((ntrilin > 0 && ntrilin != nlintotal) ||
+          (nbilin > 0 && nbilin != nlintotal) ||
+          (nlin > 0 && nlin != nlintotal)) {
+        throw eckit::UserError("Cannot use multiple interpolation methods.", Here());
+      }
+
       const std::string varName = ioda::convertV1PathToV2Path(intParam->name.value());
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[varName] = method;
       extrapMode_[varName] = intParam->extrapMode.value();
       equidistantChoice_[varName] = intParam->equidistanceChoice.value();
+      coordinateTransformation_[varName] = intParam->coordinateTransformation.value();
     }
-    if (nlin > 0 && nlin != 2) {
+    // if linear interpolation has been configured incorrectly
+    if (nlin > 0 && nlin != 1) {
+      throw eckit::UserError("Linear interpolation requires one variable.", Here());
+    }
+    // if bilinear interpolation has been configured incorrectly
+    if (nbilin > 0 && nbilin != 2) {
       throw eckit::UserError("Bilinear interpolation requires two variables.", Here());
+    }
+    // if trilinear interpolation has been configured incorrectly
+    if (ntrilin > 0 && ntrilin != 3) {
+      throw eckit::UserError("Trilinear interpolation requires three variables.", Here());
     }
     // Get channels from options
     if (options_.chlist.value() != boost::none) {
@@ -153,6 +194,22 @@ class ExtractVisitor : public boost::static_visitor<void> {
     interpolator.extract(obDat1[iloc], obDat2[iloc]);
   }
 
+  template <typename T, typename R, typename U>
+  void operator()(const std::vector<T> &obDat1,
+                  const std::vector<R> &obDat2,
+                  const std::vector<U> &obDat3) {
+    throw eckit::UserError("Trilinear interpolation must be performed with float coordinates.",
+                           Here());
+  }
+
+  void operator()(const std::vector<float> &obDat1,
+                  const std::vector<float> &obDat2,
+                  const std::vector<float> &obDat3) {
+    interpolator.extract(obDat1[iloc],
+                         obDat2[iloc],
+                         obDat3[iloc]);
+  }
+
   DataExtractor<ExtractedValue> &interpolator;
   size_t iloc;
 };
@@ -167,7 +224,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
   // Channel number handling
   if (options_.chlist.value() != boost::none)
     interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT,
-                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST);
+                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST,
+                              CoordinateTransformation::NONE);
 
   ObData obData;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
@@ -176,7 +234,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
 
     const std::string varName = allvars_[ind].fullName();
     interpolator.scheduleSort(varName, interpMethod_.at(varName), extrapMode_.at(varName),
-                              equidistantChoice_.at(varName));
+                              equidistantChoice_.at(varName),
+                              coordinateTransformation_.at(varName));
     switch (in.dtype(allvars_[ind])) {
       case ioda::ObsDtype::Integer:
         updateObData<int>(in, allvars_[ind], obData);
@@ -209,7 +268,12 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
           // 'interpolationMethod' is a copy to avoid a MetOffice CRAY icpc compile failure.
           // See https://github.com/JCSDA-internal/ufo/pull/1419
           ufo::InterpMethod interpolationMethod = interpMethod_.at(obData[ind].first);
-          if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
+          if ((interpolationMethod == InterpMethod::TRILINEAR) && (ind == (obData.size()-3))) {
+            boost::apply_visitor(visitor,
+                                 obData[ind].second, obData[ind+1].second, obData[ind+2].second);
+            break;
+          } else if ((interpolationMethod == InterpMethod::BILINEAR) &&
+                     (ind == (obData.size()-2))) {
             boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
             break;
           } else {
