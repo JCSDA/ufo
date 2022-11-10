@@ -11,10 +11,10 @@
 !! wind data. We assimilate the data as a "neutral" 10m wind, i.e. where the effects of
 !! atmospheric stability are neglected. For each observation we calculate the momentum
 !! roughness length using the Charnock relation. We then calculate the Monin-Obukhov
-!! stability function for momentum, integrated to the model's lowest wind level.
+!! stability function for momentum, integrated to 10m.
 !! The calculations are dependant upon on whether we have stable or unstable conditions
 !! according to the Obukhov Length. The neutral 10m wind components are then calculated
-!! from the lowest height model level winds.
+!! from the 10m model winds.
 !!
 !! \author J.Cotton (Met Office)
 !!
@@ -35,6 +35,7 @@ use fckit_log_module,  only : fckit_log
 use fckit_exception_module,  only : fckit_exception
 
 implicit none
+public :: ops_scatwind_phi_m_sea
 private
 
   !> Fortran derived type for neutral wind
@@ -222,16 +223,16 @@ end subroutine ufo_scatwind_neutralmetoffice_simobs
 !! \f$\alpha_{ch} =0.018\f$ is the charnock parameter, and
 !! \f$g\f$ is the acceleration due to gravity.
 !! * Call a subroutine to calculate the Monin-Obukhov stability
-!! function for momentum integrated to the lowest height model level,
+!! function for momentum integrated to 10m,
 !! \f$\Phi_{m}\f$.
 !! The calculations are dependant upon on whether we have stable or unstable
 !! conditions according to the Obukhov Length, \f$L\f$.
 !! * The neutral 10m wind components, \f$v_{10n}\f$ are then calculated from
-!! the lowest model level winds, \f$v_1\f$, as
+!! the 10m model winds, \f$v_{10}\f$, as
 !! \f[
 !! \textbf{v}_{10n}=\frac{\ln\left(\left(10+z_{0m}\right)/z_{0m}\right)}
-!!                       {\Phi_m\left(L,z_1+z_{0m},z_{0m}\right)}
-!!                  \textbf{v}_1
+!!                       {\Phi_m\left(L,10+z_{0m},z_{0m}\right)}
+!!                  \textbf{v}_{10}
 !! \f]
 !!
 !! References:
@@ -260,6 +261,7 @@ subroutine ops_scatwind_forwardmodel(nlevz,  &
 
 use ufo_constants_mod, only: &
     grav                                       ! Gravitational field strength
+use vert_interp_mod
 
 integer, intent(in)            :: nlevz        !< no. of height levels in state vec.
 real(kind_real), intent(in)    :: za(:)        !< heights of rho levs
@@ -275,21 +277,21 @@ real(kind_real), intent(inout) :: cdr10        !< 10m interpolation coefficients
 ! Local parameters
 !
 integer, parameter           :: max_string = 800    ! Length of strings
-real, parameter              :: scatt_height = 10.0 ! height of observation
+real(kind_real), parameter   :: scatt_height = 10.0 ! height of observation in m
 real, parameter              :: charnock = 0.018    ! Charnock parameter
 character(len=*), parameter  :: myname_ = "Ops_Scatwind_ForwardModel"
 character(max_string)        :: message             ! General message for output
 !
 ! Local variables
 !
-real                         :: u1           ! eastward wind on lowest model level
-real                         :: v1           ! northward wind on lowest model level
+integer                      :: wi           ! vertical interpolation index
+real(kind_real)              :: wf           ! vertical interpolation weight
+real(kind_real)              :: u10          ! eastward wind at 10m
+real(kind_real)              :: v10          ! northward wind at 10m
 real                         :: oblen_1      ! ObLen checked for very small numbers
 real                         :: recip_l_mo   ! Reciprocal of ObLen
 real                         :: z1_uv        ! Height of lowest wind (rho) level
 real                         :: z0m          ! Roughness length for momentum
-real                         :: phi_m        ! Monin-Obukhov stability function
-                                             ! integrated to lowest level
 real                         :: phi_m_10     ! Monin-Obukhov stability function
                                              ! integrated to 10m
 real                         :: phi_mn_10    ! Neutral form of stability
@@ -331,9 +333,10 @@ if (seaice == missing_value(seaice)) then  ! sea ice missing
   call fckit_log % warning(message)
 end if
 
-! Get u,v wind components on lowest model level
-u1 = u(nlevz)
-v1 = v(nlevz)
+! Get u,v wind components at 10m
+call vert_interp_weights(nlevz, scatt_height , za, wi, wf)
+call vert_interp_apply(nlevz, u, u10, wi, wf)
+call vert_interp_apply(nlevz, v, v10, wi, wf)
 
 ! Height (m) of lowest wind (rho) level
 z1_uv = za(nlevz)
@@ -345,7 +348,6 @@ recip_l_mo = 1.0 / oblen_1
 if (orog == 0.0 .and. seaice == 0.0 .and. z1_uv > 0.0) then ! over sea only
 
   ! Calculate roughness height for momentum
-  ! Consistent with UMDP24 eqn 125
   z0m = 1.54E-6 / (1.0E-5 + ustr) + (charnock / grav) * ustr * ustr
 
   ! check z0m > 0 before proceeding
@@ -353,13 +355,6 @@ if (orog == 0.0 .and. seaice == 0.0 .and. z1_uv > 0.0) then ! over sea only
     write(message, *) myname_, "Invalid roughness height"
     call abor1_ftn(message)
   end if
-
-  ! Calculate Monin-Obukhov stability function for momentum
-  ! integrated to the model's lowest wind level.
-  call ops_scatwind_phi_m_sea (recip_l_mo, & ! in
-                               z1_uv,      & ! in
-                               z0m,        & ! in
-                               phi_m)        ! out
 
   ! Calculate Monin-Obukhov stability function for momentum
   ! integrated to 10m (in case this is different to level 1)
@@ -371,22 +366,14 @@ if (orog == 0.0 .and. seaice == 0.0 .and. z1_uv > 0.0) then ! over sea only
   ! Calculate model 10m neutral wind components
   phi_mn_10 = log ((scatt_height + z0m) / z0m)
 
-  if (phi_m > 0.0) then
-    ! avoid zero divide
-    ycalc(1) = (phi_mn_10 / phi_m) * u1
-    ycalc(2) = (phi_mn_10 / phi_m) * v1
-  end if
-
   ! Store 10m interpolation coefficients to go from 10m real
   ! wind to 10m neutral wind (consistent with VAR using fixed 10m)
   ! rather than lowest model level
   if (phi_m_10 > 0.0) then
     ! avoid zero divide
-    if (cdr10 == missing_value(cdr10)) then
-      ! only store coefficients the 1st time this routine is called
-      cdr10 = (phi_mn_10 / phi_m_10)
-    end if
-
+    cdr10 = (phi_mn_10 / phi_m_10)
+    ycalc(1) = cdr10 * u10
+    ycalc(2) = cdr10 * v10
   end if
 
 else
@@ -405,7 +392,7 @@ end subroutine ops_scatwind_forwardmodel
 !! \details The main steps are as follows:
 !! * In neutral conditions we have the logarithmic profile:
 !! \f[
-!! \Phi_{mn} = \ln\left(\frac{z_1 + z_{0m}}{z_{0m}}\right)
+!! \Phi_{mn} = \ln\left(\frac{10 + z_{0m}}{z_{0m}}\right)
 !! \f]
 !! * In stable conditions the stability functions of Beljaars and Holtslag (1991)
 !!   are used:
@@ -420,7 +407,7 @@ end subroutine ops_scatwind_forwardmodel
 !!             \right)
 !! \f]
 !! with
-!! \f$\zeta_1=(z_1+z_{0m})/L\f$,
+!! \f$\zeta_1=(10+z_{0m})/L\f$,
 !! \f$\zeta_{0m}=z_{0m}/L\f$, and
 !! a=1, b=2/3, c=5, d=0.35.
 !!
@@ -432,8 +419,8 @@ end subroutine ops_scatwind_forwardmodel
 !!            2\left(\tan^{-1}(X_1) - \tan^{-1}(X_0)\right)
 !! \f]
 !! with
-!! \f$X_1=(1-16\zeta_1)^{1/4}\f$ and
-!! \f$X_0=(1-16\zeta_{0m})^{1/4}\f$ and
+!! \f$X_1=(1-16\zeta_1)^{1/4}\f$
+!! \f$X_0=(1-16\zeta_{0m})^{1/4}\f$
 !!
 !! References:
 !!
@@ -458,7 +445,7 @@ subroutine ops_scatwind_phi_m_sea (recip_l_mo, &
 implicit none
 ! Subroutine arguments:
 real, intent(in)            :: recip_l_mo !< Reciprocal of Monin-Obukhov length (m^-1).
-real, intent(in)            :: z_uv       !< Height of wind level above roughness height(m).
+real(kind_real), intent(in) :: z_uv       !< Height of wind level above roughness height(m).
 real, intent(in)            :: z0m        !< Roughness length for momentum (m).
 real, intent(out)           :: phi_m      !< Stability function for momentum.
 ! Local declarations:

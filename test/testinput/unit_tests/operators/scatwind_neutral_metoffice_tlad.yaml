@@ -1,0 +1,42 @@
+window begin: 2020-10-01T03:00:00Z
+window end: 2020-10-01T09:00:00Z
+
+observations:
+#  TLAD test case for single dimension
+- obs operator:
+    name: ScatwindNeutralMetOffice
+  obs space:
+    name: Scatwind 1d
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_2020100106.nc4
+    simulated variables: [eastward_wind, northward_wind]
+    observed variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11
+#  TLAD test case for channels
+#  In the 2d input file, the second dimension is given the label "nchans" even though they are
+#  used to store ambiguities and not channels. This will be changed in future.
+- obs operator:
+    name: ScatwindNeutralMetOffice
+  obs space:
+    name: Scatwind channels 2d
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
+    simulated variables: [eastward_wind, northward_wind]
+    observed variables: []
+    derived variables: [eastward_wind, northward_wind]
+    channels: 1-4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11
