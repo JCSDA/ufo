@@ -43,13 +43,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: interp_method
   integer :: ivar, nvars
 
-  !> Size of variables
-  nvars = self%obsvars%nvars()
-  !> Fill in geovars: variables we need from the model
-  !  need additional slot to hold vertical coord.
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
   !> grab what vertical coordinate/variable to use from the config
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name
