@@ -192,8 +192,8 @@ end do
 end subroutine refractivity_obserr_NCEP
 
 
-subroutine gnssro_obserr_avtemp(nobs, n_horiz, rmatrix_filename, obsSatid, obsOrigC, nlevs, &
-                                air_temperature, geopotential_height, obsZ, obsValue, obsErr, &
+subroutine gnssro_obserr_avtemp(nobs, n_horiz, rmatrix_filename, obsSatid, obsOrigC, obsZ, &
+                                obsValue, averageTemp, obsErr, &
                                 QCflags, missing, allow_extrapolation, record_number, &
                                 sort_order, unique, verboseOutput)
 
@@ -205,9 +205,7 @@ integer, intent(in)              :: n_horiz                  ! Number of geovals
 character(len=*), intent(in)     :: rmatrix_filename         ! Name of the R-matrix file
 integer, intent(in)              :: obsSatid(:)              ! Satellite identifier
 integer, intent(in)              :: obsOrigC(:)              ! Originating centre number
-integer, intent(in)              :: nlevs                    ! Number of model levels
-real, intent(in)                 :: air_temperature(:,:)     ! Temperature of the model background
-real, intent(in)                 :: geopotential_height(:,:) ! Geopotential height of the model levels
+real(kind_real), intent(in)      :: averageTemp(:)           ! Average temperature below a given height
 real(kind_real), intent(in)      :: obsZ(:)                  ! Height of the observation
 real(kind_real), intent(in)      :: obsValue(:)              ! The observed value
 real(kind_real), intent(out)     :: obsErr(:)                ! The calculated observation error (uncertainty)
@@ -226,9 +224,6 @@ integer, parameter :: Rmax_num = 1000                    ! Max number of R matri
 type(rmatrix_type), allocatable :: Rmatrix_list(:) ! List of all the R matrices to use
 type(rmatrix_type) :: Rmatrix                      ! The chosen R matrix
 real(kind_real) :: frac_err                        ! Fractional observation error
-real :: av_temp                                    ! Average background temperature for this observation
-integer :: npoints                                 ! Number of points used in calculating average temperature
-integer :: ilev                                    ! Loop variable, level number
 integer :: R_num_sats                              ! Actual number of R-matrices read in
 character(len=200) :: Message                      ! Message to be output
 integer :: iob                                     ! Loop variable, observation number
@@ -267,31 +262,9 @@ do iprofile = 1, size(unique)
         ! background temperature between the surface and 20km
         !--------------------------------------------------------
 
-        ! Calculate the average troposphere temperature for this profile
-        ! Using the geoval for the first observation in the profile
-        av_temp = 0
-        npoints = 0
-        igeoval = (sort_order(start_point)-1) * n_horiz + (n_horiz + 1) / 2
-
-        DO ilev = 1, nlevs
-          IF (geopotential_height(igeoval, ilev) < RMatrix_list(1) % max_height) THEN
-            av_temp = av_temp + air_temperature(igeoval, ilev)
-            npoints = npoints + 1
-          END IF
-        END DO
-
-        IF (npoints > 0) THEN
-          av_temp = av_temp / npoints
-        ELSE
-          av_temp = missing
-        END IF
-
-        ! Find the observation error matrix which best matches the average
-        ! temperature we found
-
         CALL ufo_roobserror_interpolate_rmatrix(obsSatid(iob),   &
                                                 obsOrigC(iob),   &
-                                                av_temp,         &
+                                                averageTemp(iob),&
                                                 R_num_sats,      &
                                                 RMatrix_list,    &
                                                 RMatrix)
@@ -332,7 +305,7 @@ do iprofile = 1, size(unique)
 
       if (verboseOutput) then
         WRITE(Message,'(A,I8,2F16.4,3E26.8)') 'Result', iob, obsZ(iob), frac_err, &
-            ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), av_temp
+            ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), averageTemp(iob)
         CALL fckit_log % info(Message)
       end if
 

@@ -159,6 +159,8 @@ set ( filters_files
       actions/RejectObs.h
       actions/SetFlag.cc
       actions/SetFlag.h
+      obsfunctions/AverageTemperatureBelow.cc
+      obsfunctions/AverageTemperatureBelow.h
       obsfunctions/BennartzScatIndex.cc
       obsfunctions/BennartzScatIndex.h
       obsfunctions/ChannelUseflagCheckRad.cc

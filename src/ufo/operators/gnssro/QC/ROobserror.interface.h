@@ -29,8 +29,7 @@ extern "C" {
   void ufo_roobserror_create_f90(F90roerr &, const ioda::ObsSpace &,
                                  const eckit::Configuration &, const oops::Variables &);
   void ufo_roobserror_delete_f90(F90roerr &);
-  void ufo_roobserror_prior_f90(const F90roerr &, const int &, const int &, const float*,
-                                const int &, const int &, const float*);
+  void ufo_roobserror_prior_f90(const F90roerr &);
 }  // extern C
 
 }  // namespace ufo

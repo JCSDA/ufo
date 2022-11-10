@@ -1,0 +1,44 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof_avtemp.nc4
+    simulated variables: [bending_angle]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2018041500_avtemp_20km_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof_avtemp.nc4
+  obs function:
+    name: AverageTemperatureBelow@ObsFunction
+    options:
+      height limit: 20000
+      use layer thickness: false
+    variables: [average_temperature_20km]
+    tolerance: 1.0e-7
+- obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof_avtemp.nc4
+    simulated variables: [bending_angle]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2018041500_avtemp_10km_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof_avtemp.nc4
+  obs function:
+    name: AverageTemperatureBelow@ObsFunction
+    options:
+      height limit: 10000
+      use layer thickness: true
+    variables: [average_temperature_10km]
+    tolerance: 1.0e-7

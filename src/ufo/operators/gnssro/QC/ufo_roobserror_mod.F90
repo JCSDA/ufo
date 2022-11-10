@@ -14,6 +14,7 @@ use oops_variables_mod
 use missing_values_mod
 use gnssro_mod_obserror
 use fckit_log_module, only : fckit_log
+use fckit_exception_module, only: fckit_exception
 use gnssro_mod_constants, only: max_string
 use iso_c_binding, only: c_ptr, c_int, c_size_t
 
@@ -29,6 +30,7 @@ type :: ufo_roobserror
   character(len=max_string)    :: errmodel
   character(len=max_string)    :: rmatrix_filename
   character(len=max_string)    :: err_variable
+  character(len=max_string)    :: average_temperature_name
   logical                      :: verbose_output       ! Whether to give extra output messages
   type(oops_variables), public :: obsvar
   type(c_ptr)                  :: obsdb
@@ -104,6 +106,14 @@ end if
 write(message,*) 'verbose_output = ', self % verbose_output
 call fckit_log%debug(message)
 
+self % average_temperature_name = ""
+if (f_conf % has("average temperature name")) then
+   call f_conf % get_or_die("average temperature name", str)
+   self % average_temperature_name = str
+end if
+write(message,*) 'average_temperature_name = ', trim(self % average_temperature_name)
+call fckit_log%debug(message)
+
 self%obsdb      = obspace
 
 end subroutine ufo_roobserror_create
@@ -117,8 +127,7 @@ end subroutine ufo_roobserror_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_prior(self, model_nobs, model_nlevs, air_temperature, &
-    geopotential_height)
+subroutine ufo_roobserror_prior(self)
 
 use fckit_log_module, only : fckit_log
 use ufo_utils_mod, only: cmp_strings, sort_and_unique
@@ -126,10 +135,6 @@ use ufo_utils_mod, only: cmp_strings, sort_and_unique
 implicit none
 
 type(ufo_roobserror), intent(in) :: self
-integer, intent(in)              :: model_nobs
-integer, intent(in)              :: model_nlevs
-real, intent(in)                 :: air_temperature(:,:)
-real, intent(in)                 :: geopotential_height(:,:)
 
 integer                        :: nobs
 real(kind_real), allocatable   :: obsZ(:), obsLat(:)
@@ -142,6 +147,7 @@ real(kind_real), allocatable   :: obsGeoid(:)             ! The geoid undulation
 real(kind_real), allocatable   :: obsLocR(:)              ! The local radius of curvature at the observation location
 real(kind_real), allocatable   :: obsValue(:)
 real(kind_real), allocatable   :: obsErr(:)
+real(kind_real), allocatable   :: averageTemp(:)          ! The average model temperature
 integer(c_int),  allocatable   :: obsSaid(:)
 integer(c_int),  allocatable   :: QCflags(:)
 real(kind_real)                :: missing
@@ -156,11 +162,6 @@ nobs    = obsspace_get_nlocs(self%obsdb)
 allocate(QCflags(nobs))
 allocate(obsErr(nobs))
 QCflags(:)  = 0
-
-if (model_nobs /= nobs * self % n_horiz) then
-  write(err_msg, '(A,2I8)') 'nobs from model and observations must be equal', nobs, model_nobs
-  call abor1_ftn(err_msg)
-end if
 
 ! read QC flags
 call obsspace_get_db(self%obsdb, "FortranQC", trim(self%variable),QCflags )
@@ -254,8 +255,15 @@ case ("bending_angle")
                                   record_number, sort_order, unique, self % verbose_output)
       deallocate(obsLat)
     else if (self % err_variable == "average_temperature") then
+      allocate(averageTemp(nobs))
+      if (self % average_temperature_name == "") then
+        call fckit_exception % throw("When using average_temperature error model," &
+          // " you must specify an average_temperature_name")
+      else
+        call obsspace_get_db(self%obsdb, "MetaData", self % average_temperature_name, averageTemp)
+      end if
       call gnssro_obserr_avtemp(nobs, self % n_horiz, self % rmatrix_filename, obsSatid, obsOrigC, &
-                                model_nlevs, air_temperature, geopotential_height, obsImpH, obsValue, &
+                                obsImpH, obsValue, averageTemp, &
                                 obsErr, QCflags, missing, self % allow_extrapolation, record_number, &
                                 sort_order, unique, self % verbose_output)
     else
