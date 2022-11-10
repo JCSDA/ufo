@@ -40,11 +40,11 @@ module ufo_radiancerttov_utils_mod
 
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
-    var_sfc_q2m, var_sfc_tskin, var_prsi, var_qcl, var_qci, var_cloud_layer, &
-    var_q, var_mixr, var_oz, var_co2, var_qci, var_qcl, var_surf_type_rttov, &
+    var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac, &
+    var_q, var_mixr, var_oz, var_co2, var_surf_type_rttov, &
     var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit, &
     var_sfc_wdir, var_sfc_wspeed, &
-    var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci, var_tb_overcast, &
+    var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_tb_overcast, &
     ufo_vars_getindex
 
   implicit none
@@ -81,7 +81,7 @@ module ufo_radiancerttov_utils_mod
     var_sfc_tskin /)
 
   character(len=maxvarlen), dimension(4), public :: varin_scatt = &
-    (/var_prsi, var_qcl, var_qci, var_cloud_layer /)
+    (/var_prsi, var_clw, var_cli, var_cldfrac /)
 
   ! copy of ABSORBER_ID_NAME defined in rttov_const
   character(len=*), parameter :: &
@@ -112,7 +112,7 @@ module ufo_radiancerttov_utils_mod
     UFO_Absorbers(ngases_max+2) = &
     [ null_str, var_q, var_oz, null_str, var_co2, 'mole_fraction_of_nitrous_oxide_in_air', &
     'mole_fraction_of_carbon_monoxide_in_air', 'mole_fraction_of_methane_in_air', &
-    'mole_fraction_of_sulfur_dioxide_in_air', var_qcl, var_qci]
+    'mole_fraction_of_sulfur_dioxide_in_air', var_clw, var_cli]
 
   integer, public :: nchan_inst ! number of channels being simulated (may be less than full instrument)
   integer, public :: nchan_sim  ! total number of 'obs' = nprofiles * nchannels
@@ -1065,7 +1065,7 @@ contains
             profiles(iprof)%co2(top_level:bottom_level:stride) = geoval%vals(:, iprof) * scale_fac 
           end do
         end if
-      case (var_qcl)
+      case (var_clw)
         call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
         if (conf % do_mw_scatt) then
           do iprof = 1, nProfiles
@@ -1192,11 +1192,11 @@ contains
         call abor1_ftn(message)
       end if
       
-      ! cloud fraction from var_cloud_layer (MetO) or var_cldfrac TODO (IR update)
+      ! cloud fraction from var_cldfrac TODO (IR update)
 
       ! The input cloud concentrations must be the layer grid-box-average 
       ! concentration (as opposed to the concentration within the cloudy fraction of each layer)
-      call ufo_geovals_get_var(geovals, var_cloud_layer, geoval)
+      call ufo_geovals_get_var(geovals, var_cldfrac, geoval)
       do iprof = 1, nprofiles
         profiles_scatt(iprof) % cc(top_level:bottom_level:stride) = &
           geoval%vals(:, iprof)
@@ -1205,7 +1205,7 @@ contains
       ! The scattering code will use either ciw or totalice depending on the
       ! contents of the coefficient file so we need to assign both.
       ! solid precipitation and rain are currently not supported and are left at the initialised value of 0
-      call ufo_geovals_get_var(geovals, var_qci, geoval)
+      call ufo_geovals_get_var(geovals, var_cli, geoval)
       do iprof = 1, nprofiles
         if (conf % mw_scatt % use_totalice) then
           profiles_scatt(iprof) % totalice(top_level:bottom_level:stride) = &
@@ -2179,7 +2179,7 @@ contains
           ! variable: weightingfunction_of_atmosphere_layer_CH
           ! variable: mass_content_of_cloud_ice_in_atmosphere_layer
           ! variable: brightness_temperature_overcast_of_atmosphere_layer_CH
-        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci, var_tb_overcast)
+        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_cli, var_tb_overcast)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2200,7 +2200,7 @@ contains
 
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
-              if(cmp_strings(ystr_diags(jvar), var_qci)) then
+              if(cmp_strings(ystr_diags(jvar), var_cli)) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % ciw(:,prof)
               else if(cmp_strings(ystr_diags(jvar), var_opt_depth)) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,ichan)) !level->TOA transmittances -> od
@@ -2296,7 +2296,7 @@ contains
         ! var_tb jacobians
         select case (trim(xstr_diags(jvar)))
 
-        case (var_ts,var_mixr,var_q,var_qcl,var_qci)
+        case (var_ts,var_mixr,var_q,var_clw,var_cli)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2320,7 +2320,7 @@ contains
               else if(xstr_diags(jvar) == var_q) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour)
-              else if(xstr_diags(jvar) == var_qcl) then !clw
+              else if(xstr_diags(jvar) == var_clw) then !clw
                 if (conf % do_mw_scatt) then
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % mw_scatt % profiles_k(ichan) % clw(:)
@@ -2328,7 +2328,7 @@ contains
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % profiles_k(ichan) % clw(:)
                 end if
-              else if(xstr_diags(jvar) == var_qci) then
+              else if(xstr_diags(jvar) == var_cli) then
                 if (conf % do_mw_scatt) then
                   if (conf % mw_scatt % use_totalice) then
                     hofxdiags%geovals(jvar)%vals(:,prof) = &

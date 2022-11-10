@@ -18,7 +18,6 @@ integer, parameter, public :: n_aerosols_gocart_default=14,&
 integer, parameter, public :: MAXVARLEN=100
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
-character(len=MAXVARLEN), public, parameter :: var_t    = "temperature"
 character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio" ! g/kg
 character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"     ! kg/kg
 character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
@@ -28,7 +27,7 @@ character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
 character(len=MAXVARLEN), public, parameter :: var_prsimo = "air_pressure_levels_minus_one"
 character(len=MAXVARLEN), public, parameter :: var_delp   = "air_pressure_thickness"
 character(len=MAXVARLEN), public, parameter :: var_ps     = "surface_pressure"
-character(len=MAXVARLEN), public, parameter :: var_pmsl   = "surface_pressure_at_mean_sea_level"
+character(len=MAXVARLEN), public, parameter :: var_pmsl   = "surface_pressure_at_mean_sea_level" ! used by MetOffice opsinputs
 character(len=MAXVARLEN), public, parameter :: var_z      = "geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_zm     = "geometric_height"
 character(len=MAXVARLEN), public, parameter :: var_zi     = "geopotential_height_levels"
@@ -101,9 +100,6 @@ character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_ref
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
-character(len=maxvarlen), public, parameter :: var_cloud_layer = "cloud_area_fraction_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_qcl  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_qci  = "mass_content_of_cloud_ice_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
 character(len=MAXVARLEN), public, parameter :: var_surf_tau = "transmission_at_surface" 
 character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
