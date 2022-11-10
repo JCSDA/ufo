@@ -162,8 +162,8 @@ subroutine radarradialvelocity_simobs_tl_(self, geovals, obss, nvars, nlocs, hof
 
   do ivar = 1, nvars
     do iobs=1,nlocs
-      hofx(ivar,iobs) = vfields(1,iobs)*self%sinazm_costilt(iobs) &
-                      + vfields(2,iobs)*self%cosazm_costilt(iobs)
+      hofx(ivar,iobs) = vfields(1,iobs)*self%cosazm_costilt(iobs) &
+                      + vfields(2,iobs)*self%sinazm_costilt(iobs)
     enddo
   end do
 
@@ -199,8 +199,8 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
      ! no vertical velocity and terminal velocity in GSI rw observer, it can add
      ! in future after acceptance test
      if (hofx(ivar,iobs) .ne. missing) then
-      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
-      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
+      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
+      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
      end if
     enddo
   end do
