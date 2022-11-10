@@ -73,8 +73,7 @@ call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 self%geoval_adt = geoval_adt
 self%ltraj    = .true.
 
-! Set missing flag
-self%r_miss_val = missing_value(self%r_miss_val)
+
 
 end subroutine ufo_adt_tlad_settraj
 
@@ -91,10 +90,14 @@ character(len=*), parameter :: myname_="ufo_adt_simobs_tl"
 character(max_string) :: err_msg
 integer :: iobs, nlocs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
-real(kind_real) :: offset_hofx, pe_offset_hofx
+real(kind_real) :: offset, pe_offset
 type(fckit_mpi_comm) :: f_comm
+real(c_double) :: missing
 
 call obsspace_get_comm(obss, f_comm)
+
+! Set missing flag
+missing = missing_value(missing)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -114,24 +117,29 @@ endif
 call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
 ! Local offset
-pe_offset_hofx = 0.0
+pe_offset = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (hofx(iobs)/=self%r_miss_val) then
-      pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
+   if (geoval_adt%vals(1,iobs) /= missing) then
+      pe_offset = pe_offset - geoval_adt%vals(1,iobs)
       cnt = cnt + 1
    end if
 end do
 
 ! Global offset
-call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
+call f_comm%allreduce(pe_offset, offset, fckit_mpi_sum())
 call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
-offset_hofx = offset_hofx/cnt_glb
+if (cnt_glb > 0) then
+   offset = offset/cnt_glb
+end if
 
 ! adt obs operator
 hofx = 0.0
 do iobs = 1, self%nlocs
-   hofx(iobs) = geoval_adt%vals(1,iobs) - offset_hofx
+   hofx(iobs) = geoval_adt%vals(1,iobs)
+   if (hofx(iobs) /= missing) then
+      hofx(iobs) = hofx(iobs) + offset
+   end if
 enddo
 
 end subroutine ufo_adt_simobs_tl
@@ -150,10 +158,14 @@ character(max_string) :: err_msg
 
 integer :: iobs, nlocs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
-real(kind_real) :: offset_hofx, pe_offset_hofx
+real(kind_real) :: offset, pe_offset
 type(fckit_mpi_comm) :: f_comm
+real(c_double) :: missing
 
 call obsspace_get_comm(obss, f_comm)
+
+! Set missing flag
+missing = missing_value(missing)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -174,23 +186,25 @@ if (.not. geovals%linit ) geovals%linit=.true.
 call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
 ! Local offset
-pe_offset_hofx = 0.0
+pe_offset = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (hofx(iobs)/=self%r_miss_val) then
-      pe_offset_hofx = pe_offset_hofx + hofx(iobs)
+   if (hofx(iobs) /= missing) then
+      pe_offset = pe_offset + hofx(iobs)
       cnt = cnt + 1
    end if
 end do
 
 ! Global offset
-call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
+call f_comm%allreduce(pe_offset, offset, fckit_mpi_sum())
 call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
-offset_hofx = offset_hofx/cnt_glb
+if (cnt_glb > 0) then
+   offset = offset/cnt_glb
+end if
 
 do iobs = 1, nlocs
-   if (hofx(iobs)/=self%r_miss_val) then
-      geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset_hofx
+   if (geoval_adt%vals(1,iobs) /= missing .and. hofx(iobs) /= missing) then
+      geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset
    end if
 enddo
 
