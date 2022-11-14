@@ -48,8 +48,8 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   invars_ += options_.quality_index;
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVals/" + vcoord);
-  invars_ += Variable("GeoVals/" + profile);
+  invars_ += Variable("GeoVaLs/" + vcoord);
+  invars_ += Variable("GeoVaLs/" + profile);
 }
 
 // -----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   }
 
   // check vcoord name matches air_pressure, air_pressure_levels, or air_pressure_levels_minus_one
-  if ( vcoord != "pressure" && vcoord != "air_pressure_levels" &&
+  if ( vcoord != "air_pressure" && vcoord != "air_pressure_levels" &&
        vcoord != "air_pressure_levels_minus_one") {
     errString << "Vertical coordinate not recognised" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
@@ -142,7 +142,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable("GeoVals/" + profile));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + profile));
 
   // local variables
   float const missing = util::missingValue(missing);
