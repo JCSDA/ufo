@@ -42,8 +42,8 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   std::string const vcoord = options_.vcoord.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable(obs_vcoord+"@MetaData");
-  invars_ += Variable(profile+"@HofX");
+  invars_ += Variable("MetaData/" + obs_vcoord);
+  invars_ += Variable("HofX/" + profile);
   invars_ += options_.pressure_error;
   invars_ += options_.quality_index;
 
@@ -128,13 +128,13 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::ostringstream errString;
 
   // check profile name matches one of eastward_wind or northward_wind
-  if ( profile != "eastward_wind" && profile != "northward_wind" ) {
-    errString << "Wind component must be one of eastward_wind or northward_wind" << std::endl;
+  if ( profile != "windEastward" && profile != "windNorthward" ) {
+    errString << "Wind component must be one of windEastward or windNorthward" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
   }
 
   // check vcoord name matches air_pressure, air_pressure_levels, or air_pressure_levels_minus_one
-  if ( vcoord != "air_pressure" && vcoord != "air_pressure_levels" &&
+  if ( vcoord != "pressure" && vcoord != "air_pressure_levels" &&
        vcoord != "air_pressure_levels_minus_one") {
     errString << "Vertical coordinate not recognised" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
@@ -152,8 +152,8 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::vector<float> bg_windcomponent;
   std::vector<float> pressure_error;
   std::vector<float> ob_qi;
-  in.get(Variable(obs_vcoord+"@MetaData"), ob_p);
-  in.get(Variable(profile+"@HofX"), bg_windcomponent);
+  in.get(Variable("MetaData/" + obs_vcoord), ob_p);
+  in.get(Variable("HofX/" + profile), bg_windcomponent);
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);
 
