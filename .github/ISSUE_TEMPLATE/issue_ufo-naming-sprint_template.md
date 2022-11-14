@@ -1,8 +1,8 @@
 ---
 name: 'Sprint: UFO Naming Conventions'
-about: Use this template to create a new issue for the sprint
-title: SPRINT: Update UFO (what portion?) to follow Data Conventions
-labels: Sprint
+about: 'Use this template to create a new issue for the sprint'
+title: 'SPRINT: Update UFO (what portion?) to follow Data Conventions'
+labels: 'Sprint' 
 assignees: ''
 
 ---
