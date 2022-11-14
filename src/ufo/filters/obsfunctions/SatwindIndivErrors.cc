@@ -42,14 +42,14 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   std::string const vcoord = options_.vcoord.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable(obs_vcoord+"@MetaData");
-  invars_ += Variable(profile+"@HofX");
+  invars_ += Variable("MetaData/" + obs_vcoord);
+  invars_ += Variable("HofX/" + profile);
   invars_ += options_.pressure_error;
   invars_ += options_.quality_index;
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable(vcoord+"@GeoVaLs");
-  invars_ += Variable(profile+"@GeoVaLs");
+  invars_ += Variable("GeoVaLs/" + vcoord);
+  invars_ += Variable("GeoVaLs/" + profile);
 }
 
 // -----------------------------------------------------------------------------
@@ -128,8 +128,8 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::ostringstream errString;
 
   // check profile name matches one of eastward_wind or northward_wind
-  if ( profile != "eastward_wind" && profile != "northward_wind" ) {
-    errString << "Wind component must be one of eastward_wind or northward_wind" << std::endl;
+  if ( profile != "windEastward" && profile != "windNorthward" ) {
+    errString << "Wind component must be one of windEastward or windNorthward" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
   }
 
@@ -142,7 +142,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable(profile+"@GeoVaLs"));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + profile));
 
   // local variables
   float const missing = util::missingValue(missing);
@@ -152,8 +152,8 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::vector<float> bg_windcomponent;
   std::vector<float> pressure_error;
   std::vector<float> ob_qi;
-  in.get(Variable(obs_vcoord+"@MetaData"), ob_p);
-  in.get(Variable(profile+"@HofX"), bg_windcomponent);
+  in.get(Variable("MetaData/" + obs_vcoord), ob_p);
+  in.get(Variable("HofX/" + profile), bg_windcomponent);
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);
 
