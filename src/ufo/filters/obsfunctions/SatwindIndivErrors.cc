@@ -48,8 +48,8 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   invars_ += options_.quality_index;
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable(vcoord+"@GeoVaLs");
-  invars_ += Variable(profile+"@GeoVaLs");
+  invars_ += Variable("GeoVals/" + vcoord);
+  invars_ += Variable("GeoVals/" + profile);
 }
 
 // -----------------------------------------------------------------------------
@@ -142,7 +142,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable(profile+"@GeoVaLs"));
+  const size_t nlevs = in.nlevs(Variable("GeoVals/" + profile));
 
   // local variables
   float const missing = util::missingValue(missing);
