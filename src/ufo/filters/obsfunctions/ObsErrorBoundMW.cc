@@ -54,12 +54,12 @@ ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
   const std::string &flaggrp = options_.testQCflag.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@ObsError", channels_);
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 
   const Variable &obserrlat = options_.obserrBoundLat.value();
   invars_ += obserrlat;
@@ -107,7 +107,7 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get error factor from ObsFunction
   const Variable &obserrlat = options_.obserrBoundLat.value();
@@ -157,8 +157,8 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
   if (options_.obserrFunction.value() != boost::none) {
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       int channel = ichan + 1;
-      in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
-      in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
+      in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
+      in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                             : qcflagdata[iloc] = 0;
@@ -220,8 +220,8 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
 
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       int channel = ichan + 1;
-      in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
-      in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
+      in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
+      in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                             : qcflagdata[iloc] = 0;
