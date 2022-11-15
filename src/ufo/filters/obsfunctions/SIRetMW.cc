@@ -40,7 +40,7 @@ SIRetMW::SIRetMW(const eckit::LocalConfiguration & conf)
   invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels_);
 
   // Include list of required data from ObsDiag
-  invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -66,8 +66,8 @@ void SIRetMW::compute(const ObsFilterData & in,
 
   // Get brightness temperature assuming all pixels are in clear skies
   std::vector<float> clr90(nlocs), clr150(nlocs);
-  in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_)[0], clr90);
-  in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_)[1], clr150);
+  in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_)[0], clr90);
+  in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_)[1], clr150);
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
