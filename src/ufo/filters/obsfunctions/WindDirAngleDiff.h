@@ -42,10 +42,10 @@ class WindDirAngleDiffParameters : public oops::Parameters {
 /// ### Sample YAML configuration
 ///     - filter: Bounds Check
 ///       filter variables:
-///       - name: eastward_wind
-///       - name: northward_wind
+///       - name: windEastward
+///       - name: windNorthward
 ///       test variables:
-///       - name: WindDirAngleDiff@ObsFunction
+///       - name: ObsFunction/WindDirAngleDiff
 ///         options:
 ///           test_hofx: GsiHofX
 ///       maxvalue: 50
