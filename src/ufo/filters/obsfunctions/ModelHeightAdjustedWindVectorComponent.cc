@@ -31,13 +31,13 @@ ModelHeightAdjustedWindVectorComponent<northwardWind>::ModelHeightAdjustedWindVe
         const eckit::LocalConfiguration & conf): invars_() {
   // Required observation data
   if (northwardWind) {
-    invars_ += Variable("windNorthwardAt10M@ObsValue");
+    invars_ += Variable("ObsValue/windNorthwardAt10M");
   } else {
-    invars_ += Variable("windEastwardAt10M@ObsValue");
+    invars_ += Variable("ObsValue/windEastwardAt10M");
   }
 
   // Required model surface altitude
-  invars_ += Variable("surface_altitude@GeoVaLs");
+  invars_ += Variable("GeoVaLs/surface_altitude");
 
   // Required observation station height
   parameters_.validateAndDeserialize(conf);
@@ -56,11 +56,11 @@ void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFil
   std::vector<float> StationHeight(nlocs);
 
   if (northwardWind) {
-    in.get(Variable("windNorthwardAt10M@ObsValue"), WindComponent);
+    in.get(Variable("ObsValue/windNorthwardAt10M"), WindComponent);
   } else {
-    in.get(Variable("windEastwardAt10M@ObsValue"), WindComponent);
+    in.get(Variable("ObsValue/windEastwardAt10M"), WindComponent);
   }
-  in.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
+  in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
   const float missing = util::missingValue(missing);
