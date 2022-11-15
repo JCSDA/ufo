@@ -32,10 +32,10 @@ CLWRetMW_SSMIS::CLWRetMW_SSMIS(const eckit::LocalConfiguration & conf)
                options_.ch91h.value()};
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@" + options_.varGroup.value(), channels_);
+  invars_ += Variable(options_.varGroup.value() + "/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 }
 
 // -----------------------------------------------------------------------------
@@ -54,18 +54,18 @@ void CLWRetMW_SSMIS::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   std::vector<float> bt19h(nlocs), bt19v(nlocs), bt22v(nlocs), bt37h(nlocs),
                      bt37v(nlocs), bt91v(nlocs), bt91h(nlocs);
 
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[0], bt19h);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[1], bt19v);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[2], bt22v);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[3], bt37h);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[4], bt37v);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[5], bt91v);
-  in.get(Variable("brightness_temperature@" + vargrp, channels_)[6], bt91h);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[0], bt19h);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[1], bt19v);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[2], bt22v);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[3], bt37h);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[4], bt37v);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[5], bt91v);
+  in.get(Variable(vargrp + "/brightnessTemperature", channels_)[6], bt91h);
 
   // Compute cloud liquid water amount
   cloudLiquidWater(bt19h, bt19v, bt22v, bt37h, bt37v, bt91v, bt91h, water_frac, out[0]);

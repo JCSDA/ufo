@@ -46,15 +46,15 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
            && channels.size() == 2);
     // Include list of required data from ObsSpace
     for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+      invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels);
     }
-    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
-    invars_ += Variable("sensor_zenith_angle@MetaData");
+    invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels);
+    invars_ += Variable("MetaData/sensorZenithAngle");
 
     // Include list of required data from GeoVaLs
-    invars_ += Variable("average_surface_temperature_within_field_of_view@GeoVaLs");
-    invars_ += Variable("water_area_fraction@GeoVaLs");
-    invars_ += Variable("surface_temperature_where_sea@GeoVaLs");
+    invars_ += Variable("GeoVaLs/average_surface_temperature_within_field_of_view");
+    invars_ += Variable("GeoVaLs/water_area_fraction");
+    invars_ += Variable("GeoVaLs/surface_temperature_where_sea");
 
   } else if (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) {
     // For cloud index like GMI's.
@@ -65,16 +65,16 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
            channels.size() == 2);
     // Include list of required data from ObsSpace
     for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+      invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels);
     }
-    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
+    invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels);
     // Include list of required data from ObsDiag
-    invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
-    invars_ += Variable("cloud_liquid_water@ObsDiag" , channels);
-    invars_ += Variable("cloud_liquid_water_order_2@ObsDiag" , channels);
+    invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels);
+    invars_ += Variable("ObsDiag/cloud_liquid_water" , channels);
+    invars_ += Variable("ObsDiag/cloud_liquid_water_order_2" , channels);
 
     // Include list of required data from GeoVaLs
-    invars_ += Variable("water_area_fraction@GeoVaLs");
+    invars_ += Variable("GeoVaLs/water_area_fraction");
 
   } else if (options_.ch89v.value() != boost::none && options_.ch166v.value() != boost::none) {
     // For cloud index used in GSI all-sky assimilation of MHS data.
@@ -85,12 +85,12 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
            channels.size() == 2);
     // Include list of required data from ObsSpace
     for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+      invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels);
     }
     // Get ObsBiasData for "brightness_temperature_assuming_clear_sky"
-    invars_ += Variable("brightness_temperature@ObsBiasData", channels);
+    invars_ += Variable("ObsBiasData/brightnessTemperature", channels);
     // Include list of required data from ObsDiag
-    invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
+    invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels);
 
   } else if (options_.ch18v.value() != boost::none && options_.ch18h.value() != boost::none &&
              options_.ch36v.value() != boost::none && options_.ch36h.value() != boost::none) {
@@ -103,11 +103,11 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
     ASSERT(options_.origbias.value() != boost::none);
     // Include list of required data from ObsSpace
     for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+      invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels);
     }
-    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
+    invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels);
     // Include list of required data from GeoVaLs
-    invars_ += Variable("water_area_fraction@GeoVaLs");
+    invars_ += Variable("GeoVaLs/water_area_fraction");
   }
 }
 
@@ -128,7 +128,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // --------------- amsua or atms --------------------------
   if (options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) {
@@ -137,27 +137,27 @@ void CLWRetMW::compute(const ObsFilterData & in,
     // Get variables from ObsSpace
     // Get sensor zenith angle
     std::vector<float> szas(nlocs);
-    in.get(Variable("sensor_zenith_angle@MetaData"), szas);
+    in.get(Variable("MetaData/sensorZenithAngle"), szas);
 
     // Get variables from GeoVaLs
     // Get average surface temperature in FOV
     std::vector<float> tsavg(nlocs);
-    in.get(Variable("average_surface_temperature_within_field_of_view@GeoVaLs"), tsavg);
+    in.get(Variable("GeoVaLs/average_surface_temperature_within_field_of_view"), tsavg);
 
     // Calculate retrieved cloud liquid water
     std::vector<float> bt238(nlocs), bt314(nlocs);
     const float missing = util::missingValue(missing);
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels)[0], bt238);
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels)[1], bt314);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels)[0], bt238);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels)[1], bt314);
       // Get bias based on group type
       if (options_.addBias.value() == vargrp[igrp]) {
         std::vector<float> bias238(nlocs), bias314(nlocs);
-        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)[0])) {
-        in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)[0],
+        if (in.has(Variable(options_.testBias.value() + "/brightnessTemperature", channels)[0])) {
+        in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels)[0],
                         bias238);
-        in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)[1],
+        in.get(Variable(options_.testBias.value()+ "/brightnessTemperature", channels)[1],
                         bias314);
         } else {
         bias238.assign(nlocs, 0.0f);
@@ -195,28 +195,28 @@ void CLWRetMW::compute(const ObsFilterData & in,
     std::vector<float> bc_cloud_liquid_water_37h(nlocs);
     std::vector<float> bc_cloud_liquid_water_order_2_37h(nlocs);
 
-    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+    in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels)
            [jch37v], bt_clr_37v_wobc);
-    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+    in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels)
            [jch37h], bt_clr_37h_wobc);
 
 //  Add bias correction to "brightness_temperature_assuming_clear_sky"
     std::vector<float> bias37v(nlocs), bias37h(nlocs);
     const float missing = util::missingValue(missing);
     bool bc_cloud_terms = false;
-    if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+    if (in.has(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
         [jch37v])) {
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+      in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
              [jch37v], bias37v);
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+      in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
              [jch37h], bias37h);
-      in.get(Variable("cloud_liquid_water@ObsDiag" , channels)
+      in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
              [jch37v], bc_cloud_liquid_water_37v);
-      in.get(Variable("cloud_liquid_water_order_2@ObsDiag" , channels)
+      in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
              [jch37v], bc_cloud_liquid_water_order_2_37v);
-      in.get(Variable("cloud_liquid_water@ObsDiag" , channels)
+      in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
              [jch37h], bc_cloud_liquid_water_37h);
-      in.get(Variable("cloud_liquid_water_order_2@ObsDiag" , channels)
+      in.get(Variable("Obsdiag/cloud_liquid_water_order_2" , channels)
              [jch37h], bc_cloud_liquid_water_order_2_37h);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (bc_cloud_liquid_water_37v[0] != missing &&
@@ -247,8 +247,8 @@ void CLWRetMW::compute(const ObsFilterData & in,
     std::vector<float> bt37v(nlocs), bt37h(nlocs);
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch37v], bt37v);
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch37h], bt37h);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels) [jch37v], bt37v);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels) [jch37h], bt37h);
       // Get bias based on group type
       if (options_.addBias.value() == vargrp[igrp]) {
         // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
@@ -290,13 +290,13 @@ void CLWRetMW::compute(const ObsFilterData & in,
     const int jch89v = 0;
     const int jch166v = 1;
     std::vector<float> bt_clr_89v(nlocs), bt_clr_166v(nlocs);
-    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+    in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels)
            [jch89v], bt_clr_89v);
-    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+    in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels)
            [jch166v], bt_clr_166v);
     std::vector<float> bias89v(nlocs), bias166v(nlocs);
-    in.get(Variable("brightness_temperature@ObsBiasData", channels) [jch89v], bias89v);
-    in.get(Variable("brightness_temperature@ObsBiasData", channels) [jch166v], bias166v);
+    in.get(Variable("ObsBiasData/brightnessTemperature", channels) [jch89v], bias89v);
+    in.get(Variable("ObsBiasData/brightnessTemperature", channels) [jch166v], bias166v);
 //  Add bias correction to "brightness_temperature_assuming_clear_sky"
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       bt_clr_89v[iloc] = bt_clr_89v[iloc] + bias89v[iloc];
@@ -306,8 +306,8 @@ void CLWRetMW::compute(const ObsFilterData & in,
     std::vector<float> bt89v(nlocs), bt166v(nlocs);
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch89v], bt89v);
-      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch166v], bt166v);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels) [jch89v], bt89v);
+      in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels) [jch166v], bt166v);
       // Get bias based on group type
       if (options_.addBias.value() == vargrp[igrp]) {
         // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
@@ -339,7 +339,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
 
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
-      const Variable btVar("brightness_temperature@" + vargrp[igrp], channels);
+      const Variable btVar(vargrp[igrp] + "/brightnessTemperature", channels);
       in.get(btVar[jch18v], bt18v);
       in.get(btVar[jch18h], bt18h);
       in.get(btVar[jch36v], bt36v);
@@ -348,9 +348,9 @@ void CLWRetMW::compute(const ObsFilterData & in,
       if (options_.addBias.value() == vargrp[igrp]) {
         std::vector<float> bias18v(nlocs), bias18h(nlocs);
         std::vector<float> bias36v(nlocs), bias36h(nlocs);
-        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+        if (in.has(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
             [jch36v])) {
-          const Variable testBias("brightness_temperature@" + options_.testBias.value(), channels);
+          const Variable testBias(options_.testBias.value() + "/brightnessTemperature", channels);
           in.get(testBias[jch18v], bias18v);
           in.get(testBias[jch18h], bias18h);
           in.get(testBias[jch36v], bias36v);
