@@ -72,7 +72,7 @@ BackgroundCheck::~BackgroundCheck() {
 /// specified filter variable.
 
 Variable BackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
-  return Variable(filterVariable.variable() + "_background_error@ObsDiag");
+  return Variable("ObsDiag/" + filterVariable.variable() + "_background_error");
 }
 
 // -----------------------------------------------------------------------------
