@@ -75,8 +75,8 @@ void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
       putObservation("windSpeedAt10M", windSpeed, getDerivedGroup(group_));
       putObservation("windDirectionAt10M", windFromDirection, getDerivedGroup(group_));
   } else {
-      putObservation("wind_speed", windSpeed, getDerivedGroup(group_));
-      putObservation("wind_from_direction", windFromDirection, getDerivedGroup(group_));
+      putObservation("windSpeed", windSpeed, getDerivedGroup(group_));
+      putObservation("windDirection", windFromDirection, getDerivedGroup(group_));
   }
 }
 
@@ -141,8 +141,8 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
       putObservation("windEastwardAt10M", u, getDerivedGroup(group_));
       putObservation("windNorthwardAt10M", v, getDerivedGroup(group_));
     } else {
-      putObservation("eastward_wind", u, getDerivedGroup(group_));
-      putObservation("northward_wind", v, getDerivedGroup(group_));
+      putObservation("windEastward", u, getDerivedGroup(group_));
+      putObservation("windNorthward", v, getDerivedGroup(group_));
     }
   } else if (nchans > 0) {
     std::vector<int> channels(nchans);
@@ -193,9 +193,9 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
         putObservation("windNorthwardAt10M", std::to_string(channels[jchan]), v_chan,
                        {"nlocs", "nchans"}, getDerivedGroup(group_));
       } else {
-        putObservation("eastward_wind", std::to_string(channels[jchan]), u_chan,
+        putObservation("windEastward", std::to_string(channels[jchan]), u_chan,
                        {"nlocs", "nchans"}, getDerivedGroup(group_));
-        putObservation("northward_wind", std::to_string(channels[jchan]), v_chan,
+        putObservation("windNorthward", std::to_string(channels[jchan]), v_chan,
                        {"nlocs", "nchans"}, getDerivedGroup(group_));
       }
     }
