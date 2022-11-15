@@ -148,7 +148,7 @@ subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
 
   ! get station elevation from obs
   allocate(obselev(nlocs))
-  call obsspace_get_db(obss, "MetaData", "station_elevation", obselev)
+  call obsspace_get_db(obss, "MetaData", "stationElevation", obselev)
 
   ! get observation height (above sea level)
   allocate(obshgt(nlocs))
