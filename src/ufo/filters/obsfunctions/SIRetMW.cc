@@ -35,15 +35,15 @@ SIRetMW::SIRetMW(const eckit::LocalConfiguration & conf)
 
   // Include list of required data from ObsSpace
   for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-    invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
+    invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels_);
   }
-  invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels_);
+  invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels_);
 
   // Include list of required data from ObsDiag
   invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 }
 
 // -----------------------------------------------------------------------------
@@ -71,21 +71,21 @@ void SIRetMW::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Calculate scattering index
   std::vector<float> bt90(nlocs), bt150(nlocs);
   for (size_t igrp = 0; igrp < ngrps; ++igrp) {
     // Get data based on group type
-    in.get(Variable("brightness_temperature@" + vargrp[igrp], channels_)[0], bt90);
-    in.get(Variable("brightness_temperature@" + vargrp[igrp], channels_)[1], bt150);
+    in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels_)[0], bt90);
+    in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels_)[1], bt150);
     // Get bias based on group type
     if (options_.addBias.value() == vargrp[igrp]) {
       std::vector<float> bias90(nlocs), bias150(nlocs);
-      if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels_)[0])) {
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
+      if (in.has(Variable(options_.testBias.value() + "/brightnessTemperature", channels_)[0])) {
+      in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels_)
                       [0], bias90);
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
+      in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels_)
                       [1], bias150);
       } else {
       bias90.assign(nlocs, 0.0f);

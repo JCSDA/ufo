@@ -83,22 +83,22 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
 /// \code{.yaml}
 ///     - Filter: Perform Action
 ///       filter variables:
-///       - name: air_temperature
+///       - name: airTemperature
 ///         channels: &all_channels 1-3
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: DrawObsErrorFromFile@ObsFunction
+///           name: ObsFunction/DrawObsErrorFromFile
 ///           channels: *all_channels
 ///           options:
 ///             file: <filepath>
 ///             channels: *all_channels
 ///             interpolation:
-///             - name: satellite_id@MetaData
+///             - name: MetaData/satelliteIdentifier
 ///               method: exact
-///             - name: processing_center@MetaData
+///             - name: MetaData/processingCenter
 ///               method: exact
-///             - name: air_pressure@MetaData
+///             - name: MetaData/pressure
 ///               method: linear
 /// \endcode
 ///

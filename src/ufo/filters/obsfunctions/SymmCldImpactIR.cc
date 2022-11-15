@@ -64,10 +64,10 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
   for (size_t ich = 0; ich < SCI.nvars(); ++ich) {
     // Get channel-specific clr, bak, obs, and bias
     in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_)[ich], clr);
-    in.get(Variable("brightness_temperature@HofX", channels_)[ich], bak);
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ich], obs);
-    if (in.has(Variable("brightness_temperature@ObsBiasData", channels_)[ich])) {
-      in.get(Variable("brightness_temperature@ObsBiasData", channels_)[ich], bias);
+    in.get(Variable("HofX/brightnessTemperature", channels_)[ich], bak);
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ich], obs);
+    if (in.has(Variable("ObsBiasData/brightnessTemperature", channels_)[ich])) {
+      in.get(Variable("ObsBiasData/brightnessTemperature", channels_)[ich], bias);
     } else {
       std::fill(bias.begin(), bias.end(), 0.0f);
     }
