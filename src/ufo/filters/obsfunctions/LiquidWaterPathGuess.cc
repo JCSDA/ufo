@@ -20,8 +20,8 @@ static ObsFunctionMaker<LiquidWaterPathGuess> makerLiquidWaterPathGuess_("Liquid
 LiquidWaterPathGuess::LiquidWaterPathGuess(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Include list of required data from GeoVaLs
-  invars_ += Variable("mass_content_of_cloud_liquid_water_in_atmosphere_layer@GeoVaLs");
-  invars_ += Variable("air_pressure@GeoVaLs");
+  invars_ += Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer");
+  invars_ += Variable("GeoVaLs/air_pressure");
 }
 
 // -----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ void LiquidWaterPathGuess::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable("air_pressure@GeoVaLs"));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/air_pressure"));
 
   // define scalar to multiply at end
   const float scalevals = 1.0/(2.0*Constants::grav);
@@ -48,15 +48,15 @@ void LiquidWaterPathGuess::compute(const ObsFilterData & in,
   std::vector<float> clw_levelipone(nlocs);  // clw at level i+1 (kg/kg)
 
   // initialise  p, clw for top of first layer
-  in.get(Variable("air_pressure@GeoVaLs"), 0, p_leveli);
-  in.get(Variable("mass_content_of_cloud_liquid_water_in_atmosphere_layer@GeoVaLs"),
+  in.get(Variable("GeoVaLs/air_pressure"), 0, p_leveli);
+  in.get(Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer"),
     0, clw_leveli);
 
   // perform LWP (kg/m^2) calculation
   // = sum over layers ( (pi+1-pi) * 0.5* (clwi+clwi+1) / g)
   for (size_t ilev = 0; ilev < nlevs-1; ++ilev) {
-    in.get(Variable("air_pressure@GeoVaLs"), ilev+1, p_levelipone);
-    in.get(Variable("mass_content_of_cloud_liquid_water_in_atmosphere_layer@GeoVaLs"),
+    in.get(Variable("GeoVaLs/air_pressure"), ilev+1, p_levelipone);
+    in.get(Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer"),
       ilev+1, clw_levelipone);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       dp = std::abs(p_levelipone[iloc] - p_leveli[iloc]);
