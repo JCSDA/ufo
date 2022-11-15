@@ -217,15 +217,15 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
   call obsspace_get_db(self % obsdb, "MetaData", "longitude", obsLon)
   call obsspace_get_db(self % obsdb, "MetaData", "latitude", obsLat)
-  call obsspace_get_db(self % obsdb, "MetaData", "impact_parameter", impact_param)
-  call obsspace_get_db(self % obsdb, "MetaData", "earth_radius_of_curvature", radius_curv)
-  call obsspace_get_db(self % obsdb, "MetaData", "geoid_height_above_reference_ellipsoid", undulation)
-  call obsspace_get_db(self % obsdb, "ObsValue", "bending_angle", obs_bending_angle)
+  call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
+  call obsspace_get_db(self % obsdb, "MetaData", "earthRadiusCurvature", radius_curv)
+  call obsspace_get_db(self % obsdb, "MetaData", "geoidUndulation", undulation)
+  call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
   call obsspace_get_recnum(self % obsdb, record_number)
-  call obsspace_get_db(self % obsdb, "MetaData", "occulting_sat_id", obsSatid)
-  call obsspace_get_db(self % obsdb, "MetaData", "originating_center", obsOrigC)
-  call obsspace_get_db(self % obsdb, "FortranQC", "bending_angle", qc_flags)
-  call obsspace_get_db(self % obsdb, "FortranERR", "bending_angle", obs_err)
+  call obsspace_get_db(self % obsdb, "MetaData", "satelliteIdentifier", obsSatid)
+  call obsspace_get_db(self % obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
+  call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
+  call obsspace_get_db(self % obsdb, "FortranERR", "bendingAngle", obs_err)
 
   ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
