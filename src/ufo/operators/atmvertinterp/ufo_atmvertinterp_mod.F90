@@ -196,8 +196,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! Loop over the variables
     do iobsvar = 1, size(self%obsvarindices)
       ! Check that this is a typical wind variable
-      if ((trim(self%obsvars%variable(iobsvar)) == 'eastward_wind') .or. &
-          (trim(self%obsvars%variable(iobsvar)) == 'northward_wind')) then
+      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
+          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
         ! Get the index of the row of hofx to fill
         ivar = self%obsvarindices(iobsvar)
         ! Loop over the observations
