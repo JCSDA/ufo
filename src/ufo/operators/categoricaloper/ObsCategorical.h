@@ -56,7 +56,7 @@ namespace ufo {
 /// An example yaml configuration is as follows:
 ///  obs operator:
 ///    name: Categorical
-///    categorical variable: station_id
+///    categorical variable: stationIdentification
 ///    fallback operator: "Composite"
 ///    categorised operators: {"47418": "Composite", "54857": "Identity"}
 ///    operator configurations:
@@ -65,18 +65,18 @@ namespace ufo {
 ///      components:
 ///       - name: Identity
 ///         variables:
-///         - name: air_temperature
-///         - name: surface_pressure
+///         - name: airTemperature
+///         - name: surfacePressure
 ///       - name: VertInterp
 ///         variables:
-///         - name: northward_wind
-///         - name: eastward_wind
+///         - name: windNorthward
+///         - name: windEastward
 ///
-/// This operator uses station_id@MetaData as the categorical variable.
+/// This operator uses MetaData/stationIdentification as the categorical variable.
 /// Both the Identity and Composite operators are used to produce H(x) vectors.
 /// Then, at each location in the ObsSpace:
-/// - if station_id@MetaData is equal to 47418 then the Composite H(x) is selected;
-/// - if station_id@MetaData is equal to 54857 then the Identity H(x) is selected;
+/// - if MetaData/stationIdentification is equal to 47418 then the Composite H(x) is selected;
+/// - if MetaData/stationIdentification is equal to 54857 then the Identity H(x) is selected;
 /// - otherwise, the fallback operator (also Composite in this case) H(x) is selected.
 class ObsCategorical : public ObsOperatorBase,
   private util::ObjectCounter<ObsCategorical> {

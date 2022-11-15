@@ -173,12 +173,12 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
     }
   }
 
-  putObservation("surface_pressure", PStar);
-  obsdb_.put_db("DerivedObsError", "surface_pressure", PStar_error);
-  obsdb_.put_db("GrossErrorProbability", "surface_pressure", PStar_PGE);
-  obsdb_.put_db("DiagnosticFlags/PmslUsed", "surface_pressure", PmslUsed_flag);
-  obsdb_.put_db("DiagnosticFlags/PstdUsed", "surface_pressure", PstdUsed_flag);
-  obsdb_.put_db("DiagnosticFlags/PstnUsed", "surface_pressure", PstnUsed_flag);
+  putObservation("surfacePressure", PStar);
+  obsdb_.put_db("DerivedObsError", "surfacePressure", PStar_error);
+  obsdb_.put_db("GrossErrorProbability", "surfacePressure", PStar_PGE);
+  obsdb_.put_db("DiagnosticFlags/PmslUsed", "surfacePressure", PmslUsed_flag);
+  obsdb_.put_db("DiagnosticFlags/PstdUsed", "surfacePressure", PstdUsed_flag);
+  obsdb_.put_db("DiagnosticFlags/PstnUsed", "surfacePressure", PstnUsed_flag);
 }
 }  // namespace ufo
 
