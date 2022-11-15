@@ -8,11 +8,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/ocean_pressure_depth_testdata.nc4
-    simulated variables: [air_temperature, ocean_pressure]
+    simulated variables: [airTemperature, waterPressure]
   obs function:
-    name: OceanPressureToDepth@ObsFunction
-    variables: [ocean_depth]
+    name: ObsFunction/OceanPressureToDepth
+    variables: [depthBelowWaterSurface]
     options:
-      pressure variable: ocean_pressure@ObsValue
+      pressure variable: ObsValue/waterPressure
     tolerance: 1.0e-6
     expect missing value locations to match: true
