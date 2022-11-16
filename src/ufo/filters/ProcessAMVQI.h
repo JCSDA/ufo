@@ -36,12 +36,12 @@ class ProcessAMVQIParameters : public oops::ObsFilterParametersBase {
 /// \brief A filter to convert new BUFR formatted data into variables with names
 /// corressponding to the wind generating application.
 ///
-/// \details This filter will convert variables of "percent_confidence_<number>" and
-/// "wind_generating_application_<number>" to variables named corresponding to the
-/// wind_generating_application (see Table 1).
+/// \details This filter will convert variables of "windPercentConfidence<number>" and
+/// "windGeneratingApplication<number>" to variables named corresponding to the
+/// generating application number (see Table 1).
 ///
 /// Table 1:
-/// Wind generating application number = QI type
+/// Generating application number = QI type
 /// 1 = Full weighted mixture of individual quality tests
 /// 2 = Weighted mixture of individual tests, but excluding forecast comparison
 /// 3 = Recursive filter function
