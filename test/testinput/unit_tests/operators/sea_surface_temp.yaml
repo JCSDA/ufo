@@ -16,7 +16,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sst_obs-2018-04-15_opr_out.nc4
-    simulated variables: [sea_surface_temperature]
+    simulated variables: [seaSurfaceTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sst_obs-2018-04-15_geovals.nc
   rms ref: 15.0

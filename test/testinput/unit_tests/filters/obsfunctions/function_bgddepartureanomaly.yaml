@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 7-9,11-13
 #   obsdataout:
 #     engine:
@@ -17,7 +17,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
   obs function:
-    name: BgdDepartureAnomaly@ObsFunction
+    name: ObsFunction/BgdDepartureAnomaly
     options:
       channel_low_freq: 11
       channel_high_freq: 13
