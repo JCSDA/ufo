@@ -54,15 +54,15 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
     const std::string &flaggrp = options_.testQCflag.value();
 
     // Include list of required data from ObsSpace
-    invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-    invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
+    invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+    invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
   }
 
   // Include required variables from ObsDiag
-  invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("surface_geopotential_height@GeoVaLs");
+  invars_ += Variable("GeoVaLs/surface_geopotential_height");
 }
 
 // -----------------------------------------------------------------------------
@@ -83,17 +83,17 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
-  size_t nlevs = in.nlevs(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[0]);
+  size_t nlevs = in.nlevs(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[0]);
 
   // Get surface geopotential height
   std::vector<float> zsges(nlocs);
-  in.get(Variable("surface_geopotential_height@GeoVaLs"), zsges);
+  in.get(Variable("GeoVaLs/surface_geopotential_height"), zsges);
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
   if (inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
-      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
+      in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich],
              nlevs - 1, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         out[ich][iloc] = 1.0;
@@ -135,8 +135,8 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     // Calculate error factors (error_factors) for each channel
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       size_t channel = ichan + 1;
-      in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
-      in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
+      in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
+      in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         out[ichan][iloc] = 1.0;
         if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
