@@ -38,8 +38,8 @@ ModelBestFitPressure::ModelBestFitPressure(ioda::ObsSpace & obsdb, const Paramet
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVals
   allvars_ += parameters_.model_pressure;
-  allvars_ += Variable("eastward_wind@GeoVaLs");
-  allvars_ += Variable("northward_wind@GeoVaLs");
+  allvars_ += Variable("GeoVaLs/eastward_wind");
+  allvars_ += Variable("GeoVaLs/northward_wind");
 }
 
 // -----------------------------------------------------------------------------
@@ -58,9 +58,9 @@ ModelBestFitPressure::~ModelBestFitPressure() {
  *  obs filter:
  *  - filter: Model Best Fit Pressure
  *    observation pressure:
- *      name: air_pressure@MetaData
+ *      name: MetaData/pressure
  *    model pressure:
- *      name: air_pressure_levels_minus_one@GeoVaLs
+ *      name: GeoVaLs/air_pressure_levels_minus_one
  *    top pressure: 10000
  *    pressure band half-width: 10000
  *    upper vector diff: 4
@@ -98,7 +98,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
   // Get number of vertical levels in GeoVaLs
-  const size_t num_level = data_.nlevs(Variable(model_eastvec_name + "@GeoVaLs"));
+  const size_t num_level = data_.nlevs(Variable("GeoVaLs/" + model_eastvec_name));
 
   std::vector<float> satwind_best_fit_press(nlocs, missing);
   std::vector<float> satwind_best_fit_eastward_wind;
@@ -126,7 +126,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
     obsdb_.get_db("QCFlags", model_eastvec_name, u_flags);
     obsdb_.get_db("QCFlags", model_northvec_name, v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+    throw eckit::Exception("QCFlags/windEastward or QCFlags/windNorthward not initialised",
                            Here());
   }
 
@@ -263,11 +263,11 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   // write back flags and best-fit pressure/ winds
   obsdb_.put_db("QCFlags", model_eastvec_name, u_flags);
   obsdb_.put_db("QCFlags", model_northvec_name, v_flags);
-  obsdb_.put_db("DerivedValue", "model_bestfit_pressure", satwind_best_fit_press);
+  obsdb_.put_db("DerivedValue", "pressureBestFit", satwind_best_fit_press);
   if (calculate_best_fit_winds) {
-    obsdb_.put_db("DerivedValue", "model_bestfit_eastward_wind",
+    obsdb_.put_db("DerivedValue", "windEastwardBestFit",
                   satwind_best_fit_eastward_wind);
-    obsdb_.put_db("DerivedValue", "model_bestfit_northward_wind",
+    obsdb_.put_db("DerivedValue", "windNorthwardBestFit",
                   satwind_best_fit_northward_wind);
   }
 }
