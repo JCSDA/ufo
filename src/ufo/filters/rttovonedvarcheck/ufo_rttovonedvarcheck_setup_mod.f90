@@ -136,7 +136,7 @@ self % retrieval_variables(size_geovals+1 : size_geovals+size_extravars) = str_a
 ! Check if cloud retrievals needed
 self % cloud_retrieval = .false.
 do iret = 1, size(self % retrieval_variables)
-  if (cmp_strings(self % retrieval_variables(iret), "cloud_top_pressure")) then
+  if (cmp_strings(self % retrieval_variables(iret), "pressureAtTopOfCloud")) then
     write(*,*) "Simple cloud is part of the state vector"
     self % cloud_retrieval = .true.
   end if
