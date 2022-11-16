@@ -245,7 +245,7 @@ namespace ufo {
         /// and are in the MetaData rather than the Counters group.
         /// This avoids the (default) treatment which assumes
         /// that variables in the Counters group have one value per profile.
-        varname_OPS = "OPS_" + varname + "@MetaData";
+        varname_OPS = "MetaData/OPS_" + varname;
       }
 
       // Obtain values for comparison
