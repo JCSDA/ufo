@@ -201,10 +201,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(nlocs_end(nrecs))
 
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
-  call obsspace_get_db(obss, "ObsValue", "bending_angle", obsValue)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
+  call obsspace_get_db(obss, "ObsValue", "bendingAngle", obsValue)
   call obsspace_get_recnum(obss, obsRecnum)
 
   nlocs_begin=1

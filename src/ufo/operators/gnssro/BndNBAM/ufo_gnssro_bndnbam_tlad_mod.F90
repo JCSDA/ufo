@@ -185,9 +185,9 @@ if (nlocs > 0 ) then
   allocate(self%nlocs_end(nrecs))
 
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
   call obsspace_get_recnum(obss, obsRecnum)
 
   if (  obsspace_has(obss,  "SR_flag",  "bending_angle") ) then
