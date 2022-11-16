@@ -112,7 +112,7 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
 
   //  Write out the resulting data to Derived group and update qcflags
   for (size_t ichan =0; ichan < nvars; ++ichan) {
-    putObservation("brightness_temperature_" + std::to_string(channels_[ichan]),
+    putObservation("brightnessTemperature_" + std::to_string(channels_[ichan]),
                    brightnessTemperature[ichan]);
   }
 }  // runTransform
