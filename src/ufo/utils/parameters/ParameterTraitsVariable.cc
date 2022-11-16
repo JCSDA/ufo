@@ -36,7 +36,7 @@ boost::optional<ufo::Variable> ParameterTraits<ufo::Variable>::get(
       // Handle the following YAML structure:
       //
       // <name>:
-      //   name: somevar@SomeGroup
+      //   name: SomeGroup/somevar
       //   channels: ... # optional
       //   options:      # optional
       //     ...
@@ -50,7 +50,7 @@ boost::optional<ufo::Variable> ParameterTraits<ufo::Variable>::get(
 
       // Handle the following YAML structure:
       //
-      // <name>: somevar@SomeGroup
+      // <name>: SomeGroup/somevar
 
       try {
         std::string varAndGroup = config.getString(name);
@@ -77,7 +77,7 @@ void ParameterTraits<ufo::Variable>::set(eckit::LocalConfiguration &config,
                                          const std::string &name,
                                          const ufo::Variable &value) {
   eckit::LocalConfiguration subConfig;
-  subConfig.set("name", value.variable() + "@" + value.group());
+  subConfig.set("name", value.group() + "/" + value.variable());
   const std::vector<int> &channels = value.channels();
   if (!channels.empty()) {
     const std::string channelsAsString = util::stringfunctions::join(
