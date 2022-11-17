@@ -38,14 +38,14 @@ namespace ufo {
 
     // Include list of required data from GeoVaLs/Obs
     // Model ice area fraction [0-1]
-    invars_ += Variable("ice_area_fraction@GeoVaLs");
+    invars_ += Variable("GeoVaLs/ice_area_fraction");
 
     // Sensor Zenith Angle (degrees)
-    invars_ += Variable("sensor_zenith_angle@MetaData");
+    invars_ += Variable("MetaData/sensorZenithAngle");
     // AAPP Surface Classification [0-9]
-    invars_ += Variable("surface_class@MetaData");
+    invars_ += Variable("MetaData/surfaceClassAAPP");
     // RTTOV Surface type [0-2]
-    invars_ += Variable("surface_type@MetaData");
+    invars_ += Variable("MetaData/surfaceQualifier");
   }
 
   // -----------------------------------------------------------------------------
@@ -87,16 +87,16 @@ namespace ufo {
 
     // inputs
     std::vector<float> ice_area_frac(nlocs);
-    in.get(Variable("ice_area_fraction@GeoVaLs"), ice_area_frac);
+    in.get(Variable("GeoVaLs/ice_area_fraction"), ice_area_frac);
 
     std::vector<float> satzenith(nlocs);
-    in.get(Variable("sensor_zenith_angle@MetaData"), satzenith);
+    in.get(Variable("MetaData/sensorZenithAngle"), satzenith);
 
     std::vector<int> surftype(nlocs);
-    in.get(Variable("surface_type@MetaData"), surftype);
+    in.get(Variable("MetaData/surfaceQualifier"), surftype);
 
     std::vector<int> AAPP_surface_class(nlocs);
-    in.get(Variable("surface_class@MetaData"), AAPP_surface_class);
+    in.get(Variable("MetaData/surfaceClassAAPP"), AAPP_surface_class);
 
     // Get orbit Height (km) from options
     float orbit_height = options_.orbitHeight.value();
