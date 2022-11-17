@@ -8,26 +8,26 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
     
   obs filters:  
   - filter: Variable Assignment
     assignments:
-    - name: station_name@MetaData
+    - name: MetaData/stationName
       type: string
       function:
-        name: StringManipulation@StringObsFunction
+        name: StringObsFunction/StringManipulation
         options:
           string operation: stringcut
-          variable: [full_site_name@MetaData]
+          variable: [MetaData/stationACCombined]
           startIndex: 0 
           cutLength: 4
 
   compareVariables:
     - test:
-        name: station_name@MetaData
+        name: MetaData/stationName
       reference:
-        name: station_name@TestReference
+        name: TestReference/stationName
 
 
 # Test that without startIndex and cutLength defined for stringcut an exception will be raised.  
@@ -37,18 +37,18 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/stringmanipulation_obs.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
     
   obs filters: 
   - filter: Variable Assignment
     assignments:
-    - name: station_name@MetaData
+    - name: MetaData/stationName
       type: string
       function:
-        name: StringManipulation@StringObsFunction
+        name: StringObsFunction/StringManipulation
         options:
           string operation: stringcut
-          variable: [full_site_name@MetaData]
+          variable: [MetaData/stationACCombined]
 
   expectExceptionWithMessage: startIndex and cutLength need to be set for stringcut
   
