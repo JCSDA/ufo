@@ -24,7 +24,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gmi_gpm_obs_2020121500_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-13
   geovals:
     filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
@@ -65,10 +65,10 @@ observations:
   #  Ckeck CLW retrievals from observations 
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch37v: 6
         clwret_ch37h: 7
@@ -79,10 +79,10 @@ observations:
   #  Ckeck CLW retrievals from Hofx
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch37v: 6
         clwret_ch37h: 7
