@@ -13,7 +13,7 @@ obs space:
 #   engine:
 #     type: H5File
 #     obsfile: Data/sondes_obs_2018041500_s_backgrounderror_identity_out.nc4
-  simulated variables: [surface_pressure]
+  simulated variables: [stationPressure]
 obs operator:
   name: Composite
   components:

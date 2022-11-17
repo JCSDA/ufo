@@ -3,7 +3,7 @@ Only valid observations:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -24,8 +24,8 @@ Only valid observations:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: []
 
@@ -34,7 +34,7 @@ One observation with excessive speed:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -55,8 +55,8 @@ One observation with excessive speed:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
@@ -65,7 +65,7 @@ One observation with excessive climb rate:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -86,8 +86,8 @@ One observation with excessive climb rate:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
@@ -96,7 +96,7 @@ Climb rate checks disabled:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]   
+    simulated variables: [airTemperature]   
     obsdatain:
       engine:
         type: GenList
@@ -116,8 +116,8 @@ Climb rate checks disabled:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: []
 
@@ -126,7 +126,7 @@ Where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -147,12 +147,12 @@ Where clause:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: -1
-    pressure_coordinate: air_pressure
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [2]
 
@@ -161,7 +161,7 @@ Multiple clusters of observations with excessive speed:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -224,8 +224,8 @@ Multiple clusters of observations with excessive speed:
     max_speed_interpolation_points: {"0": 1000, "101000": 1000} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
 
@@ -234,7 +234,7 @@ Multiple station ids:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]   
+    simulated variables: [airTemperature]   
     obsdatain:
       engine:
         type: GenList
@@ -258,8 +258,8 @@ Multiple station ids:
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
     station_id_variable:
-      name: station_id@MetaData
-    pressure_coordinate: air_pressure
+      name: MetaData/stationIdentification
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [4, 5]
 
@@ -268,7 +268,7 @@ No station id variable, no observation grouping:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -287,6 +287,6 @@ No station id variable, no observation grouping:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    pressure_coordinate: air_pressure
+    pressure_coordinate: pressure
     pressure_group: MetaData
   expected_rejected_obs_indices: [2]
