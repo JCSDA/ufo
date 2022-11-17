@@ -13,7 +13,7 @@ observations:
   obs filters:  
   - filter: Variable Assignment
     assignments:
-    - name: MetaData/stationName
+    - name: MetaData/stationIdentification
       type: string
       function:
         name: StringObsFunction/StringManipulation
@@ -25,9 +25,9 @@ observations:
 
   compareVariables:
     - test:
-        name: MetaData/stationName
+        name: MetaData/stationIdentification
       reference:
-        name: TestReference/stationName
+        name: TestReference/stationIdentification
 
 
 # Test that without startIndex and cutLength defined for stringcut an exception will be raised.  
@@ -42,7 +42,7 @@ observations:
   obs filters: 
   - filter: Variable Assignment
     assignments:
-    - name: MetaData/stationName
+    - name: MetaData/stationIdentification
       type: string
       function:
         name: StringObsFunction/StringManipulation
