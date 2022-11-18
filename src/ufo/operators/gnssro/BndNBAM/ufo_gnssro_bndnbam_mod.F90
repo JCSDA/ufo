@@ -403,7 +403,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   end if ! end check if ZERO OBS
 
 ! putting virtual temeprature at obs location to obs space for BackgroundCheck RONBAM
-  call obsspace_put_db(obss, "ObsDiag", "virtual_temperature", temperature)
+  call obsspace_put_db(obss, "MetaData", "virtual_temperature", temperature)
 ! putting super refraction flag to obs space 
   call obsspace_put_db(obss, "ObsDiag",   "superRefractionFlag", super_refraction_flag)
 ! saving obs vertical model layer postion for later

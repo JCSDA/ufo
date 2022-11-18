@@ -59,7 +59,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> impactparameter(obsdb_, "impactParameterRO", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> earthradius(obsdb_, "earthRadiusCurvature", "MetaData");
-  ioda::ObsDataVector<float> temperature(obsdb_, "virtual_temperature", "ObsDiag");  // background virtual temperature at obs location
+  ioda::ObsDataVector<float> temperature(obsdb_, "virtual_temperature", "MetaData");  // background virtual temperature at obs location
 
   Variables varhofx(filtervars, "HofX");
 

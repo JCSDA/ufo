@@ -17,13 +17,13 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: NBAM
   passedBenchmark: 668
 - obs operator:
@@ -38,13 +38,13 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: ECMWF
   passedBenchmark: 668
 - obs operator:
@@ -62,13 +62,13 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: NRL
   passedBenchmark: 668
 - obs operator:
@@ -83,12 +83,12 @@ observations:
 #    engine:
 #      type: H5File
 #      obsfile: Data/gnssro_ref_2018041500_s_errNCEP_out.nc4
-   simulated variables: [refractivity]
+   simulated variables: [atmosphericRefractivity]
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
-    - name:  refractivity
+    - name:  atmosphericRefractivity
     errmodel: NCEP
   passedBenchmark: 20
