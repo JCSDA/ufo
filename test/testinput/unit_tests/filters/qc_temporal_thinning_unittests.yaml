@@ -3,7 +3,7 @@ Min_spacing below observation spacing:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -28,7 +28,7 @@ Min spacing equal to observation spacing:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -53,7 +53,7 @@ Min spacing above observation spacing:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -78,7 +78,7 @@ Int-valued categories:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -98,7 +98,7 @@ Int-valued categories:
   TemporalThinning:
     min_spacing: PT15S
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
   expected_thinned_obs_indices: [1, 4, 6]
 
 String-valued categories:
@@ -106,7 +106,7 @@ String-valued categories:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -126,7 +126,7 @@ String-valued categories:
   TemporalThinning:
     min_spacing: PT15S
     category_variable:
-      name: string_category@MetaData
+      name: MetaData/string_category
   expected_thinned_obs_indices: [1, 4, 6]
 
 Categories, observations sorted in descending order:
@@ -134,7 +134,7 @@ Categories, observations sorted in descending order:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]    
+    simulated variables: [airTemperature]    
     obsdatain:
       engine:
         type: GenList
@@ -154,7 +154,7 @@ Categories, observations sorted in descending order:
   TemporalThinning:
     min_spacing: PT15S
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
   expected_thinned_obs_indices: [0, 2, 5]
 
 Categories, where clause:
@@ -162,7 +162,7 @@ Categories, where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -182,10 +182,10 @@ Categories, where clause:
   TemporalThinning:
     min_spacing: PT15S
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0
   expected_thinned_obs_indices: [2, 4]
 
@@ -194,7 +194,7 @@ Tolerance and priorities, first observation in each group to be retained:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -238,7 +238,7 @@ Tolerance and priorities, first observation in each group to be retained:
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
   expected_thinned_obs_indices: [ 1,  2,   3,  4,  5,
                                   7,  8,   9, 10, 11,
                                  13, 14,  15, 16, 17,
@@ -249,7 +249,7 @@ Tolerance and priorities, second observation in each group to be retained:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -293,7 +293,7 @@ Tolerance and priorities, second observation in each group to be retained:
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
   expected_thinned_obs_indices: [ 0,  2,   3,  4,  5,
                                   6,  8,   9, 10, 11,
                                  12, 14,  15, 16, 17,
@@ -304,7 +304,7 @@ Tolerance and priorities, third observation in each group to be retained:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -348,7 +348,7 @@ Tolerance and priorities, third observation in each group to be retained:
     min_spacing: PT15S
     tolerance:   PT05S
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
   expected_thinned_obs_indices: [ 0,  1,   3,  4,  5,
                                   6,  7,   9, 10, 11,
                                  12, 13,  15, 16, 17,
@@ -359,7 +359,7 @@ Tolerance but no priorities:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -408,7 +408,7 @@ Seed time inside observation time range (should pick preceding observation):
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -434,7 +434,7 @@ Seed time inside observation time range (should pick following observation):
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -460,7 +460,7 @@ Seed time midway between two observations (should pick following observation):
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -486,7 +486,7 @@ Seed time at earliest observation:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -512,7 +512,7 @@ Seed time before earliest observation:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -538,7 +538,7 @@ Seed time at latest observation:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -564,7 +564,7 @@ Seed time after latest observation:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -590,7 +590,7 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -634,7 +634,7 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
     min_spacing: PT15S
     tolerance:   PT02S
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     seed_time: 2010-01-01T00:04:30Z
   expected_thinned_obs_indices: [ 0,  1,  2,    3,  4,
                                   6,  7,  8,    9, 10,
@@ -646,7 +646,7 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -690,7 +690,7 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
     min_spacing: PT15S
     tolerance:   PT02S
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     seed_time: 2010-01-01T00:04:32Z
   expected_thinned_obs_indices: [ 0,  1,  2,    4,  5,
                                   6,  7,  8,   10, 11,
@@ -709,7 +709,7 @@ Records are single obs, priority variable:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -728,12 +728,12 @@ Records are single obs, priority variable:
       obsgrouping:
         group variables: [ "latitude" ]
   priority: [3, 3, 3, 4, 4, 4, 4]
-  air_temperature: [280, 280, 280, 280, 280, 280, 280]
+  airTemperature: [280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     records_are_single_obs: true
   expected_thinned_obs_indices: [0, 1, 2]
 
@@ -749,7 +749,7 @@ Records are single obs, no priority variable:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -767,7 +767,7 @@ Records are single obs, no priority variable:
         obs errors: [1.0]
       obsgrouping:
         group variables: [ "latitude" ]
-  air_temperature: [280, 280, 280, 280, 280, 280, 280]
+  airTemperature: [280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
@@ -786,7 +786,7 @@ Records are single obs, no priority variable, category variable set to category:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -806,12 +806,12 @@ Records are single obs, no priority variable, category variable set to category:
       obsgrouping:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]
-  air_temperature: [280, 280, 280, 280, 280, 280, 280, 280]
+  airTemperature: [280, 280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     records_are_single_obs: true
   expected_thinned_obs_indices: [2, 3, 6, 7]
 
@@ -827,7 +827,7 @@ Records are single obs, priority variable, category variable set to category:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -848,13 +848,13 @@ Records are single obs, priority variable, category variable set to category:
         group variables: [ "latitude" ]
   category: [0, 0, 0, 0, 1, 1, 1, 1]
   priority: [3, 3, 4, 4, 4, 4, 3, 3]
-  air_temperature: [280, 280, 280, 280, 280, 280, 280, 280]
+  airTemperature: [280, 280, 280, 280, 280, 280, 280, 280]
   TemporalThinning:
     min_spacing: PT1M
     tolerance: PT1M
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     records_are_single_obs: true
   expected_thinned_obs_indices: [0, 1, 6, 7]
