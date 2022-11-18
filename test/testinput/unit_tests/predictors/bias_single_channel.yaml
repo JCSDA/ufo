@@ -15,7 +15,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/aircraft_obs_2018041500_s_out_bc_2var.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
   geovals:
@@ -39,7 +39,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/aircraft_obs_2018041500_s_out_bc_1static_1var.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
   geovals:
@@ -67,7 +67,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/aircraft_obs_2018041500_s_out_bc_2static.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
   geovals:
@@ -92,7 +92,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/aircraft_obs_2018041500_s_out_bc_2static_no_bias_file.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
   geovals:

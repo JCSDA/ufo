@@ -12,7 +12,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -43,7 +43,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -82,7 +82,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File

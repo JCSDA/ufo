@@ -13,7 +13,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ssmis_obs_20191230T0000Z_orbital_angle_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1-24
   geovals:
     filename: Data/ufo/testinput_tier_1/ssmis_geovals_20191230T0000Z_100subset.nc4

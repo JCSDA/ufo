@@ -14,7 +14,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/coolskin_fake_obs_2018041500.nc
-    simulated variables: [sea_surface_temperature]
+    simulated variables: [seaSurfaceTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File

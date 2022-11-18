@@ -13,7 +13,7 @@ obs space:
 #   engine:
 #     type: H5File
 #     obsfile: Data/sondes_obs_2018041500_s_vertinterp_pressure_out.nc4
-  simulated variables: [air_temperature, specific_humidity, northward_wind, eastward_wind]
+  simulated variables: [airTemperature, specificHumidity, windNorthward, windEastward]
 obs operator:
   name: Composite
   components:
@@ -21,7 +21,7 @@ obs operator:
   - name: VertInterp
   # operator used to evaluate background errors
   - name: BackgroundErrorVertInterp
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     vertical coordinate: background_error_air_pressure
 geovals:
   filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
