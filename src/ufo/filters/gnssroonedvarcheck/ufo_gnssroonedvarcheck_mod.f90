@@ -352,7 +352,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
     call deallocate_singleob(Ob)
   end do
-  call obsspace_put_db(self % obsdb, "FortranQC", "bending_angle", qc_flags)
+  call obsspace_put_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
 
 end subroutine ufo_gnssroonedvarcheck_apply
 
