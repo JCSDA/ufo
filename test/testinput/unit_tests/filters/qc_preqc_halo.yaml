@@ -4,7 +4,7 @@ window end: 2018-04-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
-    vertical coordinate: air_pressure
+    vertical coordinate: pressure
   obs space:
     name: Radiosonde
     distribution:
@@ -18,7 +18,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_preqc_halo_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   obs filters:
@@ -38,7 +38,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/amsua_n19_obs_2018041500_m_preqc_halo_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 4-8
   obs filters:
   - filter: PreQC
