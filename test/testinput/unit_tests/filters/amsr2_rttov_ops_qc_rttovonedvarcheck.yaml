@@ -24,7 +24,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &ops_channels 7-12
 #   obsdataout:
 #     engine:
@@ -58,7 +58,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/amsr_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals: # Variables needed in the geovals
     - air_temperature # 1
@@ -88,11 +88,11 @@ observations:
   # Reject channels when highretlwp
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 7-12
     where:
     - variable:
-        name: LWP@OneDVar
+        name: OneDVar/liquidWaterPath
       maxvalue: 1.0e-1
     defer to post: true
   passedBenchmark: 300      # number of passed obs
@@ -125,7 +125,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/amsr_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals: # Variables needed in the geovals
     - air_temperature # 1
