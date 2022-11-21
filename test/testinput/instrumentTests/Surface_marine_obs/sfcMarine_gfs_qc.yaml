@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2020121500_m_out.nc
-    simulated variables: [eastward_wind, northward_wind, air_temperature, specific_humidity, surface_pressure]
+    simulated variables: [windEastward, windNorthward, airTemperature, specificHumidity, stationPressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_geoval_2020121500_m.nc
   obs operator:
@@ -21,13 +21,13 @@ observations:
      - name: GSISfcModel
        use_fact10: true
        variables:
-       - name: air_temperature
-       - name: specific_humidity
-       - name: eastward_wind
-       - name: northward_wind
+       - name: airTemperature
+       - name: specificHumidity
+       - name: windEastward
+       - name: windNorthward
      - name: SfcPCorrected
        variables:
-       - name: surface_pressure
+       - name: stationPressure
        da_psfc_scheme: UKMO
        # Remove the next two lines when using geoval from JEDI, not GSI.
        geovar_geomz: geopotential_height
@@ -37,7 +37,7 @@ observations:
   # Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     minvalue: 37499
     maxvalue: 106999
     action:
@@ -45,7 +45,7 @@ observations:
   #
   - filter: Bounds Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     minvalue: 195
     maxvalue: 327
     action:
@@ -53,7 +53,7 @@ observations:
   #
   - filter: Bounds Check
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     minvalue: 1.0E-7
     maxvalue: 0.034999999
     action:
@@ -61,8 +61,8 @@ observations:
   #
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     minvalue: -130
     maxvalue: 130
     action:
@@ -70,20 +70,20 @@ observations:
   #
   - filter: Bounds Check      #  Observation Range Sanity Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: Velocity@ObsFunction
+    - name: ObsFunction/Velocity
     maxvalue: 130.0
     action:
       name: reject
   # Reject when difference of wind direction is more than 50 degrees.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: WindDirAngleDiff@ObsFunction
+    - name: ObsFunction/WindDirAngleDiff
       options:
         minimum_uv: 3.5
     maxvalue: 50.0
@@ -97,70 +97,70 @@ observations:
   # Assign obsError.
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error parameter: 130             # 130 Pa (1.3mb)
   #
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [92000, 85000, 70000]
           errors: [130, 150, 190]
   #
   - filter: Perform Action
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     action:
       name: assign error
       error parameter: 1.4             # 1.4 m/s
   #
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [10000, 20000, 25000, 30000, 50000, 85000, 97500, 100000]   #Pressure (Pa), ascending order
           errors: [3.0, 2.0, 1.5, 1.5, 2.0, 2.5, 2.5, 3.0]
   #
   - filter: Perform Action
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]   #Pressure (Pa)
           errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
   #
   - filter: Perform Action
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
-          scale_factor_var: ObsValue/specific_humidity
+          scale_factor_var: ObsValue/specificHumidity
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [110000, 105000, 100000, 95000, 90000, 85000, 80000, 75000, 70000, 65000, 60000, 55000,
                    50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000]
           errors: [.19455, .19062, .18488, .17877, .17342, .16976, .16777, .16696, .16605, .16522, .16637, .17086,
@@ -168,11 +168,11 @@ observations:
   # Inflate ObsError as it is done with GSI
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorSfcPressure@ObsFunction
+        name: ObsFunction/ObsErrorFactorSfcPressure
         options:
           error_min: 100         # 1 mb
           error_max: 300         # 3 mb
@@ -183,7 +183,7 @@ observations:
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     threshold: 3.6
     absolute threshold: 990.0
     action:
@@ -191,7 +191,7 @@ observations:
   #
   - filter: Background Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     threshold: 7.0
     absolute threshold: 9.0
     action:
@@ -199,8 +199,8 @@ observations:
   #
   - filter: Background Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     threshold: 6.0
     absolute threshold: 16.0
     action:
@@ -208,7 +208,7 @@ observations:
   #
   - filter: Background Check
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     threshold: 8.0
     action:
       name: reject

@@ -10,7 +10,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
-    simulated variables: [virtual_temperature]
+    simulated variables: [virtualTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   vector ref: GsiHofX
