@@ -13,7 +13,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/sfc_obs_2020121500_out.nc
-    simulated variables: [eastward_wind, northward_wind, virtual_temperature, air_temperature, specific_humidity, surface_pressure]
+    simulated variables: [windEastward, windNorthward, virtualTemperature, airTemperature, specificHumidity, stationPressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sfc_geoval_2020121500_m.nc
   obs operator:
@@ -22,14 +22,14 @@ observations:
      - name: GSISfcModel
        use_fact10: true
        variables:
-       - name: air_temperature
-       - name: virtual_temperature
-       - name: specific_humidity
-       - name: eastward_wind
-       - name: northward_wind
+       - name: airTemperature
+       - name: virtualTemperature
+       - name: specificHumidity
+       - name: windEastward
+       - name: windNorthward
      - name: SfcPCorrected
        variables:
-       - name: surface_pressure
+       - name: stationPressure
        da_psfc_scheme: UKMO
        # Remove the next two lines when using geoval from JEDI, not GSI.
        geovar_geomz: geopotential_height
