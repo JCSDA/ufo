@@ -9,10 +9,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [geopotential_height, wind_speed, wind_from_direction]
+    simulated variables: [geopotentialHeight, windSpeed, windDirection]
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
@@ -20,6 +20,6 @@ observations:
       # Exclude BUFR sondes, whose position has already been measured.
       where:
       - variable:
-          name: ObsType@MetaData
+          name: MetaData/ObsType
         is_not_in: 50500
   passedBenchmark: 0

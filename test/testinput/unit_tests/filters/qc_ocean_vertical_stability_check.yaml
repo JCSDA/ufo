@@ -9,24 +9,24 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/ocean_vertical_stability_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime", "latitude", "longitude" ]
+        group variables: [ "stationIdentification", "dateTime", "latitude", "longitude" ]
     obsdataout:
       engine:
         type: H5File
         obsfile: Data/oceanverticalstability_testout.nc4
-    simulated variables: [ocean_temperature, ocean_salinity, ocean_pressure, ocean_depth]
-    observed variables: [ocean_temperature, ocean_salinity]
-    derived variables: [ocean_pressure, ocean_depth]
+    simulated variables: [waterTemperature, salinity, waterPressure, depthBelowWaterSurface]
+    observed variables: [waterTemperature, salinity]
+    derived variables: [waterPressure, depthBelowWaterSurface]
   obs pre filters:
 ### get pressure from depth
   - filter: Variable Transforms
     Transform: OceanDepthToPressure
-    ocean depth variable: ocean_depth
+    ocean depth variable: depthBelowWaterSurface
     ocean depth group: DerivedObsValue
 ### ocean depth will be the filter variable associated with density inversion flags
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: DerivedObsValue/ocean_depth
+      - name: DerivedObsValue/depthBelowWaterSurface
     flags:
     - name: DensitySpike
       initial value: false
@@ -38,14 +38,14 @@ observations:
   - filter: Ocean Vertical Stability Check
     where:
     - variable:
-        name: ObsValue/ocean_temperature
+        name: ObsValue/waterTemperature
       is_defined:
     filter variables:
-      - name: DerivedObsValue/ocean_depth  # density spikes/steps --> flag d
+      - name: DerivedObsValue/depthBelowWaterSurface  # density spikes/steps --> flag d
     variables:
-      temperature: ObsValue/ocean_temperature
-      salinity: ObsValue/ocean_salinity
-      pressure: DerivedObsValue/ocean_pressure
+      temperature: ObsValue/waterTemperature
+      salinity: ObsValue/salinity
+      pressure: DerivedObsValue/waterPressure
     count spikes: true
     count steps: true
     nominal tolerance: -0.05
@@ -57,10 +57,10 @@ observations:
 ### where there are any density inversions, reject temperature only:
   - filter: Perform Action
     filter variables:
-      - name: ObsValue/ocean_temperature
+      - name: ObsValue/waterTemperature
     where:
     - variable:
-        name: DiagnosticFlags/Superadiabat/ocean_depth
+        name: DiagnosticFlags/Superadiabat/depthBelowWaterSurface
       is_true:
     action:
       name: reject
@@ -68,7 +68,7 @@ observations:
   - filter: Perform Action
     where:
     - variable:
-        name: DiagnosticFlags/DensitySpike/ocean_depth
+        name: DiagnosticFlags/DensitySpike/depthBelowWaterSurface
       is_true:
     action:
       name: reject
@@ -78,11 +78,11 @@ observations:
     - name: DerivedMetaData/number_of_levels
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: ObsValue/ocean_temperature
+                name: ObsValue/waterTemperature
               is_defined:
 # create derived metadata counting spikes and steps:
   - filter: Variable Assignment
@@ -90,14 +90,14 @@ observations:
     - name: DerivedMetaData/ocean_density_inversions
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: DiagnosticFlags/DensitySpike/ocean_depth
+                name: DiagnosticFlags/DensitySpike/depthBelowWaterSurface
               is_true:
             - variable:
-                name: DiagnosticFlags/DensityStep/ocean_depth
+                name: DiagnosticFlags/DensityStep/depthBelowWaterSurface
               is_true:
           where operator: or
 # whole profile is rejected if spikes+steps >= numlev/4, so compute
@@ -108,9 +108,9 @@ observations:
     - name: DerivedMetaData/ocean_density_rejections
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
-          variables: [ocean_density_inversions@DerivedMetaData, number_of_levels@DerivedMetaData]
+          variables: [DerivedMetaData/ocean_density_inversions, DerivedMetaData/number_of_levels]
           coefs: [4, -1]
 # reject whole profile if spikes+steps >= numlev/4 AND >= 2:
   - filter: Perform Action
