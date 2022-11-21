@@ -18,7 +18,7 @@ observations:
     simulated variables: [precipitableWater] 
   geovals: 
     filename: Data/ufo/testinput_tier_1/sattcwv_geovals_20201230T0600Z.nc4
-  norm ref: MetOfficeHofX
+  norm ref: HofX
   tolerance: 1.0e-5
   linear obs operator test:
     coef TL: 1.0e-4
@@ -41,7 +41,7 @@ observations:
     simulated variables: [precipitableWater]   
   geovals: 
     filename: Data/ufo/testinput_tier_1/sattcwv_geovals_reversed_20201230T0600Z.nc4
-  norm ref: MetOfficeHofX
+  norm ref: HofX
   tolerance: 1.0e-5
   linear obs operator test:
     coef TL: 1.0e-4
