@@ -435,6 +435,8 @@ SpcCoeff/Little_Endian/avhrr3_n18.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/avhrr3_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_n20.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
+SpcCoeff/Little_Endian/tropics_sv1_srf_v1.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v1.TauCoeff.bin
 )
 
 if( crtm_FOUND )
