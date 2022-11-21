@@ -398,10 +398,10 @@ character(len=max_string)   :: var
 ! Read in the initial values from the db
 do jvar = 1, size(self % channels)
   ! Read in from the db
-  write(var,"(A19,I0)") "emissivity_", self % channels(jvar)
+  write(var,"(A11,I0)") "emissivity_", self % channels(jvar)
   call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % emiss(jvar,:))
   if (readerror) then
-    write(var,"(A25,I0)") "emissivityError_", self % channels(jvar)
+    write(var,"(A16,I0)") "emissivityError_", self % channels(jvar)
     call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % mwemisserr(jvar,:))
   end if
 
@@ -555,7 +555,7 @@ do jvar = 1, nchans
   if (allocated(self % recalc_BT)) then
     call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:))
   end if
-  write(var,"(A19,I0)") "emissivity_", self % channels(jvar)
+  write(var,"(A11,I0)") "emissivity_", self % channels(jvar)
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
@@ -566,7 +566,7 @@ end do
 ! Output Diagnostics
 call put_1d_indb(self % output_to_db(:), obsdb, "finalCost", "OneDVar", self % final_cost(:))
 nobs = size(self % final_cost(:))
-call put_1d_indb(self % output_to_db(:), obsdb, "numberOfiterations", "OneDVar", self % niter(:))
+call put_1d_indb(self % output_to_db(:), obsdb, "numberOfIterations", "OneDVar", self % niter(:))
 
 if (self % Store1DVarLWP) then
   call put_1d_indb(self % output_to_db(:), obsdb, "liquidWaterPath", "OneDVar", self % LWP(:))
