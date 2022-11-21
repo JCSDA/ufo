@@ -11,7 +11,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/mopitt_co_2020090318_m_opr_out.nc4
-    simulated variables: [carbon_monoxide_in_total_column]
+    simulated variables: [carbonmonoxideColumn]
   obs operator:
     name: ColumnRetrieval
     nlayers_retrieval: 10
