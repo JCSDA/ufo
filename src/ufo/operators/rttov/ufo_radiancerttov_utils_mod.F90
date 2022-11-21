@@ -2504,11 +2504,11 @@ contains
   character(len=200)              :: var, message
   integer                         :: ichan
 
-  variable_present = obsspace_has(obss, surface_emissivity_group, "emissivity")
+  variable_present = obsspace_has(obss, trim(surface_emissivity_group), trim("emissivity"))
   if (variable_present) then
     do ichan = 1, size(channels)
       ! Read in from the db
-      write(var,"(A19,I0)") "emissivity_", channels(ichan)
+      write(var,"(A11,I0)") "emissivity_", channels(ichan)
       call obsspace_get_db(obss, trim(surface_emissivity_group), trim(var), sfc_emiss(ichan,:))
     end do
   else
