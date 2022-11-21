@@ -13,10 +13,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, height]
+    simulated variables: [airTemperature, height]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -26,34 +26,34 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["Basic"]
     flagBasicChecksFail: true
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["SamePDiffT"]
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["Sign"]
     SCheck_CorrectT: true
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["UnstableLayer"]
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["Interpolation"]
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     - name: height
     Checks: ["Hydrostatic"]
     HCheck_CorrectZ: true

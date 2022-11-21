@@ -9,10 +9,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -44,7 +44,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -72,10 +72,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -101,10 +101,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
