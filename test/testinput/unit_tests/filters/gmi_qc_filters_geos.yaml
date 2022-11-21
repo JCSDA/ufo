@@ -24,7 +24,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gmi_gpm_obs_2020121500_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-13
   geovals:
     filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
@@ -64,58 +64,58 @@ observations:
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-9
     minvalue: 50.0
     maxvalue: 320.0
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 10-13
     minvalue: 70.0
     maxvalue: 320.0
   - filter: Domain Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     where:
     - variable:
-        name: scan_position@MetaData
+        name: MetaData/sensorScanPosition
       minvalue: 5
       maxvalue: 70
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: -55.0
       maxvalue: 55.0
     - variable:
-        name: height_above_mean_sea_level@MetaData
+        name: MetaData/height
       maxvalue: 2000
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       minvalue: 0.99
     - variable:
-        name: average_surface_temperature_within_field_of_view@GeoVaLs
+        name: GeoVaLs/average_surface_temperature_within_field_of_view
       minvalue: 275
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: -20.0
       maxvalue: 0.0
     - variable:
-        name: longitude@MetaData
+        name: MetaData/longitude
       minvalue: 25.0
       maxvalue: 40.0
 # Save CLW retrievals from ObsValue
   - filter: Variable Assignment
     assignments:
-    - name: clw_obs@DerivedMetaData
+    - name: DerivedMetaData/clw_obs
       type: float
       function:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch37v: 6
           clwret_ch37h: 7
@@ -123,10 +123,10 @@ observations:
 # Check CLW retrievals from ObsValue
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch37v: 6
         clwret_ch37h: 7
@@ -135,10 +135,10 @@ observations:
 # Ckeck CLW retrievals from Hofx
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch37v: 6
         clwret_ch37h: 7
@@ -147,11 +147,11 @@ observations:
 # emiss_qc
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     where:
     - variable:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch37v: 6
           clwret_ch37h: 7
@@ -159,7 +159,7 @@ observations:
       minvalue: 0.0
       maxvalue: 0.05
     - variable:
-        name: Emissivity_Diff_GMI@ObsFunction
+        name: ObsFunction/Emissivity_Diff_GMI
         options:
           channel: 2
           regression_constant_1: 0.13290
@@ -174,11 +174,11 @@ observations:
       name: reject
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     where:
     - variable:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch37v: 6
           clwret_ch37h: 7
@@ -186,7 +186,7 @@ observations:
       minvalue: 0.0
       maxvalue: 0.05
     - variable:
-        name: Emissivity_Diff_GMI@ObsFunction
+        name: ObsFunction/Emissivity_Diff_GMI
         options:
           channel: 4
           regression_constant_1: 0.15627
@@ -201,11 +201,11 @@ observations:
       name: reject
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     where:
     - variable:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch37v: 6
           clwret_ch37h: 7
@@ -213,7 +213,7 @@ observations:
       minvalue: 0.0
       maxvalue: 0.05
     - variable:
-        name: Emissivity_Diff_GMI@ObsFunction
+        name: ObsFunction/Emissivity_Diff_GMI
         options:
           channel: 7
           regression_constant_1: 0.30306
@@ -229,17 +229,17 @@ observations:
 # Assign observational error in all-sky DA.
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-13
     action:
       name: assign error
       error function:
-        name: ObsErrorModelRamp@ObsFunction
+        name: ObsFunction/ObsErrorModelRamp
         channels: 1-13
         options:
           channels: 1-13
           xvar:
-            name: CLWRetSymmetricMW@ObsFunction
+            name: ObsFunction/CLWRetSymmetricMW
             options:
               clwret_ch37v: 6
               clwret_ch37h: 7
@@ -265,7 +265,7 @@ observations:
   - filter: Background Check
     apply at iterations: 0, 1
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1,2,4,6
     threshold: 2.0
     absolute threshold: 30.0
@@ -274,7 +274,7 @@ observations:
   - filter: Background Check
     apply at iterations: 0, 1
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 9,10,11
     threshold: 2.0
     absolute threshold: 20.0
@@ -283,7 +283,7 @@ observations:
   - filter: Background Check
     apply at iterations: 0, 1
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 3,5,8
     threshold: 2.0
     absolute threshold: 15.0
@@ -292,7 +292,7 @@ observations:
   - filter: Background Check
     apply at iterations: 0, 1
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 12,13
     threshold: 2.0
     absolute threshold: 10.0
@@ -301,7 +301,7 @@ observations:
   - filter: Background Check
     apply at iterations: 0, 1
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 7
     threshold: 2.0
     absolute threshold: 5.0

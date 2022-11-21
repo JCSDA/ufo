@@ -15,63 +15,63 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/ompsnp_npp_obs_2020051712_qc.nc4
       obsgrouping:
         group variables: ["latitude"]
-        sort variable: "air_pressure"
+        sort variable: "pressure"
         sort order: "ascending"
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ompsnp_npp_obs_2020051712_m_qcfilters_l127_out.nc4
-    simulated variables: [integrated_layer_ozone_in_air]
+    simulated variables: [ozoneTotal]
   geovals:
     filename: Data/ufo/testinput_tier_1/ompsnp_npp_geoval_2020051712_qc.nc4
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
-        name: total_ozone_error_flag@MetaData
+        name: MetaData/total_ozone_error_flag
       minvalue: 0.1
       maxvalue: 1.1
     action:
       name: reject
   - filter: BlackList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
-        name: total_ozone_error_flag@MetaData
+        name: MetaData/total_ozone_error_flag
       minvalue: 2.1     # toss toq>2, there are some 4 and 6
     action:
       name: reject
   - filter: BlackList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
-        name: profile_ozone_error_flag@MetaData
+        name: MetaData/profile_ozone_error_flag
       minvalue: 1.1
     action:
       name: reject
   - filter: Domain Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
-        name:  latitude@MetaData
+        name:  MetaData/latitude
       minvalue: -90.0
       maxvalue: 90.0
     - variable:
-        name:  longitude@MetaData
+        name:  MetaData/longitude
       minvalue: -180.0
       maxvalue: 360.0
   - filter: Bounds Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     minvalue: 0.000001
     maxvalue: 1000.0
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 10.0
   passedBenchmark: 4925 # out of 6490
