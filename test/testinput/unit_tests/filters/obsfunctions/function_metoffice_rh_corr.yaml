@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_rh_corr_obs.nc4
-    simulated variables: [relative_humidity]
+    simulated variables: [relativeHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -20,21 +20,21 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: HofXCorrection/relative_humidity
+    - name: HofXCorrection/relativeHumidity
       type: float
       function:
-        name: MetOfficeRelativeHumidityCorrection@ObsFunction
+        name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           model pressure: air_pressure
           model specific humidity: specific_humidity
           model relative humidity: relative_humidity
           model temperature: air_temperature
-          observed pressure: MetaData/air_pressure
+          observed pressure: MetaData/pressure
   compareVariables:
   - reference:
-      name: TestReference/relative_humidity
+      name: TestReference/relativeHumidity
     test:
-      name: HofXCorrection/relative_humidity
+      name: HofXCorrection/relativeHumidity
     absTol: 0.05
 # RH is capped to 100%
 - obs space: *obsspace
@@ -44,20 +44,20 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: HofXCorrection/relative_humidity
+    - name: HofXCorrection/relativeHumidity
       type: float
       function:
-        name: MetOfficeRelativeHumidityCorrection@ObsFunction
+        name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           model pressure: air_pressure
           model specific humidity: specific_humidity
           model relative humidity: relative_humidity
           model temperature: air_temperature
-          observed pressure: MetaData/air_pressure
+          observed pressure: MetaData/pressure
           capsupersat: true
   compareVariables:
   - reference:
       name: TestReference/relative_humidity_cap_supersat
     test:
-      name: HofXCorrection/relative_humidity
+      name: HofXCorrection/relativeHumidity
     absTol: 0.05

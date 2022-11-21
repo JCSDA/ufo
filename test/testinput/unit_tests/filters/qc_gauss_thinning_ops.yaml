@@ -22,7 +22,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out1.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -59,7 +59,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out2.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -98,7 +98,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out3.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -2310,7 +2310,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out4.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -2319,7 +2319,7 @@ observations:
     time_min: 2020-05-11T03:00:00Z
     time_max: 2020-05-11T09:00:00Z
     priority_variable:
-      name: thinning_score@MetaData
+      name: MetaData/thinningPriority
   passedObservationsBenchmark:
   - 0
   - 5
@@ -4528,7 +4528,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out5.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -4538,7 +4538,7 @@ observations:
     time_min: 2020-05-11T02:30:00Z
     time_max: 2020-05-11T09:00:00Z
     category_variable:
-      name: full_site_name@MetaData
+      name: MetaData/stationACCombined
   passedObservationsBenchmark:
   - 0
   - 5
@@ -7904,7 +7904,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out6.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
   obs filters:
   - filter: Gaussian Thinning
     ops_compatibility_mode: true
@@ -7920,7 +7920,7 @@ observations:
     time_min: 2020-05-11T02:30:00Z
     time_max: 2020-05-11T09:00:00Z
     category_variable:
-      name: full_site_name@MetaData
+      name: MetaData/stationACCombined
   passedObservationsBenchmark:
   - 0
   - 10
@@ -8954,25 +8954,25 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_gauss_thinning_lon_-180_to_180_obs_out7.nc4
-    simulated variables: [ZTD]
+    simulated variables: [zenithTotalDelay]
   obs filters:
 
   - filter: Variable Assignment
     where:
     - variable:
-        name: full_site_name@MetaData
+        name: MetaData/stationACCombined
       matches_wildcard: 'ACOR-MTGH'
     assignments:
-    - name: priority@MetaData
+    - name: MetaData/thinningPriority
       type: int
       value: 1
   - filter: Variable Assignment
     where:
     - variable:
-        name: full_site_name@MetaData
+        name: MetaData/stationACCombined
       matches_wildcard: 'ACOR-MTRH'
     assignments:
-    - name: priority@MetaData
+    - name: MetaData/thinningPriority
       type: int
       value: 2
 
@@ -8984,7 +8984,7 @@ observations:
     time_min: 2020-05-11T02:30:00Z
     time_max: 2020-05-11T09:00:00Z
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/thinningPriority
   passedObservationsBenchmark:
   - 5700
   - 6785

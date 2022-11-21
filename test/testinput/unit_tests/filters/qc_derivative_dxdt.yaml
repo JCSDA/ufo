@@ -9,10 +9,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
         sort variable: "dateTime"
         sort order: "ascending"
-    simulated variables: [virtual_temperature]
+    simulated variables: [virtualTemperature]
   obs filters:
   - filter: Derivative Check
     independent: dateTime

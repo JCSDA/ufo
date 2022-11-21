@@ -12,23 +12,23 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/test_obserror_where.nc
-    simulated variables: [surface_pressure]
+    simulated variables: [stationPressure]
 
   obs filters:
   #..Start by assigning ObsError constant for all locations.
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error parameter: 100             # 100 Pa = 1.0 mb
   #..On top of that, change/increase ObsError for some higher altitude locations using where clause.
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     where:
     - variable:
-        name: ObsValue/surface_pressure
+        name: ObsValue/stationPressure
       maxvalue: 97500
     action:
       name: assign error
@@ -40,10 +40,10 @@ observations:
     - reference:
         name: TestReference/surface_pressure_obserr
       test:
-        name: EffectiveError/surface_pressure
+        name: EffectiveError/stationPressure
       absTol: 1.0e-4
 
-#  surface_pressure = 83609.25, 98709.63, 102467, 101375.6, 99413.74, 
+#  stationPressure = 83609.25, 98709.63, 102467, 101375.6, 99413.74, 
 #     102131.1, 97782.37, 101754, 100164.1, 94506.44, 101100.3, 100185.3, 
 #     100237.9, 100321.3, 100957.6, 100621.7, 101635.8, 99499.3, 100753.1, 
 #     101949.7, 101512.6, 101483.3, 101381.9, 101101.4, 97959.95, 100890.5, 

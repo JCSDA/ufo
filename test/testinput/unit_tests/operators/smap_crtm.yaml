@@ -27,7 +27,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/smap_obs_2018041500_m_crtm_opr_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-2
   geovals:
     filename: Data/ufo/testinput_tier_1/smap_geoval_2018041500_m.nc4

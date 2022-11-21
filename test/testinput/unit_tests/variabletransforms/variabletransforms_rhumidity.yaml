@@ -8,21 +8,21 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+    simulated variables: [specificHumidity, airTemperature, stationPressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity # calculate relative humidity from specific humidity (also T, P)
                                 # using Default method and default Formulation (Roger 1989)
-    specific humidity variable: specific_humidity
-    temperature variable: air_temperature
+    specific humidity variable: specificHumidity
+    temperature variable: airTemperature
     pressure variable: air_pressure
-    pressure at 2m variable: surface_pressure
-    relative humidity variable: relative_humidity
+    pressure at 2m variable: stationPressure
+    relative humidity variable: relativeHumidity
   compareVariables:             # test output matches precalculated values
     - reference:
-        name: relative_humidity_NOAA@TestReference
+        name: TestReference/relative_humidity_NOAA
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       absTol: 1.0e-5
   passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
 
@@ -33,21 +33,21 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+    simulated variables: [specificHumidity, airTemperature, stationPressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Sonntag         # Using Sonntag formulation  (whihc is the default formulation for UKMO method)
-    specific humidity variable: specific_humidity
-    temperature variable: air_temperature
+    specific humidity variable: specificHumidity
+    temperature variable: airTemperature
     pressure variable: air_pressure
-    pressure at 2m variable: surface_pressure
-    relative humidity variable: relative_humidity
+    pressure at 2m variable: stationPressure
+    relative humidity variable: relativeHumidity
   compareVariables:                # test output matches precalculated values
     - reference:
-        name: relative_humidity_UKMO@TestReference
+        name: TestReference/relative_humidity_UKMO
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -58,21 +58,21 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+    simulated variables: [specificHumidity, airTemperature, stationPressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Walko
-    specific humidity variable: specific_humidity
-    temperature variable: air_temperature
+    specific humidity variable: specificHumidity
+    temperature variable: airTemperature
     pressure variable: air_pressure
-    pressure at 2m variable: surface_pressure
-    relative humidity variable: relative_humidity
+    pressure at 2m variable: stationPressure
+    relative humidity variable: relativeHumidity
   compareVariables:                # test output matches precalculated values
     - reference:
-        name: relative_humidity_Walko@TestReference
+        name: TestReference/relative_humidity_Walko
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       absTol: 1.0e-5
   passedBenchmark: 99
 
@@ -83,20 +83,20 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
-    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+    simulated variables: [specificHumidity, airTemperature, stationPressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Formulation: Murphy
-    specific humidity variable: specific_humidity
-    temperature variable: air_temperature
+    specific humidity variable: specificHumidity
+    temperature variable: airTemperature
     pressure variable: air_pressure
-    pressure at 2m variable: surface_pressure
-    relative humidity variable: relative_humidity
+    pressure at 2m variable: stationPressure
+    relative humidity variable: relativeHumidity
   compareVariables:                # test output matches precalculated values
     - reference:
-        name: relative_humidity_Murphy@TestReference
+        name: TestReference/relative_humidity_Murphy
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       absTol: 1.0e-5
   passedBenchmark: 99

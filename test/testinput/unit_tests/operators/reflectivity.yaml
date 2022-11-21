@@ -16,7 +16,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/radar_dbz_obs_2019052222_radar_reflectivity_opr_out.nc4
-    simulated variables: [equivalent_reflectivity_factor]
+    simulated variables: [equivalentReflectivityFactor]
   geovals:
     filename: Data/ufo/testinput_tier_1/radar_dbz_geoval_2019052222.nc4
   vector ref: GsiHofX

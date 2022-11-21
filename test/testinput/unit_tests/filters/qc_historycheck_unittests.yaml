@@ -9,7 +9,7 @@ All observations' number and time stuck tolerated:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -24,7 +24,7 @@ All observations' number and time stuck tolerated:
   History Check: &referenceStuckFilterArguments
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -39,7 +39,7 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -54,7 +54,7 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -69,7 +69,7 @@ Time stuck tolerated, number stuck untolerated, 1 value:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -84,7 +84,7 @@ Time stuck tolerated, number stuck untolerated, 1 value:
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -99,7 +99,7 @@ Time stuck tolerated, number stuck tolerated, 1 value:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -113,7 +113,7 @@ Time stuck tolerated, number stuck tolerated, 1 value:
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -128,7 +128,7 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -143,7 +143,7 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -158,7 +158,7 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -173,7 +173,7 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -186,7 +186,7 @@ Stuck check historical data:
   window end: 2030-01-01T12:01:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -201,7 +201,7 @@ Stuck check historical data:
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT3H
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -210,7 +210,7 @@ Stuck check historical data:
       name: Ship
       distribution:
         name: InefficientDistribution
-      simulated variables: [air_temperature]
+      simulated variables: [airTemperature]
       obsdatain:
         engine:
           type: GenList
@@ -230,7 +230,7 @@ All temperatures different:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -245,7 +245,7 @@ All temperatures different:
   History Check:
     input category: 'SHPSYN'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT2H
@@ -264,7 +264,7 @@ Ship Track Segment from Comparison Test early break false:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -279,7 +279,7 @@ Ship Track Segment from Comparison Test early break false:
   History Check: 
     input category: 'TEMP'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -287,7 +287,7 @@ Ship Track Segment from Comparison Test early break false:
       rejection threshold: 0.5
       early break check: false
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *trackCheckShipObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3, 4]
@@ -298,7 +298,7 @@ Ship Track Segment from Comparison Test early break true:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -313,7 +313,7 @@ Ship Track Segment from Comparison Test early break true:
   History Check:
     input category: 'TEMP'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -321,7 +321,7 @@ Ship Track Segment from Comparison Test early break true:
       rejection threshold: 0.5
       early break check: true
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *trackCheckShipObsSpace2
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3, 4, 5]
@@ -330,7 +330,7 @@ Ship track check historical data:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -344,7 +344,7 @@ Ship track check historical data:
   History Check:
     input category: 'TEMP'
     time before start of window: PT6H
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -352,7 +352,7 @@ Ship track check historical data:
       rejection threshold: 0.5
       early break check: false
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *trackCheckShipObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0]
@@ -363,7 +363,7 @@ Only ship track check, compatible with stuck check (no historical data):
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -380,7 +380,7 @@ Only ship track check, compatible with stuck check (no historical data):
   History Check:
     input category: 'OPENROAD'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -388,7 +388,7 @@ Only ship track check, compatible with stuck check (no historical data):
       rejection threshold: 0.5
       early break check: false
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *genericObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [4]
@@ -403,12 +403,12 @@ Only stuck check, compatible with trackcheckship check (no historical data):
   History Check:
     input category: 'OPENROAD'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 2
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *genericObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2]
@@ -423,7 +423,7 @@ Both checks (no historical data):
   History Check:
     input category: 'OPENROAD'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -434,7 +434,7 @@ Both checks (no historical data):
       number stuck tolerance: 2
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *genericObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 4]
@@ -443,7 +443,7 @@ Both checks (with historical data):
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -460,7 +460,7 @@ Both checks (with historical data):
   History Check:
     input category: 'OPENROAD'
     time before start of window: PT1H1M
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -471,7 +471,7 @@ Both checks (with historical data):
       number stuck tolerance: 2
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *genericObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0, 2]
@@ -482,7 +482,7 @@ Identical observations stuck check:
     name: Ship
     distribution:
       name: InefficientDistribution
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -509,12 +509,12 @@ Identical observations stuck check:
   History Check:
     input category: 'LNDSYB'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 3
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *identicalObservations
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
@@ -530,12 +530,12 @@ Different Station Ids:
   History Check:
     input category: 'LNDSYB'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 3
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *identicalObservations
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3]
@@ -551,12 +551,12 @@ String-labelled station ids:
   History Check:
     input category: 'LNDSYB'
     time before start of window: PT0S
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     stuck check parameters:
       number stuck tolerance: 3
       time stuck tolerance: PT45M
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *identicalObservations
     reset larger obs space variables: true
   expected rejected obs indices: [0, 1, 2, 3]
@@ -565,7 +565,7 @@ Ship track check future data:
   window end: 2030-01-01T00:01:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -580,7 +580,7 @@ Ship track check future data:
     input category: 'TEMP'
     time before start of window: PT0S
     time after end of window: PT6H
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     ship track check parameters:
       temporal resolution: PT1S
       spatial resolution (km): 0.0000001
@@ -588,7 +588,7 @@ Ship track check future data:
       rejection threshold: 0.5
       early break check: false
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
     obs space: *trackCheckShipObsSpace
     reset larger obs space variables: true
   expected rejected obs indices: [0]

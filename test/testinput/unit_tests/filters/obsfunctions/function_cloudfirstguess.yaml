@@ -27,7 +27,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: *cloud_first_guess_channels
 #   obsdataout:
 #     engine:
@@ -40,19 +40,19 @@ observations:
   - filter: Variable Assignment
     defer to post: true
     assignments:
-    - name: cloud_first_guess_cost@CloudFirstGuess
+    - name: CloudFirstGuess/finalCost
       type: float
       function:
-        name: CloudFirstGuessMinimumResidual@ObsFunction
+        name: ObsFunction/CloudFirstGuessMinimumResidual
         options:
           channels: *cloud_first_guess_channels
           output group: CloudFirstGuess
           obs bias group: ObsBias
   compareVariables:
     - reference:
-        name: initial_cloud_fraction@TestReference
+        name: TestReference/cloudAmount
       test:
-        name: initial_cloud_fraction@CloudFirstGuess
+        name: CloudFirstGuess/cloudAmount
       absTol: 1.0e-4
 
 - obs operator:
@@ -66,10 +66,10 @@ observations:
   - filter: Variable Assignment
     defer to post: true
     assignments:
-    - name: cloud_first_guess_cost@CloudFirstGuess
+    - name: CloudFirstGuess/finalCost
       type: float
       function:
-        name: CloudFirstGuessMinimumResidual@ObsFunction
+        name: ObsFunction/CloudFirstGuessMinimumResidual
         options:
           channels: *cloud_first_guess_channels
           output group: CloudInit
@@ -79,7 +79,7 @@ observations:
           obs bias group: ObsBias
   compareVariables:
     - reference:
-        name: initial_cloud_fraction@TestReference
+        name: TestReference/cloudAmount
       test:
-        name: init_eca@CloudInit
+        name: CloudInit/init_eca
       absTol: 1.0e-4

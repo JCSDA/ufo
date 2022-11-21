@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-15
 #   obsdataout:
 #     engine:
@@ -17,17 +17,17 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
   obs function:
-    name: CLWMatchIndexMW@ObsFunction
+    name: ObsFunction/CLWMatchIndexMW
     options:
       channels: *all_channels
       clwobs_function:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch238: 1
           clwret_ch314: 2
           clwret_types: [ObsValue]
       clwbkg_function:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch238: 1
           clwret_ch314: 2

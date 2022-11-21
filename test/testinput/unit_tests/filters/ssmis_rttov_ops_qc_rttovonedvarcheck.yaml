@@ -27,70 +27,70 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/obs_ssmis_onedvar_20210701T1200Z_rrtov_onedvarcheck_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-24
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_ssmis_onedvar_20210701T1200Z.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: surface_type@MetaData
+    - name: MetaData/surfaceQualifier
       type: int
       function:
-        name: SetSurfaceType@ObsFunction
+        name: ObsFunction/SetSurfaceType
         options:
           UseReportSurface: true
-          SurfaceReport Name: surface_flag@MetaData
+          SurfaceReport Name: MetaData/surfaceFlag
 ### Set sensor zenith angle for rttov ###
   - filter: Variable Assignment
     assignments:
-    - name: sensor_zenith_angle@MetaData
+    - name: MetaData/sensorZenithAngle
       value: 53.2
       type: float
 ### Set sensor azimuth angle for rttov ###
   - filter: Variable Assignment
     assignments:
-    - name: sensor_azimuth_angle@MetaData
+    - name: MetaData/sensorAzimuthAngle
       value: 0.0
       type: float
 ### Set solar zenith angle for rttov (probably optional) ###
   - filter: Variable Assignment
     assignments:
-    - name: solar_zenith_angle@MetaData
+    - name: MetaData/solarZenithAngle
       type: float
       function:
-        name: SolarZenith@ObsFunction
+        name: ObsFunction/SolarZenith
 ### Set solar azimuth angle for rttov ###
   - filter: Variable Assignment
     assignments:
-    - name: solar_azimuth_angle@MetaData
+    - name: MetaData/solarAzimuthAngle
       value: 0.0
       type: float
 ### Reject all channels if supplied rain_flag is /=0 ###
   - filter: RejectList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     where:
     - variable:
-        name: rain_flag@MetaData
+        name: MetaData/rainFlag
       is_not_in: 0
 ### Reject difficult channels over all surfaces ###
 ### also broken channels since start of mission ###
   - filter: RejectList
     defer to post: true
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-7,17-24
 ### Only look at sea channels ###
   - filter: RejectList
     defer to post: true
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-24
     where:
     - variable:
-        name: surface_type@MetaData
+        name: MetaData/surfaceQualifier
       is_not_in: 1
 ### Perform 1D-Var ###
   - filter: RTTOV OneDVar Check
@@ -109,7 +109,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/ssmis_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     retrieval variables from geovals:
     - air_temperature # 1
