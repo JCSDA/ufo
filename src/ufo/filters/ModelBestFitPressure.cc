@@ -94,7 +94,8 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   const std::string model_pressure_name = parameters_.model_pressure.value().variable();
   const std::string model_eastvec_name = "eastward_wind";
   const std::string model_northvec_name = "northward_wind";
-
+  const std::string obs_eastvec_name = "windEastward";
+  const std::string obs_northvec_name = "windNorthward";
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
   // Get number of vertical levels in GeoVaLs
@@ -114,17 +115,17 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
 
   // wind vector obs
   std::vector<float> obs_eastward(nlocs);
-  obsdb_.get_db("ObsValue", model_eastvec_name, obs_eastward);
+  obsdb_.get_db("ObsValue", obs_eastvec_name, obs_eastward);
   std::vector<float> obs_northward(nlocs);
-  obsdb_.get_db("ObsValue", model_northvec_name, obs_northward);
+  obsdb_.get_db("ObsValue", obs_northvec_name, obs_northward);
 
   // Get flags
   std::vector<int> u_flags(obsdb_.nlocs());
   std::vector<int> v_flags(obsdb_.nlocs());
-  if (obsdb_.has("QCFlags", model_eastvec_name) &&
-      obsdb_.has("QCFlags", model_northvec_name)) {
-    obsdb_.get_db("QCFlags", model_eastvec_name, u_flags);
-    obsdb_.get_db("QCFlags", model_northvec_name, v_flags);
+  if (obsdb_.has("QCFlags", obs_eastvec_name) &&
+      obsdb_.has("QCFlags", obs_northvec_name)) {
+    obsdb_.get_db("QCFlags", obs_eastvec_name, u_flags);
+    obsdb_.get_db("QCFlags", obs_northvec_name, v_flags);
   } else {
     throw eckit::Exception("QCFlags/windEastward or QCFlags/windNorthward not initialised",
                            Here());
@@ -261,8 +262,8 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
                       << " observations with poorly constrained bestfit pressure" << std::endl;
   }
   // write back flags and best-fit pressure/ winds
-  obsdb_.put_db("QCFlags", model_eastvec_name, u_flags);
-  obsdb_.put_db("QCFlags", model_northvec_name, v_flags);
+  obsdb_.put_db("QCFlags", obs_eastvec_name, u_flags);
+  obsdb_.put_db("QCFlags", obs_northvec_name, v_flags);
   obsdb_.put_db("DerivedValue", "pressureBestFit", satwind_best_fit_press);
   if (calculate_best_fit_winds) {
     obsdb_.put_db("DerivedValue", "windEastwardBestFit",

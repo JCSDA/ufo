@@ -12,27 +12,27 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_2020100106_yesinv_invcorr_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: eastward_wind@QCFlags
+    - name: QCFlags/windEastward
       type: int
       value: 0
-    - name: northward_wind@QCFlags
+    - name: QCFlags/windNorthward
       type: int
       value: 0
   - filter: Satwind Inversion Correction
     observation pressure:
-      name: air_pressure@MetaData
+      name: MetaData/pressure
     RH threshold: 54
   compareVariables:                       # test output matches precalculated values
     - reference:
-        name: air_pressure@TestReference  # corrected pressures from OPS
+        name: TestReference/pressure  # corrected pressures from OPS
       test:
-        name: air_pressure@MetaData       # corrected pressures in ufo
+        name: MetaData/pressure       # corrected pressures in ufo
       absTol: 1.0e-5                      # tolerance in Pa
 #---------------------------------------------------
 - obs space:
@@ -45,21 +45,21 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_small_2020100106_noinv_invcorr_reversed_geovals_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: eastward_wind@QCFlags
+    - name: QCFlags/windEastward
       type: int
       value: 0
-    - name: northward_wind@QCFlags
+    - name: QCFlags/windNorthward
       type: int
       value: 0
   - filter: Satwind Inversion Correction
     observation pressure:
-      name: air_pressure@MetaData
+      name: MetaData/pressure
     RH threshold: 54
   expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
 #---------------------------------------------------
@@ -73,12 +73,12 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_small_2020100106_noinv_invcorr_noinitialqcflag_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
   obs filters:
   - filter: Satwind Inversion Correction
     observation pressure:
-      name: air_pressure@MetaData
+      name: MetaData/pressure
     RH threshold: 54
-  expectExceptionWithMessage: eastward_wind@QCFlags or northward_wind@QCFlags not initialised
+  expectExceptionWithMessage: QCFlags/windEastward or QCFlags/windNorthward not initialised

@@ -77,9 +77,9 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 *
 * \details Performs a variable conversion from windSpeed and windDirection to
 *  the wind components, windEastward and windNorthward. The newly calculated variables
-*  are included in the same obs space. This filter supports the use of nchans as the
+*  are included in the same obs space. This filter supports the use of Channels as the
 *  the second observed dimension. The variable conversion is performed for
-*  each channel and so the output eastward_wind and northward_wind variables will have the
+*  each channel and so the output windEastward and windNorthward variables will have the
 *  same dimensions as windSpeed and windDirection.
 *
 * See VariableTransformParametersBase for filter setup.

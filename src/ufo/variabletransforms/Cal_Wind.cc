@@ -189,18 +189,18 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
       std::vector<float> v_chan = v[jchan];
       if (windspeedvariable_.find("At10M") != std::string::npos) {
         putObservation("windEastwardAt10M", std::to_string(channels[jchan]), u_chan,
-                       {"nlocs", "nchans"}, getDerivedGroup(group_));
+                       {"Location", "Channel"}, getDerivedGroup(group_));
         putObservation("windNorthwardAt10M", std::to_string(channels[jchan]), v_chan,
-                       {"nlocs", "nchans"}, getDerivedGroup(group_));
+                       {"Location", "Channel"}, getDerivedGroup(group_));
       } else {
         putObservation("windEastward", std::to_string(channels[jchan]), u_chan,
-                       {"nlocs", "nchans"}, getDerivedGroup(group_));
+                       {"Location", "Channel"}, getDerivedGroup(group_));
         putObservation("windNorthward", std::to_string(channels[jchan]), v_chan,
-                       {"nlocs", "nchans"}, getDerivedGroup(group_));
+                       {"Location", "Channel"}, getDerivedGroup(group_));
       }
     }
   } else {
-    throw eckit::Exception("nchans cannot be negative", Here());
+    throw eckit::Exception("Channel cannot be negative", Here());
   }
 }
 }  // namespace ufo
