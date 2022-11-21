@@ -14,7 +14,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_s_vertinterp_opr_missingp_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs operator:
     name: VertInterp
   geovals:
