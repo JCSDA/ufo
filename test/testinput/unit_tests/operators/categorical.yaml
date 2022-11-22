@@ -44,6 +44,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -81,6 +82,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -115,6 +117,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -150,6 +153,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -188,6 +192,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -226,6 +231,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -266,6 +272,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -306,6 +313,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -315,6 +323,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -355,6 +364,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -395,6 +405,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -436,6 +447,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -477,6 +489,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -517,6 +530,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -526,6 +540,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -563,6 +578,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -600,6 +616,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -637,6 +654,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind
@@ -678,6 +696,7 @@ observations:
          variables:
          - name: air_temperature
        - name: VertInterp
+         interpolation method: log-linear
          variables:
          - name: northward_wind
          - name: eastward_wind

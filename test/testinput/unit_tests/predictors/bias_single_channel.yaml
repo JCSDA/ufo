@@ -18,6 +18,7 @@ observations:
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
@@ -42,6 +43,7 @@ observations:
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
@@ -70,6 +72,7 @@ observations:
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
@@ -95,6 +98,7 @@ observations:
     simulated variables: [air_temperature, specific_humidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:

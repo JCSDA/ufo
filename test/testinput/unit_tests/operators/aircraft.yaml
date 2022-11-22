@@ -16,6 +16,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_m_opr_out.nc4
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   linear obs operator test:
     coef TL: 0.1
     tolerance TL: 1.0e-13

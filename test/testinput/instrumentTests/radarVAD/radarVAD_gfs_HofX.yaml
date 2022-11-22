@@ -4,6 +4,7 @@ window end: 2020-12-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
+    interpolation method: log-linear
   obs space:
     name: RadarVAD
     obsdatain:

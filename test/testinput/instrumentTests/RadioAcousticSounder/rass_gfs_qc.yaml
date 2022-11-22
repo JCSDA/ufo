@@ -21,6 +21,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
 
   obs filters:
   #

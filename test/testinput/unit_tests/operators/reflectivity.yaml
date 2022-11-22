@@ -4,6 +4,7 @@ window end: 2019-05-22T22:05:00Z
 observations:
 - obs operator:
     name: VertInterp
+    interpolation method: linear
     vertical coordinate: geopotential_height
     observation vertical coordinate: height
   obs space:

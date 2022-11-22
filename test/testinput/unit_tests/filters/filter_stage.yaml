@@ -20,6 +20,7 @@ observations:
 
   obs operator: &obsop
     name: VertInterp
+    interpolation method: log-linear
     variables:
     - name: air_temperature
     vertical coordinate: air_pressure

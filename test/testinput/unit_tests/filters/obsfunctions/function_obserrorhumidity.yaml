@@ -17,6 +17,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   obs function:
     name: ObsErrorModelHumidity@ObsFunction
     options:
@@ -42,6 +43,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   obs function:
     name: ObsErrorModelHumidity@ObsFunction
     options:
@@ -67,6 +69,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   obs function:
     name: ObsErrorModelHumidity@ObsFunction
     options:

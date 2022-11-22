@@ -21,6 +21,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   #
   obs filters:
   # Observation Range Sanity Check

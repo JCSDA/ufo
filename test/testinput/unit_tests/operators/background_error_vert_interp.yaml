@@ -21,6 +21,7 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: VertInterp
+      interpolation method: log-linear
       observation vertical coordinate: air_pressure
       observation vertical coordinate group: MetaData
     # operator used to evaluate background errors

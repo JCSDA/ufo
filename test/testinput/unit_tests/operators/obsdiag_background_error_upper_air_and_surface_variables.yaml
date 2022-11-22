@@ -19,6 +19,7 @@ obs operator:
   components:
   # operators used to evaluate H(x)
   - name: VertInterp
+    interpolation method: log-linear
     variables:
     - name: air_temperature
     - name: specific_humidity

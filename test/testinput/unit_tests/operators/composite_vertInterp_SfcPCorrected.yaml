@@ -21,6 +21,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: virtual_temperature
        - name: air_temperature

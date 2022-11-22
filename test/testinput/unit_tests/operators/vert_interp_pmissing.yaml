@@ -17,6 +17,7 @@ observations:
     simulated variables: [air_temperature]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
   vector ref: GsiHofX

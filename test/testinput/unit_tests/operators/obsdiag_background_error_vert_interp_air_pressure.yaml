@@ -19,6 +19,7 @@ obs operator:
   components:
   # operator used to evaluate H(x)
   - name: VertInterp
+    interpolation method: log-linear
   # operator used to evaluate background errors
   - name: BackgroundErrorVertInterp
     observation vertical coordinate: air_pressure

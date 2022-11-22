@@ -50,16 +50,11 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   call grid_conf%get_or_die("interpolation method",interp_method)
   self%interp_method = interp_method
 
-  !> Linear interpolation is used by default.
-  self%use_ln = .false.
-  !> Log-linear interpolation is used either if it is explicitly requested
-  !  or the method is automatically determined based on the vertical coordinate used.
-  if ((trim(self%interp_method) == "automatic" .and. &
-       ((trim(self%v_coord) .eq. var_prs) .or. &
-        (trim(self%v_coord) .eq. var_prsi) .or. &
-        (trim(self%v_coord) .eq. var_prsimo))) .or. &
-      (trim(self%interp_method) == "log-linear")) then
+  !> Log-linear or linear interpolation is selected based on the explicit request
+  if ((trim(self%interp_method) == "log-linear")) then
      self%use_ln = .true.
+  else
+     self%use_ln = .false.
   endif
 
   !> Apply scaling to winds below lowest model level

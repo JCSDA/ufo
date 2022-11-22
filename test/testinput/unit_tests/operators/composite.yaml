@@ -87,6 +87,7 @@ observations:
        - name: air_temperature
        - name: surface_pressure
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: northward_wind
        - name: eastward_wind
@@ -118,6 +119,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: northward_wind
        - name: eastward_wind
@@ -153,6 +155,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: eastward_wind
      - name: Identity
@@ -180,6 +183,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: eastward_wind
        - name: northward_wind
@@ -208,6 +212,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: eastward_wind
      - name: Identity
@@ -238,6 +243,7 @@ observations:
        - name: air_temperature
        - name: surface_pressure
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: northward_wind
        - name: eastward_wind
@@ -274,11 +280,13 @@ observations:
        variables:
        - name: surface_pressure
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: air_temperature
        vertical coordinate: air_pressure
        observation vertical coordinate: air_pressure
      - name: VertInterp
+       interpolation method: log-linear
        variables:
        - name: northward_wind
        - name: eastward_wind

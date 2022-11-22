@@ -7,6 +7,7 @@ observations:
     windowSub: PT3H
     obs operator:
       name: VertInterp
+      interpolation method: log-linear
   obs space:
     name: Radiosonde
     obsdatain:
