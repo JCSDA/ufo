@@ -13,10 +13,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_uinterp.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -24,8 +24,8 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     Checks: ["Basic", "UInterpAlternative"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -44,10 +44,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_uinterp.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -57,8 +57,8 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     Checks: ["Basic", "UInterpAlternative"]
     compareWithOPS: false
     flagBasicChecksFail: true

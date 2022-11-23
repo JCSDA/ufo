@@ -13,10 +13,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_winproflags.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -24,7 +24,7 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     Checks: ["Basic", "WinProFlags"]
     compareWithOPS: false
     flagBasicChecksFail: true

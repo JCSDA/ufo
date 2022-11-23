@@ -21,7 +21,7 @@ struct VariableNames
   static constexpr const char* const obs_eastward_wind = "ObsValue/windEastward";
   static constexpr const char* const obs_northward_wind = "ObsValue/windNorthward";
   static constexpr const char* const obs_geopotential_height = "ObsValue/height";
-  static constexpr const char* const obs_dew_point_temperature = "ObsValue/dewpointTemperature";
+  static constexpr const char* const obs_dew_point_temperature = "ObsValue/dewPointTemperature";
 
   // Derived observation values
 
@@ -35,7 +35,7 @@ struct VariableNames
   static constexpr const char* const obserr_northward_wind = "ObsErrorData/windNorthward";
   static constexpr const char* const obserr_geopotential_height = "ObsErrorData/height";
   static constexpr const char* const obserr_dew_point_temperature =
-    "ObsErrorData/dewpointTemperature";
+    "ObsErrorData/dewPointTemperature";
 
   // HofX
 
@@ -44,7 +44,7 @@ struct VariableNames
   static constexpr const char* const hofx_eastward_wind = "HofX/windEastward";
   static constexpr const char* const hofx_northward_wind = "HofX/windNorthward";
   static constexpr const char* const hofx_geopotential_height = "HofX/height";
-  static constexpr const char* const hofx_dew_point_temperature = "HofX/dewpointTemperature";
+  static constexpr const char* const hofx_dew_point_temperature = "HofX/dewPointTemperature";
 
   // Background errors
 
@@ -74,7 +74,7 @@ struct VariableNames
   // MetaData
 
   static constexpr const char* const station_ID = "MetaData/stationIdentification";
-  static constexpr const char* const ObsType = "MetaData/observationSubtypeNum";
+  static constexpr const char* const ObsType = "MetaData/observationSubTypeNum";
   static constexpr const char* const Latitude = "MetaData/latitude";
   static constexpr const char* const Longitude = "MetaData/longitude";
   static constexpr const char* const Zstation = "MetaData/stationElevation";

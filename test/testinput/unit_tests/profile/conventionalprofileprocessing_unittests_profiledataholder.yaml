@@ -12,8 +12,8 @@ ProfileDataHolder:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_oneprofile.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
