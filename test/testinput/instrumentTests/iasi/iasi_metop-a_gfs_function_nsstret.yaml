@@ -1,5 +1,5 @@
-window begin: 2020-12-01T09:00:00Z
-window end: 2020-12-01T15:00:00Z
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
 
 observations:
 - obs space:
@@ -7,8 +7,8 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obs_2020120112.nc4
-    simulated variables: [brightness_temperature]
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obs_2020110112_m.nc4
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
                             55, 56, 57, 59, 61, 62, 63, 66, 68, 70, 72, 74, 76, 78, 79, 81, 82, 83,
                             84, 85, 86, 87, 89, 92, 93, 95, 97, 99, 101, 103, 104, 106, 109, 110,
@@ -60,12 +60,12 @@ observations:
                             7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
   # can have GeoVaLs section like below
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_geoval_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_geoval_2020110112_m.nc4
   # can have ObsDiag section like below
   obs diagnostics:
-    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obsdiag_2020120112.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/iasi_metop-a_obsdiag_2020110112.nc4
   obs function:
-    name: NearSSTRetCheckIR@ObsFunction
+    name: ObsFunction/NearSSTRetCheckIR
     options:
       test_qcflag: PreQC
       test_obserr: GsiObsError_nsstret

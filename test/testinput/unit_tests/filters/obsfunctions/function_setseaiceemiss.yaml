@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_seaice.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1-20
 #   obsdataout:
 #     engine:
@@ -17,7 +17,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_seaice.nc4
   obs function:
-    name: SetSeaIceEmiss@ObsFunction
+    name: ObsFunction/SetSeaIceEmiss
     channels: *channels
     options:
       channels: *channels

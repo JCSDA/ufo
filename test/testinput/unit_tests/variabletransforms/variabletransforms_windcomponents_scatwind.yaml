@@ -13,9 +13,9 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/windcomponents_2020100106_output.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
     observed variables: []
-    derived variables: [eastward_wind, northward_wind]
+    derived variables: [windEastward, windNorthward]
     channels: 1-4
   obs filters:
   - filter: Variable Transforms
@@ -23,12 +23,12 @@ observations:
   passedBenchmark: 83518           #  Passes for channels 1-4: 16462, 16366, 5580, 3351, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
-        name: eastward_wind_derivedobsvalue@TestReference
+        name: TestReference/windEastward_derivedobsvalue
       test:
-        name: eastward_wind@DerivedObsValue
+        name: DerivedObsValue/windEastward
       absTol: 1.0e-5
     - reference:
-        name: northward_wind_derivedobsvalue@TestReference
+        name: TestReference/windNorthward_derivedobsvalue
       test:
-        name: northward_wind@DerivedObsValue
+        name: DerivedObsValue/windNorthward
       absTol: 1.0e-5

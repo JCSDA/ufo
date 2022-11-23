@@ -19,7 +19,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_opr_out1.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   vector ref: GsiHofX
@@ -28,7 +28,7 @@ observations:
 - obs operator:
     name: VertInterp
     vertical coordinate: air_pressure
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
   linear obs operator test:
     coef TL: 0.1
@@ -44,7 +44,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_opr_out2.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   vector ref: GsiHofX
@@ -53,7 +53,7 @@ observations:
 - obs operator:
     name: VertInterp
     vertical coordinate: air_pressure
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
     interpolation method: automatic
   linear obs operator test:
@@ -70,7 +70,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_opr_out3.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   vector ref: GsiHofX
@@ -78,7 +78,7 @@ observations:
 - obs operator:
     name: VertInterp
     vertical coordinate: air_pressure
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
     interpolation method: log-linear
   linear obs operator test:
@@ -95,7 +95,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_opr_out4.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   vector ref: GsiHofX
@@ -103,7 +103,7 @@ observations:
 - obs operator:
     name: VertInterp
     vertical coordinate: air_pressure
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
     interpolation method: linear
   linear obs operator test:
@@ -120,7 +120,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_m_opr_out5.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   vector ref: GsiHofX_linear

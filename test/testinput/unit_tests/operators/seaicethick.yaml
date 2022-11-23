@@ -12,8 +12,8 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/cryosat2-2018-04-15_seaicethickness_opr_out1.nc4
-    simulated variables: [sea_ice_thickness]
-    observed variables: [sea_ice_thickness]
+    simulated variables: [iceThickness]
+    observed variables: [iceThickness]
   obs operator:
     name: SeaIceThickness
   linear obs operator:
@@ -36,8 +36,8 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/cryosat2-2018-04-15_seaicethickness_opr_out2.nc4
-    simulated variables: [sea_ice_freeboard]
-    observed variables: [sea_ice_freeboard]
+    simulated variables: [seaIceFreeboard]
+    observed variables: [seaIceFreeboard]
   obs operator:
     name: SeaIceThickness
   linear obs operator:

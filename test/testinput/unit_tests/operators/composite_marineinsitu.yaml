@@ -8,16 +8,16 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
-    simulated variables: [sea_water_temperature, sea_water_salinity]
+    simulated variables: [waterTemperature, salinity]
   obs operator:
     name: Composite
     components:
      - name: InsituTemperature
        variables:
-       - name: sea_water_temperature
+       - name: waterTemperature
      - name: MarineVertInterp
        variables:
-       - name: sea_water_salinity
+       - name: salinity
   geovals:
     filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
   linear obs operator test:

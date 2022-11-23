@@ -1,0 +1,12 @@
+variable maps:
+  - name: airTemperatureAt2M
+    alias: air_temperature_at_2m
+  - name: windEastwardAt10M
+    alias: eastward_wind
+  - name: windNorthwardAt10M
+    alias: northward_wind
+  - name: specificHumidity
+    alias: specific_humidity
+  - name: seaIceFraction
+    alias: ice_area_fraction
+

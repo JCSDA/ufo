@@ -20,7 +20,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/iasi_metop-a_obs_2018041500_m_crtm_land_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
               51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
@@ -60,15 +60,15 @@ observations:
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     where:
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       maxvalue: 0.99
 #      maxvalue: 0.01
     test variables:
-    - name: brightness_temperature_jacobian_surface_temperature@ObsDiag
+    - name: ObsDiag/brightness_temperature_jacobian_surface_temperature
       channels: *all_channels
     maxvalue: 0.2
   passedBenchmark: 3755  # number of passed obs (m_unittest)

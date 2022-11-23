@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020121500_m.nc
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
   geovals:
@@ -21,7 +21,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_obs_2020121500_m.nc
-    simulated variables: [eastward_wind,northward_wind]
+    simulated variables: [windEastward,windNorthward]
   obs operator:
     name: VertInterp
     apply near surface wind scaling: true

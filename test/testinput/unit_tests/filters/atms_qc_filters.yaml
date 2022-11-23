@@ -22,7 +22,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_npp_obs_2018041500_m_qc_filters_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
@@ -47,17 +47,17 @@ observations:
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: assign error
       error function:
-        name: ObsErrorModelRamp@ObsFunction
+        name: ObsFunction/ObsErrorModelRamp
         channels: *all_channels
         options:
           channels: *all_channels
           xvar:
-            name: CLWRetSymmetricMW@ObsFunction
+            name: ObsFunction/CLWRetSymmetricMW
             options:
               clwret_ch238: 1
               clwret_ch314: 2
@@ -86,10 +86,10 @@ observations:
 #  CLW Retrieval Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-7, 16-22
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch238: 1
         clwret_ch314: 2
@@ -100,10 +100,10 @@ observations:
 #  CLW Retrieval Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-7, 16-22
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch238: 1
         clwret_ch314: 2
@@ -115,10 +115,10 @@ observations:
 #  Hydrometeor Check (cloud/precipitation affected chanels)
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: HydrometeorCheckATMS@ObsFunction
+    - name: ObsFunction/HydrometeorCheckATMS
       channels: *all_channels
       options:
         channels: *all_channels
@@ -128,18 +128,18 @@ observations:
                             4.000,  4.000,  3.500,  3.000,  3.000,
                             3.000,  3.000]
         clwret_function:
-          name: CLWRetMW@ObsFunction
+          name: ObsFunction/CLWRetMW
           options:
             clwret_ch238: 1
             clwret_ch314: 2
             clwret_types: [ObsValue]
         obserr_function:
-          name: ObsErrorModelRamp@ObsFunction
+          name: ObsFunction/ObsErrorModelRamp
           channels: *all_channels
           options:
             channels: *all_channels
             xvar:
-              name: CLWRetSymmetricMW@ObsFunction
+              name: ObsFunction/CLWRetSymmetricMW
               options:
                 clwret_ch238: 1
                 clwret_ch314: 2
@@ -171,12 +171,12 @@ observations:
 #  Topography check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorTopoRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTopoRad
         channels: *all_channels
         options:
           sensor: *Sensor_ID
@@ -185,12 +185,12 @@ observations:
 #  Transmittnace Top Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorTransmitTopRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTransmitTopRad
         channels: *all_channels
         options:
           channels: *all_channels
@@ -198,12 +198,12 @@ observations:
 #  Surface Jacobian check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorSurfJacobianRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorSurfJacobianRad
         channels: *all_channels
         options:
           channels: *all_channels
@@ -214,48 +214,48 @@ observations:
 #  Situation dependent Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorSituDependMW@ObsFunction
+        name: ObsFunction/ObsErrorFactorSituDependMW
         channels: *all_channels
         options:
           sensor: *Sensor_ID
           channels: *all_channels
           clwobs_function:
-            name: CLWRetMW@ObsFunction
+            name: ObsFunction/CLWRetMW
             options:
               clwret_ch238: 1
               clwret_ch314: 2
               clwret_types: [ObsValue]
           clwbkg_function:
-            name: CLWRetMW@ObsFunction
+            name: ObsFunction/CLWRetMW
             options:
               clwret_ch238: 1
               clwret_ch314: 2
               clwret_types: [HofX]
           scatobs_function:
-            name: SCATRetMW@ObsFunction
+            name: ObsFunction/SCATRetMW
             options:
               scatret_ch238: 1
               scatret_ch314: 2
               scatret_ch890: 16
               scatret_types: [ObsValue]
           clwmatchidx_function:
-            name: CLWMatchIndexMW@ObsFunction
+            name: ObsFunction/CLWMatchIndexMW
             channels: *all_channels
             options:
               channels: *all_channels
               clwobs_function:
-                name: CLWRetMW@ObsFunction
+                name: ObsFunction/CLWRetMW
                 options:
                   clwret_ch238: 1
                   clwret_ch314: 2
                   clwret_types: [ObsValue]
               clwbkg_function:
-                name: CLWRetMW@ObsFunction
+                name: ObsFunction/CLWRetMW
                 options:
                   clwret_ch238: 1
                   clwret_ch314: 2
@@ -274,36 +274,36 @@ observations:
 #  Gross check
   - filter: Background Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     function absolute threshold:
-    - name: ObsErrorBoundMW@ObsFunction
+    - name: ObsFunction/ObsErrorBoundMW
       channels: *all_channels
       options:
         sensor: *Sensor_ID
         channels: *all_channels
         obserr_bound_latitude:
-          name: ObsErrorFactorLatRad@ObsFunction
+          name: ObsFunction/ObsErrorFactorLatRad
           options:
             latitude_parameters: [25.0, 0.25, 0.04, 3.0]
         obserr_bound_transmittop:
-          name: ObsErrorFactorTransmitTopRad@ObsFunction
+          name: ObsFunction/ObsErrorFactorTransmitTopRad
           channels: *all_channels
           options:
             channels: *all_channels
         obserr_bound_topo:
-          name: ObsErrorFactorTopoRad@ObsFunction
+          name: ObsFunction/ObsErrorFactorTopoRad
           channels: *all_channels
           options:
             channels: *all_channels
             sensor: *Sensor_ID
         obserr_function:
-          name: ObsErrorModelRamp@ObsFunction
+          name: ObsFunction/ObsErrorModelRamp
           channels: *all_channels
           options:
             channels: *all_channels
             xvar:
-              name: CLWRetSymmetricMW@ObsFunction
+              name: ObsFunction/CLWRetSymmetricMW
               options:
                 clwret_ch238: 1
                 clwret_ch314: 2
@@ -339,10 +339,10 @@ observations:
 #  Inter-channel check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: InterChannelConsistencyCheck@ObsFunction
+    - name: ObsFunction/InterChannelConsistencyCheck
       channels: *all_channels
       options:
         channels: *all_channels
@@ -359,10 +359,10 @@ observations:
 #  Useflag check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: ChannelUseflagCheckRad@ObsFunction
+    - name: ObsFunction/ChannelUseflagCheckRad
       channels: *all_channels
       options:
         channels: *all_channels
@@ -378,7 +378,7 @@ observations:
 ##  useflag check
 #   - filter: BlackList
 #     filter variables:
-#     - name: brightness_temperature
+#     - name: brightnessTemperature
 #       channels: 15
 #     action:
 #       name: reject

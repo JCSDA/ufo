@@ -156,6 +156,8 @@ namespace ufo {
                           const std::vector<size_t> &locsExt,
                           const std::vector<float> &obs_vert_coord,
                           const std::vector<float> &model_vert_coord);
+
+  std::string addOPSPrefix(const std::string & fullname);
 }  // namespace ufo
 
 #endif  // UFO_PROFILE_PROFILEAVERAGEUTILS_H_

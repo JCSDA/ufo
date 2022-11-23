@@ -10,7 +10,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_obs_2020121500.nc
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/vadwind_geoval_2020121500.nc
   vector ref: GsiHofX

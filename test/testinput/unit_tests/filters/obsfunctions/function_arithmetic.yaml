@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
 
   obs filters:
   # Variables to perform arithmetic on

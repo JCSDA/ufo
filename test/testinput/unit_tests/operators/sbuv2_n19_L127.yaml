@@ -17,7 +17,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sbuv2_n19_obs_2020051712_m_opr_l127_out.nc4
-    simulated variables: [integrated_layer_ozone_in_air]
+    simulated variables: [ozoneLayer]
   geovals:
     filename: Data/ufo/testinput_tier_1/sbuv2_n19_geoval_2020051712_m.nc4
   vector ref: GsiHofX

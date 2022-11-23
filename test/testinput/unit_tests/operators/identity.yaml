@@ -35,7 +35,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -58,7 +58,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File

@@ -15,7 +15,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/radiance/abi_g16_obs_2021051700_m.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 7-16
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/abi_g16_geoval_2021051700_m.nc4

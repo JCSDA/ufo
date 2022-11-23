@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/scatwind_obs_2020121500_m_out.nc
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/scatwind_geoval_2020121500_m.nc
 
@@ -31,60 +31,60 @@ observations:
   # WindSat (289), ASCAT (290), or OSCAT (291) either wind component or velocity greater than 20 m/s, then reject.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     minvalue: -20
     maxvalue: 20
   # 
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: Velocity@ObsFunction
+    - name: ObsFunction/Velocity
     maxvalue: 20.0
   # Assign the initial observation error (constant value, 3.5 m/s right now).
   - filter: Perform Action
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     action:
       name: assign error
       error parameter: 3.5
   # Reject when difference of wind direction is more than 50 degrees.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: WindDirAngleDiff@ObsFunction
+    - name: ObsFunction/WindDirAngleDiff
       options:
         minimum_uv: 3.5
     maxvalue: 50.0
     action:
       name: reject
     defer to post: true
-  # Difference check surface_pressure and ObsValue/air_pressure, if more than 10 hPa, reject.
+  # Difference check surface_pressure and ObsValue/pressure, if more than 10 hPa, reject.
   - filter: Difference Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     reference: GeoVaLs/surface_pressure
-    value: MetaData/air_pressure
+    value: MetaData/pressure
     maxvalue: 1000
   # LNVD check.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: SatWindsLNVDCheck@ObsFunction
+    - name: ObsFunction/SatWindsLNVDCheck
     maxvalue: 3
   #
   - filter: Background Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     threshold: 6.0
     absolute threshold: 6.0
     action:

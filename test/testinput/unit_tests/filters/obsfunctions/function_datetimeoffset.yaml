@@ -8,22 +8,22 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: level_time_displacement@MetaData
+          offset variable name: MetaData/level_time_displacement
           offset unit: seconds
   compareVariables:
   - test:
-      name: dateTime@DerivedMetaData
+      name: DerivedMetaData/dateTime
     reference:
-      name: dateTime@TestReference
+      name: TestReference/dateTime
 
 - obs space:
     name: DateTime offset by minutes
@@ -31,22 +31,22 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: level_time_displacement_minutes@MetaData
+          offset variable name: MetaData/level_time_displacement_minutes
           offset unit: minutes
   compareVariables:
   - test:
-      name: dateTime@DerivedMetaData
+      name: DerivedMetaData/dateTime
     reference:
-      name: dateTime@TestReference
+      name: TestReference/dateTime
 
 - obs space:
     name: DateTime offset by hours
@@ -54,22 +54,22 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: level_time_displacement_hours@MetaData
+          offset variable name: MetaData/level_time_displacement_hours
           offset unit: hours
   compareVariables:
   - test:
-      name: dateTime@DerivedMetaData
+      name: DerivedMetaData/dateTime
     reference:
-      name: dateTime@TestReference
+      name: TestReference/dateTime
 
 - obs space:
     name: DateTime offset by integer seconds
@@ -77,22 +77,22 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: level_time_displacement_int@MetaData
+          offset variable name: MetaData/level_time_displacement_int
           offset unit: seconds
   compareVariables:
   - test:
-      name: dateTime@DerivedMetaData
+      name: DerivedMetaData/dateTime
     reference:
-      name: dateTime@TestReference
+      name: TestReference/dateTime
 
 - obs space:
     name: DateTime offset by a quantity with an incorrect type, throwing an exception
@@ -100,16 +100,16 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: dateTime@MetaData
+          offset variable name: MetaData/dateTime
           offset unit: seconds
   expectExceptionWithMessage: Offset variable has incorrect type
 
@@ -119,20 +119,20 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@DerivedMetaData
+    - name: DerivedMetaData/dateTime
       type: datetime
       function:
-        name: DateTimeOffset@DateTimeObsFunction
+        name: DateTimeObsFunction/DateTimeOffset
         options:
-          offset variable name: level_time_displacement@MetaData
+          offset variable name: MetaData/level_time_displacement
           offset unit: seconds
           keep in window: true
   compareVariables:
   - test:
-      name: dateTime@DerivedMetaData
+      name: DerivedMetaData/dateTime
     reference:
-      name: dateTimeKeepWindow@TestReference
+      name: TestReference/dateTimeKeepWindow

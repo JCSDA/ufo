@@ -10,7 +10,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_m.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
 #   obsdataout:
 #     engine:
 #       type: H5File

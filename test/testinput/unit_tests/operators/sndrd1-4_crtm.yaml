@@ -22,7 +22,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sndrd1_g15_obs_2018041500_m_crtm_opr_out.nc4"
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-15
   geovals:
     filename: "Data/ufo/testinput_tier_1/sndrd1_g15_geoval_2018041500_m.nc4"
@@ -47,7 +47,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sndrd2_g15_obs_2018041500_m_crtm_opr_out.nc4"
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-15
 
   geovals:
@@ -73,7 +73,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sndrd3_g15_obs_2018041500_m_crtm_opr_out.nc4"
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-15
   geovals:
     filename: Data/ufo/testinput_tier_1/sndrd3_g15_geoval_2018041500_m.nc4
@@ -98,7 +98,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sndrd4_g15_obs_2018041500_m_crtm_opr_out.nc4"
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-15
   geovals:
     filename: Data/ufo/testinput_tier_1/sndrd4_g15_geoval_2018041500_m.nc4

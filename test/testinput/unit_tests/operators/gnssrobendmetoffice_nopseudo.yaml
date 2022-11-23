@@ -13,7 +13,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_nopseudo.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -38,7 +38,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_nopseudo.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
 #   obsdataout:
 #     engine:
 #       type: H5File

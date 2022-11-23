@@ -39,7 +39,7 @@ ProcessAMVQI::~ProcessAMVQI() {
 
 // -----------------------------------------------------------------------------
 /*! \brief A filter to convert new BUFR formatted data into variables with names
- *  corressponding to the wind generating application.
+ *  corresponding to the generating application.
  *
  *  Example:
  *  \code{.unparsed}
@@ -64,7 +64,7 @@ void ProcessAMVQI::doFilter() const {
   std::vector<float> percent_confidence(nlocs);
   std::vector<int> wind_generating_application(nlocs);
 
-  // Create vector of strings for percent_confidence_<number> to new variable
+  // Create vector of strings for windPercentConfidence<number> to new variable
   // Wind generating application number = QI type
   // Table 1:
   // 1 = Full weighted mixture of individual quality tests
@@ -75,13 +75,13 @@ void ProcessAMVQI::doFilter() const {
   // 6 = QI with forecast
   // 7 = Estimated Error (EE) in m/s converted to a percent confidence
   std::vector<std::string> new_variables = {
-    "QI_full_weighted_mixture",
-    "QI_weighted_mixture_exc_forecast_comparison",
-    "QI_recursive_filter_function",
-    "QI_common",
-    "QI_without_forecast",
-    "QI_with_forecast",
-    "QI_estimated_error" };
+    "qiWeightedMixtureFull",
+    "qiWeightedMixtureWithoutForecast",
+    "qiRecursiveFilterFunction",
+    "qiCommon",
+    "qiWithoutForecast",
+    "qiWithForecast",
+    "qiEstimatedError" };
   const size_t total_variables = new_variables.size();
 
   // create variable to write to obsdb
@@ -95,8 +95,8 @@ void ProcessAMVQI::doFilter() const {
   // Get BUFR data
   for (size_t iapp = 0; iapp < number_of_apps; ++iapp) {
     // names of variables
-    std::string percent_confidence_name = "percent_confidence_";
-    std::string wind_generating_application_name = "wind_generating_application_";
+    std::string percent_confidence_name = "windPercentConfidence";
+    std::string wind_generating_application_name = "windGeneratingApplication";
 
     obsdb_.get_db("MetaData",
                   percent_confidence_name.append(std::to_string(iapp + 1)),

@@ -54,16 +54,12 @@ namespace ufo {
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
         (variableNamesInt.end(),
-         {"OPS_" +
-             std::string(ufo::VariableNames::qcflags_eastward_wind),
-             "OPS_" +
-             std::string(ufo::VariableNames::qcflags_northward_wind)});
+         {addOPSPrefix(ufo::VariableNames::qcflags_eastward_wind),
+             addOPSPrefix(ufo::VariableNames::qcflags_northward_wind)});
       variableNamesFloat.insert
         (variableNamesFloat.end(),
-         {"OPS_" +
-             std::string(ufo::VariableNames::eastward_wind_derived),
-             "OPS_" +
-             std::string(ufo::VariableNames::northward_wind_derived)});
+         {addOPSPrefix(ufo::VariableNames::eastward_wind_derived),
+             addOPSPrefix(ufo::VariableNames::northward_wind_derived)});
       variableNamesGeoVaLs.insert
         (variableNamesGeoVaLs.end(),
         {ufo::VariableNames::geovals_testreference_eastward_wind,
@@ -93,12 +89,12 @@ namespace ufo {
     ProfileAverageUtils::passNonMissingAveragedObservations
       (profileDataHandler,
        profiles,
-       "eastward_wind",
+       "windEastward",
        ufo::VariableNames::eastward_wind_derived);
     ProfileAverageUtils::passNonMissingAveragedObservations
       (profileDataHandler,
        profiles,
-       "northward_wind",
+       "windNorthward",
        ufo::VariableNames::northward_wind_derived);
 
     // Fill validation information if required.

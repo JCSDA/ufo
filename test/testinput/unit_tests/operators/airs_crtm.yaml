@@ -16,7 +16,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File

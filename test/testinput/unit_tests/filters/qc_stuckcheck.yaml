@@ -11,16 +11,16 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
-    simulated variables: [northward_wind]
-    observed variables: [northward_wind]
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
-    filter variables: [northward_wind]
+    filter variables: [windNorthward]
     number stuck tolerance: 7
     time stuck tolerance: PT2M
   flaggedObservationsBenchmark: &referenceFlaggedObsIds
@@ -41,13 +41,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out2.nc4
-    simulated variables: [northward_wind]
-    observed variables: [northward_wind]
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
     number stuck tolerance: 7
@@ -62,13 +62,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out3.nc4
-    simulated variables: [northward_wind]
-    observed variables: [northward_wind]
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
     number stuck tolerance: 7
@@ -82,16 +82,16 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out4.nc4
-    simulated variables: [northward_wind]
-    observed variables: [northward_wind]
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
-    filter variables: [northward_wind]
+    filter variables: [windNorthward]
     number stuck tolerance: 8
     time stuck tolerance: PT2M
   flaggedBenchmark: 0
@@ -103,15 +103,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out5.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Stuck Check
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     percentage stuck tolerance: 15  # 15%, i.e. number stuck tolerance: 2, for record length 12
   flaggedObservationsBenchmark:
       - 458
@@ -126,15 +126,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out6.nc4
-    simulated variables: [northward_wind]
+    simulated variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
-    filter variables: [northward_wind]
+    filter variables: [windNorthward]
     number stuck tolerance: 7
   expectExceptionWithMessage: "If percentage stuck tolerance is not set"
 - obs space:
@@ -144,15 +144,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out7.nc4
-    simulated variables: [northward_wind]
+    simulated variables: [windNorthward]
   obs filters:
   - filter: Stuck Check
-    filter variables: [northward_wind]
+    filter variables: [windNorthward]
     number stuck tolerance: 7
     time stuck tolerance: PT1H
     percentage stuck tolerance: 70
@@ -164,15 +164,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out8.nc4
-    simulated variables: [air_temperature, northward_wind]
+    simulated variables: [airTemperature, windNorthward]
   obs filters:
   - filter: Stuck Check
-    filter variables: [air_temperature, northward_wind]
+    filter variables: [airTemperature, windNorthward]
     percentage stuck tolerance: 15  # 15%, i.e. number stuck tolerance: 2, for record length 12
   flaggedObservationsBenchmark:
       - 15

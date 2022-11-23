@@ -11,7 +11,7 @@ observations:
     simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:
-    name: ModelHeightAdjustedEastwardMarineWind@ObsFunction
+    name: ObsFunction/ModelHeightAdjustedEastwardMarineWind
     variables: [windEastwardAt10M]
     tolerance: 1.0e-6
 
@@ -24,6 +24,6 @@ observations:
     simulated variables: [windEastwardAt10M,windNorthwardAt10M]
 
   obs function:
-    name: ModelHeightAdjustedNorthwardMarineWind@ObsFunction
+    name: ObsFunction/ModelHeightAdjustedNorthwardMarineWind
     variables: [windNorthwardAt10M]
     tolerance: 1.0e-6
