@@ -45,7 +45,7 @@ observations:
     Method: UKMO
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
-    pressure variable: "airPressure"
+    pressure variable: "pressure"
     temperature variable: "airTemperature"
     relative humidity variable: "relativeHumidity"
     dew point temperature variable: "dewPointTemperature"
@@ -72,7 +72,7 @@ observations:
     Method: UKMO
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
-    pressure variable: "airPressure"
+    pressure variable: "pressure"
     temperature variable: "airTemperature"
     relative humidity variable: "relativeHumidity"
     dew point temperature variable: "dewPointTemperature"
