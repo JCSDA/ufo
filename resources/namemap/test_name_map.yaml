@@ -11,4 +11,5 @@ variable maps:
     alias: relative_humidity
   - name: pressure
     alias: air_pressure
-
+  - name: virtualTemperature
+    alias: virtual_temperature
