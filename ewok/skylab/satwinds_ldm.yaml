@@ -12,6 +12,7 @@ obs space:
   derived simulated variables: [eastward_wind, northward_wind]
 obs operator:
   name: VertInterp
+  interpolation method: log-linear
   variables:
   - name: eastward_wind
   - name: northward_wind

@@ -15,6 +15,7 @@ obs space:
   simulated variables: [air_temperature, specific_humidity, eastward_wind, northward_wind]
 obs operator:
   name: VertInterp
+  interpolation method: log-linear
   variables:
   - name: air_temperature
   - name: specific_humidity

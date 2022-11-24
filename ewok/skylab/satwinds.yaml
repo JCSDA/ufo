@@ -12,6 +12,7 @@ obs space:
 #
 obs operator:
   name: VertInterp
+  interpolation method: log-linear
 #
 obs filters:
   # Observation Range Sanity Check

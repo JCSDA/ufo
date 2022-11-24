@@ -17,6 +17,7 @@ obs space:
 
 obs operator:
   name: VertInterp
+  interpolation method: linear
   variables:
   - name: air_temperature
   - name: specific_humidity
