@@ -3,7 +3,7 @@ Two records, input true everywhere:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -26,7 +26,7 @@ Two records, input true at earliest datetime in each:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -49,7 +49,7 @@ Two records, input true at latest datetime in each:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -72,7 +72,7 @@ Two records, input true at earliest datetime in each, dateTimes out of order:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -95,7 +95,7 @@ Two records, input true at latest datetime in each, dateTimes out of order:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -118,7 +118,7 @@ Two records, missing dateTime at start of each:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -141,7 +141,7 @@ Two records, all dateTimes missing:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -164,7 +164,7 @@ Two records, no grouping:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -186,7 +186,7 @@ Two records, input true everywhere, air_temperature missing at first location in
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -210,7 +210,7 @@ Two records, input true everywhere, air_temperature missing at first two locatio
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -234,7 +234,7 @@ Two records, input true everywhere, air_temperature missing everywhere, retain i
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -257,7 +257,7 @@ Two records, input true everywhere, air_temperature missing everywhere, eastward
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
@@ -280,7 +280,7 @@ Two records, input true everywhere, dateTimes out of order, air_temperature miss
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
-    simulated variables: [air_temperature, eastward_wind]
+    simulated variables: [airTemperature, windEastward]
     obsdatain:
       engine:
         type: GenList
