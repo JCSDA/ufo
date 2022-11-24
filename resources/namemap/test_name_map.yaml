@@ -13,3 +13,5 @@ variable maps:
     alias: air_pressure
   - name: virtualTemperature
     alias: virtual_temperature
+  - name: stationPressure
+    alias: surface_pressure

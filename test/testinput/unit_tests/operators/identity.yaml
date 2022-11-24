@@ -10,13 +10,14 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_s_identity_opr_out.nc4
   obs operator:
     name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -28,7 +29,7 @@ observations:
 
 # Two simulated variables.
 # The expected rms is calculated as follows:
-# sqrt((rms(air_temperature)^2 + rms(eastward_wind)^2) / 2).
+# sqrt((rms(airTemperature)^2 + rms(windEastward)^2) / 2).
 - obs space:
     name: Radiosonde
     obsdatain:
@@ -42,6 +43,7 @@ observations:
 #       obsfile: Data/sondes_obs_2018041500_s_identity_2simulatedvariables_out.nc4
   obs operator:
     name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -65,6 +67,7 @@ observations:
 #       obsfile: Data/sondes_obs_2018041500_s_identity_opr_reversed_geovals_out.nc4
   obs operator:
     name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
     level index 0 is closest to surface: true
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s_reversed.nc4
