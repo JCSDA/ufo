@@ -9,13 +9,10 @@ variable maps:
     alias: specific_humidity
   - name: relativeHumidity
     alias: relative_humidity
-<<<<<<< HEAD
   - name: pressure
     alias: air_pressure
   - name: virtualTemperature
     alias: virtual_temperature
   - name: stationPressure
     alias: surface_pressure
-=======
-    
->>>>>>> feature/sprint-ioda-converters
+
