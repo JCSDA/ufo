@@ -3,23 +3,23 @@ empty:
 full:
   opt_variable_parameter:
     channels: 1,5
-    name: MetaData/latitude
+    name: latitude@MetaData
     options:
       some_option: true
 simple_string:
-  opt_variable_parameter: MetaData/latitude
+  opt_variable_parameter: latitude@MetaData
 no_channels:
   opt_variable_parameter:
-    name: MetaData/latitude
+    name: latitude@MetaData
     options:
       some_option: true
 complex_channels:
   opt_variable_parameter:
     channels: 1,5,10-15
-    name: MetaData/latitude
+    name: latitude@MetaData
 missing_name:
   opt_variable_parameter:
 misspelled_property:
   opt_variable_parameter:
-    name: MetaData/latitude
+    name: latitude@MetaData
     canali: 1,5

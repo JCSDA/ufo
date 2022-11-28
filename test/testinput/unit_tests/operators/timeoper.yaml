@@ -7,6 +7,7 @@ observations:
     windowSub: PT3H
     obs operator:
       name: VertInterp
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: Radiosonde
     obsdatain:

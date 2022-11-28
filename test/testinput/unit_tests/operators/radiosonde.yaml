@@ -4,6 +4,7 @@ window end: 2018-04-15T03:00:00Z
 observations:
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
   linear obs operator test:
     coef TL: 0.1
@@ -27,6 +28,7 @@ observations:
 # Explicit specification of the model and observation vertical coordinates
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
     observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
@@ -52,6 +54,7 @@ observations:
 # Tests with explicit specification of the interpolation method
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
     observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
@@ -77,6 +80,7 @@ observations:
   tolerance: 1.0e-06
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
     observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
@@ -102,6 +106,7 @@ observations:
   tolerance: 1.0e-06
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
     observation vertical coordinate: pressure
     observation vertical coordinate group: MetaData
@@ -128,6 +133,7 @@ observations:
 
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
   linear obs operator test:
