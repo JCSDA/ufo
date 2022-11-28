@@ -72,11 +72,11 @@ class SelectStatisticParameters : public oops::Parameters {
 ///      select minimum: true
 ///      select maximum: true
 ///
-/// will return a vector (int) of all 0's, except 1 at the location where MetaData/depthBelowWaterSurface
-/// is minimum, i.e. topmost level, and where it is maximum, i.e. bottom-most. If observations are
-/// grouped into records, the output will have 1 at the topmost and bottom-most levels of every
-/// record. Select criteria (minimum, maximum, mean, median) are all false by default and can be
-/// used in any combination.
+/// will return a vector (int) of all 0's, except 1 at the location where
+/// MetaData/depthBelowWaterSurface is minimum, i.e. topmost level, and where it is maximum,
+/// i.e. bottom-most. If observations are grouped into records, the output will have 1 at the
+/// topmost and bottom-most levels of every record. Select criteria (minimum, maximum, mean,
+/// median) are all false by default and can be used in any combination.
 ///
 /// The intention is to use SelectStatistic with the Variable Assignment filter to create a
 /// variable that can be used in a Perform Action 'where' condition to accept/reject certain obs,
