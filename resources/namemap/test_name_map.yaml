@@ -9,4 +9,5 @@ variable maps:
     alias: specific_humidity
   - name: relativeHumidity
     alias: relative_humidity
-    
+  - name: virtualTemperature
+    alias: virtual_temperature
