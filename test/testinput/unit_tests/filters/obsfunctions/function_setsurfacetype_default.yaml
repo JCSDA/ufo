@@ -53,5 +53,5 @@ observations:
       UseReportElevation: true
       UseAAPPSurfaceClass: true
       UseSurfaceWaterFraction: false
-    variables: [surface_type_default]
+    variables: [surfaceQualifier_default]
     tolerance: 1.0e-7

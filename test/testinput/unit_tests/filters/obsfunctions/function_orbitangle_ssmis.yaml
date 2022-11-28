@@ -8,13 +8,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/ssmis_f17_20210521T1200Z_obfn_orbit_angle_ref.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1-24
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ssmis_f17_20210521T1200Z_obfn_orbit_angle_out.nc4
   obs function:
-    name: OrbitAngle@ObsFunction
-    variables: [orbit_angle]
+    name: ObsFunction/OrbitAngle
+    variables: [sensorOrbitAngle]
     tolerance: 1.0e-7
