@@ -22,12 +22,12 @@ observations:
     Transform: PressureFromHeightForProfile
     Method: UKMO
     height coordinate: geopotentialHeight
-    pressure coordinate: air_pressure
+    pressure coordinate: pressure
     pressure group: MetaData
   compareVariables:
   - test:
-      name: air_pressure@DerivedMetaData
+      name: DerivedMetaData/pressure
     reference:
-      name: air_pressure_reference@ObsValue
+      name: TestReference/pressure_reference
     relTol: 1.0e-5
  

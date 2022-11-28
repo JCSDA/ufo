@@ -28,6 +28,6 @@ observations:
   - test:
       name: DerivedMetaData/pressure
     reference:
-      name: air_pressure_ICAO_reference@ObsValue
+      name: TestReference/pressure_ICAO_reference
     relTol: 1.0e-5
  

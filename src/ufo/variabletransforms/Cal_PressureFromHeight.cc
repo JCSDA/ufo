@@ -105,7 +105,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
 
   // Here we have a choice between dew point temperature and relative humidity
   // --> By default we chose dew point temperature first!
-  getObservation("ObsValue", "dewpointTemperature",
+  getObservation("ObsValue", "dewPointTemperature",
                  dewPointTemperature);
   if (dewPointTemperature.empty()) {
     // if we don't have dewpoint temperature, use relative humidity.
@@ -114,7 +114,7 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
     getObservation("ObsValue", "relativeHumidityAt2M",
                    relativeHumiditySurface, true);
   } else {
-    getObservation("ObsValue", "dewpointTemperatureAt2M",
+    getObservation("ObsValue", "dewPointTemperatureAt2M",
                    dewPointTemperatureSurface, true);
   }
 
