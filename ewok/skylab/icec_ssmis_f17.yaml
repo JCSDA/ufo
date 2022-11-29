@@ -8,7 +8,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: noaa
   simulated variables: [sea_ice_area_fraction]
 obs operator:
