@@ -36,7 +36,9 @@ BayesianBackgroundCheck::BayesianBackgroundCheck(
         const Parameters_ & parameters,
         std::shared_ptr<ioda::ObsDataVector<int> > flags,
         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
+  : FilterBase(obsdb, parameters, flags, obserr, VariableNameMap(parameters.AliasFile.value())),
+    parameters_(parameters)
+
 {
   oops::Log::trace() << "BayesianBackgroundCheck constructor" << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
@@ -58,7 +60,8 @@ BayesianBackgroundCheck::~BayesianBackgroundCheck() {
 
 Variable BayesianBackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
   return Variable(parameters_.BkgErrGroup.value() + "/" +
-                  filterVariable.variable() + parameters_.BkgErrSuffix.value());
+                  nameMap_.convertName(filterVariable.variable()) +
+                  parameters_.BkgErrSuffix.value());
 }
 
 // -----------------------------------------------------------------------------

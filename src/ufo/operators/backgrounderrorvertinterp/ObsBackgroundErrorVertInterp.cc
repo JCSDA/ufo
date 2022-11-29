@@ -29,7 +29,7 @@ static ObsOperatorMaker<ObsBackgroundErrorVertInterp> maker("BackgroundErrorVert
 
 ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace & odb,
                                                            const Parameters_ & parameters)
-  : ObsOperatorBase(odb),
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
     odb_(odb), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBackgroundErrorVertInterp constructor entered" << std::endl;
@@ -47,7 +47,7 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   getOperatorVariables(parameters.variables.value(), obsVars,
                        operatorVars, operatorVarIndices);
   for (auto ivar : operatorVarIndices)
-    requiredVars_.push_back(obsVars[ivar] + "_background_error");
+    requiredVars_.push_back(nameMap_.convertName(obsVars[ivar]) + "_background_error");
 
   oops::Log::trace() << "ObsBackgroundErrorVertInterp created" << std::endl;
 }
@@ -67,9 +67,9 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
   oops::Variables variables;
   if (parameters_.variables.value() != boost::none)
     for (const Variable &variable : *parameters_.variables.value())
-      variables += variable.toOopsVariables();
+      variables += nameMap_.convertName(variable.toOopsVariables());
   else
-    variables = odb_.assimvariables();
+    variables = nameMap_.convertName(odb_.assimvariables());
 
   ufo_backgrounderrorvertinterp_fillobsdiags_f90(obsVerticalCoordinate.size(),
                                                  obsVerticalCoordinate.c_str(),
