@@ -5,6 +5,7 @@ observations:
   - obs operator:
       name: GSISfcModel 
       use_fact10: false
+      observation alias file: ../resources/namemap/test_name_map.yaml
     obs space:
       name: GSISfcModel
       obsdatain:
@@ -23,6 +24,7 @@ observations:
   - obs operator:
       name: GSISfcModel 
       use_fact10: false
+      observation alias file: ../resources/namemap/test_name_map.yaml
     obs space:
       name: GSISfcModel
       obsdatain:
@@ -41,6 +43,7 @@ observations:
   - obs operator:
       name: GSISfcModel 
       use_fact10: true
+      observation alias file: ../resources/namemap/test_name_map.yaml
     obs space:
       name: GSISfcModel
       obsdatain:

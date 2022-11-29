@@ -26,9 +26,9 @@ observations:
         name: TestReference/windEastward_derivedobsvalue
       test:
         name: DerivedObsValue/windEastward
-      absTol: 1.0e-5
+      absTol: 2.0e-5
     - reference:
         name: TestReference/windNorthward_derivedobsvalue
       test:
         name: DerivedObsValue/windNorthward
-      absTol: 1.0e-5
+      absTol: 2.0e-5

@@ -23,5 +23,5 @@ observations:
         ch91v: 17 
         ch91h: 18 
         varGroup: ObsValue
-    variables: [clw]
+    variables: [cloudWaterContent]
     tolerance: 1.0e-6

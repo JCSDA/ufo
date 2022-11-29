@@ -42,11 +42,6 @@ subroutine atmsfcinterp_setup_(self, f_conf)
   ! if true use the wind reduction factor
   call f_conf%get_or_die("use_fact10", self%use_fact10)
 
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
-
   !> add geopotential height
   call self%geovars%push_back(var_z)
   !> need skin temperature for near-surface interpolations
@@ -195,7 +190,8 @@ subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
       ivar = self%obsvarindices(iobsvar)
 
       ! Get the name of input variable in geovals
-      geovar = self%obsvars%variable(iobsvar)
+      geovar = self%geovars%variable(iobsvar)
+
       ! Get profile for this variable from geovals
       call ufo_geovals_get_var(geovals, geovar, profile)
 

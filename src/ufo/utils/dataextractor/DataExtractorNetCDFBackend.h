@@ -33,8 +33,8 @@ namespace ufo
 ///     Coordinates can be of type `float`, `int` or `string`. Datetimes should be represented
 ///     as ISO 8601 strings. Auxiliary coordinates are supported, i.e. there can be more than one
 ///     coordinate per dimension. Coordinate names should correspond to names of ObsSpace variables.
-///     Use the name `MetaData/sensorChannelNumber` for channel numbers (for which there's no dedicated
-///     ObsSpace variable).
+///     Use the name `MetaData/sensorChannelNumber` for channel numbers (for which there's no
+///     dedicated ObsSpace variable).
 ///   - Coordinate variables should be placed in appropriate groups, e.g. `MetaData`. Because
 ///     of the limitations of the NetCDF file format, these variables can only be used as auxiliary
 ///     coordinates of the payload variable (listed in its `coordinates` attribute).

@@ -51,7 +51,6 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   invars_ += Variable("GeoVaLs/eastward_wind");
   invars_ += Variable("GeoVaLs/northward_wind");
   invars_ += Variable("GeoVaLs/" + vcoord);
-
 }
 
 // -----------------------------------------------------------------------------

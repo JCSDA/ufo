@@ -21,6 +21,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: virtualTemperature
        - name: airTemperature

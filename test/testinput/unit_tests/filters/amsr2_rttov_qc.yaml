@@ -34,8 +34,8 @@ observations:
     filter variables:
     - name: brightnessTemperature
       channels: 7-9,11-13
-    reference: ObsValue/brightness_temperature_11
-    value: ObsValue/brightness_temperature_11
+    reference: ObsValue/brightnessTemperature_11
+    value: HofX/brightnessTemperature_11
     threshold: 4.3
     action:
       name: reject
