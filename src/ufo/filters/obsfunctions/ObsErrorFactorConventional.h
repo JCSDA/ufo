@@ -100,8 +100,8 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
 /// ### example configurations for using obsgrouping: ###
 ///
 ///      obsgrouping:
-///        group variables: ["stationIdentification", "dateTime"] # Choose parameteres to identify each of
-///                                                    # the obs profiles
+///        group variables: ["stationIdentification", "dateTime"] # Choose parameteres to identify
+///                                                    # each of the obs profiles
 ///        sort variable: "pressure"
 ///        sort order: "descending"
 ///

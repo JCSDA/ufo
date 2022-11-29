@@ -195,7 +195,7 @@ std::string fullVariableName(const Variable &var)
   if (var.group().empty())
     return var.variable();
   else
-    return var.group() + "/" + var.variable() ;
+    return var.group() + "/" + var.variable();
 }
 
 template <typename T>

@@ -22,5 +22,5 @@ observations:
       UseSurfaceWaterFraction: true
       MinIceFrac: 0.05
       MinWaterFrac: 0.99
-    variables: [surface_type]
+    variables: [surfaceQualifier]
     tolerance: 1.0e-7

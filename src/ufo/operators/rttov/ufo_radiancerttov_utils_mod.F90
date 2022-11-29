@@ -930,8 +930,8 @@ contains
     if (present(ob_info)) then 
       sat_id = ob_info % satellite_identifier
     else
-      if (obsspace_has(obss, "MetaData", "satellite_identifier")) then
-        call obsspace_get_db(obss, "MetaData", "satellite_identifier", sat_id)
+      if (obsspace_has(obss, "MetaData", "satelliteIdentifier")) then
+        call obsspace_get_db(obss, "MetaData", "satelliteIdentifier", sat_id)
       else
         self % sensor_index_array = 1
       end if

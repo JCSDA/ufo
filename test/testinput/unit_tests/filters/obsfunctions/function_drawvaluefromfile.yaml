@@ -1336,12 +1336,12 @@ observations:
       - name: MetaData/latitude
         method: trilinear
         coordinate transformation: none
-      - name: MetaData/air_pressure_negative
+      - name: MetaData/pressure_negative
         method: trilinear
         coordinate transformation: loglinear
       - name: MetaData/longitude
         method: trilinear
         coordinate transformation: none
     variables: [assigned_float_variable_trilin_logp]
-  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/air_pressure_negative'. At least one value in the data is negative.
+  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/pressure_negative'. At least one value in the data is negative.
 

@@ -46,6 +46,9 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   !> grab what vertical coordinate/variable to use from the config
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name
+  
+  call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+  self%o_v_coord = coord_name
 
   call grid_conf%get_or_die("interpolation method",interp_method)
   self%interp_method = interp_method
@@ -68,16 +71,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
     call grid_conf%get_or_die("apply near surface wind scaling", self%use_fact10)
   endif
   if (self%use_fact10) call self%geovars%push_back("wind_reduction_factor_at_10m")
-
-  !> Determine observation vertical coordinate.
-  !  Use the model vertical coordinate unless the option
-  !  'observation vertical coordinate' is specified.
-  if ( grid_conf%has("observation vertical coordinate") ) then
-    call grid_conf%get_or_die("observation vertical coordinate",coord_name)
-    self%o_v_coord = coord_name
-  else
-    self%o_v_coord = self%v_coord
-  endif
 
   !> Determine observation vertical coordinate group.
   !  Use MetaData unless the option

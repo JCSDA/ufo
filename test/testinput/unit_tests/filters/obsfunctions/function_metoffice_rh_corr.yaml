@@ -17,6 +17,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/met_office_rh_corr_gv.nc4
   obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -41,6 +42,7 @@ observations:
   geovals: *geovals
   obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Variable Assignment
     assignments:

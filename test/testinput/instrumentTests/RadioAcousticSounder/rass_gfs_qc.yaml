@@ -21,7 +21,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   obs operator:
     name: VertInterp
-
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   #
   # Reject all obs with PreQC mark already set above 3

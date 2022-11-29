@@ -83,10 +83,12 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: airTemperature
        - name: stationPressure
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
        - name: windEastward
@@ -118,10 +120,12 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
        - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: airTemperature
        - name: stationPressure
@@ -153,9 +157,11 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
   expect constructor to throw exception with message: Multiple components simulate the same variables
@@ -180,10 +186,12 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
        - name: windNorthward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
        - name: windEastward
@@ -208,9 +216,11 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
   expect constructor to throw exception with message: The list of variables simulated by the obs operator differs from the list of simulated variables in the obs space
@@ -234,10 +244,12 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: airTemperature
        - name: stationPressure
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
        - name: windEastward
@@ -271,14 +283,17 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: stationPressure
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: airTemperature
        vertical coordinate: air_pressure
        observation vertical coordinate: pressure
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
        - name: windEastward

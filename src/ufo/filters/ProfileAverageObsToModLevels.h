@@ -32,8 +32,8 @@ class ProfileAverageObsToModLevelsParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(ProfileAverageObsToModLevelsParameters, FilterParametersBase)
 
  public:
-  /// Model vertical coordinate, e.g. HofX/depthBelowWaterSurface (after VertInterp and ProfileAverage
-  ///  have been applied)
+  /// Model vertical coordinate, e.g. HofX/depthBelowWaterSurface (after VertInterp and
+  /// ProfileAverage  have been applied)
   oops::RequiredParameter<Variable> model_vertical_coordinate
     {"model vertical coordinate",
      this};

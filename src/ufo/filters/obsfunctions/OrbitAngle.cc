@@ -23,10 +23,10 @@ static ObsFunctionMaker<OrbitAngle> maker_("OrbitAngle");
 
 OrbitAngle::OrbitAngle(const eckit::LocalConfiguration & conf) {
   // List of required ObsSpace variables
-  invars_ += Variable("MetaData/ephemerisLatitude")[0];
-  invars_ += Variable("MetaData/ephemerisLongitude")[0];
-  invars_ += Variable("MetaData/ephemerisLatitude")[1];
-  invars_ += Variable("MetaData/ephemerisLongitude")[1];
+  invars_ += Variable("MetaData/ephemerisLatitude1");
+  invars_ += Variable("MetaData/ephemerisLongitude1");
+  invars_ += Variable("MetaData/ephemerisLatitude2");
+  invars_ += Variable("MetaData/ephemerisLongitude2");
   invars_ += Variable("MetaData/latitude");
   invars_ += Variable("MetaData/longitude");
   invars_ += Variable("MetaData/dateTime");
@@ -53,10 +53,10 @@ void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & 
   std::vector<float> view_lat(nlocs), view_lon(nlocs);
   std::vector<util::DateTime> datetimes(nlocs);
 
-  in.get(Variable("MetaData/ephemerisLatitude")[0], ephem_lat1);
-  in.get(Variable("MetaData/ephemerisLatitude")[1], ephem_lat2);
-  in.get(Variable("MetaData/ephemerisLongitude")[0], ephem_lon1);
-  in.get(Variable("MetaData/ephemerisLongitude")[1], ephem_lon2);
+  in.get(Variable("MetaData/ephemerisLatitude1"), ephem_lat1);
+  in.get(Variable("MetaData/ephemerisLatitude2"), ephem_lat2);
+  in.get(Variable("MetaData/ephemerisLongitude1"), ephem_lon1);
+  in.get(Variable("MetaData/ephemerisLongitude2"), ephem_lon2);
   in.get(Variable("MetaData/latitude"), view_lat);
   in.get(Variable("MetaData/longitude"), view_lon);
   in.get(Variable("MetaData/dateTime"), datetimes);
