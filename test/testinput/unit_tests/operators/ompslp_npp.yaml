@@ -4,6 +4,7 @@ window end: 2019-10-17T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: "air_pressure"
   obs space:
     name: OzoneLevel
