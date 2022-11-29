@@ -17,6 +17,7 @@
 #include "ufo/filters/ObsProcessorBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/utils/VariableNameMap.h"
 
 namespace eckit {
   class Configuration;
@@ -59,15 +60,18 @@ class FilterBase : public ObsProcessorBase {
  public:
   FilterBase(ioda::ObsSpace &, const FilterParametersBaseWithAbstractActions &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> >,
-             std::shared_ptr<ioda::ObsDataVector<float> >);
+             std::shared_ptr<ioda::ObsDataVector<float> >,
+             const VariableNameMap & nameMap = VariableNameMap(boost::none));
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,
              std::shared_ptr<ioda::ObsDataVector<int> >,
-             std::shared_ptr<ioda::ObsDataVector<float> >);
+             std::shared_ptr<ioda::ObsDataVector<float> >,
+             const VariableNameMap & nameMap = VariableNameMap(boost::none));
   ~FilterBase();
 
  protected:
   ufo::Variables filtervars_;
   ufo::Variables filtersimvars_;
+  mutable VariableNameMap nameMap_;
 
  private:
   void doFilter() const override;

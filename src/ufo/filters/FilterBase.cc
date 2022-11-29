@@ -31,12 +31,14 @@ namespace ufo {
 FilterBase::FilterBase(ioda::ObsSpace & os,
                        const FilterParametersBaseWithAbstractActions & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr,
+                       const VariableNameMap & nameMap)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     filtervars_(),
     whereParameters_(parameters.where),
     whereOperator_(parameters.whereOperator),
-    actionsParameters_(parameters.actions())
+    actionsParameters_(parameters.actions()),
+    nameMap_(nameMap)
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
 
@@ -74,11 +76,13 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
 
 FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr,
+                       const VariableNameMap & nameMap)
   : FilterBase(os,
                oops::validateAndDeserialize<GenericFilterParameters>(config),
                std::move(flags),
-               std::move(obserr))
+               std::move(obserr),
+               nameMap)
 {}
 
 // -----------------------------------------------------------------------------
