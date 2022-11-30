@@ -4,8 +4,6 @@ window end: 2018-04-15T21:00:00Z
 observations:
 - obs operator:
     name: Chlorophyll Ocean Color
-  linear obs operator:
-    name: Chlorophyll Ocean Color
   obs space:
     name: Chlorophyll
     obsdatain:
