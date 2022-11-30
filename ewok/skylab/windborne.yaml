@@ -19,3 +19,6 @@ obs operator:
   - name: air_temperature
   - name: eastward_wind
   - name: northward_wind
+obs filters:
+- filter: Background Check
+  threshold: 3
