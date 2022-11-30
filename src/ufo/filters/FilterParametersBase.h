@@ -70,6 +70,9 @@ class FilterParametersBaseWithAbstractActions : public oops::ObsFilterParameters
   /// filter.
   virtual std::vector<std::unique_ptr<FilterActionParametersBase>> actions() const = 0;
 
+  /// \brief Parameter specifying path to yaml file containing Observation to GeoVaL name mapping
+  oops::OptionalParameter<std::string> AliasFile{"observation alias file", this};
+
  protected:
   /// Parameters specifying a single action to be performed on observations flagged by the filter.
   ///

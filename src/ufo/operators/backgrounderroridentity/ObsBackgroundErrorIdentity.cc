@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsBackgroundErrorIdentity> maker("BackgroundErrorIdenti
 
 ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & odb,
                                                        const Parameters_ & parameters)
-  : ObsOperatorBase(odb),
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
     odb_(odb), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBackgroundErrorIdentity constructor entered" << std::endl;
@@ -37,7 +37,7 @@ ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & od
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.
   const oops::Variables &obsvars = odb.assimvariables();
   for (size_t ivar = 0; ivar < obsvars.size(); ++ivar)
-    requiredVars_.push_back(obsvars[ivar] + "_background_error");
+    requiredVars_.push_back(nameMap_.convertName(obsvars[ivar]) + "_background_error");
 
   oops::Log::trace() << "ObsBackgroundErrorIdentity created" << std::endl;
 }
@@ -53,9 +53,9 @@ void ObsBackgroundErrorIdentity::simulateObs(const GeoVaLs & geovals, ioda::ObsV
   oops::Variables variables;
   if (parameters_.variables.value() != boost::none)
     for (const Variable &variable : *parameters_.variables.value())
-      variables += variable.toOopsVariables();
+      variables += nameMap_.convertName(variable.toOopsVariables());
   else
-    variables = odb_.assimvariables();
+    variables = nameMap_.convertName(odb_.assimvariables());
 
   ufo_backgrounderroridentity_fillobsdiags_f90(geovals.toFortran(), hofx.nlocs(), variables,
                                                ydiags.toFortran());

@@ -1,0 +1,59 @@
+obs space:
+  name: mhs_n19
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      overwrite: true
+  _source: noaa
+  simulated variables: [brightness_temperature]
+  channels: &mhs_n19_channels 1-5
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3] #,CO2]
+  obs options:
+    Sensor_ID: &Sensor_ID mhs_n19
+    EndianType: little_endian
+obs bias:
+  variational bc:
+    predictors:
+    - name: constant
+    - name: lapse_rate
+      order: 2
+    - name: lapse_rate
+    - name: emissivity
+    - name: scan_angle
+      order: 4
+    - name: scan_angle
+      order: 3
+    - name: scan_angle
+      order: 2
+    - name: scan_angle
+  covariance:
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.0]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0
+    prior:
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+obs filters:
+- filter: Background Check
+  threshold: 3
+# Useflag check
+- filter: Bounds Check
+  filter variables:
+  - name: brightness_temperature
+    channels: *mhs_n19_channels
+  test variables:
+  - name: ChannelUseflagCheckRad@ObsFunction
+    channels: *mhs_n19_channels
+    options:
+      channels: *mhs_n19_channels
+      use_flag: [1, 1, -1, 1, 1]
+  minvalue: 1.0e-12
+  action:
+    name: reject
