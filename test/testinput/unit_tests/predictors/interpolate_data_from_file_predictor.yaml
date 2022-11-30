@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_interpolate_data_from_file_predictors.nc4
-    simulated variables: [airTemperature, windEastward, windNorthward, specificHumidity]
+    simulated variables: [air_temperature, eastward_wind, northward_wind, specific_humidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -18,15 +18,15 @@ observations:
       predictors:
       - name: interpolate_data_from_file
         corrected variables:
-        - name: airTemperature
+        - name: air_temperature
           file: Data/ufo/testinput_tier_1/bias_interpolation_air_temperature.nc4
           interpolation:
-          - name: MetaData/stationIdentification
+          - name: station_id@MetaData
             method: exact
-        - name: specificHumidity
+        - name: specific_humidity
           file: Data/ufo/testinput_tier_1/bias_interpolation_specific_humidity.nc4
           interpolation:
-          - name: MetaData/stationIdentification
+          - name: station_id@MetaData
             method: exact
   tolerance: 1.0e-16
 - obs space:
@@ -35,7 +35,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/mhs_metop-b_obs_2018041500_m_interpolate_date_from_file_predictors.nc4
-    simulated variables: [brightnessTemperature]
+    simulated variables: [brightness_temperature]
     channels: &channels 2-4
 #   obsdataout:
 #     engine:
@@ -46,11 +46,11 @@ observations:
       predictors:
       - name: interpolate_data_from_file
         corrected variables:
-        - name: brightnessTemperature
+        - name: brightness_temperature
           channels: *channels
           file: Data/ufo/testinput_tier_1/bias_interpolation_brightness_temperature.nc4
           interpolation:
-          - name: MetaData/sensorScanPosition
+          - name: scan_position@MetaData
             method: nearest  # In practice, 'exact' would probably be used. 'nearest' is used
                              # here to reduce the size of the NetCDF file used by this test.
                              # The predictor's output will depend on the scan position and also (because the
