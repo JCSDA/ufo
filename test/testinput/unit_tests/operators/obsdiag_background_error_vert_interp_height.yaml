@@ -19,8 +19,10 @@ obs operator:
   components:
   # operator used to evaluate H(x)
   - name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   # operator used to evaluate background errors
   - name: BackgroundErrorVertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: height
     vertical coordinate: background_error_height
 geovals:
