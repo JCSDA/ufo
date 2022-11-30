@@ -39,9 +39,9 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
-    obsspace.put_db("MetaData", "air_pressure", air_pressures);
+    obsspace.put_db("MetaData", "pressure", air_pressures);
     const std::vector<float> air_pressure_obserrors(air_pressures.size(), 1.0f);
-    obsspace.put_db("ObsError", "air_pressure", air_pressure_obserrors);
+    obsspace.put_db("ObsError", "pressure", air_pressure_obserrors);
   }
 
   if (conf.has("min_vertical_spacing")) {
@@ -61,7 +61,7 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   if (conf.has("priority")) {
     const std::vector<int> priorities = conf.getIntVector("priority");
-    obsspace.put_db("MetaData", "priority", priorities);
+    obsspace.put_db("MetaData", "thinningPriority", priorities);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
