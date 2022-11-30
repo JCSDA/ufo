@@ -39,7 +39,7 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   std::vector<std::string> varnames {"air_pressure", "station_id", "observation_type",
-                                     "latitude_band", "channel_number", "processing_center",
+                                     "latitude_band", "sensorChannelNumber", "processing_center",
                                      "satellite_id"};
   for (std::string varname : varnames) {
     if (conf.has(varname)) {
