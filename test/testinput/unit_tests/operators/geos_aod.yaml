@@ -32,7 +32,6 @@ observations:
   vector ref: HofX
   tolerance: 1.0e-03
   linear obs operator test:
-    coefL: 1.0e-8
     coef TL: 1.0e-8
     tolerance TL: 1.0e-08
     tolerance AD: 1.0e-09
