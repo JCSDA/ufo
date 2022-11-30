@@ -62,11 +62,8 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
      missing = missing_value(obs_vcoord(1))
   end if
 
-  ! Use logarithmic interpolation if the vertical coordinate is air_pressure,
-  ! air_pressure_levels, or air_pressure_levels_minus_one
-  use_ln = (obs_vcoord_name .eq. var_prs) .or. &
-       (obs_vcoord_name .eq. var_prsi) .or. &
-       (obs_vcoord_name .eq. var_prsimo)
+  ! Use logarithmic interpolation if the vertical coordinate is background_error_air_pressure
+  use_ln = (vcoord_name .eq. "background_error_" // var_prs)
 
   ! Calculate the interpolation weights
   allocate(interp_nodes(vcoord_profile%nval))
