@@ -15,6 +15,15 @@ variable maps:
     alias: virtual_temperature
   - name: stationPressure
     alias: surface_pressure
+  - name: surfacePressure
+    alias: surface_pressure
+  - name: seaSurfaceTemperature
+    alias: sea_surface_temperature
+  - name: equivalentReflectivityFactor
+    alias: equivalent_reflectivity_factor
+  - name: salinity
+    alias: sea_water_salinity
+  - name: seaSurfaceTemperature
+    alias: sea_surface_temperature
   - name: ozoneProfile
     alias: mole_fraction_of_ozone_in_air
-

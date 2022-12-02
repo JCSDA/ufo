@@ -40,14 +40,14 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
 
   if (conf.has("air_temperature")) {
     const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");
-    obsspace.put_db("ObsValue", "air_temperature", air_temperature);
+    obsspace.put_db("ObsValue", "airTemperature", air_temperature);
   }
 
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
-    obsspace.put_db("MetaData", "air_pressure", air_pressures);
+    obsspace.put_db("MetaData", "pressure", air_pressures);
     const std::vector<float> air_pressure_obserrors(air_pressures.size(), 1.0f);
-    obsspace.put_db("ObsError", "air_pressure", air_pressure_obserrors);
+    obsspace.put_db("ObsError", "pressure", air_pressure_obserrors);
   }
 
   if (conf.has("category")) {

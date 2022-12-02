@@ -30,6 +30,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -38,12 +39,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -68,6 +72,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: sequenceNumber
     fallback operator: "Composite"
     categorised operators: {"261": "Composite",
@@ -75,12 +80,15 @@ observations:
     "637": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -105,6 +113,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {}
@@ -112,9 +121,11 @@ observations:
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -139,17 +150,21 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -174,6 +189,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity",
@@ -182,12 +198,15 @@ observations:
     "96935": "Identity"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -212,6 +231,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity",
@@ -220,12 +240,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -251,6 +274,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -260,12 +284,15 @@ observations:
     "54857": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -291,6 +318,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite1"
     categorised operators: {"47418": "Composite1",
@@ -300,21 +328,26 @@ observations:
     operator labels: ["Identity", "Composite1", "Composite2"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -340,6 +373,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -349,12 +383,15 @@ observations:
     operator labels: ["Identity", "Composite"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -380,6 +417,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -389,12 +427,15 @@ observations:
     operator labels: ["Identity"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -421,6 +462,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -430,12 +472,15 @@ observations:
     operator labels: ["Identity", "Nonexistent"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -462,6 +507,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -471,12 +517,15 @@ observations:
     operator labels: ["Identity", "Identity"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -503,6 +552,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -511,21 +561,26 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -549,6 +604,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Nonexistent"
     categorised operators: {"47418": "Composite",
@@ -557,12 +613,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -586,6 +645,7 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -594,12 +654,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -623,7 +686,8 @@ observations:
     simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: pressure
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Nonexistent",
@@ -631,12 +695,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward
@@ -664,6 +731,7 @@ observations:
 #       obsfile: Data/sondes_obs_2018041500_s_categorical_out.nc4
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: Nonexistent
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -672,12 +740,15 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: airTemperature
        - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
          - name: windEastward

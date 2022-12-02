@@ -46,12 +46,12 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");
-    obsspace.put_db("MetaData", "station_id", stationIds);
+    obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
   if (conf.has("air_temperature")) {
     const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");
-    obsspace.put_db("ObsValue", "air_temperature", air_temperature);
+    obsspace.put_db("ObsValue", "airTemperature", air_temperature);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
