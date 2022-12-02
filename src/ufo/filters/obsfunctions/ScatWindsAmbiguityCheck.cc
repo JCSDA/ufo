@@ -53,7 +53,6 @@ void ScatwindsAmbiguityCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue(missing);
-  const double deg = Constants::rad2deg;
 
   // Ensure that only one output variable is expected.
   ASSERT(out.nvars() == 1);
