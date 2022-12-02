@@ -179,7 +179,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     ydiags.get(bt314f, hdiags);
 
     std::vector<float> scanangle(nlocs);
-    odb.get_db("MetaData", "sensor_view_angle", scanangle);
+    odb.get_db("MetaData", "sensorViewAngle", scanangle);
 
     const Predictors & predictors = biascoeffs.predictors();
     const std::size_t npreds = predictors.size();

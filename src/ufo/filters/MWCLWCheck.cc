@@ -73,7 +73,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars, "ObsValue");
-  ioda::ObsDataVector<float> sza(obsdb_, "sensor_zenith_angle", "MetaData");
+  ioda::ObsDataVector<float> sza(obsdb_, "sensorZenithAngle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_guess_out(obsdb_, "clws_guess", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_obs_out(obsdb_, "clw_obs", "Diagnostic", false);

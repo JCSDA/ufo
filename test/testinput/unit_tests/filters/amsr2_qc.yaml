@@ -40,16 +40,16 @@ observations:
         tlapse: *amsr2tlap
       - name: emissivity
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 4
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 3
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 2
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
   obs filters:
   - filter: Bounds Check
     filter variables:
