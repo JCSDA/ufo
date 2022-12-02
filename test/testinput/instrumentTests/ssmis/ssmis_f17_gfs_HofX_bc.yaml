@@ -28,7 +28,7 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cloudWaterContent
+      - name: cloud_liquid_water
         sensor: SSMIS
         ch19h: 12
         ch19v: 13
@@ -46,15 +46,15 @@ observations:
         tlapse: *ssmis_f17_tlap
       - name: emissivity
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 4
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 3
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 2
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
   vector ref: ObsValue
   tolerance: 1.5e-1

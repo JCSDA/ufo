@@ -245,7 +245,7 @@ observations:
       channels: *all_channels
     where:
     - variable:
-        name: GeoVals/water_area_fraction
+        name: GeoVaLs/water_area_fraction
       maxvalue: 0.99
     test variables:
     - name: ObsDiag/brightness_temperature_jacobian_surface_temperature
