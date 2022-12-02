@@ -41,17 +41,17 @@ void testHistoryCheck(const eckit::LocalConfiguration &conf) {
 
   if (conf.has("air_temperatures")) {
     const std::vector<float> airTemperatures = conf.getFloatVector("air_temperatures");
-    obsspace.put_db("ObsValue", "air_temperature", airTemperatures);
+    obsspace.put_db("ObsValue", "airTemperature", airTemperatures);
   }
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");
-    obsspace.put_db("MetaData", "station_id", stationIds);
+    obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
   if (conf.has("station_ids_string")) {
     const std::vector<std::string> stationIds = conf.getStringVector("station_ids_string");
-    obsspace.put_db("MetaData", "station_id", stationIds);
+    obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(

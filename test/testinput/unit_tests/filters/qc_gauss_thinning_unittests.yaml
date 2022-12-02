@@ -368,7 +368,7 @@ Vertical mesh, two bins, two string-valued categories, where clause:
     vertical_min: 1
     vertical_max: 5
     category_variable:
-      name: string_MetaData/category
+      name: MetaData/string_category
     distance_norm: maximum
     where:
     - variable:
