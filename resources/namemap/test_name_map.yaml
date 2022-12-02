@@ -15,5 +15,7 @@ variable maps:
     alias: virtual_temperature
   - name: stationPressure
     alias: surface_pressure
+  - name: salinity
+    alias: sea_water_salinity
   - name: seaSurfaceTemperature
     alias: sea_surface_temperature
