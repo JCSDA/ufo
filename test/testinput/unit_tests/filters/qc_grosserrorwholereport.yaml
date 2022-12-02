@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/grosserrorwholereport_filter_test_out.nc4
-    simulated variables: [pressureSurface,
+    simulated variables: [surfacePressure,
                           airTemperatureAt2M,
                           windEastward,
                           windNorthward,
@@ -20,7 +20,7 @@ observations:
   obs filters:
   - filter: Bayesian Whole Report
     filter variables:
-    - name: pressureSurface
+    - name: surfacePressure
       options:
         probability_density_bad: 0.1
         bogus_probability_density_bad: 0.1
@@ -44,28 +44,28 @@ observations:
   passedBenchmark: 11
   compareVariables: #  test output matches ops
     - reference:
-        name: pressureSurface@GrossErrorProbabilityTestReference
+        name: GrossErrorProbabilityTestReference/surfacePressure
       test:
-        name: pressureSurface@GrossErrorProbability
+        name: GrossErrorProbability/surfacePressure
       absTol: 5.0e-4
     - reference:
-       name: airTemperatureAt2M@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/airTemperatureAt2M
       test:
-        name: airTemperatureAt2M@GrossErrorProbability
+        name: GrossErrorProbability/airTemperatureAt2M
       absTol: 5.0e-5
     - reference:
-        name: windEastward@GrossErrorProbabilityTestReference
+        name: GrossErrorProbabilityTestReference/windEastward
       test:
-        name: windEastward@GrossErrorProbability
+        name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
     - reference:
-       name: windNorthward@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/windNorthward
       test:
-       name: windNorthward@GrossErrorProbability
+       name: GrossErrorProbability/windNorthward
       absTol: 5.0e-5
     - reference:
-       name: relativeHumidityAt2M@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/relativeHumidityAt2M
       test:
-       name: relativeHumidityAt2M@GrossErrorProbability
+       name: GrossErrorProbability/relativeHumidityAt2M
       absTol: 5.0e-5
 
