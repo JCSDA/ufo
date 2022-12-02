@@ -1,164 +1,164 @@
-Assign constant observation error value:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Aircraft
-    simulated variables: [airTemperature]
-    obsdatain:
-      engine:
-        type: GenList
-        lats: [ -2, -1, 0, 1, 2 ]
-        lons: [ 178, 179, 180, 181, 182 ]
-        dateTimes: [ 0, 3600, 7200,
-                     10800, 14400 ]
-        epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
-  air_pressure: [ 100000, 90000, 80000, 90000, 100000]
-  station_id: [ 1, 1, 1, 1, 1]
-  ObsError assign:
-    filter variables:
-    - name: airTemperature
-    action:
-      name: assign error
-      error parameter: 1.2
-  expected_obserror: [1.2, 1.2, 1.2, 1.2, 1.2]
-
-# Tests using the NetCDF backend
-
-Assign observation error from NetCDF variance; 1 exact; 1 linear (along the first axis):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Aircraft
-    simulated variables: [airTemperature]
-    obsdatain:
-      engine:
-        type: GenList
-        lats: [ -2, -1, 0, 1, 2 ]
-        lons: [ 178, 179, 180, 181, 182 ]
-        dateTimes: [ 0, 3600, 7200,
-                     10800, 14400 ]
-        epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
-  air_pressure: [ 2, 4, 6, 8, 10]
-  observation_type: [0, 1, 2, 3, 4]
-  ObsError assign:
-    filter variables:
-    - name: airTemperature
-    action:
-      name: assign error
-      error function:
-        name: ObsFunction/DrawObsErrorFromFile
-        options:
-          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
-          interpolation:
-          - name: MetaData/observation_type
-            method: exact
-          - name: MetaData/air_pressure
-            method: linear
-  expected_obserror_variance: [375.5, 601, 242.5, 175, 337]
-Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the second axis):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Aircraft
-    simulated variables: [airTemperature]
-    obsdatain:
-      engine:
-        type: GenList
-        lats: [ -6, -6, -6, -4 ]
-        lons: [ 30, 35, 40, 45 ]
-        dateTimes: [ 0,
-                     0,
-                     0,
-                     0 ]
-        epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
-  ObsError assign:
-    filter variables:
-    - name: airTemperature
-    action:
-      name: assign error
-      error function:
-        name: ObsFunction/DrawObsErrorFromFile
-        options:
-          file: Data/ufo/testinput_tier_1/obserror_latitude_longitude.nc
-          interpolation:
-          - name: MetaData/latitude
-            method: nearest
-          - name: MetaData/longitude
-            method: linear
-  expected_obserror_variance: [1, 1.5, 2, 5.5]
-Assign observation error from NetCDF variance; 1 exact; 1 nearest:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Aircraft
-    simulated variables: [airTemperature]
-    obsdatain:
-      engine:
-        type: GenList
-        lats: [ -2, -1, 0, 1, 2 ]
-        lons: [ 178, 179, 180, 181, 182 ]
-        dateTimes: [ 0, 3600, 7200,
-                     10800, 14400 ]
-        epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
-  air_pressure: [ 1, 2, 4, 13, 35]
-  observation_type: [0, 1, 2, 3, 4]
-  ObsError assign:
-    filter variables:
-    - name: airTemperature
-    action:
-      name: assign error
-      error function:
-        name: ObsFunction/DrawObsErrorFromFile
-        options:
-          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
-          interpolation:
-          - name: MetaData/observation_type
-            method: exact
-          - name: MetaData/air_pressure
-            method: nearest
-  expected_obserror_variance: [278, 755, 397, 846, 676]
-Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Aircraft
-    simulated variables: [airTemperature]
-    obsdatain:
-      engine:
-        type: GenList
-        lats: [ -2, -1, 0, 1, 2 ]
-        lons: [ 178, 179, 180, 181, 182 ]
-        dateTimes: [ 0, 3600, 7200,
-                     10800, 14400 ]
-        epoch: "seconds since 2010-01-01T00:00:00Z"
-        obs errors: [1.0]
-  satellite_id:      [ 0, 0,  1, 1,  1 ]
-  processing_center: [ 0, 1,  0, 1,  0 ]
-  latitude_band:     [ 6, 11, 4, 30, 7 ]
-  sensorChannelNumber:    [ 0, 1,  2, 3,  4 ]
-  ObsError assign:
-    filter variables:
-    - name: airTemperature
-    action:
-      name: assign error
-      error function:
-        name: ObsFunction/DrawObsErrorFromFile
-        options:
-          file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
-          interpolation:
-          - name: MetaData/sensorChannelNumber
-            method: exact
-          - name: MetaData/satellite_id
-            method: exact
-          - name: MetaData/processing_center
-            method: exact
-          - name: MetaData/latitude_band
-            method: nearest
-  expected_obserror_variance: [685, 431, 771, 25, 805]
+#Assign constant observation error value:
+#  window begin: 2000-01-01T00:00:00Z
+#  window end: 2030-01-01T00:00:00Z
+#  obs space:
+#    name: Aircraft
+#    simulated variables: [airTemperature]
+#    obsdatain:
+#      engine:
+#        type: GenList
+#        lats: [ -2, -1, 0, 1, 2 ]
+#        lons: [ 178, 179, 180, 181, 182 ]
+#        dateTimes: [ 0, 3600, 7200,
+#                     10800, 14400 ]
+#        epoch: "seconds since 2010-01-01T00:00:00Z"
+#        obs errors: [1.0]
+#  pressure: [ 100000, 90000, 80000, 90000, 100000]
+#  stationIdentification: [ 1, 1, 1, 1, 1]
+#  ObsError assign:
+#    filter variables:
+#    - name: airTemperature
+#    action:
+#      name: assign error
+#      error parameter: 1.2
+#  expected_obserror: [1.2, 1.2, 1.2, 1.2, 1.2]
+#
+## Tests using the NetCDF backend
+#
+#Assign observation error from NetCDF variance; 1 exact; 1 linear (along the first axis):
+#  window begin: 2000-01-01T00:00:00Z
+#  window end: 2030-01-01T00:00:00Z
+#  obs space:
+#    name: Aircraft
+#    simulated variables: [airTemperature]
+#    obsdatain:
+#      engine:
+#        type: GenList
+#        lats: [ -2, -1, 0, 1, 2 ]
+#        lons: [ 178, 179, 180, 181, 182 ]
+#        dateTimes: [ 0, 3600, 7200,
+#                     10800, 14400 ]
+#        epoch: "seconds since 2010-01-01T00:00:00Z"
+#        obs errors: [1.0]
+#  pressure: [ 2, 4, 6, 8, 10]
+#  observationTypeNum: [0, 1, 2, 3, 4]
+#  ObsError assign:
+#    filter variables:
+#    - name: airTemperature
+#    action:
+#      name: assign error
+#      error function:
+#        name: ObsFunction/DrawObsErrorFromFile
+#        options:
+#          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
+#          interpolation:
+#          - name: MetaData/observationTypeNum
+#            method: exact
+#          - name: MetaData/pressure
+#            method: linear
+#  expected_obserror_variance: [375.5, 601, 242.5, 175, 337]
+#Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the second axis):
+#  window begin: 2000-01-01T00:00:00Z
+#  window end: 2030-01-01T00:00:00Z
+#  obs space:
+#    name: Aircraft
+#    simulated variables: [airTemperature]
+#    obsdatain:
+#      engine:
+#        type: GenList
+#        lats: [ -6, -6, -6, -4 ]
+#        lons: [ 30, 35, 40, 45 ]
+#        dateTimes: [ 0,
+#                     0,
+#                     0,
+#                     0 ]
+#        epoch: "seconds since 2010-01-01T00:00:00Z"
+#        obs errors: [1.0]
+#  ObsError assign:
+#    filter variables:
+#    - name: airTemperature
+#    action:
+#      name: assign error
+#      error function:
+#        name: ObsFunction/DrawObsErrorFromFile
+#        options:
+#          file: Data/ufo/testinput_tier_1/obserror_latitude_longitude.nc
+#          interpolation:
+#          - name: MetaData/latitude
+#            method: nearest
+#          - name: MetaData/longitude
+#            method: linear
+#  expected_obserror_variance: [1, 1.5, 2, 5.5]
+#Assign observation error from NetCDF variance; 1 exact; 1 nearest:
+#  window begin: 2000-01-01T00:00:00Z
+#  window end: 2030-01-01T00:00:00Z
+#  obs space:
+#    name: Aircraft
+#    simulated variables: [airTemperature]
+#    obsdatain:
+#      engine:
+#        type: GenList
+#        lats: [ -2, -1, 0, 1, 2 ]
+#        lons: [ 178, 179, 180, 181, 182 ]
+#        dateTimes: [ 0, 3600, 7200,
+#                     10800, 14400 ]
+#        epoch: "seconds since 2010-01-01T00:00:00Z"
+#        obs errors: [1.0]
+#  pressure: [ 1, 2, 4, 13, 35]
+#  observationTypeNum: [0, 1, 2, 3, 4]
+#  ObsError assign:
+#    filter variables:
+#    - name: airTemperature
+#    action:
+#      name: assign error
+#      error function:
+#        name: ObsFunction/DrawObsErrorFromFile
+#        options:
+#          file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
+#          interpolation:
+#          - name: MetaData/observationTypeNum
+#            method: exact
+#          - name: MetaData/pressure
+#            method: nearest
+#  expected_obserror_variance: [278, 755, 397, 846, 676]
+#Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
+#  window begin: 2000-01-01T00:00:00Z
+#  window end: 2030-01-01T00:00:00Z
+#  obs space:
+#    name: Aircraft
+#    simulated variables: [airTemperature]
+#    obsdatain:
+#      engine:
+#        type: GenList
+#        lats: [ -2, -1, 0, 1, 2 ]
+#        lons: [ 178, 179, 180, 181, 182 ]
+#        dateTimes: [ 0, 3600, 7200,
+#                     10800, 14400 ]
+#        epoch: "seconds since 2010-01-01T00:00:00Z"
+#        obs errors: [1.0]
+#  satelliteIdentifier:      [ 0, 0,  1, 1,  1 ]
+#  dataProviderOrigin: [ 0, 1,  0, 1,  0 ]
+#  latitude_band:     [ 6, 11, 4, 30, 7 ]
+#  sensorChannelNumber:    [ 0, 1,  2, 3,  4 ]
+#  ObsError assign:
+#    filter variables:
+#    - name: airTemperature
+#    action:
+#      name: assign error
+#      error function:
+#        name: ObsFunction/DrawObsErrorFromFile
+#        options:
+#          file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
+#          interpolation:
+#          - name: MetaData/sensorChannelNumber
+#            method: exact
+#          - name: MetaData/satelliteIdentifier
+#            method: exact
+#          - name: MetaData/dataProviderOrigin
+#            method: exact
+#          - name: MetaData/latitudeBand
+#            method: nearest
+#  expected_obserror_variance: [685, 431, 771, 25, 805]
 Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrating yaml order respected with sorting:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -174,9 +174,9 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrat
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  satellite_id:      [ 0, 0,  1, 1,  1 ]
-  processing_center: [ 0, 1,  0, 1,  0 ]
-  latitude_band:     [ 6, 11, 4, 30, 7 ]
+  satelliteIdentifier:      [ 0, 0,  1, 1,  1 ]
+  dataProviderOrigin: [ 0, 1,  0, 1,  0 ]
+  latitudeBand:     [ 6, 11, 4, 30, 7 ]
   sensorChannelNumber:    [ 0, 1,  2, 3,  4 ]
   ObsError assign:
     filter variables:
@@ -188,11 +188,11 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrat
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
           interpolation:
-          - name: MetaData/processing_center
+          - name: MetaData/dataProviderOrigin
             method: exact
-          - name: MetaData/satellite_id
+          - name: MetaData/satelliteIdentifier
             method: exact
-          - name: MetaData/latitude_band
+          - name: MetaData/latitudeBand
             method: nearest
           - name: MetaData/sensorChannelNumber
             method: exact
@@ -212,9 +212,9 @@ Assign observation error from NetCDF full matrix with ioda-v2-style variable nam
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  satellite_id:      [ 0, 0,  1, 1,  1 ]
-  processing_center: [ 0, 1,  0, 1,  0 ]
-  latitude_band:     [ 6, 11, 4, 30, 7 ]
+  satelliteIdentifier:      [ 0, 0,  1, 1,  1 ]
+  dataProviderOrigin: [ 0, 1,  0, 1,  0 ]
+  latitudeBand:     [ 6, 11, 4, 30, 7 ]
   sensorChannelNumber:    [ 0, 1,  2, 3,  4 ]
   ObsError assign:
     filter variables:
@@ -226,11 +226,11 @@ Assign observation error from NetCDF full matrix with ioda-v2-style variable nam
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr_v2.nc
           interpolation:
-          - name: MetaData/processing_center
+          - name: MetaData/dataProviderOrigin
             method: exact
-          - name: MetaData/satellite_id
+          - name: MetaData/satelliteIdentifier
             method: exact
-          - name: MetaData/latitude_band
+          - name: MetaData/latitudeBand
             method: nearest
           - name: MetaData/sensorChannelNumber
             method: exact
@@ -278,8 +278,8 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [2, 4, 6, 8, 9]
-  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  pressure: [2, 4, 6, 8, 9]
+  stringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -290,9 +290,9 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: exact
           - name: MetaData/dateTime
             method: exact
@@ -314,8 +314,8 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
                        0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
           obs errors: [1.0]
-    air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
-    StringVar: [south, south, south, south, north, north, north, north]
+    pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+    stringVar: [south, south, south, south, north, north, north, north]
     ObsError assign:
       filter variables:
       - name: airTemperature
@@ -324,11 +324,11 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
         error function:
           name: ObsFunction/DrawObsErrorFromFile
           options:
-            file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.nc
+            file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.csv
             interpolation:
-            - name: MetaData/StringVar
+            - name: MetaData/stringVar
               method: exact
-            - name: MetaData/air_pressure
+            - name: MetaData/pressure
               method: exact
             - name: MetaData/longitude
               method: exact
@@ -348,8 +348,8 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [2, 4, 6, 8, 9]
-  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  pressure: [2, 4, 6, 8, 9]
+  stringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -360,7 +360,7 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: nearest
   expectExceptionWithMessage: The 'nearest' method cannot be used for string variables
 Assign observation error from NetCDF variance; attempt at using 'linear' for strings:
@@ -378,8 +378,8 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [2, 4, 6, 8, 9]
-  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  pressure: [2, 4, 6, 8, 9]
+  stringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -390,11 +390,11 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: exact
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: linear
-  expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as MetaData/StringVar
+  expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as MetaData/stringVar
 Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -410,8 +410,8 @@ Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [ 300, 300, 300, 301, 301, 301]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [ 300, 300, 300, 301, 301, 301]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -422,9 +422,9 @@ Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
         options:
           file: Data/ufo/testinput_tier_1/obserror_lower_upper_bounds.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: least upper bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6]
 Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
@@ -442,8 +442,8 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [ 599, 599, 599, 600, 600, 600]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [ 599, 599, 599, 600, 600, 600]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -454,9 +454,9 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
         options:
           file: Data/ufo/testinput_tier_1/obserror_lower_upper_bounds.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: greatest lower bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6]
 Assign observation error from NetCDF variance; no match found for an 'exact' variable:
@@ -474,8 +474,8 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [ 2, 4, 6, 8, 10]
-  observation_type: [1000, 1, 2, 3, 4]
+  pressure: [ 2, 4, 6, 8, 10]
+  observationTypeNum: [1000, 1, 2, 3, 4]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -486,11 +486,11 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance.nc
           interpolation:
-          - name: MetaData/observation_type
+          - name: MetaData/observationTypeNum
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: linear
-  expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'MetaData/observation_type'
+  expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'MetaData/observationTypeNum'
 Assign observation error from NetCDF variance; no match found for a 'least upper bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -506,8 +506,8 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [-99999, 300, 99999, 301, 301, 301]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [-99999, 300, 99999, 301, 301, 301]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -518,11 +518,11 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
         options:
           file: Data/ufo/testinput_tier_1/obserror_lower_upper_bounds.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: least upper bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
-  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'MetaData/air_pressure'
+  expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'MetaData/pressure'
 Assign observation error from NetCDF variance; no match found for a 'greatest lower bound' variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -538,8 +538,8 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [99999, 599, -99999, 600, 600, 600]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [99999, 599, -99999, 600, 600, 600]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -550,11 +550,11 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
         options:
           file: Data/ufo/testinput_tier_1/obserror_lower_upper_bounds.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: greatest lower bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
-  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'MetaData/air_pressure'
+  expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'MetaData/pressure'
 Assign observation error from NetCDF variance; attempt to use the 'least upper bound' mode for a string variable:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -570,8 +570,8 @@ Assign observation error from NetCDF variance; attempt to use the 'least upper b
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [2, 4, 6, 8, 9]
-  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  pressure: [2, 4, 6, 8, 9]
+  stringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -582,7 +582,7 @@ Assign observation error from NetCDF variance; attempt to use the 'least upper b
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: least upper bound
   expectExceptionWithMessage: The 'least upper bound' method cannot be used for string variables
 Assign observation error from NetCDF variance; attempt to use the 'greatest lower bound' mode for a string variable:
@@ -600,8 +600,8 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [2, 4, 6, 8, 9]
-  StringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
+  pressure: [2, 4, 6, 8, 9]
+  stringVar: ['aaa', 'aaa', 'bbb', 'ccc', 'ccc']
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -612,7 +612,7 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
         options:
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_extract_variance_alt.nc
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: greatest lower bound
   expectExceptionWithMessage: The 'greatest lower bound' method cannot be used for string variables
 Assign observation error from NetCDF file; no variable with the @ErrorVariance suffix:
@@ -630,8 +630,8 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [ 599, 599, 100, 600, 600, 600]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [ 599, 599, 100, 600, 600, 600]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -642,9 +642,9 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
         options:
           file: Data/ufo/testinput_tier_1/obserror_misspelled_variance.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: greatest lower bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
   expectExceptionWithMessage: "No payload variable found: no variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from NetCDF file; multiple variables with the @ErrorVariance suffix:
@@ -662,8 +662,8 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
                      10800, 14400, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [ 599, 599, 100, 600, 600, 600]
-  station_id: [0, 1, 2, 0, 1, 2]
+  pressure: [ 599, 599, 100, 600, 600, 600]
+  stationIdentification: [0, 1, 2, 0, 1, 2]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -674,9 +674,9 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
         options:
           file: Data/ufo/testinput_tier_1/obserror_multiple_variances.nc
           interpolation:
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: greatest lower bound
-          - name: MetaData/station_id
+          - name: MetaData/stationIdentification
             method: exact
   expectExceptionWithMessage: "Multiple payload candidates found: more than one variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from NetCDF file; 2D array of full covariance matrices:
@@ -725,9 +725,9 @@ Assign observation error from NetCDF variance; multi-channel variable support:
                      10800, 14400 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0, 1.0]
-  satellite_id:      [ 0, 0,  1, 1,  1 ]
-  processing_center: [ 0, 1,  0, 1,  0 ]
-  latitude_band:     [ 6, 11, 4, 30, 7 ]
+  satelliteIdentifier:      [ 0, 0,  1, 1,  1 ]
+  dataProviderOrigin: [ 0, 1,  0, 1,  0 ]
+  latitudeBand:     [ 6, 11, 4, 30, 7 ]
   ObsError assign:
     filter variables:
     - name: brightnessTemperature
@@ -741,23 +741,23 @@ Assign observation error from NetCDF variance; multi-channel variable support:
           channels: *all_channels
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
           interpolation:
-          - name: MetaData/satellite_id
+          - name: MetaData/satelliteIdentifier
             method: exact
-          - name: MetaData/processing_center
+          - name: MetaData/dataProviderOrigin
             method: exact
-          - name: MetaData/latitude_band
+          - name: MetaData/latitudeBand
             method: nearest
 ##  python-iris debug command: et = cube[2, 2, 5]; meta=[f"{coord.name()}: {coord.points[0]}" for coord in et.coords()]; print(f"data={et.data} {meta}")
-##  data[1,1,0]=871   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 0', 'MetaData/latitude_band: 5', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 0']
-##  data[1,1,3]=431   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 3', 'MetaData/latitude_band: 15', 'MetaData/processing_center: 1', 'MetaData/satelliteIdentifier: 0']
-##  data[1,1,4]=83    ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 4', 'MetaData/latitude_band: 3', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 1']
-##  data[1,1,7]=399   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 7', 'MetaData/latitude_band: 46', 'MetaData/processing_center: 1', 'MetaData/satelliteIdentifier: 1']
-##  data[1,1,5]=92    ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 5', 'MetaData/latitude_band: 8', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 1']
-##  data[2,2,0]=87.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 0', 'MetaData/latitude_band: 5', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 0']
-##  data[2,2,3]=12.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 3', 'MetaData/latitude_band: 15', 'MetaData/processing_center: 1', 'MetaData/satelliteIdentifier: 0']
-##  data[2,2,4]=771.0 ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 4', 'MetaData/latitude_band: 3', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 1']
-##  data[2,2,7]=33.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 7', 'MetaData/latitude_band: 46', 'MetaData/processing_center: 1', 'MetaData/satelliteIdentifier: 1']
-##  data[2,2,5]=308.0 ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 5', 'MetaData/latitude_band: 8', 'MetaData/processing_center: 0', 'MetaData/satelliteIdentifier: 1']
+##  data[1,1,0]=871   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 0', 'MetaData/latitude_band: 5', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 0']
+##  data[1,1,3]=431   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 3', 'MetaData/latitude_band: 15', 'MetaData/dataProviderOrigin: 1', 'MetaData/satelliteIdentifier: 0']
+##  data[1,1,4]=83    ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 4', 'MetaData/latitude_band: 3', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 1']
+##  data[1,1,7]=399   ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 7', 'MetaData/latitude_band: 46', 'MetaData/dataProviderOrigin: 1', 'MetaData/satelliteIdentifier: 1']
+##  data[1,1,5]=92    ['sensorChannelNumber: 1', 'MetaData/sensorChannelNumber: 1', 'index: 5', 'MetaData/latitude_band: 8', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 1']
+##  data[2,2,0]=87.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 0', 'MetaData/latitude_band: 5', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 0']
+##  data[2,2,3]=12.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 3', 'MetaData/latitude_band: 15', 'MetaData/dataProviderOrigin: 1', 'MetaData/satelliteIdentifier: 0']
+##  data[2,2,4]=771.0 ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 4', 'MetaData/latitude_band: 3', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 1']
+##  data[2,2,7]=33.0  ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 7', 'MetaData/latitude_band: 46', 'MetaData/dataProviderOrigin: 1', 'MetaData/satelliteIdentifier: 1']
+##  data[2,2,5]=308.0 ['sensorChannelNumber: 2', 'MetaData/sensorChannelNumber: 2', 'index: 5', 'MetaData/latitude_band: 8', 'MetaData/dataProviderOrigin: 0', 'MetaData/satelliteIdentifier: 1']
   expected_obserror_variance: [871, 431, 83, 399, 92, 87, 12, 771, 33, 308]
 
 # Tests using the CSV backend
@@ -779,8 +779,8 @@ Assign observation error from CSV file; data types float, int and string; payloa
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
-  StringVar: [south, south, south, south, north, north, north, north]
+  pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
+  stringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -791,9 +791,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
         options:
           file: Data/ufo/testinput_tier_1/obsvariance_stringvar_pressure_longitude.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: nearest
           - name: MetaData/longitude
             method: nearest
@@ -815,8 +815,8 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
-  StringVar: [south, south, south, south, north, north, north, north]
+  pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
+  stringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -827,9 +827,9 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
         options:
           file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_v2.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: nearest
           - name: MetaData/longitude
             method: nearest
@@ -851,8 +851,8 @@ Assign observation error from CSV file; data types float, int and string; payloa
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
-  StringVar: ["South America", "South America", "South America", "South America",
+  pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
+  stringVar: ["South America", "South America", "South America", "South America",
               "North America", "North America", "North America", "North America"]
   ObsError assign:
     filter variables:
@@ -864,9 +864,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
         options:
           file: Data/ufo/testinput_tier_1/obserror_spaces_in_stringvar.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: nearest
           - name: MetaData/longitude
             method: nearest
@@ -916,8 +916,8 @@ Assign observation error from CSV file; data types float, int and string; missin
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
-  StringVar: [south, south, south, south, north, north, north, north]
+  pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+  stringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -928,9 +928,9 @@ Assign observation error from CSV file; data types float, int and string; missin
         options:
           file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: exact
           - name: MetaData/longitude
             method: exact
@@ -949,8 +949,8 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -961,7 +961,7 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
         options:
           file: Data/ufo/testinput_tier_1/obserror_misspelled_variance.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: "No payload column found: no column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from CSV file; multiple columns with @ErrorVariance suffix:
@@ -978,8 +978,8 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -990,7 +990,7 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
         options:
           file: Data/ufo/testinput_tier_1/obserror_multiple_variances.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: "Multiple payload candidates found: more than one column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from CSV file; string data in column with @ErrorVariance suffix:
@@ -1007,8 +1007,8 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1019,7 +1019,7 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
         options:
           file: Data/ufo/testinput_tier_1/obserror_string_variance.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: The payload column must contain numeric data
 Assign observation error from CSV file; datetime data in column with @ErrorVariance suffix:
@@ -1036,8 +1036,8 @@ Assign observation error from CSV file; datetime data in column with @ErrorVaria
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1048,7 +1048,7 @@ Assign observation error from CSV file; datetime data in column with @ErrorVaria
         options:
           file: Data/ufo/testinput_tier_1/obserror_datetime_variance.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: The payload column must contain numeric data
 Assign observation error from CSV file; empty file:
@@ -1065,8 +1065,8 @@ Assign observation error from CSV file; empty file:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1077,7 +1077,7 @@ Assign observation error from CSV file; empty file:
         options:
           file: Data/ufo/testinput_tier_1/obserror_empty.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; only one header line:
@@ -1094,8 +1094,8 @@ Assign observation error from CSV file; only one header line:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1106,7 +1106,7 @@ Assign observation error from CSV file; only one header line:
         options:
           file: Data/ufo/testinput_tier_1/obserror_no_data_types.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; no data lines:
@@ -1123,8 +1123,8 @@ Assign observation error from CSV file; no data lines:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1135,7 +1135,7 @@ Assign observation error from CSV file; no data lines:
         options:
           file: Data/ufo/testinput_tier_1/obserror_no_data_lines.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; empty data line:
@@ -1152,8 +1152,8 @@ Assign observation error from CSV file; empty data line:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1164,7 +1164,7 @@ Assign observation error from CSV file; empty data line:
         options:
           file: Data/ufo/testinput_tier_1/obserror_empty_data_line.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; incorrect number of data types:
@@ -1181,8 +1181,8 @@ Assign observation error from CSV file; incorrect number of data types:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1193,7 +1193,7 @@ Assign observation error from CSV file; incorrect number of data types:
         options:
           file: Data/ufo/testinput_tier_1/obserror_incorrect_num_entries_in_line_2.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: The number of columns in line 2 differs from that in line 1
 Assign observation error from CSV file; incorrect number of columns in the first data line:
@@ -1210,8 +1210,8 @@ Assign observation error from CSV file; incorrect number of columns in the first
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1222,7 +1222,7 @@ Assign observation error from CSV file; incorrect number of columns in the first
         options:
           file: Data/ufo/testinput_tier_1/obserror_incorrect_num_entries_in_line_3.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: The number of columns in line 3 differs from that in line 1
 Assign observation error from CSV file; unsupported data type:
@@ -1239,8 +1239,8 @@ Assign observation error from CSV file; unsupported data type:
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1]
-  StringVar: [abc]
+  pressure: [1]
+  stringVar: [abc]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1251,7 +1251,7 @@ Assign observation error from CSV file; unsupported data type:
         options:
           file: Data/ufo/testinput_tier_1/obserror_unsupported_data_type.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: Unsupported data type 'color'
 Assign observation error from CSV file; criteria insufficient to identify a unique matching row:
@@ -1268,8 +1268,8 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
         dateTimes: [ 0 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [100000]
-  StringVar: [south]
+  pressure: [100000]
+  stringVar: [south]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1280,7 +1280,7 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
         options:
           file: Data/ufo/testinput_tier_1/obsvariance_stringvar_pressure_longitude.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: Extraction criteria were not sufficient to identify a unique match in the interpolation array
 Assign observation error from CSV file; data types float, int and string; missing values:
@@ -1300,8 +1300,8 @@ Assign observation error from CSV file; data types float, int and string; missin
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
-  StringVar: [south, south, south, south, north, north, north, north]
+  pressure: [1000, 1000, 100000, 100000, 1000, 1000, 100000, 100000]
+  stringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1312,9 +1312,9 @@ Assign observation error from CSV file; data types float, int and string; missin
         options:
           file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude_missing_values.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: exact
           - name: MetaData/longitude
             method: exact
@@ -1339,8 +1339,8 @@ Assign observation error from CSV file containing errors; data types float, int 
                      0, 3600 ]
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0]
-  air_pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
-  StringVar: [south, south, south, south, north, north, north, north]
+  pressure: [10, 10, 90000, 90000, 10, 10, 90000, 90000]
+  stringVar: [south, south, south, south, north, north, north, north]
   ObsError assign:
     filter variables:
     - name: airTemperature
@@ -1351,9 +1351,9 @@ Assign observation error from CSV file containing errors; data types float, int 
         options:
           file: Data/ufo/testinput_tier_1/obserror_stringvar_pressure_longitude.csv
           interpolation:
-          - name: MetaData/StringVar
+          - name: MetaData/stringVar
             method: exact
-          - name: MetaData/air_pressure
+          - name: MetaData/pressure
             method: nearest
           - name: MetaData/longitude
             method: nearest
