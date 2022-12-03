@@ -8,13 +8,13 @@
 #ifndef UFO_GEOVALS_H_
 #define UFO_GEOVALS_H_
 
+#include <Eigen/Core>
+
 #include <algorithm>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <gsl/gsl-lite.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
@@ -147,9 +147,10 @@ class GeoVaLs : public util::Printable,
   void write(const Parameters_ &) const;
   size_t nlocs() const;
 
-  void fill(const std::string & name, gsl::span<const size_t>, gsl::span<const double>, const bool);
-  void fillAD(const std::string & name, gsl::span<const size_t>, gsl::span<double>,
-              const bool) const;
+  void fill(const std::string & name, const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
+            const Eigen::Ref<const Eigen::MatrixXd> &vals, const bool levelsTopDown);
+  void fillAD(const std::string & name, const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
+              Eigen::Ref<Eigen::MatrixXd> vals, const bool levelsTopDown) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}

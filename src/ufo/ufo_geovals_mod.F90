@@ -1186,27 +1186,28 @@ end subroutine ufo_geovals_write_netcdf
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fill(self, varname, c_nloc, c_indx, c_nval, c_vals, levels_top_down)
+subroutine ufo_geovals_fill(self, varname, c_nloc, c_indx, c_nlev, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 character(len=*), intent(in) :: varname
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
-integer(c_int), intent(in) :: c_nval
-real(c_double), intent(in) :: c_vals(c_nval)
+integer(c_int), intent(in) :: c_nlev
+real(c_double), intent(in) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, iloc, ii
+integer :: jlev, jloc, iloc
 integer :: lbgn, lend, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fill: geovals not initialized")
 
 call ufo_geovals_get_var(self, varname, geoval)
 
+if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fill: incorrect number of levels")
+
 lbgn = 1
 lend = 1
-ii = 0
 ! setting loop indices to ensure geovals are filled top to bottom
 if (levels_top_down) then
   linc=1
@@ -1218,39 +1219,38 @@ endif
 
 do jlev = lbgn, lend, linc
   do jloc=1, c_nloc
-    ii = ii + 1
     iloc = c_indx(jloc) + 1
     if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fill: error iloc")
-    geoval%vals(jlev,iloc) = c_vals(ii)
+    geoval%vals(jlev,iloc) = c_vals(jloc,jlev)
   enddo
 enddo
-if (ii /= c_nval) call abor1_ftn("ufo_geovals_fill: error size")
 
 end subroutine ufo_geovals_fill
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fillad(self, varname, c_nloc, c_indx, c_nval, c_vals, levels_top_down)
+subroutine ufo_geovals_fillad(self, varname, c_nloc, c_indx, c_nlev, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(in) :: self
 character(len=*), intent(in) :: varname
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
-integer(c_int), intent(in) :: c_nval
-real(c_double), intent(inout) :: c_vals(c_nval)
+integer(c_int), intent(in) :: c_nlev
+real(c_double), intent(inout) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, iloc, ii
+integer :: jlev, jloc, iloc
 integer :: lbgn, lend, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fillad: geovals not initialized")
 
 call ufo_geovals_get_var(self, varname, geoval)
 
+if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fillad: incorrect number of levels")
+
 lbgn = 1
 lend = 1
-ii = 0
 ! setting loop indices to ensure geovals are filled top to bottom
 if (levels_top_down) then
   linc=1
@@ -1262,13 +1262,11 @@ endif
 
 do jlev = 1, geoval%nval
   do jloc=1, c_nloc
-    ii = ii + 1
     iloc = c_indx(jloc) + 1
     if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fillad: error iloc")
-    c_vals(ii) = geoval%vals(jlev,iloc)
+    c_vals(jloc, jlev) = geoval%vals(jlev,iloc)
   enddo
 enddo
-if (ii /= c_nval) call abor1_ftn("ufo_geovals_fillad: error size")
 
 end subroutine ufo_geovals_fillad
 
