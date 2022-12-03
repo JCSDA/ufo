@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include <gsl/gsl-lite.hpp>
+
 #include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/ObjectCounter.h"
@@ -145,8 +147,9 @@ class GeoVaLs : public util::Printable,
   void write(const Parameters_ &) const;
   size_t nlocs() const;
 
-  void fill(const std::vector<size_t> &, const std::vector<double> &, const bool);
-  void fillAD(const std::vector<size_t> &, std::vector<double> &, const bool) const;
+  void fill(const std::string & name, gsl::span<const size_t>, gsl::span<const double>, const bool);
+  void fillAD(const std::string & name, gsl::span<const size_t>, gsl::span<double>,
+              const bool) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}

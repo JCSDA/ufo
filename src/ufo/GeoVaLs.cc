@@ -486,8 +486,9 @@ void GeoVaLs::putAtLocation(const std::vector<int> & vals,
   oops::Log::trace() << "GeoVaLs::putAtLocation(int) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fill(const std::vector<size_t> & indx,
-                   const std::vector<double> & vals,
+void GeoVaLs::fill(const std::string & name,
+                   gsl::span<const size_t> indx,
+                   gsl::span<const double> vals,
                    const bool levelsTopDown) {
   oops::Log::trace() << "GeoVaLs::fill starting" << std::endl;
   const size_t npts = indx.size();
@@ -495,13 +496,15 @@ void GeoVaLs::fill(const std::vector<size_t> & indx,
   std::vector<int> findx(indx.size());
   for (size_t jj = 0; jj < indx.size(); ++jj) findx[jj] = indx[jj];
 
-  ufo_geovals_fill_f90(keyGVL_, npts, findx[0], nvals, vals[0], levelsTopDown);
+  ufo_geovals_fill_f90(keyGVL_, name.size(), name.data(),
+                          npts, findx.data(), nvals, vals.data(), levelsTopDown);
 
   oops::Log::trace() << "GeoVaLs::fill done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fillAD(const std::vector<size_t> & indx,
-                     std::vector<double> & vals,
+void GeoVaLs::fillAD(const std::string & name,
+                     gsl::span<const size_t> indx,
+                     gsl::span<double> vals,
                      const bool levelsTopDown) const {
   oops::Log::trace() << "GeoVaLs::fillAD starting" << std::endl;
   const size_t npts = indx.size();
@@ -509,7 +512,8 @@ void GeoVaLs::fillAD(const std::vector<size_t> & indx,
   std::vector<int> findx(indx.size());
   for (size_t jj = 0; jj < indx.size(); ++jj) findx[jj] = indx[jj];
 
-  ufo_geovals_fillad_f90(keyGVL_, npts, findx[0], nvals, vals[0], levelsTopDown);
+  ufo_geovals_fillad_f90(keyGVL_, name.size(), name.data(),
+                            npts, findx.data(), nvals, vals.data(), levelsTopDown);
 
   oops::Log::trace() << "GeoVaLs::fillAD done" << std::endl;
 }
