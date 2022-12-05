@@ -79,7 +79,7 @@ void ScatwindsAmbiguityCheck::compute(const ObsFilterData & in,
         out[0][jj] = 0.0;
       } else {
         vecdiff_obs = std::sqrt(std::pow(u[jj]-um[jj], 2.0) + std::pow(v[jj]-vm[jj], 2.0));
-        vecdiff_opp = std::sqrt(std::pow(-u[jj]-um[jj] ,2.0) + std::pow(-v[jj]-vm[jj] ,2.0));
+        vecdiff_opp = std::sqrt(std::pow(-u[jj]-um[jj], 2.0) + std::pow(-v[jj]-vm[jj], 2.0));
         out[0][jj] = vecdiff_obs-vecdiff_opp;
       }
     } else {
