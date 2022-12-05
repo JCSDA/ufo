@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2022 NOAA NWS NCEP EMC
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -21,7 +21,8 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ScatWindsAmbiguityCheck> makerObsFuncScatWindsAmbiguityCheck_("ScatWindsAmbiguityCheck");
+static ObsFunctionMaker<ScatWindsAmbiguityCheck> makerObsFuncScatWindsAmbiguityCheck\
+_("ScatWindsAmbiguityCheck");
 
 // -----------------------------------------------------------------------------
 
@@ -77,8 +78,8 @@ void ScatwindsAmbiguityCheck::compute(const ObsFilterData & in,
       if (std::abs(u[jj]) < min_uv && std::abs(v[jj]) < min_uv) {
         out[0][jj] = 0.0;
       } else {
-        vecdiff_obs = std::sqrt(std::pow(u[jj]-um[jj],2.0) + std::pow(v[jj]-vm[jj],2.0));
-        vecdiff_opp = std::sqrt(std::pow(-u[jj]-um[jj],2.0) + std::pow(-v[jj]-vm[jj],2.0));
+        vecdiff_obs = std::sqrt(std::pow(u[jj]-um[jj], 2.0) + std::pow(v[jj]-vm[jj], 2.0));
+        vecdiff_opp = std::sqrt(std::pow(-u[jj]-um[jj] ,2.0) + std::pow(-v[jj]-vm[jj] ,2.0));
         out[0][jj] = vecdiff_obs-vecdiff_opp;
       }
     } else {
