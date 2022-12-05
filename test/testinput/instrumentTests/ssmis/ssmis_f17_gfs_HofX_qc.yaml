@@ -28,7 +28,7 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cloudWaterContent 
+      - name: cloud_liquid_water
         sensor: SSMIS
         ch19h: 12
         ch19v: 13
@@ -207,8 +207,8 @@ observations:
     filter variables:
     - name: brightnessTemperature
       channels: 1-2,12-16
-    reference: ObsValue/brightness_temperature_2 
-    value: HofX/brightness_temperature_2
+    reference: ObsValue/brightnessTemperature_2 
+    value: HofX/brightnessTemperature_2
     minvalue: -1.5
     maxvalue: 1.5
     where:

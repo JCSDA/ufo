@@ -269,7 +269,7 @@ observations:
     - name: brightnessTemperature
       channels: *all_channels
     function absolute threshold:
-    - name: ObsFunctionObsErrorBoundMW
+    - name: ObsFunction/ObsErrorBoundMW
       channels: *all_channels
       options:
         sensor: *Sensor_ID
