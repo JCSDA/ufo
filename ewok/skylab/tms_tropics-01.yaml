@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: nasa
   simulated variables: [brightness_temperature]
   channels: 1-12
@@ -18,3 +18,8 @@ obs operator:
   obs options:
     Sensor_ID: tropics_sv1_srf_v1
     EndianType: little_endian
+obs filters:
+- filter: Background Check
+  threshold: 3
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

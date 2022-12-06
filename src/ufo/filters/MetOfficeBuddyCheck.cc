@@ -195,7 +195,7 @@ std::string fullVariableName(const Variable &var)
   if (var.group().empty())
     return var.variable();
   else
-    return var.variable() + "@" + var.group();
+    return var.group() + "/" + var.variable();
 }
 
 template <typename T>
@@ -266,7 +266,8 @@ struct MetOfficeBuddyCheck::MetaData {
 MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters_& parameters,
                                          std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                          std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, std::move(flags), std::move(obserr)), options_(parameters)
+  : FilterBase(obsdb, parameters, std::move(flags), std::move(obserr),
+                VariableNameMap(parameters.AliasFile.value())), options_(parameters)
 {
   oops::Log::debug() << "MetOfficeBuddyCheck: config = " << options_ << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
@@ -479,9 +480,10 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
 Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable,
                                                       const std::string &suffix,
                                                       const std::string &groupName) const {
-  oops::Log::debug() << "BGE var: " << filterVariable.variable() + suffix + "@" +
-                        groupName << std::endl;
-  return Variable(filterVariable.variable() + suffix + "@" + groupName);
+  oops::Log::debug() << "BGE var: " << groupName + "/" +
+                        nameMap_.convertName(filterVariable.variable()) +
+                        suffix << std::endl;
+  return Variable(groupName + "/" + nameMap_.convertName(filterVariable.variable()) + suffix);
 }
 
 MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(
