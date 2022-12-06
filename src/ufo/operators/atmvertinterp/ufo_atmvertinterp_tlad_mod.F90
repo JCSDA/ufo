@@ -62,7 +62,7 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   self%interp_method = interp_method
 
   !> Log-linear or linear interpolation is selected based on the explicit request
-  if ((trim(self%interp_method) == "log-linear")) then
+  if (trim(self%interp_method) == "log-linear") then
      self%use_ln = .true.
   else
      self%use_ln = .false.
