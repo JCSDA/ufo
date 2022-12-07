@@ -55,6 +55,27 @@ class GeoVaLsParameters : public oops::Parameters {
 
 class GeoVaLs : public util::Printable,
                 private util::ObjectCounter<GeoVaLs> {
+  /// \brief A reference to a read-only vector-valued expression.
+  ///
+  /// For example, an Eigen::Vector or an Eigen::Map (the latter can be used as a view onto
+  /// a chunk of memory stored in another container, such as a std::vector).
+  template <typename T>
+  using ConstVectorRef = Eigen::Ref<const Eigen::Vector<T, Eigen::Dynamic>>;
+
+  /// \brief A reference to a read-only matrix-valued expression.
+  ///
+  /// For example, an Eigen::Matrix or an Eigen::Map (the latter can be used as a view onto
+  /// a chunk of memory stored in another container, such as a std::vector).
+  template <typename T>
+  using ConstMatrixRef = Eigen::Ref<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>;
+
+  /// \brief A reference to a writable matrix-valued expression.
+  ///
+  /// For example, an Eigen::Matrix or an Eigen::Map (the latter can be used as a view onto
+  /// a chunk of memory stored in another container, such as a std::vector).
+  template <typename T>
+  using MatrixRef = Eigen::Ref<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>;
+
  public:
   typedef GeoVaLsParameters Parameters_;
 
@@ -147,10 +168,10 @@ class GeoVaLs : public util::Printable,
   void write(const Parameters_ &) const;
   size_t nlocs() const;
 
-  void fill(const std::string & name, const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
-            const Eigen::Ref<const Eigen::MatrixXd> &vals, const bool levelsTopDown);
-  void fillAD(const std::string & name, const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
-              Eigen::Ref<Eigen::MatrixXd> vals, const bool levelsTopDown) const;
+  void fill(const std::string &name, const ConstVectorRef<size_t> &indx,
+            const ConstMatrixRef<double> &vals, const bool levelsTopDown);
+  void fillAD(const std::string &name, const ConstVectorRef<size_t> &indx,
+              MatrixRef<double> vals, const bool levelsTopDown) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}

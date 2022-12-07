@@ -486,10 +486,8 @@ void GeoVaLs::putAtLocation(const std::vector<int> & vals,
   oops::Log::trace() << "GeoVaLs::putAtLocation(int) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fill(const std::string & name,
-                   const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
-                   const Eigen::Ref<const Eigen::MatrixXd> &vals,
-                   const bool levelsTopDown) {
+void GeoVaLs::fill(const std::string &name, const ConstVectorRef<size_t> &indx,
+                   const ConstMatrixRef<double> &vals, const bool levelsTopDown) {
   oops::Log::trace() << "GeoVaLs::fill starting" << std::endl;
   const size_t npts = indx.size();
   const size_t nlev = vals.cols();
@@ -502,10 +500,8 @@ void GeoVaLs::fill(const std::string & name,
   oops::Log::trace() << "GeoVaLs::fill done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fillAD(const std::string & name,
-                     const Eigen::Ref<const Eigen::VectorX<size_t>> &indx,
-                     Eigen::Ref<Eigen::MatrixXd> vals,
-                     const bool levelsTopDown) const {
+void GeoVaLs::fillAD(const std::string &name, const ConstVectorRef<size_t> &indx,
+                     MatrixRef<double> vals, const bool levelsTopDown) const {
   oops::Log::trace() << "GeoVaLs::fillAD starting" << std::endl;
   const size_t npts = indx.size();
   const size_t nlev = vals.cols();
