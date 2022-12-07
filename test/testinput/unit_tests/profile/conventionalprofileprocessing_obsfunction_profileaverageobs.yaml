@@ -24,18 +24,18 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: air_pressure@DerivedMetaData
+      - name: DerivedMetaData/pressure
         type: float
         function:
-          name: ProfileAverageObsPressure@ObsFunction
+          name: ObsFunction/ProfileAverageObsPressure
           options:
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
             model vertical coordinate: air_pressure_levels
   compareVariables:
   - test:
-      name: air_pressure@DerivedMetaData
+      name: DerivedMetaData/pressure
     reference:
-      name: air_pressure@TestReference
+      name: TestReference/pressure
     relTol: 1.0e-8
 
 - obs space:
@@ -56,12 +56,12 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: air_pressure@DerivedMetaData
+      - name: DerivedMetaData/pressure
         type: float
         function:
-          name: ProfileAverageObsPressure@ObsFunction
+          name: ObsFunction/ProfileAverageObsPressure
           options:
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
             model vertical coordinate: air_pressure_levels
   expectExceptionWithMessage: Group variables configuration is empty
 
@@ -85,12 +85,12 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: air_pressure@DerivedMetaData
+      - name: DerivedMetaData/pressure
         type: float
         function:
-          name: ProfileAverageObsPressure@ObsFunction
+          name: ObsFunction/ProfileAverageObsPressure
           options:
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
             model vertical coordinate: air_pressure_levels
   expectExceptionWithMessage: The extended obs space has not been produced
 
@@ -116,11 +116,12 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: air_pressure@DerivedMetaData
+      - name: DerivedMetaData/pressure
         type: float
         function:
-          name: ProfileAverageObsPressure@ObsFunction
+          name: ObsFunction/ProfileAverageObsPressure
           options:
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
             model vertical coordinate: air_pressure_levels
   expectExceptionWithMessage: GeoVaLs are in the wrong order
+
