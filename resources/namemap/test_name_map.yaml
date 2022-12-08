@@ -15,3 +15,17 @@ variable maps:
     alias: virtual_temperature
   - name: stationPressure
     alias: surface_pressure
+  - name: depthBelowWaterSurface
+    alias: ocean_depth
+  - name: waterTemperature
+    alias: ocean_temperature
+  - name: surfacePressure
+    alias: surface_pressure
+  - name: seaSurfaceTemperature
+    alias: sea_surface_temperature
+  - name: equivalentReflectivityFactor
+    alias: equivalent_reflectivity_factor
+  - name: salinity
+    alias: sea_water_salinity
+  - name: seaSurfaceTemperature
+    alias: sea_surface_temperature

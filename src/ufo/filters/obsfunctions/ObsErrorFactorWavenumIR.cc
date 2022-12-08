@@ -73,7 +73,7 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
 
   // Get sensor band central radiation wavenumber
   std::vector<float> wavenumber(nchans);
-  in.get(Variable("MetaData/sensorCentralWavenumber"), wavenumber);
+  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
 
   // Inflate obs error for wavenumber in the range of (2000, 2400] during daytime over water surface
   // as a function of wavenumber number, surface-to-space transmittance, solar zenith angle, and

@@ -92,7 +92,7 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 ! check if sea ice fraction variables is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 
-if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
+if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
    call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
    self%snowthick= snowthick
 endif
@@ -136,7 +136,7 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 ! check if sea ice thickness variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
-if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
+if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
    rho_wsw = (-self%rho_snow)/self%rho_water  
 endif
@@ -146,7 +146,7 @@ ncat = icefrac_d%nval
 hofx = 0.0
 
 select case (trim(self%obsvars%variable(1)))
-case ("sea_ice_freeboard")
+case ("seaIceFreeboard")
    do iobs = 1, size(hofx,1)
       do icat = 1, ncat
          hofx(iobs) = hofx(iobs) +                                         &
@@ -155,7 +155,7 @@ case ("sea_ice_freeboard")
                       rho_wsw * icefrac_d%vals(icat,iobs) * self%snowthick%vals(icat,iobs)
       enddo
    enddo
-case ("sea_ice_thickness")
+case ("iceThickness")
    do iobs = 1, size(hofx,1)
       do icat = 1, ncat
          hofx(iobs) = hofx(iobs) +                                         &
@@ -201,7 +201,7 @@ if (geovals%nlocs /= size(hofx,1)) then
   call abor1_ftn(err_msg)
 endif
 
-if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
+if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
    rho_wsw = (-self%rho_snow)/self%rho_water   
 endif
@@ -221,7 +221,7 @@ endif
 ! backward sea ice thickness obs operator
 
 select case (trim(self%obsvars%variable(1)))
-case ("sea_ice_freeboard")
+case ("seaIceFreeboard")
    do iobs = 1, size(hofx,1)
       if (hofx(iobs) /= missing) then   
          do icat = 1, ncat
@@ -233,7 +233,7 @@ case ("sea_ice_freeboard")
          end do
       end if
    enddo
-case ("sea_ice_thickness")
+case ("iceThickness")
    do iobs = 1, size(hofx,1)
       if (hofx(iobs) /= missing) then
          do icat = 1, ncat

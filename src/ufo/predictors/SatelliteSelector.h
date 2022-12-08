@@ -46,10 +46,10 @@ class SatelliteSelectorParameters : public PredictorParametersBase {
   oops::RequiredParameter<eckit::LocalConfiguration> predictor{"owned predictor", this};
 
   /// Name for the metadata item which will be compared to allow for:
-  /// satellite_id@MetaData - the default
-  /// satellite_identifier@MetaData
+  /// MetaData/satelliteIdentifier - the default
+  /// MetaData/satelliteIdentifier
   /// This will hopefully be removed in the future.
-  oops::Parameter<std::string> metadataName{"metadata name", "satellite_id", this};
+  oops::Parameter<std::string> metadataName{"metadata name", "satelliteIdentifier", this};
 };
 
 // -----------------------------------------------------------------------------

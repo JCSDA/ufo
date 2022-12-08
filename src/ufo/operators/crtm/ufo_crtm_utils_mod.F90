@@ -901,7 +901,7 @@ character(kind=c_char,len=101) :: obsname
           geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
        endif
        if (obsspace_has(obss, "MetaData", "solarAzimuthAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "solarAzimuthAangle1", TmpVar)
+          call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle1", TmpVar)
           geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
        endif
        if (obsspace_has(obss, "MetaData", "sensorViewAngle1")) then

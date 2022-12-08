@@ -44,6 +44,7 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   # 10 missing (final pressure level)  (40-10) x3 for airTemperature, windEastward and windNorthward
   passedBenchmark: 90
   compareVariables:
@@ -99,6 +100,7 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   # There are 4 * 10 = 40 locations in the extended obs space and 7 outside it. 10 locations have
   # missing obs values. Given that there are 3 simulated variables, we expect
   # (40 + 7 - 10) * 3 = 111 observations to pass.
@@ -156,6 +158,7 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   # 10 missing (final pressure level)  (40-10) x3 for airTemperature, windEastward and windNorthward
   passedBenchmark: 90
   compareVariables:
@@ -186,8 +189,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -219,6 +224,7 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_single_level_geovals.nc
   passedBenchmark: 30  # (3x10)
@@ -247,8 +253,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -277,17 +285,18 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/airTemperature1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/airTemperature
       test:
         name: GrossErrorProbability/airTemperature
       absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/windEastward1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/windEastward
       test:
         name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
@@ -305,8 +314,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -336,17 +347,18 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/airTemperature2
+        name: GrossErrorProbabilityAfterOpsBuddyCheck2/airTemperature
       test:
         name: GrossErrorProbability/airTemperature
       absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/windEastward2
+        name: GrossErrorProbabilityAfterOpsBuddyCheck2/windEastward
       test:
         name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
@@ -364,8 +376,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -398,17 +412,18 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2958
   compareVariables:
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/airTemperature3
+        name: GrossErrorProbabilityAfterOpsBuddyCheck3/airTemperature
       test:
         name: GrossErrorProbability/airTemperature
       absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/windEastward3
+        name: GrossErrorProbabilityAfterOpsBuddyCheck3/windEastward
       test:
         name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
@@ -425,8 +440,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Met Office Buddy Check
     filter variables:
@@ -457,17 +474,18 @@ observations:
         max_longitude:  180
     pressure_coordinate: pressure
     pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/airTemperature1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/airTemperature
       test:
         name: GrossErrorProbability/airTemperature
       absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/windEastward1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/windEastward
       test:
         name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
@@ -485,8 +503,10 @@ observations:
     components:
     # operator used to evaluate H(x)
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     # operator used to evaluate background errors
     - name: BackgroundErrorIdentity
+      observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   - filter: Variable Assignment
     assignments:
@@ -532,17 +552,18 @@ observations:
     pressure_coordinate: pressure
     pressure_group: MetaData
     background_error_group: BkgError
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_buddy_check_geovals.nc4
   passedBenchmark: 2940
   compareVariables:
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/airTemperature1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/airTemperature
       test:
         name: GrossErrorProbability/airTemperature
       absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
-        name: GrossErrorProbabilityAfterOpsBuddyCheck/windEastward1
+        name: GrossErrorProbabilityAfterOpsBuddyCheck1/windEastward
       test:
         name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
@@ -566,7 +587,7 @@ observations:
   - filter: Met Office Buddy Check
     where:
     - variable:
-        name: MetaData/extended_obs_space
+        name: MetaData/extendedObsSpace
       is_in: 1
     filter variables:
     - name: waterPotentialTemperature
@@ -603,6 +624,7 @@ observations:
         max_latitude:  90
         min_longitude: -180
         max_longitude:  180
+    observation alias file: ../resources/namemap/test_name_map.yaml
   passedBenchmark: 16
   compareVariables:
     - reference:
@@ -615,3 +637,4 @@ observations:
       test:
         name: GrossErrorProbability/salinity
       absTol: 2.0e-4
+

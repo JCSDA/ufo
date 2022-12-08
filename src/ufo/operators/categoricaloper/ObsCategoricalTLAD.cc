@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsCategoricalTLAD> makerCategoricalTL_("Categoric
 
 ObsCategoricalTLAD::ObsCategoricalTLAD(const ioda::ObsSpace & odb,
                                        const Parameters_ & params)
-  : LinearObsOperatorBase(odb), odb_(odb)
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())), odb_(odb)
 {
   oops::Log::trace() << "ObsCategoricalTLAD constructor starting" << std::endl;
 
@@ -105,9 +105,9 @@ void ObsCategoricalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector 
     const auto &gvaloper = gvals.at(operName);
     // Loop over each variable at this location.
     for (const auto& varname : varnames) {
-      vecgv.resize(gvaloper.nlevs(varname));
-      gvaloper.getAtLocation(vecgv, varname, jloc);
-      geovals.putAtLocation(vecgv, varname, jloc);
+      vecgv.resize(gvaloper.nlevs(nameMap_.convertName(varname)));
+      gvaloper.getAtLocation(vecgv, nameMap_.convertName(varname), jloc);
+      geovals.putAtLocation(vecgv, nameMap_.convertName(varname), jloc);
     }
   }
 

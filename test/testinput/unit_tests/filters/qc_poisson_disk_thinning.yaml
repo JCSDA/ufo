@@ -22,7 +22,7 @@ observations:
     - name: airTemperature
     where:
     - variable:
-        name: MetaData/is_superob
+        name: MetaData/superObservation
       is_in: 1
   - filter: Poisson Disk Thinning
     min_horizontal_spacing: { "0": 2000, "1": 1000 }
@@ -88,7 +88,7 @@ observations:
     - name: airTemperature
     where:
     - variable:
-        name: MetaData/is_superob
+        name: MetaData/superObservation
       is_in: 1
   - filter: Poisson Disk Thinning
     min_horizontal_spacing: { "0": 2000, "1": 1000 }
@@ -120,7 +120,7 @@ observations:
     - name: airTemperature
     where:
     - variable:
-        name: MetaData/is_superob
+        name: MetaData/superObservation
       is_in: 1
   - filter: Poisson Disk Thinning
     min_horizontal_spacing: { "0": 2000, "1": 1000 }
