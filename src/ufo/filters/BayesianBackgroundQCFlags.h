@@ -38,7 +38,7 @@ class BayesianBackgroundQCFlagsParameters : public FilterParametersBase {
   /// todo(UKMO): might need to add the variables known as
   /// u10, v10 and uSuperob, vSuperob in OPS.
   oops::Parameter<std::map<std::string, std::string>> PGEsubstituteNames
-    {"PGE variable name substitutions", {{"northward_wind", "eastward_wind"}}, this};
+    {"PGE variable name substitutions", {{"windNorthward", "windEastward"}}, this};
 
   /// Parameters related to PGE calculations. The value of \p PGECrit
   /// is obtained from here.

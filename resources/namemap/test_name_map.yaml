@@ -29,3 +29,5 @@ variable maps:
     alias: sea_water_salinity
   - name: seaSurfaceTemperature
     alias: sea_surface_temperature
+  - name: ozoneProfile
+    alias: mole_fraction_of_ozone_in_air
