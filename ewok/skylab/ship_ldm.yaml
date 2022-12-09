@@ -1,5 +1,5 @@
 obs space:
-  name: ship
+  name: ship_ldm
   obsdatain:
     engine:
       type: H5File
@@ -7,7 +7,7 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  _source: ldm
+  _source: noaa
   simulated variables: [surface_pressure, air_temperature]
 obs operator:
   name: Composite
@@ -19,6 +19,15 @@ obs operator:
      variables:
      - name: surface_pressure
      da_psfc_scheme: UKMO
+linear obs operator:
+  name: Composite
+  components:
+  - name: Identity
+    variables:
+    - name: air_temperature
+  - name: Identity
+    variables:
+    - name: surface_pressure
 obs filters:
   # Observation Range Sanity Check
   - filter: Bounds Check

@@ -1,5 +1,5 @@
 obs space:
-  name: mhs_metop-c
+  name: abi_g17
   obsdatain:
     engine:
       type: H5File
@@ -9,12 +9,12 @@ obs space:
       allow overwrite: true
   _source: noaa
   simulated variables: [brightness_temperature]
-  channels: &mhs_metop-c_channels 1-5
+  channels: &abi_g17_channels 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 obs operator:
   name: CRTM
-  Absorbers: [H2O,O3] #,CO2]
+  Absorbers: [H2O, O3] #, CO2]
   obs options:
-    Sensor_ID: &Sensor_ID mhs_metop-c
+    Sensor_ID: abi_gr # For now, using GOES-R coefficients instead of GOES-17
     EndianType: little_endian
 obs bias:
   variational bc:
@@ -25,12 +25,16 @@ obs bias:
     - name: lapse_rate
     - name: emissivity
     - name: scan_angle
+      var_name: scan_position
       order: 4
     - name: scan_angle
+      var_name: scan_position
       order: 3
     - name: scan_angle
+      var_name: scan_position
       order: 2
     - name: scan_angle
+      var_name: scan_position
   covariance:
     minimal required obs number: 20
     variance range: [1.0e-6, 10.0]
@@ -41,21 +45,31 @@ obs bias:
         ratio: 1.1
         ratio for small dataset: 2.0
 obs filters:
+# Assign error
+- filter: Bounds Check
+  filter variables:
+  - name: brightness_temperature
+    channels: *abi_g17_channels
+  action:
+    name: assign error
+    error parameter vector: [1.4, 3.0, 2.5, 2.2, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+# Background check
 - filter: Background Check
   threshold: 3
 # Useflag check
 - filter: Bounds Check
   filter variables:
   - name: brightness_temperature
-    channels: *mhs_metop-c_channels
+    channels: *abi_g17_channels
   test variables:
   - name: ChannelUseflagCheckRad@ObsFunction
-    channels: *mhs_metop-c_channels
+    channels: *abi_g17_channels
     options:
-      channels: *mhs_metop-c_channels
-      use_flag: [1, 1, 1, 1, 1]
+      channels: *abi_g17_channels
+      use_flag: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ]
   minvalue: 1.0e-12
   action:
     name: reject
+# Thinning
 - filter: Gaussian Thinning
   horizontal_mesh: 145.0

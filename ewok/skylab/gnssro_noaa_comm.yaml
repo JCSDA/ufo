@@ -1,5 +1,5 @@
 obs space:
-  name: gnssro
+  name: gnssro_noaa_comm
   obsdatain:
     engine:
       type: H5File
@@ -29,16 +29,6 @@ obs filters:
       name: impact_height@MetaData
     minvalue: 0
     maxvalue: 60000
-- filter: Bounds Check
-  filter variables:
-  - name: bending_angle
-  where:
-  - variable:
-      name: occulting_sat_id@MetaData
-    is_in: 3-5
-  test variables:
-  - name: impact_height@MetaData
-  minvalue: 8000
 - filter: ROobserror
   filter variables:
   - name: bending_angle
