@@ -48,7 +48,8 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   /// Default is 'MetaData/land_sea'
   /// Example: to set to SSMIS report type (which is MetaData/surfaceQualifier) set
   ///          SurfaceReport Name: MetaData/surfaceQualifier
-  oops::Parameter<std::string> SurfaceMetaDataName{"SurfaceReport Name", "MetaData/landOrSeaQualifier", this};
+  oops::Parameter<std::string> SurfaceMetaDataName{"SurfaceReport Name",
+                               "MetaData/landOrSeaQualifier", this};
 
   /// Use reported Surface Elevation (default false)
   /// Example: To use the AAPPreported elevation set

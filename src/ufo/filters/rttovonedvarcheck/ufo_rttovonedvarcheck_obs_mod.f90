@@ -604,7 +604,7 @@ if (prof_index % pstar > 0) THEN
   where (surface_pressure /= missing_real)
     surface_pressure = surface_pressure / Pa_to_hPa ! hPa to Pa
   end where
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_ps), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "surfacePressure", "OneDVar", &
                    surface_pressure(:))
 
   deallocate(surface_pressure)
@@ -614,7 +614,7 @@ end if
 ! 6) Surface temperature
 !--
 if (prof_index % t2 > 0) THEN
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_t2m), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "surfaceTemperature", "OneDVar", &
                    self % output_profile(prof_index % t2, :))
 end if
 
@@ -636,7 +636,7 @@ end if
 ! 9) Skin temperature
 !--
 if (prof_index % tstar > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_tskin), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "skinTemperature", "OneDVar", &
                    self % output_profile(prof_index % tstar, :))
 end if
 

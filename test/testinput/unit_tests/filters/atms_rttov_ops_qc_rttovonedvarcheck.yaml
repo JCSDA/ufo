@@ -486,9 +486,9 @@ observations:
         name: OneDVar/emissivity
       absTol: 1.0e-4
     - reference:
-        name: TestReferenceOneDVar/skin_temperature
+        name: TestReferenceOneDVar/skinTemperature
       test:
-        name: OneDVar/skin_temperature
+        name: OneDVar/skinTemperature
       absTol: 1.0e-4
     - reference:
         name: TestReferenceOneDVar/numberOfIterations

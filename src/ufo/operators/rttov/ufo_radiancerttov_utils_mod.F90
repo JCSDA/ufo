@@ -1056,7 +1056,7 @@ contains
           end if
           
           if(.not. present(ob_info)) then
-            call obsspace_put_db(obss, "MetaData", "total_column_ozone", self % tc_ozone)
+            call obsspace_put_db(obss, "MetaData", "ozoneTotal", self % tc_ozone)
           end if
         end if
       case (var_co2)
