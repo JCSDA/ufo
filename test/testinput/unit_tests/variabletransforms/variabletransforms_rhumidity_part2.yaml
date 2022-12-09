@@ -12,13 +12,13 @@ observations:
         group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [dewPointTemperatureAt2M, airTemperatureAt2M, pressureSurface]
+    simulated variables: [dewPointTemperatureAt2M, airTemperatureAt2M, surfacePressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO 
     AllowSuperSaturation: true
-    pressure at 2m variable: "pressureSurface"
+    pressure at 2m variable: "surfacePressure"
     temperature at 2m variable: "airTemperatureAt2M"
     relative humidity at 2m variable: "relativeHumidityAt2M"
     dew point temperature at 2m variable: "dewPointTemperatureAt2M"
