@@ -7,7 +7,7 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  _source: nasa
+  _source: noaa
   simulated variables: [brightness_temperature]
   channels: &atms_n20_channels 1-22
 obs operator:
