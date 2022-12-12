@@ -9,10 +9,26 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_IMPACTHEIGHT_H_
 #define UFO_FILTERS_OBSFUNCTIONS_IMPACTHEIGHT_H_
 
+#include <string>
+#include <vector>
+
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+///
+/// \brief Options: list of channels to apply to
+///
+class ImpactHeightParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ImpactHeightParameters, Parameters)
+
+ public:
+  /// List of channels available for assimilation
+  oops::Parameter<std::string> channelList{"channels", "", this};
+};
+
 ///
 /// \brief Function calculates the GNSS-RO impact height as the difference
 /// between the impact parameter and earth's radius of curvature.
@@ -27,6 +43,8 @@ class ImpactHeight : public ObsFunctionBase<float> {
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
+  std::vector<int> channels_;
+  ImpactHeightParameters options_;
 };
 // -----------------------------------------------------------------------------
 
