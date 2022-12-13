@@ -277,6 +277,8 @@ set ( filters_files
       obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SatWindsSPDBCheck.cc
       obsfunctions/SatWindsSPDBCheck.h
+      obsfunctions/ScatWindsAmbiguityCheck.cc
+      obsfunctions/ScatWindsAmbiguityCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
