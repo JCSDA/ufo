@@ -46,16 +46,16 @@ observations:
         tlapse: *ssmis_f17_tlap
       - name: emissivity
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 4
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 3
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
         order: 2
       - name: scan_angle
-        var_name: scan_position
+        var_name: sensorScanPosition
   obs filters:
 #step1: Gross check using abs(O-B)
   - filter: Background Check
