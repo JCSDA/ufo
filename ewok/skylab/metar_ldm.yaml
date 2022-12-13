@@ -26,15 +26,15 @@ obs operator:
 linear obs operator:
   name: Composite
   components:
-   - name: Identity
-     variables:
-     - name: air_temperature
-     - name: specific_humidity
-     - name: eastward_wind
-     - name: northward_wind
-   - name: Identity
-     variables:
-     - name: surface_pressure
+  - name: Identity
+    variables:
+    - name: air_temperature
+    - name: specific_humidity
+    - name: eastward_wind
+    - name: northward_wind
+  - name: Identity
+    variables:
+    - name: surface_pressure
 obs filters:
   # Observation Range Sanity Check
   - filter: Bounds Check
