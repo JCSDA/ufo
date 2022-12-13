@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: gdas
   simulated variables: [brightness_temperature]
   channels: &cris-fsr_n20_channels 19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
@@ -444,3 +444,5 @@ obs filters:
   minvalue: 1.0e-12
   action:
     name: reject
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

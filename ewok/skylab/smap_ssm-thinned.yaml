@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: nasa
   simulated variables: [soilMoistureVolumetric]
 monitoring only: true

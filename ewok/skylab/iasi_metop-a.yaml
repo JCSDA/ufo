@@ -6,7 +6,7 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: gdas
   simulated variables: [brightness_temperature]
   channels: &iasi_metop-a_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -541,3 +541,5 @@ obs filters:
   minvalue: 1.0e-12
   action:
     name: reject
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

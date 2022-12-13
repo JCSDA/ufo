@@ -77,4 +77,4 @@ observations:
     - name: bending_angle
       channels: *all_levels
     threshold: 10
-  passedBenchmark: 1292
+  passedBenchmark: 1283

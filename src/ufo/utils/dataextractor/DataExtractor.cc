@@ -61,18 +61,8 @@ class CoordinateTransformationVisitor : public boost::static_visitor<void> {
   }
 
   void operator()(std::vector<float> &coord) {
-    const float missing = util::missingValue(missing);
-    if (coordTrans_ == CoordinateTransformation::LOGLINEAR) {
-      if (std::any_of(coord.cbegin(), coord.cend(),
-                      [missing](float c){return c != missing && c < 0.0f;})) {
-        std::stringstream msg;
-        msg << "Cannot perform log-linear interpolation for variable '" << varName_ << "'. "
-            << "At least one value in the field to be interpolated is negative.";
-        throw eckit::Exception(msg.str(), Here());
-      }
-      std::transform(coord.cbegin(), coord.cend(), coord.begin(),
-                     [missing](float c){return c != missing ? std::log(c) : missing;});
-    }
+    if (coordTrans_ == CoordinateTransformation::LOGLINEAR)
+      applyLogLinearTransform(varName_, coord);
   }
 
   const CoordinateTransformation &coordTrans_;
@@ -401,6 +391,12 @@ float linearInterpolation(
     const CoordinateValue &obVal,
     const ConstrainedRange &range,
     const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
+
+  if (obVal == util::missingValue(obVal)) {
+    const float missing = util::missingValue(missing);
+    return missing;
+  }
+
   if (isOutOfBounds(obVal, varValues, range)) {
       std::stringstream msg;
       msg << "No match found for 'linear' interpolation of value '" << obVal
@@ -714,18 +710,26 @@ void DataExtractor<ExtractedValue>::resetExtract() {
 
 
 void applyLogLinearTransform(const std::string &varName,
-                             float &obVal) {
+                             std::vector<float> &varValues) {
   const float missing = util::missingValue(missing);
-  if (obVal != missing && obVal <= 0.0f) {
+  if (std::any_of(varValues.cbegin(), varValues.cend(),
+                  [missing](float c){return c != missing && c < 0.0f;})) {
     std::stringstream msg;
     msg << "Cannot perform log-linear interpolation for variable '" << varName << "'. "
-        << "At least one value in the data is negative.";
+        << "At least one value is negative.";
     throw eckit::Exception(msg.str(), Here());
   }
 
   // Transform data.
-  if (obVal != missing)
-    obVal = std::log(obVal);
+  std::transform(varValues.cbegin(), varValues.cend(), varValues.begin(),
+                 [missing](float c){return c != missing ? std::log(c) : missing;});
+}
+
+void applyLogLinearTransform(const std::string &varName,
+                             float &varValue) {
+  std::vector<float> vecTemp{varValue};
+  applyLogLinearTransform(varName, vecTemp);
+  varValue = vecTemp[0];
 }
 
 float trilinearInterpolation(
@@ -746,13 +750,13 @@ float trilinearInterpolation(
     const CoordinateTransformation &coordTrans2,
     const DataExtractorPayload<float>::const_array_view<3>::type &interpolatedArray)
 {
-  // Apply coordinate transformations to data.
-  if (coordTrans0 == CoordinateTransformation::LOGLINEAR)
-    applyLogLinearTransform(varName0, obVal0);
-  if (coordTrans1 == CoordinateTransformation::LOGLINEAR)
-    applyLogLinearTransform(varName1, obVal1);
-  if (coordTrans2 == CoordinateTransformation::LOGLINEAR)
-    applyLogLinearTransform(varName2, obVal2);
+  const float missing = util::missingValue(missing);
+
+  if (obVal0 == util::missingValue(obVal0) ||
+      obVal1 == util::missingValue(obVal1) ||
+      obVal2 == util::missingValue(obVal2)) {
+    return missing;
+  }
 
   if (isOutOfBounds(obVal0, varValues0, range0)) {
       std::stringstream msg;
@@ -775,8 +779,6 @@ float trilinearInterpolation(
           << "extrapolation.";
       throw eckit::Exception(msg.str(), Here());
   }
-
-  const float missing = util::missingValue(missing);
 
   const int nnIndex0 =
     std::lower_bound(varValues0.begin() + range0.begin(),
@@ -876,42 +878,55 @@ void DataExtractor<float>::maybeExtractByTriLinearInterpolation(
   const float &obValDim0, const float &obValDim1, const float &obValDim2) {
   auto &ranges = constrainedRanges_;
 
-  float obValDim0N = applyExtrapolation(obValDim0);
+  // Perform requested transformation and extrapolation to the value along axis 0.
+  float obValDim0N = obValDim0;
+  const CoordinateTransformation &coordTrans0 = nextCoordToExtractBy_->coordinateTransformation;
+  if (coordTrans0 == CoordinateTransformation::LOGLINEAR)
+    applyLogLinearTransform(nextCoordToExtractBy_->name, obValDim0N);
+  obValDim0N = applyExtrapolation(obValDim0N);
+
   if (resultSet_)
     return;
   const size_t dimIndex0 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName0 = nextCoordToExtractBy_->name;
   const std::vector<float> &varValues0 =
     boost::get<std::vector<float>>(nextCoordToExtractBy_->values);
-  const CoordinateTransformation &coordTrans0 = nextCoordToExtractBy_->coordinateTransformation;
   ++nextCoordToExtractBy_;  // Consume variable
 
   if (nextCoordToExtractBy_->method != InterpMethod::TRILINEAR)
     throw eckit::BadParameter("Second parameter provided to the Trilinear interpolator is not of "
                               "method 'trilinear'.", Here());
 
-  float obValDim1N = applyExtrapolation(obValDim1);
+  // Perform requested transformation and extrapolation to the value along axis 1.
+  float obValDim1N = obValDim1;
+  const CoordinateTransformation &coordTrans1 = nextCoordToExtractBy_->coordinateTransformation;
+  if (coordTrans1 == CoordinateTransformation::LOGLINEAR)
+    applyLogLinearTransform(nextCoordToExtractBy_->name, obValDim1N);
+  obValDim1N = applyExtrapolation(obValDim1N);
   if (resultSet_)
     return;
   const size_t dimIndex1 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName1 = nextCoordToExtractBy_->name;
   const std::vector<float> &varValues1 =
     boost::get<std::vector<float>>(nextCoordToExtractBy_->values);
-  const CoordinateTransformation &coordTrans1 = nextCoordToExtractBy_->coordinateTransformation;
   ++nextCoordToExtractBy_;  // Consume variable
 
   if (nextCoordToExtractBy_->method != InterpMethod::TRILINEAR)
     throw eckit::BadParameter("Third parameter provided to the Trilinear interpolator is not of "
                               "method 'trilinear'.", Here());
 
-  float obValDim2N = applyExtrapolation(obValDim2);
+  // Perform requested transformation and extrapolation to the value along axis 2.
+  float obValDim2N = obValDim2;
+  const CoordinateTransformation &coordTrans2 = nextCoordToExtractBy_->coordinateTransformation;
+  if (coordTrans2 == CoordinateTransformation::LOGLINEAR)
+    applyLogLinearTransform(nextCoordToExtractBy_->name, obValDim2N);
+  obValDim2N = applyExtrapolation(obValDim2N);
   if (resultSet_)
     return;
   const size_t dimIndex2 = nextCoordToExtractBy_->payloadDim;
   const std::string &varName2 = nextCoordToExtractBy_->name;
   const std::vector<float> &varValues2 =
     boost::get<std::vector<float>>(nextCoordToExtractBy_->values);
-  const CoordinateTransformation &coordTrans2 = nextCoordToExtractBy_->coordinateTransformation;
 
   // convert interpolatedArray_ to the required type
   typename DataExtractorPayload<float>::index_gen indices;
@@ -920,10 +935,48 @@ void DataExtractor<float>::maybeExtractByTriLinearInterpolation(
   const interparray interpolatedArray =
     interpolatedArray_[indices[range_t()][range_t()][range_t()]];
 
-  result_ = trilinearInterpolation(varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
-                                   varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
-                                   varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
-                                   interpolatedArray);
+  // Check the order of the variables, and make sure that they match the order in the file
+  // that we are drawing from.  Hard to avoid long-and-complicated if-block.
+  if (dimIndex0 == 0 && dimIndex1 == 1) {
+    result_ =
+      trilinearInterpolation(varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             interpolatedArray);
+  } else if (dimIndex0 == 0 && dimIndex1 == 2) {
+    result_ =
+      trilinearInterpolation(varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             interpolatedArray);
+  } else if (dimIndex0 == 1 && dimIndex1 == 0) {
+    result_ =
+      trilinearInterpolation(varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             interpolatedArray);
+  } else if (dimIndex0 == 2 && dimIndex1 == 0) {
+    result_ =
+      trilinearInterpolation(varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             interpolatedArray);
+  } else if (dimIndex0 == 1 && dimIndex1 == 2) {
+    result_ =
+      trilinearInterpolation(varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             interpolatedArray);
+  } else if (dimIndex0 == 2 && dimIndex1 == 1) {
+    result_ =
+      trilinearInterpolation(varName2, varValues2, obValDim2N, ranges[dimIndex2], coordTrans2,
+                             varName1, varValues1, obValDim1N, ranges[dimIndex1], coordTrans1,
+                             varName0, varValues0, obValDim0N, ranges[dimIndex0], coordTrans0,
+                             interpolatedArray);
+  } else {
+    // This should never be executed
+    throw eckit::BadParameter("Logic for variable order has failed", Here());
+  }
 
   resultSet_ = true;
 }
