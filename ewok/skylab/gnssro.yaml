@@ -28,7 +28,7 @@ obs filters:
   - variable:
       name: impact_height@MetaData
     minvalue: 8000
-    maxvalue: 60000
+    maxvalue: 50000
 - filter: ROobserror
   filter variables:
   - name: bending_angle
