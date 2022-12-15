@@ -1,5 +1,5 @@
 obs space:
-  name: abi_g16
+  name: abi_g16_bt_64km
   obsdatain:
     engine:
       type: H5File
@@ -16,34 +16,6 @@ obs operator:
   obs options:
     Sensor_ID: abi_g16
     EndianType: little_endian
-obs bias:
-  variational bc:
-    predictors:
-    - name: constant
-    - name: lapse_rate
-      order: 2
-    - name: lapse_rate
-    - name: emissivity
-    - name: scan_angle
-      var_name: scan_position
-      order: 4
-    - name: scan_angle
-      var_name: scan_position
-      order: 3
-    - name: scan_angle
-      var_name: scan_position
-      order: 2
-    - name: scan_angle
-      var_name: scan_position
-  covariance:
-    minimal required obs number: 20
-    variance range: [1.0e-6, 10.0]
-    step size: 1.0e-4
-    largest analysis variance: 10000.0
-    prior:
-      inflation:
-        ratio: 1.1
-        ratio for small dataset: 2.0
 obs filters:
 # Assign error
 - filter: Bounds Check
@@ -66,7 +38,7 @@ obs filters:
     channels: *abi_g16_channels
     options:
       channels: *abi_g16_channels
-      use_flag: [-1,  1, -1,  1, -1, -1, -1, -1, -1, -1]
+      use_flag: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
   minvalue: 1.0e-12
   action:
     name: reject

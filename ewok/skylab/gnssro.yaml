@@ -19,7 +19,7 @@ obs operator:
     use_compress: 1
     sr_steps: 2
     vertlayer: full
-    super_ref_qc: NBAM
+    super_ref_qc: ECMWF
 obs filters:
 - filter: Domain Check
   filter variables:
@@ -27,23 +27,13 @@ obs filters:
   where:
   - variable:
       name: impact_height@MetaData
-    minvalue: 0
+    minvalue: 8000
     maxvalue: 60000
-- filter: Bounds Check
-  filter variables:
-  - name: bending_angle
-  where:
-  - variable:
-      name: occulting_sat_id@MetaData
-    is_in: 3-5
-  test variables:
-  - name: impact_height@MetaData
-  minvalue: 8000
 - filter: ROobserror
   filter variables:
   - name: bending_angle
-  errmodel: NBAM
-- filter: Background Check RONBAM
+  errmodel: NRL
+- filter: Background Check
   filter variables:
   - name: bending_angle
   threshold: 3
