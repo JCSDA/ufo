@@ -1197,8 +1197,8 @@ real(c_double), intent(in) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, iloc
-integer :: lbgn, lend, linc
+integer :: jlev, jloc, ilev, iloc
+integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fill: geovals not initialized")
 
@@ -1206,23 +1206,23 @@ call ufo_geovals_get_var(self, varname, geoval)
 
 if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fill: incorrect number of levels")
 
-lbgn = 1
-lend = 1
 ! setting loop indices to ensure geovals are filled top to bottom
 if (levels_top_down) then
+  lbgn=1
   linc=1
-  lend=geoval%nval
 else
   lbgn=geoval%nval
   linc=-1
 endif
 
-do jlev = lbgn, lend, linc
+ilev = lbgn
+do jlev=1, c_nlev
   do jloc=1, c_nloc
     iloc = c_indx(jloc) + 1
     if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fill: error iloc")
-    geoval%vals(jlev,iloc) = c_vals(jloc,jlev)
+    geoval%vals(ilev,iloc) = c_vals(jloc,jlev)
   enddo
+  ilev = ilev + linc
 enddo
 
 end subroutine ufo_geovals_fill
@@ -1240,8 +1240,8 @@ real(c_double), intent(inout) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, iloc
-integer :: lbgn, lend, linc
+integer :: jlev, jloc, ilev, iloc
+integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fillad: geovals not initialized")
 
@@ -1249,23 +1249,23 @@ call ufo_geovals_get_var(self, varname, geoval)
 
 if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fillad: incorrect number of levels")
 
-lbgn = 1
-lend = 1
 ! setting loop indices to ensure geovals are filled top to bottom
 if (levels_top_down) then
+  lbgn=1
   linc=1
-  lend=geoval%nval
 else
   lbgn=geoval%nval
   linc=-1
 endif
 
+ilev = lbgn
 do jlev = 1, geoval%nval
   do jloc=1, c_nloc
     iloc = c_indx(jloc) + 1
     if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fillad: error iloc")
     c_vals(jloc, jlev) = geoval%vals(jlev,iloc)
   enddo
+  ilev = ilev + linc
 enddo
 
 end subroutine ufo_geovals_fillad
