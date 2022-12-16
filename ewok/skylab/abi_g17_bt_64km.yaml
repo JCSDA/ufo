@@ -26,8 +26,8 @@ obs filters:
     name: assign error
     error parameter vector: [1.4, 3.0, 2.5, 2.2, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
 # Background check
-- filter: Background Check
-  threshold: 3
+#- filter: Background Check
+#  threshold: 3
 # Useflag check
 - filter: Bounds Check
   filter variables:
