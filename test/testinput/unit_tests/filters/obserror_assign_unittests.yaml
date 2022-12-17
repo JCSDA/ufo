@@ -741,6 +741,8 @@ Assign observation error from NetCDF variance; multi-channel variable support:
           channels: *all_channels
           file: Data/ufo/testinput_tier_1/obserror_multi_variant_with_extract_fullr.nc
           interpolation:
+          - name: channel_number@MetaData
+            method: exact
           - name: satellite_id@MetaData
             method: exact
           - name: processing_center@MetaData

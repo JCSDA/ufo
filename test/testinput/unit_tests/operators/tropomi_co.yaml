@@ -1,0 +1,32 @@
+window begin: '2021-08-15T15:00:00Z'
+window end: '2021-08-15T21:00:00Z'
+observations:
+- obs space:
+    name: CO
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_co_total_2021081518_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/tropomi_co_2021081518_m_opr_out1.nc4
+    simulated variables: [carbon_monoxide_in_total_column]
+  obs operator:
+    name: ColumnRetrieval
+    nlayers_retrieval: 50
+    AvgKernelVar: averaging_kernel_level
+    PresLevVar: pressure_level
+    tracer variables: [volume_mixing_ratio_of_co]
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
+    model units coeff: 1e-6 # ppmv to 1/1
+  linear obs operator test:
+    coef TL: 1.0e-8
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tropomi_co_geoval_2021081518_m.nc4
+  rms ref: 1.76506055140635e-05
+  tolerance: 1.0e-7

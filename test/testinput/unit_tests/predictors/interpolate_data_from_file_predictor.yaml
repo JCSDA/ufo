@@ -50,6 +50,8 @@ observations:
           channels: *channels
           file: Data/ufo/testinput_tier_1/bias_interpolation_brightness_temperature.nc4
           interpolation:
+          - name: channel_number@MetaData
+            method: exact
           - name: scan_position@MetaData
             method: nearest  # In practice, 'exact' would probably be used. 'nearest' is used
                              # here to reduce the size of the NetCDF file used by this test.
