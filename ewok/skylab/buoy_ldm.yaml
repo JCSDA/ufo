@@ -7,6 +7,8 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [surface_pressure, air_temperature] #, sea_surface_temperature] # TODO: add it back once  it's handled properly
 obs operator:
