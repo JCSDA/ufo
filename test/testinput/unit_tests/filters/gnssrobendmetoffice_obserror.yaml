@@ -1,5 +1,5 @@
 window begin: 2020-05-01T03:00:00Z
-window end: 2020-05-01T09:00:00Z
+window end: 2021-07-02T09:00:00Z
 
 observations:
 # Test the specification of observation errors by latitude
@@ -116,7 +116,7 @@ observations:
   obs pre filters:
   - filter: Variable Assignment
     assignments:
-    - name: MetaData/impact_height
+    - name: NewMetaData/impact_height
       type: float
       function:
         name: ImpactHeight@ObsFunction
@@ -150,7 +150,7 @@ observations:
           interpolation:
           - name: satellite_and_center@MetaData
             method: nearest
-          - name: impact_height@MetaData
+          - name: impact_height@NewMetaData
             method: bilinear
           - name: latitude@MetaData
             method: bilinear
@@ -159,4 +159,85 @@ observations:
         name: ObsError/bending_angle
       reference:
         name: LatObsErrorDrawFile/bending_angle
+      relTol: 1.0e-6
+# Test the specification of observation errors by latitude using DrawObsErrorFromFile with 2D (profile) data
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+      obsgrouping:
+        group variables: ["record_number"]
+    simulated variables: [bending_angle]
+    channels: &all_levels 1-375
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2020050106_profile_ukmo_obserr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
+  obs pre filters:
+  - filter: Domain Check
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
+  - filter: Variable Assignment
+    assignments:
+    - name: NewMetaData/impact_height
+      channels: *all_levels
+      type: float
+      function:
+        name: ImpactHeight@ObsFunction
+        options:
+          channels: *all_levels
+  - filter: Variable Assignment               # Create a new variable which combines satellite and processing centre
+    assignments:
+    - name: satellite_and_center@MetaData
+      type: int
+      function:
+        name: LinearCombination@IntObsFunction
+        options:
+          variables: [occulting_sat_id@MetaData, originating_center@MetaData]
+          coefs: [1000, 1.0]
+  obs post filters:
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bending_angle
+      channels: *all_levels
+    gradient threshold: -0.08
+    sharp gradient offset: 600
+    surface offset: 500
+  - filter: Variable Assignment
+    assignments:
+    - name: NewMetaData/bending_angle
+      type: float
+      channels: *all_levels
+      function:
+        name: DrawObsErrorFromFile@ObsFunction
+        options:
+          dispersion measure: fractional standard deviation
+          normalization variable: ObsValue/bending_angle
+          minimum value: 3.0E-6
+          file: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nc4
+          channels: *all_levels
+          interpolation:
+          - name: satellite_and_center@MetaData
+            method: exact
+          - name: impact_height@NewMetaData
+            use channel list: true
+            method: bilinear
+          - name: latitude@MetaData
+            method: bilinear
+  compareVariables:
+    - test:
+        name: NewMetaData/bending_angle
+      reference:
+        name: TwoDObsError/bending_angle
       relTol: 1.0e-6

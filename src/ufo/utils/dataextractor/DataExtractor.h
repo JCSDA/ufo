@@ -239,6 +239,13 @@ float bilinearInterpolation(
     const R &obVal1,
     const ConstrainedRange &range1,
     const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
+
+  const float missing = util::missingValue(missing);
+
+  if (obVal0 == util::missingValue(obVal0) || obVal1 == util::missingValue(obVal1)) {
+    return missing;
+  }
+
   if (isOutOfBounds(obVal0, varValues0, range0)) {
       std::stringstream msg;
       msg << "No match found for 'bilinear' interpolation of value '" << obVal0
@@ -253,8 +260,6 @@ float bilinearInterpolation(
           << "extrapolation.";
       throw eckit::Exception(msg.str(), Here());
   }
-
-  const float missing = util::missingValue(missing);
 
   const int nnIndex0 = std::lower_bound(varValues0.begin() + range0.begin(),
                                         varValues0.begin() + range0.end(), obVal0) -
@@ -471,10 +476,12 @@ float trilinearInterpolation(
     const CoordinateTransformation &coordTrans2,
     const DataExtractorPayload<float>::const_array_view<3>::type &interpolatedArray);
 
-/// \brief Apply log-linear transformation to data and field to be interpolated.
+/// \brief Apply log-linear transformation to a vector of values.
 void applyLogLinearTransform(const std::string &varName,
-                             std::vector<float> &varValues,
-                             float &obVal);
+                             std::vector<float> &varValues);
+/// \brief Apply log-linear transformation to a single value.
+void applyLogLinearTransform(const std::string &varName,
+                             float &varValues);
 
 /// \brief This class makes it possible to extract and interpolate data loaded from a file.
 ///
