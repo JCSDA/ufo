@@ -16,6 +16,7 @@ obs space:
   simulated variables: [aerosol_optical_depth]
   observed variables: [aerosol_optical_depth]
   channels: 4
+monitoring only: true
 obs operator:
   name: AodCRTM
   Absorbers: [H2O,O3]

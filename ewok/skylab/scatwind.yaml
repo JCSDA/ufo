@@ -7,7 +7,9 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  _source: gdas
+  io pool:
+    write multiple files: true
+  _source: noaa
   simulated variables: [eastward_wind, northward_wind]
 #
 obs operator:
