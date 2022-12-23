@@ -16,7 +16,6 @@
 #include <utility>       // pair
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -135,6 +134,11 @@ class InterpolationParameters : public oops::Parameters {
   oops::Parameter<EquidistantChoice> equidistanceChoice{
     "equidistant choice", EquidistantChoice::FIRST, this};
 
+  /// useChannelList indicates if this variable is two-dimensional (for instance
+  /// is a profile of GNSS-RO observations, and one of the input parameters
+  /// is the height of the observation).
+  oops::Parameter<bool> useChannelList{"use channel list", false, this};
+
   /// Transformation applied to coordinates prior to interpolation.
   /// For instance if a log-linear transform is used then the logarithm of both the observed
   /// and reference values are found prior to interpolation.
@@ -160,7 +164,7 @@ class DrawValueFromFileParametersWithoutGroup : public oops::Parameters {
   /// List of channel numbers (then deriving an observation error per channel)
   /// If this option is provided, the channel number is implicitly prepended to the list of
   /// interpolation variables and matched exactly.
-  oops::OptionalParameter<std::set<int>> chlist{"channels", this};
+  oops::Parameter<std::string> chlist{"channels", "", this};
 };
 
 
@@ -222,6 +226,7 @@ class DrawValueFromFile : public ObsFunctionBase<T> {
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::unordered_map<std::string, ExtrapolationMode> extrapMode_;
   std::unordered_map<std::string, EquidistantChoice> equidistantChoice_;
+  std::unordered_map<std::string, bool> useChannelList_;
   std::unordered_map<std::string, CoordinateTransformation> coordinateTransformation_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
