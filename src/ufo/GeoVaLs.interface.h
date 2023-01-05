@@ -93,10 +93,10 @@ extern "C" {
                                  const eckit::Configuration &,
                                  const ioda::ObsSpace &, const oops::Variables &);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration &, const size_t &);
-  void ufo_geovals_fill_f90(const int &, const int &, const int &,
-                            const int &, const double &, const bool &);
-  void ufo_geovals_fillad_f90(const int &, const int &, const int &,
-                              const int &, double &, const bool &);
+  void ufo_geovals_fill_f90(const int &, const int &, const char *, const int &, const int *,
+                            const int &, const double *, const bool &);
+  void ufo_geovals_fillad_f90(const int &, const int &, const char *, const int &, const int *,
+                              const int &, double *, const bool &);
 }  // extern C
 
 }  // namespace ufo
