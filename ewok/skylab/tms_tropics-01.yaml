@@ -1,0 +1,25 @@
+obs space:
+  name: tms_tropics-01
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      allow overwrite: true
+  _source: nasa
+  simulated variables: [brightness_temperature]
+  channels: 1-12
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3] #,CO2]
+  Clouds: [Water, Ice]
+  Cloud_Fraction: 1.0
+  obs options:
+    Sensor_ID: tropics_sv1_srf_v1
+    EndianType: little_endian
+obs filters:
+- filter: Background Check
+  threshold: 3
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

@@ -1,5 +1,5 @@
 window begin: 2020-05-01T03:00:00Z
-window end: 2020-05-01T09:00:00Z
+window end: 2021-07-02T09:00:00Z
 
 observations:
 # Test the specification of observation errors by latitude
@@ -59,10 +59,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
     simulated variables: [bendingAngle]
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
@@ -116,7 +116,7 @@ observations:
   obs pre filters:
   - filter: Variable Assignment
     assignments:
-    - name: MetaData/impactHeightRO
+    - name: DerivedMetaData/impactHeightRO
       type: float
       function:
         name: ObsFunction/ImpactHeight
@@ -150,7 +150,7 @@ observations:
           interpolation:
           - name: MetaData/satelliteAndCenter
             method: nearest
-          - name: MetaData/impactHeightRO
+          - name: DerivedMetaData/impactHeightRO
             method: bilinear
           - name: MetaData/latitude
             method: bilinear
@@ -159,4 +159,85 @@ observations:
         name: ObsError/bendingAngle
       reference:
         name: LatObsErrorDrawFile/bendingAngle
+      relTol: 1.0e-6
+# Test the specification of observation errors by latitude using DrawObsErrorFromFile with 2D (profile) data
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
+    channels: &all_levels 1-375
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2020050106_profile_ukmo_obserr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
+  obs pre filters:
+  - filter: Domain Check
+    where:
+    - variable:
+        name: MetaData/satelliteIdentifier
+      is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/impactHeightRO
+      channels: *all_levels
+      type: float
+      function:
+        name: ObsFunction/ImpactHeight
+        options:
+          channels: *all_levels
+  - filter: Variable Assignment               # Create a new variable which combines satellite and processing centre
+    assignments:
+    - name: MetaData/satelliteAndCenter
+      type: int
+      function:
+        name: IntObsFunction/LinearCombination
+        options:
+          variables: [MetaData/satelliteIdentifier, MetaData/dataProviderOrigin]
+          coefs: [1000, 1.0]
+  obs post filters:
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bendingAngle
+      channels: *all_levels
+    gradient threshold: -0.08
+    sharp gradient offset: 600
+    surface offset: 500
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/bendingAngle
+      type: float
+      channels: *all_levels
+      function:
+        name: ObsFunction/DrawObsErrorFromFile
+        options:
+          dispersion measure: fractional standard deviation
+          normalization variable: ObsValue/bendingAngle
+          minimum value: 3.0E-6
+          file: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nc4
+          channels: *all_levels
+          interpolation:
+          - name: MetaData/satelliteAndCenter
+            method: exact
+          - name: DerivedMetaData/impactHeightRO
+            use channel list: true
+            method: bilinear
+          - name: MetaData/latitude
+            method: bilinear
+  compareVariables:
+    - test:
+        name: DerivedMetaData/bendingAngle
+      reference:
+        name: TwoDObsError/bendingAngle
       relTol: 1.0e-6

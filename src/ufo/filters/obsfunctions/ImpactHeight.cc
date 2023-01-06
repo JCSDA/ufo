@@ -14,12 +14,18 @@
 #include "ufo/filters/obsfunctions/ImpactHeight.h"
 
 #include <math.h>
+#include <algorithm>
+#include <set>
+#include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
+
+#include "eckit/exception/Exceptions.h"
 
 namespace ufo {
 
@@ -32,7 +38,12 @@ static ObsFunctionMaker<ImpactHeight> makerImpactHeight_("ImpactHeight");
  */
 ImpactHeight::ImpactHeight(const eckit::LocalConfiguration & conf)
   : invars_() {
-  invars_ += Variable("MetaData/impactParameterRO");
+  // Get channels from options
+  options_.deserialize(conf);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
+  std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+
+  invars_ += Variable("MetaData/impactParameterRO", channels_);
   invars_ += Variable("MetaData/earthRadiusCurvature");
 }
 
@@ -48,16 +59,29 @@ ImpactHeight::~ImpactHeight() {}
 void ImpactHeight::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  std::vector<float> impact_parameter;
-  in.get(Variable("MetaData/impactParameterRO"), impact_parameter);
+  const size_t nchans = out.nvars();
+
+  if (nchans == 1 && channels_.size() == 0) {
+    // All good, do nothing
+  } else if (nchans != channels_.size()) {
+    std::string errString = "ImpactHeight: mismatch between channels (" +
+      std::to_string(channels_.size()) + ") and number of variables (" +
+      std::to_string(nchans) + ")";
+    throw eckit::BadValue(errString);
+  }
+
   std::vector<float> radius_curvature;
   in.get(Variable("MetaData/earthRadiusCurvature"), radius_curvature);
-  for (size_t jj = 0; jj < nlocs; ++jj) {
-    if (impact_parameter[jj] == util::missingValue(impact_parameter[jj]) ||
-        radius_curvature[jj] == util::missingValue(radius_curvature[jj])) {
-        out[0][jj] = util::missingValue(out[0][jj]);
-    } else {
-        out[0][jj] = impact_parameter[jj] - radius_curvature[jj];
+  for (size_t ichan=0; ichan < nchans ; ichan++) {
+    std::vector<float> impact_parameter;
+    in.get(Variable("MetaData/impactParameterRO", channels_)[ichan], impact_parameter);
+    for (size_t jj = 0; jj < nlocs; ++jj) {
+      if (impact_parameter[jj] == util::missingValue(impact_parameter[jj]) ||
+          radius_curvature[jj] == util::missingValue(radius_curvature[jj])) {
+          out[ichan][jj] = util::missingValue(out[ichan][jj]);
+      } else {
+          out[ichan][jj] = impact_parameter[jj] - radius_curvature[jj];
+      }
     }
   }
 }
