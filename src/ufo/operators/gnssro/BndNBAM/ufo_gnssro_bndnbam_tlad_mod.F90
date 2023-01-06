@@ -129,7 +129,7 @@ if (nlocs > 0 ) then
   self%nrecs = nrecs
 
   nlevExt = nlev + nlevAdd
-  nlevCheck = min(23, nlev) !number of levels to check super refraction
+  nlevCheck = int(nlev/2.0) !number of levels to check super refraction
 
   allocate(gesT(nlev,nlocs))
   allocate(gesQ(nlev,nlocs))

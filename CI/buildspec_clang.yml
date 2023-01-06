@@ -54,19 +54,6 @@ phases:
 
       - git lfs install # creates .gitconfig
 
-      #  Set crtm branch name
-      - export CRTM_JEDI_BRANCH="release/crtm_jedi_v2.4.0"
-
-      - if [ "$CODEBUILD_GIT_BRANCH" = "develop" ];
-        then export CODEBUILD_GIT_BRANCH_CRTM=${CRTM_JEDI_BRANCH};
-        else export CODEBUILD_GIT_BRANCH_CRTM=${CODEBUILD_GIT_BRANCH};
-        fi
-
-      - if [ "$GIT_BASE_BRANCH" = "develop" ];
-        then export GIT_BASE_BRANCH_CRTM=${CRTM_JEDI_BRANCH};
-        else export GIT_BASE_BRANCH_CRTM=${GIT_BASE_BRANCH};
-        fi
-
       # Upload branch name and commit sha as CodeBuild artifact to S3
       - mkdir -p /jcsda/artifacts
       - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
@@ -82,9 +69,6 @@ phases:
 
       # ufo
       - ./clone.sh jcsda-internal/ufo $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle ufo ${GIT_BASE_BRANCH} develop
-
-      # crtm
-      - ./clone.sh jcsda-internal/crtm $CODEBUILD_GIT_BRANCH_CRTM /jcsda/ufo-bundle crtm ${GIT_BASE_BRANCH_CRTM} $CRTM_JEDI_BRANCH
 
       # ioda
       - ./clone.sh jcsda-internal/ioda $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle ioda ${GIT_BASE_BRANCH} develop

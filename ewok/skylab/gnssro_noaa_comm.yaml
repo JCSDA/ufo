@@ -1,5 +1,5 @@
 obs space:
-  name: gnssro_spire
+  name: gnssro_noaa_comm
   obsdatain:
     engine:
       type: H5File
@@ -23,6 +23,13 @@ obs operator:
     vertlayer: full
     super_ref_qc: ECMWF
 obs filters:
+- filter: Domain Check
+  filter variables:
+  - name: bending_angle
+  where:
+  - variable:
+      name: occulting_sat_id@MetaData
+    is_not_in: 269 # don't use spire from this source in favor of gnssro_spire
 - filter: Domain Check
   filter variables:
   - name: bending_angle
