@@ -277,8 +277,21 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<T> & out) const {
   DataExtractor<T> interpolator{fpath_, options_.group};
 
+  // Channel number handling - do we only process the channels specified in the
+  // options, or leave it up to useChannelList variables?
+  bool extract_channels = channels_.size() > 0;
+  for (auto const & useChannel : useChannelList_) {
+    if (useChannel.second) {
+      extract_channels = false;
+      break;
+    }
+  }
+  if (extract_channels)
+    interpolator.scheduleSort("MetaData/channel_number", InterpMethod::EXACT,
+                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST,
+                              CoordinateTransformation::NONE);
+
   ObData obData;
-  bool extract_channels = false;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
     oops::Log::debug() << "Extracting " << allvars_[ind].variable() <<
       " from the obsSpace" << std::endl;
@@ -303,18 +316,6 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
           break;
         default:
           throw eckit::UserError("Data type not yet handled.", Here());
-      }
-    } else if (varName == "MetaData/channel_number") {
-      if (in.has(allvars_[ind])) {
-        updateObData<int>(in, allvars_[ind], obData);
-        extract_channels = false;
-      } else {
-        extract_channels = true;
-        oops::Log::debug() << "Adding channels ..." << std::endl;
-        for (int thisChan : channels_) {
-          oops::Log::debug() << thisChan << "  ";
-        }
-        oops::Log::debug() << std::endl;
       }
     } else {
       switch (in.dtype(allvars_[ind])) {
