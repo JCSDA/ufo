@@ -56,13 +56,13 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
 
   // MetaData
   if (data_.has(Variable("MetaData/correctedStationAltitude"))) {
-    getObservation("MetaData", "correctedStationAltitude",
+    getObservation("MetaData", "correctedStationElevation",
                      ZStn);
   } else {
-    getObservation("MetaData", "stationAltitude",
+    getObservation("MetaData", "stationElevation",
                      ZStn);
   }
-  getObservation("MetaData", "standardAltitude",
+  getObservation("MetaData", "standardElevation",
                  ZStd, true);
 
   // Errors
