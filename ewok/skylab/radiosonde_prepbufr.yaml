@@ -10,7 +10,9 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [air_temperature, virtual_temperature, specific_humidity, eastward_wind, northward_wind]
 obs operator:

@@ -224,7 +224,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   end if
 
   nlevExt   = nlev + nlevAdd
-  nlevCheck = min(23, nlev)   !number of levels to check super refaction
+  nlevCheck = int(nlev/2.0)  !number of levels to check super refaction
 
 ! define new integration grids
   do igrd = 0, ngrd-1

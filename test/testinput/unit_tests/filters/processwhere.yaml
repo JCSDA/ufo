@@ -27,6 +27,21 @@ successful:
         minvalue: 4
   # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 7
+    - where:                      # test minvalue when it's in the middle if the range and exclusive
+      - variable:
+          name:  var1@MetaData
+        minvalue: 4
+        min_exclusive: true
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 6
+    - where:                      # test minvalue and maxvalue when it's in the middle if the range and min_exclusive true
+      - variable:
+          name:  var1@MetaData
+        minvalue: 4
+        maxvalue: 8
+        min_exclusive: true
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 4
     - where:                      # test minvalue when all are < min
       - variable:
           name:  MetaData/var1
@@ -39,6 +54,13 @@ successful:
         maxvalue: 10
   # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
+    - where:                      # test maxvalue when it's in the middle if the range and exclusive
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 5
+        max_exclusive: true
+   # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 4
     - where:                      # test maxvalue when all but one are > max, one == max
       - variable:
           name:  MetaData/var1
@@ -59,6 +81,32 @@ successful:
         maxvalue: 5
   # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 4
+    - where:                      # test min & max at same time with both exclusvie bounds
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 7
+        max_exclusive: true
+        minvalue: 3
+        min_exclusive: true
+   # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 3
+    - where:                      # test min and max at same time with one exclusive bound
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 9
+        max_exclusive: true
+        minvalue: 2
+   # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 7
+    - where:                      # test min and max with exclusive set to false
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 9
+        max_exclusive: false
+        minvalue: 2
+        min_exclusive: false
+   # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 8
     - where:                      # test min & max at the same time when max < min
       - variable:
           name:  MetaData/var2
@@ -73,6 +121,15 @@ successful:
         maxvalue: 7
   # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 1
+    - where:                      # test min & max when max == min and are exclusive
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 5
+        minvalue: 5
+        max_exclusive: true
+        min_exclusive: true
+   # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 0
     - where:                      # test min & max  for variable with missing values
       - variable:
           name:  MetaData/var5
@@ -119,6 +176,30 @@ successful:
         maxvalue: "****-**-**T14:00:00Z"
   # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
+    - where:                      # test maxvalue and exclusive for datetime hours
+      - variable:
+          name:  dateTime@MetaData
+        maxvalue: "****-**-22T15:00:00Z"
+        max_exclusive: true
+    # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 7
+    - where:                      # test maxvalue and minvalue with exclusive bound for datetime hours
+      - variable:
+          name:  dateTime@MetaData
+        maxvalue: "****-**-18T15:00:00Z"
+        max_exclusive: true
+        minvalue: "****-**-15T06:00:00Z"
+        min_exclusive: true
+    # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 2
+    - where:                      # test maxvalue and minvalue with min_exclusive bound for datetime hours
+      - variable:
+          name:  dateTime@MetaData
+        maxvalue: "****-**-18T15:00:00Z"
+        minvalue: "****-**-15T06:00:00Z"
+        min_exclusive: true
+    # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 3
     - where:                      # test maxvalue for datetime hours with unconstrained minvalue
       - variable:
           name:  MetaData/dateTime

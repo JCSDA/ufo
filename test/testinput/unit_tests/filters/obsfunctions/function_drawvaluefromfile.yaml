@@ -1318,7 +1318,7 @@ observations:
         method: trilinear
         coordinate transformation: none
     variables: [assigned_float_variable_trilin_logp]
-  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/latitude'. At least one value in the field to be interpolated is negative.
+  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/latitude'. At least one value is negative.
 
 - obs space: &ObsSpace
     name: 3D payload array with trilinear interpolation, log-linear in pressure with data values < 0 (expect exception)
@@ -1343,5 +1343,94 @@ observations:
         method: trilinear
         coordinate transformation: none
     variables: [assigned_float_variable_trilin_logp]
-  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/pressure_negative'. At least one value in the data is negative.
+  expect compute to throw exception with message: Cannot perform log-linear interpolation for variable 'MetaData/pressure_negative'. At least one value is negative.
+
+- obs space: &ObsSpace
+    name: 1D payload array with channels
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata_channels.nc
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/variable_assignment_testdata_1d_channels_out.nc
+    simulated variables: [airTemperature]
+    channels: &all_chans 1-3
+  obs function:
+    name: IntObsFunction/DrawValueFromFile
+    channels: *all_chans
+    options:
+      channels: *all_chans
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_simple.nc
+      group: IntResult
+      interpolation:
+      - name: MetaData/int_variable_1
+        method: nearest
+        extrapolation mode: nearest
+        use channel list: true
+    variables: [assigned_int_variable_0]
+    tolerance: 100
+
+- obs space: &ObsSpace
+    name: 2D payload array with channels in first variable
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata_channels.nc
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/variable_assignment_testdata_2d_channels_out.nc
+    simulated variables: [airTemperature]
+    channels: &all_chans 1-3
+  obs function:
+    name: ObsFunction/DrawValueFromFile
+    channels: *all_chans
+    options:
+      channels: *all_chans
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: MetaData/float_variable_2
+        method: nearest
+      - name: MetaData/pressure
+        method: bilinear
+      - name: MetaData/float_variable_1
+        method: bilinear
+        extrapolation mode: nearest
+        use channel list: true
+    variables: [assigned_float_variable_0]
+    tolerance: 1.0E-6
+
+- obs space: &ObsSpace
+    name: 3D payload array with channels
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata_channels.nc
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/variable_assignment_testdata_3d_channels_out.nc
+    simulated variables: [airTemperature]
+    channels: &all_chans 1-3
+  obs function:
+    name: ObsFunction/DrawValueFromFile
+    channels: *all_chans
+    options:
+      channels: *all_chans
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_advanced4.nc
+      group: FloatResult2D
+      interpolation:
+      - name: MetaData/float_variable_2
+        method: trilinear
+      - name: MetaData/pressure
+        method: trilinear
+      - name: MetaData/float_variable_1
+        method: trilinear
+        extrapolation mode: nearest
+        use channel list: true
+    variables: [assigned_float_variable_1]
+    tolerance: 1.0E-6
 

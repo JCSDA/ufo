@@ -10,7 +10,9 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [bending_angle]
 obs operator:
@@ -19,7 +21,7 @@ obs operator:
     use_compress: 1
     sr_steps: 2
     vertlayer: full
-    super_ref_qc: NBAM
+    super_ref_qc: ECMWF
 obs filters:
 - filter: Domain Check
   filter variables:
@@ -27,13 +29,13 @@ obs filters:
   where:
   - variable:
       name: impact_height@MetaData
-    minvalue: 0
-    maxvalue: 60000
+    minvalue: 8000
+    maxvalue: 50000
 - filter: ROobserror
   filter variables:
   - name: bending_angle
-  errmodel: NBAM
-- filter: Background Check RONBAM
+  errmodel: NRL
+- filter: Background Check
   filter variables:
   - name: bending_angle
   threshold: 3

@@ -36,10 +36,10 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
-set( CRTM_COEFFS_BRANCH "2.4.0_skylab_2.0" )
+set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
 
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.4.0.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.5.0.tar.gz)
 set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
@@ -399,6 +399,8 @@ SpcCoeff/Little_Endian/mhs_metop-b.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_metop-b.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_metop-c.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_metop-c.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_n18.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD1_g15.SpcCoeff.bin
@@ -435,6 +437,8 @@ SpcCoeff/Little_Endian/avhrr3_n18.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/avhrr3_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_n20.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
+SpcCoeff/Little_Endian/tropics_sv1_srf_v1.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v1.TauCoeff.bin
 )
 
 if( crtm_FOUND )

@@ -1,27 +1,35 @@
 obs space:
-  name: buoy
+  name: ship_ldm
   obsdatain:
     engine:
       type: H5File
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
-  _source: ldm
-  simulated variables: [surface_pressure, air_temperature, sea_surface_temperature]
+      allow overwrite: true
+  io pool:
+    write multiple files: true
+  _source: noaa
+  simulated variables: [surface_pressure, air_temperature]
 obs operator:
   name: Composite
   components:
    - name: GSISfcModel
      variables:
      - name: air_temperature
-   - name: Identity
-     variables:
-     - name: sea_surface_temperature
    - name: SfcPCorrected
      variables:
      - name: surface_pressure
      da_psfc_scheme: UKMO
+linear obs operator:
+  name: Composite
+  components:
+  - name: Identity
+    variables:
+    - name: air_temperature
+  - name: Identity
+    variables:
+    - name: surface_pressure
 obs filters:
   # Observation Range Sanity Check
   - filter: Bounds Check
@@ -40,14 +48,6 @@ obs filters:
     action:
       name: reject
   #
-  - filter: Bounds Check
-    filter variables:
-    - name: sea_surface_temperature
-    minvalue: 271
-    maxvalue: 305
-    action:
-      name: reject
-  #
   # Assign obsError.
   - filter: Perform Action
     filter variables:
@@ -55,18 +55,6 @@ obs filters:
     action:
       name: assign error
       error parameter: 130             # 130 Pa (1.3mb)
-  - filter: Perform Action
-    filter variables:
-    - name: air_temperature
-    action:
-      name: assign error
-      error parameter: 2.0
-  - filter: Perform Action
-    filter variables:
-    - name: sea_surface_temperature
-    action:
-      name: assign error
-      error parameter: 3.5
   #
   - filter: Perform Action
     filter variables:
@@ -93,18 +81,18 @@ obs filters:
             name: ObsValue/surface_pressure
           xvals: [10000, 20000, 25000, 30000, 50000, 85000, 97500, 100000]   #Pressure (Pa), ascending order
           errors: [3.0, 2.0, 1.5, 1.5, 2.0, 2.5, 2.5, 3.0]
-  # Inflate ObsError as it is done with GSI
-  - filter: Perform Action
-    filter variables:
-    - name: surface_pressure
-    action:
-      name: inflate error
-      inflation variable:
-        name: ObsErrorFactorSfcPressure@ObsFunction
-        options:
-          error_min: 100         # 1 mb
-          error_max: 300         # 3 mb
-    defer to post: true
+  # Inflate ObsError as it is done with GSI  # TODO: reactivate this filter when nlocs=0 is handled properly (code is having a hard time)
+# - filter: Perform Action
+#   filter variables:
+#   - name: surface_pressure
+#   action:
+#     name: inflate error
+#     inflation variable:
+#       name: ObsErrorFactorSfcPressure@ObsFunction
+#       options:
+#         error_min: 100         # 1 mb
+#         error_max: 300         # 3 mb
+#   defer to post: true
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
@@ -120,15 +108,6 @@ obs filters:
     - name: air_temperature
     threshold: 7.0
     absolute threshold: 9.0
-    action:
-      name: reject
-    defer to post: true
-  #
-  - filter: Background Check
-    filter variables:
-    - name: sea_surface_temperature
-    threshold: 5.0
-    absolute threshold: 6.0
     action:
       name: reject
     defer to post: true

@@ -6,7 +6,9 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [brightness_temperature]
   channels: &amsua_metop-b_channels 1-15
@@ -335,3 +337,5 @@ obs filters:
   minvalue: 1.0e-12
   action:
     name: reject
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

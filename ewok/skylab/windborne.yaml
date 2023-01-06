@@ -11,7 +11,9 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   simulated variables: [air_temperature, eastward_wind, northward_wind]
 obs operator:
   name: VertInterp
@@ -19,3 +21,6 @@ obs operator:
   - name: air_temperature
   - name: eastward_wind
   - name: northward_wind
+obs filters:
+- filter: Background Check
+  threshold: 3
