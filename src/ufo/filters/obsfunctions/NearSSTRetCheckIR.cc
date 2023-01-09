@@ -119,7 +119,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get variables from ObsSpace
   // Get sensor band central radiation wavenumber
   std::vector<float> wavenumber(nchans);
-  in.get(Variable("MetaData/sensorCentralWavenumber"), wavenumber);
+  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
 
   // Get effective observation error and convert it to inverse of the error variance
   const float missing = util::missingValue(missing);
