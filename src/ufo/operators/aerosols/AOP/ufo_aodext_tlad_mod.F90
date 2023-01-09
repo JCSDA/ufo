@@ -174,7 +174,7 @@ type(ufo_geoval), pointer :: airdens_profile
  ! Get some metadata from obsspace, observed AOD wavelengths
  ! -----------------------
  allocate(self%obss_wavelength(nvars))  
- call obsspace_get_db(obss,"VarMetaData", "obs_wavelength", self%obss_wavelength)
+ call obsspace_get_db(obss,"MetaData", "obs_wavelength", self%obss_wavelength)
 
 end subroutine ufo_aodext_tlad_settraj
 

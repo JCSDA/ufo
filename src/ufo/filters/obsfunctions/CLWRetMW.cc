@@ -216,7 +216,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
              [jch37v], bc_cloud_liquid_water_order_2_37v);
       in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
              [jch37h], bc_cloud_liquid_water_37h);
-      in.get(Variable("Obsdiag/cloud_liquid_water_order_2" , channels)
+      in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
              [jch37h], bc_cloud_liquid_water_order_2_37h);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (bc_cloud_liquid_water_37v[0] != missing &&
