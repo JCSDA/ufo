@@ -85,7 +85,7 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
     if (options_.order.value() != boost::none) {
       order_ = options_.order.value().get();
     }
-    hdiags_ += oops::Variables({"brightnessTemperature"}, vars.channels());
+    hdiags_ += oops::Variables({"brightness_temperature"}, vars.channels());
     hdiags_ += oops::Variables({"brightness_temperature_assuming_clear_sky"}, vars.channels());
     hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, vars.channels());
     geovars_ += oops::Variables({"water_area_fraction",
@@ -119,7 +119,7 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
   if (sensor == "AMSUA" || sensor == "ATMS") {
     geovars_ += oops::Variables({"water_area_fraction",
                                  "average_surface_temperature_within_field_of_view"});
-    hdiags_ += oops::Variables({"brightnessTemperature"}, vars.channels());
+    hdiags_ += oops::Variables({"brightness_temperature"}, vars.channels());
   }
 }
 
@@ -150,13 +150,13 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     bt91v.resize(nlocs);
 
     // From the obs database, grab all the brightness temperatures of channels.
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[0]), bt19h);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[1]), bt19v);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[2]), bt22v);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[3]), bt37h);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[4]), bt37v);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[5]), bt91v);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[6]), bt91h);
+    odb.get_db(vargrp, "brightnessTemperature", bt19h, {channels_[0]});
+    odb.get_db(vargrp, "brightnessTemperature", bt19v, {channels_[1]});
+    odb.get_db(vargrp, "brightnessTemperature", bt22v, {channels_[2]});
+    odb.get_db(vargrp, "brightnessTemperature", bt37h, {channels_[3]});
+    odb.get_db(vargrp, "brightnessTemperature", bt37v, {channels_[4]});
+    odb.get_db(vargrp, "brightnessTemperature", bt91v, {channels_[5]});
+    odb.get_db(vargrp, "brightnessTemperature", bt91h, {channels_[6]});
   }
 
   std::vector<float> bt238o, bt314o, bt238f, bt314f, bt238fBC, bt314fBC;
@@ -169,13 +169,13 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     bt314fBC.resize(nlocs);
 
     // From the obs database, grab all the brightness temperatures of channels.
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[0]), bt238o);
-    odb.get_db(vargrp, "brightnessTemperature_" + std::to_string(channels_[1]), bt314o);
+    odb.get_db(vargrp, "brightnessTemperature", bt238o, {channels_[0]});
+    odb.get_db(vargrp, "brightnessTemperature", bt314o, {channels_[1]});
 
     std::string hdiags;
-    hdiags = "brightnessTemperature_" + std::to_string(channels_[0]);
+    hdiags = "brightness_temperature_" + std::to_string(channels_[0]);
     ydiags.get(bt238f, hdiags);
-    hdiags = "brightnessTemperature_" + std::to_string(channels_[1]);
+    hdiags = "brightness_temperature_" + std::to_string(channels_[1]);
     ydiags.get(bt314f, hdiags);
 
     std::vector<float> scanangle(nlocs);
@@ -228,12 +228,12 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     bt37h.resize(nlocs);
     bt37v.resize(nlocs);
-    odb.get_db("ObsValue", "brightnessTemperature_" + std::to_string(channels_[jch37v]), bt37v);
-    odb.get_db("ObsValue", "brightnessTemperature_" + std::to_string(channels_[jch37h]), bt37h);
+    odb.get_db("ObsValue", "brightnessTemperature", bt37v, {channels_[jch37v]});
+    odb.get_db("ObsValue", "brightnessTemperature", bt37h, {channels_[jch37h]});
 
     std::vector<float> bt_hofx_37vo(nlocs), bt_hofx_37ho(nlocs);
-    ydiags.get(bt_hofx_37vo, "brightnessTemperature_" + std::to_string(channels_[jch37v]));
-    ydiags.get(bt_hofx_37ho, "brightnessTemperature_" + std::to_string(channels_[jch37h]));
+    ydiags.get(bt_hofx_37vo, "brightness_temperature_" + std::to_string(channels_[jch37v]));
+    ydiags.get(bt_hofx_37ho, "brightness_temperature_" + std::to_string(channels_[jch37h]));
 
     std::vector<float> bt_clr_37vo(nlocs), bt_clr_37ho(nlocs);
     ydiags.get(bt_clr_37vo, "brightness_temperature_assuming_clear_sky_" +
