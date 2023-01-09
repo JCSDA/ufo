@@ -77,6 +77,10 @@ class WhereParameters : public oops::Parameters {
   oops::OptionalParameter<util::AnyOf<int, float, util::PartialDateTime>> maxvalue{
     "maxvalue", this};
 
+  /// Select whether the minvalue or maxvalue is an exclusive limit. Default value is inclusive.
+  oops::Parameter<bool> minExclusive{"min_exclusive", false, this};
+  oops::Parameter<bool> maxExclusive{"max_exclusive", false, this};
+
   /// Select locations at which the condition variable takes one of the specified values. For
   /// integer variables, this can be an integer, range of integers (e.g. `3-5`) or a
   /// comma-separated list of integers and/or ranges (e.g. `3-5, 7-8, 10`). For string variables,
