@@ -12,23 +12,24 @@ obs space:
 monitoring only: true
 obs operator:
   name: Identity
+  observation alias file: testinput/obsop_name_map.yaml
 obs filters:
 - filter: Domain Check
   where:
   - variable: # Update over land only
-      name: slmsk@GeoVaLs
+      name: GeoVaLs/slmsk
     absolute_tolerance: 1.0e-3
     is_close_to_any_of: [1]
   - variable: # Accept only "high quality" retrievals from SMAP
-      name: soilMoistureVolumetric@PreQC
+      name: PreQC/soilMoistureVolumetric
     is_in: 0, 8
   - variable: # Accept only where snow mass is minimal
-      name: sheleg@GeoVaLs
+      name: GeoVaLs/sheleg
     maxvalue: 0.001
 - filter: BlackList
   where:
   - variable: # exclude vegetation types (IGBP) 1-4, 13, 15, 17
-      name: vtype@GeoVaLs
+      name: GeoVaLs/vtype
     absolute_tolerance: 1.0e-3
     is_close_to_any_of: [1, 2, 3, 4, 13, 15, 17]
 
