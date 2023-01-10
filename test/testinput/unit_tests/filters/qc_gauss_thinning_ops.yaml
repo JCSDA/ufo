@@ -2,8 +2,12 @@
 # Thinning filter makes it retain the same observations as the Ops_Thinning function from the
 # Met Office OPS system when run in serial.
 
-window begin: 2020-05-11T02:59:59Z  # Shifted back by 1 s to include obs taken at 03:00:00
-window end: 2020-05-11T09:00:00Z
+# Shifted back by 1 s to include obs taken at 03:00:00
+window begin: 2020-05-11T02:59:59Z
+# Also shifted back by 1 s to preserve a 6 h-long window
+# Note the obsfile used in this test has no obs at the window end time, so shifting the end
+# forward by 1 s does not affect the number of obs processed by the test.
+window end: 2020-05-11T08:59:59Z
 
 # The first two tests operate on test data containing series of observations that differ by only
 # one coordinate (latitude, longitude, time or pressure); many of these have the same distance from

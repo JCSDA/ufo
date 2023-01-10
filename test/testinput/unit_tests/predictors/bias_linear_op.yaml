@@ -19,6 +19,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out1.nc4
   obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
@@ -50,6 +51,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out2.nc4
   obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
@@ -89,6 +91,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out3.nc4
   obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
