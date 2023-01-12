@@ -45,8 +45,8 @@ obs filter data:
     - name: ObsErrorData/windNorthward
   QCFlags:
     variables:
-    - name: QCFlagsData/eastward_wind
-    - name: QCFlagsData/northward_wind
+    - name: QCFlagsData/windEastward
+    - name: QCFlagsData/windNorthward
   float obs functions:
   - variable:
       name: ObsFunction/Conditional

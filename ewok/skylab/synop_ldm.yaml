@@ -127,6 +127,6 @@ obs filters:
     filter variables:
     - name: airTemperature
     where:
-    - variable: QCflagsData/surface_pressure
+    - variable: QCflagsData/stationPressure
       minvalue: 1
     defer to post: true
