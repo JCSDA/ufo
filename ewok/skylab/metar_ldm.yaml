@@ -235,14 +235,14 @@ obs filters:
     filter variables:
     - name: windNorthward
     where:
-    - variable: QCflagsData/eastward_wind
+    - variable: QCflagsData/windEastward
       minvalue: 1
     defer to post: true
   - filter: RejectList
     filter variables:
     - name: windEastward
     where:
-    - variable: QCflagsData/northward_wind
+    - variable: QCflagsData/windNorthward
       minvalue: 1
     defer to post: true
   # Reject specific humidity where air temperature was rejected.
@@ -250,7 +250,7 @@ obs filters:
     filter variables:
     - name: specificHumidity
     where:
-    - variable: QCflagsData/air_temperature
+    - variable: QCflagsData/airTemperature
       minvalue: 1
     defer to post: true
   # Reject all variables where surface pressure was rejected.
@@ -261,6 +261,6 @@ obs filters:
     - name: windEastward
     - name: windNorthward
     where:
-    - variable: QCflagsData/surface_pressure
+    - variable: QCflagsData/stationPressure
       minvalue: 1
     defer to post: true

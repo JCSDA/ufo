@@ -62,7 +62,7 @@ obs filters:
   # If T was bad, remove S as well regardless
   - filter: RejectList
     where:
-    - variable: QCflagsData/sea_water_temperature
+    - variable: QCflagsData/sea_waterTemperature
       minvalue: 1
     defer to post: true
 

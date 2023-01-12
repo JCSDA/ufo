@@ -110,6 +110,6 @@ obs filters:
     filter variables:
     - name: specificHumidity
     where:
-    - variable: QCflagsData/air_temperature
+    - variable: QCflagsData/airTemperature
       minvalue: 1
     defer to post: true
