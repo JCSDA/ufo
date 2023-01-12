@@ -11,7 +11,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/tropomi_no2_2020090318_m_opr_out1.nc4
-    simulated variables: [nitrogendioxidetroposphericColumn]
+    simulated variables: [nitrogendioxideColumn]
   obs operator:
     name: ColumnRetrieval
     nlayers_retrieval: 34
@@ -40,7 +40,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/tropomi_no2_2020090318_m_opr_out2.nc4
-    simulated variables: [nitrogendioxideColumn]
+    simulated variables: [nitrogendioxideTotal]
   obs operator:
     name: ColumnRetrieval
     nlayers_retrieval: 34
