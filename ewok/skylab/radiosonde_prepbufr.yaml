@@ -106,7 +106,7 @@ obs filters:
           name: MetaData/pressure
         xvals: [25000, 20000, 10]
         errors: [0.2, 0.4, 0.8]
-        scale_factor_var: ObsValue/specific_humidity
+        scale_factor_var: ObsValue/specificHumidity
 - filter: Perform Action
   filter variables:
   - name: windEastward

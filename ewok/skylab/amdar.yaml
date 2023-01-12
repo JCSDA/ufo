@@ -87,7 +87,7 @@ obs filters:
             name: MetaData/height
           xvals: [100, 5000, 10000, 12000, 14000, 16000]
           errors: [0.25, 0.2, 0.2, 0.25, 0.35, 0.2]
-          scale_factor_var: ObsValue/specific_humidity
+          scale_factor_var: ObsValue/specificHumidity
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:

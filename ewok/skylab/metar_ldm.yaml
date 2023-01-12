@@ -173,7 +173,7 @@ obs filters:
       error function:
         name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
-          scale_factor_var: ObsValue/specific_humidity
+          scale_factor_var: ObsValue/specificHumidity
           xvar:
             name: ObsValue/stationPressure
           xvals: [110000, 105000, 100000, 95000, 90000, 85000, 80000, 75000, 70000, 65000, 60000, 55000,
