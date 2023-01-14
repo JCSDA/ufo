@@ -14,30 +14,31 @@ obs space:
 obs operator:
   name: Composite
   components:
-   - name: GSISfcModel
-     variables:
-     - name: airTemperature
-#  - name: Identity
-#    observation alias file: testinput/obsop_name_map.yaml
-#    variables:
-#    - name: seaSurfaceTemperature
-   - name: SfcPCorrected
-     variables:
-     - name: stationPressure
-     da_psfc_scheme: UKMO
+  - name: GSISfcModel
+    observation alias file: $(observation_alias_file)
+    variables:
+    - name: airTemperature
+# - name: Identity
+#   observation alias file: $(observation_alias_file)
+#   variables:
+#   - name: seaSurfaceTemperature
+  - name: SfcPCorrected
+    variables:
+    - name: stationPressure
+    da_psfc_scheme: UKMO
 linear obs operator:
   name: Composite
   components:
   - name: Identity
-    observation alias file: testinput/obsop_name_map.yaml
+    observation alias file: $(observation_alias_file)
     variables:
     - name: airTemperature
 # - name: Identity
-#   observation alias file: testinput/obsop_name_map.yaml
+#   observation alias file: $(observation_alias_file)
 #   variables:
 #   - name: seaSurfaceTemperature
   - name: Identity
-    observation alias file: testinput/obsop_name_map.yaml
+    observation alias file: $(observation_alias_file)
     variables:
     - name: stationPressure
 obs filters:

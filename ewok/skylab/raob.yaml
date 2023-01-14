@@ -15,7 +15,7 @@ obs space:
   simulated variables: [airTemperature, specificHumidity, windEastward, windNorthward]
 obs operator:
   name: VertInterp
-  observation alias file: testinput/obsop_name_map.yaml
+  observation alias file: $(observation_alias_file)
   variables:
   - name: airTemperature
   - name: specificHumidity

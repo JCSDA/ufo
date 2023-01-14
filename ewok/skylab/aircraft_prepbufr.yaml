@@ -17,7 +17,7 @@ obs space:
   simulated variables: [windEastward, windNorthward, airTemperature]
 obs operator:
   name: VertInterp
-  observation alias file: testinput/obsop_name_map.yaml
+  observation alias file: $(observation_alias_file)
 obs filters:
 # Observation Range Sanity Check
 - filter: Bounds Check

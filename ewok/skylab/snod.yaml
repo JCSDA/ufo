@@ -12,7 +12,7 @@ obs space:
 monitoring only: true
 obs operator:
   name: Identity
-  observation alias file: testinput/obsop_name_map.yaml
+  observation alias file: $(observation_alias_file)
 obs filters:
 - filter: Bounds Check # negative / missing snow
   filter variables:

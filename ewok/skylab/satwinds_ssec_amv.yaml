@@ -14,7 +14,7 @@ obs space:
 #
 obs operator:
   name: VertInterp
-  observation alias file: testinput/obsop_name_map.yaml
+  observation alias file: $(observation_alias_file)
 #
 obs filters:
   # Observation Range Sanity Check
