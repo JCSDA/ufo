@@ -292,19 +292,19 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
 
       // Compare output values with OPS equivalents.
       const auto &expected_flagsOut =
-        profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsQCFlags");
+        profileDataHandler.get<int>("ModelLevelsQCFlags/OPS_windEastward");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
         EXPECT(flagsOut[jlev] == expected_flagsOut[jlev]);
       const auto &expected_valuesOut =
-        profileDataHandler.get<float>("OPS_eastward_wind@ModelLevelsDerivedValue");
+        profileDataHandler.get<float>("ModelLevelsDerivedValue/OPS_windEastward");
       for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
         EXPECT(oops::is_close_relative(valuesOut[jlev], expected_valuesOut[jlev], 1e-4f));
       const auto &expected_ZMin =
-        profileDataHandler.get<float>("OPS_LogP_u_Min@ModelLevelsDerivedValue");
+        profileDataHandler.get<float>("ModelLevelsDerivedValue/OPS_LogP_u_Min");
       for (size_t jlev = 0; jlev < ZMin.size(); ++jlev)
         EXPECT(oops::is_close_relative(ZMin[jlev], expected_ZMin[jlev], 1e-14f));
       const auto &expected_ZMax =
-        profileDataHandler.get<float>("OPS_LogP_u_Max@ModelLevelsDerivedValue");
+        profileDataHandler.get<float>("ModelLevelsDerivedValue/OPS_LogP_u_Max");
       for (size_t jlev = 0; jlev < ZMax.size(); ++jlev)
         EXPECT(oops::is_close_relative(ZMax[jlev], expected_ZMax[jlev], 1e-14f));
     }

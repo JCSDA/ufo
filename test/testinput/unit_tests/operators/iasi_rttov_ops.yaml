@@ -49,7 +49,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: *all_channels
 #   obsdataout:
 #     engine:

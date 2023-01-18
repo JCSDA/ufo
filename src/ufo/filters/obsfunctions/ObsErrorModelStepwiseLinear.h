@@ -78,14 +78,14 @@ class ObsErrorModelStepwiseLinearParameters : public oops::Parameters {
 /// #### Example for air temperature assigned obserror by pressure (e.g., sonde data) ####
 ///
 ///       filter variables:
-///       - name: air_temperature
+///       - name: airTemperature
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: ObsErrorModelStepwiseLinear@ObsFunction
+///           name: ObsFunction/ObsErrorModelStepwiseLinear
 ///           options:
 ///             xvar:
-///               name: air_pressure@ObsValue
+///               name: ObsValue/pressure
 ///             xvals: [110000, 85000, 50000, 25000, 10000, 1]   #Pressure (Pa)
 ///             errors: [1.1, 1.3, 1.8, 2.4, 4.0, 4.5]
 ///

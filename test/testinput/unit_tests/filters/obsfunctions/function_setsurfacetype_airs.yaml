@@ -8,13 +8,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/airs_aqua_20210701T1200Z_obs_obfn_setsurface.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1, 6, 7, 10, 11, 15, 16, 17, 20, 21
   geovals:
     filename:
       Data/ufo/testinput_tier_1/airs_aqua_20210701T1200Z_geovals_obfn_setsurface.nc4
   obs function:
-    name: SetSurfaceType@ObsFunction
+    name: ObsFunction/SetSurfaceType
     options:
       UseReportSurface: false
       UseReportElevation: true
@@ -22,5 +22,5 @@ observations:
       UseSurfaceWaterFraction: true
       MinIceFrac: 0.05
       MinWaterFrac: 0.99
-    variables: [surface_type]
+    variables: [surfaceQualifier]
     tolerance: 1.0e-7

@@ -4,6 +4,7 @@ window end: 2018-04-15T03:00:00Z
 observations:
 - obs operator:
     name: InsituTemperature
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: InsituTemperature
     obsdatain:
@@ -14,8 +15,8 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/profile_2018-04-15_insitutemperature_opr_out.nc
-    simulated variables: [sea_water_temperature]
-    observed variables: [sea_water_temperature]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
   rms ref: 15.020734025831988

@@ -69,11 +69,11 @@ ModelObThreshold::~ModelObThreshold() {
  *  obs filters:
  *  - filter: ModelOb Threshold
  *    model profile:
- *      name: relative_humidity@GeoVaLs
+ *      name: GeoVaLs/relative_humidity
  *    model vertical coordinate:
- *      name: air_pressure@GeoVaLs
+ *      name: GeoVaLs/air_pressure
  *    observation height:
- *      name: air_pressure@MetaData
+ *      name: MetaData/pressure
  *    thresholds: [50,50,40,30]
  *    coordinate values: [100000,80000,50000,20000]
  *    threshold type: min

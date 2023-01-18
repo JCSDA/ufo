@@ -12,7 +12,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/lam_domaincheck_sondes_tv_obs_2018041500_m.nc4
-    simulated variables: [virtual_temperature]
+    simulated variables: [virtualTemperature]
   obs filters:
   # this obs function will compute, based off of input parameters,
   # if an observation is inside of a specified limited area domain
@@ -20,9 +20,9 @@ observations:
   # and can be filtered out by the bounds check.
   - filter: Bounds Check
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     test variables:
-    - name: LAMDomainCheck@ObsFunction
+    - name: ObsFunction/LAMDomainCheck
       options:
         map_projection: gnomonic_ed # only option currently supported
         save: true # will save the DerivedValue to IODA output file

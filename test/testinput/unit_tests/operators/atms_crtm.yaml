@@ -25,7 +25,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_npp_obs_2018041500_m_qc_atms_crtm_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4

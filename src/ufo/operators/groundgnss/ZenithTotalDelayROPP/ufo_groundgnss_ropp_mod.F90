@@ -126,8 +126,8 @@ subroutine ufo_groundgnss_ropp_simobs(self, geovals, hofx, obss)
 
      call obsspace_get_db(obss, "MetaData", "longitude",        obsLon) 
      call obsspace_get_db(obss, "MetaData", "latitude",         obsLat) 
-     call obsspace_get_db(obss, "MetaData", "station_height",   obsHeight) 
-     call obsspace_get_db(obss, "ObsValue", "ZTD",              obsValue) 
+     call obsspace_get_db(obss, "MetaData", "stationElevation", obsHeight) 
+     call obsspace_get_db(obss, "ObsValue", "zenithTotalDelay", obsValue) 
 !    obsValue = 0.0
 
      allocate(ichk(nlev))

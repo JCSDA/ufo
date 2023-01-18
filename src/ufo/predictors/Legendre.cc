@@ -44,7 +44,7 @@ void Legendre::compute(const ioda::ObsSpace & odb,
   std::vector<int> scan_position(nlocs, 0);
   std::vector<double> LegPoly(order_+1, 0);
 
-  odb.get_db("MetaData", "scan_position", scan_position);
+  odb.get_db("MetaData", "sensorScanPosition", scan_position);
   const std::size_t nvars = vars_.size();
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     double xscan{-1.0 + 2.0 * (scan_position[jl] - 1) / (nscan_ - 1)};

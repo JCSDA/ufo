@@ -4,36 +4,38 @@ obs space:
     engine:
       type: H5File
     obsgrouping:
-      group variables: [ 'record_number' ]
-      sort variable: 'impact_height'
+      group variables: [ 'sequenceNumber' ]
+      sort variable: 'impactHeightRO'
       sort order: 'ascending'
   obsdataout:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
-  simulated variables: [bending_angle]
+  simulated variables: [bendingAngle]
 obs operator:
   name: GnssroBndNBAM
   obs options:
     use_compress: 1
     sr_steps: 2
     vertlayer: full
-    super_ref_qc: NBAM
+    super_ref_qc: ECMWF
 obs filters:
 - filter: Domain Check
   filter variables:
-  - name: bending_angle
+  - name: bendingAngle
   where:
   - variable:
-      name: impact_height@MetaData
-    minvalue: 0
-    maxvalue: 60000
+      name: MetaData/impactHeightRO
+    minvalue: 8000
+    maxvalue: 50000
 - filter: ROobserror
   filter variables:
-  - name: bending_angle
-  errmodel: NBAM
-- filter: Background Check RONBAM
+  - name: bendingAngle
+  errmodel: NRL
+- filter: Background Check
   filter variables:
-  - name: bending_angle
+  - name: bendingAngle
   threshold: 3

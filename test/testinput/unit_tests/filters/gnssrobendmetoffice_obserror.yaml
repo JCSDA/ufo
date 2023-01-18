@@ -15,8 +15,8 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
       obsgrouping:
-        group variables: ["record_number"]
-    simulated variables: [bending_angle]
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
 #    obsdataout:
 #      engine:
 #        type: H5File
@@ -26,13 +26,13 @@ observations:
   obs filters:
   - filter: GNSSRO Impact Height Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: MetOffice
     err_variable: latitude
     rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
@@ -42,9 +42,9 @@ observations:
     defer to post: true
   compareVariables:
     - reference:
-        name: bending_angle@LatitudeObsError
+        name: LatitudeObsError/bendingAngle
       test:
-        name: bending_angle@EffectiveError
+        name: EffectiveError/bendingAngle
       relTol: 1.0e-5
 # Test the specification of observation errors by average temperature
 - obs operator:
@@ -58,11 +58,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
-    simulated variables: [bending_angle]
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
+    simulated variables: [bendingAngle]
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2020050106_1dvar_ukmo_obserr_avg_temperature_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
@@ -71,13 +71,13 @@ observations:
     - name: MetaData/average_temperature_20km
       type: float
       function:
-        name: AverageTemperatureBelow@ObsFunction
+        name: ObsFunction/AverageTemperatureBelow
         options:
           height limit: 20000
           use layer thickness: false
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: MetOffice
     err_variable: average_temperature
     rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
@@ -88,9 +88,9 @@ observations:
     average temperature name: average_temperature_20km
   compareVariables:
     - reference:
-        name: bending_angle@AvTempObsError
+        name: AvTempObsError/bendingAngle
       test:
-        name: bending_angle@EffectiveError
+        name: EffectiveError/bendingAngle
       relTol: 4.0e-4
 # Test the specification of observation errors by latitude using DrawObsErrorFromFile
 - obs operator:
@@ -105,8 +105,8 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
       obsgrouping:
-        group variables: ["record_number"]
-    simulated variables: [bending_angle]
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
 #    obsdataout:
 #      engine:
 #        type: H5File
@@ -116,49 +116,49 @@ observations:
   obs pre filters:
   - filter: Variable Assignment
     assignments:
-    - name: NewMetaData/impact_height
+    - name: DerivedMetaData/impactHeightRO
       type: float
       function:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
   - filter: Variable Assignment               # Create a new variable which combines satellite and processing centre
     assignments:
-    - name: satellite_and_center@MetaData
+    - name: MetaData/satelliteAndCenter
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
-          variables: [occulting_sat_id@MetaData, originating_center@MetaData]
+          variables: [MetaData/satelliteIdentifier, MetaData/dataProviderOrigin]
           coefs: [1000, 1.0]
   obs post filters:
   - filter: GNSSRO Impact Height Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
   - filter: Variable Assignment
     assignments:
-    - name: ObsError/bending_angle
+    - name: ObsError/bendingAngle
       type: float
       function:
-        name: DrawObsErrorFromFile@ObsFunction
+        name: ObsFunction/DrawObsErrorFromFile
         options:
           dispersion measure: fractional standard deviation
-          normalization variable: ObsValue/bending_angle
+          normalization variable: ObsValue/bendingAngle
           minimum value: 3.0E-6
           file: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nc4
           interpolation:
-          - name: satellite_and_center@MetaData
+          - name: MetaData/satelliteAndCenter
             method: nearest
-          - name: impact_height@NewMetaData
+          - name: DerivedMetaData/impactHeightRO
             method: bilinear
-          - name: latitude@MetaData
+          - name: MetaData/latitude
             method: bilinear
   compareVariables:
     - test:
-        name: ObsError/bending_angle
+        name: ObsError/bendingAngle
       reference:
-        name: LatObsErrorDrawFile/bending_angle
+        name: LatObsErrorDrawFile/bendingAngle
       relTol: 1.0e-6
 # Test the specification of observation errors by latitude using DrawObsErrorFromFile with 2D (profile) data
 - obs operator:
@@ -173,71 +173,71 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
       obsgrouping:
-        group variables: ["record_number"]
-    simulated variables: [bending_angle]
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
     channels: &all_levels 1-375
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2020050106_profile_ukmo_obserr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2020050106_profile_ukmo_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
   obs pre filters:
   - filter: Domain Check
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
   - filter: Variable Assignment
     assignments:
-    - name: NewMetaData/impact_height
+    - name: DerivedMetaData/impactHeightRO
       channels: *all_levels
       type: float
       function:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
         options:
           channels: *all_levels
   - filter: Variable Assignment               # Create a new variable which combines satellite and processing centre
     assignments:
-    - name: satellite_and_center@MetaData
+    - name: MetaData/satelliteAndCenter
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
-          variables: [occulting_sat_id@MetaData, originating_center@MetaData]
+          variables: [MetaData/satelliteIdentifier, MetaData/dataProviderOrigin]
           coefs: [1000, 1.0]
   obs post filters:
   - filter: GNSSRO Impact Height Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
       channels: *all_levels
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
   - filter: Variable Assignment
     assignments:
-    - name: NewMetaData/bending_angle
+    - name: DerivedMetaData/bendingAngle
       type: float
       channels: *all_levels
       function:
-        name: DrawObsErrorFromFile@ObsFunction
+        name: ObsFunction/DrawObsErrorFromFile
         options:
           dispersion measure: fractional standard deviation
-          normalization variable: ObsValue/bending_angle
+          normalization variable: ObsValue/bendingAngle
           minimum value: 3.0E-6
           file: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nc4
           channels: *all_levels
           interpolation:
-          - name: satellite_and_center@MetaData
+          - name: MetaData/satelliteAndCenter
             method: exact
-          - name: impact_height@NewMetaData
+          - name: DerivedMetaData/impactHeightRO
             use channel list: true
             method: bilinear
-          - name: latitude@MetaData
+          - name: MetaData/latitude
             method: bilinear
   compareVariables:
     - test:
-        name: NewMetaData/bending_angle
+        name: DerivedMetaData/bendingAngle
       reference:
-        name: TwoDObsError/bending_angle
+        name: TwoDObsError/bendingAngle
       relTol: 1.0e-6

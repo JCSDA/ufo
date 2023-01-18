@@ -51,7 +51,7 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
     getObservation("MetaData", "correctedStationAltitude",
                      ZStn);
   } else {
-    getObservation("MetaData", "stationAltitude",
+    getObservation("MetaData", "stationElevation",
                      ZStn);
   }
   data_.get(Variable("ObsError/stationPressure"),

@@ -60,13 +60,13 @@ class TropopauseEstimateParameters : public oops::Parameters {
 /// ### Sample YAML configuration
 ///     - filter: Difference Check
 ///       filter variables:
-///       - name: eastward_wind
-///       - name: northward_wind
-///       reference: TropopauseEstimate@ObsFunction
+///       - name: windEastward
+///       - name: windNorthward
+///       reference: ObsFunction/TropopauseEstimate
 ///    #  options:                         # These options will not work yet with Difference Check
 ///    #    - tropo_equator: 13000         # 130 hPa
 ///    #    - tropo_pole: 37000            # 370 hPa
-///       value: air_pressure@MetaData
+///       value: MetaData/pressure
 ///       minvalue: -5000                  # 50 hPa above tropopause level, negative p-diff
 ///
 class TropopauseEstimate : public ObsFunctionBase<float> {

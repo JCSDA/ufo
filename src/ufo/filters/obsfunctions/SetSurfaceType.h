@@ -45,10 +45,11 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   oops::Parameter<bool> UseReportSurface{"UseReportSurface", false, this};
 
   /// Change name of variable storing the reported surface type
-  /// Default is 'land_sea@MetaData'
-  /// Example: to set to SSMIS report type (which is surface_flag@MetaData) set
-  ///          SurfaceReport Name: surface_flag@MetaData
-  oops::Parameter<std::string> SurfaceMetaDataName{"SurfaceReport Name", "land_sea@MetaData", this};
+  /// Default is 'MetaData/land_sea'
+  /// Example: to set to SSMIS report type (which is MetaData/surfaceQualifier) set
+  ///          SurfaceReport Name: MetaData/surfaceQualifier
+  oops::Parameter<std::string> SurfaceMetaDataName{"SurfaceReport Name",
+                               "MetaData/landOrSeaQualifier", this};
 
   /// Use reported Surface Elevation (default false)
   /// Example: To use the AAPPreported elevation set
@@ -61,7 +62,7 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   oops::Parameter<bool> UseAAPPSurfaceClass{"UseAAPPSurfaceClass", false, this};
 
   /// Use reported Surface Water Fraction (default false)
-  /// Example: To use reported Surface Water Fraction (which is water_fraction@MetaData) set
+  /// Example: To use reported Surface Water Fraction (which is MetaData/waterFraction) set
   ///          UseSurfaceWaterFraction: true
   oops::Parameter<bool> UseSurfaceWaterFraction{"UseSurfaceWaterFraction", false, this};
 

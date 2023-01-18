@@ -38,12 +38,12 @@ SCATRetMW::SCATRetMW(const eckit::LocalConfiguration & conf)
 
   // Include list of required data from ObsSpace
   for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-    invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
+    invars_ += Variable(options_.varGroup.value()[igrp] + "/brightnessTemperature", channels_);
   }
-  invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels_);
+  invars_ += Variable(options_.testBias.value() + "/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 }
 
 // -----------------------------------------------------------------------------
@@ -65,21 +65,21 @@ void SCATRetMW::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type from GeoVaLs
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get observation, bias correction and HofX from ObsSpace
   std::vector<float> bt238(nlocs), bt314(nlocs), bt890(nlocs);
   for (size_t igrp = 0; igrp < ngrps; ++igrp) {
     // Get data based on group type
-    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[0], bt238);
-    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[1], bt314);
-    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[2], bt890);
+    in.get(Variable(vargrp[igrp]+"/brightnessTemperature", channels_)[0], bt238);
+    in.get(Variable(vargrp[igrp]+"/brightnessTemperature", channels_)[1], bt314);
+    in.get(Variable(vargrp[igrp]+"/brightnessTemperature", channels_)[2], bt890);
     // Get bias based on group type
     if (options_.addBias.value() == vargrp[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs), bias890(nlocs);
-      in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[0], bias238);
-      in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[1], bias314);
-      in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[2], bias890);
+      in.get(Variable(options_.testBias.value()+"/brightnessTemperature", channels_)[0], bias238);
+      in.get(Variable(options_.testBias.value()+"/brightnessTemperature", channels_)[1], bias314);
+      in.get(Variable(options_.testBias.value()+"/brightnessTemperature", channels_)[2], bias890);
       // Add bias correction to the assigned group (only need to do it for ObsValue, since HofX
       // includes bias correction
       if (options_.addBias.value() == "ObsValue") {

@@ -10,7 +10,7 @@ obs space:
 #   engine:
 #     type: H5File
 #     obsfile: Data/amsua_n19_obs_2018041500_m_qc_optics_out.nc4
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &all_channels 1-15
 obs operator:
   name: CRTM

@@ -48,7 +48,7 @@ class SurfaceEmissivityParameters : public oops::Parameters {
   oops::Parameter<double> EmissSeaIceDefault{"EmissSeaIceDefault", 0.92, this};
 
   /// Location of emissivity values to be read from the database e.g.
-  /// default is surface_emissivity_<chan>@DerivedObsValue
+  /// default is DerivedObsValue/emissivity_<chan>
   oops::Parameter<std::string> groupInObsSpace{"group in obs space", "DerivedObsValue", this};
 
   /// Default eigen value path is blank but needs to be present if using PC emiss

@@ -17,7 +17,7 @@ observations:
     # the default action for RejectList is "reject"
     where:
       - variable:
-          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 6
   # now "accept back" all rejected observations of variable2 with var1 >= 3 and var1 <= 7
   - filter: AcceptList
@@ -25,7 +25,7 @@ observations:
     filter variables: [variable2]
     where:
       - variable:
-          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 3
         maxvalue: 7
   # all observations of variable1 with var1 <= 5 and of variable2 with var1 <= 7 should be accepted
@@ -46,7 +46,7 @@ observations:
       name: reject
     where:
       - variable:
-          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 6
   # now "accept back" all rejected observations of variable2 with var1 >= 3 and var1 <= 7
   - filter: RejectList
@@ -55,7 +55,7 @@ observations:
     filter variables: [variable2]
     where:
       - variable:
-          name:  var1@MetaData  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 3
         maxvalue: 7
   # all observations of variable1 with var1 <= 5 and of variable2 with var1 <= 7 should be accepted

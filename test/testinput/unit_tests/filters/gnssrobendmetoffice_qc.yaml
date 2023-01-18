@@ -14,8 +14,8 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
       obsgrouping:
-        group variables: ["record_number"]
-    simulated variables: [bending_angle]
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -26,45 +26,45 @@ observations:
   - filter: Domain Check
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 0
       maxvalue: 60000
   - filter: BlackList
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 523  # Apply for FY-3D
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 40000  # Remove above 40km
     - variable:
-        name: quality_flags@MetaData
+        name: MetaData/qualityFlags
       any_bit_set_of: 13 # Apply to rising occultations
   - filter: BlackList
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 42  # Apply for TerraSAR-X
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 40000  # Remove above 40km
   - filter: GNSSRO Impact Height Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
   - filter: Profile Few Observations Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     threshold: 10
     defer to post: true
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: MetOffice
     err_variable: latitude
     rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
@@ -82,7 +82,7 @@ observations:
     y_test: 5
     bmatrix_filename: ../resources/bmatrix/gnssro/gnssro_bmatrix.txt
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
   passedBenchmark: 229
 - obs operator:
     name: GnssroBendMetOffice
@@ -96,54 +96,54 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
       obsgrouping:
-        group variables: ["record_number"]
-    simulated variables: [bending_angle]
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
   obs filters:
   - filter: Domain Check
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 0
       maxvalue: 60000
   - filter: BlackList
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 523  # Apply for FY-3D
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 40000  # Remove above 40km
     - variable:
-        name: quality_flags@MetaData
+        name: MetaData/qualityFlags
       any_bit_set_of: 13 # Apply to rising occultations
   - filter: BlackList
     where:
     - variable:
-        name: occulting_sat_id@MetaData
+        name: MetaData/satelliteIdentifier
       is_in: 42  # Apply for TerraSAR-X
     - variable:
-        name: ImpactHeight@ObsFunction
+        name: ObsFunction/ImpactHeight
       minvalue: 40000  # Remove above 40km
   - filter: GNSSRO Impact Height Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     gradient threshold: -0.08
     sharp gradient offset: 600
     surface offset: 500
     verbose output: true
   - filter: Profile Few Observations Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     threshold: 10
     defer to post: true
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: MetOffice
     err_variable: latitude
     rmatrix_filename: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
@@ -161,5 +161,5 @@ observations:
     y_test: 5
     bmatrix_filename: ../resources/bmatrix/gnssro/gnssro_bmatrix.txt
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
   passedBenchmark: 229

@@ -9,19 +9,19 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "air_pressure"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "pressure"
         sort order: "descending"
 #   obsdataout: 
 #     engine:
 #       type: H5File
 #       obsfile: Data/rass_tv_obs_2020121500_out.nc
-    simulated variables: [virtual_temperature]
+    simulated variables: [virtualTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   obs operator:
     name: VertInterp
-
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs filters:
   #
   # Reject all obs with PreQC mark already set above 3
@@ -33,7 +33,7 @@ observations:
   # Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     minvalue: 195
     maxvalue: 327
     action:
@@ -41,41 +41,41 @@ observations:
   #
   - filter: Perform Action
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     action:
       name: assign error
       error parameter: 1.3
   #
   - filter: Perform Action
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: MetaData/air_pressure
+            name: MetaData/pressure
           xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
           errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
   #
   - filter: Perform Action
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorConventional@ObsFunction
+        name: ObsFunction/ObsErrorFactorConventional
         options:
           test QCflag: PreQC
-          inflate variables: [virtual_temperature]
-          pressure: MetaData/air_pressure
+          inflate variables: [virtualTemperature]
+          pressure: MetaData/pressure
     defer to post: true
   #
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: virtual_temperature
+    - name: virtualTemperature
     threshold: 7.0
     absolute threshold: 9.0
     action:

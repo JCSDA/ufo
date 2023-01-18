@@ -69,11 +69,11 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
 /// ### example configurations for testing this obs function: ###
 ///
 ///  obs function:
-///    name: ObsErrorFactorConventional@ObsFunction
-///    variables: [eastward_wind]   # Variable name for output
+///    name: ObsFunction/ObsErrorFactorConventional
+///    variables: [windEastward]   # Variable name for output
 ///    tolerance: 1.e-6
 ///    options:
-///      inflate variables: [eastward_wind] # Ok to be multiple dimensions for running
+///      inflate variables: [windEastward]  # Ok to be multiple dimensions for running
 ///                                         # this obsFunction only (not within a filter)
 ///      test QCflag: PreQC  # Optional. If not defined, use QCflags from prior filters
 ///      test QCthreshold: 2 # Optonal, only when PreQC is used
@@ -85,24 +85,24 @@ class ObsErrorFactorConventionalParameters : public oops::Parameters {
 /// ### example configurations for using this obs function in a filter: ###
 ///   - filter: BlackList
 ///     filter variables:
-///     - name: virtual_temperature # Have to be consistent with "inflate
+///     - name: virtualTemperature # Have to be consistent with "inflate
 ///                                 # variables". Therefore, only one variable allowed
 ///                                 # while running with this obsFunc
 ///     action:
 ///       name: inflate error
 ///       inflation variable:
-///         name: ObsErrorFactorConventional@ObsFunction
+///         name: ObsFunction/ObsErrorFactorConventional
 ///         options:
-///           inflate variables: [virtual_temperature]  # Have to be consistent with "filter
+///           inflate variables: [virtualTemperature]  # Have to be consistent with "filter
 ///                                                     # variables". Therefore, only one
 ///                                                     # variable allowed
 ///
 /// ### example configurations for using obsgrouping: ###
 ///
 ///      obsgrouping:
-///        group variables: ["station_id", "datetime"] # Choose parameteres to identify each of
-///                                                    # the obs profiles
-///        sort variable: "air_pressure"
+///        group variables: ["stationIdentification", "dateTime"] # Choose parameteres to identify
+///                                                    # each of the obs profiles
+///        sort variable: "pressure"
 ///        sort order: "descending"
 ///
 class ObsErrorFactorConventional : public ObsFunctionBase<float> {

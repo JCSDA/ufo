@@ -42,24 +42,24 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   // The starting (un-inflated) value of obserror. If running in sequence of filters,
   // then it is probably found in ObsErrorData, otherwise, it is probably ObsError.
   const std::string errgrp = options_->original_obserr.value();
-  invars_ += Variable("surface_pressure@"+errgrp);
+  invars_ += Variable(errgrp+"/stationPressure");
 
   // Include list of required data from ObsValue
-  invars_ += Variable("surface_pressure@ObsValue");
-  invars_ += Variable("virtual_temperature@ObsValue");
-  invars_ += Variable("air_temperature@ObsValue");
+  invars_ += Variable("ObsValue/stationPressure");
+  invars_ += Variable("ObsValue/virtualTemperature");
+  invars_ += Variable("ObsValue/airTemperature");
 
   // Include list of required data from MetaData
-  invars_ += Variable("station_elevation@MetaData");
+  invars_ += Variable("MetaData/stationElevation");
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("surface_pressure@GeoVaLs");
-  invars_ += Variable("air_pressure@GeoVaLs");
-  invars_ += Variable("virtual_temperature@GeoVaLs");
+  invars_ += Variable("GeoVaLs/surface_pressure");
+  invars_ += Variable("GeoVaLs/air_pressure");
+  invars_ += Variable("GeoVaLs/virtual_temperature");
   const std::string geovar_geomz = options_->geovar_geomz.value();
-  invars_ += Variable(geovar_geomz + "@GeoVaLs");
+  invars_ += Variable("GeoVaLs/" + geovar_geomz);
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
-  invars_ += Variable(geovar_sfc_geomz + "@GeoVaLs");
+  invars_ += Variable("GeoVaLs/" + geovar_sfc_geomz);
 }
 
 // -----------------------------------------------------------------------------
@@ -79,25 +79,25 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
 
   // Get dimensions
   size_t nlocs = data.nlocs();
-  size_t nlevs = data.nlevs(Variable("air_pressure@GeoVaLs"));
+  size_t nlevs = data.nlevs(Variable("GeoVaLs/air_pressure"));
 
   // Get MetaData of station elevation
   std::vector<float> ob_elevation(nlocs);
-  data.get(Variable("station_elevation@MetaData"), ob_elevation);
+  data.get(Variable("MetaData/stationElevation"), ob_elevation);
 
   // Get ObsValue of surface pressure
   std::vector<float> ob_pressure_sfc(nlocs);
-  data.get(Variable("surface_pressure@ObsValue"), ob_pressure_sfc);
+  data.get(Variable("ObsValue/stationPressure"), ob_pressure_sfc);
 
   // Get ObsValue of virtual temperature (optional), initialize
   // the vector as missing value and get values only if it exists
   std::vector<float> ob_temp_sfc(nlocs, missing);
-  if (data.has(Variable("virtual_temperature@ObsValue"))) {
-    data.get(Variable("virtual_temperature@ObsValue"), ob_temp_sfc);
+  if (data.has(Variable("ObsValue/virtualTemperature"))) {
+    data.get(Variable("ObsValue/virtualTemperature"), ob_temp_sfc);
   }
-  if (data.has(Variable("air_temperature@ObsValue"))) {
+  if (data.has(Variable("ObsValue/airTemperature"))) {
     std::vector<float> ob_temp_sfc2(nlocs);
-    data.get(Variable("air_temperature@ObsValue"), ob_temp_sfc2);
+    data.get(Variable("ObsValue/airTemperature"), ob_temp_sfc2);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (ob_temp_sfc[iloc] == missing &&
           ob_temp_sfc2[iloc] != missing) {
@@ -109,23 +109,23 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   // Get original ObsError of surface pressure
   std::vector<float> currentObserr(nlocs);
   const std::string errgrp = options_->original_obserr.value();
-  data.get(Variable("surface_pressure@"+errgrp), currentObserr);
+  data.get(Variable(errgrp + "/stationPressure"), currentObserr);
 
   // Get GeoVaLs of surface altitude and pressure
   std::vector<float> model_elevation(nlocs);
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
-  data.get(Variable(geovar_sfc_geomz + "@GeoVaLs"), model_elevation);
+  data.get(Variable("GeoVaLs/" + geovar_sfc_geomz), model_elevation);
   if (geovar_sfc_geomz.find("geopotential_height") != std::string::npos) {
     // Transform geopotential height to geometric height
     std::vector<float> latitude(nlocs);
-    data.get(Variable("latitude@MetaData"), latitude);
+    data.get(Variable("MetaData/latitude"), latitude);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       model_elevation[iloc] = formulas::Geopotential_to_Geometric_Height(latitude[iloc],
                               model_elevation[iloc]);
     }
   }
   std::vector<float> model_pres_sfc(nlocs);
-  data.get(Variable("surface_pressure@GeoVaLs"), model_pres_sfc);
+  data.get(Variable("GeoVaLs/surface_pressure"), model_pres_sfc);
 
   // Get GeoVaLs pointer for retrieving vertical profiles
   const ufo::GeoVaLs * gvals = data.getGeoVaLs();
@@ -139,14 +139,14 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
 
   // Get GeoVaLs of altitude and virtual temperature at model bottom level
   std::vector<float> model_temp_sfc(nlocs);
-  data.get(Variable("virtual_temperature@GeoVaLs"), levbot, model_temp_sfc);
+  data.get(Variable("GeoVaLs/virtual_temperature"), levbot, model_temp_sfc);
   std::vector<float> model_elevation_bot(nlocs);
   const std::string geovar_geomz = options_->geovar_geomz.value();
-  data.get(Variable(geovar_geomz + "@GeoVaLs"), levbot, model_elevation_bot);
+  data.get(Variable("GeoVaLs/" + geovar_geomz), levbot, model_elevation_bot);
   if (geovar_geomz.find("geopotential_height") != std::string::npos) {
     // Transform geopotential height to geometric height
     std::vector<float> latitude(nlocs);
-    data.get(Variable("latitude@MetaData"), latitude);
+    data.get(Variable("MetaData/latitude"), latitude);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       model_elevation_bot[iloc] = formulas::Geopotential_to_Geometric_Height(
                    latitude[iloc], model_elevation_bot[iloc]);

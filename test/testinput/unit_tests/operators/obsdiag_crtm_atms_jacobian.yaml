@@ -10,7 +10,7 @@ obs space:
 #   engine:
 #     type: H5File
 #     obsfile: Data/atms_npp_obs_2018041500_m_qc_jacobian_out.nc4
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &all_channels 1-22
 obs operator:
   name: CRTM

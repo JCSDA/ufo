@@ -3,13 +3,13 @@ Duplicates, constraints on buddy counts, legacy pair collector:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
 #   obsdataout:
 #     engine:
 #       type: H5File

@@ -150,13 +150,13 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     bt91v.resize(nlocs);
 
     // From the obs database, grab all the brightness temperatures of channels.
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[0]), bt19h);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[1]), bt19v);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[2]), bt22v);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[3]), bt37h);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[4]), bt37v);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[5]), bt91v);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[6]), bt91h);
+    odb.get_db(vargrp, "brightnessTemperature", bt19h, {channels_[0]});
+    odb.get_db(vargrp, "brightnessTemperature", bt19v, {channels_[1]});
+    odb.get_db(vargrp, "brightnessTemperature", bt22v, {channels_[2]});
+    odb.get_db(vargrp, "brightnessTemperature", bt37h, {channels_[3]});
+    odb.get_db(vargrp, "brightnessTemperature", bt37v, {channels_[4]});
+    odb.get_db(vargrp, "brightnessTemperature", bt91v, {channels_[5]});
+    odb.get_db(vargrp, "brightnessTemperature", bt91h, {channels_[6]});
   }
 
   std::vector<float> bt238o, bt314o, bt238f, bt314f, bt238fBC, bt314fBC;
@@ -169,8 +169,8 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     bt314fBC.resize(nlocs);
 
     // From the obs database, grab all the brightness temperatures of channels.
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[0]), bt238o);
-    odb.get_db(vargrp, "brightness_temperature_" + std::to_string(channels_[1]), bt314o);
+    odb.get_db(vargrp, "brightnessTemperature", bt238o, {channels_[0]});
+    odb.get_db(vargrp, "brightnessTemperature", bt314o, {channels_[1]});
 
     std::string hdiags;
     hdiags = "brightness_temperature_" + std::to_string(channels_[0]);
@@ -179,7 +179,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     ydiags.get(bt314f, hdiags);
 
     std::vector<float> scanangle(nlocs);
-    odb.get_db("MetaData", "sensor_view_angle", scanangle);
+    odb.get_db("MetaData", "sensorViewAngle", scanangle);
 
     const Predictors & predictors = biascoeffs.predictors();
     const std::size_t npreds = predictors.size();
@@ -199,7 +199,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   }
 
   std::vector<float> szas(nlocs);
-  odb.get_db("MetaData", "sensor_zenith_angle", szas);
+  odb.get_db("MetaData", "sensorZenithAngle", szas);
 
   std::vector<float> water_frac(nlocs, 0.0);
   std::vector<float> tsavg(nlocs, 0.0);
@@ -228,8 +228,8 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     bt37h.resize(nlocs);
     bt37v.resize(nlocs);
-    odb.get_db("ObsValue", "brightness_temperature_" + std::to_string(channels_[jch37v]), bt37v);
-    odb.get_db("ObsValue", "brightness_temperature_" + std::to_string(channels_[jch37h]), bt37h);
+    odb.get_db("ObsValue", "brightnessTemperature", bt37v, {channels_[jch37v]});
+    odb.get_db("ObsValue", "brightnessTemperature", bt37h, {channels_[jch37h]});
 
     std::vector<float> bt_hofx_37vo(nlocs), bt_hofx_37ho(nlocs);
     ydiags.get(bt_hofx_37vo, "brightness_temperature_" + std::to_string(channels_[jch37v]));
@@ -246,7 +246,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
 
     std::vector<float> scanangle(nlocs, 0.0);
-    odb.get_db("MetaData", "scan_position", scanangle);
+    odb.get_db("MetaData", "sensorScanPosition", scanangle);
 
     // common vectors storage, ptau5
     std::vector <float> pred(nlocs, 0.0);

@@ -51,11 +51,11 @@ class MetOfficeBuddyPair;
 ///
 /// \code{.yaml}
 /// filter variables:
-/// - name: air_temperature
-/// - name: eastward_wind
+/// - name: airTemperature
+/// - name: windEastward
 ///   options:
 ///     first_component_of_two: true
-/// - name: northward_wind
+/// - name: windNorthward
 /// \endcode
 ///
 /// See MetOfficeBuddyCheckParameters for the documentation of the other available parameters.

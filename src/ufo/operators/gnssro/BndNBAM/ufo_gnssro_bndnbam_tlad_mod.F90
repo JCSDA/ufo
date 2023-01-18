@@ -129,7 +129,7 @@ if (nlocs > 0 ) then
   self%nrecs = nrecs
 
   nlevExt = nlev + nlevAdd
-  nlevCheck = min(23, nlev) !number of levels to check super refraction
+  nlevCheck = int(nlev/2.0) !number of levels to check super refraction
 
   allocate(gesT(nlev,nlocs))
   allocate(gesQ(nlev,nlocs))
@@ -185,17 +185,17 @@ if (nlocs > 0 ) then
   allocate(self%nlocs_end(nrecs))
 
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
   call obsspace_get_recnum(obss, obsRecnum)
 
-  if (  obsspace_has(obss,  "SR_flag",  "bending_angle") ) then
+  if (  obsspace_has(obss,  "ObsDiag",  "superRefractionFlag") ) then
     allocate(obsSRflag(nlocs))
-    call obsspace_get_db(obss,  "SR_flag", "bending_angle", obsSRflag)
-    hasSRflag = 1 ! SR_flag generated in hofx for real case run
+    call obsspace_get_db(obss,  "ObsDiag", "superRefractionFlag", obsSRflag)
+    hasSRflag = 1 ! superRefractionFlag generated in hofx for real case run
   else
-    hasSRflag = 0 ! SR_flag does not exist in ctest
+    hasSRflag = 0 ! superRefractionFlag does not exist in ctest
   end if
 
   self%nlocs_begin=1

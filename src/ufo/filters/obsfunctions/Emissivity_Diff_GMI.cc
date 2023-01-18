@@ -34,11 +34,11 @@ Emissivity_Diff_GMI::Emissivity_Diff_GMI(const eckit::LocalConfiguration & conf)
          options_.regression_coeff_1.value() != boost::none &&
          options_.regression_coeff_2.value() != boost::none);
 
-  invars_ += Variable("average_surface_temperature_within_field_of_view@GeoVaLs");
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/average_surface_temperature_within_field_of_view");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
   // GMI channels
   const std::vector<int> channels = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-  invars_ += Variable("brightness_temperature@ObsValue", channels);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels);
 }
 
 // -----------------------------------------------------------------------------
@@ -56,11 +56,11 @@ void Emissivity_Diff_GMI::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get average surface temperature in FOV
   std::vector<float> tsavg(nlocs);
-  in.get(Variable("average_surface_temperature_within_field_of_view@GeoVaLs"), tsavg);
+  in.get(Variable("GeoVaLs/average_surface_temperature_within_field_of_view"), tsavg);
 
   const int channel = options_.channel.value().get();
   const float regression_constant_1 = options_.regression_constant_1.value().get();
@@ -72,21 +72,21 @@ void Emissivity_Diff_GMI::compute(const ObsFilterData & in,
   std::vector<float> regression_2(nlocs);
   const std::vector<int> channels = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
   std::vector<float> bt_obs(nlocs);
-  in.get(Variable("brightness_temperature@ObsValue", channels), bt_obs);
+  in.get(Variable("ObsValue/brightnessTemperature", channels), bt_obs);
 
   // Regression 1
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     regression_1[iloc] = regression_constant_1;
   }
   for (size_t ich = 0; ich < channels.size(); ++ich) {
-    in.get(Variable("brightness_temperature@ObsValue", channels)[ich], bt_obs);
+    in.get(Variable("ObsValue/brightnessTemperature", channels)[ich], bt_obs);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (water_frac[iloc] > 0.99) {
         regression_1[iloc] += bt_obs[iloc] * regression_coeff_1[ich];
       }
     }
   }
-  in.get(Variable("brightness_temperature@ObsValue", channels)[channel-1], bt_obs);
+  in.get(Variable("ObsValue/brightnessTemperature", channels)[channel-1], bt_obs);
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     if (water_frac[iloc] > 0.99) {
       // Regression 2

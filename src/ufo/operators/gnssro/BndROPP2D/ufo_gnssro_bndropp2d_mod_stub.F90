@@ -98,11 +98,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   allocate(obsLocR(nobs))
   allocate(obsGeoid(nobs))
 
-  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
-  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "longitude",            obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude",             obsLat)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO",    obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
 
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs

@@ -89,32 +89,32 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
   // 1. get the right variables
   // -------------------------------------------------------------------------------
   // Compulsory meta-data
-  getObservation("MetaData", "station_elevation",
+  getObservation("MetaData", "stationElevation",
                  stationElevation, true);
   // Compulsory surface observation
-  getObservation("ObsValue", "pressure_station",
+  getObservation("ObsValue", "stationPressure",
                  pressureStation, true);
-  getObservation("ObsValue", "air_temperature_surface",
+  getObservation("ObsValue", "airTemperatureAt2M",
                  airTemperatureSurface, true);
 
   // Compulsory upper air observation
   getObservation("ObsValue", heightCoord_,
                  geopotentialHeight, true);
-  getObservation("ObsValue", "air_temperature",
+  getObservation("ObsValue", "airTemperature",
                  airTemperature, true);
 
   // Here we have a choice between dew point temperature and relative humidity
   // --> By default we chose dew point temperature first!
-  getObservation("ObsValue", "dew_point_temperature",
+  getObservation("ObsValue", "dewPointTemperature",
                  dewPointTemperature);
   if (dewPointTemperature.empty()) {
     // if we don't have dewpoint temperature, use relative humidity.
-    getObservation("ObsValue", "relative_humidity",
+    getObservation("ObsValue", "relativeHumidity",
                    relativeHumidity, true);
-    getObservation("ObsValue", "relative_humidity_surface",
+    getObservation("ObsValue", "relativeHumidityAt2M",
                    relativeHumiditySurface, true);
   } else {
-    getObservation("ObsValue", "dew_point_temperature_surface",
+    getObservation("ObsValue", "dewPointTemperatureAt2M",
                    dewPointTemperatureSurface, true);
   }
 

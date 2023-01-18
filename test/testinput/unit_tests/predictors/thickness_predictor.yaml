@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   geovals:
     filename: &geovalsin Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors_reversed.nc4
@@ -28,7 +28,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_20191230T0000_rttov_predictors.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   geovals:
     filename: &geovalsin Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4

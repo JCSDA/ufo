@@ -21,8 +21,7 @@ namespace ufo
 /// \brief Parts of the input data for the DataExtractor that don't depend on the type of the
 /// extracted values.
 ///
-/// Note: the names of all coordinates are expected to be of the form `Group/var` (ioda-v2 style)
-/// rather than `var@Group` (ioda-v1 style).
+/// Note: the names of all coordinates are expected to be of the form `Group/var`.
 struct DataExtractorInputBase {
   /// \brief A coordinate indexing a dimension of the payload array, i.e. the array from which
   /// a DataExtractor will extract data.
@@ -49,8 +48,7 @@ struct DataExtractorInputBase {
 /// \tparam ExtractedValue
 ///   Type of the values to be extracted. Must be `float`, `int` or `std::string`.
 ///
-/// Note: the names of all coordinates are expected to be of the form `Group/var` (ioda-v2 style)
-/// rather than `var@Group` (ioda-v1 style).
+/// Note: the names of all coordinates are expected to be of the form `Group/var`.
 template <typename ExtractedValue>
 struct DataExtractorInput : public DataExtractorInputBase {
   /// Array from which values will be extracted

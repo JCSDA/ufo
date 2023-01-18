@@ -105,6 +105,10 @@ namespace ufo {
       SetQCFlag(flag, jlev, vecs...);
     }
 
+    /// Add an "OPS_" prefix to the names of variables that are used in the comparison
+    /// with results from the Met Office OPS system.
+    std::string addOPSPrefix(const std::string & fullname);
+
    protected:  // variables
     /// Configurable parameters
     const ConventionalProfileProcessingParameters &options_;

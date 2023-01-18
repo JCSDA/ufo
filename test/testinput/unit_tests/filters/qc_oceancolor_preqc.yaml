@@ -12,14 +12,14 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/viirs_jpss1_oc_l2_2018-04-15_oceancolor_preqc_out.nc
-    simulated variables: [mass_concentration_of_chlorophyll_in_sea_water]
+    simulated variables: [chlorophyllMassConcentration]
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: mass_concentration_of_chlorophyll_in_sea_water 
+    - name: chlorophyllMassConcentration 
     where:
     - variable:
-        name: mass_concentration_of_chlorophyll_in_sea_water@PreQC
+        name: PreQC/chlorophyllMassConcentration
       any_bit_set_of: 0,1,3,4,5,8,9,10,12,14,15,16,19,21,22,25
     action:
       name: reject

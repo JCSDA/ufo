@@ -39,13 +39,6 @@ contains
 subroutine ufo_marinevertinterp_setup(self)
   class(ufo_marinevertinterp), intent(inout) :: self
 
-  integer :: ivar, nvars
-
-  ! Set variables requested from the model
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
   call self%geovars%push_back("sea_water_cell_thickness")
 
 end subroutine ufo_marinevertinterp_setup

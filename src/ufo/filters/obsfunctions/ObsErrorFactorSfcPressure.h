@@ -42,8 +42,8 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 /// The starting obserror is then altered by this code with the "inflate error" action,
 /// For testing purposes, the optional parameter of original_obserr group name such as ObsError
 /// to override the default ObsErrorData can be used for tolerance check of reference results.
-/// Internally, the code expects to find surface_altitude@GeoVaLs and height@GeoVaLs, however,
-/// some datasets may have surface_geopotential_height@GeoVaLs and geopotential_height@GeoVaLs
+/// Internally, the code expects to find GeoVals/surface_altitude and GeoVaLs/height, however,
+/// some datasets may have GeoVaLs/surface_geopotential_height and GeoVaLs/geopotential_height
 /// in its place.
 ///
 /// ~~~~
@@ -52,11 +52,11 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///
 ///     - filter: BlackList
 ///       filter variables:
-///       - name: surface_pressure
+///       - name: stationPressure
 ///       action:
 ///         name: inflate error
 ///         inflation variable:
-///           name: ObsErrorFactorSfcPressure@ObsFunction
+///           name: ObsFunction/ObsErrorFactorSfcPressure
 ///           options:
 ///             geovar_geomz: geopotential_height     # default is height
 ///             geovar_sfc_geomz: surface_geopotential_height     # default is surface_altitude

@@ -40,10 +40,10 @@ class SatWindsLNVDCheckParameters : public oops::Parameters {
 /// ### Sample YAML configuration
 ///     - filter: Bounds Check
 ///       filter variables:
-///       - name: eastward_wind
-///       - name: northward_wind
+///       - name: windEastward
+///       - name: windNorthward
 ///       test variables:
-///       - name: SatWindsLNVDCheck@ObsFunction
+///       - name: ObsFunction/SatWindsLNVDCheck
 ///         options:
 ///           test_hofx: GsiHofX
 ///       maxvalue: 3

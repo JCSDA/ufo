@@ -46,31 +46,31 @@ class ExponentialParameters : public oops::Parameters {
 /// \details Example 1
 ///
 ///  obs function:
-///    name: Exponential@ObsFunction
+///    name: ObsFunction/Exponential
 ///    options:
-///      variables: [wind_speed@ObsValue]
+///      variables: [ObsValue/windSpeed]
 ///      coeffA: 0.1
 ///      coeffB: -0.3
 ///      coeffC: 0.2
 ///      coeffD: 0.12
 ///
-/// will return 0.1 * exp(-0.3 * wind_speed@ObsValue) + 0.2
-/// or if wind_speed@ObsValue is missing, 0.12 in that location.
+/// will return 0.1 * exp(-0.3 * ObsValue/windSpeed) + 0.2
+/// or if ObsValue/windSpeed is missing, 0.12 in that location.
 ///
 /// Example 2 - multi-channel (not sure who might need this, but...)
 ///
 ///  obs function:
-///    name: Exponential@ObsFunction
+///    name: ObsFunction/Exponential
 ///    channels: &select_chans 1-3
 ///    options:
 ///      variables:
-///      - name: brightness_temperature@ObsValue
+///      - name: ObsValue/brightnessTemperature
 ///        channels: *select_chans
 ///      coeffB: 0.5
 ///      coeffC: -1.0
 ///
-/// will return 1.0 * exp(0.5 * brightness_temperature_<channel>@ObsValue) -1.0,
-/// or missing at locations where brightness_temperature_<channel>@ObsValue is missing,
+/// will return 1.0 * exp(0.5 * ObsValue/brightnessTemperature[channel]) -1.0,
+/// or missing at locations where ObsValue/brightnessTemperature[channel] is missing,
 /// since default values are coeffA: 1.0, coeffB = 1.0; coeffC = 0.0; coeffD = missing.
 
 class Exponential : public ObsFunctionBase<float> {
