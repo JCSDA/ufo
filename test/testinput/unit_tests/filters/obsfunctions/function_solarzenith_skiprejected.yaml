@@ -11,19 +11,19 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
-    simulated variables: [air_temperature, surface_pressure]
+    simulated variables: [airTemperature, stationPressure]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: zenith@MetaData
+    - name: MetaData/solarZenithAngle
       type: float
       function:
-        name: SolarZenith@ObsFunction
+        name: ObsFunction/SolarZenith
         options:
           skip rejected: true
   compareVariables:
   - test:
-      name: zenith@MetaData
+      name: MetaData/solarZenithAngle
     reference:
-      name: zenith_skip_rejected@TestReference
+      name: TestReference/zenith_skip_rejected
     relTol: 1e-6

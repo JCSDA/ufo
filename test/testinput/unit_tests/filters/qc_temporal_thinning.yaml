@@ -12,43 +12,43 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_temporal_thinning_surface_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Temporal Thinning
     min_spacing: PT01H03M00S
     seed_time: 2018-04-15T00:00:00Z
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_in: 10101
   - filter: Temporal Thinning
     min_spacing: PT01H02M00S
     seed_time: 2018-04-15T00:00:00Z
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_in: 10201, 10202
   - filter: Temporal Thinning
     min_spacing: PT01H04M00S
     seed_time: 2018-04-15T00:00:00Z
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_in: 10900
   - filter: Temporal Thinning
     min_spacing: PT10H00M00S
     seed_time: 2018-04-15T00:00:00Z
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_not_in: 10101, 10201, 10202, 10900
   passedObservationsBenchmark:
       - 462
@@ -84,18 +84,18 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_temporal_thinning_sonde_nogrouping_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Temporal Thinning
     min_spacing: PT00H56M00S
     tolerance: PT00H02M00S
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     priority_variable:
-      name: num_levels@MetaData
+      name: MetaData/num_levels
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_not_in: 50400
   passedObservationsBenchmark: &sondePassedObsIds
       - 2
@@ -206,18 +206,18 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_temporal_thinning_sonde_grouping1_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Temporal Thinning
     min_spacing: PT00H56M00S
     tolerance: PT00H02M00S
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     priority_variable:
-      name: num_levels@MetaData
+      name: MetaData/num_levels
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_not_in: 50400
   passedObservationsBenchmark:
     *sondePassedObsIds
@@ -235,18 +235,18 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_temporal_thinning_sonde_grouping2_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Temporal Thinning
     min_spacing: PT00H56M00S
     tolerance: PT00H02M00S
     category_variable:
-      name: call_sign@MetaData
+      name: MetaData/call_sign
     priority_variable:
-      name: num_levels@MetaData
+      name: MetaData/num_levels
     where:
     - variable:
-        name: obs_type@MetaData
+        name: MetaData/obs_type
       is_not_in: 50400
   passedObservationsBenchmark:
     *sondePassedObsIds

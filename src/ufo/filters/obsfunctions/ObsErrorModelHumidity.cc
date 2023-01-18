@@ -88,7 +88,7 @@ ObsErrorModelHumidity::ObsErrorModelHumidity(const eckit::Configuration &config)
                      << config << std::endl;
 
   // Include list of required data for the estimation of saturation specific humidity
-  invars_ += Variable("MetaData/air_pressure");
+  invars_ += Variable("MetaData/pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
   invars_ += Variable("GeoVaLs/air_temperature");
 }
@@ -112,7 +112,7 @@ void ObsErrorModelHumidity::compute(const ObsFilterData & data,
 
   // Get obs pressure
   std::vector<float> ob_pressure(nlocs);
-  data.get(Variable("MetaData/air_pressure"), ob_pressure);
+  data.get(Variable("MetaData/pressure"), ob_pressure);
 
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data.getGeoVaLs();

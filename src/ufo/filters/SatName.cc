@@ -98,13 +98,13 @@ SatName::~SatName() {}
  * satellites or channels.
  *
  * Required :
- * *  "MetaData", "sensor_central_frequency"
- * *  "MetaData", "satellite_identifier"
- * *  "MetaData", "wind_computation_method"
+ * *  "MetaData", "sensorCentralFrequency"
+ * *  "MetaData", "satelliteIdentifier"
+ * *  "MetaData", "windComputationMethod"
  *
  * Outputs:
- * *  "MetaData", "satwind_id"
- * *  "Diag", "satwind_id"
+ * *  "MetaData", "satwindIdentifier"
+ * *  "Diag", "satwindIdentifier"
  *
  * Example:
  * The following yaml will attempt to identify two infrared channels with computation method
@@ -113,7 +113,7 @@ SatName::~SatName() {}
  * "wind channel" string.
  * If observations are identified from GOES-16 (platform number 270) they are also labelled with
  * the respective "Sat name" string.
- * This will fill MetaData/satwind_id with values "GOES16ir112","GOES16ir38" if these are present
+ * This will fill MetaData/satwindIdentifier with values "GOES16ir112","GOES16ir38" if these are present
  * in the observations.
  * If either the satellite or channel are not identified, then MetaData/satwind_id is set to
  * "MISSING". To help track down why observations are set to missing we also output a diagnostic
@@ -154,9 +154,9 @@ void SatName::applyFilter(const std::vector<bool> & apply,
   std::vector<std::string> wind_id(obsdb_.nlocs(), missing_value_string);
   std::vector<std::string> diag_id(obsdb_.nlocs(), missing_value_string);
   // get variables from ObsSpace
-  obsdb_.get_db("MetaData", "sensor_central_frequency", cfreq);
-  obsdb_.get_db("MetaData", "satellite_identifier", satid);
-  obsdb_.get_db("MetaData", "wind_computation_method", compm);
+  obsdb_.get_db("MetaData", "sensorCentralFrequency", cfreq);
+  obsdb_.get_db("MetaData", "satelliteIdentifier", satid);
+  obsdb_.get_db("MetaData", "windComputationMethod", compm);
   // define counter variables to be summed over all processors at the end of the routine
   std::unique_ptr<ioda::Accumulator<size_t>> countSatAccumulator =
       obsdb_.distribution()->createAccumulator<size_t>();
@@ -196,8 +196,8 @@ void SatName::applyFilter(const std::vector<bool> & apply,
     // combine diagnostic strings and fill diag_id
     diag_id[jobs] = satellite_diag + channel_diag;
   }
-  obsdb_.put_db("MetaData", "satwind_id", wind_id);
-  obsdb_.put_db("Diag", "satwind_id", diag_id);
+  obsdb_.put_db("MetaData", "satwindIdentifier", wind_id);
+  obsdb_.put_db("Diag", "satwindIdentifier", diag_id);
   // sum number of unidentified satellites and channels
   const std::size_t count_missing_sat = countSatAccumulator->computeResult();
   const std::size_t count_missing_chan = countChanAccumulator->computeResult();

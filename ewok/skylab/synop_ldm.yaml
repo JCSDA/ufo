@@ -1,5 +1,5 @@
 obs space:
-  name: synop
+  name: synop_ldm
   obsdatain:
     engine:
       type: H5File
@@ -7,32 +7,37 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
-  simulated variables: [surface_pressure, air_temperature]
+  simulated variables: [stationPressure, airTemperature]
 obs operator:
   name: Composite
   components:
-   - name: GSISfcModel
-     variables:
-     - name: air_temperature
-   - name: SfcPCorrected
-     variables:
-     - name: surface_pressure
-     da_psfc_scheme: UKMO
+  - name: GSISfcModel
+    observation alias file: $(observation_alias_file)
+    variables:
+    - name: airTemperature
+  - name: SfcPCorrected
+    variables:
+    - name: stationPressure
+    da_psfc_scheme: UKMO
 linear obs operator:
   name: Composite
   components:
   - name: Identity
+    observation alias file: $(observation_alias_file)
     variables:
-    - name: air_temperature
+    - name: airTemperature
   - name: Identity
+    observation alias file: $(observation_alias_file)
     variables:
-    - name: surface_pressure
+    - name: stationPressure
 obs filters:
   # Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     minvalue: 37499
     maxvalue: 106999
     action:
@@ -40,7 +45,7 @@ obs filters:
   #
   - filter: Bounds Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     minvalue: 195
     maxvalue: 327
     action:
@@ -48,61 +53,61 @@ obs filters:
   # Assign obsError.
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     action:
       name: assign error
       error parameter: 1.3
   #
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error parameter: 100.0     # 1.0 hPa
   #
   - filter: Perform Action
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [92000, 85000, 70000]
           errors: [110, 120, 140]
   #
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: ObsValue/surface_pressure
+            name: ObsValue/stationPressure
           xvals: [10000, 20000, 25000, 30000, 50000, 85000, 97500, 100000]
           errors: [3.0, 2.0, 1.5, 1.5, 2.0, 2.5, 2.5, 3.0]
   #
-  # Inflate ObsError as it is done with GSI
-  - filter: Perform Action
-    filter variables:
-    - name: surface_pressure
-    action:
-      name: inflate error
-      inflation variable:
-        name: ObsErrorFactorSfcPressure@ObsFunction
-        options:
-          error_min: 100         # 1 mb
-          error_max: 300         # 3 mb
-    defer to post: true
+  # Inflate ObsError as it is done with GSI  # TODO: reactivate this filter when nlocs=0 is handled properly (code is having a hard time)
+# - filter: Perform Action
+#   filter variables:
+#   - name: stationPressure
+#   action:
+#     name: inflate error
+#     inflation variable:
+#       name: ObsFunction/ObsErrorFactorSfcPressure
+#       options:
+#         error_min: 100         # 1 mb
+#         error_max: 300         # 3 mb
+#   defer to post: true
   #
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     threshold: 3.6
     absolute threshold: 990.0
     action:
@@ -111,7 +116,7 @@ obs filters:
   #
   - filter: Background Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     threshold: 7.0
     absolute threshold: 11.0
     action:
@@ -121,8 +126,8 @@ obs filters:
   # Reject all variables where surface pressure was rejected.
   - filter: RejectList
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     where:
-    - variable: QCflagsData/surface_pressure
+    - variable: QCflagsData/stationPressure
       minvalue: 1
     defer to post: true

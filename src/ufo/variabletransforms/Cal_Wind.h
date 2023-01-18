@@ -26,9 +26,9 @@ class Cal_WindComponentsParameters: public VariableTransformParametersBase {
   /// Observation group name. Default is ObsValue.
   oops::Parameter<std::string> group{"group", "ObsValue", this};
   oops::Parameter<std::string> WindDirectionVariable{"wind direction variable",
-                                                     "wind_from_direction", this};
+                                                     "windDirection", this};
   oops::Parameter<std::string> WindSpeedVariable{"wind speed variable",
-                                                "wind_speed", this};
+                                                "windSpeed", this};
 };
 
 /// Configuration parameters for the wind speed and direction transform.
@@ -39,16 +39,16 @@ class Cal_WindSpeedAndDirectionParameters: public VariableTransformParametersBas
   /// Observation group name. Default is ObsValue.
   oops::Parameter<std::string> group{"group", "ObsValue", this};
   oops::Parameter<std::string> EastwardWindVariable{"eastward wind variable",
-                                                    "eastward_wind", this};
+                                                    "windEastward", this};
   oops::Parameter<std::string> NorthwardWindVariable{"northward wind variable",
-                                                     "northward_wind", this};
+                                                     "windNorthward", this};
 };
 
 /*!
 * \brief Wind Speed And Direction filter
 *
-* \details  Performs a variable conversion from the wind components, eastward_wind and
-*  northward_wind, to wind_speed and wind_from_direction. The newly calculated variables
+* \details  Performs a variable conversion from the wind components, windEastward and
+*  windNorthward, to windSpeed and windDirection. The newly calculated variables
 *  are included in the same obs space. The filter does not have any configuration options.
 ///
 *
@@ -75,12 +75,12 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 /*!
 * \brief Retrieve wind components.
 *
-* \details Performs a variable conversion from wind_speed and wind_from_direction to
-*  the wind components, eastward_wind and northward_wind. The newly calculated variables
-*  are included in the same obs space. This filter supports the use of nchans as the
+* \details Performs a variable conversion from windSpeed and windDirection to
+*  the wind components, windEastward and windNorthward. The newly calculated variables
+*  are included in the same obs space. This filter supports the use of Channels as the
 *  the second observed dimension. The variable conversion is performed for
-*  each channel and so the output eastward_wind and northward_wind variables will have the
-*  same dimensions as wind_speed and wind_from_direction.
+*  each channel and so the output windEastward and windNorthward variables will have the
+*  same dimensions as windSpeed and windDirection.
 *
 * See VariableTransformParametersBase for filter setup.
 */

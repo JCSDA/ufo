@@ -529,7 +529,7 @@ character(len=1) :: angle_hf
               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
               hofxdiags%geovals(jvar)%vals = missing
               allocate(TmpVar(self%n_Profiles))
-              call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
+              call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
               do jprofile = 1, self%n_Profiles
                  if (.not.self%Skip_Profiles(jprofile)) then
                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
@@ -550,7 +550,7 @@ character(len=1) :: angle_hf
                hofxdiags%geovals(jvar)%vals = missing
                allocate(TmpVar(self%n_Profiles))
                allocate(Tao(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
+               call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
                      ! get layer-to-space transmittance
@@ -582,7 +582,7 @@ character(len=1) :: angle_hf
                allocate(TmpVar(self%n_Profiles))
                allocate(Tao(self%n_Layers))
                allocate(Wfunc(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
+               call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
                      ! get layer-to-space transmittance

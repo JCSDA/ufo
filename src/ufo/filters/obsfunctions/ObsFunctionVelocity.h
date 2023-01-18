@@ -33,29 +33,29 @@ class VelocityParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-/// \brief Outputs the wind speed of the u(eastward_wind) and v(northward_wind)
+/// \brief Outputs the wind speed of the u(windEastward) and v(windNorthward)
 /// components of wind.
 ///
 /// Example 1
 ///
 ///  obs function:
-///    name: Velocity@ObsFunction
+///    name: ObsFunction/Velocity
 ///    options:
 ///      type: ObsValue
 ///
-/// will return sqrt( eastward_wind@ObsValue  * eastward_wind@ObsValue +
-///                   northward_wind@ObsValue * northward_wind@ObsValue )
+/// will return sqrt( ObsValue/windEastward  * ObsValue/windEastward +
+///                   ObsValue/windNorthward * ObsValue/windNorthward )
 ///
 /// Example 2 - multi-channel
 ///
 ///  obs function:
-///    name: Velocity@ObsFunction
+///    name: ObsFunction/Velocity
 ///    options:
 ///      type: ObsValue
 ///      channels: 1-4
 ///
-/// will return sqrt( eastward_wind_<channel>@ObsValue  * eastward_wind_<channel>@ObsValue +
-///                   northward_wind_<channel>@ObsValue * northward_wind_<channel>@ObsValue )
+/// will return sqrt( ObsValue/windEastward[channel] * ObsValue/windEastward[channel] +
+///                   ObsValue/windNorthward[channel] * ObsValue/windNorthward[channel] )
 ///
 
 template <typename FunctionValue>

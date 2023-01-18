@@ -108,8 +108,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   ! then use nval as a way to check whether the array has been initialised (since
   ! it is called in a loop).
   DO iVar = 1, obs_diags % nvar
-    IF (obs_diags % variables(ivar) == "refractivity" .OR. &
-        obs_diags % variables(ivar) == "model_heights") THEN
+    IF (obs_diags % variables(ivar) == "atmosphericRefractivity_model" .OR. &
+        obs_diags % variables(ivar) == "geopotentialHeight_model") THEN
       write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: initialising obs_diags for " // &
         obs_diags % variables(ivar)
       call fckit_log%info(err_msg)
@@ -169,12 +169,12 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
     do ilev = 1, nlevels
       levelNumbers(ilev) = ilev
     end do
-    call obsspace_get_db(obss, "MetaData", "impact_parameter", impact_param, levelNumbers)
+    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param, levelNumbers)
   else
-    call obsspace_get_db(obss, "MetaData", "impact_parameter", impact_param)
+    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param)
   end if
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", radius_curv)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", undulation)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", radius_curv)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", undulation)
 
   obs_loop: do iloc = 1, nlocs
 
@@ -208,7 +208,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
 
     ! If output to refractivity is needed, then initialise things
     DO iVar = 1, obs_diags % nvar
-        IF (obs_diags % variables(ivar) == "refractivity") THEN
+        IF (obs_diags % variables(ivar) == "atmosphericRefractivity_model") THEN
             IF (iloc == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(refractivity)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(refractivity), obs_diags % nlocs))
@@ -223,7 +223,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
             END IF
         END IF
 
-        IF (obs_diags % variables(ivar) == "model_heights") THEN
+        IF (obs_diags % variables(ivar) == "geopotentialHeight_model") THEN
             IF (iloc == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(model_heights)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(model_heights), obs_diags % nlocs))

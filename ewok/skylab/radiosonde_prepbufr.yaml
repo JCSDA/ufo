@@ -4,125 +4,128 @@ obs space:
     engine:
       type: H5File
     obsgrouping:
-      group variables: [station_id, LaunchTime]
-      sort variable: air_pressure
+      group variables: [stationIdentification, releaseTime]
+      sort variable: pressure
       sort order: descending
   obsdataout:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
-  simulated variables: [air_temperature, virtual_temperature, specific_humidity, eastward_wind, northward_wind]
+  simulated variables: [airTemperature, virtualTemperature, specificHumidity, windEastward, windNorthward]
 obs operator:
   name: VertInterp
+  observation alias file: $(observation_alias_file)
 obs filters:
 - filter: Bounds Check
   filter variables:
-  - name: air_temperature
+  - name: airTemperature
   minvalue: 195
   maxvalue: 327
   action:
     name: reject
 - filter: Bounds Check
   filter variables:
-  - name: virtual_temperature
+  - name: virtualTemperature
   minvalue: 195
   maxvalue: 327
   action:
     name: reject
 - filter: Bounds Check
   filter variables:
-  - name: specific_humidity
+  - name: specificHumidity
   minvalue: 1.0E-8
   maxvalue: 0.034999999
   action:
     name: reject
 - filter: Bounds Check
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   minvalue: -130
   maxvalue: 130
   action:
     name: reject
 - filter: Bounds Check
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   test variables:
-  - name: Velocity@ObsFunction
+  - name: ObsFunction/Velocity
   maxvalue: 130.0
   action:
     name: reject
 - filter: Perform Action
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   action:
     name: assign error
     error parameter: 1.4
 - filter: Perform Action
   filter variables:
-  - name: specific_humidity
+  - name: specificHumidity
   action:
     name: assign error
     error parameter: 1.0E-3
 - filter: Perform Action
   filter variables:
-  - name: air_temperature
+  - name: airTemperature
   action:
     name: assign error
     error function:
-      name: ObsErrorModelStepwiseLinear@ObsFunction
+      name: ObsFunction/ObsErrorModelStepwiseLinear
       options:
         xvar:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
         errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
 - filter: Perform Action
   filter variables:
-  - name: virtual_temperature
+  - name: virtualTemperature
   action:
     name: assign error
     error function:
-      name: ObsErrorModelStepwiseLinear@ObsFunction
+      name: ObsFunction/ObsErrorModelStepwiseLinear
       options:
         xvar:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         xvals: [100000, 95000, 90000, 85000, 35000, 30000, 25000, 20000, 15000, 10000, 7500, 5000, 4000, 3000, 2000, 1000]
         errors: [1.2, 1.1, 0.9, 0.8, 0.8, 0.9, 1.2, 1.2, 1.0, 0.8, 0.8, 0.9, 0.95, 1.0, 1.25, 1.5]
 - filter: Perform Action
   filter variables:
-  - name: specific_humidity
+  - name: specificHumidity
   action:
     name: assign error
     error function:
-      name: ObsErrorModelStepwiseLinear@ObsFunction
+      name: ObsFunction/ObsErrorModelStepwiseLinear
       options:
         xvar:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         xvals: [25000, 20000, 10]
         errors: [0.2, 0.4, 0.8]
-        scale_factor_var: ObsValue/specific_humidity
+        scale_factor_var: ObsValue/specificHumidity
 - filter: Perform Action
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   action:
     name: assign error
     error function:
-      name: ObsErrorModelStepwiseLinear@ObsFunction
+      name: ObsFunction/ObsErrorModelStepwiseLinear
       options:
         xvar:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]
         errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
 - filter: Bounds Check
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   test variables:
-  - name: WindDirAngleDiff@ObsFunction
+  - name: ObsFunction/WindDirAngleDiff
     options:
       minimum_uv: 3.5
   maxvalue: 50.0
@@ -131,7 +134,7 @@ obs filters:
   defer to post: true
 - filter: Background Check
   filter variables:
-  - name: air_temperature
+  - name: airTemperature
   threshold: 7.0
   absolute threshold: 9.0
   action:
@@ -139,15 +142,15 @@ obs filters:
   defer to post: true
 - filter: Background Check
   filter variables:
-  - name: virtual_temperature
+  - name: virtualTemperature
   threshold: 7.0
   absolute threshold: 9.0
   action:
     name: reject
 - filter: Background Check
   filter variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
   threshold: 6.0
   absolute threshold: 19.0
   action:
@@ -155,29 +158,29 @@ obs filters:
   defer to post: true
 - filter: Background Check
   filter variables:
-  - name: specific_humidity
+  - name: specificHumidity
   threshold: 8.0
   action:
     name: reject
   defer to post: true
 - filter: RejectList
   filter variables:
-  - name: northward_wind
+  - name: windNorthward
   where:
-  - variable: QCflagsData/eastward_wind
+  - variable: QCflagsData/windEastward
     minvalue: 1
   defer to post: true
 - filter: RejectList
   filter variables:
-  - name: eastward_wind
+  - name: windEastward
   where:
-  - variable: QCflagsData/northward_wind
+  - variable: QCflagsData/windNorthward
     minvalue: 1
   defer to post: true
 - filter: RejectList
   filter variables:
-  - name: specific_humidity
+  - name: specificHumidity
   where:
-  - variable: QCflagsData/air_temperature
+  - variable: QCflagsData/airTemperature
     minvalue: 1
   defer to post: true

@@ -2,28 +2,28 @@ window begin: 2000-01-01T00:00:00Z
 window end: 2030-01-01T00:00:00Z
 
 observations:
-# 1. Tests of Conditional@ObsFunction
+# 1. Tests of ObsFunction/Conditional
 - obs space: &ObsSpace
     name: Floating-point result, with default value
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs function:
-    name: Conditional@ObsFunction
+    name: ObsFunction/Conditional
     options:
       defaultvalue: 75.5
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 1
         value: 3.0
       - where:
         - variable:
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 5
         value: 9.0
     # Variable from the TestReference group storing the reference result,
@@ -34,13 +34,13 @@ observations:
     <<: *ObsSpace
     name: Floating-point result, without default value
   obs function:
-    name: Conditional@ObsFunction
+    name: ObsFunction/Conditional
     options:
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 75.5
     # Variable from the TestReference group storing the reference result,
@@ -51,20 +51,20 @@ observations:
     <<: *ObsSpace
     name: Floating-point result, firstmatchingcase flag set to false
   obs function:
-    name: Conditional@ObsFunction
+    name: ObsFunction/Conditional
     options:
       firstmatchingcase: false
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 12345.0  # will be overriden by the value set below
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 75.5     # will override the value set above
     # Variable from the TestReference group storing the reference result,
@@ -75,20 +75,20 @@ observations:
     <<: *ObsSpace
     name: Floating-point result, firstmatchingcase flag set to true
   obs function:
-    name: Conditional@ObsFunction
+    name: ObsFunction/Conditional
     options:
       firstmatchingcase: true
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 75.5
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 12345.0  # won't be overriden by the value set below
     # Variable from the TestReference group storing the reference result,
@@ -96,28 +96,28 @@ observations:
     variables: [assigned_float_variable_2]
     tolerance: 1e-8
 
-# 2. Tests of Conditional@IntObsFunction
+# 2. Tests of IntObsFunction/Conditional
 - obs space: &ObsSpace
     name: Integer result, with default value
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs function:
-    name: Conditional@IntObsFunction
+    name: IntObsFunction/Conditional
     options:
       defaultvalue: 75
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 1
         value: 1
       - where:
         - variable:
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 5
         value: 5
     # Variable from the TestReference group storing the reference result,
@@ -127,41 +127,41 @@ observations:
     <<: *ObsSpace
     name: Integer result, without default value
   obs function:
-    name: Conditional@IntObsFunction
+    name: IntObsFunction/Conditional
     options:
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 75
     # Variable from the TestReference group storing the reference result,
     # [missing, 75, 75, 75, missing]
     variables: [assigned_int_variable_2]
 
-# 3. Tests of Conditional@StringObsFunction
+# 3. Tests of StringObsFunction/Conditional
 - obs space: &ObsSpace
     name: String result, with default value
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs function:
-    name: Conditional@StringObsFunction
+    name: StringObsFunction/Conditional
     options:
       defaultvalue: XYZ
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 1
         value: ABC
       - where:
         - variable:
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 5
         value: MNO
     # Variable from the TestReference group storing the reference result,
@@ -171,41 +171,41 @@ observations:
     <<: *ObsSpace
     name: String result, without default value
   obs function:
-    name: Conditional@StringObsFunction
+    name: StringObsFunction/Conditional
     options:
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: XYZ
     # Variable from the TestReference group storing the reference result,
     # [missing, XYZ, XYZ, XYZ, missing]
     variables: [assigned_string_variable_2]
 
-# 4. Tests of Conditional@DateTimeObsFunction
+# 4. Tests of DateTimeObsFunction/Conditional
 - obs space: &ObsSpace
     name: Datetime result, with default value
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs function:
-    name: Conditional@DateTimeObsFunction
+    name: DateTimeObsFunction/Conditional
     options:
       defaultvalue: 2000-01-02T03:04:05Z
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 1
         value: 2018-04-15T06:00:00Z
       - where:
         - variable:
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 5
         value: 2018-04-19T06:00:00Z
     # Variable from the TestReference group storing the reference result,
@@ -219,13 +219,13 @@ observations:
     <<: *ObsSpace
     name: Datetime result, without default value
   obs function:
-    name: Conditional@DateTimeObsFunction
+    name: DateTimeObsFunction/Conditional
     options:
       cases:
       - where:
         - variable:
             # [1, 2, 3, 4, 5]
-            name: int_variable_1@MetaData
+            name: MetaData/int_variable_1
           is_in: 2-4
         value: 2000-01-02T03:04:05Z
     # Variable from the TestReference group storing the reference result,

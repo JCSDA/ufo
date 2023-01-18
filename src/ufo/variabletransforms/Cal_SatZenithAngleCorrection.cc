@@ -49,7 +49,7 @@ void Cal_SatZenithAngleCorrection::runTransform(const std::vector<bool> &apply) 
 
   // Read in zenith angle
   std::vector<float> zenithAngle;
-  getObservation("MetaData", "sensor_zenith_angle", zenithAngle, true);
+  getObservation("MetaData", "sensorZenithAngle", zenithAngle, true);
 
   // Setup Variables
   const size_t nlocs = obsdb_.nlocs();

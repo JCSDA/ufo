@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_2020100106_noinv_rhcheck_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   obs filters:
@@ -25,7 +25,7 @@ observations:
     model vertical coordinate:
       name: air_pressure@GeoVaLs
     observation height:
-      name: air_pressure@MetaData
+      name: MetaData/pressure
     thresholds: [50,45,40,30]
     coordinate values: [100000,80000,50000,20000]
     threshold type: min
@@ -37,7 +37,7 @@ observations:
     model vertical coordinate:
       name: air_pressure@GeoVaLs
     observation height:
-      name: air_pressure@MetaData
+      name: MetaData/pressure
     thresholds: [300,300]
     coordinate values: [100000,20000]
     threshold type: max

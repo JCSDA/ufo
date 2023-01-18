@@ -32,9 +32,9 @@ SatwindInversionCorrection::SatwindInversionCorrection(ioda::ObsSpace & obsdb,
   // Get parameters from options
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVaLs
-  allvars_ += Variable("air_temperature@GeoVaLs");
-  allvars_ += Variable("relative_humidity@GeoVaLs");
-  allvars_ += Variable("air_pressure@GeoVaLs");
+  allvars_ += Variable("GeoVaLs/air_temperature");
+  allvars_ += Variable("GeoVaLs/relative_humidity");
+  allvars_ += Variable("GeoVaLs/air_pressure");
 }
 
 // -----------------------------------------------------------------------------
@@ -74,7 +74,7 @@ SatwindInversionCorrection::~SatwindInversionCorrection() {
  *  obs filters:
  *  - filter: Satwind Inversion Correction
  *    observation pressure:
- *      name: air_pressure@MetaData
+ *      name: MetaData/pressure
  *    RH threshold: 50
  *    maximum pressure: 96000
  * \endcode
@@ -109,21 +109,21 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
   data_.get(parameters_.obs_pressure, obs_pressure);
 // Get wind computation method
   std::vector<int> comp_method(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "wind_computation_method", comp_method);
+  obsdb_.get_db("MetaData", "windComputationMethod", comp_method);
 // Get flags
   std::vector<int> u_flags(obsdb_.nlocs());
   std::vector<int> v_flags(obsdb_.nlocs());
-  if (obsdb_.has("QCFlags", "eastward_wind") && obsdb_.has("QCFlags", "northward_wind")) {
-    obsdb_.get_db("QCFlags", "eastward_wind", u_flags);
-    obsdb_.get_db("QCFlags", "northward_wind", v_flags);
+  if (obsdb_.has("QCFlags", "windEastward") && obsdb_.has("QCFlags", "windNorthward")) {
+    obsdb_.get_db("QCFlags", "windEastward", u_flags);
+    obsdb_.get_db("QCFlags", "windNorthward", v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+    throw eckit::Exception("QCFlags/windEastward or QCFlags/windNorthward not initialised",
                            Here());
   }
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 // Get number of vertical levels in GeoVaLs
-  const size_t nlevs = data_.nlevs(Variable(model_vcoord_name+"@GeoVaLs"));
+  const size_t nlevs = data_.nlevs(Variable("GeoVaLs/"+model_vcoord_name));
 // Vectors storing GeoVaL column for current location.
   std::vector <double> model_temp_profile(gvals->nlevs(model_temp_name), 0.0);
   std::vector <double> model_rh_profile(gvals->nlevs(model_rh_name), 0.0);
@@ -217,8 +217,8 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
   //  write back corrected pressure, updated flags and original pressure
   obsdb_.put_db(parameters_.obs_pressure.value().group(),
                 parameters_.obs_pressure.value().variable(), obs_pressure);
-  obsdb_.put_db("QCFlags", "eastward_wind", u_flags);
-  obsdb_.put_db("QCFlags", "northward_wind", v_flags);
+  obsdb_.put_db("QCFlags", "windEastward", u_flags);
+  obsdb_.put_db("QCFlags", "windNorthward", v_flags);
   obsdb_.put_db(parameters_.obs_pressure.value().group(),
                 parameters_.obs_pressure.value().variable() + std::string("_original"),
                 original_pressure);

@@ -14,14 +14,14 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
-        group variables: [ "record_number" ]
-        sort variable: "impact_height"
+        group variables: [ "sequenceNumber" ]
+        sort variable: "impactHeightRO"
         sort order: "ascending"
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_compress1_2018041500_3prof_opr_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
@@ -42,14 +42,14 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
-        group variables: [ "record_number" ]
-        sort variable: "impact_height"
+        group variables: [ "sequenceNumber" ]
+        sort variable: "impactHeightRO"
         sort order: "ascending"
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_compress0_2018041500_3prof_opr_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX

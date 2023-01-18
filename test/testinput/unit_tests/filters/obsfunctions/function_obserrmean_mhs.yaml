@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/mhs_n19_obs_2018041500_m_qc.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-5
 #   obsdataout:
 #     engine:
@@ -21,11 +21,11 @@ observations:
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/mhs_n19_obsdiag_2018041500_m_qc.nc4
   obs function:
-    name: ObsErrorModelQuad@ObsFunction
+    name: ObsFunction/ObsErrorModelQuad
     options:
       channels: *all_channels 
       xvar:
-        name: SIRetSymmetricMW@ObsFunction
+        name: ObsFunction/SIRetSymmetricMW
         options:
           siret_ch90: 1
           siret_ch150: 2

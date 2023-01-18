@@ -8,17 +8,17 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       value: 75.5
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_0@TestReference
+      name: TestReference/assigned_float_variable_0
 
 - obs space:
     <<: *ObsSpace
@@ -27,17 +27,17 @@ observations:
   - filter: Variable Assignment
     where: &Where
     - variable: # select observations 1, 2 and 3
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
       minvalue: 4
       maxvalue: 8
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       value: 75.5
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_1@TestReference
+      name: TestReference/assigned_float_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -46,14 +46,14 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       value: 75.5
       type: float
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_float_variable_2@TestReference
+      name: TestReference/assigned_float_variable_2
 
 - obs space:
     <<: *ObsSpace
@@ -62,13 +62,13 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: int_variable_1@MetaData
+    - name: MetaData/int_variable_1
       value: 75
   compareVariables:
   - test:
-      name: int_variable_1@MetaData
+      name: MetaData/int_variable_1
     reference:
-      name: assigned_int_variable_1@TestReference
+      name: TestReference/assigned_int_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -77,14 +77,14 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       value: 75
       type: int
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_int_variable_2@TestReference
+      name: TestReference/assigned_int_variable_2
 
 - obs space:
     <<: *ObsSpace
@@ -93,13 +93,13 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: string_variable_1@MetaData
+    - name: MetaData/string_variable_1
       value: XYZ
   compareVariables:
   - test:
-      name: string_variable_1@MetaData
+      name: MetaData/string_variable_1
     reference:
-      name: assigned_string_variable_1@TestReference
+      name: TestReference/assigned_string_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -108,14 +108,14 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       value: XYZ
       type: string
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_string_variable_2@TestReference
+      name: TestReference/assigned_string_variable_2
 
 - obs space:
     <<: *ObsSpace
@@ -124,13 +124,13 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: dateTime@MetaData
+    - name: MetaData/dateTime
       value: 2000-01-02T03:04:05Z
   compareVariables:
   - test:
-      name: dateTime@MetaData
+      name: MetaData/dateTime
     reference:
-      name: assigned_dateTime_variable_1@TestReference
+      name: TestReference/assigned_dateTime_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -139,14 +139,14 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       value: 2000-01-02T03:04:05Z
       type: datetime
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_dateTime_variable_2@TestReference
+      name: TestReference/assigned_dateTime_variable_2
 
 - obs space:
     <<: *ObsSpace
@@ -155,20 +155,20 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable_1@MetaData
+    - name: MetaData/new_variable_1
       value: 75.5
       type: float
-    - name: int_variable_1@MetaData
+    - name: MetaData/int_variable_1
       value: 75
   compareVariables:
   - test:
-      name: new_variable_1@MetaData
+      name: MetaData/new_variable_1
     reference:
-      name: assigned_float_variable_2@TestReference
+      name: TestReference/assigned_float_variable_2
   - test:
-      name: int_variable_1@MetaData
+      name: MetaData/int_variable_1
     reference:
-      name: assigned_int_variable_1@TestReference
+      name: TestReference/assigned_int_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -177,21 +177,21 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: float_variable_1@MetaData
-      function: # will produce 0.5 * float_variable_1@MetaData
-        name: ObsErrorModelRamp@ObsFunction
+    - name: MetaData/float_variable_1
+      function: # will produce 0.5 * MetaData/float_variable_1
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           x0: [0.5]
           x1: [10]
           err0: [0.25]
           err1: [5]
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_3@TestReference
+      name: TestReference/assigned_float_variable_3
 
 - obs space:
     <<: *ObsSpace
@@ -200,22 +200,22 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: float
-      function: # will produce 0.5 * float_variable_1@MetaData
-        name: ObsErrorModelRamp@ObsFunction
+      function: # will produce 0.5 * MetaData/float_variable_1
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           x0: [0.5]
           x1: [10]
           err0: [0.25]
           err1: [5]
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_float_variable_4@TestReference
+      name: TestReference/assigned_float_variable_4
 
 - obs space:
     <<: *ObsSpace
@@ -224,21 +224,21 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: int_variable_1@MetaData
-      function: # will produce 0.5 * float_variable_1@MetaData (then truncated to int during assignment)
-        name: ObsErrorModelRamp@ObsFunction
+    - name: MetaData/int_variable_1
+      function: # will produce 0.5 * MetaData/float_variable_1 (then truncated to int during assignment)
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           x0: [0.5]
           x1: [10]
           err0: [0.25]
           err1: [5]
   compareVariables:
   - test:
-      name: int_variable_1@MetaData
+      name: MetaData/int_variable_1
     reference:
-      name: assigned_int_variable_3@TestReference
+      name: TestReference/assigned_int_variable_3
 
 - obs space:
     <<: *ObsSpace
@@ -247,22 +247,22 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: int
-      function: # will produce 0.5 * float_variable_1@MetaData (then truncated to int during assignment)
-        name: ObsErrorModelRamp@ObsFunction
+      function: # will produce 0.5 * MetaData/float_variable_1 (then truncated to int during assignment)
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           x0: [0.5]
           x1: [10]
           err0: [0.25]
           err1: [5]
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_int_variable_4@TestReference
+      name: TestReference/assigned_int_variable_4
 
 - obs space:
     <<: *ObsSpace
@@ -271,14 +271,14 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       source variable:
-        name: assigned_float_variable_3@TestReference
+        name: TestReference/assigned_float_variable_3
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_3@TestReference
+      name: TestReference/assigned_float_variable_3
 
 - obs space:
     <<: *ObsSpace
@@ -287,15 +287,15 @@ observations:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: float
       source variable:
-        name: assigned_float_variable_3@TestReference
+        name: TestReference/assigned_float_variable_3
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_float_variable_4@TestReference
+      name: TestReference/assigned_float_variable_4
 
 - obs space:
     <<: *ObsSpace
@@ -304,14 +304,14 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: int_variable_1@MetaData                  # [1, 75, 75, 75, 5]
+    - name: MetaData/int_variable_1                  # [1, 75, 75, 75, 5]
       source variable:
-        name: assigned_int_variable_3@TestReference  # [1, 2, 3, 4, 5]
+        name: TestReference/assigned_int_variable_3  # [1, 2, 3, 4, 5]
   compareVariables:
   - test:
-      name: int_variable_1@MetaData
+      name: MetaData/int_variable_1
     reference:
-      name: assigned_int_variable_3@TestReference
+      name: TestReference/assigned_int_variable_3
 
 - obs space:
     <<: *ObsSpace
@@ -320,15 +320,15 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: int
       source variable:
-        name: assigned_int_variable_3@TestReference  # [1, 2, 3, 4, 5]
+        name: TestReference/assigned_int_variable_3  # [1, 2, 3, 4, 5]
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_int_variable_4@TestReference    # [_, 2, 3, 4, _]
+      name: TestReference/assigned_int_variable_4    # [_, 2, 3, 4, _]
 
 - obs space:
     <<: *ObsSpace
@@ -337,14 +337,14 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: string_variable_1@MetaData                 # ["ABC", "DEF", "GHI", "JKL", "MNO"]
+    - name: MetaData/string_variable_1                 # ["ABC", "DEF", "GHI", "JKL", "MNO"]
       source variable:
-        name: assigned_string_variable_2@TestReference # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+        name: TestReference/assigned_string_variable_2 # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
   compareVariables:
   - test:
-      name: string_variable_1@MetaData
+      name: MetaData/string_variable_1
     reference:
-      name: assigned_string_variable_1@TestReference   # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
+      name: TestReference/assigned_string_variable_1   # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
 
 - obs space:
     <<: *ObsSpace
@@ -353,15 +353,15 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: string
       source variable:
-        name: assigned_string_variable_1@TestReference  # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
+        name: TestReference/assigned_string_variable_1  # ["ABC", "XYZ", "XYZ", "XYZ", "MNO"]
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_string_variable_2@TestReference    # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+      name: TestReference/assigned_string_variable_2    # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
 
 - obs space:
     <<: *ObsSpace
@@ -370,14 +370,14 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: dateTime@MetaData                            # ["2018-04-15T06:00:00Z", "2018-04-16T15:00:00Z", "2018-04-17T06:00:00Z", "2018-04-18T15:00:00Z", "2018-04-19T06:00:00Z"]
+    - name: MetaData/dateTime                            # ["2018-04-15T06:00:00Z", "2018-04-16T15:00:00Z", "2018-04-17T06:00:00Z", "2018-04-18T15:00:00Z", "2018-04-19T06:00:00Z"]
       source variable:
-        name: assigned_dateTime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+        name: TestReference/assigned_dateTime_variable_2 # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
   compareVariables:
   - test:
-      name: dateTime@MetaData
+      name: MetaData/dateTime
     reference:
-      name: assigned_dateTime_variable_1@TestReference   # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+      name: TestReference/assigned_dateTime_variable_1   # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
 
 - obs space:
     <<: *ObsSpace
@@ -386,15 +386,15 @@ observations:
   - filter: Variable Assignment
     where: *Where  # selects observations 1, 2 and 3
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: datetime
       source variable:
-        name: assigned_dateTime_variable_1@TestReference  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+        name: TestReference/assigned_dateTime_variable_1  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
   compareVariables:
   - test:
-      name: new_variable@MetaData
+      name: MetaData/new_variable
     reference:
-      name: assigned_dateTime_variable_2@TestReference    # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+      name: TestReference/assigned_dateTime_variable_2    # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
 
 - obs space:
     <<: *ObsSpace
@@ -402,14 +402,14 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: int_variable_1@MetaData                       # [1, 2, 3, 4, 5]
+    - name: MetaData/int_variable_1                       # [1, 2, 3, 4, 5]
       source variable:
-        name: assigned_float_variable_7@TestReference     # [_, 74.5, 74.9, 75.4, _]
+        name: TestReference/assigned_float_variable_7     # [_, 74.5, 74.9, 75.4, _]
   compareVariables:
   - test:
-      name: int_variable_1@MetaData
+      name: MetaData/int_variable_1
     reference:
-      name: assigned_int_variable_2@TestReference         # [_, 75, 75, 75, _]
+      name: TestReference/assigned_int_variable_2         # [_, 75, 75, 75, _]
 
 ## Test Conditional ObsFunction "add on" - Example 1
 ## Float variable assignment including multiple where in a case
@@ -419,31 +419,31 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: conditional_assignment_variable_0@MetaData
+    - name: MetaData/conditional_assignment_variable_0
       type: float
       function:
-        name: Conditional@ObsFunction
+        name: ObsFunction/Conditional
         options:
           defaultvalue: 9.0
           cases:
           - where:
             - variable:
-                name: float_variable_1@MetaData
+                name: MetaData/float_variable_1
               minvalue: 4
             - variable:
-                name: float_variable_2@MetaData
+                name: MetaData/float_variable_2
               minvalue: -11.75
             value: 75.5
           - where:
             - variable:
-                name: int_variable_1@MetaData
+                name: MetaData/int_variable_1
               is_in: 1
             value: 3.0
   compareVariables:
   - test:
-      name: conditional_assignment_variable_0@MetaData
+      name: MetaData/conditional_assignment_variable_0
     reference:
-      name: assigned_float_variable_1@TestReference
+      name: TestReference/assigned_float_variable_1
 
 ## Test Conditional ObsFunction "add on" - Example 2
 ## Cast to integer and no default value
@@ -453,15 +453,15 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: conditional_assignment_variable_1@MetaData
+    - name: MetaData/conditional_assignment_variable_1
       type: int
       function:
-        name: Conditional@ObsFunction
+        name: ObsFunction/Conditional
         options:
           cases:
           - where:
             - variable:
-                name: float_variable_1@MetaData
+                name: MetaData/float_variable_1
               minvalue: 4.0
               maxvalue: 8.0
             value: 75
@@ -469,14 +469,14 @@ observations:
           # because firstmatchingcase = true by default
           - where:
             - variable:
-                name: int_variable_1@MetaData
+                name: MetaData/int_variable_1
               is_in: 2
             value: 2
   compareVariables:
   - test:
-      name: conditional_assignment_variable_1@MetaData
+      name: MetaData/conditional_assignment_variable_1
     reference:
-      name: assigned_int_variable_2@TestReference
+      name: TestReference/assigned_int_variable_2
 
 - obs space: &ObsSpace
     name: Assign values produced by a string-valued ObsFunction to a string variable
@@ -484,26 +484,26 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: string_variable_1@MetaData
+    - name: MetaData/string_variable_1
       function:
-        name: Conditional@StringObsFunction
+        name: StringObsFunction/Conditional
         options:
           cases:
           - where:
             - variable:
                 # [1, 2, 3, 4, 5]
-                name: int_variable_1@MetaData
+                name: MetaData/int_variable_1
               is_in: 2-4
             value: XYZ
   compareVariables:
   - test:
-      name: string_variable_1@MetaData
+      name: MetaData/string_variable_1
     reference:
-      name: assigned_string_variable_2@TestReference # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+      name: TestReference/assigned_string_variable_2 # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
 
 - obs space: &ObsSpace
     name: Assign values produced by a datetime-valued ObsFunction to a datetime variable
@@ -511,26 +511,26 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@MetaData
+    - name: MetaData/dateTime
       function:
-        name: Conditional@DateTimeObsFunction
+        name: DateTimeObsFunction/Conditional
         options:
           cases:
           - where:
             - variable:
                 # [1, 2, 3, 4, 5]
-                name: int_variable_1@MetaData
+                name: MetaData/int_variable_1
               is_in: 2-4
             value: 2000-01-02T03:04:05Z
   compareVariables:
   - test:
-      name: dateTime@MetaData
+      name: MetaData/dateTime
     reference:
-      name: assigned_dateTime_variable_2@TestReference # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
+      name: TestReference/assigned_dateTime_variable_2 # ["9996-02-29T23:58:57Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", "9996-02-29T23:58:57Z"]
 
 ## Tests on the obsspace with multiple channels
 
@@ -540,33 +540,33 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/multichannel_variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
-    observed variables: [air_temperature]
+    simulated variables: [airTemperature]
+    observed variables: [airTemperature]
     channels: 1, 2, 4
   obs filters:
   - filter: Variable Assignment
     where: &MultichannelWhere
     - variable: # select observations 1, 2 and 3
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
       minvalue: 4
       maxvalue: 8
     assignments:
-    - name: float_variable@MetaData
+    - name: MetaData/float_variable
       channels: 1, 4
       value: 75.5
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_1@TestReference
+      name: TestReference/assigned_float_variable_1
   - test:
-      name: float_variable_2@MetaData # shouldn't be modified
+      name: MetaData/float_variable_2 # shouldn't be modified
     reference:
-      name: float_variable_2@TestReference
+      name: TestReference/float_variable_2
   - test:
-      name: float_variable_4@MetaData
+      name: MetaData/float_variable_4
     reference:
-      name: assigned_float_variable_2@TestReference
+      name: TestReference/assigned_float_variable_2
 
 - obs space:
     <<: *MultichannelObsSpace
@@ -575,19 +575,19 @@ observations:
   - filter: Variable Assignment
     where: *MultichannelWhere
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       channels: 1, 4
       value: 75.5
       type: float
   compareVariables:
   - test:
-      name: new_variable_1@MetaData
+      name: MetaData/new_variable_1
     reference:
-      name: assigned_float_variable_3@TestReference
+      name: TestReference/assigned_float_variable_3
   - test:
-      name: new_variable_4@MetaData
+      name: MetaData/new_variable_4
     reference:
-      name: assigned_float_variable_3@TestReference
+      name: TestReference/assigned_float_variable_3
 
 - obs space:
     <<: *MultichannelObsSpace
@@ -596,18 +596,18 @@ observations:
   - filter: Variable Assignment
     where: *MultichannelWhere
     assignments:
-    - name: string_variable@MetaData
+    - name: MetaData/string_variable
       channels: 1, 4
       value: XYZ
   compareVariables:
   - test:
-      name: string_variable_1@MetaData
+      name: MetaData/string_variable_1
     reference:
-      name: assigned_string_variable_1@TestReference
+      name: TestReference/assigned_string_variable_1
   - test:
-      name: string_variable_4@MetaData
+      name: MetaData/string_variable_4
     reference:
-      name: assigned_string_variable_2@TestReference
+      name: TestReference/assigned_string_variable_2
 
 - obs space:
     <<: *MultichannelObsSpace
@@ -616,19 +616,19 @@ observations:
   - filter: Variable Assignment
     where: *MultichannelWhere
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       channels: 1, 4
       value: XYZ
       type: string
   compareVariables:
   - test:
-      name: new_variable_1@MetaData
+      name: MetaData/new_variable_1
     reference:
-      name: assigned_string_variable_3@TestReference
+      name: TestReference/assigned_string_variable_3
   - test:
-      name: new_variable_4@MetaData
+      name: MetaData/new_variable_4
     reference:
-      name: assigned_string_variable_3@TestReference
+      name: TestReference/assigned_string_variable_3
 
 - obs space:
     <<: *MultichannelObsSpace
@@ -637,13 +637,13 @@ observations:
   - filter: Variable Assignment
     where: *MultichannelWhere
     assignments:
-    - name: float_variable@MetaData
+    - name: MetaData/float_variable
       channels: 1, 4
-      function: # will produce 0.5 * float_variable_1@MetaData and 0.25 * float_variable_1@MetaData
-        name: ObsErrorModelRamp@ObsFunction
+      function: # will produce 0.5 * MetaData/float_variable_1 and 0.25 * MetaData/float_variable_1
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           channels: 1, 4
           x0: [0.5, 0.5]
           x1: [10, 10]
@@ -651,17 +651,17 @@ observations:
           err1: [5, 2.5]
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_4@TestReference
+      name: TestReference/assigned_float_variable_4
   - test:
-      name: float_variable_2@MetaData # shouldn't be modified
+      name: MetaData/float_variable_2 # shouldn't be modified
     reference:
-      name: float_variable_2@TestReference
+      name: TestReference/float_variable_2
   - test:
-      name: float_variable_4@MetaData
+      name: MetaData/float_variable_4
     reference:
-      name: assigned_float_variable_5@TestReference
+      name: TestReference/assigned_float_variable_5
 
 - obs space:
     <<: *MultichannelObsSpace
@@ -670,14 +670,14 @@ observations:
   - filter: Variable Assignment
     where: *MultichannelWhere
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       channels: 1, 4
       type: float
-      function: # will produce 0.5 * float_variable_1@MetaData and 0.25 * float_variable_1@MetaData
-        name: ObsErrorModelRamp@ObsFunction
+      function: # will produce 0.5 * MetaData/float_variable_1 and 0.25 * MetaData/float_variable_1
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           channels: 1, 4
           x0: [0.5, 0.5]
           x1: [10, 10]
@@ -685,13 +685,13 @@ observations:
           err1: [5, 2.5]
   compareVariables:
   - test:
-      name: new_variable_1@MetaData
+      name: MetaData/new_variable_1
     reference:
-      name: assigned_float_variable_6@TestReference
+      name: TestReference/assigned_float_variable_6
   - test:
-      name: new_variable_4@MetaData
+      name: MetaData/new_variable_4
     reference:
-      name: assigned_float_variable_7@TestReference
+      name: TestReference/assigned_float_variable_7
 
 ## Test Conditional ObsFunction "add on" - Example 3
 ## Create array for multiple channels
@@ -702,34 +702,34 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: conditional_assignment_new@MetaData
+    - name: MetaData/conditional_assignment_new
       channels: 1, 4
       type: float
       function:
-        name: Conditional@ObsFunction
+        name: ObsFunction/Conditional
         options:
           firstmatchingcase: false
           defaultvalue: -10.0
           cases:
           - where:
             - variable:
-                name: float_variable_1@MetaData
+                name: MetaData/float_variable_1
               minvalue: 4.0
             value: 75.5
           - where:
             - variable:
-                name: float_variable_2@MetaData
+                name: MetaData/float_variable_2
               maxvalue: 6.25
             value: -12.0
   compareVariables:
   - test:
-      name: conditional_assignment_new_1@MetaData
+      name: MetaData/conditional_assignment_new_1
     reference:
-      name: assigned_float_variable_2@TestReference
+      name: TestReference/assigned_float_variable_2
   - test:
-      name: conditional_assignment_new_4@MetaData
+      name: MetaData/conditional_assignment_new_4
     reference:
-      name: assigned_float_variable_2@TestReference
+      name: TestReference/assigned_float_variable_2
 
 - obs space: &ObsSpace
     name: Try to assign a string to a float variable
@@ -737,11 +737,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       value: ABCDEF
   expectExceptionWithMessage: could not be converted to the required type
 
@@ -751,17 +751,17 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: string_variable_1@MetaData
-      function: # will produce 0.5 * float_variable_1@MetaData
-        name: ObsErrorModelRamp@ObsFunction
+    - name: MetaData/string_variable_1
+      function: # will produce 0.5 * MetaData/float_variable_1
+        name: ObsFunction/ObsErrorModelRamp
         options:
           xvar:
-            name: float_variable_1@MetaData
+            name: MetaData/float_variable_1
           x0: [0.5]
           x1: [10]
           err0: [0.25]
@@ -774,20 +774,20 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     where: *Where
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       function:
-        name: Conditional@StringObsFunction
+        name: StringObsFunction/Conditional
         options:
           cases:
           - where:
             - variable:
                 # [1, 2, 3, 4, 5]
-                name: int_variable_1@MetaData
+                name: MetaData/int_variable_1
               is_in: 2-4
             value: XYZ
   expectExceptionWithMessage: StringObsFunction/Conditional is not a function producing numeric values
@@ -798,9 +798,9 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       source variable:
-        name: string_variable_1@MetaData
+        name: MetaData/string_variable_1
   expectExceptionWithMessage: MetaData/string_variable_1 is not a numeric variable
 
 - obs space: &ObsSpace
@@ -809,9 +809,9 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: int_variable_1@MetaData
+    - name: MetaData/int_variable_1
       source variable:
-        name: string_variable_1@MetaData
+        name: MetaData/string_variable_1
   expectExceptionWithMessage: MetaData/string_variable_1 is not a numeric variable
 
 - obs space: &ObsSpace
@@ -820,9 +820,9 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: string_variable_1@MetaData
+    - name: MetaData/string_variable_1
       source variable:
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
   # Unfortunately in this case ioda throws a nested exception; the message attached to the
   # innermost exception is fairly clear (Requested data type not equal to storage datatype),
   # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
@@ -835,9 +835,9 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: dateTime@MetaData
+    - name: MetaData/dateTime
       source variable:
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
   # Unfortunately in this case ioda throws a nested exception; the message attached to the
   # innermost exception is fairly clear (Requested data type not equal to storage datatype),
   # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
@@ -850,7 +850,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: air_temperature@ObsValue
+    - name: ObsValue/airTemperature
       value: 75.5
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
 
@@ -860,7 +860,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: new_variable@ObsValue
+    - name: ObsValue/new_variable
       value: 75.5
       type: float
   expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
@@ -871,7 +871,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       value: ABCDEF
   expectExceptionWithMessage: You need to specify the type of the variable to be created
 
@@ -881,9 +881,9 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: new_variable@MetaData
+    - name: MetaData/new_variable
       type: int
-      source variable: float_variable_3@MetaData  # contains 1e20
+      source variable: MetaData/float_variable_3  # contains 1e20
   expectExceptionWithMessage: Value 1.00000002e+20 can not be represented in the target integer type
 
 - obs space:
@@ -893,22 +893,22 @@ observations:
   - filter: Variable Assignment
     where:
     - variable:
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
       minvalue: 4
       maxvalue: 6
     - variable:
-        name: float_variable_1@MetaData
+        name: MetaData/float_variable_1
       minvalue: 7
       maxvalue: 8
     where operator: or
     assignments:
-    - name: float_variable_1@MetaData
+    - name: MetaData/float_variable_1
       value: 75.5
   compareVariables:
   - test:
-      name: float_variable_1@MetaData
+      name: MetaData/float_variable_1
     reference:
-      name: assigned_float_variable_1@TestReference
+      name: TestReference/assigned_float_variable_1
 
 - obs space:
     <<: *ObsSpace
@@ -917,46 +917,46 @@ observations:
   # (1) Set up a variable in the MetaData and DerivedMetaData groups.
   - filter: Variable Assignment
     assignments:
-    - name: modified_variable@MetaData
+    - name: MetaData/modified_variable
       type: float
       value: 3.0
-    - name: modified_variable@DerivedMetaData
+    - name: DerivedMetaData/modified_variable
       type: float
       value: 4.0
   # (2) Set up the reference values by copying them from the variables created in stage (1).
   - filter: Variable Assignment
     assignments:
-    - name: modified_variable@TestReference
+    - name: TestReference/modified_variable
       type: float
       source variable:
-        name: modified_variable@MetaData
-    - name: modified_variable_derived@TestReference
+        name: MetaData/modified_variable
+    - name: TestReference/modified_variable_derived
       type: float
       source variable:
-        name: modified_variable@DerivedMetaData
+        name: DerivedMetaData/modified_variable
   # (3) Assign from MetaData to DerivedMetaData with 'skip derived' set to false (the default).
   - filter: Variable Assignment
     assignments:
-    - name: modified_variable@DerivedMetaData
+    - name: DerivedMetaData/modified_variable
       source variable:
-        name: modified_variable@MetaData
+        name: MetaData/modified_variable
       skip derived: false
   # (4) Expect DerivedMetaData to have been copied to itself.
   compareVariables:
   - test:
-      name: modified_variable@DerivedMetaData
+      name: DerivedMetaData/modified_variable
     reference:
-      name: modified_variable_derived@TestReference
+      name: TestReference/modified_variable_derived
   # (5) Assign from MetaData to DerivedMetaData with 'skip derived' set to true.
   - filter: Variable Assignment
     assignments:
-    - name: modified_variable@DerivedMetaData
+    - name: DerivedMetaData/modified_variable
       source variable:
-        name: modified_variable@MetaData
+        name: MetaData/modified_variable
       skip derived: true
   # (6) Expect DerivedMetaData to have been set to MetaData.
   compareVariables:
   - test:
-      name: modified_variable@DerivedMetaData
+      name: DerivedMetaData/modified_variable
     reference:
-      name: modified_variable@TestReference
+      name: TestReference/modified_variable

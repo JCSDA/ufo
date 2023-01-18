@@ -40,14 +40,14 @@ ObsErrorFactorWavenumIR::ObsErrorFactorWavenumIR(const eckit::LocalConfiguration
   ASSERT(channels_.size() > 0);
 
   // Include required variables from ObsDiag
-  invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("solar_zenith_angle@MetaData");
-  invars_ += Variable("sensor_band_central_radiation_wavenumber@VarMetaData");
+  invars_ += Variable("MetaData/solarZenithAngle");
+  invars_ += Variable("MetaData/sensorCentralWavenumber");
 }
 
 // -----------------------------------------------------------------------------
@@ -61,19 +61,19 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
-  size_t nlevs = in.nlevs(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[0]);
+  size_t nlevs = in.nlevs(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[0]);
 
   // Get surface geopotential height
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get sensor zenith angle
   std::vector<float> solza(nlocs);
-  in.get(Variable("solar_zenith_angle@MetaData"), solza);
+  in.get(Variable("MetaData/solarZenithAngle"), solza);
 
   // Get sensor band central radiation wavenumber
   std::vector<float> wavenumber(nchans);
-  in.get(Variable("sensor_band_central_radiation_wavenumber@VarMetaData"), wavenumber);
+  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
 
   // Inflate obs error for wavenumber in the range of (2000, 2400] during daytime over water surface
   // as a function of wavenumber number, surface-to-space transmittance, solar zenith angle, and
@@ -82,7 +82,7 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   for (size_t ich = 0; ich < nchans; ++ich) {
     for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0;
     if (wavenumber[ich] > 2000.0 && wavenumber[ich] <= 2400.0) {
-      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
+      in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich],
              nlevs - 1, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (water_frac[iloc] > 0.f && solza[iloc] <= 89.f) {

@@ -686,39 +686,53 @@ end subroutine ufo_geovals_maxloc_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fill_c(c_key, c_nloc, c_indx, c_nval, c_vals, c_levelsTopDown) bind(c, name="ufo_geovals_fill_f90")
+subroutine ufo_geovals_fill_c(c_key, lvar, c_var, c_nloc, c_indx, c_nlev, c_vals, c_levelsTopDown) &
+  bind(c, name="ufo_geovals_fill_f90")
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod, only: c_f_string
 implicit none
 integer(c_int), intent(in) :: c_key
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
-integer(c_int), intent(in) :: c_nval
-real(c_double), intent(in) :: c_vals(c_nval)
+integer(c_int), intent(in) :: c_nlev
+real(c_double), intent(in) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: c_levelsTopDown
 
 type(ufo_geovals), pointer :: geovals
+character(len=MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key, geovals)
+call c_f_string(c_var, varname)
 
-call ufo_geovals_fill(geovals, c_nloc, c_indx, c_nval, c_vals, c_levelsTopDown)
+call ufo_geovals_fill(geovals, varname, c_nloc, c_indx, c_nlev, c_vals, c_levelsTopDown)
 
 end subroutine ufo_geovals_fill_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fillad_c(c_key, c_nloc, c_indx, c_nval, c_vals, c_levelsTopDown) bind(c, name="ufo_geovals_fillad_f90")
+subroutine ufo_geovals_fillad_c(c_key, lvar, c_var, c_nloc, c_indx, c_nlev, c_vals, c_levelsTopDown) &
+  bind(c, name="ufo_geovals_fillad_f90")
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod, only: c_f_string
 implicit none
 integer(c_int), intent(in) :: c_key
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_nloc
 integer(c_int), intent(in) :: c_indx(c_nloc)
-integer(c_int), intent(in) :: c_nval
-real(c_double), intent(inout) :: c_vals(c_nval)
+integer(c_int), intent(in) :: c_nlev
+real(c_double), intent(inout) :: c_vals(c_nloc, c_nlev)
 logical(c_bool), intent(in) :: c_levelsTopDown
 
 type(ufo_geovals), pointer :: geovals
+character(len=MAXVARLEN) :: varname
+call c_f_string(c_var, varname)
 
 call ufo_geovals_registry%get(c_key, geovals)
 
-call ufo_geovals_fillad(geovals, c_nloc, c_indx, c_nval, c_vals, c_levelsTopDown)
+call ufo_geovals_fillad(geovals, varname, c_nloc, c_indx, c_nlev, c_vals, c_levelsTopDown)
 
 end subroutine ufo_geovals_fillad_c
 

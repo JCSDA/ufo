@@ -27,7 +27,7 @@ ObsErrorFactorLatRad::ObsErrorFactorLatRad(const eckit::LocalConfiguration & con
 
   ASSERT((options_.latitudeParameters.value()).size() == 4);
 
-  invars_ += Variable("latitude@MetaData");
+  invars_ += Variable("MetaData/latitude");
 }
 
 // -----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
 
   const size_t nlocs = in.nlocs();
   std::vector<float> lats;
-  in.get(Variable("latitude@MetaData"), lats);
+  in.get(Variable("MetaData/latitude"), lats);
   if (params[0] > 0.0) {
     for (size_t jj = 0; jj < nlocs; ++jj) {
       out[0][jj] = 1.0;

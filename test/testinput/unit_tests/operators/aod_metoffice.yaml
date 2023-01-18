@@ -14,8 +14,8 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_mo.nc4
-    simulated variables: [aerosol_optical_depth]
-    observed variables: [aerosol_optical_depth]
+    simulated variables: [aerosolOpticalDepth]
+    observed variables: [aerosolOpticalDepth]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -40,8 +40,8 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_mo.nc4
-    simulated variables: [aerosol_optical_depth]
-    observed variables: [aerosol_optical_depth]
+    simulated variables: [aerosolOpticalDepth]
+    observed variables: [aerosolOpticalDepth]
 #   obsdataout:
 #     engine:
 #       type: H5File

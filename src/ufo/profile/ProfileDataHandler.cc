@@ -186,7 +186,7 @@ namespace ufo {
         }
 
         // If varname is observation_report then all filter variables will be rejected.
-        bool isObservationReport = varname == "observation_report";
+        bool isObservationReport = varname == "observationReport";
 
         // Index of elements in this profile.
         size_t idxprof = 0;

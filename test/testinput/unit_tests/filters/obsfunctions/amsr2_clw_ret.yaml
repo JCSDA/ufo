@@ -24,23 +24,23 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/amsr2_gcom-w1_obs_2020111500_clw_ret_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-14
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020111500.nc4
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-14
     minvalue: 50.0
     maxvalue: 340.0
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-14
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch18v: 7
         clwret_ch18h: 8
@@ -54,10 +54,10 @@ observations:
     maxvalue: 999.0
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-14
     test variables:
-    - name: CLWRetMW@ObsFunction
+    - name: ObsFunction/CLWRetMW
       options:
         clwret_ch18v: 7
         clwret_ch18h: 8

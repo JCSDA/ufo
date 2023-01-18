@@ -38,7 +38,7 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
   std::vector<float> cenlat(nlocs, 0.0);
   std::vector<float> node(nlocs, 0.0);
   odb.get_db("MetaData", "latitude", cenlat);
-  odb.get_db("MetaData", "sensor_azimuth_angle", node);
+  odb.get_db("MetaData", "sensorAzimuthAngle", node);
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {

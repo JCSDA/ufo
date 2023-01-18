@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/Jason-2-2018-04-15.nc
-    simulated variables: [absolute_dynamic_topography]
+    simulated variables: [absoluteDynamicTopography]
 #   obsdataout:
 #     engine:
 #       type: H5File

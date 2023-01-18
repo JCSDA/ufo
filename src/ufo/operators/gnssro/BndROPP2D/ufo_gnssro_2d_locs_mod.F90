@@ -46,7 +46,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, nlocs_ext, lons, lats)
   call obsspace_get_db(obss, "MetaData", "latitude", lat)
 
   allocate(obsAzim(nlocs))
-  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", obsAzim)
+  call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", obsAzim)
 
   !Setup ufo 2d locations 
   do i = 1, nlocs

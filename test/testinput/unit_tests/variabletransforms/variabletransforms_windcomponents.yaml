@@ -13,21 +13,21 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/windcomponents_2018041500_output.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
   passedBenchmark: 148
   compareVariables:                #  test output matches precalculated values
     - reference:
-        name: eastward_wind@TestReference
+        name: TestReference/windEastward
       test:
-        name: eastward_wind@DerivedObsValue
+        name: DerivedObsValue/windEastward
       absTol: 5.0e-5
     - reference:
-        name: northward_wind@TestReference
+        name: TestReference/windNorthward
       test:
-        name: northward_wind@DerivedObsValue
+        name: DerivedObsValue/windNorthward
       absTol: 5.0e-5
 
 - obs space:
@@ -36,21 +36,21 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_missing_values_2018041500.nc4
-    simulated variables: [wind_speed, wind_from_direction]
+    simulated variables: [windSpeed, windDirection]
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
     FillMissingDerivedFromOriginal: true
   compareVariables:                #  test output matches precalculated values
     - reference:
-        name: eastward_wind@TestReference
+        name: TestReference/windEastward
       test:
-        name: eastward_wind@DerivedObsValue
+        name: DerivedObsValue/windEastward
       absTol: 5.0e-5
     - reference:
-        name: northward_wind@TestReference
+        name: TestReference/windNorthward
       test:
-        name: northward_wind@DerivedObsValue
+        name: DerivedObsValue/windNorthward
       absTol: 5.0e-5
 
 - obs space:
@@ -67,12 +67,12 @@ observations:
     wind direction variable: windDirectionAt10M
   compareVariables:                #  test output matches precalculated values
     - reference:
-        name: windEastwardAt10M@TestReference
+        name: TestReference/windEastwardAt10M
       test:
-        name: windEastwardAt10M@DerivedObsValue
+        name: DerivedObsValue/windEastwardAt10M
       absTol: 5.0e-5
     - reference:
-        name: windNorthwardAt10M@TestReference
+        name: TestReference/windNorthwardAt10M
       test:
-        name: windNorthwardAt10M@DerivedObsValue
+        name: DerivedObsValue/windNorthwardAt10M
       absTol: 5.0e-5

@@ -17,6 +17,14 @@ namespace ufo {
     : options_(options)
   {}
 
+  std::string ProfileCheckBase::addOPSPrefix(const std::string & fullname)
+  {
+    std::string varname;
+    std::string groupname;
+    ufo::splitVarGroup(fullname, varname, groupname);
+    return groupname + std::string("/OPS_") + varname;
+  }
+
   ProfileCheckFactory::ProfileCheckFactory(const std::string & name)
   {
     if (getMakers().find(name) != getMakers().end())

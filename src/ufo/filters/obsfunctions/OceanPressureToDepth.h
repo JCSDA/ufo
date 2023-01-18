@@ -37,9 +37,9 @@ class OceanPressureToDepthParameters : public oops::Parameters {
 /// Example
 ///
 ///  obs function:
-///    name: OceanPressureToDepth@ObsFunction
+///    name: ObsFunction/OceanPressureToDepth
 ///    options:
-///      pressure variable: ocean_pressure@ObsValue
+///      pressure variable: ObsValue/waterPressure
 ///
 /// will return depth (m), given pressure (Pa) and latitude (deg). Depth calculated
 /// according to formula (3) in https://archimer.ifremer.fr/doc/00447/55889/57949.pdf

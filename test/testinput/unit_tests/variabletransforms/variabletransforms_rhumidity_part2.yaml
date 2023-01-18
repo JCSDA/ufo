@@ -9,24 +9,24 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [dew_point_temperature_surface, air_temperature_surface, pressure_surface]
+    simulated variables: [dewPointTemperatureAt2M, airTemperatureAt2M, surfacePressure]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO 
     AllowSuperSaturation: true
-    pressure at 2m variable: "pressure_surface"
-    temperature at 2m variable: "air_temperature_surface"
-    relative humidity at 2m variable: "relative_humidity_surface"
-    dew point temperature at 2m variable: "dew_point_temperature_surface"
+    pressure at 2m variable: "surfacePressure"
+    temperature at 2m variable: "airTemperatureAt2M"
+    relative humidity at 2m variable: "relativeHumidityAt2M"
+    dew point temperature at 2m variable: "dewPointTemperatureAt2M"
   compareVariables:
     - reference:
-        name: relative_humidity_reference@ObsValue
+        name: TestReference/relativeHumidity
       test:
-        name: relative_humidity_surface@DerivedObsValue
+        name: DerivedObsValue/relativeHumidityAt2M
       relTol: 1.0e-5
 - obs space:
     name: Relative humidity calculation, upper-air variables
@@ -35,25 +35,25 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [dew_point_temperature, air_temperature]
+    simulated variables: [dewPointTemperature, airTemperature]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
-    pressure variable: "air_pressure"
-    temperature variable: "air_temperature"
-    relative humidity variable: "relative_humidity"
-    dew point temperature variable: "dew_point_temperature"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    dew point temperature variable: "dewPointTemperature"
   compareVariables:
     - reference:
-        name: relative_humidity_reference@ObsValue
+        name: TestReference/relativeHumidity
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5
 - obs space:
     name: Relative humidity calculation, RH initially missing
@@ -62,23 +62,23 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [dew_point_temperature, air_temperature]
+    simulated variables: [dewPointTemperature, airTemperature]
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
-    pressure variable: "air_pressure"
-    temperature variable: "air_temperature"
-    relative humidity variable: "relative_humidity"
-    dew point temperature variable: "dew_point_temperature"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    dew point temperature variable: "dewPointTemperature"
   compareVariables:
     - reference:
-        name: relative_humidity_reference@ObsValue
+        name: TestReference/relativeHumidity
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5

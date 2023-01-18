@@ -24,11 +24,11 @@ BennartzScatIndex::BennartzScatIndex(const eckit::LocalConfiguration & conf)
   channels_ = {options_.ch89.value(), options_.ch150.value()};
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
   if (options_.applyBias.value().size()) {
-    invars_ += Variable("brightness_temperature@"+options_.applyBias.value(), channels_);
+    invars_ += Variable(options_.applyBias.value()+"/brightnessTemperature", channels_);
   }
-  invars_ += Variable("sensor_zenith_angle@MetaData");
+  invars_ += Variable("MetaData/sensorZenithAngle");
 }
 
 // -----------------------------------------------------------------------------
@@ -43,18 +43,18 @@ void BennartzScatIndex::compute(const ObsFilterData & in,
 
   // Get satellite zenith angle
   std::vector<float> satzen(nlocs);
-  in.get(Variable("sensor_zenith_angle@MetaData"), satzen);
+  in.get(Variable("MetaData/sensorZenithAngle"), satzen);
 
   // Get observation values for required channels
   std::vector<float> bt89(nlocs), bt150(nlocs);
-  in.get(Variable("brightness_temperature@ObsValue", channels_)[0], bt89);
-  in.get(Variable("brightness_temperature@ObsValue", channels_)[1], bt150);
+  in.get(Variable("ObsValue/brightnessTemperature", channels_)[0], bt89);
+  in.get(Variable("ObsValue/brightnessTemperature", channels_)[1], bt150);
 
   // Apply bias correction if apply_bias is present in filter options
   std::vector<float> bias89(nlocs), bias150(nlocs);
   if (options_.applyBias.value().size()) {
-    in.get(Variable("brightness_temperature@"+options_.applyBias.value(), channels_)[0], bias89);
-    in.get(Variable("brightness_temperature@"+options_.applyBias.value(), channels_)[1], bias150);
+    in.get(Variable(options_.applyBias.value()+"/brightnessTemperature", channels_)[0], bias89);
+    in.get(Variable(options_.applyBias.value()+"/brightnessTemperature", channels_)[1], bias150);
     // Apply bias correction
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       bt89[iloc] -= bias89[iloc];

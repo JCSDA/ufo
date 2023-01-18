@@ -13,10 +13,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_profile_horizontal_drift_keep_in_window.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [geopotential_height, wind_speed, wind_from_direction]
+    simulated variables: [geopotentialHeight, windSpeed, windDirection]
   obs filters:
     - filter: Variable Transforms
       Transform: ProfileHorizontalDrift
@@ -25,20 +25,20 @@ observations:
       # Exclude BUFR sondes, whose position has already been measured.
       where:
       - variable:
-          name: ObsType@MetaData
+          name: MetaData/ObsType
         is_not_in: 50500
   compareVariables:
     - reference:
-        name: latitude@TestReference
+        name: TestReference/latitude
       test:
-        name: latitude@MetaData
+        name: MetaData/latitude
       absTol: 1.0e-4
     - reference:
-        name: longitude@TestReference
+        name: TestReference/longitude
       test:
-        name: longitude@MetaData
+        name: MetaData/longitude
       absTol: 1.0e-4
     - reference:
-        name: dateTime@TestReference
+        name: TestReference/dateTime
       test:
-        name: dateTime@MetaData
+        name: MetaData/dateTime

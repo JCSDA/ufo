@@ -9,36 +9,36 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_averageobs_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime", "latitude", "longitude", "extended_obs_space"]
+        group variables: ["stationIdentification", "dateTime", "latitude", "longitude", "extendedObsSpace"]
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: oceanprofileaverage_testout.nc4
-    simulated variables: [ocean_salinity, ocean_potential_temperature, ocean_depth]
-    observed variables: [ocean_salinity]
-    derived variables: [ocean_potential_temperature, ocean_depth]
+    simulated variables: [salinity, waterPotentialTemperature, depthBelowWaterSurface]
+    observed variables: [salinity]
+    derived variables: [waterPotentialTemperature, depthBelowWaterSurface]
   HofX: HofX
 
   obs post filters:
-  - filter: Create Diagnostic Flags 
-    filter variables: [ocean_potential_temperature, ocean_salinity]
+  - filter: Create Diagnostic Flags
+    filter variables: [waterPotentialTemperature, salinity]
     flags:
     - name: BayBgCheckReject
       initial value: false
   - filter: Perform Action
-    filter variables: [ocean_potential_temperature]
+    filter variables: [waterPotentialTemperature]
     where:
     - variable:
-        name: GrossErrorProbability/ocean_potential_temperature
+        name: GrossErrorProbability/waterPotentialTemperature
       minvalue: 0.5 # to emulate Bayesian BG check already performed
     action:
       name: set
       flag: BayBgCheckReject
   - filter: Perform Action
-    filter variables: [ocean_salinity]
+    filter variables: [salinity]
     where:
     - variable:
-        name: GrossErrorProbability/ocean_salinity
+        name: GrossErrorProbability/salinity
       minvalue: 0.5 # to emulate Bayesian BG check already performed
     action:
       name: set
@@ -47,31 +47,31 @@ observations:
   - filter: Average Observations To Model Levels
     where:
     - variable:
-        name: DiagnosticFlags/BayBgCheckReject/ocean_potential_temperature
+        name: DiagnosticFlags/BayBgCheckReject/waterPotentialTemperature
       is_false:
     filter variables:
-    - name: ocean_potential_temperature
-    observation vertical coordinate: DerivedObsValue/ocean_depth
-    model vertical coordinate: HofX/ocean_depth  # as if ProfileAverage already performed
+    - name: waterPotentialTemperature
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
+    model vertical coordinate: HofX/depthBelowWaterSurface  # as if ProfileAverage already performed
   - filter: Average Observations To Model Levels
     where:
     - variable:
-        name: DiagnosticFlags/BayBgCheckReject/ocean_salinity
+        name: DiagnosticFlags/BayBgCheckReject/salinity
       is_false:
     filter variables:
-    - name: ocean_salinity
-    observation vertical coordinate: DerivedObsValue/ocean_depth
-    model vertical coordinate: HofX/ocean_depth
+    - name: salinity
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
+    model vertical coordinate: HofX/depthBelowWaterSurface
   compareVariables:
     - reference:
-        name: TestReference/ocean_potential_temperature
+        name: TestReference/waterPotentialTemperature
       test:
-        name: DerivedObsValue/ocean_potential_temperature
+        name: DerivedObsValue/waterPotentialTemperature
       relTol: 1e-8
     - reference:
-        name: TestReference/ocean_salinity
+        name: TestReference/salinity
       test:
-        name: DerivedObsValue/ocean_salinity
+        name: DerivedObsValue/salinity
       relTol: 1e-8
 #---------------------------------------------------
 - obs space:
@@ -81,36 +81,36 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_averageobs_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime", "latitude", "longitude", "extended_obs_space"]
+        group variables: ["stationIdentification", "dateTime", "latitude", "longitude", "extendedObsSpace"]
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: oceanprofileaverage_testout_minus.nc4
-    simulated variables: [ocean_salinity, ocean_potential_temperature, ocean_depth_minus]
-    observed variables: [ocean_salinity]
-    derived variables: [ocean_potential_temperature, ocean_depth_minus]
+    simulated variables: [salinity, waterPotentialTemperature, depthBelowWaterSurface_minus]
+    observed variables: [salinity]
+    derived variables: [waterPotentialTemperature, depthBelowWaterSurface_minus]
   HofX: HofX
 
   obs post filters:
-  - filter: Create Diagnostic Flags 
-    filter variables: [ocean_potential_temperature, ocean_salinity]
+  - filter: Create Diagnostic Flags
+    filter variables: [waterPotentialTemperature, salinity]
     flags:
     - name: BayBgCheckReject
       initial value: false
   - filter: Perform Action
-    filter variables: [ocean_potential_temperature]
+    filter variables: [waterPotentialTemperature]
     where:
     - variable:
-        name: GrossErrorProbability/ocean_potential_temperature
+        name: GrossErrorProbability/waterPotentialTemperature
       minvalue: 0.5 # to emulate Bayesian BG check already performed
     action:
       name: set
       flag: BayBgCheckReject
   - filter: Perform Action
-    filter variables: [ocean_salinity]
+    filter variables: [salinity]
     where:
     - variable:
-        name: GrossErrorProbability/ocean_salinity
+        name: GrossErrorProbability/salinity
       minvalue: 0.5 # to emulate Bayesian BG check already performed
     action:
       name: set
@@ -119,31 +119,31 @@ observations:
   - filter: Average Observations To Model Levels
     where:
     - variable:
-        name: DiagnosticFlags/BayBgCheckReject/ocean_potential_temperature
+        name: DiagnosticFlags/BayBgCheckReject/waterPotentialTemperature
       is_false:
     filter variables:
-    - name: ocean_potential_temperature
-    observation vertical coordinate: DerivedObsValue/ocean_depth_minus
-    model vertical coordinate: HofX/ocean_depth_minus  # as if ProfileAverage already performed
+    - name: waterPotentialTemperature
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface_minus
+    model vertical coordinate: HofX/depthBelowWaterSurface_minus  # as if ProfileAverage already performed
   - filter: Average Observations To Model Levels
     where:
     - variable:
-        name: DiagnosticFlags/BayBgCheckReject/ocean_salinity
+        name: DiagnosticFlags/BayBgCheckReject/salinity
       is_false:
     filter variables:
-    - name: ocean_salinity
-    observation vertical coordinate: DerivedObsValue/ocean_depth_minus
-    model vertical coordinate: HofX/ocean_depth_minus
+    - name: salinity
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface_minus
+    model vertical coordinate: HofX/depthBelowWaterSurface_minus
   compareVariables:
     - reference:
-        name: TestReference/ocean_potential_temperature
+        name: TestReference/waterPotentialTemperature
       test:
-        name: DerivedObsValue/ocean_potential_temperature
+        name: DerivedObsValue/waterPotentialTemperature
       relTol: 1e-8
     - reference:
-        name: TestReference/ocean_salinity
+        name: TestReference/salinity
       test:
-        name: DerivedObsValue/ocean_salinity
+        name: DerivedObsValue/salinity
       relTol: 1e-8
 #---------------------------------------------------
 - obs space:
@@ -153,23 +153,23 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_averageobs_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime", "latitude", "longitude", "extended_obs_space"]
+        group variables: ["stationIdentification", "dateTime", "latitude", "longitude", "extendedObsSpace"]
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: oceanprofileaverage_testout_exception1.nc4
-    simulated variables: [ocean_potential_temperature, ocean_depth]
+    simulated variables: [waterPotentialTemperature, depthBelowWaterSurface]
     observed variables: []
-    derived variables: [ocean_potential_temperature, ocean_depth]
+    derived variables: [waterPotentialTemperature, depthBelowWaterSurface]
   HofX: HofX
-  
+
   obs post filters:
 ### Average profile obs on to model levels
   - filter: Average Observations To Model Levels
     filter variables:
-    - name: ocean_potential_temperature
-    observation vertical coordinate: DerivedObsValue/ocean_depth
-    model vertical coordinate: DerivedObsValue/ocean_depth  # has all-zero extended space
+    - name: waterPotentialTemperature
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
+    model vertical coordinate: DerivedObsValue/depthBelowWaterSurface  # has all-zero extended space
   expectExceptionWithMessage: "when applying the ProfileAverage obsOperator"
 #---------------------------------------------------
 - obs space:
@@ -179,23 +179,23 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_averageobs_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime", "latitude", "longitude", "extended_obs_space"]
+        group variables: ["stationIdentification", "dateTime", "latitude", "longitude", "extendedObsSpace"]
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: oceanprofileaverage_testout_exception2.nc4
-    simulated variables: [ocean_potential_temperature, ocean_depth_minus]
+    simulated variables: [waterPotentialTemperature, depthBelowWaterSurface_minus]
     observed variables: []
-    derived variables: [ocean_potential_temperature, ocean_depth_minus]
+    derived variables: [waterPotentialTemperature, depthBelowWaterSurface_minus]
   HofX: HofX
-  
+
   obs post filters:
 ### Average profile obs on to model levels
   - filter: Average Observations To Model Levels
     filter variables:
-    - name: ocean_potential_temperature
-    observation vertical coordinate: DerivedObsValue/ocean_depth_minus
-    model vertical coordinate: HofX/ocean_depth
+    - name: waterPotentialTemperature
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface_minus
+    model vertical coordinate: HofX/depthBelowWaterSurface
   expectExceptionWithMessage: "The model vertical coordinate is increasing"
 #---------------------------------------------------
 - obs space:
@@ -205,21 +205,21 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_averageobs_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime", "latitude", "longitude", "extended_obs_space"]
+        group variables: ["stationIdentification", "dateTime", "latitude", "longitude", "extendedObsSpace"]
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: oceanprofileaverage_testout_exception3.nc4
-    simulated variables: [ocean_potential_temperature, ocean_depth]
+    simulated variables: [waterPotentialTemperature, depthBelowWaterSurface]
     observed variables: []
-    derived variables: [ocean_potential_temperature, ocean_depth]
+    derived variables: [waterPotentialTemperature, depthBelowWaterSurface]
   HofX: HofX
-  
+
   obs post filters:
 ### Average profile obs on to model levels
   - filter: Average Observations To Model Levels
     filter variables:
-    - name: ocean_potential_temperature
-    observation vertical coordinate: DerivedObsValue/ocean_depth
-    model vertical coordinate: HofX/ocean_depth_minus
+    - name: waterPotentialTemperature
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
+    model vertical coordinate: HofX/depthBelowWaterSurface_minus
   expectExceptionWithMessage: "The model vertical coordinate is decreasing"

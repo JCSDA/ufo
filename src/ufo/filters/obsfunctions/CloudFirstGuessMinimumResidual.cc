@@ -36,9 +36,9 @@ CloudFirstGuessMinimumResidual::CloudFirstGuessMinimumResidual(
   ASSERT(channels_.size() > 0);
 
   // List of required data
-  invars_ += Variable("ObsValue/brightness_temperature", channels_);
-  invars_ += Variable("ObsErrorData/brightness_temperature", channels_);
-  invars_ += Variable(options_.obsBiasGroup.value() + "/brightness_temperature", channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable("ObsErrorData/brightnessTemperature", channels_);
+  invars_ += Variable(options_.obsBiasGroup.value() + "/brightnessTemperature", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_from_atmosphere_layer_to_toa", channels_);
   invars_ += Variable("GeoVaLs/air_pressure");
@@ -59,7 +59,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
 
   /// Setup constant variables used throughout the routine
   const std::string btOvercastName = "ObsDiag/brightness_temperature_from_atmosphere_layer_to_toa";
-  const std::vector<std::string> vars = {"brightness_temperature"};
+  const std::vector<std::string> vars = {"brightnessTemperature"};
   const std::vector<std::string> clearSkyName = {"brightness_temperature_assuming_clear_sky"};
   const float missing = util::missingValue(missing);
   const float largeCostValue = 1.0e9f;

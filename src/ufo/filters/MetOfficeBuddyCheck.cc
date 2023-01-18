@@ -148,7 +148,7 @@ ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb) {
 /// that should be buddy-checked.
 ///
 /// The buddy check operates on all profiles unless the ObsSpace contains the
-/// `extended_obs_space@MetaData` variable, in which case only profiles for which this variable is
+/// `MetaData/extendedObsSpace` variable, in which case only profiles for which this variable is
 /// set to 1 are buddy-checked. All profiles to be buddy-checked must comprise exactly \p numLevels
 /// locations; an exception is thrown if that is not the case.
 ///
@@ -156,9 +156,9 @@ Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
                               const int numLevels) {
   // Assume ObsSpace contains only the averaged profiles if this variable isn't present.
   boost::optional<std::vector<int>> extended_obs_space;
-  if (obsdb.has("MetaData", "extended_obs_space")) {
+  if (obsdb.has("MetaData", "extendedObsSpace")) {
     extended_obs_space = std::vector<int>(obsdb.nlocs());
-    obsdb.get_db("MetaData", "extended_obs_space", *extended_obs_space);
+    obsdb.get_db("MetaData", "extendedObsSpace", *extended_obs_space);
     obsdb.distribution()->allGatherv(*extended_obs_space);
   }
 

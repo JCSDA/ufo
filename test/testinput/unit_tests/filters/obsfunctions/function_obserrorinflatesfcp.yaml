@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
-    simulated variables: [surface_pressure]
+    simulated variables: [stationPressure]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -19,7 +19,7 @@ observations:
     name: SfcPCorrected
     da_psfc_scheme: UKMO
   obs function:
-    name: ObsErrorFactorSfcPressure@ObsFunction
+    name: ObsFunction/ObsErrorFactorSfcPressure
     options:
       original_obserr: ObsError
       error_min: 100         # 1 mb

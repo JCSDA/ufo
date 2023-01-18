@@ -53,20 +53,20 @@ class ArithmeticParameters : public oops::Parameters {
 /// Example
 ///
 ///  obs function:
-///    name: Arithmetic@ObsFunction
+///    name: ObsFunction/Arithmetic
 ///    options:
-///      variables: [variable1@ObsValue,
-///                  variable2@ObsValue,
-///                  variable3@ObsValue]
+///      variables: [ObsValue/variable1,
+///                  ObsValue/variable2,
+///                  ObsValue/variable3]
 ///      coefficients: [0.1, 0.2, 0.3]
 ///      exponents: [1, 2, 3]
 ///      total coefficient: 4
 ///      total exponent: 5
 ///      additive constant: 6
 ///
-/// will return 4 * (0.1 * (variable1@ObsValue)^1 +
-///                  0.2 * (variable2@ObsValue)^2 +
-///                  0.3 * (variable3@ObsValue)^3)^5 + 6
+/// will return 4 * (0.1 * (ObsValue/variable1)^1 +
+///                  0.2 * (ObsValue/variable2)^2 +
+///                  0.3 * (ObsValue/variable3)^3)^5 + 6
 ///
 /// Can be also be used with the name LinearCombination
 /// to output a linear combination of variables
@@ -74,39 +74,39 @@ class ArithmeticParameters : public oops::Parameters {
 /// Example 1
 ///
 ///  obs function:
-///    name: LinearCombination@ObsFunction
+///    name: ObsFunction/LinearCombination
 ///    options:
-///      variables: [representation_error@GeoVaLs,
-///                  sea_water_temperature@ObsError]
+///      variables: [GeoVaLs/representation_error,
+///                  ObsError/waterTemperature]
 ///      coefs: [0.1, 1.0]
 ///
-/// will return 0.1 * representation_error@GeoVaLs +
-///             1.0 * sea_water_temperature@ObsError
+/// will return 0.1 * GeoVaLs/representation_error +
+///             1.0 * ObsError/waterTemperature
 ///
 /// Example 2 - multi-channel
 ///
 ///  obs function:
-///    name: LinearCombination@ObsFunction
+///    name: ObsFunction/LinearCombination
 ///    channels: &select_chans 6-15, 18-22 # this line may be needed depending on the filter used
 ///    options:
 ///      variables:
-///      - name: brightness_temperature@ObsValue
+///      - name: ObsValue/brightnessTemperature
 ///        channels: *select_chans
-///      - name: brightness_temperature@ObsError
+///      - name: ObsError/brightnessTemperature
 ///        channels: *select_chans
 ///      coefs: [1.0, 0.5]
 ///
-/// will return 1.0 * brightness_temperature_<channel>@ObsValue +
-///             0.5 * brightness_temperature_<channel>@ObsError
+/// will return 1.0 * ObsValue/brightnessTemperature[channel] +
+///             0.5 * ObsError/brightnessTemperature[channel]
 ///
 /// Example 3 - multi-channel with intercept and using channel numbers
 ///
 ///  obs function:
-///    name: LinearCombination@ObsFunction
+///    name: ObsFunction/LinearCombination
 ///    channels: &select_chans 6-15, 18-22 # this line may be needed depending on the filter used
 ///    options:
 ///      variables:
-///      - name: brightness_temperature@ObsValue
+///      - name: ObsValue/brightnessTemperature
 ///        channels: *select_chans
 ///      coefs: [0.5]
 ///      intercept: 3.6

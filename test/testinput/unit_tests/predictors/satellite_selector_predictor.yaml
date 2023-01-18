@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_obs_20191230T0000_rttov_predictors_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_predictors.nc4
