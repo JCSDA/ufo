@@ -54,7 +54,7 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
   // Check the ObsSpace has been extended. If this is not the case
   // then it will not be possible to access profiles in the original and
   // extended sections of the ObsSpace.
-  if (!obsdb.has("MetaData", "extended_obs_space"))
+  if (!obsdb.has("MetaData", "extendedObsSpace"))
     throw eckit::UserError("The extended obs space has not been produced", Here());
 
   // GeoVaLs.

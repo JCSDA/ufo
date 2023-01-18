@@ -209,22 +209,22 @@ self % yobs = self % yobs - self % ybias
 call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))
 call obsspace_get_db(config % obsdb, "MetaData", "longitude", self % lon(:))
 call obsspace_get_db(config % obsdb, "MetaData", "dateTime", self % date(:))
-call obsspace_get_db(config % obsdb, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
+call obsspace_get_db(config % obsdb, "MetaData", "sensorZenithAngle", self % sat_zen(:))
 
 ! Read in optional angles
-variable_present = obsspace_has(config % obsdb, "MetaData", "sensor_azimuth_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "sensorAzimuthAngle")
 if (variable_present) then
-  call obsspace_get_db(config % obsdb, "MetaData", "sensor_azimuth_angle", self % sat_azi(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "sensorAzimuthAngle", self % sat_azi(:))
 end if
 
-variable_present = obsspace_has(config % obsdb, "MetaData", "solar_zenith_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "solarZenithAngle")
 if (variable_present) then
-  call obsspace_get_db(config % obsdb, "MetaData", "solar_zenith_angle", self % sol_zen(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "solarZenithAngle", self % sol_zen(:))
 end if
 
-variable_present = obsspace_has(config % obsdb, "MetaData", "solar_azimuth_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "solarAzimuthAngle")
 if (variable_present) then
-  call obsspace_get_db(config % obsdb, "MetaData", "solar_azimuth_angle", self % sol_azi(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "solarAzimuthAngle", self % sol_azi(:))
 end if
 
 ! Read in initial cloud top pressure and cloud fraction if doing cloud retrieval
@@ -234,15 +234,15 @@ if (config % cloud_retrieval) then
   self % cloudtopp(:) = 850.0_kind_real
   self % cloudfrac(:) = zero
 
-  variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_top_pressure")
+  variable_present = obsspace_has(config % obsdb, "MetaData", "pressureAtTopOfCloud")
   if (variable_present) then
-    call obsspace_get_db(config % obsdb, "MetaData", "initial_cloud_top_pressure", self % cloudtopp(:))
+    call obsspace_get_db(config % obsdb, "MetaData", "pressureAtTopOfCloud", self % cloudtopp(:))
     self % cloudtopp(:) = self % cloudtopp(:) * Pa_to_hPa
   end if
 
-  variable_present = obsspace_has(config % obsdb, "MetaData", "initial_cloud_fraction")
+  variable_present = obsspace_has(config % obsdb, "MetaData", "cloudAmount")
   if (variable_present) then
-    call obsspace_get_db(config % obsdb, "MetaData", "initial_cloud_fraction", self % cloudfrac(:))
+    call obsspace_get_db(config % obsdb, "MetaData", "cloudAmount", self % cloudfrac(:))
   end if
 
   where(self % cloudfrac < zero .or. self % cloudfrac > one)
@@ -253,12 +253,8 @@ if (config % cloud_retrieval) then
 end if
 
 ! Read in elevation for all obs
-if (obsspace_has(config % obsdb, "MetaData", "elevation")) then
-  call obsspace_get_db(config % obsdb, "MetaData", "elevation", self % elevation(:))
-else if (obsspace_has(config % obsdb, "MetaData", "surface_height")) then
-  call obsspace_get_db(config % obsdb, "MetaData", "surface_height", self % elevation(:))
-else if (obsspace_has(config % obsdb, "MetaData", "model_orography")) then
-  call obsspace_get_db(config % obsdb, "MetaData", "model_orography", self % elevation(:))
+if (obsspace_has(config % obsdb, "MetaData", "heightOfSurface")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "heightOfSurface", self % elevation(:))
 else if (ufo_vars_getindex(geovals % variables, 'surface_altitude') > 0) then
   call ufo_geovals_get_var(geovals, 'surface_altitude', geoval)
   self % elevation(:) = geoval%vals(1, :)
@@ -270,16 +266,16 @@ endif
 self % channels(:) = config % channels(:)
 
 ! Read in surface type from ObsSpace or model data (deprecated)
-if (obsspace_has(config % obsdb, "MetaData", "surface_type")) then
-  call obsspace_get_db(config % obsdb, "MetaData", "surface_type", self % surface_type(:))
+if (obsspace_has(config % obsdb, "MetaData", "surfaceQualifier")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "surfaceQualifier", self % surface_type(:))
 else
   call ufo_geovals_get_var(geovals, "surface_type", geoval)
   self % surface_type(:) = geoval%vals(1, :)
 endif
 
 ! Read in satellite identifier
-if (obsspace_has(config % obsdb, "MetaData", "satellite_identifier")) then
-  call obsspace_get_db(config % obsdb, "MetaData", "satellite_identifier", self % satellite_identifier(:))
+if (obsspace_has(config % obsdb, "MetaData", "satelliteIdentifier")) then
+  call obsspace_get_db(config % obsdb, "MetaData", "satelliteIdentifier", self % satellite_identifier(:))
 endif
 
 
@@ -402,10 +398,10 @@ character(len=max_string)   :: var
 ! Read in the initial values from the db
 do jvar = 1, size(self % channels)
   ! Read in from the db
-  write(var,"(A19,I0)") "surface_emissivity_", self % channels(jvar)
+  write(var,"(A11,I0)") "emissivity_", self % channels(jvar)
   call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % emiss(jvar,:))
   if (readerror) then
-    write(var,"(A25,I0)") "surface_emissivity_error_", self % channels(jvar)
+    write(var,"(A16,I0)") "emissivityError_", self % channels(jvar)
     call obsspace_get_db(config % obsdb, trim(config % EmissGroupInObsSpace), trim(var), self % mwemisserr(jvar,:))
   end if
 
@@ -559,7 +555,7 @@ do jvar = 1, nchans
   if (allocated(self % recalc_BT)) then
     call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:))
   end if
-  write(var,"(A19,I0)") "surface_emissivity_", self % channels(jvar)
+  write(var,"(A11,I0)") "emissivity_", self % channels(jvar)
   call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
@@ -568,16 +564,16 @@ do jvar = 1, nchans
 end do
 
 ! Output Diagnostics
-call put_1d_indb(self % output_to_db(:), obsdb, "FinalCost", "OneDVar", self % final_cost(:))
+call put_1d_indb(self % output_to_db(:), obsdb, "finalCost", "OneDVar", self % final_cost(:))
 nobs = size(self % final_cost(:))
-call put_1d_indb(self % output_to_db(:), obsdb, "n_iterations", "OneDVar", self % niter(:))
+call put_1d_indb(self % output_to_db(:), obsdb, "numberOfIterations", "OneDVar", self % niter(:))
 
 if (self % Store1DVarLWP) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "LWP", "OneDVar", self % LWP(:))
+  call put_1d_indb(self % output_to_db(:), obsdb, "liquidWaterPath", "OneDVar", self % LWP(:))
 end if
 
 if (self % Store1DVarIWP) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "IWP", "OneDVar", self % IWP(:))
+  call put_1d_indb(self % output_to_db(:), obsdb, "iceWaterPath", "OneDVar", self % IWP(:))
 end if
 
 !--
@@ -595,7 +591,7 @@ end if
 if (self % Store1DVarCLW) then
   do jvar = 1, size(self % CLW,1)
     write(var,"(A,I0)") "lev",jvar
-    call put_1d_indb(self % output_to_db(:), obsdb, var, "OneDVar/cloud_liquid_water", self % CLW(jvar,:))
+    call put_1d_indb(self % output_to_db(:), obsdb, var, "OneDVar/liquidWaterContent", self % CLW(jvar,:))
   end do
 end if
 
@@ -608,7 +604,7 @@ if (prof_index % pstar > 0) THEN
   where (surface_pressure /= missing_real)
     surface_pressure = surface_pressure / Pa_to_hPa ! hPa to Pa
   end where
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_ps), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "surfacePressure", "OneDVar", &
                    surface_pressure(:))
 
   deallocate(surface_pressure)
@@ -618,7 +614,7 @@ end if
 ! 6) Surface temperature
 !--
 if (prof_index % t2 > 0) THEN
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_t2m), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "surfaceTemperature", "OneDVar", &
                    self % output_profile(prof_index % t2, :))
 end if
 
@@ -632,7 +628,7 @@ end if
 ! Windspeed retrieval is directionless, i.e., there are no separate u and v
 ! components.
 if (prof_index % windspeed > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "surface_wind_speed", "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "windSpeed", "OneDVar", &
                    self % output_profile(prof_index % windspeed, :))
 end if
 
@@ -640,7 +636,7 @@ end if
 ! 9) Skin temperature
 !--
 if (prof_index % tstar > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var_sfc_tskin), "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "skinTemperature", "OneDVar", &
                    self % output_profile(prof_index % tstar, :))
 end if
 
@@ -651,13 +647,13 @@ end if
 ! 11) Cloud top pressure
 !--
 if (prof_index % cloudtopp > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "cloud_top_pressure", "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "pressureAtTopOfCloud", "OneDVar", &
                    self % output_profile(prof_index % cloudtopp, :))
 end if
 
 ! 12) Cloud fraction
 if (prof_index % cloudfrac > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "cloud_fraction", "OneDVar", &
+  call put_1d_indb(self % output_to_db(:), obsdb, "cloudAmount", "OneDVar", &
                    self % output_profile(prof_index % cloudfrac, :))
 end if
 

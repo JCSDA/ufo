@@ -35,9 +35,9 @@ class Cal_RemapScanPositionParameters: public VariableTransformParametersBase {
 * \details  Within the Variable Transforms filter, apply the transform "RemapScanPosition"
 *  in order to renumber the satellite scan position. At the Met Office ATMS observations are
 *  spatially resampled, resulting in 32 fields of view per record sampled from the raw
-*  96 FOVs. From the initial observation data the values of scan_position@MetaData are 
-*  2, 5, 8, ..., 92, 95 (integers). However, in the calculation of observation bias we 
-*  require scan_position@MetaData to be renumbered as 1, 2, 3, ..., 32.
+*  96 FOVs. From the initial observation data the values of MetaData/sensorScanPosition are
+*  2, 5, 8, ..., 92, 95 (integers). However, in the calculation of observation bias we
+*  require MetaData/sensorScanPosition to be renumbered as 1, 2, 3, ..., 32.
 ///
 *
 * See VariableTransformParametersBase for filter setup.

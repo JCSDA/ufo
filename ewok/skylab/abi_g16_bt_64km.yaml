@@ -10,7 +10,7 @@ obs space:
   io pool:
     write multiple files: true
   _source: noaa
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &abi_g16_channels 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 obs operator:
   name: CRTM
@@ -22,7 +22,7 @@ obs filters:
 # Assign error
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *abi_g16_channels
   action:
     name: assign error
@@ -33,10 +33,10 @@ obs filters:
 # Useflag check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *abi_g16_channels
   test variables:
-  - name: ChannelUseflagCheckRad@ObsFunction
+  - name: ObsFunction/ChannelUseflagCheckRad
     channels: *abi_g16_channels
     options:
       channels: *abi_g16_channels

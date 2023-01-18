@@ -44,21 +44,21 @@ HydrometeorCheckAMSUA::HydrometeorCheckAMSUA(const eckit::LocalConfiguration & c
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("brightness_temperature_jacobian_surface_emissivity@ObsDiag", channels_);
-  invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_emissivity", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("constant@"+biastermgrp, channels_);
-  invars_ += Variable("scan_angle_order_4@"+biastermgrp, channels_);
-  invars_ += Variable("scan_angle_order_3@"+biastermgrp, channels_);
-  invars_ += Variable("scan_angle_order_2@"+biastermgrp, channels_);
-  invars_ += Variable("scan_angle@"+biastermgrp, channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable(biasgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(biastermgrp+"/constant", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_4", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_3", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_2", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 
   // Include list of required data from ObsFunction
   const Variable &obserrfunc = options_.obserrFunction.value();
@@ -94,33 +94,33 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get surface temperature jacobian
   std::vector<std::vector<float>> dbtde(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature_jacobian_surface_emissivity@ObsDiag", channels_)[ichan],
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_emissivity", channels_)[ichan],
            dbtde[ichan]);
   }
 
   // Get HofX for clear-sky simulation
   std::vector<float> hofxclr536(nlocs);
-  in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag", channels_)[ich536],
+  in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_)[ich536],
          hofxclr536);
 
   // Get ObsBiasTerm: constant term for 23.8GHz channel
   std::vector<float> bias_const238(nlocs);
-  in.get(Variable("constant@"+biastermgrp, channels_)[ich238], bias_const238);
+  in.get(Variable(biastermgrp+"/constant", channels_)[ich238], bias_const238);
 
   // Get ObsBiasTerm: scan angle terms for 23.8GHz channel
   size_t nangs = 4;
   std::vector<float> values(nlocs);
   std::vector<std::string> scanterms(nangs);
   std::vector<float> bias_scanang238(nlocs);
-  scanterms[0] = "scan_angle_order_4@"+biastermgrp;
-  scanterms[1] = "scan_angle_order_3@"+biastermgrp;
-  scanterms[2] = "scan_angle_order_2@"+biastermgrp;
-  scanterms[3] = "scan_angle@"+biastermgrp;
+  scanterms[0] = biastermgrp+"/scan_angle_order_4";
+  scanterms[1] = biastermgrp+"/scan_angle_order_3";
+  scanterms[2] = biastermgrp+"/scan_angle_order_2";
+  scanterms[3] = biastermgrp+"/scan_angle";
   for (size_t iang = 0; iang < nangs; ++iang) {
     in.get(Variable(scanterms[iang], channels_)[ich238], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
@@ -135,9 +135,9 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> innov(nchans, std::vector<float>(nlocs));
   std::vector<float> hofx(nlocs);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], btobs[ichan]);
-    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], bias[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], hofx);
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ichan], btobs[ichan]);
+    in.get(Variable(biasgrp+"/brightnessTemperature", channels_)[ichan], bias[ichan]);
+    in.get(Variable(hofxgrp+"/brightnessTemperature", channels_)[ichan], hofx);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innov[ichan][iloc] = btobs[ichan][iloc] - hofx[iloc];
     }

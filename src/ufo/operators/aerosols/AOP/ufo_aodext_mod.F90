@@ -183,7 +183,7 @@ integer :: km, nobs, nch, ic, i, j, k
  ! Get some metadata from obsspace, observed AOD wavelengths
  ! -----------------------
  allocate(obss_wavelength(nvars))
- call obsspace_get_db(obss,"VarMetaData", "obs_wavelength", obss_wavelength)
+ call obsspace_get_db(obss,"MetaData", "obs_wavelength", obss_wavelength)
 
  ! Check if observed wavelength AOD is within the range of bkg wavelength to apply angstrom law
  ! else hofx set to missing value

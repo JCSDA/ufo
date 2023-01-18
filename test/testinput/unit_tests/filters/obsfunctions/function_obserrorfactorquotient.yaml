@@ -12,7 +12,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/2020100106_metars_small_out.nc
-    simulated variables: [surface_pressure, air_temperature]
+    simulated variables: [stationPressure, airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc
   obs operator:
@@ -22,25 +22,25 @@ observations:
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: surface_pressure@ObsValue
+            name: ObsValue/stationPressure
           xvals: [85000, 80000]
           errors: [120, 140]
     defer to post: true
 #
   - filter: BlackList
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorSfcPressure@ObsFunction
+        name: ObsFunction/ObsErrorFactorSfcPressure
         options:
           error_min: 100         # 1 mb
           error_max: 300         # 3 mb
@@ -48,15 +48,15 @@ observations:
 #
   - filter: Bounds Check
     filter variables:
-    - name: surface_pressure
+    - name: stationPressure
     action:
       name: reject
     maxvalue: 2.5
     test variables:
-    - name: ObsErrorFactorQuotient@ObsFunction
+    - name: ObsFunction/ObsErrorFactorQuotient
       options:
-        numerator: surface_pressure@ObsErrorData
-        denominator: surface_pressure@ObsError
+        numerator: ObsErrorData/stationPressure
+        denominator: ObsError/stationPressure
         save: true
     defer to post: true
   passedBenchmark: 62

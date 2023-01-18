@@ -4,13 +4,14 @@ window end: 2020-12-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: RASS-tv
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_obs_2020121500.nc
-    simulated variables: [virtual_temperature]
+    simulated variables: [virtualTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_tv_geoval_2020121500.nc
   vector ref: GsiHofX

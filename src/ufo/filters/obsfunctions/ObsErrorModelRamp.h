@@ -105,17 +105,17 @@ class ObsErrorModelRampParameters : public oops::Parameters {
 /// #### AMSUA ####
 ///
 ///       filter variables:
-///       - name: brightness_temperature
+///       - name: brightnessTemperature
 ///         channels: &errassignchan 1-15
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: ObsErrorModelRamp@ObsFunction
+///           name: ObsFunction/ObsErrorModelRamp
 ///           channels: *errassignchan
 ///           options:
 ///             channels: *errassignchan
 ///             xvar:
-///               name: CLWRetMean@ObsFunction
+///               name: ObsFunction/CLWRetMean
 ///               options:
 ///                 clwret_ch238: 1
 ///                 clwret_ch314: 2
@@ -138,17 +138,17 @@ class ObsErrorModelRampParameters : public oops::Parameters {
 /// #### ABI/AHI ####
 ///
 ///       filter variables:
-///       - name: brightness_temperature
+///       - name: brightnessTemperature
 ///         channels: &errassignchan 8-10
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: ObsErrorModelRamp@ObsFunction
+///           name: ObsFunction/ObsErrorModelRamp
 ///           channels: *errassignchan
 ///           options:
 ///             channels: *errassignchan
 ///             xvar:
-///               name: SymmCldImpactIR@ObsFunction
+///               name: ObsFunction/SymmCldImpactIR
 ///               channels: *errassignchan
 ///               options:
 ///                 channels: *errassignchan
@@ -164,10 +164,10 @@ class ObsErrorModelRampParameters : public oops::Parameters {
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: ObsErrorModelRamp@ObsFunction
+///           name: ObsFunction/ObsErrorModelRamp
 ///           options:
 ///             xvar:
-///               name: {xvar}@[ObsFunction, GeoVaLs, ObsDiag, ObsValue, etc...]
+///               name: [ObsFunction, GeoVaLs, ObsDiag, ObsValue, etc...]/{xvar}
 ///               options: {xvar options}
 ///             x0: [{X0}]
 ///             x1: [{X1}]

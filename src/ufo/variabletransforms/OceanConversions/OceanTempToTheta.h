@@ -32,22 +32,22 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
  public:
   /// Input salinity
   oops::Parameter<std::string> SalinityVariable{"ocean salinity variable",
-                                                "ocean_salinity", this};
+                                                "salinity", this};
   oops::Parameter<std::string> SalinityGroup{"ocean salinity group",
                                              "ObsValue", this};
   /// Input temperature
   oops::Parameter<std::string> TemperatureVariable{"ocean temperature variable",
-                                                   "ocean_temperature", this};
+                                                   "waterTemperature", this};
   oops::Parameter<std::string> TemperatureGroup{"ocean temperature group",
                                                 "ObsValue", this};
   /// Input pressure
   oops::Parameter<std::string> PressureVariable{"ocean pressure variable",
-                                                "ocean_pressure", this};
+                                                "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
   /// Potential temperature variable name
   oops::Parameter<std::string> ThetaVariable{"ocean potential temperature name",
-                                               "ocean_potential_temperature", this};
+                                               "waterPotentialTemperature", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -60,11 +60,11 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
 ///  obs filters:
 ///  - filter: Variable Transforms
 ///    Transform: OceanTempToTheta
-///    ocean pressure variable: ocean_pressure
+///    ocean pressure variable: waterPressure
 ///    ocean pressure group: DerivedObsValue
-///    ocean temperature variable: ocean_temperature
+///    ocean temperature variable: waterTemperature
 ///    ocean temperature group: ObsValue
-///    ocean salinity variable: ocean_salinity
+///    ocean salinity variable: salinity
 ///    ocean salinity group: ObsValue
 ///
 /// will return potential temperature (deg.C) in a variable named (by default)

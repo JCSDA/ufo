@@ -17,10 +17,9 @@ namespace ufo
 
 /// \brief Produces input for a DataExtractor by loading data from a NetCDF file.
 ///
-/// ioda-v1 and ioda-v2-style NetCDF files are supported. ioda-v1-style files should have the
-/// following structure:
-///   - It should contain exactly one variable whose name ends with the `@<group>` suffix, where
-///     <group> is the value of the `payloadGroup` parameter passed to the loadData() method.
+/// The input NetCDF file should have the following structure:
+///   - The file should contain exactly one variable in a group whose name
+///     is the value of the `payloadGroup` parameter passed to the loadData() method.
 ///     This is the variable containing the values to be extracted (also known as the _payload_).
 ///     Its type needs to match the template parameter `ExtractedValue`, which must be
 ///     set to either `float`, `int` or `std::string`.
@@ -34,62 +33,15 @@ namespace ufo
 ///     Coordinates can be of type `float`, `int` or `string`. Datetimes should be represented
 ///     as ISO 8601 strings. Auxiliary coordinates are supported, i.e. there can be more than one
 ///     coordinate per dimension. Coordinate names should correspond to names of ObsSpace variables.
-///     Use the name `channel_number@MetaData` for channel numbers (for which there's no dedicated
-///     ObsSpace variable).
-///
-/// ioda-v2-style files are similar except that
-///   - The payload variable should be placed in the NetCDF group specified by the `payloadGroup`
-///     parameter passed to loadData().
+///     Use the name `MetaData/sensorChannelNumber` for channel numbers (for which there's no
+///     dedicated ObsSpace variable).
 ///   - Coordinate variables should be placed in appropriate groups, e.g. `MetaData`. Because
 ///     of the limitations of the NetCDF file format, these variables can only be used as auxiliary
 ///     coordinates of the payload variable (listed in its `coordinates` attribute).
 ///
-/// Example 1: the following NetCDF metadata describe a ioda-v1-style file encoding the dependence
+/// Example 1: the following NetCDF metadata describe a file encoding the dependence
 /// of the diagonal elements of a covariance matrix (with rows and columns corresponding to certain
 /// air pressures) on the observation type:
-///
-/// \code
-/// dimensions:
-///   air_pressure@MetaData = 10 ;
-///   index = 5 ;
-/// variables:
-///   int air_temperature@ErrorVariance(air_pressure@MetaData, index) ;
-///     air_temperature@ErrorVariance:coordinates = "observation_type@MetaData index" ;
-///   int air_pressure@MetaData(air_pressure@MetaData) ;
-///   int index(index) ;
-///   int observation_type@MetaData(index) ;
-/// \endcode
-///
-/// Example 2: the following NetCDF metadata describe a ioda-v1-style file encoding the dependence
-/// of a full covariance matrix (with rows and columns corresponding to channel numbers) on
-/// multiple variables (`latitude_band@MetaData`, `processing_center@MetaData` and
-/// `satellite_id@MetaData(index)`):
-///
-/// \code
-/// dimensions:
-///   channel_number = 10 ;
-///   channel_number@MetaData = 10 ;
-///   index = 8 ;
-/// variables:
-///   float air_temperature@ErrorVariance(channel_number, channel_number@MetaData, index) ;
-///     air_temperature@ErrorVariance:coordinates = "latitude_band@MetaData \
-///         processing_center@MetaData satellite_id@MetaData" ;
-///     string air_temperature@ErrorVariance:full = "true" ;
-///   int index(index) ;
-///   int channel_number(channel_number) ;
-///   int channel_number@MetaData(channel_number@MetaData) ;
-///   int latitude_band@MetaData(index) ;
-///   int processing_center@MetaData(index) ;
-///   int satellite_id@MetaData(index) ;
-/// \endcode
-///
-/// Notice how a channel_number describes the outermost two dimensions.  The very outermost
-/// dimension is collapsed and discarded after extracting the diagonal elements of the covariance
-/// matrices, so its name can be arbitrary. (This lets us stay conforming to the CF convention,
-/// which forbids multiple axes of an array to be indexed by the same coordinate.)
-///
-/// Example 3: the following NetCDF metadata describe a ioda-v2-style file equivalent to the one
-/// from Example 1:
 ///
 /// \code
 /// dimensions:
@@ -101,16 +53,50 @@ namespace ufo
 ///
 /// group: MetaData {
 ///   variables:
-///     int air_pressure(rows) ;
-///     int observation_type(index) ;
+///     int pressure(rows) ;
+///     int observationSubtypeNum(index) ;
 /// }
 ///
 /// group: ErrorVariance {
 ///   variables:
-///     float air_temperature(rows, index) ;
-///       air_temperature:coordinates = "/MetaData/air_pressure /MetaData/observation_type" ;
+///     float airTemperature(rows, index) ;
+///       airTemperature:coordinates = "/MetaData/pressure /MetaData/observationSubTypeNum" ;
 /// }
 /// \endcode
+
+/// Example 2: the following NetCDF metadata describe a ioda-v1-style file encoding the dependence
+/// of a full covariance matrix (with rows and columns corresponding to channel numbers) on
+/// multiple variables (`MetaData/latitudeBand`, `MetaData/processingCenter` and
+/// `MetaData/satelliteIdentifier`):
+///
+/// \code
+/// dimensions:
+///   sensorChannelNumber = 10 ;
+///   MetaData/sensorChannelNumber = 10 ;
+///   index = 8 ;
+/// variables:
+///   int index(index) ;
+///   int sensorChannelNumber(sensorChannelNumber) ;
+///
+/// group: MetaData {
+///   variables:
+///     int sensorChannelNumber(MetaData/sensorChannelNumber) ;
+///     int latitudeBand(index) ;
+///     int preocessingCenter(index) ;
+///     int satelliteIdentifier(index) ;
+/// }
+/// group: ErrorVariance {
+///   variables:
+///     float airTemperature(sensorChannelNumber, MetaData/sensorChannelNumber, index) ;
+///       airTemperature:coordinates = "MetaData/latitudeBand \
+///       MetaData/processingCenter MetaData/satelliteIdentifier" ;
+/// }
+/// \endcode
+/// Notice how a sensorChannelNumber describes the outermost two dimensions.  The very outermost
+/// dimension is collapsed and discarded after extracting the diagonal elements of the covariance
+/// matrices, so its name can be arbitrary. (This lets us stay conforming to the CF convention,
+/// which forbids multiple axes of an array to be indexed by the same coordinate.)
+///
 template <typename ExtractedValue>
 class DataExtractorNetCDFBackend : public DataExtractorBackend<ExtractedValue> {
  public:

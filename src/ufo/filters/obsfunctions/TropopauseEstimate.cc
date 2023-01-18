@@ -34,9 +34,9 @@ TropopauseEstimate::TropopauseEstimate(const eckit::LocalConfiguration & conf)
   options_.deserialize(conf);
 
   // We must know the datetime of each observation
-  invars_ += Variable("dateTime@MetaData");
+  invars_ += Variable("MetaData/dateTime");
   // We must know the latitude of each observation
-  invars_ += Variable("latitude@MetaData");
+  invars_ += Variable("MetaData/latitude");
 
   if (options_.convert_p2z.value())
         oops::Log::debug() << "  TropopauseEstimate: will convert pres to height" << std::endl;
@@ -62,9 +62,9 @@ void TropopauseEstimate::compute(const ObsFilterData & in,
 
   // Retrieve the datetime and latitude.
   std::vector<float> latitude;
-  in.get(Variable("latitude@MetaData"), latitude);
+  in.get(Variable("MetaData/latitude"), latitude);
   std::vector<util::DateTime> datetimes;
-  in.get(Variable("dateTime@MetaData"), datetimes);
+  in.get(Variable("MetaData/dateTime"), datetimes);
 
   // If datetimes is empty, then we should just exit because there is nothing we can do otherwise.
   if (datetimes.empty()) {

@@ -25,11 +25,14 @@ static ObsOperatorMaker<ObsMarineVertInterp> makerMarineVertInterp_("MarineVertI
 
 ObsMarineVertInterp::ObsMarineVertInterp(const ioda::ObsSpace & odb,
                                          const ObsMarineVertInterpParameters & params)
-  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
+  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+    keyOper_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
     operatorVars_, operatorVarIndices);
+
+  varin_ += nameMap_.convertName(operatorVars_);
 
   ufo_marinevertinterp_setup_f90(keyOper_, params.toConfiguration(),
     operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),  varin_);

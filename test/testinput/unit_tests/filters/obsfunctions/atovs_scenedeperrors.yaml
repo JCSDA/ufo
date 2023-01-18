@@ -12,16 +12,16 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atovs_metopb_obs_2021011512_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-20
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: brightness_temperature@ObsError
+    - name: ObsError/brightnessTemperature
       channels: &all_channels 1-20
       type: float
       function:
-        name: MetOfficeAllSkyErrorModel@ObsFunction
+        name: ObsFunction/MetOfficeAllSkyErrorModel
         options:
           channels: *all_channels
 
@@ -54,7 +54,7 @@ observations:
 
   compareVariables:
   - test:
-      name: brightness_temperature@ObsError
+      name: ObsError/brightnessTemperature
     reference:
-      name: scene_dependent_errors@TestReference
+      name: TestReference/scene_dependent_errors
     relTol: 1e-6

@@ -53,14 +53,14 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
-  invars_ += Variable("surface_wind_speed@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
+  invars_ += Variable("GeoVaLs/surface_wind_speed");
 
   // Include required variables from ObsFunction
   const Variable &clwobs = options_.clwobsFunction.value();
@@ -126,7 +126,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   // Get Original Observation Error
   std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr0[ichan]);
+    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
   }
 
   // Get ObsErrorData (obs error from previous QC step) and convert to inverse of error variance
@@ -135,8 +135,8 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   std::vector<int> qcflagdata;
   const float missing = util::missingValue(missing);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
     for (size_t iloc = 0; iloc < nlocs; iloc++) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;
@@ -150,8 +150,8 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> hofx(nchans, std::vector<float>(nlocs));
   std::vector<std::vector<float>> innov(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], btobs[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], hofx[ichan]);
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ichan], btobs[ichan]);
+    in.get(Variable(hofxgrp+"/brightnessTemperature", channels_)[ichan], hofx[ichan]);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innov[ichan][iloc] = btobs[ichan][iloc] - hofx[ichan][iloc];
     }
@@ -160,11 +160,11 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   // Get variables from GeoVaLs
   // Get surface wind speed
   std::vector<float> surface_wind_speed(nlocs);
-  in.get(Variable("surface_wind_speed@GeoVaLs"), surface_wind_speed);
+  in.get(Variable("GeoVaLs/surface_wind_speed"), surface_wind_speed);
 
   // Load area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Set channel number
   int ich238, ich314, ich503, ich528, ich536, ich544, ich549, ich890;

@@ -40,14 +40,14 @@ void testTrackCheck(const eckit::LocalConfiguration &conf) {
 
   if (conf.has("air_pressures")) {
     const std::vector<float> airPressures = conf.getFloatVector("air_pressures");
-    obsspace.put_db("MetaData", "air_pressure", airPressures);
+    obsspace.put_db("MetaData", "pressure", airPressures);
     const std::vector<float> airPressureObserrors(airPressures.size(), 1.0f);
-    obsspace.put_db("ObsError", "air_pressure", airPressureObserrors);
+    obsspace.put_db("ObsError", "pressure", airPressureObserrors);
   }
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");
-    obsspace.put_db("MetaData", "station_id", stationIds);
+    obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(

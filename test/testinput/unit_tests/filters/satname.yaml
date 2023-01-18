@@ -12,11 +12,11 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_2020100106_noinv_satellitename_out.nc4
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
   obs filters:
   - filter: satname
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     SatName assignments:
     - min WMO Satellite id: 1  
       max WMO Satellite id: 999

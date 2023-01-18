@@ -216,12 +216,12 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_tl(self, geovals, obss, nvars, &
   ! if we have a single dimension then we should have 2 variables
   if (nchans /= 0) then
     if (size(hofx(:,1)) /= 2*nchans) then
-      write(err_msg, '(A,I5,A,I5)') "HofX should have nchans variables for both eastward_wind and northward_wind. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
+      write(err_msg, '(A,I5,A,I5)') "HofX should have nchans variables for both windEastward and windNorthward. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
       call fckit_exception%throw(err_msg)
     endif
   else
     if (size(hofx(:,1)) /= 2) then
-      call fckit_exception%throw("HofX should have 2 variables eastward_wind and northward_wind")
+      call fckit_exception%throw("HofX should have 2 variables windEastward and windNorthward")
     endif
   end if
 
@@ -253,9 +253,9 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_tl(self, geovals, obss, nvars, &
 
   ! if we have channels then need to spread these values across the channels correctly
   if (nchans /= 0) then
-    ! eastward_wind hofx is stored in slot 1
+    ! windEastward hofx is stored in slot 1
     hofx_u = hofx(1,:)
-    ! northward_wind hofx is stored in slot 2
+    ! windNorthward hofx is stored in slot 2
     hofx_v = hofx(2,:)
     chan_loop: do ichan = 1, nchans
       hofx(ichan,:) = hofx_u
@@ -321,12 +321,12 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_ad(self, geovals, obss, nvars, &
   ! if we have a single dimension then we should have 2 variables
   if (nchans /= 0) then
     if (size(hofx(:,1)) /= 2*nchans) then
-      write(err_msg, '(A,I5,A,I5)') "HofX should have nchans variables for both eastward_wind and northward_wind. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
+      write(err_msg, '(A,I5,A,I5)') "HofX should have nchans variables for both windEastward and windNorthward. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
       call fckit_exception%throw(err_msg)
     endif
   else
     if (size(hofx(:,1)) /= 2) then
-      call fckit_exception%throw("HofX should have 2 variables eastward_wind and northward_wind")
+      call fckit_exception%throw("HofX should have 2 variables windEastward and windNorthward")
     endif
   end if
 

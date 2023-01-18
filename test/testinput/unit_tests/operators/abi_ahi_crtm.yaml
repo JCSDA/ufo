@@ -20,7 +20,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ahi_himawari8_obs_2019042306_m_crtm_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 7-16
   geovals:
     filename: Data/ufo/testinput_tier_1/ahi_himawari8_geoval_2019042306_m.nc4
@@ -48,7 +48,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/abi_g16_obs_2019042306_m_crtm_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 7-16
   geovals:
     filename: Data/ufo/testinput_tier_1/abi_g16_geoval_2019042306_m.nc4

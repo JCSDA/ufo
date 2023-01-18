@@ -41,7 +41,7 @@ InterChannelConsistencyCheck::InterChannelConsistencyCheck(const eckit::LocalCon
 
   // TODO(EL) the following two lines will be removed when the revised filter behavior is in place
   // Include required variables from ObsDiag (note: included here to trigger posterFilter)
-  invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -77,8 +77,8 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
   std::vector<float> obserrdata(nlocs);
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs, 0.0));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;

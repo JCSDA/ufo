@@ -46,27 +46,27 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
-  invars_ += Variable("brightness_temperature_jacobian_air_temperature@ObsDiag", channels_);
-  invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
-  invars_ += Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_air_temperature", channels_);
+  invars_ += Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_);
+  invars_ += Variable("ObsDiag/pressure_level_at_peak_of_weightingfunction", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@ObsError", channels_);
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
-  invars_ += Variable("land_area_fraction@GeoVaLs");
-  invars_ += Variable("ice_area_fraction@GeoVaLs");
-  invars_ += Variable("surface_snow_area_fraction@GeoVaLs");
-  invars_ += Variable("average_surface_temperature_within_field_of_view@GeoVaLs");
-  invars_ += Variable("air_pressure@GeoVaLs");
-  invars_ += Variable("air_temperature@GeoVaLs");
-  invars_ += Variable("tropopause_pressure@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
+  invars_ += Variable("GeoVaLs/land_area_fraction");
+  invars_ += Variable("GeoVaLs/ice_area_fraction");
+  invars_ += Variable("GeoVaLs/surface_snow_area_fraction");
+  invars_ += Variable("GeoVaLs/average_surface_temperature_within_field_of_view");
+  invars_ += Variable("GeoVaLs/air_pressure");
+  invars_ += Variable("GeoVaLs/air_temperature");
+  invars_ += Variable("GeoVaLs/tropopause_pressure");
 }
 
 // -----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
-  size_t nlevs = in.nlevs(Variable("air_pressure@GeoVaLs"));
+  size_t nlevs = in.nlevs(Variable("GeoVaLs/air_pressure"));
 
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
@@ -98,7 +98,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // Load surface temperature jacobian
   std::vector<std::vector<float>> dbtdts(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature",
                      channels_)[ichan], dbtdts[ichan]);
   }
 
@@ -108,7 +108,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level = nlevs - ilev - 1;
-      in.get(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
+      in.get(Variable("ObsDiag/brightness_temperature_jacobian_air_temperature",
                        channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
   }
@@ -119,7 +119,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level = nlevs - ilev - 1;
-      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag",
+      in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer",
              channels_)[ichan], level,  tao[ichan][ilev]);
     }
   }
@@ -128,7 +128,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   std::vector<float> values(nlocs, 0.0);
   std::vector<std::vector<float>> wfunc_pmaxlev(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag",
+    in.get(Variable("ObsDiag/pressure_level_at_peak_of_weightingfunction",
                      channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       wfunc_pmaxlev[ichan][iloc] = nlevs - values[iloc] + 1;
@@ -141,8 +141,8 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv_use(nchans, std::vector<float>(nlocs, 0.0));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], values);
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflag);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], values);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
@@ -154,8 +154,8 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // Get bias corrected innovation (tbobs - hofx) (hofx includes bias correction)
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ichan], innovation[ichan]);
+    in.get(Variable(hofxgrp+"/brightnessTemperature", channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
@@ -164,27 +164,27 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // Get original observation error (uninflated) from ObsSpaec
   std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr[ichan]);
+    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
   }
 
   // Get variables from GeoVaLS
   // Get tropopause pressure [Pa]
   std::vector<float> tropprs(nlocs);
-  in.get(Variable("tropopause_pressure@GeoVaLs"), tropprs);
+  in.get(Variable("GeoVaLs/tropopause_pressure"), tropprs);
 
   // Get average surface temperature within FOV
   std::vector<float> tsavg(nlocs);
-  in.get(Variable("average_surface_temperature_within_field_of_view@GeoVaLs"), tsavg);
+  in.get(Variable("GeoVaLs/average_surface_temperature_within_field_of_view"), tsavg);
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
   std::vector<float> land_frac(nlocs);
   std::vector<float> ice_frac(nlocs);
   std::vector<float> snow_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
-  in.get(Variable("land_area_fraction@GeoVaLs"), land_frac);
-  in.get(Variable("ice_area_fraction@GeoVaLs"), ice_frac);
-  in.get(Variable("surface_snow_area_fraction@GeoVaLs"), snow_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
+  in.get(Variable("GeoVaLs/land_area_fraction"), land_frac);
+  in.get(Variable("GeoVaLs/ice_area_fraction"), ice_frac);
+  in.get(Variable("GeoVaLs/surface_snow_area_fraction"), snow_frac);
 
   // Determine dominant surface type in each FOV
   std::vector<bool> land(nlocs, false);
@@ -220,14 +220,14 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
     const size_t level = nlevs - ilev - 1;
-    in.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
+    in.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
   // Get air temperature
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
     const size_t level = nlevs - ilev - 1;
-    in.get(Variable("air_temperature@GeoVaLs"), level, tair[ilev]);
+    in.get(Variable("GeoVaLs/air_temperature"), level, tair[ilev]);
   }
 
   // Minimum Residual Method (MRM) for Cloud Detection:

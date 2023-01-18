@@ -13,10 +13,10 @@ observations:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
   obs function:
-    name: ModelHeightAdjustedAirTemperature@ObsFunction
+    name: ObsFunction/ModelHeightAdjustedAirTemperature
     options:
       elevation:
-        name: station_elevation@MetaData
+        name: MetaData/stationElevation
     variables: [airTemperatureAt2M]
     tolerance: 1.0e-6
 

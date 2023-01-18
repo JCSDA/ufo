@@ -40,7 +40,7 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
 
   // Ensure observations have been sorted by air pressure in descending order.
   if (requireDescendingPressureSort_) {
-    if (obsdb_.obs_sort_var() != "air_pressure")
+    if (obsdb_.obs_sort_var() != "pressure")
       throw eckit::UserError("Sort variable must be air_pressure", Here());
     if (obsdb_.obs_sort_order() != "descending")
       throw eckit::UserError("Profiles must be sorted in descending order", Here());
@@ -60,8 +60,8 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   getObservation("MetaData", "longitude", longitude_in, true);
   getObservation("MetaData", "dateTime", datetime_in, true);
   getObservation("ObsValue", heightCoord_, height, true);
-  getObservation("ObsValue", "wind_speed", wind_speed, true);
-  getObservation("ObsValue", "wind_from_direction", wind_from_direction, true);
+  getObservation("ObsValue", "windSpeed", wind_speed, true);
+  getObservation("ObsValue", "windDirection", wind_from_direction, true);
 
   if (!oops::allVectorsSameNonZeroSize(latitude_in, longitude_in, datetime_in,
                                        height, wind_speed, wind_from_direction)) {

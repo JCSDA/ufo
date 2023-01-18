@@ -4,11 +4,12 @@ window end: 2020-10-01T09:00:00Z
 observations:
 - obs operator:
     name: VertInterp
-    observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   linear obs operator:
     name: VertInterp
-    observation vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Satwind
@@ -20,7 +21,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_2020100106_noinv_opr_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   vector ref: MetOfficeHofX

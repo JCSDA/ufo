@@ -41,7 +41,7 @@ module ufo_radiancerttov_utils_mod
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
     var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac, &
-    var_q, var_mixr, var_oz, var_co2, var_surf_type_rttov, &
+    var_q, var_mixr, var_oz, var_co2, &
     var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit, &
     var_sfc_wdir, var_sfc_wspeed, &
     var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_tb_overcast, &
@@ -61,6 +61,7 @@ module ufo_radiancerttov_utils_mod
   integer, parameter, public            :: maxvarin = 50
 
   character(len=max_string), public     :: message
+  character(len=maxvarlen), parameter   :: var_surf_type_rttov = "surfaceQualifier"  ! 0 (land), 1 (water), 2 (sea-ice)
 
   integer, public                       :: nvars_in
   integer, public                       :: rttov_errorstatus
@@ -859,7 +860,7 @@ contains
     character(len=6) :: chan
 
     write(chan, '(I0)') n
-    varname = 'brightness_temperature_' // trim(chan)
+    varname = 'brightnessTemperature_' // trim(chan)
 
   end subroutine get_var_name
 
@@ -929,8 +930,8 @@ contains
     if (present(ob_info)) then 
       sat_id = ob_info % satellite_identifier
     else
-      if (obsspace_has(obss, "MetaData", "satellite_identifier")) then
-        call obsspace_get_db(obss, "MetaData", "satellite_identifier", sat_id)
+      if (obsspace_has(obss, "MetaData", "satelliteIdentifier")) then
+        call obsspace_get_db(obss, "MetaData", "satelliteIdentifier", sat_id)
       else
         self % sensor_index_array = 1
       end if
@@ -1055,7 +1056,7 @@ contains
           end if
           
           if(.not. present(ob_info)) then
-            call obsspace_put_db(obss, "MetaData", "total_column_ozone", self % tc_ozone)
+            call obsspace_put_db(obss, "MetaData", "ozoneTotal", self % tc_ozone)
           end if
         end if
       case (var_co2)
@@ -1391,18 +1392,10 @@ contains
     else
 
 !Set RT profile elevation (ob has priority, otherwise model height from geoval)
-      if (obsspace_has(obss, "MetaData", "elevation")) then
-        call obsspace_get_db(obss, "MetaData", "elevation", TmpVar)
-        profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
-        write(message,'(A)') 'Using MetaData/elevation for profile elevation'
-      else if (obsspace_has(obss, "MetaData", "surface_height")) then
-        call obsspace_get_db(obss, "MetaData", "surface_height", TmpVar)
+      if (obsspace_has(obss, "MetaData", "heightOfSurface")) then
+        call obsspace_get_db(obss, "MetaData", "heightOfSurface", TmpVar)
         profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
         write(message,'(A)') 'Using MetaData/surface_height for profile elevation'
-      else if (obsspace_has(obss, "MetaData", "model_orography")) then
-        call obsspace_get_db(obss, "MetaData", "model_orography", TmpVar)
-        profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
-        write(message,'(A)') 'Using MetaData/model_orography for profile elevation'
       else if (ufo_vars_getindex(geovals%variables, "surface_altitude") > 0) then
         call ufo_geovals_get_var(geovals, "surface_altitude", geoval)
         profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
@@ -1435,40 +1428,40 @@ contains
 !Set RTTOV viewing geometry
 
       ! sensor zenith - RTTOV convention 0-max (coef dependent). Nadir = 0 deg
-      variable_present = obsspace_has(obss, "MetaData", "sensor_zenith_angle")
+      variable_present = obsspace_has(obss, "MetaData", "sensorZenithAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", profiles(1:nprofiles)%zenangle)
+        call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", profiles(1:nprofiles)%zenangle)
       else
-        write(message,'(A)') 'ERROR: Mandatory input MetaData/sensor_zenith_angle not in database. Aborting...'
+        write(message,'(A)') 'ERROR: Mandatory input MetaData/sensorZenithAngle not in database. Aborting...'
         call abor1_ftn(message)
       end if
 
       ! sensor azimuth - convention is 0-360 deg. E=+90
-      variable_present = obsspace_has(obss, "MetaData", "sensor_azimuth_angle")
+      variable_present = obsspace_has(obss, "MetaData", "sensorAzimuthAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", profiles(1:nprofiles)%azangle)
+        call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", profiles(1:nprofiles)%azangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/sensor_azimuth_angle not in database: setting to zero for RTTOV'
+        write(message,'(A)') 'Warning: Optional input MetaData/sensorAzimuthAngle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%azangle = zero
       end if
 
       ! solar zenith
-      variable_present = obsspace_has(obss, "MetaData", "solar_zenith_angle")
+      variable_present = obsspace_has(obss, "MetaData", "solarZenithAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", profiles(1:nprofiles)%sunzenangle)
+        call obsspace_get_db(obss, "MetaData", "solarZenithAngle", profiles(1:nprofiles)%sunzenangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/solar_zenith_angle not in database: setting to zero'
+        write(message,'(A)') 'Warning: Optional input MetaData/solarZenithAngle not in database: setting to zero'
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunzenangle = zero
       end if
 
       ! solar azimuth
-      variable_present = obsspace_has(obss, "MetaData", "solar_azimuth_angle")
+      variable_present = obsspace_has(obss, "MetaData", "solarAzimuthAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", profiles(1:nprofiles)%sunazangle)
+        call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle", profiles(1:nprofiles)%sunazangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/solar_azimuth_angle not in database: setting to zero for RTTOV'
+        write(message,'(A)') 'Warning: Optional input MetaData/solarAzimuthAngle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunazangle = zero
       end if
@@ -1478,7 +1471,7 @@ contains
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", var_surf_type_rttov, profiles(1:nlocs_total)%skin%surftype)
       else
-        write(message,'(A)') 'ERROR: Mandatory input MetaData/surface_type not in database. Aborting...'
+        write(message,'(A)') 'ERROR: Mandatory input MetaData/surfaceQualifier not in database. Aborting...'
         call abor1_ftn(message)
       end if
     end if
@@ -2511,11 +2504,11 @@ contains
   character(len=200)              :: var, message
   integer                         :: ichan
 
-  variable_present = obsspace_has(obss, surface_emissivity_group, "surface_emissivity")
+  variable_present = obsspace_has(obss, trim(surface_emissivity_group), trim("emissivity"))
   if (variable_present) then
     do ichan = 1, size(channels)
       ! Read in from the db
-      write(var,"(A19,I0)") "surface_emissivity_", channels(ichan)
+      write(var,"(A11,I0)") "emissivity_", channels(ichan)
       call obsspace_get_db(obss, trim(surface_emissivity_group), trim(var), sfc_emiss(ichan,:))
     end do
   else

@@ -3,7 +3,7 @@ Horizontal mesh 20000:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -24,7 +24,7 @@ Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -45,7 +45,7 @@ Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -66,7 +66,7 @@ Horizontal mesh 20000, extreme latitudes:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -87,7 +87,7 @@ Horizontal mesh 10000:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -109,7 +109,7 @@ Vertical mesh, single bin:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -134,7 +134,7 @@ Vertical mesh, two bins:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -159,7 +159,7 @@ Vertical mesh, two bins, all observations in single bin:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -184,7 +184,7 @@ Thinning in time, single bin:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -210,7 +210,7 @@ Thinning in time, two bins:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -236,7 +236,7 @@ Thinning in time, two bins, all observations in single bin:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -261,7 +261,7 @@ Vertical mesh, two bins, single category:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -280,7 +280,7 @@ Vertical mesh, two bins, single category:
     vertical_min: 1
     vertical_max: 5
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     distance_norm: maximum
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
@@ -289,7 +289,7 @@ Vertical mesh, two bins, two categories:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -308,7 +308,7 @@ Vertical mesh, two bins, two categories:
     vertical_min: 1
     vertical_max: 5
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     distance_norm: maximum
   expected_thinned_obs_indices: [1, 3, 5, 7]
 
@@ -317,7 +317,7 @@ Vertical mesh, two bins, two categories, where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -336,11 +336,11 @@ Vertical mesh, two bins, two categories, where clause:
     vertical_min: 1
     vertical_max: 5
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     distance_norm: maximum
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0
   expected_thinned_obs_indices: [1, 3]
 
@@ -349,7 +349,7 @@ Vertical mesh, two bins, two string-valued categories, where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -368,11 +368,11 @@ Vertical mesh, two bins, two string-valued categories, where clause:
     vertical_min: 1
     vertical_max: 5
     category_variable:
-      name: string_category@MetaData
+      name: MetaData/string_category
     distance_norm: maximum
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0
   expected_thinned_obs_indices: [1, 3]
 
@@ -381,7 +381,7 @@ Vertical mesh, two bins, equal priorities:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -400,7 +400,7 @@ Vertical mesh, two bins, equal priorities:
     vertical_min: 1
     vertical_max: 5
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     distance_norm: maximum
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
@@ -409,7 +409,7 @@ Vertical mesh, two bins, nonequal priorities:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -428,7 +428,7 @@ Vertical mesh, two bins, nonequal priorities:
     vertical_min: 1
     vertical_max: 5
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     distance_norm: maximum
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 7]
 
@@ -437,7 +437,7 @@ Vertical mesh, single bin, nonequal priorities, where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -456,11 +456,11 @@ Vertical mesh, single bin, nonequal priorities, where clause:
     vertical_min: 3
     vertical_max: 5
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     distance_norm: maximum
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0
   expected_thinned_obs_indices: [1, 3, 6]
 
@@ -469,7 +469,7 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -492,13 +492,13 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
     vertical_min: 3
     vertical_max: 5
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     distance_norm: maximum
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0
   expected_thinned_obs_indices: [1, 3, 6, 9, 12, 14]
 
@@ -507,7 +507,7 @@ ops_compatibility_mode but round_horizontal_bin_count_to_nearest = false:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -528,7 +528,7 @@ ops_compatibility_mode but distance_norm = geodesic:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -549,7 +549,7 @@ Thinning in time, obs in single bin, records are single obs:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -571,7 +571,7 @@ Thinning in time, obs in single bin, records are single obs:
     time_max: '2010-01-01T00:06:00Z'
     time_mesh: 'PT1M'
     priority_variable:
-      name: priority@MetaData
+      name: MetaData/priority
     records_are_single_obs: true
     distance_norm: maximum
   expected_thinned_obs_indices: [4, 5, 6]
@@ -581,7 +581,7 @@ Thinning in time, obs in single bin, records are single obs, no priority:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -610,7 +610,7 @@ Thinning in time, obs in single bin, records are single obs, category variable s
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -636,7 +636,7 @@ Thinning in time, obs in single bin, records are single obs, category variable s
     records_are_single_obs: true
     distance_norm: maximum
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
   expected_thinned_obs_indices: [0, 1, 6, 7]
 
 Thinning in time, obs in single bin, records are single obs, four categories per record:
@@ -644,7 +644,7 @@ Thinning in time, obs in single bin, records are single obs, four categories per
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -670,5 +670,5 @@ Thinning in time, obs in single bin, records are single obs, four categories per
     records_are_single_obs: true
     distance_norm: maximum
     category_variable:
-      name: category@MetaData
+      name: MetaData/category
   expect_exception_with_message_during_operation: Cannot have multiple categories per record

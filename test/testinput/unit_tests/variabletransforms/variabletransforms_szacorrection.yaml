@@ -8,14 +8,14 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/szacorrection_unit_transforms_2021011500.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-20
   obs filters:
 ##  Apply variable transform
   - filter: Variable Transforms
     Transform: SatZenithAngleCorrection
     transform variable:
-      name: surface_emissivity@DerivedObsValue
+      name: DerivedObsValue/emissivity
       channels: *all_channels
     ## Test coeffs
     coefficient a: [-3.60E-03, -2.38E-03, -2.58E-03, -2.58E-03, -1.56E-03, -1.49E-03, -1.76E-03, -1.83E-03, -1.58E-03, -1.62E-03,
@@ -31,7 +31,7 @@ observations:
     maximum value: 1.0
   compareVariables: # test output matches precalculated values
     - reference:
-        name: surface_emissivity@TestReference
+        name: TestReference/emissivity
       test:
-        name: surface_emissivity@DerivedObsValue
+        name: DerivedObsValue/emissivity
       absTol: 1.0e-7

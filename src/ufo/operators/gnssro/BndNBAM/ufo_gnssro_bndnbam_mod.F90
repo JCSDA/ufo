@@ -201,10 +201,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(nlocs_end(nrecs))
 
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
-  call obsspace_get_db(obss, "ObsValue", "bending_angle", obsValue)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
+  call obsspace_get_db(obss, "ObsValue", "bendingAngle", obsValue)
   call obsspace_get_recnum(obss, obsRecnum)
 
   nlocs_begin=1
@@ -405,9 +405,9 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 ! putting virtual temeprature at obs location to obs space for BackgroundCheck RONBAM
   call obsspace_put_db(obss, "MetaData", "virtual_temperature", temperature)
 ! putting super refraction flag to obs space 
-  call obsspace_put_db(obss, "SRflag",   "bending_angle", super_refraction_flag)
+  call obsspace_put_db(obss, "ObsDiag",   "superRefractionFlag", super_refraction_flag)
 ! saving obs vertical model layer postion for later
-  call obsspace_put_db(obss, "LayerIdx",   "bending_angle", LayerIdx)
+  call obsspace_put_db(obss, "ObsDiag",   "modelLayerIndex", LayerIdx)
   if (trim(self%roconf%output_diags) .eq. "true") then
       call obsspace_put_db(obss, "ObsDiag", "specific_humidity", humidity)
       call obsspace_put_db(obss, "ObsDiag", "refractivity", refractivity)

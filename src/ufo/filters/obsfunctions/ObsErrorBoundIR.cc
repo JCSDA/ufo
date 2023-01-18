@@ -48,9 +48,9 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   const std::string &flaggrp = options_.testQCflag.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@ObsError", channels_);
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -86,9 +86,9 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   const float missing = util::missingValue(missing);
   float varinv = 0.0;
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
+    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;

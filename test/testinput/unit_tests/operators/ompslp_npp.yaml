@@ -4,6 +4,7 @@ window end: 2019-10-17T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: "air_pressure"
   obs space:
     name: OzoneLevel
@@ -15,7 +16,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ompslp_npp_obs_2019101700_m_opr_out.nc4
-    simulated variables: [mole_fraction_of_ozone_in_air]
+    simulated variables: [ozoneProfile]
   geovals:
     filename: Data/ufo/testinput_tier_1/ompslp_npp_geoval_2019101700_m.nc4
   vector ref: GsiHofX

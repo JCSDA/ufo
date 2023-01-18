@@ -20,7 +20,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 7-9, 11-13 
 #   obsdataout:
 #     engine:
@@ -32,17 +32,17 @@ observations:
   # Equivalent to OPS Im36HCloud = T, OminBCloud_36H = 4.3
   - filter: Difference Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 7-9,11-13
-    reference: brightness_temperature_11@ObsValue
-    value: brightness_temperature_11@HofX
+    reference: ObsValue/brightnessTemperature_11
+    value: HofX/brightnessTemperature_11
     threshold: 4.3
     action:
       name: reject
   # Equivalent to OPS ImCloudAnomaly = T, ImCloudThresh = 5
   - filter: Bounds Check
     test variables:
-    - name: BgdDepartureAnomaly@ObsFunction
+    - name: ObsFunction/BgdDepartureAnomaly
       options:
         channel_low_freq: 11 
         channel_high_freq: 13

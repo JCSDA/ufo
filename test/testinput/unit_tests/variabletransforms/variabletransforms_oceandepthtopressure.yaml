@@ -8,24 +8,24 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/ocean_depthtopressure_out.nc4
-    simulated variables: [ocean_pressure]
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: Data/ocean_depthtopressure_out.nc4
+    simulated variables: [waterPressure]
     observed variables: []
-    derived variables: [ocean_pressure]
+    derived variables: [waterPressure]
   obs filters:
   - filter: Variable Transforms
     where:
     - variable:
-        name: MetaData/ocean_depth
+        name: MetaData/depthBelowWaterSurface
       is_defined:
     Transform: OceanDepthToPressure
-    # ocean depth variable: MetaData/ocean_depth
+    # ocean depth variable: MetaData/depthBelowWaterSurface
   compareVariables:
     - reference:
-        name: TestReference/ocean_pressure
+        name: TestReference/waterPressure
       test:
-        name: DerivedObsValue/ocean_pressure
+        name: DerivedObsValue/waterPressure
       relTol: 2.0e-5

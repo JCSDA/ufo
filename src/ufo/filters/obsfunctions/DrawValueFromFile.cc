@@ -281,13 +281,11 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
   // options, or leave it up to useChannelList variables?
   bool extract_channels = channels_.size() > 0;
   for (auto const & useChannel : useChannelList_) {
-    if (useChannel.second) {
+    if (useChannel.second)
       extract_channels = false;
-      break;
-    }
   }
   if (extract_channels)
-    interpolator.scheduleSort("MetaData/channel_number", InterpMethod::EXACT,
+    interpolator.scheduleSort("MetaData/sensorChannelNumber", InterpMethod::EXACT,
                               ExtrapolationMode::ERROR, EquidistantChoice::FIRST,
                               CoordinateTransformation::NONE);
 

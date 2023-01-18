@@ -13,10 +13,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_relativehumidity_obs_extended.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, relative_humidity]
+    simulated variables: [airTemperature, relativeHumidity]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -28,8 +28,8 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
-    - name: relative_humidity
+    - name: airTemperature
+    - name: relativeHumidity
     Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
     compareWithOPS: false
     flagBasicChecksFail: true

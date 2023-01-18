@@ -152,7 +152,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   
 ! Get the meta-data from the observations
   allocate(obs_height(self%nlocs))
-  call obsspace_get_db(obss, "MetaData", "obs_height", obs_height)
+  call obsspace_get_db(obss, "MetaData", "height", obs_height)
   allocate(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix

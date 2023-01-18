@@ -43,7 +43,7 @@ namespace ufo {
     // Check the ObsSpace has been extended. If this is not the case
     // then it will not be possible to access profiles in the original and
     // extended sections of the ObsSpace.
-    if (!odb_.has("MetaData", "extended_obs_space"))
+    if (!odb_.has("MetaData", "extendedObsSpace"))
       throw eckit::UserError("The extended obs space has not been produced", Here());
 
     // Add model air pressure to the list of variables used in this operator.
@@ -115,14 +115,14 @@ namespace ufo {
   }
 
   void ObsProfileAverageData::setUpAuxiliaryReferenceVariables() {
-    if (!(odb_.has("MetOfficeHofX", "slant_path_location") &&
-          odb_.has("MetOfficeHofX", "slant_pressure")))
+    if (!(odb_.has("MetOfficeHofX", "slantPathLocation") &&
+          odb_.has("MetOfficeHofX", "slantPressure")))
       throw eckit::UserError("At least one reference variable is not present", Here());
     // Get reference values of the slant path locations and pressures.
     slant_path_location_ref_.resize(odb_.nlocs());
     slant_pressure_ref_.resize(odb_.nlocs());
-    odb_.get_db("MetOfficeHofX", "slant_path_location", slant_path_location_ref_);
-    odb_.get_db("MetOfficeHofX", "slant_pressure", slant_pressure_ref_);
+    odb_.get_db("MetOfficeHofX", "slantPathLocation", slant_path_location_ref_);
+    odb_.get_db("MetOfficeHofX", "slantPressure", slant_pressure_ref_);
   }
 
   void ObsProfileAverageData::compareAuxiliaryReferenceVariables
@@ -138,7 +138,7 @@ namespace ufo {
     std::stringstream errmsg;
     for (std::size_t mlev = 0; mlev < locsExtended.size(); ++mlev) {
       if (slant_path_location[mlev] != slant_path_location_ref_profile[mlev]) {
-        errmsg << "Mismatch for slant_path_location, level = " << mlev
+        errmsg << "Mismatch for slantPathLocation, level = " << mlev
                << " (this code, OPS): "
                << slant_path_location[mlev] << ", "
                << slant_path_location_ref_profile[mlev];
@@ -147,7 +147,7 @@ namespace ufo {
       if (!oops::is_close_relative(slant_pressure[mlev],
                                    slant_pressure_ref_profile[mlev],
                                    1e-5f)) {
-        errmsg << "Mismatch for slant_pressure, level = " << mlev
+        errmsg << "Mismatch for slantPressure, level = " << mlev
                << " (this code, OPS): "
                << slant_pressure[mlev] << ", "
                << slant_pressure_ref_profile[mlev];

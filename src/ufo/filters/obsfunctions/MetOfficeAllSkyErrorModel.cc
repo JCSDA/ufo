@@ -45,13 +45,13 @@ MetOfficeAllSkyErrorModel::MetOfficeAllSkyErrorModel(const eckit::LocalConfigura
   ASSERT(channels_.size() > 0);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("LWP@OneDVar");
-  invars_ += Variable("IWP@OneDVar");
-  invars_ += Variable("transmittance@OneDVar", channels_);
-  invars_ += Variable("surface_type@MetaData");
-  invars_ += Variable("instrument_noise@MetaDataError", channels_);
-  invars_ += Variable("surface_emissivity_error@SurfEmiss", channels_);
-  invars_ += Variable("brightness_temperature@QCflagsData", channels_);
+  invars_ += Variable("OneDVar/liquidWaterPath");
+  invars_ += Variable("OneDVar/iceWaterPath");
+  invars_ += Variable("OneDVar/transmittance", channels_);
+  invars_ += Variable("MetaData/surfaceQualifier");
+  invars_ += Variable("MetaDataError/instrumentNoise", channels_);
+  invars_ += Variable("SurfEmiss/emissivityError", channels_);
+  invars_ += Variable("QCflagsData/brightnessTemperature", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -90,24 +90,24 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
   float const missing = util::missingValue(missing);
   const int missingValueInt = util::missingValue(missingValueInt);
 
-  if (in.has(Variable("LWP@OneDVar"))) {
-    in.get(Variable("LWP@OneDVar"), ob_lwp);
+  if (in.has(Variable("OneDVar/liquidWaterPath"))) {
+    in.get(Variable("OneDVar/liquidWaterPath"), ob_lwp);
   } else {
     std::fill(ob_lwp.begin(), ob_lwp.end(), missing);
   }
 
-  if (in.has(Variable("IWP@OneDVar"))) {
-    in.get(Variable("IWP@OneDVar"), ob_iwp);
+  if (in.has(Variable("OneDVar/iceWaterPath"))) {
+    in.get(Variable("OneDVar/iceWaterPath"), ob_iwp);
   } else {
     std::fill(ob_iwp.begin(), ob_iwp.end(), missing);
   }
 
-  if (in.has(Variable("surface_type@MetaData"))) {
-    in.get(Variable("surface_type@MetaData"), ob_surf_type);
+  if (in.has(Variable("MetaData/surfaceQualifier"))) {
+    in.get(Variable("MetaData/surfaceQualifier"), ob_surf_type);
   } else {
     std::fill(ob_surf_type.begin(), ob_surf_type.end(), missingValueInt);
     // surface type must be defined
-    throw eckit::UserError("surface_type@MetaData not found");
+    throw eckit::UserError("MetaData/surfaceQualifier not found");
   }
 
   std::vector<float> ob_instr_noise(nlocs);
@@ -120,37 +120,37 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
 
   for (size_t ich = 0; ich < nchans; ++ich) {
     // mandatory NEDT for all channels
-    if (in.has(Variable("instrument_noise@MetaDataError", channels_)[ich])) {
-      in.get(Variable("instrument_noise@MetaDataError", channels_)[ich], ob_instr_noise);
+    if (in.has(Variable("MetaDataError/instrumentNoise", channels_)[ich])) {
+      in.get(Variable("MetaDataError/instrumentNoise", channels_)[ich], ob_instr_noise);
     } else {
-      throw eckit::UserError("instrument_noise@MetaDataError not found");
+      throw eckit::UserError("MetaDataError/instrumentNoise not found");
     }
 
     // transmittance
-    if (in.has(Variable("transmittance@OneDVar", channels_)[ich]) &&
+    if (in.has(Variable("OneDVar/transmittance", channels_)[ich]) &&
       (options_.taulinsea.value() != boost::none || options_.taulinice.value() != boost::none ||
        options_.taulinland.value() != boost::none || options_.tausqsea.value() != boost::none ||
        options_.tausqice.value() != boost::none || options_.tausqland.value() != boost::none) ) {
-      in.get(Variable("transmittance@OneDVar", channels_)[ich], tausurf);
+      in.get(Variable("OneDVar/transmittance", channels_)[ich], tausurf);
       oops::Log::debug() << "Transmittance: " << tausurf << std::endl;
     } else {
       std::fill(tausurf.begin(), tausurf.end(), missing);
-      oops::Log::warning() << "transmittance@OneDVar not found or not needed" << std::endl;
+      oops::Log::warning() << "OneDVar/transmittance not found or not needed" << std::endl;
     }
 
     // surface MW emissivity error
-    if (in.has(Variable("surface_emissivity_error@SurfEmiss", channels_)[ich]) &&
+    if (in.has(Variable("SurfEmiss/emissivityError", channels_)[ich]) &&
         (options_.taulinland.value() != boost::none
          || options_.tausqland.value() != boost::none) ) {
-      in.get(Variable("surface_emissivity_error@SurfEmiss", channels_)[ich], surf_emiss_error);
+      in.get(Variable("SurfEmiss/emissivityError", channels_)[ich], surf_emiss_error);
     } else {
       std::fill(surf_emiss_error.begin(), surf_emiss_error.end(), 0.0f);
-      oops::Log::warning() << "surface_emissivity_error@SurfEmiss not found or not needed"
+      oops::Log::warning() << "SurfEmiss/emissivityError not found or not needed"
                            << std::endl;
     }
 
-    if (in.has(Variable("brightness_temperature@QCflagsData", channels_)[ich])) {
-      in.get(Variable("brightness_temperature@QCflagsData", channels_)[ich], flagsQC);
+    if (in.has(Variable("QCflagsData/brightnessTemperature", channels_)[ich])) {
+      in.get(Variable("QCflagsData/brightnessTemperature", channels_)[ich], flagsQC);
     } else {
       std::fill(flagsQC.begin(), flagsQC.end(), missingValueInt);
     }
@@ -170,7 +170,7 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
         if (ob_instr_noise[iloc] != missing) {
           out[ich][iloc] += ob_instr_noise[iloc]*ob_instr_noise[iloc];
         } else {
-          throw eckit::BadValue("instrument_noise@MetaDataError has invalid value");
+          throw eckit::BadValue("MetaDataError/instrumentNoise has invalid value");
         }
 
         // over sea
@@ -235,8 +235,8 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
             *predictor*predictor*tausqland[ich]*VarErrorScaling;
         }
 
-        // 1D-Var LWP and IWP. Note both of these two predictor must be available
-        // or prescribed max values for each of them are used instead.
+        // 1D-Var liquidWaterPath and iceWaterPath. Note both of these two predictors
+        // must be available or prescribed max values for each of them are used instead.
         if (options_.lwpcoef.value() != boost::none && options_.iwpcoef.value() != boost::none
             && lwpcoef[ich] > 0.0f && iwpcoef[ich] > 0.0f) {
           if (ob_lwp[iloc] != missing &&  ob_iwp[iloc] != missing) {

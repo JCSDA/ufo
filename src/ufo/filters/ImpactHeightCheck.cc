@@ -35,10 +35,10 @@ ImpactHeightCheck::ImpactHeightCheck(
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ImpactHeightCheck constructor" << std::endl;
-  allvars_ += Variable("ObsDiag/refractivity");
-  allvars_ += Variable("ObsDiag/model_heights");
-  allvars_ += Variable("MetaData/impact_parameter");
-  allvars_ += Variable("MetaData/earth_radius_of_curvature");
+  allvars_ += Variable("ObsDiag/atmosphericRefractivity_model");
+  allvars_ += Variable("ObsDiag/geopotentialHeight_model");
+  allvars_ += Variable("MetaData/impactParameterRO");
+  allvars_ += Variable("MetaData/earthRadiusCurvature");
 
   // It is essential for observations to be grouped according to (e.g.) profile number
   // (unless there is only one profile in the sample, which would be very unusual).
@@ -77,7 +77,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
 
   // Get the refractivity from the obs diagnostics, including the number of
   // vertical levels on which the refractivity has been calculated (nRefLevels)
-  Variable refractivityVariable = Variable("ObsDiag/refractivity");
+  Variable refractivityVariable = Variable("ObsDiag/atmosphericRefractivity_model");
   oops::Log::debug() << data_.nlevs(refractivityVariable) << std::endl;
   const size_t nRefLevels = data_.nlevs(refractivityVariable);
   std::vector<std::vector<float>> refractivity;
@@ -98,7 +98,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
 
   // Get the height of the levels on which the refractivity has been calculated.
   // Must be the same length as the array defining the refractivity.
-  Variable modelHeightsVariable = Variable("ObsDiag/model_heights");
+  Variable modelHeightsVariable = Variable("ObsDiag/geopotentialHeight_model");
   oops::Log::debug() << data_.nlevs(modelHeightsVariable) << std::endl;
   if (data_.nlevs(modelHeightsVariable) != nRefLevels) {
     throw eckit::BadValue("Model heights and refractivity must have the same number of levels",
@@ -124,7 +124,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   // Read in the observation impact parameter for each observation and level
   std::vector<std::vector<float>> impactParameter;
   for (size_t ichan=1; ichan <= nchans; ++ichan) {
-      const Variable impactVariable = Variable("MetaData/impact_parameter_" +
+      const Variable impactVariable = Variable("MetaData/impactParameterRO_" +
                                                std::to_string(ichan));
       std::vector<float> tempVar;
       data_.get(impactVariable, tempVar);
@@ -137,7 +137,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << std::endl;
 
   // Read in the earth's radius of curvature for each observation
-  Variable radiusCurvatureParameter = Variable("MetaData/earth_radius_of_curvature");
+  Variable radiusCurvatureParameter = Variable("MetaData/earthRadiusCurvature");
   std::vector<float> radiusCurvature;
   data_.get(radiusCurvatureParameter, radiusCurvature);
 

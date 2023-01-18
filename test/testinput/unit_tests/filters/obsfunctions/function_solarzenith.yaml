@@ -8,9 +8,9 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/solar_zenith.nc4
-    simulated variables: [air_temperature, surface_pressure]
+    simulated variables: [airTemperature, stationPressure]
   obs function: &ObsFunction
-    name: SolarZenith@ObsFunction
+    name: ObsFunction/SolarZenith
     variables: [zenith]
     tolerance: 1.0e-7
     expect missing value locations to match: true

@@ -8,8 +8,8 @@ obs space:
       type: H5File
       allow overwrite: true
   _source: nasa
-  simulated variables: [carbon_monoxide_in_total_column]
-  observed variables: [carbon_monoxide_in_total_column]
+  simulated variables: [carbonmonoxideTotal]
+  observed variables: [carbonmonoxideTotal]
 obs operator:
   name: ColumnRetrieval
   nlayers_retrieval: 10
