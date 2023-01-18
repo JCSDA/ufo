@@ -52,13 +52,8 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: coord_group
   character(kind=c_char,len=:), allocatable :: interp_method
-  integer :: ivar, nvars
+  integer :: ivar
 
-  !> Fill in variables requested from the model
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
   !> grab what vertical coordinate/variable to use from the config
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name

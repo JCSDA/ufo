@@ -101,9 +101,9 @@ void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &con
   ioda::ObsSpace obsSpace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   boost::optional<std::vector<float>> airPressures;
-  if (obsSpace.has("MetaData", "air_pressure")) {
+  if (obsSpace.has("MetaData", "pressure")) {
     airPressures = std::vector<float>(obsSpace.nlocs());
-    obsSpace.get_db("MetaData", "air_pressure", *airPressures);
+    obsSpace.get_db("MetaData", "pressure", *airPressures);
   }
 
   std::vector<float> latitudes(obsSpace.nlocs());

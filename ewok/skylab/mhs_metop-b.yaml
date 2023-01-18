@@ -1,0 +1,63 @@
+obs space:
+  name: mhs_metop-b
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      allow overwrite: true
+  io pool:
+    write multiple files: true
+  _source: noaa
+  simulated variables: [brightnessTemperature]
+  channels: &mhs_metop-b_channels 1-5
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3] #,CO2]
+  obs options:
+    Sensor_ID: &Sensor_ID mhs_metop-b
+    EndianType: little_endian
+obs bias:
+  variational bc:
+    predictors:
+    - name: constant
+    - name: lapse_rate
+      order: 2
+    - name: lapse_rate
+    - name: emissivity
+    - name: scan_angle
+      order: 4
+    - name: scan_angle
+      order: 3
+    - name: scan_angle
+      order: 2
+    - name: scan_angle
+  covariance:
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.0]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0
+    prior:
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+obs filters:
+- filter: Background Check
+  threshold: 3
+# Useflag check
+- filter: Bounds Check
+  filter variables:
+  - name: brightnessTemperature
+    channels: *mhs_metop-b_channels
+  test variables:
+  - name: ObsFunction/ChannelUseflagCheckRad
+    channels: *mhs_metop-b_channels
+    options:
+      channels: *mhs_metop-b_channels
+      use_flag: [1, 1, 1, 1, 1]
+  minvalue: 1.0e-12
+  action:
+    name: reject
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

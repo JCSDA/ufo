@@ -12,15 +12,15 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ssmis_f17_20210521T1200Z_obfn_ref_setsfctype_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &channels 1-24
   geovals:
     filename:
       Data/ufo/testinput_tier_1/geovals_ssmis_f17_20210521T1200Z_obfn_ref.nc4
   obs function:
-    name: SetSurfaceType@ObsFunction
+    name: ObsFunction/SetSurfaceType
     options:
       UseReportSurface: true
-      SurfaceReport Name: surface_flag@MetaData    
-    variables: [surface_type]
+      SurfaceReport Name: MetaData/surface_flag
+    variables: [surfaceQualifier]
     tolerance: 1.0e-7

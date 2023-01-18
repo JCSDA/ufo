@@ -10,7 +10,9 @@
 #include "eckit/exception/Exceptions.h"
 #include "ioda/Misc/StringFuncs.h"  // for convertV1PathToV2Path
 #include "ioda/ObsDataVector.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/DrawValueFromFile.h"
 
@@ -21,7 +23,10 @@ namespace {
 // -----------------------------------------------------------------------------
 typedef std::vector<std::pair<std::string, boost::variant<std::vector<int>,
                                                           std::vector<float>,
-                                                          std::vector<std::string>>
+                                                          std::vector<std::string>,
+                                                          std::vector<std::vector<int>>,
+                                                          std::vector<std::vector<float>>,
+                                                          std::vector<std::vector<std::string>>>
                    >> ObData;
 
 
@@ -38,6 +43,13 @@ class PrintVisitor : public boost::static_visitor<void> {
     os_ << obData[iloc_];
   }
 
+  template <typename T>
+  void operator()(const std::vector<std::vector<T>> &obData) {
+    for (size_t i=0; i < obData[iloc_].size(); ++i) {
+      os_ << obData[iloc_][i] << "  ";
+    }
+  }
+
  private:
   std::ostream &os_;
   size_t iloc_;
@@ -50,6 +62,28 @@ template <typename T>
 void updateObData(const ObsFilterData &in, const Variable &var, ObData &obData) {
   std::vector<T> dat;
   in.get(var, dat);
+  obData.emplace_back(var.fullName(), std::move(dat));
+}
+
+// -----------------------------------------------------------------------------
+/// \brief This is a convenience function for updating our container for useful
+/// data, given as an input vector
+template <typename T>
+void updateObData(const Variable &var, const std::vector<T> &dat, ObData &obData) {
+  obData.emplace_back(var.fullName(), std::move(dat));
+}
+
+// -----------------------------------------------------------------------------
+/// \brief This is a convenience function for updating our container for useful observation data
+template <typename T>
+void updateObData(const ObsFilterData &in, const Variable &var, ObData &obData,
+                  const std::vector<int> &channels) {
+  std::vector<std::vector<T>> dat;
+  for (size_t ichan=0; ichan < channels.size(); ++ichan) {
+    std::vector<T> temp;
+    in.get(Variable(var.fullName(), channels)[ichan], temp);
+    dat.push_back(temp);
+  }
   obData.emplace_back(var.fullName(), std::move(dat));
 }
 
@@ -87,6 +121,11 @@ constexpr util::NamedEnumerator<EquidistantChoice>
   EquidistantChoiceParameterTraitsHelper::namedValues[];
 
 // -----------------------------------------------------------------------------
+constexpr char CoordinateTransformationParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<CoordinateTransformation>
+  CoordinateTransformationParameterTraitsHelper::namedValues[];
+
+// -----------------------------------------------------------------------------
 static ObsFunctionMaker<DrawValueFromFile<float>> floatMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<int>> intMaker("DrawValueFromFile");
 static ObsFunctionMaker<DrawValueFromFile<std::string>> stringMaker("DrawValueFromFile");
@@ -102,35 +141,71 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
     std::vector<eckit::LocalConfiguration> interpSubConfs;
     const std::vector<InterpolationParameters> &interpolationParameters =
       options_.interpolation.value();
+
     int nlin = 0;
+    int nbilin = 0;
+    int ntrilin = 0;
+    int nlintotal = 0;
     for (auto intParam = interpolationParameters.begin();
          intParam != interpolationParameters.end(); ++intParam) {
       const ufo::InterpMethod & method = intParam->method.value();
-      if (method == InterpMethod::BILINEAR) {
+      if (method == InterpMethod::TRILINEAR) {
+        ntrilin++;
+        nlintotal++;
+      } else if (method == InterpMethod::BILINEAR) {
+        nbilin++;
+        nlintotal++;
+      } else if (method == InterpMethod::LINEAR) {
         nlin++;
-      } else if (nlin > 0) {
+        nlintotal++;
+      } else if (ntrilin > 0) {
+        // if trilinear interpolation has been used at least once
+        // but the current option is not trilinear interpolation
+        throw eckit::UserError("Trilinear interpolation can only be supplied as the final three "
+                               "arguments.", Here());
+      } else if (nbilin > 0) {
+        // if bilinear interpolation has been used at least once
+        // but the current option is not bilinear interpolation
         throw eckit::UserError("Bilinear interpolation can only be supplied as the final two "
                                "arguments.", Here());
-      } else if ((method == InterpMethod::LINEAR) &&
-                 (intParam + 1 != interpolationParameters.end())) {
+      } else if (nlin > 0) {
+        // if linear interpolation has been used at least once
+        // but the current option is not linear interpolation
         throw eckit::UserError("Linear interpolation can only be supplied as the very last "
                                "argument.", Here());
       }
+      // if more than one interpolation option has been used
+      if ((ntrilin > 0 && ntrilin != nlintotal) ||
+          (nbilin > 0 && nbilin != nlintotal) ||
+          (nlin > 0 && nlin != nlintotal)) {
+        throw eckit::UserError("Cannot use multiple interpolation methods.", Here());
+      }
+
       const std::string varName = ioda::convertV1PathToV2Path(intParam->name.value());
       interpSubConfs.push_back(intParam->toConfiguration());
       interpMethod_[varName] = method;
       extrapMode_[varName] = intParam->extrapMode.value();
       equidistantChoice_[varName] = intParam->equidistanceChoice.value();
+      useChannelList_[varName] = intParam->useChannelList.value();
+      coordinateTransformation_[varName] = intParam->coordinateTransformation.value();
     }
-    if (nlin > 0 && nlin != 2) {
+    // if linear interpolation has been configured incorrectly
+    if (nlin > 0 && nlin != 1) {
+      throw eckit::UserError("Linear interpolation requires one variable.", Here());
+    }
+    // if bilinear interpolation has been configured incorrectly
+    if (nbilin > 0 && nbilin != 2) {
       throw eckit::UserError("Bilinear interpolation requires two variables.", Here());
     }
-    // Get channels from options
-    if (options_.chlist.value() != boost::none) {
-        std::set<int> channels = options_.chlist.value().get();
-        channels_ = {std::make_move_iterator(std::begin(channels)),
-                     std::make_move_iterator(std::end(channels))};
+    // if trilinear interpolation has been configured incorrectly
+    if (ntrilin > 0 && ntrilin != 3) {
+      throw eckit::UserError("Trilinear interpolation requires three variables.", Here());
     }
+
+    // Get channels from options
+    std::set<int> channelset = oops::parseIntSet(options_.chlist);
+    std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+
     fpath_ = options_.fpath.value();
     allvars_  = Variables(interpSubConfs);
 }
@@ -141,20 +216,58 @@ template <typename ExtractedValue>
 class ExtractVisitor : public boost::static_visitor<void> {
  public:
   ExtractVisitor(DataExtractor<ExtractedValue> &interpolator, size_t iloc) :
-    interpolator(interpolator), iloc(iloc) {}
+    interpolator(interpolator), iloc(iloc), ivar(0) {}
 
+  // Get the correct element for a vector
   template <typename T>
-  void operator()(const std::vector<T> &obDat) {
-    interpolator.extract(obDat[iloc]);
+  T getElement(const std::vector<T> &vec) {
+    return vec[iloc];
   }
 
+  // Get the correct element for a vector of vectors
+  template <typename T>
+  T getElement(const std::vector<std::vector<T>> &vec) {
+    return vec[ivar][iloc];
+  }
+
+  // Catch-all function for tri-linear interpolation
+  template <typename T>
+  float getFloatElement(const T &vec) {
+    throw eckit::UserError("Trilinear interpolation must be performed with float coordinates.",
+                           Here());
+  }
+
+  // Get the correct element for a float for use with trilinear interpolation
+  float getFloatElement(const std::vector<float> &vec) {
+    return getElement(vec);
+  }
+
+  // Get the correct element for a float for use with trilinear interpolation
+  float getFloatElement(const std::vector<std::vector<float>> &vec) {
+    return getElement(vec);
+  }
+
+  // Extract data for 1D extraction (nearest, linear interpolation etc.)
+  template <typename T>
+  void operator()(const T &obDat) {
+    interpolator.extract(getElement(obDat));
+  }
+
+  // Extract data for 2D extraction (bilinear interpolation)
   template <typename T, typename R>
-  void operator()(const std::vector<T> &obDat1, const std::vector<R> &obDat2) {
-    interpolator.extract(obDat1[iloc], obDat2[iloc]);
+  void operator()(const T &obDat1, const R &obDat2) {
+    interpolator.extract(getElement(obDat1), getElement(obDat2));
+  }
+
+  // Extract data for 3D extraction (trilinear interpolation)
+  template <typename T, typename R, typename U>
+  void operator()(const T &obDat1, const R &obDat2, const U &obDat3) {
+    interpolator.extract(getFloatElement(obDat1), getFloatElement(obDat2), getFloatElement(obDat3));
   }
 
   DataExtractor<ExtractedValue> &interpolator;
   size_t iloc;
+  int ivar;
 };
 
 
@@ -164,10 +277,19 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<T> & out) const {
   DataExtractor<T> interpolator{fpath_, options_.group};
 
-  // Channel number handling
-  if (options_.chlist.value() != boost::none)
-    interpolator.scheduleSort("channel_number@MetaData", InterpMethod::EXACT,
-                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST);
+  // Channel number handling - do we only process the channels specified in the
+  // options, or leave it up to useChannelList variables?
+  bool extract_channels = channels_.size() > 0;
+  for (auto const & useChannel : useChannelList_) {
+    if (useChannel.second) {
+      extract_channels = false;
+      break;
+    }
+  }
+  if (extract_channels)
+    interpolator.scheduleSort("MetaData/sensorChannelNumber", InterpMethod::EXACT,
+                              ExtrapolationMode::ERROR, EquidistantChoice::FIRST,
+                              CoordinateTransformation::NONE);
 
   ObData obData;
   for (size_t ind=0; ind < allvars_.size(); ind++) {
@@ -176,22 +298,42 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
 
     const std::string varName = allvars_[ind].fullName();
     interpolator.scheduleSort(varName, interpMethod_.at(varName), extrapMode_.at(varName),
-                              equidistantChoice_.at(varName));
-    switch (in.dtype(allvars_[ind])) {
-      case ioda::ObsDtype::Integer:
-        updateObData<int>(in, allvars_[ind], obData);
-        break;
-      case ioda::ObsDtype::String:
-        updateObData<std::string>(in, allvars_[ind], obData);
-        break;
-      case ioda::ObsDtype::Float:
-        updateObData<float>(in, allvars_[ind], obData);
-        break;
-      case ioda::ObsDtype::DateTime:
-        updateObDataDateTime(in, allvars_[ind], obData);
-        break;
-      default:
-        throw eckit::UserError("Data type not yet handled.", Here());
+                              equidistantChoice_.at(varName),
+                              coordinateTransformation_.at(varName));
+    if (useChannelList_.at(varName)) {
+      switch (in.dtype(allvars_[ind])) {
+        case ioda::ObsDtype::Integer:
+          updateObData<int>(in, allvars_[ind], obData, channels_);
+          break;
+        case ioda::ObsDtype::String:
+          updateObData<std::string>(in, allvars_[ind], obData, channels_);
+          break;
+        case ioda::ObsDtype::Float:
+          updateObData<float>(in, allvars_[ind], obData, channels_);
+          break;
+        case ioda::ObsDtype::DateTime:
+          updateObDataDateTime(in, allvars_[ind], obData);
+          break;
+        default:
+          throw eckit::UserError("Data type not yet handled.", Here());
+      }
+    } else {
+      switch (in.dtype(allvars_[ind])) {
+        case ioda::ObsDtype::Integer:
+          updateObData<int>(in, allvars_[ind], obData);
+          break;
+        case ioda::ObsDtype::String:
+          updateObData<std::string>(in, allvars_[ind], obData);
+          break;
+        case ioda::ObsDtype::Float:
+          updateObData<float>(in, allvars_[ind], obData);
+          break;
+        case ioda::ObsDtype::DateTime:
+          updateObDataDateTime(in, allvars_[ind], obData);
+          break;
+        default:
+          throw eckit::UserError("Data type not yet handled.", Here());
+      }
     }
   }
   // Finalise (apply) sort by calling with no arguments.
@@ -200,7 +342,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
   for (size_t jvar = 0; jvar < out.nvars(); ++jvar) {
     for (size_t iloc = 0; iloc < in.nlocs(); ++iloc) {
       try {
-        if (options_.chlist.value() != boost::none)
+        if (extract_channels)
           interpolator.extract(channels_[jvar]);
 
         // Perform any extraction methods.
@@ -209,7 +351,13 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
           // 'interpolationMethod' is a copy to avoid a MetOffice CRAY icpc compile failure.
           // See https://github.com/JCSDA-internal/ufo/pull/1419
           ufo::InterpMethod interpolationMethod = interpMethod_.at(obData[ind].first);
-          if ((interpolationMethod == InterpMethod::BILINEAR) && (ind == (obData.size()-2))) {
+          visitor.ivar = jvar;
+          if ((interpolationMethod == InterpMethod::TRILINEAR) && (ind == (obData.size()-3))) {
+            boost::apply_visitor(visitor,
+                                 obData[ind].second, obData[ind+1].second, obData[ind+2].second);
+            break;
+          } else if ((interpolationMethod == InterpMethod::BILINEAR) &&
+                     (ind == (obData.size()-2))) {
             boost::apply_visitor(visitor, obData[ind].second, obData[ind+1].second);
             break;
           } else {

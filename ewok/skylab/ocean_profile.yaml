@@ -14,18 +14,18 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: navy
-  simulated variables: [sea_water_temperature, sea_water_salinity]
+  simulated variables: [sea_waterTemperature, salinity]
 obs operator:
   name: Composite
   components:
   - name: InsituTemperature
     variables:
-    - name: sea_water_temperature
+    - name: sea_waterTemperature
   - name: MarineVertInterp
     variables:
-    - name: sea_water_salinity
+    - name: salinity
 obs error:
   covariance model: diagonal
 obs filters:
@@ -33,28 +33,28 @@ obs filters:
   # land check
   - filter: Domain Check
     where:
-    - variable: {name: sea_area_fraction@GeoVaLs}
+    - variable: {name: GeoVaLs/sea_area_fraction}
       minvalue: 0.5
 
   ## Filters for T:
   - filter: Bounds Check
-    filter variables: [{name: sea_water_temperature}]
+    filter variables: [{name: sea_waterTemperature}]
     minvalue: -2.0
     maxvalue: 36.0
 
   - filter: Background Check
-    filter variables: [{name: sea_water_temperature}]
+    filter variables: [{name: sea_waterTemperature}]
     threshold: 5.0
     absolute threshold: 5.0
 
   ## Filters for S:
   - filter: Bounds Check
-    filter variables: [{name: sea_water_salinity}]
+    filter variables: [{name: salinity}]
     minvalue: 1.0
     maxvalue: 40.0
 
   - filter: Background Check
-    filter variables: [{name: sea_water_salinity}]
+    filter variables: [{name: salinity}]
     threshold: 5.0
     absolute threshold: 5.0
 
@@ -62,7 +62,7 @@ obs filters:
   # If T was bad, remove S as well regardless
   - filter: RejectList
     where:
-    - variable: QCflagsData/sea_water_temperature
+    - variable: QCflagsData/sea_waterTemperature
       minvalue: 1
     defer to post: true
 

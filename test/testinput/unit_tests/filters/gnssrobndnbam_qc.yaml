@@ -17,33 +17,33 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_2018041500_3prof_qcfilter_generic_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     errmodel: NRL
   - filter: Background Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     threshold: 3
     where:
     - variable:
-        name:  earth_radius_of_curvature@MetaData
+        name:  MetaData/earthRadiusCurvature
       minvalue: 6250000.0
       maxvalue: 6450000.0
     - variable:
-        name:  geoid_height_above_reference_ellipsoid@MetaData
+        name:  MetaData/geoidUndulation
       minvalue: -200.0
       maxvalue: 200.0
     - variable:
-        name:  latitude@MetaData
+        name:  MetaData/latitude
       minvalue: -90.0
       maxvalue: 90.0
     - variable:
-        name:  longitude@MetaData
+        name:  MetaData/longitude
       minvalue: -180.0
       maxvalue: 360.0
   passedBenchmark: 661
@@ -62,31 +62,31 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_bndnbam_2018041500_3prof_qcfilter_ronbam_out.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: Background Check RONBAM
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
   - filter: Domain Check
     filter variables:
-    - name: bending_angle
+    - name: bendingAngle
     where:
     - variable:
-        name:  earth_radius_of_curvature@MetaData
+        name:  MetaData/earthRadiusCurvature
       minvalue: 6250000.0
       maxvalue: 6450000.0
     - variable:
-        name:  geoid_height_above_reference_ellipsoid@MetaData
+        name:  MetaData/geoidUndulation
       minvalue: -200.0
       maxvalue: 200.0
     - variable:
-        name:  latitude@MetaData
+        name:  MetaData/latitude
       minvalue: -90.0
       maxvalue: 90.0
     - variable:
-        name:  longitude@MetaData
+        name:  MetaData/longitude
       minvalue: -180.0
       maxvalue: 360.0
   passedBenchmark: 663

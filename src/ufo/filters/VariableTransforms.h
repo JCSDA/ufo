@@ -40,7 +40,7 @@ namespace ufo {
 ///
 /// \par Important:
 /// Any new variable created is assigned to the observation space with the
-/// "@DerivedObsValue" tag.
+/// "DerivedObsValue/" tag.
 ///
 class VariableTransforms : public FilterBase,
                            private util::ObjectCounter<VariableTransforms> {

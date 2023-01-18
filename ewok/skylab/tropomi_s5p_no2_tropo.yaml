@@ -6,10 +6,10 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: esa
-  simulated variables: [nitrogen_dioxide_in_tropospheric_column]
-  observed variables: [nitrogen_dioxide_in_tropospheric_column]
+  simulated variables: [nitrogendioxideColumn]
+  observed variables: [nitrogendioxideColumn]
 obs operator:
   name: ColumnRetrieval
   nlayers_retrieval: 34

@@ -51,19 +51,19 @@ class InterpolateDataFromFileParameters : public PredictorParametersBase {
 /// name: interpolate_data_from_file
 /// options:
 ///   corrected variables:
-///   - name: air_temperature
+///   - name: airTemperature
 ///     file: Data/ufo/testinput_tier_1/air_temperature_bias.nc4
 ///     interpolation:
-///     - name: station_id@MetaData
+///     - name: MetaData/stationIdentification
 ///       method: exact
 /// \endcode
 ///
-/// and the `air_temperature_bias.nc4` file contains a 1D array `air_temperature@ObsBias` indexed
-/// by a `station_id@MetaData` coordinate. The DrawValueFromFile ObsFunction will then load this
-/// file and for each location produce the element of the `air_temperature@ObsBias` array
-/// corresponding to the element of the `station_id@MetaData` array matching the value of the
-/// `station_id@MetaData` ObsSpace variable at that location. This will also be the value produced
-/// by this predictor.
+/// and the `air_temperature_bias.nc4` file contains a 1D array `ObsBias/airTemperature` indexed
+/// by a `MetaData/stationIdentification` coordinate. The DrawValueFromFile ObsFunction will then
+/// load this file and for each location produce the element of the `ObsBias/airTemperature` array
+/// corresponding to the element of the `MetaData/stationIdentification` array matching the value
+/// of the `MetaData/stationIdentification` ObsSpace variable at that location. This will also be
+/// the value produced by this predictor.
 ///
 /// The predictor will produce zeros for all bias-corrected variables missing from the `corrected
 /// variables` list.

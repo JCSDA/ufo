@@ -138,7 +138,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   } else {
     group = "ObsBiasData";
   }
-  Variable obsbiasvar("brightness_temperature@"+group,
+  Variable obsbiasvar(group + "/brightnessTemperature",
                       obsdb_.obsvariables().channels());
   ioda::ObsDataVector<float> obsbias(obsdb_, obsbiasvar.toOopsVariables());
   data_.get(obsbiasvar, obsbias);

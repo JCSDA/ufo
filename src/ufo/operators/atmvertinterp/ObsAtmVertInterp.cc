@@ -27,12 +27,14 @@ static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
 
 ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
-  : ObsOperatorBase(odb), keyOperAtmVertInterp_(0),
-    odb_(odb), varin_()
+  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+    keyOperAtmVertInterp_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
+
+  varin_ += nameMap_.convertName(operatorVars_);
 
   ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),
                               operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),

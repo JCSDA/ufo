@@ -41,7 +41,7 @@ void testFirstRejectionSimultaneousIncluded(const eckit::LocalConfiguration &con
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");
-    obsspace.put_db("MetaData", "station_id", stationIds);
+    obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(

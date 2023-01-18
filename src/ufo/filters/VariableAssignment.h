@@ -108,42 +108,42 @@ class VariableAssignmentParameters : public oops::ObsFilterParametersBase {
 /// been assigned. Conversely, QC flags previously set to `pass` are reset to `missing` at
 /// locations where the obs value has been set to missing.
 ///
-/// Example 1: Create new variables `air_temperature@GrossErrorProbability` and
-/// `relative_humidity@GrossErrorProbability` and set them to 0.1 at all locations.
+/// Example 1: Create new variables `GrossErrorProbability/airTemperature` and
+/// `GrossErrorProbability/relativeHumidity` and set them to 0.1 at all locations.
 ///
 ///     filter: Variable Assignment
 ///     assignments:
-///     - name: air_temperature@GrossErrorProbability
+///     - name: GrossErrorProbability/airTemperature
 ///       type: float  # type must be specified if the variable doesn't already exist
 ///       value: 0.1
-///     - name: relative_humidity@GrossErrorProbability
+///     - name: GrossErrorProbability/relativeHumidity
 ///       type: float
 ///       value: 0.1
 ///
-/// Example 2: Set `air_temperature@GrossErrorProbability` to 0.05 at all locations in the tropics.
+/// Example 2: Set `GrossErrorProbability/airTemperature` to 0.05 at all locations in the tropics.
 ///
 ///     filter: Variable Assignment
 ///     where:
 ///     - variable:
-///         name: latitude@MetaData
+///         name: MetaData/latitude
 ///       minvalue: -30
 ///       maxvalue:  30
 ///     assignments:
-///     - name: air_temperature@GrossErrorProbability
+///     - name: GrossErrorProbability/airTemperature
 ///       value: 0.05
 ///
-/// Example 3: Set `relative_humidity@GrossErrorProbability` to values computed by an ObsFunction
+/// Example 3: Set `GrossErrorProbability/relativeHumidity` to values computed by an ObsFunction
 /// (0.1 in the southern extratropics and 0.05 in the northern extratropics, with a linear
 /// transition in between).
 ///
 ///     filter: Variable Assignment
 ///     assignments:
-///     - name: relative_humidity@GrossErrorProbability
+///     - name: GrossErrorProbability/relativeHumidity
 ///       function:
-///         name: ObsErrorModelRamp@ObsFunction
+///         name: ObsFunction/ObsErrorModelRamp
 ///         options:
 ///           xvar:
-///             name: latitude@MetaData
+///             name: MetaData/latitude
 ///           x0: [-30]
 ///           x1: [30]
 ///           err0: [0.1]

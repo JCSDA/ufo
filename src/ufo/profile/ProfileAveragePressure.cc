@@ -82,10 +82,10 @@ namespace ufo {
     if (options_.compareWithOPS.value()) {
       variableNamesFloat.insert
         (variableNamesFloat.end(),
-         {"OPS_" + std::string(ufo::VariableNames::modellevels_logP_rho_derived),
-             "OPS_" + std::string(ufo::VariableNames::modellevels_logP_derived),
-             "OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_rho_derived),
-             "OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_derived)});
+         {addOPSPrefix(ufo::VariableNames::modellevels_logP_rho_derived),
+             addOPSPrefix(ufo::VariableNames::modellevels_logP_derived),
+             addOPSPrefix(ufo::VariableNames::modellevels_ExnerP_rho_derived),
+             addOPSPrefix(ufo::VariableNames::modellevels_ExnerP_derived)});
       variableNamesGeoVaLs.insert
         (variableNamesGeoVaLs.end(),
          {ufo::VariableNames::geovals_testreference_logP_rho,
@@ -222,30 +222,30 @@ namespace ufo {
     // or averaged sections of the ObsSpace.
     if (extended_obs_space) {
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::modellevels_logP_rho_derived),
+        (addOPSPrefix(ufo::VariableNames::modellevels_logP_rho_derived),
          std::move(profile.getGeoVaLVector
                    (ufo::VariableNames::geovals_testreference_logP_rho)));
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::modellevels_logP_derived),
+        (addOPSPrefix(ufo::VariableNames::modellevels_logP_derived),
          std::move(profile.getGeoVaLVector
                    (ufo::VariableNames::geovals_testreference_logP)));
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_rho_derived),
+        (addOPSPrefix(ufo::VariableNames::modellevels_ExnerP_rho_derived),
          std::move(profile.getGeoVaLVector
                    (ufo::VariableNames::geovals_testreference_ExnerP_rho)));
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::modellevels_ExnerP_derived),
+        (addOPSPrefix(ufo::VariableNames::modellevels_ExnerP_derived),
          std::move(profile.getGeoVaLVector
                    (ufo::VariableNames::geovals_testreference_ExnerP)));
     } else {
       // Create a copy here because the vector will be used later in the routine.
       std::vector <float> logP = profile.get<float>(ufo::VariableNames::LogP_derived);
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::LogP_derived),
+        (addOPSPrefix(ufo::VariableNames::LogP_derived),
          std::move(logP));
       std::vector <float> bigPgaps = profile.get<float>(ufo::VariableNames::bigPgaps_derived);
       profile.set<float>
-        ("OPS_" + std::string(ufo::VariableNames::bigPgaps_derived),
+        (addOPSPrefix(ufo::VariableNames::bigPgaps_derived),
          std::move(bigPgaps));
     }
   }

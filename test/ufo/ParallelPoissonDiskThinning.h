@@ -99,7 +99,7 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   // Collect pressures from all processes
   std::vector<float> pressures(obsspace.nlocs());
-  obsspace.get_db("MetaData", "air_pressure", pressures);
+  obsspace.get_db("MetaData", "pressure", pressures);
   obsspace.distribution()->allGatherv(pressures);
 
   // Collect categories from all processes

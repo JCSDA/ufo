@@ -22,10 +22,10 @@ static ObsFunctionMaker<SunGlintAngle> makerSunGlintAngle_("SunGlintAngle");
 SunGlintAngle::SunGlintAngle(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Include list of required data from ObsSpace
-  invars_ += Variable("solar_zenith_angle@MetaData");
-  invars_ += Variable("solar_azimuth_angle@MetaData");
-  invars_ += Variable("sensor_zenith_angle@MetaData");
-  invars_ += Variable("sensor_azimuth_angle@MetaData");
+  invars_ += Variable("MetaData/solarZenithAngle");
+  invars_ += Variable("MetaData/solarAzimuthAngle");
+  invars_ += Variable("MetaData/sensorZenithAngle");
+  invars_ += Variable("MetaData/sensorAzimuthAngle");
 }
 
 // -----------------------------------------------------------------------------
@@ -44,10 +44,10 @@ void SunGlintAngle::compute(const ObsFilterData & in,
   std::vector<float> sun_zenith(nlocs), sun_azimuth(nlocs);
   std::vector<float> sat_zenith(nlocs), sat_azimuth(nlocs);
 
-  in.get(Variable("solar_zenith_angle@MetaData"), sun_zenith);
-  in.get(Variable("solar_azimuth_angle@MetaData"), sun_azimuth);
-  in.get(Variable("sensor_zenith_angle@MetaData"), sat_zenith);
-  in.get(Variable("sensor_azimuth_angle@MetaData"), sat_azimuth);
+  in.get(Variable("MetaData/solarZenithAngle"), sun_zenith);
+  in.get(Variable("MetaData/solarAzimuthAngle"), sun_azimuth);
+  in.get(Variable("MetaData/sensorZenithAngle"), sat_zenith);
+  in.get(Variable("MetaData/sensorAzimuthAngle"), sat_azimuth);
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     sun_zenith[iloc]  *= Constants::deg2rad;
     sun_azimuth[iloc] *= Constants::deg2rad;

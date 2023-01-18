@@ -16,7 +16,6 @@
 #include <utility>       // pair
 #include <vector>
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -42,7 +41,8 @@ struct InterpMethodParameterTraitsHelper {
     { InterpMethod::LEAST_UPPER_BOUND, "least upper bound" },
     { InterpMethod::GREATEST_LOWER_BOUND, "greatest lower bound" },
     { InterpMethod::LINEAR, "linear" },
-    { InterpMethod::BILINEAR, "bilinear" }
+    { InterpMethod::BILINEAR, "bilinear" },
+    { InterpMethod::TRILINEAR, "trilinear" }
   };
 };
 
@@ -65,6 +65,15 @@ struct EquidistantChoiceParameterTraitsHelper {
   };
 };
 
+struct CoordinateTransformationParameterTraitsHelper {
+  typedef CoordinateTransformation EnumType;
+  static constexpr char enumTypeName[] = "CoordinateTransformation";
+  static constexpr util::NamedEnumerator<CoordinateTransformation> namedValues[] = {
+    { CoordinateTransformation::NONE, "none" },
+    { CoordinateTransformation::LOGLINEAR, "loglinear" }
+  };
+};
+
 }  // namespace ufo
 
 
@@ -83,6 +92,11 @@ struct ParameterTraits<ufo::ExtrapolationMode> :
 template <>
 struct ParameterTraits<ufo::EquidistantChoice> :
     public EnumParameterTraits<ufo::EquidistantChoiceParameterTraitsHelper>
+{};
+
+template <>
+struct ParameterTraits<ufo::CoordinateTransformation> :
+    public EnumParameterTraits<ufo::CoordinateTransformationParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -119,6 +133,19 @@ class InterpolationParameters : public oops::Parameters {
   /// \see EquidistantChoice for a list of supported choices.
   oops::Parameter<EquidistantChoice> equidistanceChoice{
     "equidistant choice", EquidistantChoice::FIRST, this};
+
+  /// useChannelList indicates if this variable is two-dimensional (for instance
+  /// is a profile of GNSS-RO observations, and one of the input parameters
+  /// is the height of the observation).
+  oops::Parameter<bool> useChannelList{"use channel list", false, this};
+
+  /// Transformation applied to coordinates prior to interpolation.
+  /// For instance if a log-linear transform is used then the logarithm of both the observed
+  /// and reference values are found prior to interpolation.
+  ///
+  /// \see CoordinateTransformation for a list of supported choices.
+  oops::Parameter<CoordinateTransformation> coordinateTransformation{
+    "coordinate transformation", CoordinateTransformation::NONE, this};
 };
 
 
@@ -137,7 +164,7 @@ class DrawValueFromFileParametersWithoutGroup : public oops::Parameters {
   /// List of channel numbers (then deriving an observation error per channel)
   /// If this option is provided, the channel number is implicitly prepended to the list of
   /// interpolation variables and matched exactly.
-  oops::OptionalParameter<std::set<int>> chlist{"channels", this};
+  oops::Parameter<std::string> chlist{"channels", "", this};
 };
 
 
@@ -166,20 +193,20 @@ class DrawValueFromFileParameters : public DrawValueFromFileParametersWithoutGro
 /// \code{.yaml}
 ///     - filter: Variable Assignment
 ///       assignments:
-///       - name: interpolated_value@DerivedObsValue
+///       - name: DerivedObsValue/interpolatedValue
 ///         function:
-///           name: DrawValueFromFile@ObsFunction
+///           name: ObsFunction/DrawValueFromFile
 ///           channels: 1-3
 ///           options:
 ///             file: <filepath>
 ///             channels: 1-3
 ///             group: DerivedObsValue
 ///             interpolation:
-///             - name: satellite_id@MetaData
+///             - name: MetaData/satelliteIdentifier
 ///               method: exact
-///             - name: processing_center@MetaData
+///             - name: MetaData/processingCenter
 ///               method: exact
-///             - name: air_pressure@MetaData
+///             - name: MetaData/pressure
 ///               method: linear
 /// \endcode
 ///
@@ -199,6 +226,8 @@ class DrawValueFromFile : public ObsFunctionBase<T> {
   std::unordered_map<std::string, InterpMethod> interpMethod_;
   std::unordered_map<std::string, ExtrapolationMode> extrapMode_;
   std::unordered_map<std::string, EquidistantChoice> equidistantChoice_;
+  std::unordered_map<std::string, bool> useChannelList_;
+  std::unordered_map<std::string, CoordinateTransformation> coordinateTransformation_;
   std::string fpath_;
   DrawValueFromFileParameters options_;
   std::vector<int> channels_;

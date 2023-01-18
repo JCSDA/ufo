@@ -88,7 +88,7 @@ subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
   allocate(obsLat(self%nlocs))
 
 ! get observation vectors
-  call obsspace_get_db(obss, "MetaData", "altitude", obsZ)
+  call obsspace_get_db(obss, "MetaData", "height", obsZ)
   call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
   call gnssro_ref_constants(self%roconf%use_compress)
 

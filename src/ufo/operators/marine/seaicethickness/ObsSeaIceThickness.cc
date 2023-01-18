@@ -30,7 +30,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
 {
   std::vector<std::string> vvin{"sea_ice_category_area_fraction",
                                 "sea_ice_category_thickness"};
-  if (odb.assimvariables().has("sea_ice_freeboard")) {
+  if (odb.assimvariables().has("seaIceFreeboard")) {
     vvin.push_back("sea_ice_category_snow_thickness");
   }
   varin_.reset(new oops::Variables(vvin));

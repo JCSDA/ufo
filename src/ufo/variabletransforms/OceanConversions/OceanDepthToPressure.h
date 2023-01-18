@@ -32,12 +32,12 @@ class OceanDepthToPressureParameters : public VariableTransformParametersBase {
  public:
   /// Input variable of the ocean depth to pressure conversion
   oops::Parameter<std::string> DepthVariable{"ocean depth variable",
-                                             "ocean_depth", this};
+                                             "depthBelowWaterSurface", this};
   oops::Parameter<std::string> DepthGroup{"ocean depth group",
                                           "MetaData", this};
   /// Pressure variable name
   oops::Parameter<std::string> PressureVariable{"ocean pressure name",
-                                               "ocean_pressure", this};
+                                               "waterPressure", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -49,10 +49,10 @@ class OceanDepthToPressureParameters : public VariableTransformParametersBase {
 ///  obs filters:
 ///  - filter: Variable Transforms
 ///    Transform: OceanDepthToPressure
-///    ocean depth variable: ocean_depth
+///    ocean depth variable: depthBelowWaterSurface
 ///    ocean depth group: DerivedObsValue
 ///
-/// will return pressure (dbar) in a variable named (by default) "DerivedObsValue/ocean_pressure",
+/// will return pressure (dbar) in a variable named (by default) "DerivedObsValue/waterPressure",
 /// as a function of depth (m) and latitude (deg).
 /// Computed by TEOS-10 function gsw_p_from_z.
 ///

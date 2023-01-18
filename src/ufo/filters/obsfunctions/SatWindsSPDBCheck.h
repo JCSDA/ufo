@@ -54,10 +54,10 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
 /// ### Sample YAML configuration
 ///     - filter: Bounds Check
 ///       filter variables:
-///       - name: eastward_wind
-///       - name: northward_wind
+///       - name: windEastward
+///       - name: windNorthward
 ///       test variables:
-///       - name: SatWindsSPDBCheck@ObsFunction
+///       - name: ObsFunction/SatWindsSPDBCheck
 ///         options:
 ///           error_min: 1.4
 ///           error_max: 20.0

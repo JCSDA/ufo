@@ -13,14 +13,9 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019050700_1obs.nc4
-    simulated variables: [bending_angle]
+    simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019050700_1obs.nc4
-  obs filters:
-  - filter: Background Check
-    filter variables:
-    - name: bending_angle
-    threshold: 3.0
   norm ref: MetOfficeHofX
   tolerance: 1.0e-5
   linear obs operator test:

@@ -43,33 +43,39 @@ ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> & params)
 template<typename T>
 void processWhereMinMax(const std::vector<T> & data,
                         const T & vmin, const T & vmax,
-                        std::vector<bool> & mask) {
+                        std::vector<bool> & mask,
+                        bool minExclusive,
+                        bool maxExclusive) {
   const T missing = util::missingValue(missing);
   if (vmin != missing || vmax != missing) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
       if (data[jj] == missing) continue;
-      if (vmin != missing && data[jj] < vmin) mask[jj] = false;
-      if (vmax != missing && data[jj] > vmax) mask[jj] = false;
+      if (!minExclusive && vmin != missing && data[jj] < vmin) mask[jj] = false;
+      else if (minExclusive && vmin != missing && data[jj] <= vmin) mask[jj] = false;
+      if (!maxExclusive && vmax != missing && data[jj] > vmax) mask[jj] = false;
+      else if (maxExclusive && vmax != missing && data[jj] >= vmax) mask[jj] = false;
     }
   }
 }
 
-
 // -----------------------------------------------------------------------------
 void processWhereMinMax(const std::vector<util::DateTime> & data,
                         const util::PartialDateTime & vmin, const util::PartialDateTime & vmax,
-                        std::vector<bool> & mask) {
+                        std::vector<bool> & mask,
+                        bool minExclusive,
+                        bool maxExclusive) {
   const util::PartialDateTime not_set_value {};
   const util::DateTime missing = util::missingValue(missing);
   if (vmin != not_set_value || vmax != not_set_value) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
       if (data[jj] == missing) continue;
-      if (vmin != not_set_value && vmin > data[jj]) mask[jj] = false;
-      if (vmax != not_set_value && vmax < data[jj]) mask[jj] = false;
+      if (!minExclusive && vmin != missing && data[jj] < vmin) mask[jj] = false;
+      else if (minExclusive && vmin != missing && data[jj] <= vmin) mask[jj] = false;
+      if (!maxExclusive && vmax != missing && data[jj] > vmax) mask[jj] = false;
+      else if (maxExclusive && vmax != missing && data[jj] >= vmax) mask[jj] = false;
     }
   }
 }
-
 
 // -----------------------------------------------------------------------------
 template<typename T>
@@ -215,7 +221,7 @@ void applyMinMax(std::vector<bool> & where, WhereParameters const & parameters,
   if (vmin != not_set_value || vmax != not_set_value) {
     std::vector<T> data;
     filterdata.get(varname, data);
-    processWhereMinMax(data, vmin, vmax, where);
+    processWhereMinMax(data, vmin, vmax, where, parameters.minExclusive, parameters.maxExclusive);
   }
 }
 
@@ -233,7 +239,7 @@ void applyMinMax<util::DateTime>(std::vector<bool> & where, WhereParameters cons
   if (vmin != not_set_value || vmax != not_set_value) {
     std::vector<util::DateTime> data;
     filterdata.get(varname, data);
-    processWhereMinMax(data, vmin, vmax, where);
+    processWhereMinMax(data, vmin, vmax, where, parameters.minExclusive, parameters.maxExclusive);
   }
 }
 

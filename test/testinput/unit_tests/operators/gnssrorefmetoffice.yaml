@@ -14,18 +14,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_obs_2019123006_refractivity_ukmo_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
-  obs filters:
-  - filter: Background Check
-    filter variables:
-    - name: refractivity
-    threshold: 3.0
   norm ref: MetOfficeHofX
   tolerance: 1.0e-5
   linear obs operator test:
@@ -45,18 +40,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity_nopseudo.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/gnssro_obs_2019123006_refractivity_ukmo_opr_nopseudo_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity_nopseudo.nc4
-  obs filters:
-  - filter: Background Check
-    filter variables:
-    - name: refractivity
-    threshold: 3.0
   norm ref: MetOfficeHofX
   tolerance: 1.0e-5
   linear obs operator test:
@@ -76,7 +66,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File

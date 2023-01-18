@@ -28,11 +28,14 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerVertInterpTL_("VertInte
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const Parameters_ & params)
-  : LinearObsOperatorBase(odb), keyOperAtmVertInterp_(0), varin_()
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+    keyOperAtmVertInterp_(0), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
+
+  varin_ += nameMap_.convertName(operatorVars_);
 
   ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),
                                    operatorVars_,

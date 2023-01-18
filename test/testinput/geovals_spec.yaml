@@ -8,7 +8,7 @@ geovals test:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -24,7 +24,7 @@ geovals test:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-10,15
 #   obsdataout:
 #     engine:
@@ -58,7 +58,7 @@ geovals test:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sbuv2_n19_obs_2018041500_m.nc4
-    simulated variables: [integrated_layer_ozone_in_air]
+    simulated variables: [ozoneTotal]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -88,5 +88,5 @@ geovals get test:
 #     engine:
 #       type: H5File
 #       obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-10,15

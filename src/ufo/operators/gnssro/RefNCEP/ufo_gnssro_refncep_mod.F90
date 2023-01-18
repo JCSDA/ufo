@@ -76,7 +76,7 @@ contains
       allocate(obsZ(nlocs))
       allocate(obsLat(nlocs))
 
-      call obsspace_get_db(obss, "MetaData", "altitude", obsZ)
+      call obsspace_get_db(obss, "MetaData", "height", obsZ)
       call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
 
       call gnssro_ref_constants(self%roconf%use_compress)

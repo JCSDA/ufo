@@ -40,11 +40,11 @@ module ufo_radiancerttov_utils_mod
 
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
-    var_sfc_q2m, var_sfc_tskin, var_prsi, var_qcl, var_qci, var_cloud_layer, &
-    var_q, var_mixr, var_oz, var_co2, var_qci, var_qcl, var_surf_type_rttov, &
+    var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac, &
+    var_q, var_mixr, var_oz, var_co2, &
     var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit, &
     var_sfc_wdir, var_sfc_wspeed, &
-    var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci, var_tb_overcast, &
+    var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_tb_overcast, &
     ufo_vars_getindex
 
   implicit none
@@ -61,6 +61,7 @@ module ufo_radiancerttov_utils_mod
   integer, parameter, public            :: maxvarin = 50
 
   character(len=max_string), public     :: message
+  character(len=maxvarlen), parameter   :: var_surf_type_rttov = "surfaceQualifier"  ! 0 (land), 1 (water), 2 (sea-ice)
 
   integer, public                       :: nvars_in
   integer, public                       :: rttov_errorstatus
@@ -81,7 +82,7 @@ module ufo_radiancerttov_utils_mod
     var_sfc_tskin /)
 
   character(len=maxvarlen), dimension(4), public :: varin_scatt = &
-    (/var_prsi, var_qcl, var_qci, var_cloud_layer /)
+    (/var_prsi, var_clw, var_cli, var_cldfrac /)
 
   ! copy of ABSORBER_ID_NAME defined in rttov_const
   character(len=*), parameter :: &
@@ -112,7 +113,7 @@ module ufo_radiancerttov_utils_mod
     UFO_Absorbers(ngases_max+2) = &
     [ null_str, var_q, var_oz, null_str, var_co2, 'mole_fraction_of_nitrous_oxide_in_air', &
     'mole_fraction_of_carbon_monoxide_in_air', 'mole_fraction_of_methane_in_air', &
-    'mole_fraction_of_sulfur_dioxide_in_air', var_qcl, var_qci]
+    'mole_fraction_of_sulfur_dioxide_in_air', var_clw, var_cli]
 
   integer, public :: nchan_inst ! number of channels being simulated (may be less than full instrument)
   integer, public :: nchan_sim  ! total number of 'obs' = nprofiles * nchannels
@@ -859,7 +860,7 @@ contains
     character(len=6) :: chan
 
     write(chan, '(I0)') n
-    varname = 'brightness_temperature_' // trim(chan)
+    varname = 'brightnessTemperature_' // trim(chan)
 
   end subroutine get_var_name
 
@@ -929,8 +930,8 @@ contains
     if (present(ob_info)) then 
       sat_id = ob_info % satellite_identifier
     else
-      if (obsspace_has(obss, "MetaData", "satellite_identifier")) then
-        call obsspace_get_db(obss, "MetaData", "satellite_identifier", sat_id)
+      if (obsspace_has(obss, "MetaData", "satelliteIdentifier")) then
+        call obsspace_get_db(obss, "MetaData", "satelliteIdentifier", sat_id)
       else
         self % sensor_index_array = 1
       end if
@@ -1055,7 +1056,7 @@ contains
           end if
           
           if(.not. present(ob_info)) then
-            call obsspace_put_db(obss, "MetaData", "total_column_ozone", self % tc_ozone)
+            call obsspace_put_db(obss, "MetaData", "ozoneTotal", self % tc_ozone)
           end if
         end if
       case (var_co2)
@@ -1065,7 +1066,7 @@ contains
             profiles(iprof)%co2(top_level:bottom_level:stride) = geoval%vals(:, iprof) * scale_fac 
           end do
         end if
-      case (var_qcl)
+      case (var_clw)
         call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
         if (conf % do_mw_scatt) then
           do iprof = 1, nProfiles
@@ -1192,11 +1193,11 @@ contains
         call abor1_ftn(message)
       end if
       
-      ! cloud fraction from var_cloud_layer (MetO) or var_cldfrac TODO (IR update)
+      ! cloud fraction from var_cldfrac TODO (IR update)
 
       ! The input cloud concentrations must be the layer grid-box-average 
       ! concentration (as opposed to the concentration within the cloudy fraction of each layer)
-      call ufo_geovals_get_var(geovals, var_cloud_layer, geoval)
+      call ufo_geovals_get_var(geovals, var_cldfrac, geoval)
       do iprof = 1, nprofiles
         profiles_scatt(iprof) % cc(top_level:bottom_level:stride) = &
           geoval%vals(:, iprof)
@@ -1205,7 +1206,7 @@ contains
       ! The scattering code will use either ciw or totalice depending on the
       ! contents of the coefficient file so we need to assign both.
       ! solid precipitation and rain are currently not supported and are left at the initialised value of 0
-      call ufo_geovals_get_var(geovals, var_qci, geoval)
+      call ufo_geovals_get_var(geovals, var_cli, geoval)
       do iprof = 1, nprofiles
         if (conf % mw_scatt % use_totalice) then
           profiles_scatt(iprof) % totalice(top_level:bottom_level:stride) = &
@@ -1391,18 +1392,10 @@ contains
     else
 
 !Set RT profile elevation (ob has priority, otherwise model height from geoval)
-      if (obsspace_has(obss, "MetaData", "elevation")) then
-        call obsspace_get_db(obss, "MetaData", "elevation", TmpVar)
-        profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
-        write(message,'(A)') 'Using MetaData/elevation for profile elevation'
-      else if (obsspace_has(obss, "MetaData", "surface_height")) then
-        call obsspace_get_db(obss, "MetaData", "surface_height", TmpVar)
+      if (obsspace_has(obss, "MetaData", "heightOfSurface")) then
+        call obsspace_get_db(obss, "MetaData", "heightOfSurface", TmpVar)
         profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
         write(message,'(A)') 'Using MetaData/surface_height for profile elevation'
-      else if (obsspace_has(obss, "MetaData", "model_orography")) then
-        call obsspace_get_db(obss, "MetaData", "model_orography", TmpVar)
-        profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
-        write(message,'(A)') 'Using MetaData/model_orography for profile elevation'
       else if (ufo_vars_getindex(geovals%variables, "surface_altitude") > 0) then
         call ufo_geovals_get_var(geovals, "surface_altitude", geoval)
         profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
@@ -1435,40 +1428,40 @@ contains
 !Set RTTOV viewing geometry
 
       ! sensor zenith - RTTOV convention 0-max (coef dependent). Nadir = 0 deg
-      variable_present = obsspace_has(obss, "MetaData", "sensor_zenith_angle")
+      variable_present = obsspace_has(obss, "MetaData", "sensorZenithAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", profiles(1:nprofiles)%zenangle)
+        call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", profiles(1:nprofiles)%zenangle)
       else
-        write(message,'(A)') 'ERROR: Mandatory input MetaData/sensor_zenith_angle not in database. Aborting...'
+        write(message,'(A)') 'ERROR: Mandatory input MetaData/sensorZenithAngle not in database. Aborting...'
         call abor1_ftn(message)
       end if
 
       ! sensor azimuth - convention is 0-360 deg. E=+90
-      variable_present = obsspace_has(obss, "MetaData", "sensor_azimuth_angle")
+      variable_present = obsspace_has(obss, "MetaData", "sensorAzimuthAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", profiles(1:nprofiles)%azangle)
+        call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", profiles(1:nprofiles)%azangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/sensor_azimuth_angle not in database: setting to zero for RTTOV'
+        write(message,'(A)') 'Warning: Optional input MetaData/sensorAzimuthAngle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%azangle = zero
       end if
 
       ! solar zenith
-      variable_present = obsspace_has(obss, "MetaData", "solar_zenith_angle")
+      variable_present = obsspace_has(obss, "MetaData", "solarZenithAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", profiles(1:nprofiles)%sunzenangle)
+        call obsspace_get_db(obss, "MetaData", "solarZenithAngle", profiles(1:nprofiles)%sunzenangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/solar_zenith_angle not in database: setting to zero'
+        write(message,'(A)') 'Warning: Optional input MetaData/solarZenithAngle not in database: setting to zero'
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunzenangle = zero
       end if
 
       ! solar azimuth
-      variable_present = obsspace_has(obss, "MetaData", "solar_azimuth_angle")
+      variable_present = obsspace_has(obss, "MetaData", "solarAzimuthAngle")
       if (variable_present) then
-        call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", profiles(1:nprofiles)%sunazangle)
+        call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle", profiles(1:nprofiles)%sunazangle)
       else
-        write(message,'(A)') 'Warning: Optional input MetaData/solar_azimuth_angle not in database: setting to zero for RTTOV'
+        write(message,'(A)') 'Warning: Optional input MetaData/solarAzimuthAngle not in database: setting to zero for RTTOV'
         call fckit_log%info(message)
         profiles(1:nprofiles)%sunazangle = zero
       end if
@@ -1478,7 +1471,7 @@ contains
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", var_surf_type_rttov, profiles(1:nlocs_total)%skin%surftype)
       else
-        write(message,'(A)') 'ERROR: Mandatory input MetaData/surface_type not in database. Aborting...'
+        write(message,'(A)') 'ERROR: Mandatory input MetaData/surfaceQualifier not in database. Aborting...'
         call abor1_ftn(message)
       end if
     end if
@@ -2179,7 +2172,7 @@ contains
           ! variable: weightingfunction_of_atmosphere_layer_CH
           ! variable: mass_content_of_cloud_ice_in_atmosphere_layer
           ! variable: brightness_temperature_overcast_of_atmosphere_layer_CH
-        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_qci, var_tb_overcast)
+        case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_cli, var_tb_overcast)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2200,7 +2193,7 @@ contains
 
             if(chan == ch_diags(jvar)) then
               ! if profile not skipped
-              if(cmp_strings(ystr_diags(jvar), var_qci)) then
+              if(cmp_strings(ystr_diags(jvar), var_cli)) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = RTProf % ciw(:,prof)
               else if(cmp_strings(ystr_diags(jvar), var_opt_depth)) then
                 od_level(:) = log(RTProf % transmission%tau_levels(:,ichan)) !level->TOA transmittances -> od
@@ -2296,7 +2289,7 @@ contains
         ! var_tb jacobians
         select case (trim(xstr_diags(jvar)))
 
-        case (var_ts,var_mixr,var_q,var_qcl,var_qci)
+        case (var_ts,var_mixr,var_q,var_clw,var_cli)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2320,7 +2313,7 @@ contains
               else if(xstr_diags(jvar) == var_q) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour)
-              else if(xstr_diags(jvar) == var_qcl) then !clw
+              else if(xstr_diags(jvar) == var_clw) then !clw
                 if (conf % do_mw_scatt) then
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % mw_scatt % profiles_k(ichan) % clw(:)
@@ -2328,7 +2321,7 @@ contains
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % profiles_k(ichan) % clw(:)
                 end if
-              else if(xstr_diags(jvar) == var_qci) then
+              else if(xstr_diags(jvar) == var_cli) then
                 if (conf % do_mw_scatt) then
                   if (conf % mw_scatt % use_totalice) then
                     hofxdiags%geovals(jvar)%vals(:,prof) = &
@@ -2511,11 +2504,11 @@ contains
   character(len=200)              :: var, message
   integer                         :: ichan
 
-  variable_present = obsspace_has(obss, surface_emissivity_group, "surface_emissivity")
+  variable_present = obsspace_has(obss, trim(surface_emissivity_group), trim("emissivity"))
   if (variable_present) then
     do ichan = 1, size(channels)
       ! Read in from the db
-      write(var,"(A19,I0)") "surface_emissivity_", channels(ichan)
+      write(var,"(A11,I0)") "emissivity_", channels(ichan)
       call obsspace_get_db(obss, trim(surface_emissivity_group), trim(var), sfc_emiss(ichan,:))
     end do
   else

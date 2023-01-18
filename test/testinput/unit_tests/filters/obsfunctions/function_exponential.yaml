@@ -16,10 +16,10 @@ observations:
     derived variables: [fake_y1_data]
     observed variables: []
   obs function:
-    name: Exponential@ObsFunction
+    name: ObsFunction/Exponential
     options:
       variables:
-      - name: fake_x_data@MetaData
+      - name: MetaData/fake_x_data
         channels: 1
       coeffB: 0.1
       coeffC: -1.0
@@ -42,10 +42,10 @@ observations:
     observed variables: []
     channels: 1-3
   obs function:
-    name: Exponential@ObsFunction
+    name: ObsFunction/Exponential
     options:
       variables:
-      - name: fake_x_data@MetaData
+      - name: MetaData/fake_x_data
         channels: 1-3
       coeffA: -1.0
       coeffB: -0.1

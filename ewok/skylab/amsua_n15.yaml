@@ -6,9 +6,11 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &amsua_n15_channels 1-15
 obs operator:
   name: CRTM
@@ -49,17 +51,17 @@ obs bias:
 obs filters:
 - filter: BlackList
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   action:
     name: assign error
     error function:
-      name: ObsErrorModelRamp@ObsFunction
+      name: ObsFunction/ObsErrorModelRamp
       channels: *amsua_n15_channels
       options:
         channels: *amsua_n15_channels
         xvar:
-          name: CLWRetSymmetricMW@ObsFunction
+          name: ObsFunction/CLWRetSymmetricMW
           options:
             clwret_ch238: 1
             clwret_ch314: 2
@@ -79,10 +81,10 @@ obs filters:
 #  CLW Retrieval Check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: 1-6, 15
   test variables:
-  - name: CLWRetMW@ObsFunction
+  - name: ObsFunction/CLWRetMW
     options:
       clwret_ch238: 1
       clwret_ch314: 2
@@ -93,10 +95,10 @@ obs filters:
 #  CLW Retrieval Check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: 1-6, 15
   test variables:
-  - name: CLWRetMW@ObsFunction
+  - name: ObsFunction/CLWRetMW
     options:
       clwret_ch238: 1
       clwret_ch314: 2
@@ -107,10 +109,10 @@ obs filters:
 #  Hydrometeor Check (cloud/precipitation affected channels)
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   test variables:
-  - name: HydrometeorCheckAMSUA@ObsFunction
+  - name: ObsFunction/HydrometeorCheckAMSUA
     channels: *amsua_n15_channels
     options:
       channels: *amsua_n15_channels
@@ -118,18 +120,18 @@ obs filters:
                          0.230, 0.250, 0.275, 0.340, 0.400,
                          0.600, 1.000, 1.500, 2.000, 3.500]
       clwret_function:
-        name: CLWRetMW@ObsFunction
+        name: ObsFunction/CLWRetMW
         options:
           clwret_ch238: 1
           clwret_ch314: 2
           clwret_types: [ObsValue]
       obserr_function:
-        name: ObsErrorModelRamp@ObsFunction
+        name: ObsFunction/ObsErrorModelRamp
         channels: *amsua_n15_channels
         options:
           channels: *amsua_n15_channels
           xvar:
-            name: CLWRetSymmetricMW@ObsFunction
+            name: ObsFunction/CLWRetSymmetricMW
             options:
               clwret_ch238: 1
               clwret_ch314: 2
@@ -152,12 +154,12 @@ obs filters:
 #  Topography check
 - filter: BlackList
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   action:
     name: inflate error
     inflation variable:
-      name: ObsErrorFactorTopoRad@ObsFunction
+      name: ObsFunction/ObsErrorFactorTopoRad
       channels: *amsua_n15_channels
       options:
         sensor: amsua_n15
@@ -165,24 +167,24 @@ obs filters:
 #  Transmittance Top Check
 - filter: BlackList
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   action:
     name: inflate error
     inflation variable:
-      name: ObsErrorFactorTransmitTopRad@ObsFunction
+      name: ObsFunction/ObsErrorFactorTransmitTopRad
       channels: *amsua_n15_channels
       options:
         channels: *amsua_n15_channels
 #  Surface Jacobian check
 - filter: BlackList
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   action:
     name: inflate error
     inflation variable:
-      name: ObsErrorFactorSurfJacobianRad@ObsFunction
+      name: ObsFunction/ObsErrorFactorSurfJacobianRad
       channels: *amsua_n15_channels
       options:
         channels: *amsua_n15_channels
@@ -192,31 +194,31 @@ obs filters:
 #  Situation dependent Check
 - filter: BlackList
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   action:
     name: inflate error
     inflation variable:
-      name: ObsErrorFactorSituDependMW@ObsFunction
+      name: ObsFunction/ObsErrorFactorSituDependMW
       channels: *amsua_n15_channels
       options:
         sensor: amsua_n15
         channels: *amsua_n15_channels
         clwobs_function:
-          name: CLWRetMW@ObsFunction
+          name: ObsFunction/CLWRetMW
           options:
             clwret_ch238: 1
             clwret_ch314: 2
             clwret_types: [ObsValue]
         clwbkg_function:
-          name: CLWRetMW@ObsFunction
+          name: ObsFunction/CLWRetMW
           options:
             clwret_ch238: 1
             clwret_ch314: 2
             clwret_types: [HofX]
             bias_application: HofX
         scatobs_function:
-          name: SCATRetMW@ObsFunction
+          name: ObsFunction/SCATRetMW
           options:
             scatret_ch238: 1
             scatret_ch314: 2
@@ -224,18 +226,18 @@ obs filters:
             scatret_types: [ObsValue]
             bias_application: HofX
         clwmatchidx_function:
-          name: CLWMatchIndexMW@ObsFunction
+          name: ObsFunction/CLWMatchIndexMW
           channels: *amsua_n15_channels
           options:
             channels: *amsua_n15_channels
             clwobs_function:
-              name: CLWRetMW@ObsFunction
+              name: ObsFunction/CLWRetMW
               options:
                 clwret_ch238: 1
                 clwret_ch314: 2
                 clwret_types: [ObsValue]
             clwbkg_function:
-              name: CLWRetMW@ObsFunction
+              name: ObsFunction/CLWRetMW
               options:
                 clwret_ch238: 1
                 clwret_ch314: 2
@@ -250,36 +252,36 @@ obs filters:
 #  Gross check
 - filter: Background Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   function absolute threshold:
-  - name: ObsErrorBoundMW@ObsFunction
+  - name: ObsFunction/ObsErrorBoundMW
     channels: *amsua_n15_channels
     options:
       sensor: amsua_n15
       channels: *amsua_n15_channels
       obserr_bound_latitude:
-        name: ObsErrorFactorLatRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorLatRad
         options:
           latitude_parameters: [25.0, 0.25, 0.04, 3.0]
       obserr_bound_transmittop:
-        name: ObsErrorFactorTransmitTopRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTransmitTopRad
         channels: *amsua_n15_channels
         options:
           channels: *amsua_n15_channels
       obserr_bound_topo:
-        name: ObsErrorFactorTopoRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTopoRad
         channels: *amsua_n15_channels
         options:
           channels: *amsua_n15_channels
           sensor: amsua_n15
       obserr_function:
-        name: ObsErrorModelRamp@ObsFunction
+        name: ObsFunction/ObsErrorModelRamp
         channels: *amsua_n15_channels
         options:
           channels: *amsua_n15_channels
           xvar:
-            name: CLWRetSymmetricMW@ObsFunction
+            name: ObsFunction/CLWRetSymmetricMW
             options:
               clwret_ch238: 1
               clwret_ch314: 2
@@ -305,10 +307,10 @@ obs filters:
 #  Inter-channel check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   test variables:
-  - name: InterChannelConsistencyCheck@ObsFunction
+  - name: ObsFunction/InterChannelConsistencyCheck
     channels: *amsua_n15_channels
     options:
       channels: *amsua_n15_channels
@@ -322,10 +324,10 @@ obs filters:
 #  Useflag check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *amsua_n15_channels
   test variables:
-  - name: ChannelUseflagCheckRad@ObsFunction
+  - name: ObsFunction/ChannelUseflagCheckRad
     channels: *amsua_n15_channels
     options:
       channels: *amsua_n15_channels
@@ -335,3 +337,5 @@ obs filters:
   minvalue: 1.0e-12
   action:
     name: reject
+- filter: Gaussian Thinning
+  horizontal_mesh: 145.0

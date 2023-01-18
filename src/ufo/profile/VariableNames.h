@@ -15,146 +15,146 @@ struct VariableNames
 {
   // Observation values
 
-  static constexpr const char* const obs_air_pressure = "air_pressure@MetaData";
-  static constexpr const char* const obs_air_temperature = "air_temperature@ObsValue";
-  static constexpr const char* const obs_relative_humidity = "relative_humidity@ObsValue";
-  static constexpr const char* const obs_eastward_wind = "eastward_wind@ObsValue";
-  static constexpr const char* const obs_northward_wind = "northward_wind@ObsValue";
-  static constexpr const char* const obs_geopotential_height = "height@ObsValue";
-  static constexpr const char* const obs_dew_point_temperature = "dew_point_temperature@ObsValue";
+  static constexpr const char* const obs_air_pressure = "MetaData/pressure";
+  static constexpr const char* const obs_air_temperature = "ObsValue/airTemperature";
+  static constexpr const char* const obs_relative_humidity = "ObsValue/relativeHumidity";
+  static constexpr const char* const obs_eastward_wind = "ObsValue/windEastward";
+  static constexpr const char* const obs_northward_wind = "ObsValue/windNorthward";
+  static constexpr const char* const obs_geopotential_height = "ObsValue/height";
+  static constexpr const char* const obs_dew_point_temperature = "ObsValue/dewPointTemperature";
 
   // Derived observation values
 
-  static constexpr const char* const obs_derived_air_pressure = "air_pressure@DerivedMetaData";
+  static constexpr const char* const obs_derived_air_pressure = "DerivedMetaData/pressure";
 
   // Observation errors
 
-  static constexpr const char* const obserr_air_temperature = "air_temperature@ObsErrorData";
-  static constexpr const char* const obserr_relative_humidity = "relative_humidity@ObsErrorData";
-  static constexpr const char* const obserr_eastward_wind = "eastward_wind@ObsErrorData";
-  static constexpr const char* const obserr_northward_wind = "northward_wind@ObsErrorData";
-  static constexpr const char* const obserr_geopotential_height = "height@ObsErrorData";
+  static constexpr const char* const obserr_air_temperature = "ObsErrorData/airTemperature";
+  static constexpr const char* const obserr_relative_humidity = "ObsErrorData/relativeHumidity";
+  static constexpr const char* const obserr_eastward_wind = "ObsErrorData/windEastward";
+  static constexpr const char* const obserr_northward_wind = "ObsErrorData/windNorthward";
+  static constexpr const char* const obserr_geopotential_height = "ObsErrorData/height";
   static constexpr const char* const obserr_dew_point_temperature =
-    "dew_point_temperature@ObsErrorData";
+    "ObsErrorData/dewPointTemperature";
 
   // HofX
 
-  static constexpr const char* const hofx_air_temperature = "air_temperature@HofX";
-  static constexpr const char* const hofx_relative_humidity = "relative_humidity@HofX";
-  static constexpr const char* const hofx_eastward_wind = "eastward_wind@HofX";
-  static constexpr const char* const hofx_northward_wind = "northward_wind@HofX";
-  static constexpr const char* const hofx_geopotential_height = "height@HofX";
-  static constexpr const char* const hofx_dew_point_temperature = "dew_point_temperature@HofX";
+  static constexpr const char* const hofx_air_temperature = "HofX/airTemperature";
+  static constexpr const char* const hofx_relative_humidity = "HofX/relativeHumidity";
+  static constexpr const char* const hofx_eastward_wind = "HofX/windEastward";
+  static constexpr const char* const hofx_northward_wind = "HofX/windNorthward";
+  static constexpr const char* const hofx_geopotential_height = "HofX/height";
+  static constexpr const char* const hofx_dew_point_temperature = "HofX/dewPointTemperature";
 
   // Background errors
 
   static constexpr const char* const bkgerr_air_temperature =
-    "air_temperature_background_error@ObsDiag";
+    "ObsDiag/air_temperature_background_error";
   static constexpr const char* const bkgerr_relative_humidity =
-    "relative_humidity_background_error@ObsDiag";
+    "ObsDiag/relative_humidity_background_error";
   static constexpr const char* const bkgerr_eastward_wind =
-    "eastward_wind_background_error@ObsDiag";
+    "ObsDiag/eastward_wind_background_error";
   static constexpr const char* const bkgerr_northward_wind =
-    "northward_wind_background_error@ObsDiag";
+    "ObsDiag/northward_wind_background_error";
   static constexpr const char* const bkgerr_geopotential_height =
-    "height_background_error@ObsDiag";
+    "ObsDiag/height_background_error";
   static constexpr const char* const bkgerr_dew_point_temperature =
-    "dew_point_temperature_background_error@ObsDiag";
+    "ObsDiag/dew_point_temperature_background_error";
 
   // Probability of gross error
 
-  static constexpr const char* const pge_air_temperature = "air_temperature@GrossErrorProbability";
+  static constexpr const char* const pge_air_temperature = "GrossErrorProbability/airTemperature";
   static constexpr const char* const pge_relative_humidity =
-    "relative_humidity@GrossErrorProbability";
-  static constexpr const char* const pge_eastward_wind = "eastward_wind@GrossErrorProbability";
-  static constexpr const char* const pge_northward_wind = "northward_wind@GrossErrorProbability";
+    "GrossErrorProbability/relativeHumidity";
+  static constexpr const char* const pge_eastward_wind = "GrossErrorProbability/windEastward";
+  static constexpr const char* const pge_northward_wind = "GrossErrorProbability/windNorthward";
   static constexpr const char* const pge_geopotential_height =
-    "height@GrossErrorProbability";
+    "GrossErrorProbability/height";
 
   // MetaData
 
-  static constexpr const char* const station_ID = "station_id@MetaData";
-  static constexpr const char* const ObsType = "ops_subtype@MetaData";
-  static constexpr const char* const Latitude = "latitude@MetaData";
-  static constexpr const char* const Longitude = "longitude@MetaData";
-  static constexpr const char* const Zstation = "station_altitude@MetaData";
-  static constexpr const char* const LevelType = "level_type@MetaData";
-  static constexpr const char* const InstrType = "instrument_type@MetaData";
-  static constexpr const char* const extended_obs_space = "extended_obs_space@MetaData";
+  static constexpr const char* const station_ID = "MetaData/stationIdentification";
+  static constexpr const char* const ObsType = "MetaData/observationSubTypeNum";
+  static constexpr const char* const Latitude = "MetaData/latitude";
+  static constexpr const char* const Longitude = "MetaData/longitude";
+  static constexpr const char* const Zstation = "MetaData/stationElevation";
+  static constexpr const char* const LevelType = "MetaData/levelType";
+  static constexpr const char* const InstrType = "MetaData/instrumentIdentifier";
+  static constexpr const char* const extended_obs_space = "MetaData/extendedObsSpace";
 
   // QC flags
 
-  static constexpr const char* const qcflags_observation_report = "observation_report@QCFlags";
-  static constexpr const char* const qcflags_air_temperature = "air_temperature@QCFlags";
-  static constexpr const char* const qcflags_relative_humidity = "relative_humidity@QCFlags";
-  static constexpr const char* const qcflags_geopotential_height = "height@QCFlags";
-  static constexpr const char* const qcflags_eastward_wind = "eastward_wind@QCFlags";
-  static constexpr const char* const qcflags_northward_wind = "northward_wind@QCFlags";
-  static constexpr const char* const qcflags_wind_profiler = "wind_profiler@QCFlags";
+  static constexpr const char* const qcflags_observation_report = "QCFlags/observationReport";
+  static constexpr const char* const qcflags_air_temperature = "QCFlags/airTemperature";
+  static constexpr const char* const qcflags_relative_humidity = "QCFlags/relativeHumidity";
+  static constexpr const char* const qcflags_geopotential_height = "QCFlags/height";
+  static constexpr const char* const qcflags_eastward_wind = "QCFlags/windEastward";
+  static constexpr const char* const qcflags_northward_wind = "QCFlags/windNorthward";
+  static constexpr const char* const qcflags_wind_profiler = "QCFlags/windProfiler";
 
   // Diagnostic flags
 
   static constexpr const char* const diagflags_profile_interpolation_eastward_wind =
-    "DiagnosticFlags/Profile/Interpolation/eastward_wind";
+    "DiagnosticFlags/Profile/Interpolation/windEastward";
   static constexpr const char* const diagflags_profile_standard_level_eastward_wind =
-    "DiagnosticFlags/Profile/StandardLevel/eastward_wind";
+    "DiagnosticFlags/Profile/StandardLevel/windEastward";
 
   // Counters
 
-  static constexpr const char* const counter_NumAnyErrors = "NumAnyErrors@Counters";
-  static constexpr const char* const counter_NumSamePErrObs = "NumSamePErrObs@Counters";
-  static constexpr const char* const counter_NumSuperadiabat = "NumSuperadiabat@Counters";
-  static constexpr const char* const counter_Num925Miss = "Num925Miss@Counters";
-  static constexpr const char* const counter_Num100Miss = "Num100Miss@Counters";
-  static constexpr const char* const counter_NumStdMiss = "NumStdMiss@Counters";
-  static constexpr const char* const counter_NumHydErrObs = "NumHydErrObs@Counters";
-  static constexpr const char* const counter_NumIntHydErrors = "NumIntHydErrors@Counters";
-  static constexpr const char* const counter_NumInterpErrors = "NumInterpErrors@Counters";
-  static constexpr const char* const counter_NumInterpErrObs = "NumInterpErrObs@Counters";
-  static constexpr const char* const counter_NumSignChange = "NumSignChange@Counters";
-  static constexpr const char* const counter_TotCProfs = "TotCProfs@Counters";
-  static constexpr const char* const counter_TotHProfs = "TotHProfs@Counters";
-  static constexpr const char* const counter_TotCFlags = "TotCFlags@Counters";
-  static constexpr const char* const counter_TotHFlags = "TotHFlags@Counters";
-  static constexpr const char* const counter_TotLFlags = "TotLFlags@Counters";
-  static constexpr const char* const counter_NumGapsT = "NumGapsT@Counters";
-  static constexpr const char* const counter_NumGapsU = "NumGapsU@Counters";
-  static constexpr const char* const counter_NumGapsUWP = "NumGapsUWP@Counters";
-  static constexpr const char* const counter_NumGapsRH = "NumGapsRH@Counters";
+  static constexpr const char* const counter_NumAnyErrors = "Counters/NumAnyErrors";
+  static constexpr const char* const counter_NumSamePErrObs = "Counters/NumSamePErrObs";
+  static constexpr const char* const counter_NumSuperadiabat = "Counters/NumSuperadiabat";
+  static constexpr const char* const counter_Num925Miss = "Counters/Num925Miss";
+  static constexpr const char* const counter_Num100Miss = "Counters/Num100Miss";
+  static constexpr const char* const counter_NumStdMiss = "Counters/NumStdMiss";
+  static constexpr const char* const counter_NumHydErrObs = "Counters/NumHydErrObs";
+  static constexpr const char* const counter_NumIntHydErrors = "Counters/NumIntHydErrors";
+  static constexpr const char* const counter_NumInterpErrors = "Counters/NumInterpErrors";
+  static constexpr const char* const counter_NumInterpErrObs = "Counters/NumInterpErrObs";
+  static constexpr const char* const counter_NumSignChange = "Counters/NumSignChange";
+  static constexpr const char* const counter_TotCProfs = "Counters/TotCProfs";
+  static constexpr const char* const counter_TotHProfs = "Counters/TotHProfs";
+  static constexpr const char* const counter_TotCFlags = "Counters/TotCFlags";
+  static constexpr const char* const counter_TotHFlags = "Counters/TotHFlags";
+  static constexpr const char* const counter_TotLFlags = "Counters/TotLFlags";
+  static constexpr const char* const counter_NumGapsT = "Counters/NumGapsT";
+  static constexpr const char* const counter_NumGapsU = "Counters/NumGapsU";
+  static constexpr const char* const counter_NumGapsUWP = "Counters/NumGapsUWP";
+  static constexpr const char* const counter_NumGapsRH = "Counters/NumGapsRH";
 
   // Corrections
 
-  static constexpr const char* const obscorrection_air_temperature = "air_temperature@Corrections";
+  static constexpr const char* const obscorrection_air_temperature = "Corrections/airTemperature";
   static constexpr const char* const obscorrection_geopotential_height =
-    "height@Corrections";
+    "Corrections/height";
 
   // Intermediate values
 
-  static constexpr const char* const DC = "DC@MetaData";
-  static constexpr const char* const ETol = "ETol@MetaData";
-  static constexpr const char* const D = "D@MetaData";
-  static constexpr const char* const E = "E@MetaData";
-  static constexpr const char* const HydError = "HydError@MetaData";
-  static constexpr const char* const PBottom = "PBottom@MetaData";
-  static constexpr const char* const StdLev = "StdLev@MetaData";
-  static constexpr const char* const SigAbove = "SigAbove@MetaData";
-  static constexpr const char* const SigBelow = "SigBelow@MetaData";
-  static constexpr const char* const IndStd = "IndStd@MetaData";
-  static constexpr const char* const LevErrors = "LevErrors@MetaData";
-  static constexpr const char* const tInterp = "tInterp@MetaData";
-  static constexpr const char* const uInterp = "uInterp@MetaData";
-  static constexpr const char* const vInterp = "vInterp@MetaData";
-  static constexpr const char* const LogP = "LogP@MetaData";
-  static constexpr const char* const NumStd = "NumStd@MetaData";
-  static constexpr const char* const NumSig = "NumSig@MetaData";
-  static constexpr const char* const Press = "Press@MetaData";
-  static constexpr const char* const Temp = "Temp@MetaData";
-  static constexpr const char* const rh = "rh@MetaData";
-  static constexpr const char* const td = "td@MetaData";
-  static constexpr const char* const tbk = "tbk@MetaData";
-  static constexpr const char* const rhbk = "rhbk@MetaData";
-  static constexpr const char* const FlagH = "FlagH@MetaData";
-  static constexpr const char* const Indx = "Indx@MetaData";
+  static constexpr const char* const DC = "MetaData/DC";
+  static constexpr const char* const ETol = "MetaData/ETol";
+  static constexpr const char* const D = "MetaData/D";
+  static constexpr const char* const E = "MetaData/E";
+  static constexpr const char* const HydError = "MetaData/HydError";
+  static constexpr const char* const PBottom = "MetaData/PBottom";
+  static constexpr const char* const StdLev = "MetaData/StdLev";
+  static constexpr const char* const SigAbove = "MetaData/SigAbove";
+  static constexpr const char* const SigBelow = "MetaData/SigBelow";
+  static constexpr const char* const IndStd = "MetaData/IndStd";
+  static constexpr const char* const LevErrors = "MetaData/LevErrors";
+  static constexpr const char* const tInterp = "MetaData/tInterp";
+  static constexpr const char* const uInterp = "MetaData/uInterp";
+  static constexpr const char* const vInterp = "MetaData/vInterp";
+  static constexpr const char* const LogP = "MetaData/LogP";
+  static constexpr const char* const NumStd = "MetaData/NumStd";
+  static constexpr const char* const NumSig = "MetaData/NumSig";
+  static constexpr const char* const Press = "MetaData/Press";
+  static constexpr const char* const Temp = "MetaData/Temp";
+  static constexpr const char* const rh = "MetaData/rh";
+  static constexpr const char* const td = "MetaData/td";
+  static constexpr const char* const tbk = "MetaData/tbk";
+  static constexpr const char* const rhbk = "MetaData/rhbk";
+  static constexpr const char* const FlagH = "MetaData/FlagH";
+  static constexpr const char* const Indx = "MetaData/Indx";
 
   // GeoVaLs
 
@@ -197,34 +197,34 @@ struct VariableNames
   // Averaged values on model levels
 
   static constexpr const char* const air_temperature_derived =
-    "air_temperature@DerivedObsValue";
+    "DerivedObsValue/airTemperature";
   static constexpr const char* const eastward_wind_derived =
-    "eastward_wind@DerivedObsValue";
+    "DerivedObsValue/windEastward";
   static constexpr const char* const northward_wind_derived =
-    "northward_wind@DerivedObsValue";
+    "DerivedObsValue/windNorthward";
   static constexpr const char* const relative_humidity_derived =
-    "relative_humidity@DerivedObsValue";
+    "DerivedObsValue/relativeHumidity";
 
   // Derived observation values (used in averaging)
 
-  static constexpr const char* const LogP_derived = "logP@DerivedMetaData";
-  static constexpr const char* const bigPgaps_derived = "bigPgaps@DerivedMetaData";
+  static constexpr const char* const LogP_derived = "DerivedMetaData/logP";
+  static constexpr const char* const bigPgaps_derived = "DerivedMetaData/bigPgaps";
 
   // Derived model values (used in averaging)
 
-  static constexpr const char* const modellevels_logP_derived = "LogPB@DerivedModelValue";
-  static constexpr const char* const modellevels_ExnerP_derived = "ExnerPB@DerivedModelValue";
+  static constexpr const char* const modellevels_logP_derived = "DerivedModelValue/LogPB";
+  static constexpr const char* const modellevels_ExnerP_derived = "DerivedModelValue/ExnerPB";
   static constexpr const char* const modellevels_air_temperature_derived =
-    "air_temperature@DerivedModelValue";
+    "DerivedModelValue/airTemperature";
 
   // Derived model values on rho levels (used in averaging)
 
   static constexpr const char* const modellevels_logP_rho_derived =
-    "LogPA@DerivedModelValue";
+    "DerivedModelValue/LogPA";
   static constexpr const char* const modellevels_logPWB_rho_derived =
-    "LogPWB@DerivedModelValue";
+    "DerivedModelValue/LogPWB";
   static constexpr const char* const modellevels_ExnerP_rho_derived =
-    "ExnerPA@DerivedModelValue";
+    "DerivedModelValue/ExnerPA";
 };
 
 }  // namespace ufo

@@ -31,13 +31,13 @@ WindDirAngleDiff::WindDirAngleDiff(const eckit::LocalConfiguration & conf)
   options_.deserialize(conf);
 
   // We need to retrieve the observed wind components.
-  invars_ += Variable("eastward_wind@ObsValue");
-  invars_ += Variable("northward_wind@ObsValue");
+  invars_ += Variable("ObsValue/windEastward");
+  invars_ += Variable("ObsValue/windNorthward");
 
   // Typical use would be HofX group, but during testing, we include option for GsiHofX
   std::string test_hofx = options_.test_hofx.value();
-  invars_ += Variable("eastward_wind@" + test_hofx);
-  invars_ += Variable("northward_wind@" + test_hofx);
+  invars_ += Variable(test_hofx + "/windEastward");
+  invars_ += Variable(test_hofx + "/windNorthward");
 
   // TODO(gthompsn): Need to include a check that whatever HofX group name used actually exists.
 }
@@ -62,13 +62,13 @@ void WindDirAngleDiff::compute(const ObsFilterData & in,
 
   // Retrieve observations of wind components
   std::vector<float> u, v;
-  in.get(Variable("eastward_wind@ObsValue"), u);
-  in.get(Variable("northward_wind@ObsValue"), v);
+  in.get(Variable("ObsValue/windEastward"), u);
+  in.get(Variable("ObsValue/windNorthward"), v);
   // Retrieve Model HofX wind components
   std::string test_hofx = options_.test_hofx.value();
   std::vector<float> um, vm;
-  in.get(Variable("eastward_wind@" + test_hofx), um);
-  in.get(Variable("northward_wind@" + test_hofx), vm);
+  in.get(Variable(test_hofx + "/windEastward"), um);
+  in.get(Variable(test_hofx + "/windNorthward"), vm);
 
   double wdir_obs, wdir_model;
 

@@ -31,7 +31,7 @@ std::vector<bool> identifyRejectedObservations(const ObsFilterData &data) {
 
   std::vector<int> qcflags(nlocs);
   for (size_t iv = 0; iv < simulatedVars.size(); ++iv) {
-    data.get(Variable(simulatedVars[iv] + "@QCflagsData"), qcflags);
+    data.get(Variable("QCflagsData/" + simulatedVars[iv]), qcflags);
     for (size_t iloc = 0; iloc < nlocs; ++iloc)
       if (qcflags[iloc] == QCflags::pass)
         rejected[iloc] = false;
@@ -48,9 +48,9 @@ SolarZenith::SolarZenith(const eckit::LocalConfiguration & conf) {
   options_.validateAndDeserialize(conf);
 
   // List of required ObsSpace variables
-  invars_ += Variable("latitude@MetaData");
-  invars_ += Variable("longitude@MetaData");
-  invars_ += Variable("dateTime@MetaData");
+  invars_ += Variable("MetaData/latitude");
+  invars_ += Variable("MetaData/longitude");
+  invars_ += Variable("MetaData/dateTime");
 }
 
 void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
@@ -71,9 +71,9 @@ void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> &
   // Inputs
   std::vector<float> lats(nlocs), lons(nlocs);
   std::vector<util::DateTime> datetimes(nlocs);
-  in.get(Variable("latitude@MetaData"), lats);
-  in.get(Variable("longitude@MetaData"), lons);
-  in.get(Variable("dateTime@MetaData"), datetimes);
+  in.get(Variable("MetaData/latitude"), lats);
+  in.get(Variable("MetaData/longitude"), lons);
+  in.get(Variable("MetaData/dateTime"), datetimes);
 
   std::vector<bool> rejected;
   const bool skipRejected = options_.skipRejected;

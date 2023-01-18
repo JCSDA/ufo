@@ -18,6 +18,7 @@
 #include <boost/multi_array.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <boost/variant/multivisitors.hpp>
 
 #include "eckit/exception/Exceptions.h"
 
@@ -37,6 +38,15 @@ namespace ufo {
 
 template <typename T>
 using DataExtractorPayload = boost::multi_array<T, 3>;
+
+/// \brief Coordinate transformation used by the DataExtractor prior to interpolation.
+enum class CoordinateTransformation {
+  /// \brief No transformation of coordinates.
+  NONE,
+
+  /// \brief Log-linear transformation of coordinates, ignoring missing values.
+  LOGLINEAR
+};
 
 
 /// \brief Determine whether the value provided is out-of-bounds for the given vector and
@@ -78,7 +88,7 @@ bool isOutOfBounds(const T obVal, const std::vector<T> &varValues, const Constra
 ///   boost::multi_array<float, 3> array (boost::extents[2][3][2]);
 ///   for (int i=0; i<2; i++)
 ///     for (int j=0; j<3; j++)
-///       for (int k=0; k<2; j++)
+///       for (int k=0; k<2; k++)
 ///       array[i][j][k] = ...
 ///
 ///   // Let's fetch a 1D slice, constraining our first and last dimensions.
@@ -154,7 +164,7 @@ const typename DataExtractorPayload<T>::template const_array_view<1>::type get1D
 ///                                           ConstrainedRange(2)};
 ///   ranges[0].constrain(0, 1);  // Let's pick the very first index...
 ///
-///   auto arraySliceView = get1DSlice(array, 1, 2, ranges);
+///   auto arraySliceView = get2DSlice(array, 1, 2, ranges);
 /// \endcode
 template <typename T>
 const typename DataExtractorPayload<T>::template const_array_view<2>::type get2DSlice(
@@ -229,6 +239,13 @@ float bilinearInterpolation(
     const R &obVal1,
     const ConstrainedRange &range1,
     const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
+
+  const float missing = util::missingValue(missing);
+
+  if (obVal0 == util::missingValue(obVal0) || obVal1 == util::missingValue(obVal1)) {
+    return missing;
+  }
+
   if (isOutOfBounds(obVal0, varValues0, range0)) {
       std::stringstream msg;
       msg << "No match found for 'bilinear' interpolation of value '" << obVal0
@@ -243,8 +260,6 @@ float bilinearInterpolation(
           << "extrapolation.";
       throw eckit::Exception(msg.str(), Here());
   }
-
-  const float missing = util::missingValue(missing);
 
   const int nnIndex0 = std::lower_bound(varValues0.begin() + range0.begin(),
                                         varValues0.begin() + range0.end(), obVal0) -
@@ -405,7 +420,15 @@ enum class InterpMethod {
   /// This method can only be used for the final two indexing variables (see
   /// `bilinearInterpolation`).  It is supported only when DataExtractor produces values of type
   /// `float`, but not `int` or `std::string`.
-  BILINEAR
+  BILINEAR,
+
+  /// \brief Perform a trilinear interpolation along three dimensions indexed by the ObsSpace
+  /// variables.
+  ///
+  /// This method can only be used for the final three indexing variables (see
+  /// `trilinearInterpolation`).  It is supported only when DataExtractor produces values of type
+  /// `float`, but not `int` or `std::string`.
+  TRILINEAR
 };
 
 
@@ -434,6 +457,31 @@ enum class EquidistantChoice {
   /// \brief Select the last matching index in the case of a tiebreak.
   LAST
 };
+
+float trilinearInterpolation(
+    const std::string &varName0,
+    const std::vector<float> &varValues0,
+    float obVal0,
+    const ConstrainedRange &range0,
+    const CoordinateTransformation &coordTrans0,
+    const std::string &varName1,
+    const std::vector<float> &varValues1,
+    float obVal1,
+    const ConstrainedRange &range1,
+    const CoordinateTransformation &coordTrans1,
+    const std::string &varName2,
+    const std::vector<float> &varValues2,
+    float obVal2,
+    const ConstrainedRange &range2,
+    const CoordinateTransformation &coordTrans2,
+    const DataExtractorPayload<float>::const_array_view<3>::type &interpolatedArray);
+
+/// \brief Apply log-linear transformation to a vector of values.
+void applyLogLinearTransform(const std::string &varName,
+                             std::vector<float> &varValues);
+/// \brief Apply log-linear transformation to a single value.
+void applyLogLinearTransform(const std::string &varName,
+                             float &varValues);
 
 /// \brief This class makes it possible to extract and interpolate data loaded from a file.
 ///
@@ -498,12 +546,14 @@ class DataExtractor
   /// extracted is out-of-bounds.
   /// \ param[in] equidistantChoice is the choice of index when a value is equidistant between
   /// two indices.
+  /// \ param[in] coordinateTransformation is the transformation applied to the coordinates.
   /// \internal This member function call corresponds to a RecursiveSplitter.groupBy call, useful
   /// to sort according to nearesr/exact match variables.  In the special case of float type,
   /// RecursiveSplitter.sortGroupsBy is used.
   void scheduleSort(const std::string &varName, const InterpMethod &method,
                     const ExtrapolationMode &extrapMode,
-                    const EquidistantChoice &equidistantChoice);
+                    const EquidistantChoice &equidistantChoice,
+                    const CoordinateTransformation &coordinateTransformation);
 
   /// \brief Finalise the sort, sorting each of the coordinates indexing the axes of the array to
   /// be interpolated, as well as that array itself.
@@ -527,7 +577,7 @@ class DataExtractor
 
   /// \brief Perform extract, given the observation values associated with the current extract
   /// iteration and the next.
-  /// \details Calls the relevant extract method (linear), corresponding to the coordinate
+  /// \details Calls the relevant extract method (bilinear), corresponding to the coordinate
   /// associated with this extract iteration and the next (along with the associated interpolation
   /// method).  This method actually functions as two iterations, passing the current iteration
   /// coordinate and the next iteration coordinate.  These are passed to the underlying binary
@@ -547,6 +597,33 @@ class DataExtractor
       maybeExtractByBiLinearInterpolation(obValDim0, obValDim1);
     else
         throw eckit::UserError("Only bilinear method supports two variables as arguments.", Here());
+    ++nextCoordToExtractBy_;
+  }
+
+  /// \brief Perform extract, given the observation values associated with the current extract
+  /// iteration and the next.
+  /// \details Calls the relevant extract method (trilinear), corresponding to the coordinates
+  /// associated with this extract iteration (along with the associated interpolation
+  /// method).  This method actually functions as three iterations, passing the current iteration
+  /// coordinate and the next two iteration coordinates.
+  /// These are passed to the underlying operation.
+  /// \param[in] obValDim0 is the observation value used for the extract operation corresponding
+  /// to the first coordinate utilised by the underlying method.
+  /// \param[in] obValDim1 is the observation value used for the extract operation corresponding
+  /// to the second coordinate utilised by the underlying method.
+  /// \param[in] obValDim2 is the observation value used for the extract operation corresponding
+  /// to the third coordinate utilised by the underlying method.
+  void extract(float obValDim0, float obValDim1, float obValDim2) {
+    if (nextCoordToExtractBy_ == coordsToExtractBy_.cend())
+      throw eckit::UserError("Too many extract() calls made for the expected number of variables.",
+                             Here());
+
+    // Perform the extraction using the selected method
+    if (nextCoordToExtractBy_->method == InterpMethod::TRILINEAR)
+      maybeExtractByTriLinearInterpolation(obValDim0, obValDim1, obValDim2);
+    else
+      throw eckit::UserError("Only trilinear method supports three variables as arguments.",
+                             Here());
     ++nextCoordToExtractBy_;
   }
 
@@ -615,6 +692,14 @@ class DataExtractor
                               "values, but not integers or strings.", Here());
   }
 
+  void maybeExtractByTriLinearInterpolation(const float &obValDim0,
+                                            const float &obValDim1,
+                                            const float &obValDim2) {
+    // Should never be called -- this error should be detected earlier (scheduleSort).
+    throw eckit::BadParameter("Trilinear interpolation can be used when extracting floating-point "
+                              "values, but not integers or strings.", Here());
+  }
+
   /// \brief Fetch the result produced by previous calls to extract(), none of which may have
   /// used linear interpolation.
   ///
@@ -676,6 +761,8 @@ class DataExtractor
     ExtrapolationMode extrapMode;
     /// Equidistant choice to use
     EquidistantChoice equidistantChoice;
+    /// Coordinate transformation to use
+    CoordinateTransformation coordinateTransformation;
     /// Axis of the payload array indexed by the coordinate (0 or 1)
     int payloadDim;
   };
@@ -725,6 +812,12 @@ void DataExtractor<float>::maybeExtractByBiLinearInterpolation(
   resultSet_ = true;
 }
 
+
+
+// Specialization of trilinear interpolation for ExtractedValue = float.
+template <>
+void DataExtractor<float>::maybeExtractByTriLinearInterpolation
+  (const float &obValDim0, const float &obValDim1, const float &obValDim2);
 
 }  // namespace ufo
 

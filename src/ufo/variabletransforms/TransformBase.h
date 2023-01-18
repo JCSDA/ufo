@@ -95,7 +95,7 @@ class TransformBase {
                       std::vector<T> &obsVector, bool require = false) const {
     if (!obsdb_.has(originalTag, varName)) {
       if (require)
-        throw eckit::BadValue("The parameter `" + varName + "@" + originalTag +
+        throw eckit::BadValue("The parameter `" + originalTag + "/" + varName +
                               "` does not exist in the ObsSpace ", Here());
       else
         return;

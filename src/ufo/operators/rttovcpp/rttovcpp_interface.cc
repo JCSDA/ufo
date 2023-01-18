@@ -189,13 +189,13 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
       std::vector<double> elev(nprofiles, 0.0);
       std::vector<util::DateTime> times(nprofiles);
 
-      odb_.get_db("MetaData", "sensor_zenith_angle",  satzen);  // in degree
-      odb_.get_db("MetaData", "sensor_azimuth_angle", satazi);  // in degree
-      odb_.get_db("MetaData", "solar_zenith_angle",   sunzen);  // in degree
-      odb_.get_db("MetaData", "solar_azimuth_angle",  sunazi);  // in degree
+      odb_.get_db("MetaData", "sensorZenithAngle",  satzen);  // in degree
+      odb_.get_db("MetaData", "sensorAzimuthAngle", satazi);  // in degree
+      odb_.get_db("MetaData", "solarZenithAngle",   sunzen);  // in degree
+      odb_.get_db("MetaData", "solarAzimuthAngle",  sunazi);  // in degree
       odb_.get_db("MetaData", "latitude",  lat);  // -90~90 in degree
       odb_.get_db("MetaData", "longitude", lon);  // 0~360 in degree
-      odb_.get_db("MetaData", "height_above_mean_sea_level", elev);  // in m
+      odb_.get_db("MetaData", "height", elev);  // height above mean sea level in m
       odb_.get_db("MetaData", "dateTime", times);
 
   // 4. Call rttov set functions

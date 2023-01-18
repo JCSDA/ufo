@@ -4,24 +4,25 @@ obs space:
     engine:
       type: H5File
     obsgrouping:
-      group variables: ["station_id"]
+      group variables: ["stationIdentification"]
       sort variable: "dateTime"
       sort order: "ascending"
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: ldm
-  simulated variables: [air_temperature, specific_humidity]
-# derived simulated variables: [eastward_wind, northward_wind]
+  simulated variables: [airTemperature, specificHumidity]
+# derived simulated variables: [windEastward, windNorthward]
 
 obs operator:
   name: VertInterp
+  observation alias file: $(observation_alias_file)
   variables:
-  - name: air_temperature
-  - name: specific_humidity
-# - name: eastward_wind
-# - name: northward_wind
+  - name: airTemperature
+  - name: specificHumidity
+# - name: windEastward
+# - name: windNorthward
   vertical coordinate: height
   observation vertical coordinate: height
 
@@ -32,7 +33,7 @@ obs filters:
   #
   - filter: Bounds Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     minvalue: 195
     maxvalue: 327
     action:
@@ -40,7 +41,7 @@ obs filters:
   #
   - filter: Bounds Check
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     minvalue: 1.0E-7
     maxvalue: 0.034999999
     action:
@@ -49,18 +50,18 @@ obs filters:
   # Begin by assigning all ObsError to a constant value. These will get overwritten for specific types.
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     action:
       name: assign error
       error parameter: 2.0             # 2.0 K
   # Assign the initial observation error, based on pressure (for AMDAR and MDCRS; itype=131,133)
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
             name: MetaData/height
@@ -69,28 +70,28 @@ obs filters:
   # Begin by assigning all ObsError to a constant value. These will get overwritten for specific types.
   - filter: Perform Action
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     action:
       name: assign error
       error parameter: 1.0E-3
   # Assign the initial observation error, based on height/pressure ONLY MDCRS
   - filter: Perform Action
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
             name: MetaData/height
           xvals: [100, 5000, 10000, 12000, 14000, 16000]
           errors: [0.25, 0.2, 0.2, 0.25, 0.35, 0.2]
-          scale_factor_var: ObsValue/specific_humidity
+          scale_factor_var: ObsValue/specificHumidity
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     threshold: 7.0
     absolute threshold: 8.0
     action:
@@ -99,7 +100,7 @@ obs filters:
   #
   - filter: Background Check
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     threshold: 8.0
     action:
       name: reject
@@ -107,8 +108,8 @@ obs filters:
   # Reject specific humidity where temperature was rejected.
   - filter: RejectList
     filter variables:
-    - name: specific_humidity
+    - name: specificHumidity
     where:
-    - variable: QCflagsData/air_temperature
+    - variable: QCflagsData/airTemperature
       minvalue: 1
     defer to post: true

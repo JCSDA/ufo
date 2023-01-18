@@ -6,10 +6,10 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
   _source: nasa
-  simulated variables: [carbon_monoxide_in_total_column]
-  observed variables: [carbon_monoxide_in_total_column]
+  simulated variables: [carbonmonoxideTotal]
+  observed variables: [carbonmonoxideTotal]
 obs operator:
   name: ColumnRetrieval
   nlayers_retrieval: 10

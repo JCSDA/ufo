@@ -43,16 +43,12 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: interp_method
   integer :: ivar, nvars
 
-  !> Size of variables
-  nvars = self%obsvars%nvars()
-  !> Fill in geovars: variables we need from the model
-  !  need additional slot to hold vertical coord.
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
   !> grab what vertical coordinate/variable to use from the config
   call grid_conf%get_or_die("vertical coordinate",coord_name)
   self%v_coord = coord_name
+  
+  call grid_conf%get_or_die("observation vertical coordinate",coord_name)
+  self%o_v_coord = coord_name
 
   call grid_conf%get_or_die("interpolation method",interp_method)
   self%interp_method = interp_method
@@ -75,16 +71,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
     call grid_conf%get_or_die("apply near surface wind scaling", self%use_fact10)
   endif
   if (self%use_fact10) call self%geovars%push_back("wind_reduction_factor_at_10m")
-
-  !> Determine observation vertical coordinate.
-  !  Use the model vertical coordinate unless the option
-  !  'observation vertical coordinate' is specified.
-  if ( grid_conf%has("observation vertical coordinate") ) then
-    call grid_conf%get_or_die("observation vertical coordinate",coord_name)
-    self%o_v_coord = coord_name
-  else
-    self%o_v_coord = self%v_coord
-  endif
 
   !> Determine observation vertical coordinate group.
   !  Use MetaData unless the option
@@ -203,8 +189,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! Loop over the variables
     do iobsvar = 1, size(self%obsvarindices)
       ! Check that this is a typical wind variable
-      if ((trim(self%obsvars%variable(iobsvar)) == 'eastward_wind') .or. &
-          (trim(self%obsvars%variable(iobsvar)) == 'northward_wind')) then
+      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
+          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
         ! Get the index of the row of hofx to fill
         ivar = self%obsvarindices(iobsvar)
         ! Loop over the observations

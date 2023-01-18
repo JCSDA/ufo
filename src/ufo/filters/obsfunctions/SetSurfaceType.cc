@@ -30,26 +30,26 @@ namespace ufo {
     options_.validateAndDeserialize(conf);
 
     // Include list of required data from GeoVaLs
-    invars_ += Variable("ice_area_fraction@GeoVaLs");
-    invars_ += Variable("surface_altitude@GeoVaLs");
+    invars_ += Variable("GeoVaLs/ice_area_fraction");
+    invars_ += Variable("GeoVaLs/surface_altitude");
 
     // Include list of required data from ObsSpace
-    invars_ += Variable("latitude@MetaData");
+    invars_ += Variable("MetaData/latitude");
 
     if (options_.UseReportSurface.value()) {
       invars_ += Variable(options_.SurfaceMetaDataName.value());
     }
 
     if (options_.UseReportElevation.value()) {
-      invars_ += Variable("surface_height@MetaData");
+      invars_ += Variable("MetaData/heightOfSurface");
     }
 
     if (options_.UseAAPPSurfaceClass.value()) {
-      invars_ += Variable("surface_class@MetaData");
+      invars_ += Variable("MetaData/surfaceClassAAPP");
     }
 
     if (options_.UseSurfaceWaterFraction.value()) {
-      invars_ += Variable("water_fraction@MetaData");
+      invars_ += Variable("MetaData/waterFraction");
     }
   }
 
@@ -69,9 +69,9 @@ namespace ufo {
     std::vector<int> surftype(nlocs, options_.SurfaceTypeDefault.value());
 
     // mandatory variables
-    in.get(Variable("ice_area_fraction@GeoVaLs"), ice_area_frac);
-    in.get(Variable("latitude@MetaData"), latitude);
-    in.get(Variable("surface_altitude@GeoVaLs"), model_height);
+    in.get(Variable("GeoVaLs/ice_area_fraction"), ice_area_frac);
+    in.get(Variable("MetaData/latitude"), latitude);
+    in.get(Variable("GeoVaLs/surface_altitude"), model_height);
 
     int surftype_land_   = options_.SurfaceTypeLand.value();
     int surftype_sea_    = options_.SurfaceTypeSea.value();
@@ -79,10 +79,10 @@ namespace ufo {
 
     // if available and requested, set elevation to ob surface height
     if (options_.UseReportElevation.value()) {
-      if (in.has(Variable("surface_height@MetaData"))) {
-        in.get(Variable("surface_height@MetaData"), elevation);
+      if (in.has(Variable("MetaData/heightOfSurface"))) {
+        in.get(Variable("MetaData/heightOfSurface"), elevation);
       } else {
-        oops::Log::warning() << "UseReportElevation is true but surface_height@MetaData"
+        oops::Log::warning() << "UseReportElevation is true but MetaData/heightOfSurface"
                              << " not present. Using model data for elevation data\n";
           elevation = model_height;
       }
@@ -133,9 +133,9 @@ namespace ufo {
 
     // if available and requested, set closest appropriate surface type using water_fraction
     if (options_.UseSurfaceWaterFraction.value()) {
-      if (in.has(Variable("water_fraction@MetaData"))) {
+      if (in.has(Variable("MetaData/waterFraction"))) {
         std::vector<float> water_fraction(nlocs);
-        in.get(Variable("water_fraction@MetaData"), water_fraction);
+        in.get(Variable("MetaData/waterFraction"), water_fraction);
 
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           if (water_fraction[iloc] > options_.MinWaterFrac.value()) {
@@ -145,7 +145,7 @@ namespace ufo {
           }
         }
       } else {
-        oops::Log::warning() << "UseSurfaceWaterFraction is true but water_fraction@MetaData "
+        oops::Log::warning() << "UseSurfaceWaterFraction is true but MetaData/waterFraction "
                              << "not present. Ignoring\n";
           }
     }
@@ -168,9 +168,9 @@ namespace ufo {
 
     // if available and requested, set closest appropriate surface type using AAPP surface class
     if (options_.UseAAPPSurfaceClass.value()) {
-      if (in.has(Variable("surface_class@MetaData"))) {
+      if (in.has(Variable("MetaData/surfaceClassAAPP"))) {
         std::vector<int> AAPP_surface_class(nlocs);
-        in.get(Variable("surface_class@MetaData"), AAPP_surface_class);
+        in.get(Variable("MetaData/surfaceClassAAPP"), AAPP_surface_class);
 
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           if (AAPP_surface_class[iloc] == AAPP_surfclass::sea) {
@@ -189,7 +189,7 @@ namespace ufo {
           }
         }
       } else {
-        oops::Log::warning() << "UseAAPPSurfaceClass is true but surface_class@MetaData not "
+        oops::Log::warning() << "UseAAPPSurfaceClass is true but MetaData/surfaceClassAAPP not "
                              << "present. Ignoring\n";
           }
     }

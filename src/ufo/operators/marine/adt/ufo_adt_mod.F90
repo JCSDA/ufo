@@ -63,8 +63,7 @@ implicit none
     real(kind_real), allocatable :: obs_adt(:)
     integer :: obss_nlocs
     integer :: iobs, cnt, cnt_glb
-    real(kind_real) :: offset_hofx, pe_offset_hofx
-    real(kind_real) :: offset_obs, pe_offset_obs
+    real(kind_real) :: offset, pe_offset
     type(fckit_mpi_comm) :: f_comm
     real(c_double) :: missing
 
@@ -88,30 +87,34 @@ implicit none
     ! Read in obs data
     allocate(obs_adt(obss_nlocs))
 
-    call obsspace_get_db(obss, "ObsValue", "absolute_dynamic_topography", obs_adt)
+    call obsspace_get_db(obss, "ObsValue", "absoluteDynamicTopography", obs_adt)
 
     ! Local offset
-    pe_offset_hofx = 0.0
-    pe_offset_obs = 0.0
+    pe_offset = 0.0
     cnt = 0
     do iobs = 1, obss_nlocs
-       if (hofx(iobs)/=missing) then
-          pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
-          pe_offset_obs = pe_offset_obs + obs_adt(iobs)
+      ! TODO this really should only be done on qc'd obs, otherwise bad obs
+      ! that aren't assimilated will throw off this global offset
+       if (geoval_adt%vals(1,iobs) /= missing .and. obs_adt(iobs) /= missing) then
+          pe_offset = pe_offset + obs_adt(iobs) - geoval_adt%vals(1,iobs)
           cnt = cnt + 1
        end if
     end do
 
     ! Global offsets
-    call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
-    call f_comm%allreduce(pe_offset_obs, offset_obs, fckit_mpi_sum())
+    call f_comm%allreduce(pe_offset, offset, fckit_mpi_sum())
     call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
-    offset_hofx = offset_hofx/cnt_glb
-    offset_obs = offset_obs/cnt_glb
+    if (cnt_glb > 0) then
+      offset = offset/cnt_glb
+    end if
 
     ! Adjust simulated obs to obs offset
     do iobs = 1, obss_nlocs
-       hofx(iobs) = geoval_adt%vals(1,iobs) + (offset_obs-offset_hofx)
+      hofx(iobs) = geoval_adt%vals(1,iobs)
+      ! only add offset if hofx is not a missing value
+      if (hofx(iobs) /= missing) then
+          hofx(iobs) = hofx(iobs) + offset
+      end if
     enddo
 
     deallocate(obs_adt)
