@@ -9,16 +9,16 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "ocean_depth"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "depthBelowWaterSurface"
         sort order: "ascending"
-    simulated variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
   obs function:
-    name: SelectStatistic@IntObsFunction
+    name: IntObsFunction/SelectStatistic
     variables: [ocean_surface]
     options:
       variable: 
-      - name: ocean_depth@MetaData
+      - name: MetaData/depthBelowWaterSurface
       select minimum: true
     tolerance: 1.0e-6
     expect missing value locations to match: true
@@ -29,21 +29,21 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "ocean_depth"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "depthBelowWaterSurface"
         sort order: "ascending"
-    simulated variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
   obs function:
-    name: SelectStatistic@IntObsFunction
+    name: IntObsFunction/SelectStatistic
     variables: [ocean_bottom]
     options:
       variable:
-      - name: MetaData/ocean_depth
+      - name: MetaData/depthBelowWaterSurface
       select maximum: true
       force select: true
       where:
         - variable:
-            name: QCflagsData/ocean_temperature
+            name: QCflagsData/waterTemperature
           is_in: 0
     tolerance: 1.0e-6
     expect missing value locations to match: true
@@ -54,20 +54,20 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "ocean_depth"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "depthBelowWaterSurface"
         sort order: "ascending"
-    simulated variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
   obs function:
-    name: SelectStatistic@IntObsFunction
+    name: IntObsFunction/SelectStatistic
     variables: [ocean_mean]
     options:
       variable:
-      - name: MetaData/ocean_depth
+      - name: MetaData/depthBelowWaterSurface
       select mean: true
       where:
         - variable:
-            name: ObsValue/ocean_temperature
+            name: ObsValue/waterTemperature
           is_defined:
     tolerance: 1.0e-6
     expect missing value locations to match: true
@@ -78,20 +78,20 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "ocean_depth"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "depthBelowWaterSurface"
         sort order: "ascending"
-    simulated variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
   obs function:
-    name: SelectStatistic@IntObsFunction
+    name: IntObsFunction/SelectStatistic
     variables: [ocean_median]
     options:
       variable:
-      - name: MetaData/ocean_depth
+      - name: MetaData/depthBelowWaterSurface
       select median: true
       where:
         - variable:
-            name: MetaData/ocean_depth
+            name: MetaData/depthBelowWaterSurface
           maxvalue: 250
     tolerance: 1.0e-6
     expect missing value locations to match: true
@@ -101,13 +101,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
-    simulated variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
   obs function:
-    name: SelectStatistic@IntObsFunction
+    name: IntObsFunction/SelectStatistic
     variables: [temp_mean_and_min]
     options:
       variable:
-      - name: ocean_temperature@ObsValue
+      - name: ObsValue/waterTemperature
       select minimum: true
       select mean: true
     tolerance: 1.0e-6
@@ -119,18 +119,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_select_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "ocean_depth"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "depthBelowWaterSurface"
         sort order: "ascending"
-    simulated variables: [channel_data]
+    simulated variables: [channelData]
     channels: 1-3
   obs function:
-    name: SelectStatistic@IntObsFunction
-    variables: [channel_data]
+    name: IntObsFunction/SelectStatistic
+    variables: [channelData]
     channels: 1-3
     options:
       variable:
-      - name: channel_data@ObsValue
+      - name: ObsValue/channelData
         channels: 1-3
       select minimum: true
       select mean: true

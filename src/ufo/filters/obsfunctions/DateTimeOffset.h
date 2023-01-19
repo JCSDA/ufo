@@ -75,9 +75,9 @@ class DateTimeOffsetParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-/// \brief Add time offsets (in seconds, minutes or hours) to dateTime@MetaData.
+/// \brief Add time offsets (in seconds, minutes or hours) to MetaData/dateTime.
 ///
-/// This function is used to add a location-dependent offset to dateTime@MetaData.
+/// This function is used to add a location-dependent offset to MetaData/dateTime.
 /// If the offset at a particular location is missing then
 /// the corresponding datetime is not modified.
 ///

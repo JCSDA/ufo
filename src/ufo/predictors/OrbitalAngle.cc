@@ -46,7 +46,7 @@ void OrbitalAngle::compute(const ioda::ObsSpace & odb,
 
   // retrieve the sensor orbital angle
   std::vector<double> orbital_angle(nlocs, 0.0);
-  odb.get_db("MetaData", "satellite_orbital_angle", orbital_angle);
+  odb.get_db("MetaData", "satelliteOrbitalAngle", orbital_angle);
 
   switch (component_)
   {

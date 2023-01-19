@@ -19,7 +19,7 @@ observations:
   - filter: BlackList
     where:
     - variable:
-        name: latitude@MetaData  # [1, 2, ..., 10]
+        name: MetaData/latitude  # [1, 2, ..., 10]
       minvalue: 3
       maxvalue: 4
   # This filter will put missing values in the first 3 elements of variable1@DerivedObsValue.
@@ -28,10 +28,10 @@ observations:
   - filter: Variable Assignment
     where:
     - variable:
-        name: latitude@MetaData  # [1, 2, ..., 10]
+        name: MetaData/latitude  # [1, 2, ..., 10]
       minvalue: 4  # Select only the last 7 locations
     assignments:
-    - name: variable1@DerivedObsValue
+    - name: DerivedObsValue/variable1
       type: float
       value: 1
   benchmarkFlag: 10  # missing
@@ -45,24 +45,24 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
     # The first two elements of ObsValue and the last two of ObsError are missing
-    simulated variables: [surface_pressure]
-    observed variables: [surface_pressure]
+    simulated variables: [stationPressure]
+    observed variables: [stationPressure]
   obs filters:
   # Blacklist location 2
   - filter: BlackList
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: 0
       maxvalue: 0
-  # Leave only the first element of surface_pressure@DerivedObsValue set to a missing value
+  # Leave only the first element of DerivedObsValue/stationPressure set to a missing value
   - filter: Variable Assignment
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: -2  # Select all locations except the first
     assignments:
-    - name: surface_pressure@DerivedObsValue
+    - name: DerivedObsValue/stationPressure
       type: float
       value: 100000
   benchmarkFlag: 10  # missing
@@ -77,10 +77,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature, eastward_wind]
-    derived variables: [eastward_wind]
-    observed variables: [air_temperature]
-  expectExceptionWithMessage: All filters have been run, but the derived simulated variable eastward_wind can't be found either in the ObsValue or the DerivedObsValue group
+    simulated variables: [airTemperature, windEastward]
+    derived variables: [windEastward]
+    observed variables: [airTemperature]
+  expectExceptionWithMessage: All filters have been run, but the derived simulated variable windEastward can't be found either in the ObsValue or the DerivedObsValue group
 
 - obs space:
     name: Derived variable assigned values, but not error estimates
@@ -88,17 +88,17 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature, eastward_wind]
-    derived variables: [eastward_wind]
-    observed variables: [air_temperature]
+    simulated variables: [airTemperature, windEastward]
+    derived variables: [windEastward]
+    observed variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: eastward_wind@DerivedObsValue
+    - name: DerivedObsValue/windEastward
       type: float
       value: 10
-  passedBenchmark: 5 # air_temperature
-  failedBenchmark: 5 # eastward_wind -- its error estimates are missing
+  passedBenchmark: 5 # airTemperature
+  failedBenchmark: 5 # windEastward -- its error estimates are missing
 
 - obs space:
     name: Derived simulated variable assigned both values and error estimates
@@ -106,13 +106,13 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [air_temperature, eastward_wind]
-    derived variables: [eastward_wind]
-    observed variables: [air_temperature]
+    simulated variables: [airTemperature, windEastward]
+    derived variables: [windEastward]
+    observed variables: [airTemperature]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: eastward_wind@DerivedObsValue
+    - name: DerivedObsValue/windEastward
       type: float
       value: 10
   - filter: Perform Action
@@ -127,9 +127,9 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    simulated variables: [surface_pressure]
+    simulated variables: [stationPressure]
     # Already exists. But the first two elements of ObsValue and the last two of ObsError are missing
-    derived variables: [surface_pressure]
+    derived variables: [stationPressure]
     observed variables: []
   obs filters:
   # Add a dummy filter to force the QCmanager and Final Check to be run.
@@ -145,14 +145,14 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    # The input file contains no relative_humidity@ObsError variable
-    simulated variables: [relative_humidity, air_temperature]
-    observed variables: [relative_humidity, air_temperature]
+    # The input file contains no ObsError/relativeHumidity variable
+    simulated variables: [relativeHumidity, airTemperature]
+    observed variables: [relativeHumidity, airTemperature]
   obs filters:
   # Add a dummy filter to force the QCmanager and Final Check to be run.
   - filter: Domain Check
-  passedBenchmark: 5 # air_temperature
-  failedBenchmark: 5 # relative_humidity -- its error estimates are missing
+  passedBenchmark: 5 # airTemperature
+  failedBenchmark: 5 # relativeHumidity -- its error estimates are missing
 
 - obs space:
     name: Simulated variable without initial ObsErrors; errors assigned by a filter
@@ -160,12 +160,12 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
-    # The input file contains no relative_humidity@ObsError variable
-    simulated variables: [relative_humidity, air_temperature]
-    observed variables: [relative_humidity, air_temperature]
+    # The input file contains no ObsError/relativeHumidity variable
+    simulated variables: [relativeHumidity, airTemperature]
+    observed variables: [relativeHumidity, airTemperature]
   obs filters:
   - filter: Perform Action
-    filter variables: [relative_humidity]
+    filter variables: [relativeHumidity]
     action:
       name: assign error
       error parameter: 0.1

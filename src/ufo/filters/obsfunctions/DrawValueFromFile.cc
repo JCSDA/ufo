@@ -287,7 +287,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
     }
   }
   if (extract_channels)
-    interpolator.scheduleSort("MetaData/channel_number", InterpMethod::EXACT,
+    interpolator.scheduleSort("MetaData/sensorChannelNumber", InterpMethod::EXACT,
                               ExtrapolationMode::ERROR, EquidistantChoice::FIRST,
                               CoordinateTransformation::NONE);
 

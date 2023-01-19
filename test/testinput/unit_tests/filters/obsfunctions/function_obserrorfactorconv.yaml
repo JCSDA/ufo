@@ -12,10 +12,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
       obsgrouping:
-        group variables: ["station_id", "dateTime"]
-        sort variable: "air_pressure"
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "pressure"
         sort order: "descending"  
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -23,12 +23,12 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/converr_vadwind_geoval_2020120112_s.nc4
   obs function:
-    name: ObsErrorFactorConventional@ObsFunction
-    variables: [eastward_wind]
+    name: ObsFunction/ObsErrorFactorConventional
+    variables: [windEastward]
     tolerance: 1.e-6
     options:
-      inflate variables: [eastward_wind] # Required
+      inflate variables: [windEastward] # Required
       test QCflag: PreQC  # Optional. Default is from filter qcflags     
       test QCthreshold: 2 # Optonal only when using PreQC flags 
                           # Default value = 3 for PreQC
-      pressure: "MetaData/air_pressure"
+      pressure: "MetaData/pressure"

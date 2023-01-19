@@ -12,9 +12,9 @@ Sondes:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
+        group variables: [ "stationIdentification" ]
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulated variables: [air_temperature, height]
+    simulated variables: [airTemperature, height]
 #   obsdataout:
 #     engine:
 #       type: H5File

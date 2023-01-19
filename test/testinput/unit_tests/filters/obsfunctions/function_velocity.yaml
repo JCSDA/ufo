@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_2018041500_m_velocity_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   # can have GeoVaLs section like below
   #geovals:
   #  filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
@@ -21,8 +21,8 @@ observations:
   #obs diagnostics:
   #  filename: Data/ufo/testinput_tier_1/satwind_obsdiag_2018041500_m.nc4
   obs function:
-    name: Velocity@ObsFunction
+    name: ObsFunction/Velocity
     options:
       type: ObsValue
-    variables: [wind_speed]
+    variables: [windSpeed]
     tolerance: 1.e-7

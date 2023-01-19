@@ -6,6 +6,8 @@ observations:
     name: VertInterp
     interpolation method: log-linear
     observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Satwind
@@ -13,11 +15,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
   obs filters:
-  # Create MetaData/satwind_id string variable containing channel information
+  # Create MetaData/satwindIdentifier string variable containing channel information
   - filter: satname
     SatName assignments:
     - min WMO Satellite id: 1
@@ -39,75 +41,77 @@ observations:
     number of generating apps: 4
   # Assign estimated pressure errors for each satellite and channel combination
   # Errors are defined as a function of:
-  #     air_pressure@MetaData
-  #     satwind_id@MetaData
+  #     MetaData/pressure
+  #     MetaData/satwindIdentifier
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure@MetaDataError
+    - name: MetaDataError/pressure
       type: float
       function:
-        name: DrawValueFromFile@ObsFunction
+        name: ObsFunction/DrawValueFromFile
         options:
           file: Data/ufo/testinput_tier_1/satwind_pressure_errors.nc4
           group: MetaDataError
           interpolation:
-          - name: satwind_id@MetaData
+          - name: MetaData/satwindIdentifier
             method: exact
-          - name: air_pressure@MetaData
+          - name: MetaData/pressure
             method: linear
   # Post filter - Assign individual observation errors
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
-          wind component: eastward_wind
-          observation vertical coordinate: air_pressure
+          wind component: windEastward
+          observation vertical coordinate: pressure
           vertical coordinate: air_pressure_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
+            name: MetaData/qiWithoutForecast
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: northward_wind
+    - name: windNorthward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
-          wind component: northward_wind
-          observation vertical coordinate: air_pressure
+          wind component: windNorthward
+          observation vertical coordinate: pressure
           vertical coordinate: air_pressure_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
+            name: MetaData/qiWithoutForecast
   compareVariables:            #  test output matches precalculated values
     - reference:
-        name: eastward_wind@TestReference
+        name: TestReference/windEastward
       test:
-        name: eastward_wind@EffectiveError
+        name: EffectiveError/windEastward
       absTol: 1.0e-5
     - reference:
-        name: northward_wind@TestReference
+        name: TestReference/windNorthward
       test:
-        name: northward_wind@EffectiveError
+        name: EffectiveError/windNorthward
       absTol: 1.0e-5
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
     interpolation method: log-linear
     observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: GeoVaLs are in the wrong order, throwing an exception
@@ -115,7 +119,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
   obs filters:
@@ -125,34 +129,36 @@ observations:
   # Set constant pressure error
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure@MetaDataError
+    - name: MetaDataError/pressure
       type: float
       value: 10000.0
   # Post filter - Assign individual observation errors
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
-          wind component: eastward_wind
-          observation vertical coordinate: air_pressure
+          wind component: windEastward
+          observation vertical coordinate: pressure
           vertical coordinate: air_pressure_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
+            name: MetaData/qiWithoutForecast
   expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
     interpolation method: log-linear
     observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Incorrect vertical coordinate
@@ -160,7 +166,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
   obs filters:
@@ -170,34 +176,36 @@ observations:
   # Set constant pressure error
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure@MetaDataError
+    - name: MetaDataError/pressure
       type: float
       value: 10000.0
   # Post filter - Assign individual observation errors
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
-          wind component: eastward_wind
-          observation vertical coordinate: air_pressure
+          wind component: windEastward
+          observation vertical coordinate: pressure
           vertical coordinate: geopotential_height_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
+            name: MetaData/qiWithoutForecast
   expectExceptionWithMessage: Vertical coordinate not recognised
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
     interpolation method: log-linear
     observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Invalid pressure error input
@@ -205,7 +213,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
   obs filters:
@@ -215,34 +223,36 @@ observations:
   # Set constant pressure error
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure@MetaDataError
+    - name: MetaDataError/pressure
       type: float
       value: 100.0
   # Post filter - Assign individual observation errors
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
-          wind component: eastward_wind
-          observation vertical coordinate: air_pressure
+          wind component: windEastward
+          observation vertical coordinate: pressure
           vertical coordinate: air_pressure_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
+            name: MetaData/qiWithoutForecast
   expectExceptionWithMessage: "Pressure error invalid: 100 Pa"
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
     interpolation method: log-linear
     observation vertical coordinate: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
     name: Invalid wind component specified
@@ -250,7 +260,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_small_20201001T0600Z.nc4
   obs filters:
@@ -260,26 +270,26 @@ observations:
   # Set constant pressure error
   - filter: Variable Assignment
     assignments:
-    - name: air_pressure@MetaDataError
+    - name: MetaDataError/pressure
       type: float
       value: 10000.0
   # Post filter - Assign individual observation errors
   - filter: Perform Action
     defer to post: true
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     action:
       name: assign error
       error function:
-        name: SatwindIndivErrors@ObsFunction
+        name: ObsFunction/SatwindIndivErrors
         options:
           verror add: 7.5
           verror mult: -5.0
           wind component: air_temperature
-          observation vertical coordinate: air_pressure
+          observation vertical coordinate: pressure
           vertical coordinate: air_pressure_levels_minus_one
           pressure error:
-            name: air_pressure@MetaDataError
+            name: MetaDataError/pressure
           quality index:
-            name: QI_without_forecast@MetaData
-  expectExceptionWithMessage: Wind component must be one of eastward_wind or northward_wind
+            name: MetaData/qiWithoutForecast
+  expectExceptionWithMessage: Wind component must be one of windEastward or windNorthward

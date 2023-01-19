@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1, 2, 16 
 #   obsdataout: 
 #     engine:
@@ -17,7 +17,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
   obs function:
-    name: SCATRetMW@ObsFunction
+    name: ObsFunction/SCATRetMW
     options:
       scatret_ch238: 1
       scatret_ch314: 2

@@ -9,20 +9,21 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/met_office_conventional_profile_processing_average_temperature_obs_printfilterdata_out.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 
   obs operator:
     name: VertInterp
     interpolation method: log-linear
     variables:
-    - name: air_temperature
+    - name: airTemperature
+    observation alias file: ../resources/namemap/test_name_map.yaml
 
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
@@ -33,14 +34,14 @@ observations:
     minimum location: 0
     maximum location: 11
     variables:
-    - variable: HofX/air_temperature
+    - variable: HofX/airTemperature
     defer to post: true
   - filter: Print Filter Data
     message: Printing filter data before Background Check, MPI rank 0 only
     minimum location: 1735
     maximum location: 0
     variables:
-    - variable: HofX/air_temperature
+    - variable: HofX/airTemperature
     defer to post: true
     print only rank 0: true
   - filter: Create Diagnostic Flags
@@ -49,7 +50,7 @@ observations:
       initial value: true
   - filter: Background Check
     filter variables:
-    - air_temperature
+    - airTemperature
     absolute threshold: 2.0
     defer to post: true
     actions:
@@ -62,14 +63,14 @@ observations:
     minimum location: 0
     maximum location: 11
     variables:
-    - variable: ObsValue/air_temperature
-    - variable: HofX/air_temperature
+    - variable: ObsValue/airTemperature
+    - variable: HofX/airTemperature
     - variable: MetaData/dateTime
-    - variable: MetaData/air_pressure
+    - variable: MetaData/pressure
     - variable: GeoVaLs/air_temperature
       levels: 0, 2-4, 100
     - variable: MetaData/ObsType
-    - variable: MetaData/station_id
+    - variable: MetaData/stationIdentification
     - variable: ObsValue/missing
     - variable: missing/air_temperature
     - variable: GeoVaLs/missing
@@ -78,22 +79,22 @@ observations:
     message: Printing filter data with masking after Background Check
     where:
     - variable:
-       name: ObsValue/air_temperature
+       name: ObsValue/airTemperature
       minvalue: 280
     minimum location: 0
     maximum location: 11
     variables:
-    - variable: ObsValue/air_temperature
-    - variable: DiagnosticFlags/BkgFlag/air_temperature
+    - variable: ObsValue/airTemperature
+    - variable: DiagnosticFlags/BkgFlag/airTemperature
     defer to post: true
   - filter: Variable Assignment
     assignments:
-    - name: air_temperature@DerivedObsValue
+    - name: DerivedObsValue/airTemperature
       type: float
       function:
-        name: LinearCombination@ObsFunction
+        name: ObsFunction/LinearCombination
         options:
-          variables: [air_temperature@ObsValue]
+          variables: [ObsValue/airTemperature]
           coefs: [2.0]
     defer to post: true
   - filter: Print Filter Data
@@ -101,8 +102,8 @@ observations:
     minimum location: 0
     maximum location: 11
     variables:
-    - variable: ObsValue/air_temperature
-    - variable: DerivedObsValue/air_temperature
+    - variable: ObsValue/airTemperature
+    - variable: DerivedObsValue/airTemperature
     defer to post: true
     skip derived: true
   - filter: Print Filter Data
@@ -110,8 +111,8 @@ observations:
     minimum location: 0
     maximum location: 11
     variables:
-    - variable: ObsValue/air_temperature
-    - variable: DerivedObsValue/air_temperature
+    - variable: ObsValue/airTemperature
+    - variable: DerivedObsValue/airTemperature
     defer to post: true
     skip derived: false
 
@@ -125,17 +126,17 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Print Filter Data
     message: Printing filter data
     minimum location: 2
     maximum location: 1
     variables:
-    - variable: ObsValue/air_temperature
+    - variable: ObsValue/airTemperature
   expectExceptionWithMessage: Minimum location cannot be larger than maximum location
 
 - obs space:
@@ -144,7 +145,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: Print Filter Data
@@ -153,7 +154,7 @@ observations:
     maximum location: 2
     variables:
     - variable:
-        name: ObsValue/brightness_temperature
+        name: ObsValue/brightnessTemperature
         channels: 1-7, 15-28, 100
   passedBenchmark: 2200
 

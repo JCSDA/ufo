@@ -46,17 +46,17 @@ class ObsErrorFactorQuotientParameters : public oops::Parameters {
 ///
 ///     - Filter: Bounds Check
 ///       filter variables:
-///       - name: air_temperature
+///       - name: airTemperature
 ///       action:
 ///         name: reject
 ///       maxvalue: 3.6
 ///       test variables:
-///       - name: ObsErrorFactorQuotient@ObsFunction
+///       - name: ObsFunction/ObsErrorFactorQuotient
 ///           options:
 ///             numerator:
-///               name: air_temperature@ObsErrorData   # After inflation step
+///               name: ObsErrorData/airTemperature   # After inflation step
 ///             denominator:
-///               name: air_temperature@ObsError
+///               name: ObsError/airTemperature
 ///       defer to post: true                         # Likely necessary for order of filters
 ///
 class ObsErrorFactorQuotient : public ObsFunctionBase<float> {

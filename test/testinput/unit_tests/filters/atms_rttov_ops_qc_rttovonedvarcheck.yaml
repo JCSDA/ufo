@@ -23,7 +23,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &ops_channels 1-22
 #   obsdataout:
 #     engine:
@@ -43,7 +43,7 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5, 16-17
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
@@ -61,7 +61,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -110,7 +110,7 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5, 16-17
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
@@ -128,7 +128,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -187,7 +187,7 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5, 16-17
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
@@ -204,7 +204,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -247,7 +247,7 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5, 16-17
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
@@ -264,7 +264,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -305,13 +305,13 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5, 16-17
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 60.0
     ModName: RTTOV
     ModOptions:
@@ -326,7 +326,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -343,7 +343,7 @@ observations:
   - filter: RTTOV OneDVar Check
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: 60.0
     ModName: RTTOV
     ModOptions:
@@ -358,7 +358,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -374,9 +374,9 @@ observations:
     RetrievedErrorFactor: -1.0
   compareVariables:
     - reference:
-        name: final_cost_onedvar@TestReference
+        name: TestReference/final_cost_onedvar
       test:
-        name: FinalCost@OneDVar
+        name: OneDVar/finalCost
       absTol: 1.0e-4
 # Test the surface emissivity retrieval works
 - obs operator: 
@@ -392,46 +392,46 @@ observations:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 4-5, 16-17
   # Setup surface emissivity for test
   # To be replaced with DrawFromFile
   - filter: Variable Assignment
     assignments:
-    - name: surface_emissivity@VarMetaData
+    - name: VarMetaData/emissivity
       channels: *ops_channels
       type: float
       function:
-        name: Conditional@ObsFunction
+        name: ObsFunction/Conditional
         options:
           firstmatchingcase: false
           defaultvalue: 0.0
           cases:
           - where:
             - variable:
-                name: surface_type@MetaData
+                name: MetaData/surfaceQualifier
               is_in: 0 # land
             value: 0.95
           - where:
             - variable:
-                name: surface_type@MetaData
+                name: MetaData/surfaceQualifier
               is_in: 2 # seaice
             value: 0.92
   # Setup surface emissivity error for test
   - filter: Variable Assignment
     assignments:
-    - name: surface_emissivity_error@VarMetaData
+    - name: VarMetaData/emissivityError
       channels: *ops_channels
       type: float
       function:
-        name: Conditional@ObsFunction
+        name: ObsFunction/Conditional
         options:
           firstmatchingcase: false
           defaultvalue: 0.0
           cases:
           - where:
             - variable:
-                name: surface_type@MetaData
+                name: MetaData/surfaceQualifier
               is_in: 0 # land
             value: 0.8
   # Do 1D-Var check
@@ -449,7 +449,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atovs_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *ops_channels
     retrieval variables from geovals:
     - air_temperature
@@ -476,30 +476,26 @@ observations:
   passedBenchmark: 774      # number of passed obs
   compareVariables:
     - reference:
-        name: brightness_temperature@TestReferenceOneDVar
+        name: TestReferenceOneDVar/brightnessTemperature
       test:
-        name: brightness_temperature@OneDVar
+        name: OneDVar/brightnessTemperature
       absTol: 1.0e-4
-  compareVariables:
     - reference:
-        name: surface_emissivity@TestReferenceOneDVar
+        name: TestReferenceOneDVar/emissivity
       test:
-        name: surface_emissivity@OneDVar
+        name: OneDVar/emissivity
       absTol: 1.0e-4
-  compareVariables:
     - reference:
-        name: skin_temperature@TestReferenceOneDVar
+        name: TestReferenceOneDVar/skinTemperature
       test:
-        name: skin_temperature@OneDVar
+        name: OneDVar/skinTemperature
       absTol: 1.0e-4
-  compareVariables:
     - reference:
-        name: n_iterations@TestReferenceOneDVar
+        name: TestReferenceOneDVar/numberOfIterations
       test:
-        name: n_iterations@OneDVar
-  compareVariables:
+        name: OneDVar/numberOfIterations
     - reference:
-        name: brightness_temperature@TestReferenceOneDVarBack
+        name: TestReferenceOneDVarBack/brightnessTemperature
       test:
-        name: brightness_temperature@OneDVarBack
+        name: OneDVarBack/brightnessTemperature
       absTol: 1.0e-4

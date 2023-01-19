@@ -8,7 +8,7 @@ obs space:
       type: H5File
       allow overwrite: true
   _source: noaa
-  simulated variables: [absolute_dynamic_topography]
+  simulated variables: [absoluteDynamicTopography]
 obs operator:
   name: ADT
 obs error:
@@ -16,7 +16,7 @@ obs error:
 obs filters:
   - filter: Domain Check
     where:
-    - variable: {name: sea_area_fraction@GeoVaLs}
+    - variable: {name: GeoVaLs/sea_area_fraction}
       minvalue: 0.9
   - filter: Bounds Check
     minvalue: -2.0

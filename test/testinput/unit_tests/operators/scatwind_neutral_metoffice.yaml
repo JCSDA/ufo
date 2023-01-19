@@ -15,8 +15,8 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/scatwind_obs_1d_2020100106_opr_test_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
-    observed variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
+    observed variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4
   vector ref: MetOfficeHofX
@@ -24,16 +24,16 @@ observations:
 - obs operator:
     name: ScatwindNeutralMetOffice
   obs space:
-    name: Missing northward wind from simulated variables, throwing an exception
+    name: Missing windNorthward from simulated variables, throwing an exception
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_small_2020100106.nc4
-    simulated variables: [eastward_wind]
-    observed variables: [eastward_wind]
+    simulated variables: [windEastward]
+    observed variables: [windEastward]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_20201001T0600Z.nc4
-  expect simulateObs to throw exception with message: HofX should have 2 variables eastward_wind and northward_wind
+  expect simulateObs to throw exception with message: HofX should have 2 variables windEastward and windNorthward
 - obs operator:
     name: ScatwindNeutralMetOffice
   obs space:
@@ -42,8 +42,8 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/scatwind_obs_1d_small_2020100106.nc4
-    simulated variables: [eastward_wind, northward_wind]
-    observed variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
+    observed variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_reversed_20201001T0600Z.nc4
   expect simulateObs to throw exception with message: GeoVaLs are not ordered from model top to bottom
@@ -58,9 +58,9 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
     observed variables: []
-    derived variables: [eastward_wind, northward_wind]
+    derived variables: [windEastward, windNorthward]
     channels: 1-4
   geovals:
     filename: Data/ufo/testinput_tier_1/scatwind_geoval_20201001T0600Z.nc4

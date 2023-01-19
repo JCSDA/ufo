@@ -24,6 +24,7 @@ list( APPEND ufo_resources
   rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
   bmatrix/gnssro/gnssro_bmatrix.txt
   namemap/test_name_map.yaml
+  namemap/bayesian_name_map.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/auxillary)

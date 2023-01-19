@@ -3,22 +3,22 @@ window end: 2018-04-15T03:00:00Z
 
 # The value of `rms ref` is calculated for most of the cases below by determining the
 # rms values for each variable and operator separately and combining them as follows:
-# sqrt((rms(air_temperature)^2 + rms(eastward_wind)^2 + rms(northward_wind)^2) / 3).
+# sqrt((rms(airTemperature)^2 + rms(windEastward)^2 + rms(windNorthward)^2) / 3).
 #
 # The individual rms values are:
-# - eastward_wind: VertInterp: 24.343567787559724, Identity: 7.6217412865213365
-# - northward_wind: VertInterp: 5.5678287067725627, Identity: 5.7432477706044107
-# - air_temperature: Identity: 294.79799709699643
+# - windEastward: VertInterp: 24.343567787559724, Identity: 7.6217412865213365
+# - windNorthward: VertInterp: 5.5678287067725627, Identity: 5.7432477706044107
+# - airTemperature: Identity: 294.79799709699643
 #
 # Two of the cases use a mixture of Identity and Composite operators for different
-# station_ids. In those cases the rms ref is taken directly from the output rms value.
+# stationIdentification. In those cases the rms ref is taken directly from the output rms value.
 # It has been verified that each of these rms values is different to the rms values
 # obtained when only one of the operators is used. This indicates that the
 # categorical operator is performing as expected.
 
 observations:
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 - obs space:
@@ -27,10 +27,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -38,16 +39,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -57,7 +61,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is record_number@MetaData.
+# Categorical variable is MetaData/sequenceNumber.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 - obs space:
@@ -66,26 +70,30 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: record_number
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: sequenceNumber
     fallback operator: "Composite"
     categorised operators: {"261": "Composite",
     "159": "Composite",
     "637": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -95,7 +103,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # No operators assigned to values of the categorical variable, so the fallback will be used everywhere.
 - obs space:
@@ -104,23 +112,26 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {}
     operator configurations:
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -130,7 +141,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Identity operator used for one value of the categorical variable.
 - obs space:
@@ -139,24 +150,28 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -166,7 +181,7 @@ observations:
   rms ref: 170.58276494804048
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Identity operator used for all values of the categorical variable.
 - obs space:
@@ -175,10 +190,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity",
     "54857": "Identity",
@@ -186,16 +202,19 @@ observations:
     "96935": "Identity"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -205,7 +224,7 @@ observations:
   rms ref: 170.29086384535719
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite and Identity operators used for different values of the categorical variable.
 - obs space:
@@ -214,10 +233,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Identity",
     "54857": "Composite",
@@ -225,16 +245,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -244,7 +267,7 @@ observations:
   rms ref: 170.37753256777677
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # Duplicate entry in categorised operators list (expect this to have no effect).
@@ -254,10 +277,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -266,16 +290,19 @@ observations:
     "54857": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -285,7 +312,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # The 'operator labels' section is used to differentiate between duplicate component operators.
@@ -295,10 +322,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite1"
     categorised operators: {"47418": "Composite1",
     "54857": "Composite1",
@@ -307,26 +335,31 @@ observations:
     operator labels: ["Identity", "Composite1", "Composite2"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -336,7 +369,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # The 'operator labels' section is used but has no effect.
@@ -346,10 +379,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -358,16 +392,19 @@ observations:
     operator labels: ["Identity", "Composite"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -377,7 +414,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # The 'operator labels' section is used but is the incorrect length, so expect an exception to be thrown.
@@ -387,10 +424,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -399,16 +437,19 @@ observations:
     operator labels: ["Identity"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: Incorrect number of operator labels specified
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -419,7 +460,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # The 'operator labels' section is used but has an incorrect entry, so expect an exception to be thrown.
@@ -429,10 +470,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -441,16 +483,19 @@ observations:
     operator labels: ["Identity", "Nonexistent"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The operator Composite has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -461,7 +506,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # The 'operator labels' section is used but is incorrectly filled, so expect an exception to be thrown.
@@ -471,10 +516,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -483,16 +529,19 @@ observations:
     operator labels: ["Identity", "Identity"]
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The operator Composite has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -503,7 +552,7 @@ observations:
   rms ref: 170.81126924331446
   tolerance: 1.0e-06
 
-# Categorical variable is station_id@MetaData.
+# Categorical variable is MetaData/stationIdentification.
 # Composite operator used as fallback.
 # Composite operator used for all values of the categorical variable.
 # Duplicate entry in operator configurations list and the 'operator labels' section is not used, so expect an exception to be thrown.
@@ -513,10 +562,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -524,26 +574,31 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: There are at least two duplicate component operators. Consider using the 'operator labels' configuration option to differentiate between them
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -561,10 +616,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Nonexistent"
     categorised operators: {"47418": "Composite",
     "54857": "Composite",
@@ -572,16 +628,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The operator Nonexistent has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -599,10 +658,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: station_id
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Nonexistent",
@@ -610,16 +670,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The operator Nonexistent has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -637,10 +700,11 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
   obs operator:
     name: Categorical
-    categorical variable: air_pressure
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: pressure
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
     "54857": "Nonexistent",
@@ -648,16 +712,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The categorical variable must be a vector of either strings or integers
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -675,13 +742,14 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_s_categorical_out.nc4
   obs operator:
     name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
     categorical variable: Nonexistent
     fallback operator: "Composite"
     categorised operators: {"47418": "Composite",
@@ -690,16 +758,19 @@ observations:
     "96935": "Composite"}
     operator configurations:
     - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
     - name: Composite
       components:
        - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: air_temperature
+         - name: airTemperature
        - name: VertInterp
          interpolation method: log-linear
+         observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
-         - name: northward_wind
-         - name: eastward_wind
+         - name: windNorthward
+         - name: windEastward
   expect constructor to throw exception with message: The categorical variable Nonexistent does not exist
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4

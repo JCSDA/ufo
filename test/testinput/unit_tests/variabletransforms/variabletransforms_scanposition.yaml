@@ -21,7 +21,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
@@ -31,6 +31,6 @@ observations:
       UseValidDataOnly: false
   compareVariables:
     - reference:
-        name: scan_position@TestReference
+        name: TestReference/sensorScanPosition
       test:
-        name: scan_position@MetaData
+        name: MetaData/sensorScanPosition

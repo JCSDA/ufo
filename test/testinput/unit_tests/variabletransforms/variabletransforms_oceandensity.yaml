@@ -8,28 +8,28 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/ocean_density_out.nc4
-    simulated variables: [ocean_temperature, ocean_salinity, ocean_density]
-    observed variables: [ocean_temperature, ocean_salinity]
-    derived variables: [ocean_density]
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: Data/ocean_density_out.nc4
+    simulated variables: [waterTemperature, salinity, waterDensity]
+    observed variables: [waterTemperature, salinity]
+    derived variables: [waterDensity]
   obs filters:
   - filter: Variable Transforms
     where:
     - variable:
-        name: ObsValue/ocean_temperature
+        name: ObsValue/waterTemperature
       is_defined:
     - variable:
-        name: ObsValue/ocean_salinity
+        name: ObsValue/salinity
       is_defined:
     Transform: OceanDensity
     ocean pressure group: TestReference
   compareVariables:
     - reference:
-        name: TestReference/ocean_density
+        name: TestReference/waterDensity
       test:
-        name: DerivedObsValue/ocean_density
+        name: DerivedObsValue/waterDensity
       relTol: 2.0e-4
       

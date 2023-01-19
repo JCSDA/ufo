@@ -122,8 +122,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   ! then use nval as a way to check whether the array has been initialised (since
   ! it is called in a loop).
   DO iVar = 1, obs_diags % nvar
-    IF (obs_diags % variables(ivar) == "refractivity" .OR. &
-        obs_diags % variables(ivar) == "model_heights") THEN
+    IF (obs_diags % variables(ivar) == "atmosphericRefractivity" .OR. &
+        obs_diags % variables(ivar) == "geopotentialHeight") THEN
       write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: initialising obs_diags for " // &
         obs_diags % variables(ivar)
       call fckit_log%info(err_msg)
@@ -169,7 +169,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
   call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
-  call obsspace_get_db(obss, "MetaData", "obs_height", obs_height)
+  call obsspace_get_db(obss, "MetaData", "height", obs_height)
 
   obs_loop: do iobs = 1, nobs 
 
@@ -198,7 +198,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
     ! If required, then save the refractivity and model heights to the obs diagnostics.
     ! Allocate the output arrays on the first iteration.
     DO iVar = 1, obs_diags % nvar
-        IF (obs_diags % variables(ivar) == "refractivity") THEN
+        IF (obs_diags % variables(ivar) == "atmosphericRefractivity") THEN
             IF (iobs == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(refractivity)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(refractivity), obs_diags % nlocs))
@@ -213,7 +213,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
             END IF
         END IF
 
-        IF (obs_diags % variables(ivar) == "model_heights") THEN
+        IF (obs_diags % variables(ivar) == "geopotentialHeight") THEN
             IF (iobs == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(model_heights)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(model_heights), obs_diags % nlocs))

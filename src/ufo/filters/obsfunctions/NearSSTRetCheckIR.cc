@@ -44,21 +44,21 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
-  invars_ += Variable("brightness_temperature_jacobian_air_temperature@ObsDiag", channels_);
-  invars_ += Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_air_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_humidity_mixing_ratio", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@ObsError", channels_);
-  invars_ += Variable("sensor_band_central_radiation_wavenumber@VarMetaData");
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
+  invars_ += Variable("MetaData/sensorCentralWavenumber");
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
-  invars_ += Variable("surface_temperature_where_sea@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
+  invars_ += Variable("GeoVaLs/surface_temperature_where_sea");
 }
 
 // -----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
-  size_t nlevs = in.nlevs(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
+  size_t nlevs = in.nlevs(Variable("ObsDiag/brightness_temperature_jacobian_air_temperature",
                                     channels_)[0]);
 
   // Get test groups from options
@@ -90,7 +90,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get surface temperature jacobian
   std::vector<std::vector<float>> dbtdts(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature",
                      channels_)[ichan], dbtdts[ichan]);
   }
 
@@ -100,7 +100,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level = nlevs - ilev - 1;
-      in.get(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
+      in.get(Variable("ObsDiag/brightness_temperature_jacobian_air_temperature",
                        channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
   }
@@ -111,7 +111,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level = nlevs - ilev - 1;
-      in.get(Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag",
+      in.get(Variable("ObsDiag/brightness_temperature_jacobian_humidity_mixing_ratio",
                        channels_)[ichan], level, dbtdq[ichan][ilev]);
     }
   }
@@ -119,15 +119,15 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get variables from ObsSpace
   // Get sensor band central radiation wavenumber
   std::vector<float> wavenumber(nchans);
-  in.get(Variable("sensor_band_central_radiation_wavenumber@VarMetaData"), wavenumber);
+  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
 
   // Get effective observation error and convert it to inverse of the error variance
   const float missing = util::missingValue(missing);
   std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], values);
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflag);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], values);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2))
@@ -138,8 +138,8 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get bias corrected innovation (tbobs - hofx) (hofx includes bias correction)
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ichan], innovation[ichan]);
+    in.get(Variable(hofxgrp+"/brightnessTemperature", channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
@@ -148,21 +148,21 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get original observation error (uninflated)
   std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr[ichan]);
+    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
   }
 
   // Get variables from GeoVaLS
   // Get solar zenith angle
   std::vector<float> solza(nlocs);
-  in.get(Variable("solar_zenith_angle@MetaData"), solza);
+  in.get(Variable("MetaData/solarZenithAngle"), solza);
 
   // Get water temperature
   std::vector<float> tzbgr(nlocs);
-  in.get(Variable("surface_temperature_where_sea@GeoVaLs"), tzbgr);
+  in.get(Variable("GeoVaLs/surface_temperature_where_sea"), tzbgr);
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Retrieved NSST increment (dtz) and average of surface temeprature jacobian (ts_ave)
   // Setup constants

@@ -66,7 +66,7 @@ class Cal_SatBrightnessTempFromRadParameters: public VariableTransformParameters
   /// either frequency, wavelength or wavenumber for a particular channel.  This will take the same
   /// format as other variables e.g
   /// spectral variable:
-  ///   name: wavenumber@MetaData
+  ///   name: Metadata/sensorCentralWavenumber
   ///   channels: 1-20
   oops::RequiredParameter<Variable> spectralVariable{"spectral variable", this};
 
@@ -111,7 +111,7 @@ class Cal_SatBrightnessTempFromRadParameters: public VariableTransformParameters
 *     name: ObsValue/radiance
 *     channels: *all_channels
 *   spectral variable:
-*     name: VarMetaData/wavenumber
+*     name: MetaData/sensorCentralWavenumber
 *     channels: *all_channels
 *   radiance units: wavenumber
 *   minimum value: 150

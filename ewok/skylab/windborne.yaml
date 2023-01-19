@@ -6,7 +6,7 @@ obs space:
       type: H5File
     obsgrouping:
       group variables: ["flight_name"]
-      sort variable: "air_pressure"
+      sort variable: "pressure"
       sort order: "descending"
   obsdataout:
     engine:
@@ -14,14 +14,15 @@ obs space:
       allow overwrite: true
   io pool:
     write multiple files: true
-  simulated variables: [air_temperature, eastward_wind, northward_wind]
+  simulated variables: [airTemperature, windEastward, windNorthward]
 obs operator:
   name: VertInterp
   interpolation method: log-linear
+  observation alias file: $(observation_alias_file)
   variables:
-  - name: air_temperature
-  - name: eastward_wind
-  - name: northward_wind
+  - name: airTemperature
+  - name: windEastward
+  - name: windNorthward
 obs filters:
 - filter: Background Check
   threshold: 3

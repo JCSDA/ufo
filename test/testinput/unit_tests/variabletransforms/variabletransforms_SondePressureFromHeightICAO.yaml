@@ -13,21 +13,21 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conversion_height2pressure.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [air_temperature, relative_humidity, geopotential_height, dew_point_temperature]
+    simulated variables: [airTemperature, relativeHumidity, geopotentialHeight, dewPointTemperature]
   obs filters:
   - filter: Variable Transforms
     Transform: PressureFromHeightForICAO
     Method: UKMO
-    height coordinate: geopotential_height
-    pressure coordinate: air_pressure
+    height coordinate: geopotentialHeight
+    pressure coordinate: pressure
     pressure group: MetaData
   compareVariables:
   - test:
-      name: air_pressure@DerivedMetaData
+      name: DerivedMetaData/pressure
     reference:
-      name: air_pressure_ICAO_reference@ObsValue
+      name: TestReference/pressure_ICAO_reference
     relTol: 1.0e-5
  

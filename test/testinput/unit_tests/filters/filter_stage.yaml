@@ -9,10 +9,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -21,8 +21,9 @@ observations:
   obs operator: &obsop
     name: VertInterp
     interpolation method: log-linear
+    observation alias file: ../resources/namemap/test_name_map.yaml
     variables:
-    - name: air_temperature
+    - name: airTemperature
     vertical coordinate: air_pressure
 
   geovals: &geoval
@@ -31,23 +32,23 @@ observations:
   obs pre filters:
   - filter: Print Filter Data
     variables:
-    - variable: ObsValue/air_temperature
+    - variable: ObsValue/airTemperature
     minimum location: 0
     maximum location: 6
   obs prior filters:
   - filter: Print Filter Data
     variables:
-    - variable: ObsValue/air_temperature
+    - variable: ObsValue/airTemperature
       levels: 0
     minimum location: 0
     maximum location: 6
   obs post filters:
   - filter: Print Filter Data
     variables:
-    - variable: ObsValue/air_temperature
+    - variable: ObsValue/airTemperature
     - variable: GeoVaLs/air_temperature
       levels: 0
-    - variable: HofX/air_temperature
+    - variable: HofX/airTemperature
     minimum location: 0
     maximum location: 6
 

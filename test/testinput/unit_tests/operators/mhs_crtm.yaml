@@ -22,7 +22,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/mhs_n19_obs_2018041500_m_crtm_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-5
   geovals:
     filename: Data/ufo/testinput_tier_1/mhs_n19_geoval_2018041500_m.nc4

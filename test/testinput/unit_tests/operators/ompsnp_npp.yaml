@@ -15,13 +15,13 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/ompsnp_npp_obs_2019101700_m.nc4
       obsgrouping:
         group variables: ["latitude"]
-        sort variable: "air_pressure"
+        sort variable: "pressure"
         sort order: "ascending"
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/ompsnp_npp_obs_2019101700_m_opr_out.nc4
-    simulated variables: [integrated_layer_ozone_in_air]
+    simulated variables: [ozoneTotal]
   geovals:
     filename: Data/ufo/testinput_tier_1/ompsnp_npp_geoval_2019101700_m.nc4
   vector ref: GsiHofX

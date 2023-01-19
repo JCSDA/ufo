@@ -7,7 +7,7 @@ window end: 2020-05-11T09:00:00Z
 # checking that the locations accepted match those calculated by a python script to do the same.
 # The second includes other_variable as one of the simulated variables, which would result in
 # different locations being accepted if the filter acted on it - but the test checks that the
-# filter is only applied to sea_surface_temperature (as above) and ignores other_variable, not
+# filter is only applied to seaSurfaceTemperature (as above) and ignores other_variable, not
 # rejecting any locations in the latter.
 # While the first 2 tests have 'min_num_obs_per_bin' set, the third doesn't - it tests that the
 # default value of 5 is used (note the spatial bins are the same as for the first 2 tests, but
@@ -28,11 +28,11 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/superob_test_out1.nc4
-    simulated variables: [sea_surface_temperature]
+    simulated variables: [seaSurfaceTemperature]
   obs filters:
   - filter: Gaussian Thinning
     filter variables:
-    - name: sea_surface_temperature
+    - name: seaSurfaceTemperature
     select_median: true
     min_num_obs_per_bin: 1
     horizontal_mesh: 6000  # km
@@ -67,11 +67,11 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/superob_test_out2.nc4
-    simulated variables: [sea_surface_temperature, other_variable]
+    simulated variables: [seaSurfaceTemperature, other_variable]
   obs filters:
   - filter: Gaussian Thinning
     filter variables:
-    - name: sea_surface_temperature
+    - name: seaSurfaceTemperature
     select_median: true
     min_num_obs_per_bin: 1
     horizontal_mesh: 6000  # km
@@ -93,11 +93,11 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/superob_test_out3.nc4
-    simulated variables: [sea_surface_temperature]
+    simulated variables: [seaSurfaceTemperature]
   obs filters:
   - filter: Gaussian Thinning
     filter variables:
-    - name: sea_surface_temperature
+    - name: seaSurfaceTemperature
     select_median: true
     horizontal_mesh: 6000  # km
     time_mesh: PT6H00M00S  # so only 1 time bin, not 2
@@ -120,18 +120,18 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/superob_test_out4.nc4
-    simulated variables: [sea_surface_temperature]
-    derived variables: [sea_surface_temperature]
+    simulated variables: [seaSurfaceTemperature]
+    derived variables: [seaSurfaceTemperature]
     observed variables: []
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: sea_surface_temperature@DerivedObsValue
+    - name: DerivedObsValue/seaSurfaceTemperature
       type: float
       function:
-        name: LinearCombination@ObsFunction
+        name: ObsFunction/LinearCombination
         options:
-          variables: [sea_surface_temperature@ObsValue, latitude@MetaData]
+          variables: [ObsValue/seaSurfaceTemperature, MetaData/latitude]
           coefs: [1.0, 0.05]  # meaningless quantity, just for testing
   - filter: Gaussian Thinning
     select_median: true

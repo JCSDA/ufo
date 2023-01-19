@@ -52,12 +52,10 @@ namespace ufo {
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
         (variableNamesInt.end(),
-         {"OPS_" +
-             std::string(ufo::VariableNames::qcflags_relative_humidity)});
+         {addOPSPrefix(ufo::VariableNames::qcflags_relative_humidity)});
       variableNamesFloat.insert
         (variableNamesFloat.end(),
-         {"OPS_" +
-             std::string(ufo::VariableNames::relative_humidity_derived)});
+         {addOPSPrefix(ufo::VariableNames::relative_humidity_derived)});
       variableNamesGeoVaLs.insert
         (variableNamesGeoVaLs.end(),
          {ufo::VariableNames::geovals_testreference_relative_humidity,
@@ -85,7 +83,7 @@ namespace ufo {
     ProfileAverageUtils::passNonMissingAveragedObservations
       (profileDataHandler,
        profiles,
-       "relative_humidity",
+       "relativeHumidity",
        ufo::VariableNames::relative_humidity_derived);
 
     // Fill validation information if required.

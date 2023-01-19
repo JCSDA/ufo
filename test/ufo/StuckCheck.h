@@ -40,12 +40,12 @@ void testStuckCheck(const eckit::LocalConfiguration &conf) {
 
   if (conf.has("air_temperatures")) {
     const std::vector<float> airTemperatures = conf.getFloatVector("air_temperatures");
-    obsspace.put_db("ObsValue", "air_temperature", airTemperatures);
+    obsspace.put_db("ObsValue", "airTemperature", airTemperatures);
   }
 
   if (conf.has("air_pressures")) {
     const std::vector<float> airPressures = conf.getFloatVector("air_pressures");
-    obsspace.put_db("ObsValue", "air_pressure", airPressures);
+    obsspace.put_db("ObsValue", "pressure", airPressures);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(

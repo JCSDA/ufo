@@ -12,7 +12,7 @@ observations:
 #       engine:
 #         type: H5File
 #         obsfile: Data/windspeedanddirection_2018041500_output.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   obs filters:
     - filter: Variable Transforms
       Transform: WindSpeedAndDirection
@@ -21,14 +21,14 @@ observations:
   passedBenchmark: 148
   compareVariables:            #  test output matches precalculated values
     - reference:
-        name: wind_speed@TestReference
+        name: TestReference/windSpeed
       test:
-        name: wind_speed@DerivedObsValue
+        name: DerivedObsValue/windSpeed
       absTol: 5.0e-6
     - reference:
-        name: wind_from_direction@TestReference
+        name: TestReference/windDirection
       test:
-        name: wind_from_direction@DerivedObsValue
+        name: DerivedObsValue/windDirection
       absTol: 5.0e-5
 
 # Check the filter can create derived variables and sets correct QC flags
@@ -39,9 +39,9 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [wind_speed, wind_from_direction]
+    simulated variables: [windSpeed, windDirection]
     observed variables: []
-    derived variables: [wind_speed, wind_from_direction]
+    derived variables: [windSpeed, windDirection]
   obs filters:
   - filter: Variable Transforms
     Transform: WindSpeedAndDirection
@@ -65,12 +65,12 @@ observations:
       northward wind variable: windNorthwardAt10M
   compareVariables:            #  test output matches precalculated values
     - reference:
-        name: windSpeedAt10M@TestReference
+        name: TestReference/windSpeedAt10M
       test:
-        name: windSpeedAt10M@DerivedObsValue
+        name: DerivedObsValue/windSpeedAt10M
       absTol: 5.0e-6
     - reference:
-        name: windDirectionAt10M@TestReference
+        name: TestReference/windDirectionAt10M
       test:
-        name: windDirectionAt10M@DerivedObsValue
+        name: DerivedObsValue/windDirectionAt10M
       absTol: 5.0e-5

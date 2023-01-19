@@ -17,15 +17,15 @@ successful:
   ProcessWhere:
     - where:                      # test minvalue when all are >= min
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         minvalue: 1
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
     - where:                      # test minvalue when it's in the middle of the range
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         minvalue: 4
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 7
     - where:                      # test minvalue when it's in the middle if the range and exclusive
       - variable:
@@ -44,15 +44,15 @@ successful:
       size where true: 4
     - where:                      # test minvalue when all are < min
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         minvalue: 11
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 0
     - where:                      # test maxvalue when all are <= max
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         maxvalue: 10
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
     - where:                      # test maxvalue when it's in the middle if the range and exclusive
       - variable:
@@ -63,23 +63,23 @@ successful:
       size where true: 4
     - where:                      # test maxvalue when all but one are > max, one == max
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         maxvalue: 1
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 1
     - where:                      # test min & max at the same time when all should pass
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         minvalue: 1
         maxvalue: 10
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 10
     - where:                      # test min & max at the same time when some should pass
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         minvalue: 2
         maxvalue: 5
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 4
     - where:                      # test min & max at same time with both exclusvie bounds
       - variable:
@@ -109,17 +109,17 @@ successful:
       size where true: 8
     - where:                      # test min & max at the same time when max < min
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         minvalue: 6
         maxvalue: 4
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 0
     - where:                      # test min & max at the same time when max == min
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         minvalue: 7
         maxvalue: 7
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 1
     - where:                      # test min & max when max == min and are exclusive
       - variable:
@@ -132,49 +132,49 @@ successful:
       size where true: 0
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  var5@MetaData
+          name:  MetaData/var5
         minvalue: 2
         maxvalue: 5
-  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 8
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  var5@MetaData
+          name:  MetaData/var5
         minvalue: 0
         maxvalue: 100
-  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 10
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  var5@MetaData
+          name:  MetaData/var5
         minvalue: 100
-  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
     - where:                      # test min & max for datetime hours
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         minvalue: "****-**-**T14:00:00Z"
         maxvalue: "****-**-**T18:00:00Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test minvalue for datetime hours
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         minvalue: "****-**-**T14:00:00Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test minvalue for datetime hours unconstrained maxvalue
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         minvalue: "****-**-**T14:00:00Z"
         maxvalue: "****-**-**T**:**:**Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test maxvalue for datetime hours
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         maxvalue: "****-**-**T14:00:00Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test maxvalue and exclusive for datetime hours
       - variable:
@@ -202,390 +202,390 @@ successful:
       size where true: 3
     - where:                      # test maxvalue for datetime hours with unconstrained minvalue
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         minvalue: "****-**-**T**:**:**Z"
         maxvalue: "****-**-**T14:00:00Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 5
     - where:                      # test unconstrained minvalue and maxvalue for datetime hours
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         minvalue: "****-**-**T**:**:**Z"
         maxvalue: "****-**-**T**:**:**Z"
-  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+  # MetaData/datetime1 = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
       size where true: 10
     - where:                      # test that AND for 2 conditions works as expected
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         maxvalue: 5
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         maxvalue: 6
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 1
     - where:                      # test that AND for 2 conditions works as expected
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         maxvalue: 5
       - variable:
-          name:  var2@MetaData
+          name:  MetaData/var2
         minvalue: 6
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 5
     - where:                      # test that is_defined works when all is defined
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         is_defined:
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
     - where:                      # test that is_not_defined works when all is defined
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         is_not_defined:
-  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 0
     - where:                      # test that is_defined works when some are defined
       - variable:
-          name:  var5@MetaData
+          name:  MetaData/var5
         is_defined:
-  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 6
     - where:                      # test that is_not_defined works when some are defined
       - variable:
-          name:  var5@MetaData
+          name:  MetaData/var5
         is_not_defined:
-  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
     - where:                      # test is_defined on an integer variable
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         is_defined:
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 6
     - where:                      # test is_not_defined on an integer variable
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         is_not_defined:
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
     - where:                      # test is_defined on a string variable
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_defined:
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 10
     - where:                      # test is_not_defined on a string variable
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_not_defined:
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 0
     - where:                       # test is_in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_in: 1
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 5
     - where:                       # test is_in
       - variable:
-          name:  intvar4@MetaData
+          name:  MetaData/intvar4
         is_in: 0-3
-  # intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+  # MetaData/intvar4 = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
       size where true: 8
     - where:                      # test maxvalue when all are <= max
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         maxvalue: 10
-  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/intvar1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
     - where:                      # test maxvalue when all but one are > max, one == max
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         maxvalue: 1
-  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/intvar1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 1
     - where:                      # test min & max at the same time when all should pass
       - variable:
-          name:  intvar2@MetaData
+          name:  MetaData/intvar2
         minvalue: 1
         maxvalue: 10
-  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/intvar2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 10
     - where:                      # test min & max at the same time when some should pass
       - variable:
-          name:  intvar2@MetaData
+          name:  MetaData/intvar2
         minvalue: 2
         maxvalue: 5
-  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/intvar2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 4
     - where:                      # test min & max at the same time when max < min
       - variable:
-          name:  intvar2@MetaData
+          name:  MetaData/intvar2
         minvalue: 6
         maxvalue: 4
-  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/intvar2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 0
     - where:                      # test min & max at the same time when max == min
       - variable:
-          name:  intvar2@MetaData
+          name:  MetaData/intvar2
         minvalue: 7
         maxvalue: 7
-  # intvar2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+  # MetaData/intvar2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 1
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         minvalue: 2
         maxvalue: 5
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 8
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         minvalue: 0
         maxvalue: 100
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 10
     - where:                      # test min & max  for variable with missing values
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         minvalue: 100
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
     - where:                       # test is_in for string-based inputs
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 3
     - where:                       # test is_in for string-based inputs, ignore value not present (DUMMYVAL)
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, DUMMYVAL]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 3
     - where:                       # test is_in for string-based inputs with duplicates
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 3
     - where:                       # test is_in when nothing is in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_in: 5-22
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 0
     - where:                       # test is_in when all is in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_in: 0, 1
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 10
     - where:                       # test is_in when some values are missing
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         is_in: 0-3
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.0e-5
         is_close_to_any_of: [0.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 5
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.0e-4
         is_close_to_any_of: [1.0, 2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 2
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.5
         is_close_to_any_of: [2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 3
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         relative_tolerance: 0.5
         is_close_to_any_of: [2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 3
     - where:                       # test is_not_in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_not_in: 1
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 5
     - where:                       # test is_not_in
       - variable:
-          name:  intvar4@MetaData
+          name:  MetaData/intvar4
         is_not_in: 0-3
-  # intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+  # MetaData/intvar4 = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
       size where true: 2
     - where:                       # test is_not_in when nothing is in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_not_in: 5-22
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 10
     - where:                       # test is_not_in when all is in
       - variable:
-          name:  intvar3@MetaData
+          name:  MetaData/intvar3
         is_not_in: 0, 1
-  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+  # MetaData/intvar3 = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       size where true: 0
     - where:                       # test is_not_in when some values are missing
       - variable:
-          name:  intvar5@MetaData
+          name:  MetaData/intvar5
         is_not_in: 0-3
-  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+  # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 2
     - where:                       # test is_not_in for string-based inputs
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 7
     - where:                       # test is_not_in for string-based inputs, ignore value not present (DUMMYVAL)
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, DUMMYVAL]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 7
     - where:                       # test is_not_in for string-based inputs with duplicates
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 7
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.0e-5
         is_not_close_to_any_of: [0.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 5
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.0e-5
         is_not_close_to_any_of: [1.0, 2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 8
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         absolute_tolerance: 1.5
         is_not_close_to_any_of: [2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 7
     - where:
       - variable:
-          name: var4@MetaData
+          name: MetaData/var4
         relative_tolerance: 0.2
         is_not_close_to_any_of: [2.0]
-  # var4@MetaData = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
+  # MetaData/var4 = 0.0*5, 1.0, 2.0, 3.0, 4.0, 5.0
       size where true: 9
     - where:                      # test any_bit_set_of with a single bit specified
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         any_bit_set_of: 3
-  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # MetaData/intvar1 =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
   # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
       size where true: 3  # "where" should select the following values of intvar1: 8, 9, 10
     - where:                      # test any_bit_set_of with multiple bits specified
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         any_bit_set_of: 0, 1
-  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # MetaData/intvar1 =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
   # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
       size where true: 8  # "where" should select all values of intvar1 except for 4 and 8
     - where:                      # test any_bit_unset_of with a single bit specified
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         any_bit_unset_of: 3
-  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # MetaData/intvar1 =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
   # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
       size where true: 7  # "where" should select all values of intvar1 except for 8, 9, 10
     - where:                      # test any_bit_unset_of with multiple bits specified
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         any_bit_unset_of: 0, 1
-  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # MetaData/intvar1 =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
   # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
       size where true: 8  # "where" should select the following values of intvar1: 3 and 7
     - where:                       # test matches_regex on string variables
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         matches_regex: ".*U.*A.*"
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 2
     - where:                       # test matches_regex on int variables
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         matches_regex: "10?"
-  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/intvar1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 2
     - where:                       # test matches_wildcard on string variables
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         matches_wildcard: "*U*A*"
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 2
     - where:                       # test matches_wildcard on int variables
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         matches_wildcard: "1*"
-  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/intvar1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 2
     - where:                       # test matches_any_wildcard on string variables
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         matches_any_wildcard: ["*U*A*", "H*"]
-  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+  # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 3
     - where:                       # test matches_any_wildcard on int variables
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         matches_any_wildcard: ["1*", "6*"]
-  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # MetaData/intvar1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 3
     - where:                       # test matches_any_wildcard with an empty list of wildcards on string variables
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         matches_any_wildcard: []
       size where true: 0
     - where:                       # test matches_any_wildcard with an empty list of wildcards on int variables
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         matches_any_wildcard: []
       size where true: 0
     - where:                       # test is_true
       - variable:
-          name:  boolvar1@MetaData     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
+          name:  MetaData/boolvar1     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
         is_true:
       size where true: 6
     - where:                       # test is_false
       - variable:
-          name:  boolvar1@MetaData     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
+          name:  MetaData/boolvar1     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
         is_false:
       size where true: 4
     - where:                       # test use of a float-valued obs function as a variable
       - variable:
-          name:  Conditional@ObsFunction
+          name:  ObsFunction/Conditional
           options:
             cases:
             - where:
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 minvalue: 3
               value: 0.6
             defaultvalue: 0.4
@@ -593,12 +593,12 @@ successful:
       size where true: 8
     - where:                       # test use of an int-valued obs function as a variable
       - variable:
-          name:  Conditional@IntObsFunction
+          name:  IntObsFunction/Conditional
           options:
             cases:
             - where:
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 minvalue: 3
               value: 6
             defaultvalue: 4
@@ -606,12 +606,12 @@ successful:
       size where true: 8
     - where:                       # test use of an string-valued obs function as a variable
       - variable:
-          name:  Conditional@StringObsFunction
+          name:  StringObsFunction/Conditional
           options:
             cases:
             - where:
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 minvalue: 3
               value: xyz
             defaultvalue: abc
@@ -619,12 +619,12 @@ successful:
       size where true: 8
     - where:                       # test use of a datetime-valued obs function as a variable
       - variable:
-          name:  Conditional@DateTimeObsFunction
+          name:  DateTimeObsFunction/Conditional
           options:
             cases:
             - where:
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 minvalue: 3
               value: 2000-02-01T00:00:00Z
             defaultvalue: 1999-12-01T00:00:00Z
@@ -655,54 +655,54 @@ operator:
     # Check the 'and' option works as expected
     - where:
       - variable:
-          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 3
       - variable:
-          name:  var2@MetaData # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+          name:  MetaData/var2 # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
         minvalue: 6
       where operator: and
       size where true: 3
     - where:
       - variable:
-          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 3
       - variable:
-          name:  var2@MetaData # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+          name:  MetaData/var2 # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
         minvalue: 6
       where operator: or
       size where true: 10
     - where:
       - variable:
-          name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+          name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         minvalue: 10
       - variable:
-          name: var2@MetaData  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+          name: MetaData/var2  # 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
         minvalue: 10
       - variable:
-          name:  intvar3@MetaData  # 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+          name:  MetaData/intvar3  # 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
         is_in: 1
       where operator: or
       size where true: 6
     - where:
       - variable:
-          name: intvar5@MetaData  # 1, _, 2, _, 3, _, 4, _, 5, 0
+          name: MetaData/intvar5  # 1, _, 2, _, 3, _, 4, _, 5, 0
         is_not_defined:
       - variable:
-          name: intvar5@MetaData  # 1, _, 2, _, 3, _, 4, _, 5, 0
+          name: MetaData/intvar5  # 1, _, 2, _, 3, _, 4, _, 5, 0
         is_defined:
       where operator: or
       size where true: 10
     - where:
       - variable:
-          name:  Conditional@ObsFunction
+          name:  ObsFunction/Conditional
           options:
             cases:
             - where:
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 minvalue: 8
               - variable:
-                  name: var1@MetaData  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  name: MetaData/var1  # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
                 maxvalue: 3
               where operator: or
               value: 0.6               # assigned to indices 0, 1, 2, 7, 8, 9
@@ -729,82 +729,82 @@ user_error_type_handling_is_in:
   ProcessWhere:
     - where:                       # test is_not_in for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         is_not_in: 0.5
       size where true: 0
     - where:                       # test is_in for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         is_in: 0.5
       size where true: 0
     - where:                       # test any_bit_set_of for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         any_bit_set_of: 1
       size where true: 0
     - where:                       # test any_bit_set_of for unsupported type (string)
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         any_bit_set_of: 1
       size where true: 0
     - where:                       # test any_bit_unset_of for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         any_bit_unset_of: 1
       size where true: 0
     - where:                       # test any_bit_unset_of for unsupported type (string)
       - variable:
-          name:  station_id@MetaData
+          name:  MetaData/stationIdentification
         any_bit_unset_of: 1
       size where true: 0
     - where:                       # test matches_regex for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         matches_regex: abc.*
       size where true: 0
     - where:                       # test matches_wildcard for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         matches_wildcard: abc*
       size where true: 0
     - where:                       # test matches_any_wildcard for unsupported type (float)
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         matches_any_wildcard: [abc*]
       size where true: 0
     - where:                       # test is_not_close_to_any_of for unsupported type (int)
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         relative_tolerance: 0.2
         is_not_close_to_any_of: [1]
       size where true: 0
     - where:                       # test is_close_to_any_of for unsupported type (int)
       - variable:
-          name:  intvar1@MetaData
+          name:  MetaData/intvar1
         absolute_tolerance: 0.2
         is_close_to_any_of: [1]
       size where true: 0
     - where:                       # test is_not_close_to_any_of when both tolerances given
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         relative_tolerance: 0.2
         absolute_tolerance: 0.2
         is_not_close_to_any_of: [1.5]
       size where true: 0
     - where:                       # test is_close_to_any_of when both tolerances given
       - variable:
-          name:  var1@MetaData
+          name:  MetaData/var1
         relative_tolerance: 0.2
         absolute_tolerance: 0.2
         is_close_to_any_of: [1.5]
       size where true: 0
     - where:                       # test is_defined for unsupported type (DateTime)
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         is_defined:
       size where true: 0
     - where:                       # test is_not_defined for unsupported type (DateTime)
       - variable:
-          name:  dateTime@MetaData
+          name:  MetaData/dateTime
         is_not_defined:
       size where true: 0

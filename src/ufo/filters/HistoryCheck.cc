@@ -73,16 +73,16 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   if (options_.resetLargerObsSpaceVariables) {  // used for unit testing
     if (unitTestConfig_.has("station_ids_wide")) {
       const std::vector<int> stationIds = unitTestConfig_.getIntVector("station_ids_wide");
-      widerObsSpace.put_db("MetaData", "station_id", stationIds);
+      widerObsSpace.put_db("MetaData", "stationIdentification", stationIds);
     } else if (unitTestConfig_.has("station_ids_wide_string")) {
       const std::vector<std::string> stationIds =
           unitTestConfig_.getStringVector("station_ids_wide_string");
-      widerObsSpace.put_db("MetaData", "station_id", stationIds);
+      widerObsSpace.put_db("MetaData", "stationIdentification", stationIds);
     }
     if (unitTestConfig_.has("air_temperatures_wide")) {
       const std::vector<float> airTemperatures =
           unitTestConfig_.getFloatVector("air_temperatures_wide");
-      widerObsSpace.put_db("ObsValue", "air_temperature", airTemperatures);
+      widerObsSpace.put_db("ObsValue", "airTemperature", airTemperatures);
     }
   }  // end of manual data entry section used for unit testing
   std::shared_ptr<ioda::ObsDataVector<float>> obserrWide(

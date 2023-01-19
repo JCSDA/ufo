@@ -11,18 +11,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [scaledRadiance]
-    simulated variables: [brightness_temperature]
-    derived variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
     channels: *all_channels
   obs pre filters:
 ### Assign channel wavenumbers in m-1
   - filter: Variable Assignment
     assignments:
-    - name: VarMetaData/wavenumber
+    - name: MetaData/wavenumber
       type: float
       channels: *all_channels
       function:
-        name: LinearCombination@ObsFunction
+        name: ObsFunction/LinearCombination
         options:
           variables:
           - name: ObsValue/scaledRadiance
@@ -49,7 +49,7 @@ observations:
       name: ObsValue/radiance
       channels: *all_channels
     spectral variable:
-      name: VarMetaData/wavenumber
+      name: MetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
     planck1: 1.191042953e-16
@@ -57,14 +57,14 @@ observations:
 ### Compare variables output
   compareVariables:
   - reference:
-      name: radianceWavenumber@TestReference
+      name: TestReference/radianceWavenumber
     test:
-      name: radiance@DerivedObsValue
+      name: DerivedObsValue/radiance
     absTol: 1.0e-5
   - reference:
-      name: brightness_temperature@TestReference
+      name: TestReference/brightnessTemperature
     test:
-      name: brightness_temperature@DerivedObsValue
+      name: DerivedObsValue/brightnessTemperature
     absTol: 1.0e-4
 
 - obs space:
@@ -74,18 +74,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [scaledRadiance]
-    simulated variables: [brightness_temperature]
-    derived variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
     channels: *all_channels
   obs pre filters:
 ### Assign channel wave numbers in m-1
   - filter: Variable Assignment
     assignments:
-    - name: VarMetaData/wavenumber
+    - name: MetaData/wavenumber
       type: float
       channels: *all_channels
       function:
-        name: LinearCombination@ObsFunction
+        name: ObsFunction/LinearCombination
         options:
           variables:
           - name: ObsValue/scaledRadiance
@@ -111,7 +111,7 @@ observations:
       name: ObsValue/radiance
       channels: *all_channels
     spectral variable:
-      name: VarMetaData/wavenumber
+      name: MetaData/wavenumber
       channels: *all_channels
     minimum value: 208.0
     maximum value: 210.0
@@ -119,7 +119,7 @@ observations:
 ### Assign nominal error (ensure not missing values)
   - filter: Perform Action
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: assign error
@@ -133,18 +133,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceWavenumber]
-    simulated variables: [brightness_temperature]
-    derived variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
     channels: *all_channels
   obs pre filters:
 ### Assign channel wavenumbers in m-1
   - filter: Variable Assignment
     assignments:
-    - name: VarMetaData/wavenumber
+    - name: MetaData/wavenumber
       type: float
       channels: *all_channels
       function:
-        name: LinearCombination@ObsFunction
+        name: ObsFunction/LinearCombination
         options:
           variables:
           - name: ObsValue/radianceWavenumber
@@ -159,7 +159,7 @@ observations:
       name: ObsValue/radianceWavenumber
       channels: *all_channels
     spectral variable:
-      name: VarMetaData/wavenumber
+      name: MetaData/wavenumber
       channels: *all_channels
     radiance units: wavenumber
     planck1: 1.191042953e-16
@@ -167,9 +167,9 @@ observations:
 ### Compare variables output
   compareVariables:
   - reference:
-      name: brightness_temperature@TestReference
+      name: TestReference/brightnessTemperature
     test:
-      name: brightness_temperature@DerivedObsValue
+      name: DerivedObsValue/brightnessTemperature
     absTol: 1.0e-4
 
 - obs space:
@@ -179,8 +179,8 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceFrequency]
-    simulated variables: [brightness_temperature]
-    derived variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
     channels: *all_channels
   obs pre filters:
 ### Radiance to BT - frequency is in Hz hence spectral radiance is
@@ -191,7 +191,7 @@ observations:
       name: ObsValue/radianceFrequency
       channels: *all_channels
     spectral variable:
-      name: VarMetaData/frequency
+      name: MetaData/sensorCentralFrequency
       channels: *all_channels
     radiance units: frequency
     planck1: 1.191042953e-16
@@ -199,9 +199,9 @@ observations:
 ### Compare variables output
   compareVariables:
   - reference:
-      name: brightness_temperature@TestReference
+      name: TestReference/brightnessTemperature
     test:
-      name: brightness_temperature@DerivedObsValue
+      name: DerivedObsValue/brightnessTemperature
     absTol: 1.0e-4
 
 - obs space:
@@ -211,8 +211,8 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/RadToBT_obs_2021071200.nc4
     observed variables: [radianceWavelength]
-    simulated variables: [brightness_temperature]
-    derived variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
     channels: *all_channels
   obs pre filters:
 ### Radiance to BT - wavelength is in microns hence spectral radiance is
@@ -223,7 +223,7 @@ observations:
       name: ObsValue/radianceWavelength
       channels: *all_channels
     spectral variable:
-      name: VarMetaData/wavelength
+      name: MetaData/sensorCentralWavelength
       channels: *all_channels
     radiance units: wavelength
     planck1: 1.191042953e-16
@@ -231,7 +231,7 @@ observations:
 ### Compare variables output
   compareVariables:
   - reference:
-      name: brightness_temperature@TestReference
+      name: TestReference/brightnessTemperature
     test:
-      name: brightness_temperature@DerivedObsValue
+      name: DerivedObsValue/brightnessTemperature
     absTol: 1.0e-4

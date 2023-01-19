@@ -35,7 +35,7 @@ CLWMatchIndexMW::CLWMatchIndexMW(const eckit::LocalConfiguration & conf)
   ASSERT(channels_.size() > 0);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
 
   const Variable &clwobs = options_.clwobsFunction.value();
   invars_ += clwobs;
@@ -58,7 +58,7 @@ void CLWMatchIndexMW::compute(const ObsFilterData & in,
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Get CLW retrieval based on observation from ObsFunction
   const Variable &clwobsvar = options_.clwobsFunction.value();

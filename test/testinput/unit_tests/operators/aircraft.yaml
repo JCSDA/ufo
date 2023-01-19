@@ -8,8 +8,8 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
-    simulated variables: [air_temperature,specific_humidity]
-    #simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [airTemperature,specificHumidity]
+    #simulated variables: [windEastward, windNorthward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -17,6 +17,8 @@ observations:
   obs operator:
     name: VertInterp
     interpolation method: log-linear
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    
   linear obs operator test:
     coef TL: 0.1
     tolerance TL: 1.0e-13

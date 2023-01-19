@@ -20,7 +20,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/windprof_obs_2018041500_m_verterp_opr_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/windprof_geoval_2018041500_m.nc4
   vector ref: GsiHofX

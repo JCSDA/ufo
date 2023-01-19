@@ -11,15 +11,15 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
     observed variables: []
-    derived variables: [eastward_wind, northward_wind]
+    derived variables: [windEastward, windNorthward]
     channels: 1-4
   obs function:
-    name: Velocity@ObsFunction
+    name: ObsFunction/Velocity
     options:
       type: MetOfficeHofX  # calculate wind speed of Met Office background u/v winds (HofX)
       channels: 1-4
-    variables: [wind_speed_hofx]
+    variables: [windSpeed_hofx]
     channels: 1-4
     tolerance: 1.e-7  # compare TestResult/wind_speed_hofx with TestReference/wind_speed_hofx

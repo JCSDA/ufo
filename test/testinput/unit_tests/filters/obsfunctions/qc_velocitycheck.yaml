@@ -12,14 +12,14 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_2018041500_m_windspeedtest_out.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   obs filters:
   - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: Velocity@ObsFunction
+    - name: ObsFunction/Velocity
     maxvalue: 60
   passedBenchmark: 146
 # Filter the wind components if the computed wind speed is greater than 60 (m/s).

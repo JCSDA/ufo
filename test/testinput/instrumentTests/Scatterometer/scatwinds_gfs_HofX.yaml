@@ -5,13 +5,14 @@ observations:
 - obs operator:
     name: GSISfcModel
     use_fact10: true
+    observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: Scatwinds
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/scatwind_obs_2020121500_m.nc
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/scatwind_geoval_2020121500_m.nc
   vector ref: GsiHofX

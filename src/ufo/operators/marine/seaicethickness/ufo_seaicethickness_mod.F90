@@ -81,7 +81,7 @@ type(c_ptr), value, intent(in)    :: obss
        call abor1_ftn(err_msg)
     endif 
 
-    if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) then
+    if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
        rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
        rho_wsw = (-self%rho_snow)/self%rho_water  
     endif
@@ -89,7 +89,7 @@ type(c_ptr), value, intent(in)    :: obss
     ! check if sea ice fraction variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
     ! check if snow thickness variable is in geovals and get it
-    if (cmp_strings(self%obsvars%variable(1), "sea_ice_freeboard")) &
+    if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) &
        call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
     ! check if sea ice thickness variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
@@ -99,14 +99,14 @@ type(c_ptr), value, intent(in)    :: obss
 
     ! total sea ice fraction obs operator
     select case (trim(self%obsvars%variable(1)))
-    case ("sea_ice_freeboard")
+    case ("seaIceFreeboard")
        do iobs = 1, size(hofx,1)
           do icat = 1, ncat
              hofx(iobs) = hofx(iobs)+ rho_wiw*icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)&
                                     + rho_wsw*icefrac%vals(icat,iobs) * snowthick%vals(icat,iobs)
           enddo
        enddo
-    case ("sea_ice_thickness")
+    case ("iceThickness")
        do iobs = 1, size(hofx,1)
           do icat = 1, ncat
              hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)

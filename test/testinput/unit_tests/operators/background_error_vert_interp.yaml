@@ -11,7 +11,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [air_temperature, specific_humidity]
+    simulated variables: [airTemperature, specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -22,11 +22,13 @@ observations:
     # operator used to evaluate H(x)
     - name: VertInterp
       interpolation method: log-linear
-      observation vertical coordinate: air_pressure
+      observation alias file: ../resources/namemap/test_name_map.yaml
+      observation vertical coordinate: pressure
       observation vertical coordinate group: MetaData
     # operator used to evaluate background errors
     - name: BackgroundErrorVertInterp
-      observation vertical coordinate: air_pressure
+      observation alias file: ../resources/namemap/test_name_map.yaml
+      observation vertical coordinate: pressure
       observation vertical coordinate group: MetaData
       vertical coordinate: background_error_air_pressure
   geovals:

@@ -78,13 +78,13 @@ class StringManipulationParameters : public oops::Parameters {
 /// Example 1
 ///   - filter: Variable Assignment
 ///     assignments:
-///     - name: station_name@MetaData
+///     - name: MetaData/stationName
 ///       type: string
 ///       function:
-///         name: StringManipulation@StringObsFunction
+///         name: StringObsFunction/StringManipulation
 ///         options:
 ///         string operation: stringcut
-///         variable: [full_site_name@MetaData]
+///         variable: [MetaData/stationACCombined]
 ///         startIndex: 0
 ///         cutLength: 4
 

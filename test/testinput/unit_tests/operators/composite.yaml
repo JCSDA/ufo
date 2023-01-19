@@ -15,7 +15,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-#    simulated variables: [eastward_wind]
+#    simulated variables: [windEastward]
 #  obs operator:
 #    name: VertInterp
 #    vertical coordinate: air_pressure
@@ -29,7 +29,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-#    simulated variables: [northward_wind]
+#    simulated variables: [windNorthward]
 #  obs operator:
 #    name: VertInterp
 #    vertical coordinate: air_pressure
@@ -43,7 +43,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-#    simulated variables: [surface_pressure]
+#    simulated variables: [stationPressure]
 #  obs operator:
 #    name: Identity
 #  geovals:
@@ -58,7 +58,7 @@ observations:
 #        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
 #    # We use the identity operator here just for testing purposes -- in reality we'd use the
 #    # VertInterp operator
-#    simulated variables: [air_temperature]
+#    simulated variables: [airTemperature]
 #  obs operator:
 #    name: Identity
 #  geovals:
@@ -74,7 +74,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+    simulated variables: [windEastward, stationPressure, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -83,14 +83,16 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: air_temperature
-       - name: surface_pressure
+       - name: airTemperature
+       - name: stationPressure
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
-       - name: eastward_wind
+       - name: windNorthward
+       - name: windEastward
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -98,8 +100,8 @@ observations:
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
   # The reference value is calculated as
-  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
-  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  #     sqrt( (rms(airTemperature)^2 + rms(stationPressure)^2 +
+  #            rms(windEastward)^2 + rms(windNorthward)^2) / 4)
   # with the values of rms(...) taken from the four commented-out test cases at the top of this file
   rms ref: 49141.92596374258
   tolerance: 1.0e-06
@@ -110,7 +112,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+    simulated variables: [windEastward, stationPressure, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -120,13 +122,15 @@ observations:
     components:
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
-       - name: eastward_wind
+       - name: windNorthward
+       - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: air_temperature
-       - name: surface_pressure
+       - name: airTemperature
+       - name: stationPressure
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -134,8 +138,8 @@ observations:
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
   # The reference value is calculated as
-  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
-  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  #     sqrt( (rms(airTemperature)^2 + rms(stationPressure)^2 +
+  #            rms(windEastward)^2 + rms(windNorthward)^2) / 4)
   # with the values of rms(...) taken from the four commented-out test cases at the top of this file
   rms ref: 49141.92596374258
   tolerance: 1.0e-06
@@ -146,7 +150,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
 #   obsdataout:
 #    engine:
 #      type: H5File
@@ -156,11 +160,13 @@ observations:
     components:
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: eastward_wind
+       - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: eastward_wind
+       - name: windEastward
   expect constructor to throw exception with message: Multiple components simulate the same variables
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -174,7 +180,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -184,13 +190,15 @@ observations:
     components:
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: eastward_wind
-       - name: northward_wind
+       - name: windEastward
+       - name: windNorthward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
-       - name: eastward_wind
+       - name: windNorthward
+       - name: windEastward
   expect constructor to throw exception with message: Multiple components simulate the same variables
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -203,7 +211,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, northward_wind, air_temperature]
+    simulated variables: [windEastward, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -213,11 +221,13 @@ observations:
     components:
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: eastward_wind
+       - name: windEastward
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
+       - name: windNorthward
   expect constructor to throw exception with message: The list of variables simulated by the obs operator differs from the list of simulated variables in the obs space
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -230,7 +240,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+    simulated variables: [windEastward, stationPressure, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -239,16 +249,18 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: air_temperature
-       - name: surface_pressure
+       - name: airTemperature
+       - name: stationPressure
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
-       - name: eastward_wind
+       - name: windNorthward
+       - name: windEastward
        vertical coordinate: air_pressure
-       observation vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -256,8 +268,8 @@ observations:
     tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13
   # The reference value is calculated as
-  #     sqrt( (rms(air_temperature)^2 + rms(surface_pressure)^2 +
-  #            rms(eastward_wind)^2 + rms(northward_wind)^2) / 4)
+  #     sqrt( (rms(airTemperature)^2 + rms(stationPressure)^2 +
+  #            rms(windEastward)^2 + rms(windNorthward)^2) / 4)
   # with the values of rms(...) taken from the four commented-out test cases at the top of this file
   rms ref: 49141.92596374258
   tolerance: 1.0e-06
@@ -268,7 +280,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_obs.nc4
-    simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+    simulated variables: [windEastward, stationPressure, windNorthward, airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -277,21 +289,24 @@ observations:
     name: Composite
     components:
      - name: Identity
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: surface_pressure
+       - name: stationPressure
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: air_temperature
+       - name: airTemperature
        vertical coordinate: air_pressure
-       observation vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
      - name: VertInterp
        interpolation method: log-linear
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: northward_wind
-       - name: eastward_wind
+       - name: windNorthward
+       - name: windEastward
        vertical coordinate: air_pressure_levels
-       observation vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_geovals.nc4
   linear obs operator test:

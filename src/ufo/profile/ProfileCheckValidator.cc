@@ -236,16 +236,17 @@ namespace ufo {
     // Compare integer values obtained in this code and OPS
     for (const auto& valueToCompare_int : valuesToCompare_int_) {
       oops::Log::debug() << "  " << valueToCompare_int << std::endl;
+
       std::string varname;
       std::string groupname;
       ufo::splitVarGroup(valueToCompare_int, varname, groupname);
-      std::string varname_OPS = "OPS_" + valueToCompare_int;
+      std::string varname_OPS = groupname + std::string("/OPS_") + varname;
       if (groupname == "Counters") {
         /// Special case: OPS counters have one value per profile level,
         /// and are in the MetaData rather than the Counters group.
         /// This avoids the (default) treatment which assumes
         /// that variables in the Counters group have one value per profile.
-        varname_OPS = "OPS_" + varname + "@MetaData";
+        varname_OPS = "MetaData/OPS_" + varname;
       }
 
       // Obtain values for comparison
@@ -296,10 +297,14 @@ namespace ufo {
     // Compare float values obtained in this code and OPS
     for (const auto& valueToCompare_float : valuesToCompare_float_) {
       oops::Log::debug() << "  " << valueToCompare_float << std::endl;
+      std::string varname;
+      std::string groupname;
+      ufo::splitVarGroup(valueToCompare_float, varname, groupname);
+      const std::string varname_OPS = groupname + std::string("/OPS_") + varname;
       const std::vector <float> &values_thiscode =
         profileDataHandler.get<float>(valueToCompare_float);
       const std::vector <float> &values_OPS =
-        profileDataHandler.get<float>("OPS_" + valueToCompare_float);
+        profileDataHandler.get<float>(varname_OPS);
       compareOutput(valueToCompare_float, values_OPS, values_thiscode,
                     0, tol, nMismatches_);
     }

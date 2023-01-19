@@ -8,14 +8,15 @@ obs space:
       type: H5File
       allow overwrite: true
   _source: ldm
-  simulated variables: [wind_direction, wind_speed]
-  derived simulated variables: [eastward_wind, northward_wind]
+  simulated variables: [windDirection, windSpeed]
+  derived simulated variables: [windEastward, windNorthward]
 obs operator:
   name: VertInterp
   interpolation method: log-linear
+  observation alias file: $(observation_alias_file)
   variables:
-  - name: eastward_wind
-  - name: northward_wind
+  - name: windEastward
+  - name: windNorthward
 obs filters:
   # First step is to create the needed derived simulated variables.
   - filter: Variable Transforms
@@ -23,22 +24,22 @@ obs filters:
   # Assign the initial observation error, based on height/pressure
   - filter: Perform Action
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
-            name: MetaData/air_pressure
+            name: MetaData/pressure
           xvals: [100000, 95000, 80000, 65000, 60000, 55000, 50000, 45000, 40000, 35000, 30000, 25000, 20000, 15000, 10000]   #Pressure (Pa)
           errors: [1.4, 1.5, 1.6, 1.8, 1.9, 2.0, 2.1, 2.3, 2.6, 2.8, 3.0, 3.2, 2.7, 2.4, 2.1]
   # Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     minvalue: -130
     maxvalue: 130
     action:
@@ -46,18 +47,18 @@ obs filters:
   #
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: Velocity@ObsFunction
+    - name: ObsFunction/Velocity
     maxvalue: 130.0
     action:
       name: reject
   #
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
     - name: MetaData/satwind_quality_ind_no_fc
     minvalue: 80.0
@@ -66,45 +67,45 @@ obs filters:
   # Reject when pressure greater than 925 mb.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: MetaData/air_pressure
+    - name: MetaData/pressure
     maxvalue: 92500
   # MODIS-Aqua/Terra (257) and (259), reject when pressure less than 125 mb.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: MetaData/air_pressure
+    - name: MetaData/pressure
     minvalue: 12500
   # Multiple satellite platforms, reject when pressure is more than 50 mb above tropopause.
   - filter: Difference Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     reference: TropopauseEstimate@ObsFunction
-    value: MetaData/air_pressure
+    value: MetaData/pressure
     minvalue: -5000                    # 50 hPa above tropopause level, negative p-diff
     action:
       name: reject
   # Difference check surface_pressure and ObsValue/air_pressure, if less than 100 hPa, reject.
   - filter: Difference Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     reference: GeoVaLs/surface_pressure
-    value: MetaData/air_pressure
+    value: MetaData/pressure
     maxvalue: -10000
 
   # Reject when difference of wind direction is more than 50 degrees.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: WindDirAngleDiff@ObsFunction
+    - name: ObsFunction/WindDirAngleDiff
       options:
         minimum_uv: 3.5
     maxvalue: 50.0
@@ -114,10 +115,10 @@ obs filters:
   # AVHRR (244), MODIS (257,258,259), VIIRS (260), GOES (247) use a LNVD check.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: SatWindsLNVDCheck@ObsFunction
+    - name: ObsFunction/SatWindsLNVDCheck
     maxvalue: 3
     action:
       name: reject
@@ -125,10 +126,10 @@ obs filters:
   # AVHRR and MODIS (ObsType=244,257,258,259) use a SPDB check.
   - filter: Bounds Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     test variables:
-    - name: SatWindsSPDBCheck@ObsFunction
+    - name: ObsFunction/SatWindsSPDBCheck
       options:
         error_min: 1.4
         error_max: 20.0
@@ -139,23 +140,23 @@ obs filters:
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     threshold: 6.0
     action:
       name: reject
   # Reject eastward wind where northward wind was rejected and vice versa.
   - filter: RejectList
     filter variables:
-    - name: northward_wind
+    - name: windNorthward
     where:
-    - variable: QCflagsData/eastward_wind
+    - variable: QCflagsData/windEastward
       minvalue: 1
     defer to post: true
   - filter: RejectList
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
     where:
-    - variable: QCflagsData/northward_wind
+    - variable: QCflagsData/windNorthward
       minvalue: 1
     defer to post: true

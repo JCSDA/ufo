@@ -62,7 +62,7 @@ class OrbitalAngleParameters : public PredictorParametersBase {
 /**
  *This orbital angle predictor is used to fit residual errors as a function of satellite
  *orbital angle using a Fourier series. The data must contain this orbital angle time
- *series in the variable "satellite_orbital_angle@MetaData". Two member variables are 
+ *series in the variable "MetaData/satelliteOrbitalAngle". Two member variables are 
  *used to store the order of the term in the series being calculated (order_) and the 
  *Fourier component (cos or sin), respectively. These are read from the yaml configuration
  *file.

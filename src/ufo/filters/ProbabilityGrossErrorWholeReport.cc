@@ -118,17 +118,17 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
   }
   // Get input probability of gross error affecting whole report
   std::vector<float> ReportPGE(nlocs);
-  if (obsdb_.has("MetaData", "GrossErrorProbabilityReport")) {
-    obsdb_.get_db("MetaData", "GrossErrorProbabilityReport", ReportPGE);
+  if (obsdb_.has("MetaData", "grossErrorProbabilityReport")) {
+    obsdb_.get_db("MetaData", "grossErrorProbabilityReport", ReportPGE);
   } else {
-    throw eckit::BadValue("MetaData/GrossErrorProbabilityReport not present", Here());
+    throw eckit::BadValue("MetaData/grossErrorProbabilityReport not present", Here());
   }
   // Get ObsType
   std::vector<int> ObsType(nlocs);
-  if (obsdb_.has("MetaData", "ObsType")) {
-    obsdb_.get_db("MetaData", "ObsType", ObsType);
+  if (obsdb_.has("MetaData", "observationTypeNum")) {
+    obsdb_.get_db("MetaData", "observationTypeNum", ObsType);
   } else {
-    throw eckit::BadValue("MetaData/ObsType not present", Here());
+    throw eckit::BadValue("MetaData/observationTypeNum not present", Here());
   }
 
   // Calculate probability that whole report is affected by gross error
@@ -208,7 +208,7 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
     obsdb_.put_db("GrossErrorProbability", varname[ivar], varPGE[ivar]);
     obsdb_.put_db("QCFlags", varname[ivar], varQCflags[ivar]);
   }
-  obsdb_.put_db("MetaData", "GrossErrorProbabilityReport", ReportPGE);
+  obsdb_.put_db("MetaData", "grossErrorProbabilityReport", ReportPGE);
 }
 
 // -----------------------------------------------------------------------------

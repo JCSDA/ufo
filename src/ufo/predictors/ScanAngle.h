@@ -39,7 +39,7 @@ class ScanAngleParameters : public PredictorParametersBase {
   oops::OptionalParameter<int> order{"order", this};
 
   /// Name of the variable (from the MetaData group) containing the scan angle.
-  oops::Parameter<std::string> varName{"var_name", "sensor_view_angle", this};
+  oops::Parameter<std::string> varName{"var_name", "sensorViewAngle", this};
 };
 
 // -----------------------------------------------------------------------------

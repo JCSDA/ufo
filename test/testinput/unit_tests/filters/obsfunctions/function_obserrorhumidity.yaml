@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_singular.nc4
-    simulated variables: [specific_humidity]
+    simulated variables: [specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -19,10 +19,10 @@ observations:
     name: VertInterp
     interpolation method: log-linear
   obs function:
-    name: ObsErrorModelHumidity@ObsFunction
+    name: ObsFunction/ObsErrorModelHumidity
     options:
       xvar:
-        name: MetaData/air_pressure
+        name: MetaData/pressure
       xvals: [50000]  # Pressure (Pa)
       errors: [0.2]   # RH error
     variables: [specific_humidity_obserr]
@@ -34,7 +34,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_vector.nc4
-    simulated variables: [specific_humidity]
+    simulated variables: [specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -45,10 +45,10 @@ observations:
     name: VertInterp
     interpolation method: log-linear
   obs function:
-    name: ObsErrorModelHumidity@ObsFunction
+    name: ObsFunction/ObsErrorModelHumidity
     options:
       xvar:
-        name: MetaData/air_pressure
+        name: MetaData/pressure
       xvals: [25000, 20000, 10]  # Pressure (Pa)
       errors: [0.2, 0.4, 0.8]    # RH error
     variables: [specific_humidity_obserr]
@@ -60,7 +60,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_q_obs_2020121500_UKMO.nc4
-    simulated variables: [specific_humidity]
+    simulated variables: [specificHumidity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -71,10 +71,10 @@ observations:
     name: VertInterp
     interpolation method: log-linear
   obs function:
-    name: ObsErrorModelHumidity@ObsFunction
+    name: ObsFunction/ObsErrorModelHumidity
     options:
       xvar:
-        name: MetaData/air_pressure
+        name: MetaData/pressure
       xvals: [50000]  # Pressure (Pa)
       errors: [0.2]   # RH error
       Formulation: Sonntag  #formula for sat. vapor pressure
