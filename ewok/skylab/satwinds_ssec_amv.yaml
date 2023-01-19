@@ -1,5 +1,5 @@
 obs space:
-  name: satwinds
+  name: satwinds_ssec_amv
   obsdatain:
     engine:
       type: H5File
@@ -7,6 +7,8 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [eastward_wind, northward_wind]
 #
