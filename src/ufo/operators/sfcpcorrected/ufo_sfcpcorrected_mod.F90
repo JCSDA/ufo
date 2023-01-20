@@ -132,7 +132,7 @@ cor_psfc = missing
 allocate(obs_height(nobs))
 allocate(obs_psfc(nobs))
 call obsspace_get_db(obss, "MetaData",  trim(self%station_altitude),obs_height)
-call obsspace_get_db(obss, "ObsValue",  "surface_pressure", obs_psfc)
+call obsspace_get_db(obss, "ObsValue",  "stationPressure", obs_psfc)
 
 ! get model variables; geovars_list = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
 write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                    &
