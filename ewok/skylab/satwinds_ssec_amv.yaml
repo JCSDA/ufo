@@ -14,6 +14,7 @@ obs space:
 #
 obs operator:
   name: VertInterp
+  interpolation method: log-linear
   observation alias file: $(observation_alias_file)
 #
 obs filters:

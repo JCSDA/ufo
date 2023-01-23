@@ -88,6 +88,7 @@ observations:
        - name: airTemperature
        - name: stationPressure
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
@@ -120,6 +121,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
@@ -157,6 +159,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
@@ -186,6 +189,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
@@ -216,6 +220,7 @@ observations:
     name: Composite
     components:
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
@@ -249,6 +254,7 @@ observations:
        - name: airTemperature
        - name: stationPressure
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
@@ -287,12 +293,14 @@ observations:
        variables:
        - name: stationPressure
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: airTemperature
        vertical coordinate: air_pressure
        observation vertical coordinate: pressure
      - name: VertInterp
+       interpolation method: log-linear
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windNorthward
