@@ -27,7 +27,7 @@ module ufo_oasim_mod
  integer, parameter :: max_string=800
 
  ! Oasim oject
- type, extends(oasim), public :: ufo_oasim
+ type, public :: ufo_oasim
  private
  contains
    procedure :: setup  => ufo_oasim_setup
