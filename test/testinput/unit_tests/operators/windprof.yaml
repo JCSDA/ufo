@@ -4,7 +4,6 @@ window end: 2018-04-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
-    interpolation method: linear
     vertical coordinate: geopotential_height
   linear obs operator test:
     coef TL: 0.1

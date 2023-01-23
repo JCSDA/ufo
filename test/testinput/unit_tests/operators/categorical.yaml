@@ -47,7 +47,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -89,7 +88,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -127,7 +125,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -167,7 +164,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -210,7 +206,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -253,7 +248,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -298,7 +292,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -343,7 +336,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -355,7 +347,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -400,7 +391,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -445,7 +435,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -491,7 +480,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -537,7 +525,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -582,7 +569,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -594,7 +580,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -636,7 +621,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -678,7 +662,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -720,7 +703,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward
@@ -766,7 +748,6 @@ observations:
          variables:
          - name: airTemperature
        - name: VertInterp
-         interpolation method: log-linear
          observation alias file: ../resources/namemap/test_name_map.yaml
          variables:
          - name: windNorthward

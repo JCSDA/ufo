@@ -4,8 +4,6 @@ window end: 2020-10-01T09:00:00Z
 observations:
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    observation vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
@@ -108,8 +106,6 @@ observations:
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    observation vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
@@ -155,8 +151,6 @@ observations:
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    observation vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
@@ -202,8 +196,6 @@ observations:
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    observation vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
@@ -249,8 +241,6 @@ observations:
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    observation vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one

@@ -13,7 +13,6 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -21,13 +20,14 @@
 namespace ufo {
 
 enum class InterpolationMethod {
-  LINEAR, LOGLINEAR
+  AUTOMATIC, LINEAR, LOGLINEAR
 };
 
 struct InterpolationMethodParameterTraitsHelper {
   typedef InterpolationMethod EnumType;
   static constexpr char enumTypeName[] = "InterpolationMethod";
   static constexpr util::NamedEnumerator<InterpolationMethod> namedValues[] = {
+    { InterpolationMethod::AUTOMATIC, "automatic" },
     { InterpolationMethod::LINEAR, "linear" },
     { InterpolationMethod::LOGLINEAR, "log-linear"}
   };
@@ -75,9 +75,10 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
      "observation vertical coordinate group",
      this};
 
-  oops::RequiredParameter<InterpolationMethod> interpMethod
+  oops::Parameter<InterpolationMethod> interpMethod
     {"interpolation method",
-     "interpolation method (options: linear, log-linear)",
+     "interpolation method (options: automatic, linear, log-linear)",
+     InterpolationMethod::AUTOMATIC,
      this};
 
   oops::OptionalParameter<bool> ApplyFact10
