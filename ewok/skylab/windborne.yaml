@@ -12,8 +12,6 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  io pool:
-    write multiple files: true
   simulated variables: [airTemperature, windEastward, windNorthward]
 obs operator:
   name: VertInterp
