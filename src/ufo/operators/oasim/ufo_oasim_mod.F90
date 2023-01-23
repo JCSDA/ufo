@@ -47,7 +47,7 @@ type(fckit_configuration), intent(in)     :: f_conf
 character(len=*), parameter :: myname_="ufo_oasim_simobs"
 character(max_string) :: err_msg
 
-call self%create('../../oasim/test/data')
+call self%oasim_%create('../../oasim/test/data')
 
 end subroutine ufo_oasim_setup
 
