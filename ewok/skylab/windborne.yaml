@@ -17,7 +17,6 @@ obs space:
   simulated variables: [airTemperature, windEastward, windNorthward]
 obs operator:
   name: VertInterp
-  interpolation method: log-linear
   observation alias file: $(observation_alias_file)
   variables:
   - name: airTemperature
