@@ -56,7 +56,7 @@ subroutine ufo_oasim_delete(self)
 implicit none
 class(ufo_oasim), intent(inout) :: self
 
-call self%cancel()
+call self%oasim_%delete()
 
 end subroutine ufo_oasim_delete
 
