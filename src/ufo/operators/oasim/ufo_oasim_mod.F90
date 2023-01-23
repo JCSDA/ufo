@@ -29,6 +29,7 @@ module ufo_oasim_mod
  ! Oasim oject
  type, public :: ufo_oasim
  private
+   type(oasim) :: oasim_
  contains
    procedure :: setup  => ufo_oasim_setup
    procedure :: delete => ufo_oasim_delete
