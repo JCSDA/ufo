@@ -129,7 +129,7 @@ implicit none
 
     do iobs = 1, obss_nlocs
 
-    call self%run(km, dt, is_midnight, day_of_year, &
+    call self%oasim_%run(km, dt, is_midnight, day_of_year, &
             cosz, slp%vals(iobs,1), wspd%vals(iobs,1), ozone%vals(iobs,1), wvapor%vals(iobs,1), &
             rh%vals(iobs,1), cov%vals(iobs,1), cldtau%vals(iobs,1), clwp%vals(iobs,1), &
             cldre%vals(iobs,1), ta_in%vals(iobs,:), wa_in%vals(iobs,:), asym%vals(iobs,:), &
