@@ -19,7 +19,6 @@ obs operator:
   components:
   # operator used to evaluate H(x)
   - name: VertInterp
-    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   # operator used to evaluate background errors
   - name: BackgroundErrorVertInterp
