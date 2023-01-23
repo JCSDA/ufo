@@ -4,6 +4,7 @@ window end: 2019-05-22T22:05:00Z
 observations:
 - obs operator:
     name: VertInterp
+    interpolation method: linear
     observation alias file: ../resources/namemap/test_name_map.yaml
     vertical coordinate: geopotential_height
     observation vertical coordinate: height

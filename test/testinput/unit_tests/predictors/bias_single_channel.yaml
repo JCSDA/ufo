@@ -18,6 +18,7 @@ observations:
     simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
@@ -43,6 +44,7 @@ observations:
     simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
@@ -72,6 +74,7 @@ observations:
     simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
@@ -98,6 +101,7 @@ observations:
     simulated variables: [airTemperature, specificHumidity]
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
