@@ -4,6 +4,7 @@ window end: 2020-12-01T15:00:00Z
 observations:
 - obs operator:
     name: VertInterp
+    interpolation method: log-linear
   obs space:
     name: test_obserrorfactorconv
     obsdatain:

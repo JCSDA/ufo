@@ -16,6 +16,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_m_opr_out.nc4
   obs operator:
     name: VertInterp
+    interpolation method: log-linear
     observation alias file: ../resources/namemap/test_name_map.yaml
     
   linear obs operator test:
