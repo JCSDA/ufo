@@ -41,7 +41,6 @@ contains
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_oasim_setup(self, f_conf)
-implicit none
 class(ufo_oasim),          intent(inout)  :: self
 type(fckit_configuration), intent(in)     :: f_conf
 
