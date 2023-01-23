@@ -79,8 +79,6 @@ type(ufo_geovals), pointer :: geovals
 call ufo_radianceoasim_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-! TODO: actually call simobs!!
-!stop 42
 call self%simobs(geovals, c_hofx, c_obsspace)
 
 end subroutine ufo_radianceoasim_simobs_c
