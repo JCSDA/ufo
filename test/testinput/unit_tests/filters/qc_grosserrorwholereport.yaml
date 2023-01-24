@@ -12,31 +12,31 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/grosserrorwholereport_filter_test_out.nc4
-    simulated variables: [pressure_at_model_surface,
-                          air_temperature_at_2m,
-                          eastward_wind,
-                          northward_wind,
-                          relative_humidity_at_2m]
+    simulated variables: [surfacePressure,
+                          airTemperatureAt2M,
+                          windEastward,
+                          windNorthward,
+                          relativeHumidityAt2M]
   obs filters:
   - filter: Bayesian Whole Report
     filter variables:
-    - name: pressure_at_model_surface
+    - name: surfacePressure
       options:
         probability_density_bad: 0.1
         bogus_probability_density_bad: 0.1
-    - name: air_temperature_at_2m
+    - name: airTemperatureAt2M
       options:
         probability_density_bad: 0.1
-    - name: eastward_wind
+    - name: windEastward
       options:
         probability_density_bad: 0.1
         synop_probability_density_bad: 0.1
         bogus_probability_density_bad: 0.1
-    - name: northward_wind
+    - name: windNorthward
       options:
         not_used_in_whole_report: true
         second_component_of_two: true
-    - name: relative_humidity_at_2m
+    - name: relativeHumidityAt2M
       options:
         not_used_in_whole_report: true
         probability_density_bad: 0.1
@@ -44,28 +44,28 @@ observations:
   passedBenchmark: 11
   compareVariables: #  test output matches ops
     - reference:
-        name: pressure_at_model_surface@GrossErrorProbabilityTestReference
+        name: GrossErrorProbabilityTestReference/surfacePressure
       test:
-        name: pressure_at_model_surface@GrossErrorProbability
+        name: GrossErrorProbability/surfacePressure
       absTol: 5.0e-4
     - reference:
-       name: air_temperature_at_2m@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/airTemperatureAt2M
       test:
-        name: air_temperature_at_2m@GrossErrorProbability
+        name: GrossErrorProbability/airTemperatureAt2M
       absTol: 5.0e-5
     - reference:
-        name: eastward_wind@GrossErrorProbabilityTestReference
+        name: GrossErrorProbabilityTestReference/windEastward
       test:
-        name: eastward_wind@GrossErrorProbability
+        name: GrossErrorProbability/windEastward
       absTol: 5.0e-5
     - reference:
-       name: northward_wind@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/windNorthward
       test:
-       name: northward_wind@GrossErrorProbability
+       name: GrossErrorProbability/windNorthward
       absTol: 5.0e-5
     - reference:
-       name: relative_humidity_at_2m@GrossErrorProbabilityTestReference
+       name: GrossErrorProbabilityTestReference/relativeHumidityAt2M
       test:
-       name: relative_humidity_at_2m@GrossErrorProbability
+       name: GrossErrorProbability/relativeHumidityAt2M
       absTol: 5.0e-5
 

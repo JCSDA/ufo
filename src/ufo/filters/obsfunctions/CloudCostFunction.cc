@@ -51,20 +51,20 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
 
   // List of required data
   for (size_t i = 0; i < fields_.size(); ++i) {
-    invars_ += Variable("brightness_temperature_jacobian_"+fields_[i]+"@ObsDiag", channels_);
+    invars_ += Variable("ObsDiag/brightness_temperature_jacobian_"+fields_[i], channels_);
   }
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@"+options_.HofXGroup.value(), channels_);
-  invars_ += Variable("latitude@MetaData");
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable(options_.HofXGroup.value() + "/brightnessTemperature", channels_);
+  invars_ += Variable("MetaData/latitude");
   if (options_.qtotal_lnq_gkg.value()) {
-    invars_ += Variable("specific_humidity@GeoVaLs");
-    invars_ += Variable("mass_content_of_cloud_liquid_water_in_atmosphere_layer@GeoVaLs");
-    invars_ += Variable("mass_content_of_cloud_ice_in_atmosphere_layer@GeoVaLs");
-    invars_ += Variable("air_pressure@GeoVaLs");
-    invars_ += Variable("air_temperature@GeoVaLs");
-    invars_ += Variable("surface_pressure@GeoVaLs");
-    invars_ += Variable("surface_temperature@GeoVaLs");
-    invars_ += Variable("specific_humidity_at_two_meters_above_surface@GeoVaLs");
+    invars_ += Variable("GeoVaLs/specific_humidity");
+    invars_ += Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer");
+    invars_ += Variable("GeoVaLs/mass_content_of_cloud_ice_in_atmosphere_layer");
+    invars_ += Variable("GeoVaLs/air_pressure");
+    invars_ += Variable("GeoVaLs/air_temperature");
+    invars_ += Variable("GeoVaLs/surface_pressure");
+    invars_ += Variable("GeoVaLs/surface_temperature");
+    invars_ += Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface");
   }
 }
 
@@ -105,7 +105,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
             (fields_[ifield] == clw_name || fields_[ifield] == ciw_name)) continue;
       if (fields_[ifield] == "skin_temperature") break;
       skinTempIndex += in.nlevs(Variable(
-                      "brightness_temperature_jacobian_"+fields_[ifield]+"@ObsDiag", channels_)[0]);
+                      "ObsDiag/brightness_temperature_jacobian_"+fields_[ifield], channels_)[0]);
     }
     staticB.scale(skinTempIndex, options_.skinTempError.value().value());
   }
@@ -116,10 +116,10 @@ void CloudCostFunction::compute(const ObsFilterData & in,
                      humidity_total(nlocs);
 
   // Determine if pressure is ascending or descending (B-matrix assumption)
-  size_t np = in.nlevs(Variable("air_pressure@GeoVaLs"));
+  size_t np = in.nlevs(Variable("GeoVaLs/air_pressure"));
   std::vector<float> gv_pres_1(nlocs), gv_pres_N(nlocs);
-  in.get(Variable("air_pressure@GeoVaLs"), 0, gv_pres_1);
-  in.get(Variable("air_pressure@GeoVaLs"), np - 1, gv_pres_N);
+  in.get(Variable("GeoVaLs/air_pressure"), 0, gv_pres_1);
+  in.get(Variable("GeoVaLs/air_pressure"), np - 1, gv_pres_N);
   const float missing = util::missingValue(missing);
   ASSERT(gv_pres_1[0] != missing);
   ASSERT(gv_pres_N[0] != missing);
@@ -134,18 +134,18 @@ void CloudCostFunction::compute(const ObsFilterData & in,
       // qtotal ln(g/kg) Jacobian calculated when "specific_humidity" is reached in field list
       continue;
     }
-    std::string jac_name = "brightness_temperature_jacobian_"+fields_[ifield]+"@ObsDiag";
+    std::string jac_name = "ObsDiag/brightness_temperature_jacobian_"+fields_[ifield];
     size_t nlevs = in.nlevs(Variable(jac_name, channels_)[0]);
     std::vector<float> jac_store(nlocs);
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level_gv = (p_ascending ? ilev : nlevs-ilev-1);
       const int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv-1 : level_gv);
       if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
-        in.get(Variable("air_pressure@GeoVaLs"), level_gv, gv_pres);
-        in.get(Variable("air_temperature@GeoVaLs"), level_gv, gv_temp);
-        in.get(Variable("specific_humidity@GeoVaLs"), level_gv, gv_qgas);
-        in.get(Variable(clw_name+"@GeoVaLs"), level_gv, gv_clw);
-        in.get(Variable(ciw_name+"@GeoVaLs"), level_gv, gv_ciw);
+        in.get(Variable("GeoVaLs/air_pressure"), level_gv, gv_pres);
+        in.get(Variable("GeoVaLs/air_temperature"), level_gv, gv_temp);
+        in.get(Variable("GeoVaLs/specific_humidity"), level_gv, gv_qgas);
+        in.get(Variable("GeoVaLs/"+clw_name), level_gv, gv_clw);
+        in.get(Variable("GeoVaLs/"+ciw_name), level_gv, gv_ciw);
         std::vector<float> qsaturated(nlocs);
         ufo_ops_satrad_qsatwat_f90(qsaturated.data(), gv_temp.data(), gv_pres.data(),
                                    static_cast<int>(nlocs));
@@ -175,9 +175,9 @@ void CloudCostFunction::compute(const ObsFilterData & in,
 
         if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
           std::vector<float> jac_clw(nlocs), jac_ciw(nlocs);
-          in.get(Variable("brightness_temperature_jacobian_"+clw_name+"@ObsDiag", channels_)[ichan],
+          in.get(Variable("ObsDiag/brightness_temperature_jacobian_"+clw_name, channels_)[ichan],
                  level_jac, jac_clw);
-          in.get(Variable("brightness_temperature_jacobian_"+ciw_name+"@ObsDiag", channels_)[ichan],
+          in.get(Variable("ObsDiag/brightness_temperature_jacobian_"+ciw_name, channels_)[ichan],
                  level_jac, jac_ciw);
           std::vector<float> dq_dqtotal(nlocs), dql_dqtotal(nlocs), dqi_dqtotal(nlocs);
           int qsplit_derivative_mode = 2;  // compute derivatives
@@ -201,9 +201,9 @@ void CloudCostFunction::compute(const ObsFilterData & in,
 
         if (fields_[ifield] == "specific_humidity_at_two_meters_above_surface"
             && options_.qtotal_lnq_gkg.value()) {
-          in.get(Variable("surface_pressure@GeoVaLs"), level_gv, gv_pres);
-          in.get(Variable("surface_temperature@GeoVaLs"), level_gv, gv_temp);
-          in.get(Variable("specific_humidity_at_two_meters_above_surface@GeoVaLs"),
+          in.get(Variable("GeoVaLs/surface_pressure"), level_gv, gv_pres);
+          in.get(Variable("GeoVaLs/surface_temperature"), level_gv, gv_temp);
+          in.get(Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface"),
                  level_gv, gv_qgas);
           std::vector<float> qsaturated(nlocs);
           ufo_ops_satrad_qsatwat_f90(qsaturated.data(), gv_temp.data(), gv_pres.data(),
@@ -245,8 +245,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   std::vector<float> bgvalues(nlocs);
   std::vector<bool> is_out_of_bounds(nlocs, false);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], obsvalues);
-    in.get(Variable("brightness_temperature@"+options_.HofXGroup.value(), channels_)[ichan],
+    in.get(Variable("ObsValue/brightnessTemperature", channels_)[ichan], obsvalues);
+    in.get(Variable(options_.HofXGroup.value() + "/brightnessTemperature", channels_)[ichan],
            bgvalues);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       departures[iloc][ichan] = obsvalues[iloc] - bgvalues[iloc];
@@ -258,7 +258,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   }
 
   std::vector<float> latitude(nlocs);
-  in.get(Variable("latitude@MetaData"), latitude);
+  in.get(Variable("MetaData/latitude"), latitude);
   Eigen::MatrixXf Hmatrix(nchans, sizeB);
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {

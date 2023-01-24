@@ -25,9 +25,9 @@ static ObsFunctionMaker<ModelHeightAdjustedAirTemperature>
 ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
         const eckit::LocalConfiguration & conf): invars_() {
   // Required observation data
-  invars_ += Variable("airTemperatureAt2M@ObsValue");
+  invars_ += Variable("ObsValue/airTemperatureAt2M");
   // Required model surface altitude
-  invars_ += Variable("surface_altitude@GeoVaLs");
+  invars_ += Variable("GeoVaLs/surface_altitude");
 
   // Required observation station height
   parameters_.validateAndDeserialize(conf);
@@ -44,8 +44,8 @@ void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
   std::vector<float> ModelHeight(nlocs);
   std::vector<float> StationHeight(nlocs);
 
-  in.get(Variable("airTemperatureAt2M@ObsValue"), t2);
-  in.get(Variable("surface_altitude@GeoVaLs"), ModelHeight);
+  in.get(Variable("ObsValue/airTemperatureAt2M"), t2);
+  in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
   const float missing = util::missingValue(missing);

@@ -17,7 +17,7 @@ window end: 2030-01-01T00:00:00Z
 
 observations:
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records not treated as single obs
 # - Category variable not used
 # Results:
@@ -33,11 +33,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out1.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -48,14 +48,14 @@ observations:
   passedBenchmark: 1
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records not treated as single obs
-# - Category variable equal to station_id
+# - Category variable equal to stationIdentification
 # Results:
 # - Thinning performed within each profile. Only one location kept in each case.
 # - Locations with times closest to 270: 1, 3, 5, 7, 8, 10, 12, 14.
 - obs space:
-    name: Records are not single obs, category variable station_id
+    name: Records are not single obs, category variable stationIdentification
     obsdatain:
       engine:
         type: H5File
@@ -65,23 +65,23 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out2.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
     time_max: '2010-01-01T00:06:00Z'
     time_mesh: 'PT1M'
-    category_variable: station_id@MetaData
+    category_variable: MetaData/stationIdentification
     distance_norm: maximum
   passedObservationsBenchmark: [1, 3, 5, 7, 8, 10, 12, 14]
   passedBenchmark: 8
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records not treated as single obs
 # - Category variable equal to category
 # Results:
@@ -99,23 +99,23 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out3.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
     time_max: '2010-01-01T00:06:00Z'
     time_mesh: 'PT1M'
-    category_variable: category@MetaData
+    category_variable: MetaData/category
     distance_norm: maximum
   passedObservationsBenchmark: [7, 8]
   passedBenchmark: 2
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records treated as single obs
 # - Category variable not used
 # Results:
@@ -131,11 +131,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out4.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -147,14 +147,14 @@ observations:
   passedBenchmark: 2
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records treated as single obs
-# - Category variable equal to station_id
+# - Category variable equal to stationIdentification
 # Results:
 # - Each record is in a unique category
 # - Nothing is thinned
 - obs space:
-    name: Records are single obs, category variable station_id
+    name: Records are single obs, category variable stationIdentification
     obsdatain:
       engine:
         type: H5File
@@ -164,11 +164,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out5.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -176,12 +176,12 @@ observations:
     time_mesh: 'PT1M'
     distance_norm: maximum
     records_are_single_obs: true
-    category_variable: station_id@MetaData
+    category_variable: MetaData/stationIdentification
   passedObservationsBenchmark: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   passedBenchmark: 16
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records treated as single obs
 # - Category variable equal to category
 # Results:
@@ -198,11 +198,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out6.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -210,12 +210,12 @@ observations:
     time_mesh: 'PT1M'
     distance_norm: maximum
     records_are_single_obs: true
-    category_variable: category@MetaData
+    category_variable: MetaData/category
   passedObservationsBenchmark: [6, 7, 8, 9]
   passedBenchmark: 4
 
 # Setup:
-# - Obs grouped into records by category and station_id
+# - Obs grouped into records by category and stationIdentification
 # - Records treated as single obs
 # - Category variable equal to category
 # Notes:
@@ -224,7 +224,7 @@ observations:
 # - One record in each category is kept
 # - Locations with times closest to 270: 8, 9 (category 1), 6, 7 (category 2)
 - obs space:
-    name: Records are single obs, grouped by category and station_id, category variable category
+    name: Records are single obs, grouped by category and stationIdentification, category variable category
     obsdatain:
       engine:
         type: H5File
@@ -234,11 +234,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out7.nc4
       obsgrouping:
-        group variables: [ "category", "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "category", "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -246,12 +246,12 @@ observations:
     time_mesh: 'PT1M'
     distance_norm: maximum
     records_are_single_obs: true
-    category_variable: category@MetaData
+    category_variable: MetaData/category
   passedObservationsBenchmark: [6, 7, 8, 9]
   passedBenchmark: 4
 
 # Setup:
-# - Obs grouped into records by station_id
+# - Obs grouped into records by stationIdentification
 # - Records treated as single obs
 # - Category variable equal to category_bad
 # Results:
@@ -267,11 +267,11 @@ observations:
 #       type: H5File
 #       obsfile: Data/thinning_records_test_out8.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-    simulated variables: [air_temperature]
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Gaussian Thinning
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_min: '2010-01-01T00:04:00Z'
@@ -279,7 +279,7 @@ observations:
     time_mesh: 'PT1M'
     distance_norm: maximum
     records_are_single_obs: true
-    category_variable: category_bad@MetaData
+    category_variable: MetaData/category_bad
   expectExceptionWithMessage: Cannot have multiple categories per record
 
 

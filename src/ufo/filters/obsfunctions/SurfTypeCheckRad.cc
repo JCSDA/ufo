@@ -45,14 +45,14 @@ SurfTypeCheckRad::SurfTypeCheckRad(const eckit::LocalConfiguration & conf)
   const std::string &flaggrp = options_.testQCflag.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
+  invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
+  invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("water_area_fraction@GeoVaLs");
-  invars_ += Variable("land_area_fraction@GeoVaLs");
-  invars_ += Variable("ice_area_fraction@GeoVaLs");
-  invars_ += Variable("surface_snow_area_fraction@GeoVaLs");
+  invars_ += Variable("GeoVaLs/water_area_fraction");
+  invars_ += Variable("GeoVaLs/land_area_fraction");
+  invars_ += Variable("GeoVaLs/ice_area_fraction");
+  invars_ += Variable("GeoVaLs/surface_snow_area_fraction");
 }
 
 // -----------------------------------------------------------------------------
@@ -76,10 +76,10 @@ void SurfTypeCheckRad::compute(const ObsFilterData & in,
   std::vector<float> land_frac(nlocs);
   std::vector<float> ice_frac(nlocs);
   std::vector<float> snow_frac(nlocs);
-  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
-  in.get(Variable("land_area_fraction@GeoVaLs"), land_frac);
-  in.get(Variable("ice_area_fraction@GeoVaLs"), ice_frac);
-  in.get(Variable("surface_snow_area_fraction@GeoVaLs"), snow_frac);
+  in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
+  in.get(Variable("GeoVaLs/land_area_fraction"), land_frac);
+  in.get(Variable("GeoVaLs/ice_area_fraction"), ice_frac);
+  in.get(Variable("GeoVaLs/surface_snow_area_fraction"), snow_frac);
 
   bool sea = true;
   bool land = false;
@@ -103,8 +103,8 @@ void SurfTypeCheckRad::compute(const ObsFilterData & in,
   const float missing = util::missingValue(missing);
 
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
-    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
+    in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
+    in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
 
     for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ichan][iloc] = 0.0;
 

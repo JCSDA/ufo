@@ -10,36 +10,36 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: variable_1@MetaData
+    - name: MetaData/variable_1
       type: int
       value: 1
   - filter: Variable Assignment
     assignments:
-    - name: variable_2@MetaData
+    - name: MetaData/variable_2
       type: int
       value: 2
   - filter: Variable Assignment
     assignments:
-    - name: variable_5@MetaData
+    - name: MetaData/variable_5
       type: int
       value: 5
   - filter: Variable Assignment
     assignments:
-    - name: variable_1_plus_2@MetaData
+    - name: MetaData/variable_1_plus_2
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
           variables:
-          - name: variable_1@MetaData
-          - name: variable_2@MetaData
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
           coefs: [1, 2]
   compareVariables:
   - test:
-      name: variable_1_plus_2@MetaData
+      name: MetaData/variable_1_plus_2
     reference:
-      name: variable_5@MetaData
+      name: MetaData/variable_5

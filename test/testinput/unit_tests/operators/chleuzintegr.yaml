@@ -10,7 +10,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/viirs_jpss1_oc_l2_2018-04-15.nc
-    simulated variables: [mass_concentration_of_chlorophyll_in_sea_water]
+    simulated variables: [chlorophyllMassConcentration]
 #   obsdataout:
 #     engine:
 #       type: H5File

@@ -253,7 +253,7 @@ void ObsAccessor::groupObservationsByCategoryVariable(
 
   default:
     throw eckit::UserError(
-          categoryVariable_->variable() + "@" + categoryVariable_->group() +
+          categoryVariable_->group() + "/" + categoryVariable_->variable() +
           " is neither an integer nor a string variable", Here());
   }
 }

@@ -9,15 +9,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [air_temperature, humidity_mixing_ratio]
+    simulated variables: [airTemperature, waterVaporMixingRatio]
   obs filters:
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
-    - name: humidity_mixing_ratio
+    - name: airTemperature
+    - name: waterVaporMixingRatio
     action:
       name: assign error
       error parameter: 1.0
@@ -25,15 +25,15 @@ observations:
     Transform: RelativeHumidity
     Method: UKMOmixingratio
     AllowSuperSaturation: true
-    pressure variable: "air_pressure"
-    temperature variable: "air_temperature"
-    relative humidity variable: "relative_humidity"
-    water vapor mixing ratio variable: "humidity_mixing_ratio"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    water vapor mixing ratio variable: "waterVaporMixingRatio"
   compareVariables:
     - reference:
-        name: relative_humidity_reference@ObsValue
+        name: TestReference/relativeHumidity
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5
 - obs space:
     name: Relative humidity mixing ratio calculation, upper-air variables, no super saturation
@@ -42,15 +42,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/mixRatio2RH_conversion_aircraft_nosupersat.nc4
       obsgrouping:
-        group variables: ["station_id"]
+        group variables: ["stationIdentification"]
         sort variable: "dateTime"
         sort order: "descending"
-    simulated variables: [air_temperature, humidity_mixing_ratio]
+    simulated variables: [airTemperature, waterVaporMixingRatio]
   obs filters:
   - filter: Perform Action
     filter variables:
-    - name: air_temperature
-    - name: humidity_mixing_ratio
+    - name: airTemperature
+    - name: waterVaporMixingRatio
     action:
       name: assign error
       error parameter: 1.0
@@ -58,13 +58,13 @@ observations:
     Transform: RelativeHumidity
     Method: UKMOmixingratio
     AllowSuperSaturation: false
-    pressure variable: "air_pressure"
-    temperature variable: "air_temperature"
-    relative humidity variable: "relative_humidity"
-    water vapor mixing ratio variable: "humidity_mixing_ratio"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    water vapor mixing ratio variable: "waterVaporMixingRatio"
   compareVariables:
     - reference:
-        name: relative_humidity_reference@ObsValue
+        name: TestReference/relativeHumidity
       test:
-        name: relative_humidity@DerivedObsValue
+        name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5

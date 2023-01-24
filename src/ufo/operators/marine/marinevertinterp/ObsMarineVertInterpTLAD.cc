@@ -25,11 +25,14 @@ static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_(
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
                                                  const ObsMarineVertInterpParameters & params)
-  : LinearObsOperatorBase(odb), keyOper_(0), varin_()
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+    keyOper_(0), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
     operatorVars_, operatorVarIndices);
+
+  varin_ += nameMap_.convertName(operatorVars_);
 
   ufo_marinevertinterp_tlad_setup_f90(keyOper_, params.toConfiguration(),
     operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(), varin_);

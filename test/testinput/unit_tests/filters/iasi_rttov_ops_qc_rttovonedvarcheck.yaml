@@ -76,7 +76,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: *all_channels
 #   obsdataout:
 #     engine:
@@ -88,25 +88,25 @@ observations:
 ### No Channels ###
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     where:
     - variable:
-        name: qcf_NoChannels@MetaData
+        name: MetaData/qcf_NoChannels
       is_in: 1
 ### BlackList ###
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *1dvar_not_used
 ### Remove channels over land
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *land_not_used
     where:
     - variable:
-        name: surface_type@MetaData
+        name: MetaData/surfaceQualifier
       is_in: 0
 ### 1D-Var check ###
   - filter: RTTOV OneDVar Check
@@ -127,7 +127,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/iasi_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *1dvarchannels
     retrieval variables from geovals:
     - air_temperature # 1
@@ -154,12 +154,12 @@ observations:
   passedBenchmark: 536
   compareVariables:
     - reference:
-        name: n_iterations@TestReference
+        name: TestReference/numberOfIterations
       test:
-        name: n_iterations@OneDVar
+        name: OneDVar/numberOfIterations
   compareVariables:
     - reference:
-        name: cloud_top_pressure@TestReference
+        name: TestReference/pressureAtTopOfCloud
       test:
-        name: cloud_top_pressure@OneDVar
+        name: OneDVar/pressureAtTopOfCloud
       absTol: 1.0e-3

@@ -12,22 +12,23 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
     observed variables: [stationPressure, pressureReducedToMeanSeaLevel, standardPressure]
-    derived variables: [surface_pressure]
-    simulated variables: [surface_pressure]
+    derived variables: [surfacePressure]
+    simulated variables: [surfacePressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
   obs operator:
     name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
 
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: pressureReducedToMeanSeaLevel@ObsValue
+    - name: ObsValue/pressureReducedToMeanSeaLevel
     minvalue: 0.00001
 
   - filter: Bounds Check
     filter variables:
-    - name: stationPressure@ObsValue
+    - name: ObsValue/stationPressure
     minvalue: 0.00001
 
   - filter: BlackList
@@ -59,29 +60,29 @@ observations:
 
   compareVariables:
     - reference:
-        name: PStarErr@TestReference
+        name: TestReference/PStarErr
       test:
-        name: surface_pressure@DerivedObsError
+        name: DerivedObsError/surfacePressure
       absTol: 1.0e-5
     - reference:
-        name: PStar_PGE@TestReference
+        name: TestReference/PStar_PGE
       test:
-        name: surface_pressure@GrossErrorProbability
+        name: GrossErrorProbability/surfacePressure
       absTol: 1.0e-5
     - reference:
-        name: PStar@TestReference
+        name: TestReference/PStar
       test:
-        name: surface_pressure@DerivedObsValue
+        name: DerivedObsValue/surfacePressure
       relTol: 1.0e-5
     - reference:
-        name: PmslUsedFlag@TestReference
+        name: TestReference/PmslUsedFlag
       test:
-        name: DiagnosticFlags/PmslUsed/surface_pressure
+        name: DiagnosticFlags/PmslUsed/surfacePressure
     - reference:
-        name: PstdUsedFlag@TestReference
+        name: TestReference/PstdUsedFlag
       test:
-        name: DiagnosticFlags/PstdUsed/surface_pressure
+        name: DiagnosticFlags/PstdUsed/surfacePressure
     - reference:
-        name: PstnUsedFlag@TestReference
+        name: TestReference/PstnUsedFlag
       test:
-        name: DiagnosticFlags/PstnUsed/surface_pressure
+        name: DiagnosticFlags/PstnUsed/surfacePressure

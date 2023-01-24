@@ -21,7 +21,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_20200401T0000Z_10locs.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 18-22
 #   obsdataout:
 #     engine:
@@ -32,10 +32,10 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: cloud_cost@MetaData
+    - name: CloudCostObsFunction/finalCost
       type: float
       function:
-        name: CloudCostFunction@ObsFunction
+        name: ObsFunction/CloudCostFunction
         options:
           cost channels list: 18, 20, 22
           RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
@@ -59,7 +59,7 @@ observations:
           HofX group: MetOfficeBiasCorrHofX
   compareVariables:
   - reference:
-      name: cloud_cost@TestReference
+      name: TestReference/finalCost
     test:
-      name: cloud_cost@MetaData
+      name: CloudCostObsFunction/finalCost
     absTol: 1.0e-5

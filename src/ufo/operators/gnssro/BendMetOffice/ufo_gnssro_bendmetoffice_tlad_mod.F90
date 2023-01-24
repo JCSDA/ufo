@@ -149,9 +149,9 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   allocate(obsLocR(self%nlocs))
   allocate(obsGeoid(self%nlocs))
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", impact_param)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
   ALLOCATE(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix

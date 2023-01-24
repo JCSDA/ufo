@@ -36,11 +36,11 @@ class CloudFirstGuessMinimumResidualParameters : public oops::Parameters {
 
   /// Output name for cloud top pressure
   oops::Parameter<std::string> cloudTopPressureName{"output name for cloud top pressure",
-                                                    "initial_cloud_top_pressure", this};
+                                                    "pressureAtTopOfCloud", this};
 
   /// Output name for cloud fraction
   oops::Parameter<std::string> cloudFractionName{"output name for cloud fraction",
-                                                    "initial_cloud_fraction", this};
+                                                    "cloudAmount", this};
 
   /// Minimum pressure for the cloud in Pa
   oops::Parameter<float> minCloudPressure{"minimum cloud top pressure", 10000.0f, this};

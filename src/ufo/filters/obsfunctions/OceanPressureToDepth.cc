@@ -29,7 +29,7 @@ OceanPressureToDepth::OceanPressureToDepth(const eckit::LocalConfiguration & con
 
   // Create variable and add to invars_
   invars_ += options_.pressure.value();
-  invars_ += Variable("latitude@MetaData");
+  invars_ += Variable("MetaData/latitude");
 }
 
 // -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void OceanPressureToDepth::compute(const ObsFilterData & in,
   in.get(invars_[0], pressure);
   // Get latitude
   std::vector<float> lats(nlocs);
-  in.get(Variable("latitude@MetaData"), lats);
+  in.get(Variable("MetaData/latitude"), lats);
 
   // output depth
   std::vector<float> &depth = out[0];

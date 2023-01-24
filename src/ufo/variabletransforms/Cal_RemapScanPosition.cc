@@ -34,7 +34,7 @@ void Cal_RemapScanPosition::runTransform(const std::vector<bool> &apply) {
   const size_t nlocs = obsdb_.nlocs();
 
   std::vector<int> original_scan_position;
-  getObservation("MetaData", "scan_position", original_scan_position, true);
+  getObservation("MetaData", "sensorScanPosition", original_scan_position, true);
 
   std::vector<int> remapped_scan_position(nlocs);
   remapped_scan_position.assign(nlocs, missingValueInt);
@@ -51,7 +51,7 @@ void Cal_RemapScanPosition::runTransform(const std::vector<bool> &apply) {
     }
   }
   // Overwrite variable at existing locations
-  obsdb_.put_db("MetaData", "scan_position", remapped_scan_position);
+  obsdb_.put_db("MetaData", "sensorScanPosition", remapped_scan_position);
 }
 }  // namespace ufo
 

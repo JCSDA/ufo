@@ -55,12 +55,11 @@ namespace ufo {
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
         (variableNamesInt.end(),
-         {"OPS_" + std::string(ufo::VariableNames::qcflags_air_temperature)});
+         {addOPSPrefix(ufo::VariableNames::qcflags_air_temperature)});
       variableNamesFloat.insert
         (variableNamesFloat.end(),
-         {"OPS_" + std::string(ufo::VariableNames::modellevels_air_temperature_derived),
-             "OPS_"
-             + std::string(ufo::VariableNames::air_temperature_derived)});
+         {addOPSPrefix(ufo::VariableNames::modellevels_air_temperature_derived),
+             addOPSPrefix(ufo::VariableNames::air_temperature_derived)});
       variableNamesGeoVaLs.insert
         (variableNamesGeoVaLs.end(),
         {ufo::VariableNames::geovals_air_temperature,
@@ -89,7 +88,7 @@ namespace ufo {
     ProfileAverageUtils::passNonMissingAveragedObservations
       (profileDataHandler,
        profiles,
-       "air_temperature",
+       "airTemperature",
        ufo::VariableNames::air_temperature_derived);
 
     // Fill validation information if required.
@@ -112,7 +111,7 @@ namespace ufo {
           const size_t numModelLevels = profile.getNumProfileLevels();
           model_air_temperature.resize(numModelLevels, missingValueFloat);
           profile.set<float>
-            ("OPS_" + std::string(ufo::VariableNames::modellevels_air_temperature_derived),
+            (addOPSPrefix(ufo::VariableNames::modellevels_air_temperature_derived),
              std::move(model_air_temperature));
         }
       }

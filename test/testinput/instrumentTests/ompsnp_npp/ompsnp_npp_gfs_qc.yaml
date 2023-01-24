@@ -38,13 +38,13 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_obs_2020121500.nc
       obsgrouping:
         group variables: ["latitude"]
-        sort variable: "air_pressure"
+        sort variable: "pressure"
         sort order: "ascending"
 #    obsdataout:
 #      engine:
 #        type: H5File
 #        obsfile: Data/ompsnp_npp_obs_2020121500_out.nc
-    simulated variables: [integrated_layer_ozone_in_air]
+    simulated variables: [ozoneTotal]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/ompsnp_npp_geoval_2020121500.nc
   obs operator:
@@ -57,10 +57,10 @@ observations:
   # Reject all the pressure levels higher in height than pressure of 0.64hPa
   - filter: RejectList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
-        name: MetaData/air_pressure
+        name: MetaData/pressure
       maxvalue: 64.0
     action:
       name: reject
@@ -68,7 +68,7 @@ observations:
   # Accept total_ozone_error_flag values of 0 and 2, but not any others.
   - filter: RejectList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
         name: MetaData/total_ozone_error_flag
@@ -78,7 +78,7 @@ observations:
   #
   - filter: AcceptList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
         name: MetaData/total_ozone_error_flag
@@ -90,7 +90,7 @@ observations:
   # Accept profile_ozone_error_flag values of 0, 1, and 7, but not any others.
   - filter: RejectList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
         name: MetaData/profile_ozone_error_flag
@@ -100,7 +100,7 @@ observations:
   #
   - filter: AcceptList
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     where:
     - variable:
         name: MetaData/profile_ozone_error_flag
@@ -109,185 +109,185 @@ observations:
     action:
       name: accept
   #
-  # Assign initial error value based on air_pressure
+  # Assign initial error value based on pressure
   - filter: Perform Action
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     action:
       name: assign error
       error function:
         name: ObsErrorModelStepwiseLinear@ObsFunction
         options:
           xvar:
-            name: MetaData/air_pressure
+            name: MetaData/pressure
           xvals: [0.001, 10.1325, 16.00935, 25.43258, 40.32735, 63.93607, 101.325, 160.0935, 254.3257, 403.2735, 639.3608, 1013.25, 1600.935, 2543.258, 4032.735, 6393.607, 10132.5, 16009.35, 25432.57, 40327.35, 63936.07, 101325]
           errors: [7.7236, 0.04, 0.02, 0.015, 0.03, 0.15, 0.056, 0.125, 0.2, 0.299, 0.587, 0.864, 1.547, 2.718, 3.893, 4.353, 3.971, 4.407, 4.428, 3.312, 2.198, 2.285]
 
   # Gross error check with (O - B) / ObsError greater than threshold.
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 100
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         maxvalue: 0.001
 #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 30
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  30000.0
         maxvalue: 110000.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 40
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue: 20000.0
         maxvalue: 30000.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 44.42
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue: 10100.0
         maxvalue: 20000.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 57.52
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  6400.0
         maxvalue: 10100.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 69.4
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  4000.0
         maxvalue:  6400.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 70
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  2600.0
         maxvalue:  4000.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 62.73
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  1600.0
         maxvalue:  2600.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 50.52
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:  1100.0
         maxvalue:  1600.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 35.9
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:   700.0
         maxvalue:  1100.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 26.41
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:   400.0
         maxvalue:   700.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 20.51
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:   300.0
         maxvalue:   400.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 12.82
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         minvalue:   200.0
         maxvalue:   300.0
   #
   - filter: Background Check
     filter variables:
-    - name: integrated_layer_ozone_in_air
+    - name: ozoneTotal
     absolute threshold: 10
     action:
       name: reject
     where:
       - variable:
-          name: MetaData/air_pressure
+          name: MetaData/pressure
         maxvalue:   200.0
 
   passedBenchmark: 4133

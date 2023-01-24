@@ -23,19 +23,19 @@ namespace oops {
 ///
 /// * by setting a key to the variable name (a string), e.g.
 ///
-///       selected variable: air_temperature@ObsValue
+///       selected variable: ObsValue/airTemperature
 ///
 /// * by setting a key to a dictionary containing a key "name" set to the variable name
 ///   and optionally extra keys called "channels" and "options", e.g.
 ///
 ///       selected variable:
-///         name: brightness_temperature@ObsValue
+///         name: ObsValue/brightnessTemperature
 ///         channels: 1,5,7-10,13
 ///
 ///   or
 ///
 ///       selected variable:
-///         name: SCATRetMW@ObsFunction
+///         name: ObsFunction/SCATRetMW
 ///         options:
 ///           scatret_ch238: 1
 ///           scatret_ch314: 2

@@ -14,7 +14,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -40,7 +40,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity_nopseudo.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -66,7 +66,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
-    simulated variables: [refractivity]
+    simulated variables: [atmosphericRefractivity]
 #   obsdataout:
 #     engine:
 #       type: H5File

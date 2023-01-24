@@ -30,7 +30,7 @@ class Cal_SatRadianceFromScaledRadianceParameters: public VariableTransformParam
  public:
   /// The variable that will be transformed.  This will take the same format as other variables e.g
   /// transform variable:
-  ///   name: radiance@ObsValue
+  ///   name: ObsValue/radiance
   ///   channels: 1-20
   oops::RequiredParameter<Variable> transformVariable{"transform from", this};
 
@@ -72,9 +72,9 @@ class Cal_SatRadianceFromScaledRadianceParameters: public VariableTransformParam
 *     name: ObsValue/scaledRadiance
 *     channels: *all_channels
 *   number of scale factors: 10
-*   scale factor variable: MetaData/channel_scale_factor
-*   scale factor start: MetaData/start_channel_scale
-*   scale factor end: MetaData/end_channel_scale
+*   scale factor variable: MetaData/channelScaleFactor
+*   scale factor start: MetaData/startChannel
+*   scale factor end: MetaData/endChannel
 *   get scaling factors from multiple arrays: true
 * \endcode
 *

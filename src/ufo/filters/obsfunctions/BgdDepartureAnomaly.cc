@@ -30,13 +30,13 @@ BgdDepartureAnomaly::BgdDepartureAnomaly(const eckit::LocalConfiguration & conf)
   const std::string & hofxopt = options_.testHofX.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@"+hofxopt, channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable(hofxopt+"/brightnessTemperature", channels_);
 
   if (options_.ObsBias.value().size()) {
     // Get optional bias correction
     const std::string & biasopt = options_.ObsBias.value();
-    invars_ += Variable("brightness_temperature@"+biasopt, channels_);
+    invars_ += Variable(biasopt+"/brightnessTemperature", channels_);
   }
 }
 
@@ -57,17 +57,17 @@ void BgdDepartureAnomaly::compute(const ObsFilterData & in,
   const std::string & hofxopt = options_.testHofX.value();
   std::vector<float> obslow(nlocs), obshigh(nlocs);
   std::vector<float> bgdlow(nlocs), bgdhigh(nlocs);
-  in.get(Variable("brightness_temperature@ObsValue", channels_)[0], obslow);
-  in.get(Variable("brightness_temperature@ObsValue", channels_)[1], obshigh);
-  in.get(Variable("brightness_temperature@"+hofxopt, channels_)[0], bgdlow);
-  in.get(Variable("brightness_temperature@"+hofxopt, channels_)[1], bgdhigh);
+  in.get(Variable("ObsValue/brightnessTemperature", channels_)[0], obslow);
+  in.get(Variable("ObsValue/brightnessTemperature", channels_)[1], obshigh);
+  in.get(Variable(hofxopt+"/brightnessTemperature", channels_)[0], bgdlow);
+  in.get(Variable(hofxopt+"/brightnessTemperature", channels_)[1], bgdhigh);
 
   // Get bias correction if ObsBias is present in filter options
   if (options_.ObsBias.value().size()) {
     const std::string & biasopt = options_.ObsBias.value();
     std::vector<float> biaslow(nlocs), biashigh(nlocs);
-    in.get(Variable("brightness_temperature@"+biasopt, channels_)[0], biaslow);
-    in.get(Variable("brightness_temperature@"+biasopt, channels_)[1], biashigh);
+    in.get(Variable(biasopt+"/brightnessTemperature", channels_)[0], biaslow);
+    in.get(Variable(biasopt+"/brightnessTemperature", channels_)[1], biashigh);
 
     // Apply bias correction
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {

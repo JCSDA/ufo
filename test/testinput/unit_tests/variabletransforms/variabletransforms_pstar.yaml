@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/PStar_obs_20210521T1200Z.nc4
-    simulated variables: [surface_pressure]
+    simulated variables: [surfacePressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
 
@@ -44,32 +44,32 @@ observations:
 
   compareVariables:
     - reference:
-        name: PStarErr@TestReference
+        name: TestReference/PStarErr
       test:
-        name: surface_pressure@DerivedObsError
+        name: DerivedObsError/surfacePressure
       absTol: 1.0e-5
     - reference:
-        name: PStar_PGE@TestReference
+        name: TestReference/PStar_PGE
       test:
-        name: surface_pressure@GrossErrorProbability
+        name: GrossErrorProbability/surfacePressure
       absTol: 1.0e-5
     - reference:
-        name: PStar@TestReference
+        name: TestReference/PStar
       test:
-        name: surface_pressure@DerivedObsValue
+        name: DerivedObsValue/surfacePressure
       relTol: 1.0e-5
     - reference:
-        name: PmslUsedFlag@TestReference
+        name: TestReference/PmslUsedFlag
       test:
-        name: DiagnosticFlags/PmslUsed/surface_pressure
+        name: DiagnosticFlags/PmslUsed/surfacePressure
     - reference:
-        name: PstdUsedFlag@TestReference
+        name: TestReference/PstdUsedFlag
       test:
-        name: DiagnosticFlags/PstdUsed/surface_pressure
+        name: DiagnosticFlags/PstdUsed/surfacePressure
     - reference:
-        name: PstnUsedFlag@TestReference
+        name: TestReference/PstnUsedFlag
       test:
-        name: DiagnosticFlags/PstnUsed/surface_pressure
+        name: DiagnosticFlags/PstnUsed/surfacePressure
 
 
 - obs space:
@@ -82,7 +82,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/PStar.nc4
-    simulated variables: [surface_pressure]
+    simulated variables: [surfacePressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
 

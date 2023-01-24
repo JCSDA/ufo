@@ -4,14 +4,15 @@ window end: 2018-04-15T03:00:00Z
 observations:
   - obs operator:
       name: MarineVertInterp
+      observation alias file: ../resources/namemap/test_name_map.yaml
     obs space:
       name: InsituSalinity
       obsdatain:
         engine:
           type: H5File
           obsfile: Data/ufo/testinput_tier_1/profile_2018-04-15.nc
-      simulated variables: [sea_water_salinity]
-      observed variables: [sea_water_salinity]
+      simulated variables: [salinity]
+      observed variables: [salinity]
 #   obsdataout:
 #     engine:
 #       type: H5File

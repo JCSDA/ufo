@@ -94,7 +94,7 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// Note this is numbering from 1 as it is Fortran that will provide output.
   oops::OptionalParameter<std::vector<int>> inspectProfileNumber{"InspectProfileNumber", this};
 
-  /// An optional group which provides the path to reading surface_emissivity@<Group>.  This allows
+  /// An optional group which provides the path to reading <Group>/emissivity.  This allows
   /// RTTOV to use surface emissivity from the ObsSpace
   oops::Parameter<std::string> surfaceEmissivityGroup{"surface emissivity group", "", this};
 

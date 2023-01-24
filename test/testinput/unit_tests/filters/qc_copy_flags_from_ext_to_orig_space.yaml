@@ -12,13 +12,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_copybackflags_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "extended_obs_space"]  # emulating ObsSpace extension done
+        group variables: ["stationIdentification", "extendedObsSpace"]  # emulating ObsSpace extension done
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: Data/function_copybackflags_testout.nc4
-    simulated variables: [ocean_depth, var1]
-    derived variables: [ocean_depth, var1]
+    simulated variables: [depthBelowWaterSurface, var1]
+    derived variables: [depthBelowWaterSurface, var1]
     observed variables: []
   HofX: HofX
   obs post filters:
@@ -28,8 +28,8 @@ observations:
         name: DiagnosticFlags/flag1/var1
       is_false:
     filter variables: [DiagnosticFlags/flag1/var1]
-    model vertical coordinate: HofX/ocean_depth
-    observation vertical coordinate: DerivedObsValue/ocean_depth
+    model vertical coordinate: HofX/depthBelowWaterSurface
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
   compareVariables:
   - test:
       name: DiagnosticFlags/flag1/var1
@@ -42,13 +42,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_copybackflags_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "extended_obs_space"]  # emulating ObsSpace extension done
+        group variables: ["stationIdentification", "extendedObsSpace"]  # emulating ObsSpace extension done
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: Data/function_copybackflags_testout_manyfiltervars.nc4
-    simulated variables: [ocean_depth, var1]
-    derived variables: [ocean_depth, var1]
+    simulated variables: [depthBelowWaterSurface, var1]
+    derived variables: [depthBelowWaterSurface, var1]
     observed variables: []
   HofX: HofX
   obs post filters:
@@ -56,8 +56,8 @@ observations:
     filter variables: 
     - name: DiagnosticFlags/flag1/var1
     - name: DiagnosticFlags/flag2/var1
-    model vertical coordinate: HofX/ocean_depth
-    observation vertical coordinate: DerivedObsValue/ocean_depth
+    model vertical coordinate: HofX/depthBelowWaterSurface
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
   compareVariables:
   - test:
       name: DiagnosticFlags/flag1/var1
@@ -74,18 +74,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/function_copybackflags_testdata.nc4
       obsgrouping:
-        group variables: ["station_id", "extended_obs_space"]  # emulating ObsSpace extension done
+        group variables: ["stationIdentification", "extendedObsSpace"]  # emulating ObsSpace extension done
     # obsdataout:
     #   engine:
     #     type: H5File
     #     obsfile: Data/function_copybackflags_testout_notdiagflag.nc4
-    simulated variables: [ocean_depth, var1]
-    derived variables: [ocean_depth, var1]
+    simulated variables: [depthBelowWaterSurface, var1]
+    derived variables: [depthBelowWaterSurface, var1]
     observed variables: []
   HofX: HofX
   obs post filters:
   - filter: Copy Flags From Extended To Original Space
-    filter variables: [ocean_depth]
-    model vertical coordinate: HofX/ocean_depth
-    observation vertical coordinate: DerivedObsValue/ocean_depth
+    filter variables: [depthBelowWaterSurface]
+    model vertical coordinate: HofX/depthBelowWaterSurface
+    observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
   expectExceptionWithMessage: "Filter variable must be a Diagnostic Flag"

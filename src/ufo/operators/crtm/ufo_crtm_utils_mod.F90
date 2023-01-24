@@ -851,16 +851,16 @@ character(kind=c_char,len=101) :: obsname
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
 
- call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "solarZenithAngle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
 !  For some microwave instruments the solar and sensor azimuth angles can be
@@ -875,10 +875,10 @@ character(kind=c_char,len=101) :: obsname
  where (abs(geo(:)%Source_Zenith_Angle) > 180.0_kind_real) &
     geo(:)%Source_Zenith_Angle = 100.0_kind_real
 
- call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sensorScanPosition", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sensor_view_angle", TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "MetaData", "sensorViewAngle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
@@ -888,24 +888,24 @@ character(kind=c_char,len=101) :: obsname
  if (cmp_strings(trim(obsname),'GMI-GPM') .or. cmp_strings(trim(obsname),'gmi_gpm')) then
     if ( present(geo_hf) ) then
        geo_hf = geo
-       if (obsspace_has(obss, "MetaData", "sensor_zenith_angle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle1", TmpVar)
+       if (obsspace_has(obss, "MetaData", "sensorZenithAngle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensorZenithAngle1", TmpVar)
           geo_hf(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
        endif
-       if (obsspace_has(obss, "MetaData", "solar_zenith_angle1")) then
-          call obsspace_get_db(obss, "MetaData", "solar_zenith_angle1", TmpVar)
+       if (obsspace_has(obss, "MetaData", "solarZenithAngle1")) then
+          call obsspace_get_db(obss, "MetaData", "solarZenithAngle1", TmpVar)
           geo_hf(:)%Source_Zenith_Angle = TmpVar(:)
        endif
-       if (obsspace_has(obss, "MetaData", "sensor_azimuth_angle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle1", TmpVar)
+       if (obsspace_has(obss, "MetaData", "sensorAzimuthAngle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle1", TmpVar)
           geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
        endif
-       if (obsspace_has(obss, "MetaData", "solar_azimuth_angle1")) then
-          call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle1", TmpVar)
+       if (obsspace_has(obss, "MetaData", "solarAzimuthAngle1")) then
+          call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle1", TmpVar)
           geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
        endif
-       if (obsspace_has(obss, "MetaData", "sensor_view_angle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensor_view_angle1", TmpVar)
+       if (obsspace_has(obss, "MetaData", "sensorViewAngle1")) then
+          call obsspace_get_db(obss, "MetaData", "sensorViewAngle1", TmpVar)
           geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
        endif
 !      For some microwave instruments the solar and sensor azimuth angles can be
@@ -933,7 +933,7 @@ character(len=*), intent(out) :: varname
 character(len=6) :: chan
 
  write(chan, '(I0)') n
- varname = 'brightness_temperature_' // trim(chan)
+ varname = 'brightnessTemperature_' // trim(chan)
 
 end subroutine get_var_name
 

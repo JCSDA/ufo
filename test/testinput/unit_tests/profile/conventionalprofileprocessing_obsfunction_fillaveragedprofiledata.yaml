@@ -9,10 +9,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -24,19 +24,19 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: latitude@DerivedMetaData
+      - name: DerivedMetaData/latitude
         type: float
         function:
-          name: FillAveragedProfileData@ObsFunction
+          name: ObsFunction/FillAveragedProfileData
           options:
-            variable to copy: latitude@MetaData
+            variable to copy: MetaData/latitude
             model vertical coordinate: air_pressure_levels
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
   compareVariables:
   - test:
-      name: latitude@DerivedMetaData
+      name: DerivedMetaData/latitude
     reference:
-      name: latitude@TestReference
+      name: TestReference/latitude
     relTol: 1.0e-8
 
 - obs space:
@@ -45,7 +45,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -57,14 +57,14 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: latitude@DerivedMetaData
+      - name: DerivedMetaData/latitude
         type: float
         function:
-          name: FillAveragedProfileData@ObsFunction
+          name: ObsFunction/FillAveragedProfileData
           options:
-            variable to copy: latitude@MetaData
+            variable to copy: MetaData/latitude
             model vertical coordinate: air_pressure_levels
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
   expectExceptionWithMessage: Group variables configuration is empty
 
 - obs space:
@@ -74,10 +74,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -87,14 +87,14 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: latitude@DerivedMetaData
+      - name: DerivedMetaData/latitude
         type: float
         function:
-          name: FillAveragedProfileData@ObsFunction
+          name: ObsFunction/FillAveragedProfileData
           options:
-            variable to copy: latitude@MetaData
+            variable to copy: MetaData/latitude
             model vertical coordinate: air_pressure_levels
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
   expectExceptionWithMessage: The extended obs space has not been produced
 
 - obs space:
@@ -104,10 +104,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -119,12 +119,12 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-      - name: latitude@DerivedMetaData
+      - name: DerivedMetaData/latitude
         type: float
         function:
-          name: FillAveragedProfileData@ObsFunction
+          name: ObsFunction/FillAveragedProfileData
           options:
-            variable to copy: latitude@MetaData
+            variable to copy: MetaData/latitude
             model vertical coordinate: theta
-            observation vertical coordinate: MetaData/air_pressure
+            observation vertical coordinate: MetaData/pressure
   expectExceptionWithMessage: Model vertical coordinate must be a pressure

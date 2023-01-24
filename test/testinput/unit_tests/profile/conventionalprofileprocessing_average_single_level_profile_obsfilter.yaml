@@ -16,10 +16,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -31,7 +31,7 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     Checks: ["Basic", "AveragePressure", "AverageTemperature"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -40,9 +40,9 @@ observations:
   HofX: HofX
   compareVariables:
   - test:
-      name: air_temperature@DerivedObsValue
+      name: DerivedObsValue/airTemperature
     reference:
-      name: air_temperature@TestReference
+      name: TestReference/airTemperature
 # Wind speed
 - obs space:
     name: Radiosonde
@@ -51,10 +51,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [eastward_wind, northward_wind]
+    simulated variables: [windEastward, windNorthward]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -66,8 +66,8 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: eastward_wind
-    - name: northward_wind
+    - name: windEastward
+    - name: windNorthward
     Checks: ["Basic", "AveragePressure", "AverageWindSpeed"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -76,13 +76,13 @@ observations:
   HofX: HofX
   compareVariables:
   - test:
-      name: eastward_wind@DerivedObsValue
+      name: DerivedObsValue/windEastward
     reference:
-      name: eastward_wind@TestReference
+      name: TestReference/windEastward
   - test:
-      name: northward_wind@DerivedObsValue
+      name: DerivedObsValue/windNorthward
     reference:
-      name: northward_wind@TestReference
+      name: TestReference/windNorthward
 # Relative humidity
 - obs space:
     name: Radiosonde
@@ -91,10 +91,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
       obsgrouping:
-        group variables: [ "station_id" ]
-        sort variable: "air_pressure"
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
         sort order: "descending"
-    simulated variables: [air_temperature, relative_humidity]
+    simulated variables: [airTemperature, relativeHumidity]
     extension:
       allocate companion records with length: 71
 #   obsdataout:
@@ -106,8 +106,8 @@ observations:
   obs filters:
   - filter: Conventional Profile Processing
     filter variables:
-    - name: air_temperature
-    - name: relative_humidity
+    - name: airTemperature
+    - name: relativeHumidity
     Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
     compareWithOPS: false
     flagBasicChecksFail: true
@@ -116,6 +116,6 @@ observations:
   HofX: HofX
   compareVariables:
   - test:
-      name: relative_humidity@DerivedObsValue
+      name: DerivedObsValue/relativeHumidity
     reference:
-      name: relative_humidity@TestReference
+      name: TestReference/relativeHumidity

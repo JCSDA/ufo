@@ -64,9 +64,10 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
      "air_pressure",  // this should be consistent with var_prs defined in ufo_vars_mod
      this};
 
-  oops::OptionalParameter<std::string> ObsVertCoord
+  oops::Parameter<std::string> ObsVertCoord
     {"observation vertical coordinate",
      "vertical coordinate for the observations",
+     "pressure",
      this};
 
   oops::OptionalParameter<std::string> ObsVertGroup

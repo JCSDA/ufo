@@ -32,7 +32,7 @@ namespace ufo {
 static ObsFunctionMaker<ImpactHeight> makerImpactHeight_("ImpactHeight");
 
 /* -----------------------------------------------------------------------------
- * Specify that impact_parameter and earth_radius_of_curvature need to be
+ * Specify that impactParameterRO and earthRadiusCurvature need to be
  * provided to this function
  * -----------------------------------------------------------------------------
  */
@@ -43,8 +43,8 @@ ImpactHeight::ImpactHeight(const eckit::LocalConfiguration & conf)
   std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
 
-  invars_ += Variable("impact_parameter@MetaData", channels_);
-  invars_ += Variable("earth_radius_of_curvature@MetaData");
+  invars_ += Variable("MetaData/impactParameterRO", channels_);
+  invars_ += Variable("MetaData/earthRadiusCurvature");
 }
 
 // -----------------------------------------------------------------------------
@@ -71,10 +71,10 @@ void ImpactHeight::compute(const ObsFilterData & in,
   }
 
   std::vector<float> radius_curvature;
-  in.get(Variable("earth_radius_of_curvature@MetaData"), radius_curvature);
+  in.get(Variable("MetaData/earthRadiusCurvature"), radius_curvature);
   for (size_t ichan=0; ichan < nchans ; ichan++) {
     std::vector<float> impact_parameter;
-    in.get(Variable("impact_parameter@MetaData", channels_)[ichan], impact_parameter);
+    in.get(Variable("MetaData/impactParameterRO", channels_)[ichan], impact_parameter);
     for (size_t jj = 0; jj < nlocs; ++jj) {
       if (impact_parameter[jj] == util::missingValue(impact_parameter[jj]) ||
           radius_curvature[jj] == util::missingValue(radius_curvature[jj])) {

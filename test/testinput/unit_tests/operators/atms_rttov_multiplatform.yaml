@@ -24,7 +24,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22 
     # obsdataout:
     #   engine:
@@ -60,7 +60,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22 
     # obsdataout:
     #   engine:
@@ -96,7 +96,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_obs_2020040100_rttov_multiplatform.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22 
     # obsdataout:
     #   engine:

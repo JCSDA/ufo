@@ -13,10 +13,10 @@ observations:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
   obs function:
-    name: ModelHeightAdjustedEastwardWind@ObsFunction
+    name: ObsFunction/ModelHeightAdjustedEastwardWind
     options:
       elevation:
-        name: station_elevation@MetaData
+        name: MetaData/stationElevation
     variables: [windEastwardAt10M]
     tolerance: 1.0e-6
 
@@ -31,10 +31,10 @@ observations:
     filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
 
   obs function:
-    name: ModelHeightAdjustedNorthwardWind@ObsFunction
+    name: ObsFunction/ModelHeightAdjustedNorthwardWind
     options:
       elevation:
-        name: station_elevation@MetaData
+        name: MetaData/stationElevation
     variables: [windNorthwardAt10M]
     tolerance: 1.0e-6
 

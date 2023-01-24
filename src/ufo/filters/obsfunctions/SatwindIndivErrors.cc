@@ -42,14 +42,15 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   std::string const vcoord = options_.vcoord.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable(obs_vcoord+"@MetaData");
-  invars_ += Variable(profile+"@HofX");
+  invars_ += Variable("MetaData/" + obs_vcoord);
+  invars_ += Variable("HofX/" + profile);
   invars_ += options_.pressure_error;
   invars_ += options_.quality_index;
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable(vcoord+"@GeoVaLs");
-  invars_ += Variable(profile+"@GeoVaLs");
+  invars_ += Variable("GeoVaLs/eastward_wind");
+  invars_ += Variable("GeoVaLs/northward_wind");
+  invars_ += Variable("GeoVaLs/" + vcoord);
 }
 
 // -----------------------------------------------------------------------------
@@ -127,9 +128,9 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   std::ostringstream errString;
 
-  // check profile name matches one of eastward_wind or northward_wind
-  if ( profile != "eastward_wind" && profile != "northward_wind" ) {
-    errString << "Wind component must be one of eastward_wind or northward_wind" << std::endl;
+  // check profile name matches one of windEastward or windNorthward
+  if ( profile != "windEastward" && profile != "windNorthward" ) {
+    errString << "Wind component must be one of windEastward or windNorthward" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
   }
 
@@ -142,7 +143,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
 
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable(profile+"@GeoVaLs"));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + vcoord));
 
   // local variables
   float const missing = util::missingValue(missing);
@@ -152,16 +153,16 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   std::vector<float> bg_windcomponent;
   std::vector<float> pressure_error;
   std::vector<float> ob_qi;
-  in.get(Variable(obs_vcoord+"@MetaData"), ob_p);
-  in.get(Variable(profile+"@HofX"), bg_windcomponent);
+  in.get(Variable("MetaData/" + obs_vcoord), ob_p);
+  in.get(Variable("HofX/" + profile), bg_windcomponent);
   in.get(options_.pressure_error, pressure_error);
   in.get(options_.quality_index, ob_qi);
 
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = in.getGeoVaLs();
   // Vectors storing GeoVaL column for current location.
-  std::vector <double> cx_p(gvals->nlevs(vcoord), 0.0);
-  std::vector <double> cx_windcomponent(gvals->nlevs(profile), 0.0);
+  std::vector <double> cx_p(nlevs, 0.0);
+  std::vector <double> cx_windcomponent(nlevs, 0.0);
 
   // diagnostic variables to be summed over all processors at the end of the routine
   std::unique_ptr<ioda::Accumulator<size_t>> countQiAccumulator =
@@ -171,7 +172,12 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     // Get GeoVaLs at the specified location.
     gvals->getAtLocation(cx_p, vcoord, iloc);
-    gvals->getAtLocation(cx_windcomponent, profile, iloc);
+    // Temporary mapping for variable names
+    if ( profile == "windEastward" ) {
+      gvals->getAtLocation(cx_windcomponent, "eastward_wind", iloc);
+    } else if ( profile == "windNorthward" ) {
+      gvals->getAtLocation(cx_windcomponent, "northward_wind", iloc);
+    }
     // Check GeoVaLs are in correct vertical order
     if (cx_p.front() > cx_p.back()) {
       throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());

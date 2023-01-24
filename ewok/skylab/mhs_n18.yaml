@@ -8,7 +8,7 @@ obs space:
       type: H5File
       allow overwrite: true
   _source: noaa
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &mhs_n18_channels 1-5
 obs operator:
   name: CRTM
@@ -46,10 +46,10 @@ obs filters:
 # Useflag check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *mhs_n18_channels
   test variables:
-  - name: ChannelUseflagCheckRad@ObsFunction
+  - name: ObsFunction/ChannelUseflagCheckRad
     channels: *mhs_n18_channels
     options:
       channels: *mhs_n18_channels

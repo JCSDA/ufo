@@ -26,12 +26,14 @@ static ObsOperatorMaker<ObsAtmSfcInterp> makerGSISfcModel_("GSISfcModel");
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const Parameters_ & parameters)
-  : ObsOperatorBase(odb), keyOperAtmSfcInterp_(0),
-    odb_(odb), varin_()
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+    keyOperAtmSfcInterp_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices);
+
+  varin_ += nameMap_.convertName(operatorVars_);
 
   ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, parameters.toConfiguration(),
                              operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),

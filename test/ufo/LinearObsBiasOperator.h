@@ -60,8 +60,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     const eckit::LocalConfiguration gconf(conf, "geovals");
     GeoVaLsParameters geovalsparams;
     geovalsparams.validateAndDeserialize(gconf);
-    oops::Variables requiredVars = odb.obsvariables();
-    requiredVars += bias.requiredVars();
+    oops::Variables requiredVars = bias.requiredVars();
     requiredVars += targetBias.requiredVars();
     const GeoVaLs geovals(geovalsparams, odb, requiredVars);
 
