@@ -231,7 +231,7 @@ namespace ufo {
     std::vector<size_t> model_vert_coord_ext(nlocs_ext);
     for (size_t mlev = 0; mlev < nlocs_ext; ++mlev) {
       model_vert_coord_ext[mlev] = model_vert_coord[locsExt[mlev]];
-      oops::Log::debug() << "model_vert_coord[mlev]: " <<
+      oops::Log::debug() << "model_vert_coord[" << mlev << "]: " <<
                             model_vert_coord[locsExt[mlev]] << std::endl;
     }
     if (std::all_of(model_vert_coord_ext.begin(), model_vert_coord_ext.end(),
@@ -242,14 +242,25 @@ namespace ufo {
     }
 
     // Stop if model vertical coordinate not in same direction as obs vertical coordinate:
-    const bool mod_vert_coord_increasing = model_vert_coord[locsExt[1]] >
+    const bool mod_vert_coord_equal = model_vert_coord[locsExt[1]] == model_vert_coord[locsExt[0]];
+    const bool mod_vert_coord_increasing = model_vert_coord[locsExt[1]] >=
                                            model_vert_coord[locsExt[0]];
     if (nlocs_obs <= 1) {
       return mod_vert_coord_increasing;
     }
-    const bool obs_vert_coord_increasing = obs_vert_coord[locsOriginal[1]] >
+    const bool obs_vert_coord_equal = obs_vert_coord[locsOriginal[1]] == obs_vert_coord[locsOriginal[0]];
+    const bool obs_vert_coord_increasing = obs_vert_coord[locsOriginal[1]] >=
                                            obs_vert_coord[locsOriginal[0]];
 
+    if (obs_vert_coord_equal) {
+      oops::Log::debug() << " obs_vert_coord_equal " << obs_vert_coord[locsOriginal[1]] << " == "
+                         << obs_vert_coord[locsOriginal[0]] << std::endl;
+      return mod_vert_coord_increasing;
+    } else if (mod_vert_coord_equal) {
+      oops::Log::debug() << " mod_vert_coord_equal " << model_vert_coord[locsExt[1]] << " == "
+                         << model_vert_coord[locsExt[0]] << std::endl;
+      return obs_vert_coord_increasing;
+    }
     if (obs_vert_coord_increasing && !mod_vert_coord_increasing) {
       throw eckit::UserError(": The model vertical coordinate is decreasing, but the observation "
             "vertical coordinate is increasing. They must go in the same direction.", Here());
