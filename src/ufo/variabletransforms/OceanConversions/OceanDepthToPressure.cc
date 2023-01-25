@@ -81,9 +81,10 @@ void OceanDepthToPressure::runTransform(const std::vector<bool> &apply) {
     obserr_[iv][jobs] = pressureError[jobs];
   }
 
-  // copy PGEFinal and QCflags to new pressure
+  // copy ObsError, PGEFinal and QCflags to new pressure
   obsdb_.put_db("GrossErrorProbability", pressurevariable_, pressurepge);
   obsdb_.put_db("QCFlags", pressurevariable_, pressureflags);
+  obsdb_.put_db("DerivedObsError", pressurevariable_, pressureError);
 }
 
 // -----------------------------------------------------------------------------

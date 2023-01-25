@@ -15,7 +15,6 @@ obs operator:
   name: Composite
   components:
   - name: GSISfcModel
-    observation alias file: $(observation_alias_file)
     use_fact10: true
     variables:
     - name: airTemperature
@@ -30,14 +29,12 @@ linear obs operator:
   name: Composite
   components:
   - name: Identity
-    observation alias file: $(observation_alias_file)
     variables:
     - name: airTemperature
     - name: specificHumidity
     - name: windEastward
     - name: windNorthward
   - name: Identity
-    observation alias file: $(observation_alias_file)
     variables:
     - name: stationPressure
 obs filters:

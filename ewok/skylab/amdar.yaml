@@ -17,8 +17,6 @@ obs space:
 
 obs operator:
   name: VertInterp
-  interpolation method: linear
-  observation alias file: $(observation_alias_file)
   variables:
   - name: airTemperature
   - name: specificHumidity

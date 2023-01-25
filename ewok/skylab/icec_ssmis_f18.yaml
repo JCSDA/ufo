@@ -13,7 +13,6 @@ obs space:
   simulated variables: [sea_ice_area_fraction]
 obs operator:
   name: Identity
-  observation alias file: $(observation_alias_file)
 obs error:
   covariance model: diagonal
 obs filters:

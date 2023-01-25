@@ -32,7 +32,7 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
  public:
   /// Input salinity
   oops::Parameter<std::string> SalinityVariable{"ocean salinity variable",
-                                                "salinity", this};
+                                                "absoluteSalinity", this};
   oops::Parameter<std::string> SalinityGroup{"ocean salinity group",
                                              "ObsValue", this};
   /// Input temperature
@@ -64,11 +64,11 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
 ///    ocean pressure group: DerivedObsValue
 ///    ocean temperature variable: waterTemperature
 ///    ocean temperature group: ObsValue
-///    ocean salinity variable: salinity
+///    ocean salinity variable: absoluteSalinity
 ///    ocean salinity group: ObsValue
 ///
 /// will return potential temperature (deg.C) in a variable named (by default)
-/// "DerivedObsValue/ocean_potential_temperature",
+/// "DerivedObsValue/waterPotentialTemperature",
 /// given salinity (g/kg), temperature (deg.C) and pressure (dbar).
 ///
 

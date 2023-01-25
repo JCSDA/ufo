@@ -4,8 +4,6 @@ window end: 2018-04-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
-    interpolation method: log-linear
-    vertical coordinate: air_pressure
     observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: Radiosonde
