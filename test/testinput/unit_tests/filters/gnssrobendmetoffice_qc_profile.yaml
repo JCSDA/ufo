@@ -7,6 +7,7 @@ observations:
     vert_interp_ops: true
     pseudo_ops: true
     min_temp_grad: 1.0e-6
+    channels: &all_levels 1-375
   obs space:
     name: GnssroBnd
     obsdatain:
@@ -16,11 +17,11 @@ observations:
       obsgrouping:
         group variables: ["sequenceNumber"]
     simulated variables: [bendingAngle]
-    channels: &all_levels 1-375
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_20210701T1200Z_profile_out.nc4
+    channels: *all_levels
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_20210701T1200Z_profile_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
   obs pre filters:
@@ -29,6 +30,24 @@ observations:
     - variable:
         name: MetaData/satelliteIdentifier
       is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
+  - filter: Variable Assignment
+    assignments:
+    - name: NewMetaData/impactHeightRO
+      type: float
+      channels: *all_levels
+      function:
+        name: ObsFunction/ImpactHeight
+        options:
+          channels: *all_levels
+  - filter: Variable Assignment               # Create a new variable which combines satellite and processing centre
+    assignments:
+    - name: MetaData/satelliteAndCenter
+      type: int
+      function:
+        name: IntObsFunction/LinearCombination
+        options:
+          variables: [MetaData/satelliteIdentifier, MetaData/dataProviderOrigin]
+          coefs: [1000, 1.0]
   obs post filters:
   - filter: GNSSRO Impact Height Check
     filter variables:
@@ -42,7 +61,7 @@ observations:
     where:
     - variable:
         name: MetaData/satelliteIdentifier
-      is_not_in: 42, 43, 750, 751
+      is_not_in: 42, 43
   - filter: GNSSRO Impact Height Check
     filter variables:
     - name: bendingAngle
@@ -55,7 +74,7 @@ observations:
     where:
     - variable:
         name: MetaData/satelliteIdentifier
-      is_in: 42, 43, 750, 751
+      is_in: 42, 43
   - filter: GNSSRO Impact Height Check
     filter variables:
     - name: bendingAngle
@@ -71,10 +90,55 @@ observations:
       is_in: 523  # Apply for FY-3D
     - variable:
         name: MetaData/qualityFlags
-      any_bit_set_of: 13 # Apply to rising occultations
+      any_bit_unset_of: 13 # Apply to setting occultations
   - filter: Profile Few Observations Check
     filter variables:
     - name: bendingAngle
       channels: *all_levels
     threshold: 10
-  passedBenchmark: 1283
+  - filter: Variable Assignment
+    assignments:
+    - name: ObsError/bendingAngle
+      type: float
+      channels: *all_levels
+      function:
+        name: ObsFunction/DrawObsErrorFromFile
+        options:
+          channels: *all_levels
+          dispersion measure: fractional standard deviation
+          normalization variable: ObsValue/bendingAngle
+          minimum value: 3.0E-6
+          file: ../resources/rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nc4
+          interpolation:
+          - name: MetaData/satelliteAndCenter
+            method: exact
+          - name: NewMetaData/impactHeightRO
+            method: bilinear
+            use channel list: true
+            extrapolation mode: nearest
+          - name: MetaData/latitude
+            method: bilinear
+            extrapolation mode: nearest
+  - filter: GNSS-RO 1DVar Check
+    defer to post: true
+    vert_interp_ops: false
+    pseudo_ops: false
+    min_temp_grad: 1.0e-6
+    capsupersat: false
+    cost_funct_test: 2
+    channels: *all_levels
+    Delta_ct2: 1
+    Delta_factor: 0.01
+    n_iteration_test: 20
+    OB_test: 2.5
+    y_test: 5
+    bmatrix_filename: ../resources/bmatrix/gnssro/gnssro_bmatrix.txt
+    filter variables:
+    - name: bendingAngle
+      channels: *all_levels
+  compareVariables:
+    - test:
+        name: OneDVarDiags/finalCost
+      reference:
+        name: ReferenceDiagnostics/finalCost
+      relTol: 1.0e-4
