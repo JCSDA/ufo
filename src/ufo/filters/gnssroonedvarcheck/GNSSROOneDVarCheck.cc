@@ -14,6 +14,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
@@ -34,6 +35,10 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
 {
   oops::Log::debug() << "GNSSROOneDVarCheck contructor starting" << std::endl;
 
+  std::set<int> channelset = oops::parseIntSet(parameters_.channelList);
+  std::vector<int> channels;
+  std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
+
   // Setup fortran object
   ufo_gnssroonedvarcheck_create_f90(key_,
                                     obsdb,
@@ -49,7 +54,9 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                     parameters_.pseudo_ops.value(),
                                     parameters_.vert_interp_ops.value(),
                                     parameters_.y_test.value(),
-                                    GNSSROOneDVarCheck::qcFlag());
+                                    GNSSROOneDVarCheck::qcFlag(),
+                                    channels.size(),
+                                    channels[0]);
 
   oops::Log::debug() << "GNSSROOneDVarCheck contructor complete. " << std::endl;
 }

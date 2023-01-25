@@ -11,7 +11,6 @@ obs space:
   simulated variables: [seaSurfaceTemperature]
 obs operator:
   name: Identity
-  observation alias file: $(observation_alias_file)
 obs error:
   covariance model: diagonal
 obs filters:

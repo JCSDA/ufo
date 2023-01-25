@@ -17,7 +17,6 @@ obs space:
 
 obs operator:
   name: VertInterp
-  observation alias file: $(observation_alias_file)
   variables:
   - name: airTemperature
   - name: specificHumidity

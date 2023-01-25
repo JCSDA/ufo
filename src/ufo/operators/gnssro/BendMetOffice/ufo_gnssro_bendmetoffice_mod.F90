@@ -32,6 +32,7 @@ type :: ufo_gnssro_BendMetOffice
   logical :: vert_interp_ops
   logical :: pseudo_ops
   real(kind_real) :: min_temp_grad
+  integer, allocatable :: chanList(:)
   contains
     procedure :: setup     => ufo_gnssro_bendmetoffice_setup
     procedure :: simobs    => ufo_gnssro_bendmetoffice_simobs
@@ -43,7 +44,7 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, chanList)
 
 implicit none
 
@@ -51,10 +52,13 @@ class(ufo_gnssro_BendMetOffice), intent(inout) :: self
 logical(c_bool), intent(in) :: vert_interp_ops
 logical(c_bool), intent(in) :: pseudo_ops
 real(c_float), intent(in) :: min_temp_grad
+integer(c_int), intent(in) :: chanList(:)
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
+allocate(self % chanList(1:size(chanList)))
+self % chanList = chanList
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -98,7 +102,6 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   integer                      :: iVar                          ! Loop variable, obs diagnostics variable number
   real(kind_real), allocatable :: refractivity(:)               ! Refractivity on various model levels
   real(kind_real), allocatable :: model_heights(:)              ! Geopotential heights that refractivity is calculated on
-  integer                      :: levelNumbers(nlevels)         ! List level numbers to get
   real(kind_real)              :: calculated_hofx(nlevels)      ! Array to receive the calculated h(x) on levels
 
   write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: begin"
@@ -152,6 +155,11 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
     call fckit_exception%throw(err_msg)
   end if
 
+  if (nlevels > 1 .AND. nlevels /= size(self % chanList)) then
+    write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', nlevels, size(self%chanList)
+    call fckit_exception%throw(err_msg)
+  end if
+
   if (prs%vals(1,1) .gt. prs%vals(prs%nval,1) ) then
     write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
     call fckit_exception%throw(err_msg)
@@ -166,10 +174,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
   if (nlevels > 1) then
-    do ilev = 1, nlevels
-      levelNumbers(ilev) = ilev
-    end do
-    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param, levelNumbers)
+    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param, self % chanList)
   else
     call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param)
   end if

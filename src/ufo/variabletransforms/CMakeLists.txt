@@ -42,6 +42,10 @@ if( ${gsw_FOUND} )
             OceanConversions/OceanDepthToPressure.h
             OceanConversions/OceanTempToTheta.cc
             OceanConversions/OceanTempToTheta.h
+            OceanConversions/OceanTempToConservativeTemp.cc
+            OceanConversions/OceanTempToConservativeTemp.h
+            OceanConversions/OceanPracticalSalinityToAbsoluteSalinity.cc
+            OceanConversions/OceanPracticalSalinityToAbsoluteSalinity.h
       )
       
       PREPEND( _p_variabletransforms_oceanfiles       "variabletransforms"       ${variabletransforms_oceanfiles} )
