@@ -112,4 +112,68 @@ real(c_float) function gsw_pt_from_t_c(c_sal, c_temp, c_pressure) &
 
 end function gsw_pt_from_t_c
 
+! -----------------------------------------------------------------------------
+!> \brief real(c_float) function gsw_ct_from_t_c
+!!
+!! \details  real(c_float) function **gsw_ct_from_t_c**(c_sal, c_temp, c_pressure)
+!! calculates conservative temperature as a function of salinity, temperature and pressure.
+!! It takes the following arguments as input:
+!! * float c_sal - absolute salinity (g/kg)
+!! * float c_temp - in situ temperature (deg.C)
+!! * float c_pressure - pressure (dbar)
+!!
+!! and returns conservative temperature (deg.C) according to TEOS-10 function gsw_CT_from_t.
+!!
+
+real(c_float) function gsw_ct_from_t_c(c_sal, c_temp, c_pressure) &
+                                 bind(c, name='gsw_ct_from_t_f90')
+  use gsw_mod_toolbox, only: gsw_CT_from_t
+  implicit none
+  real(c_float),  intent(in   ) :: c_sal, c_temp, c_pressure
+  real(kind_real) :: sal, temp, pressure
+
+  !! convert reals
+  sal = real(c_sal, kind_real)
+  temp = real(c_temp, kind_real)
+  pressure = real(c_pressure, kind_real)
+
+  ! call GSW fortran function
+  gsw_ct_from_t_c = gsw_CT_from_t(sal, temp, pressure)
+  return
+
+end function gsw_ct_from_t_c
+
+! -----------------------------------------------------------------------------
+!> \brief real(c_float) function gsw_sa_from_sp_c
+!!
+!! \details  real(c_float) function **gsw_sa_from_sp_c**(c_sal, c_pressure, c_longitude, c_latitude)
+!! calculates absolute salinity as a function of practical salinity, pressure, longitude and latitude.
+!! It takes the following arguments as input:
+!! * float c_sal - absolute salinity (g/kg)
+!! * float c_pressure - pressure (dbar)
+!! * float c_longitude - longitude (degrees)
+!! * float c_latitude - latitude (degrees)
+!!
+!! and returns absolute salinity (g/kg) according to TEOS-10 function gsw_SA_from_SP.
+!!
+
+real(c_float) function gsw_sa_from_sp_c(c_sal, c_pressure, c_longitude, c_latitude) &
+                                 bind(c, name='gsw_sa_from_sp_f90')
+  use gsw_mod_toolbox, only: gsw_SA_from_SP
+  implicit none
+  real(c_float),  intent(in   ) :: c_sal, c_pressure, c_longitude, c_latitude
+  real(kind_real) :: sal, pressure, longitude, latitude
+
+  !! convert reals
+  sal = real(c_sal, kind_real)
+  pressure = real(c_pressure, kind_real)
+  longitude = real(c_longitude, kind_real)
+  latitude = real(c_latitude, kind_real)
+
+  ! call GSW fortran function
+  gsw_sa_from_sp_c = gsw_SA_from_SP(sal, pressure, longitude, latitude)
+  return
+
+end function gsw_sa_from_sp_c
+
 end module ufo_oceanconversions_mod_c
