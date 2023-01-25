@@ -1,0 +1,44 @@
+window begin: 2017-12-31T21:00:00Z
+window end: 2030-01-01T03:00:00Z
+
+observations:
+- obs space:
+    name: Ocean practical salinity to absolute salinity conversion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ocean_practicalsalinitytoabsolutesalinity_out.nc4
+    simulated variables: [salinity, absoluteSalinity]
+    observed variables: [salinity]
+    derived variables: [absoluteSalinity]
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: ObsValue/salinity
+      is_defined:
+    Transform: OceanPracticalSalinityToAbsoluteSalinity
+    ocean pressure group: TestReference
+  compareVariables:
+    - reference:
+        name: TestReference/absoluteSalinity
+      test:
+        name: DerivedObsValue/absoluteSalinity
+      relTol: 2.0e-4
+    - reference:
+        name: TestReference/float_missing
+      test:
+        name: GrossErrorProbability/absoluteSalinity
+    - reference:
+        name: TestReference/int_zeros
+      test:
+        name: QCFlags/absoluteSalinity
+    - reference:
+        name: ObsError/salinity
+      test:
+        name: DerivedObsError/absoluteSalinity
+        

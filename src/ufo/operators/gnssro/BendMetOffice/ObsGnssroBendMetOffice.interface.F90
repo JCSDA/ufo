@@ -35,18 +35,29 @@ contains
 subroutine ufo_gnssro_bendmetoffice_setup_c(c_key_self, &
                                             vert_interp_ops, &
                                             pseudo_ops, &
-                                            min_temp_grad) bind(c,name='ufo_gnssro_bendmetoffice_setup_f90')
+                                            min_temp_grad, &
+                                            nchans, &
+                                            chanList) bind(c,name='ufo_gnssro_bendmetoffice_setup_f90')
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-logical(c_bool), intent(in) :: vert_interp_ops
-logical(c_bool), intent(in) :: pseudo_ops
-real(c_float), intent(in) :: min_temp_grad
-    
+integer(c_int), intent(inout) :: c_key_self        !< Reference to this object
+logical(c_bool), intent(in)   :: vert_interp_ops   !< Whether to do vertical interpolation using ln(p)
+logical(c_bool), intent(in)   :: pseudo_ops        !< Whether to use pseudo-levels
+real(c_float), intent(in)     :: min_temp_grad     !< Minimum temperature gradient
+integer(c_int), intent(in)    :: nchans            !< Number of channels (levels) to be used
+integer(c_int), intent(in)    :: chanList(nchans)  !< List of channels to use
+
+integer(c_int)                :: noChans(1)        !< Channel list when no channels are used
+
 type(ufo_gnssro_BendMetOffice), pointer :: self
 
 call ufo_gnssro_bendmetoffice_registry%setup(c_key_self, self)
 
-call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad)
+if (nchans == 0) then
+  noChans(1) = 0
+  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, noChans)
+else
+  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, chanList)
+end if
 
 end subroutine ufo_gnssro_bendmetoffice_setup_c
   

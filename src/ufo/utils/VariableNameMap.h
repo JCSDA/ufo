@@ -7,6 +7,7 @@
 
 #ifndef UFO_UTILS_VARIABLENAMEMAP_H_
 #define UFO_UTILS_VARIABLENAMEMAP_H_
+
 #include <map>
 #include <string>
 #include <vector>
@@ -41,14 +42,13 @@ class VariableMapParameters : public oops::Parameters {
 /// of if an alias file is provided but a variable alias is not provided, the name conversion
 /// returns the original variable name.
 
-class VariableNameMap
-{
+class VariableNameMap {
  public:
     explicit VariableNameMap(const boost::optional<std::string> &);
     ~VariableNameMap();
 
-  const std::string convertName(const std::string &);
-  oops::Variables convertName(const oops::Variables &);
+  std::string convertName(const std::string &) const;
+  oops::Variables convertName(const oops::Variables &) const;
 
  private:
   std::map<std::string, std::string> Aliases_;
