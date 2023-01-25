@@ -20,7 +20,6 @@ observations:
 
   obs operator:
     name: VertInterp
-    interpolation method: log-linear
     variables:
     - name: airTemperature
     observation alias file: ../resources/namemap/test_name_map.yaml
