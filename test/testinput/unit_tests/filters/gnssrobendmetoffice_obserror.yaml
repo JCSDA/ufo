@@ -68,7 +68,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: MetaData/average_temperature_20km
+    - name: MetaData/averageTemperature20km
       type: float
       function:
         name: ObsFunction/AverageTemperatureBelow
@@ -85,7 +85,7 @@ observations:
     allow extrapolation: true
     verbose output: true
     defer to post: true
-    average temperature name: average_temperature_20km
+    average temperature name: averageTemperature20km
   compareVariables:
     - reference:
         name: AvTempObsError/bendingAngle
@@ -116,7 +116,7 @@ observations:
   obs pre filters:
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/impactHeightRO
+    - name: NewMetaData/impactHeightRO
       type: float
       function:
         name: ObsFunction/ImpactHeight
@@ -150,10 +150,12 @@ observations:
           interpolation:
           - name: MetaData/satelliteAndCenter
             method: nearest
-          - name: DerivedMetaData/impactHeightRO
+          - name: NewMetaData/impactHeightRO
             method: bilinear
+            extrapolation mode: nearest
           - name: MetaData/latitude
             method: bilinear
+            extrapolation mode: nearest
   compareVariables:
     - test:
         name: ObsError/bendingAngle
@@ -166,6 +168,7 @@ observations:
     vert_interp_ops: true
     pseudo_ops: true
     min_temp_grad: 1.0e-6
+    channels: &all_levels 1-375
   obs space:
     name: GnssroBnd
     obsdatain:
@@ -175,11 +178,11 @@ observations:
       obsgrouping:
         group variables: ["sequenceNumber"]
     simulated variables: [bendingAngle]
-    channels: &all_levels 1-375
+    channels: *all_levels
 #    obsdataout:
 #      engine:
 #        type: H5File
-#        obsfile: Data/gnssro_obs_2020050106_profile_ukmo_obserr_out.nc4
+#        obsfile: Data/gnssro_obs_2021070112_profile_ukmo_obserr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
   obs pre filters:
@@ -190,7 +193,7 @@ observations:
       is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/impactHeightRO
+    - name: NewMetaData/impactHeightRO
       channels: *all_levels
       type: float
       function:
@@ -230,11 +233,13 @@ observations:
           interpolation:
           - name: MetaData/satelliteAndCenter
             method: exact
-          - name: DerivedMetaData/impactHeightRO
+          - name: NewMetaData/impactHeightRO
             use channel list: true
             method: bilinear
+            extrapolation mode: nearest
           - name: MetaData/latitude
             method: bilinear
+            extrapolation mode: nearest
   compareVariables:
     - test:
         name: DerivedMetaData/bendingAngle

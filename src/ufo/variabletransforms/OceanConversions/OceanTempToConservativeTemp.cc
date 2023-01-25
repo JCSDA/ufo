@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/variabletransforms/OceanConversions/OceanTempToTheta.h"
+#include "ufo/variabletransforms/OceanConversions/OceanTempToConservativeTemp.h"
 
 #include <cmath>
 
@@ -17,10 +17,10 @@
 
 namespace ufo {
 
-static TransformMaker<OceanTempToTheta>
-    makerOceanTempToTheta_("OceanTempToTheta");
+static TransformMaker<OceanTempToConservativeTemp>
+    makerOceanTempToConservativeTemp_("OceanTempToConservativeTemp");
 
-OceanTempToTheta::OceanTempToTheta(
+OceanTempToConservativeTemp::OceanTempToConservativeTemp(
         const Parameters_ &options,
         const ObsFilterData &data,
         const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
@@ -32,14 +32,14 @@ OceanTempToTheta::OceanTempToTheta(
       temperaturegroup_(options.TemperatureGroup),
       pressurevariable_(options.PressureVariable),
       pressuregroup_(options.PressureGroup),
-      thetavariable_(options.ThetaVariable)
+      conservativetempvariable_(options.ConservativeTempVariable)
 {}
 
 // -----------------------------------------------------------------------------
 
-void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
+void OceanTempToConservativeTemp::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() <<
-    "Retrieve Ocean Potential Temperature from Salinity, Temperature, Pressure" <<
+    "Retrieve Ocean Conservative Temperature from Absolute Salinity, In Situ Temp., Pressure" <<
     std::endl;
 
   // dimension
@@ -49,10 +49,10 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   std::vector<float> pressure;
   std::vector<float> temp;
   std::vector<float> sal;
-  std::vector<float> theta(nlocs, missingValueFloat);
-  std::vector<float> thetaError(nlocs, missingValueFloat);
-  std::vector<float> thetapge;
-  std::vector<int> thetaflags;
+  std::vector<float> conservativetemp(nlocs, missingValueFloat);
+  std::vector<float> conservativetempError(nlocs, missingValueFloat);
+  std::vector<float> conservativetemppge;
+  std::vector<int> conservativetempflags;
   getObservation(salinitygroup_,
                  salinityvariable_,
                  sal, true);
@@ -62,42 +62,42 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   getObservation(pressuregroup_,
                  pressurevariable_,
                  pressure, true);
-  data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), thetaError);
+  data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), conservativetempError);
   getObservation("GrossErrorProbability", temperaturevariable_,
-                 thetapge);
+                 conservativetemppge);
   getObservation("QCFlags", temperaturevariable_,
-                 thetaflags);
+                 conservativetempflags);
 
-  if (thetapge.empty()) {
-    thetapge.assign(nlocs, missingValueFloat);
+  if (conservativetemppge.empty()) {
+    conservativetemppge.assign(nlocs, missingValueFloat);
   }
-  if (thetaflags.empty()) {
-    thetaflags.assign(nlocs, 0);
+  if (conservativetempflags.empty()) {
+    conservativetempflags.assign(nlocs, 0);
   }
 
-  // compute theta as function of temperature, pressure and salinity
+  // compute conservative temp as function of temperature, pressure and salinity
   for (size_t loc = 0; loc < nlocs; ++loc) {
     if (!apply[loc]) continue;
     if (sal[loc] != missingValueFloat &&
         temp[loc] != missingValueFloat &&
         pressure[loc] != missingValueFloat) {
-      theta[loc] = gsw_pt_from_t_f90(sal[loc],
-                                     temp[loc],
-                                     pressure[loc]);
+      conservativetemp[loc] = gsw_ct_from_t_f90(sal[loc],
+                                                temp[loc],
+                                                pressure[loc]);
     }
   }
-  obsdb_.put_db("DerivedObsValue", thetavariable_, theta);
-  const size_t iv = obserr_.varnames().find(thetavariable_);
+  obsdb_.put_db("DerivedObsValue", conservativetempvariable_, conservativetemp);
+  const size_t iv = obserr_.varnames().find(conservativetempvariable_);
   for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
     if (!apply[jobs])
       continue;
-    obserr_[iv][jobs] = thetaError[jobs];
+    obserr_[iv][jobs] = conservativetempError[jobs];
   }
 
-  // copy ObsError, PGEFinal and QCflags to new potential temperature
-  obsdb_.put_db("GrossErrorProbability", thetavariable_, thetapge);
-  obsdb_.put_db("QCFlags", thetavariable_, thetaflags);
-  obsdb_.put_db("DerivedObsError", thetavariable_, thetaError);
+  // copy ObsError, PGEFinal and QCflags to new conservative temperature
+  obsdb_.put_db("GrossErrorProbability", conservativetempvariable_, conservativetemppge);
+  obsdb_.put_db("QCFlags", conservativetempvariable_, conservativetempflags);
+  obsdb_.put_db("DerivedObsError", conservativetempvariable_, conservativetempError);
 }
 
 // -----------------------------------------------------------------------------
