@@ -10,6 +10,7 @@ module ufo_gnssroonedvarcheck_mod
 use, intrinsic :: iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
+use fckit_exception_module, only: fckit_exception
 use iso_c_binding
 use kinds
 use missing_values_mod
@@ -47,6 +48,7 @@ type, public :: ufo_gnssroonedvarcheck
   logical                   :: pseudo_ops        !< Whether to use pseudo levels in forward operator
   logical                   :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
   real(kind_real)           :: min_temp_grad     !< The minimum vertical temperature gradient allowed
+  integer, allocatable      :: chanList(:)       !< List of channels (levels) to use
 end type ufo_gnssroonedvarcheck
 
 ! ------------------------------------------------------------------------------
@@ -64,7 +66,8 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
                                          capsupersat, cost_funct_test, &
                                          Delta_ct2, Delta_factor, min_temp_grad, &
                                          n_iteration_test, OB_test, pseudo_ops, &
-                                         vert_interp_ops, y_test, onedvarflag)
+                                         vert_interp_ops, y_test, onedvarflag, &
+                                         chanList)
 
   implicit none
   type(ufo_gnssroonedvarcheck), intent(inout) :: self              !< gnssroonedvarcheck main object
@@ -81,8 +84,10 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   logical(c_bool), intent(in)                 :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
   real(c_float), intent(in)                   :: y_test            !< Threshold on distance between observed and solution bending angles
   integer(c_int), intent(in)                  :: onedvarflag       !< flag for qc manager
+  integer(c_int), intent(in)                  :: chanList(:)       !< List of channels to use
 
   character(len=800) :: message
+  integer :: i
 
   self % obsdb = obsspace
   self % onedvarflag = onedvarflag
@@ -98,6 +103,8 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   self % pseudo_ops = pseudo_ops
   self % vert_interp_ops = vert_interp_ops
   self % y_test = y_test
+  allocate(self % chanList(1:SIZE(chanList)))
+  self % chanList(1:SIZE(chanList)) = chanList(1:SIZE(chanList))
 
   write(message, '(A)') 'GNSS-RO 1D-Var check: input parameters are:'
   call fckit_log % debug(message)
@@ -123,6 +130,12 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   call fckit_log % debug(message)
   write(message, '(A,F16.8)') 'y_test = ', y_test
   call fckit_log % debug(message)
+  write(message, '(A)') 'chanList = '
+  call fckit_log % debug(message)
+  do i = 1, SIZE(chanList), 100
+    write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
+    call fckit_log % debug(message)
+  end do
 
 end subroutine ufo_gnssroonedvarcheck_create
 
@@ -137,6 +150,8 @@ subroutine ufo_gnssroonedvarcheck_delete(self)
 
   implicit none
   type(ufo_gnssroonedvarcheck), intent(inout) :: self !< gnssroonedvarcheck main object
+
+  if (allocated(self % chanList)) deallocate(self % chanList)
 
 end subroutine ufo_gnssroonedvarcheck_delete
 
@@ -190,6 +205,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   integer                            :: start_point           ! Starting index of the current profile
   integer                            :: current_point         ! Ending index of the current profile
   integer                            :: iprofile              ! Loop variable, profile number
+  integer                            :: iobs                  ! Loop variable, observation number
   integer                            :: nobs_profile          ! Number of observations in the profile
   character(len=800)                 :: Message               ! Message to be output
   logical                            :: BAerr                 ! Has there been an error in the bending angle calculation?
@@ -200,32 +216,64 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   real(kind_real)                    :: O_Bdiff               ! Average RMS(O-B) for profile
   real(kind_real), allocatable       :: Tb(:)                 ! Calculated background temperature (derived from p,q)
   real(kind_real), allocatable       :: Ts(:)                 ! 1DVar solution temperature
+  integer                            :: nlevels               ! Number of vertical levels in the data
+  integer                            :: ilevel                ! Loop variable, level number
+  real(kind_real)                    :: missing               ! Missing data indicator (for reals)
+!
+! Diagnostics to push back to the obs-space
+!
+  integer, allocatable               :: indices(:)            ! The indices of the diagnostic elements to be updated
+  integer, allocatable               :: niter(:)              ! Number of iterations required to converge
+  real(kind_real), allocatable       :: initial_cost(:)       ! Initial cost-function value
+  real(kind_real), allocatable       :: final_cost(:)         ! Final cost-function value
+  real(kind_real), allocatable       :: dfs_list(:)           ! Degrees of freedom for signal
 
   ! Get the obs-space information
   nobs = obsspace_get_nlocs(self % obsdb)
+  nlevels = max(1, obsspace_get_nchans(self % obsdb))
+
+  if (nlevels > 1 .AND. nlevels /= SIZE(self % chanList)) then
+    write(Message,'(a,2I5)') 'nChans should equal length of channel list', nlevels, SIZE(self % chanList)
+    call fckit_exception%throw(Message)
+  end if
+
   allocate(obsLon(nobs))
   allocate(obsLat(nobs))
-  allocate(impact_param(nobs))
+  allocate(impact_param(nlevels * nobs))
   allocate(radius_curv(nobs))
   allocate(undulation(nobs))
-  allocate(obs_bending_angle(nobs))
+  allocate(obs_bending_angle(nlevels * nobs))
   allocate(record_number(nobs))
   allocate(obsSatid(nobs))
   allocate(obsOrigC(nobs))
-  allocate(qc_flags(nobs))
-  allocate(obs_err(nobs))
+  allocate(qc_flags(nlevels * nobs))
+  allocate(obs_err(nlevels * nobs))
+! Allocate room for diagnostics
+  allocate(niter(nobs))
+  allocate(initial_cost(nobs))
+  allocate(final_cost(nobs))
+  allocate(dfs_list(nobs))
 
   call obsspace_get_db(self % obsdb, "MetaData", "longitude", obsLon)
   call obsspace_get_db(self % obsdb, "MetaData", "latitude", obsLat)
-  call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
   call obsspace_get_db(self % obsdb, "MetaData", "earthRadiusCurvature", radius_curv)
   call obsspace_get_db(self % obsdb, "MetaData", "geoidUndulation", undulation)
   call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
   call obsspace_get_recnum(self % obsdb, record_number)
+
+  if (nlevels > 1) then
+    call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags, self % chanList)
+    call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param, self % chanList)
+    call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle, self % chanList)
+    call obsspace_get_db(self % obsdb, "ObsError", "bendingAngle", obs_err, self % chanList)
+  else
+    call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
+    call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
+    call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
+    call obsspace_get_db(self % obsdb, "ObsError", "bendingAngle", obs_err)
+  end if
   call obsspace_get_db(self % obsdb, "MetaData", "satelliteIdentifier", obsSatid)
   call obsspace_get_db(self % obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
-  call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
-  call obsspace_get_db(self % obsdb, "FortranERR", "bendingAngle", obs_err)
 
   ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
@@ -240,8 +288,19 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
   ! Read through the record numbers in order to find a profile of observations
   ! Each profile shares the same record number
-  allocate(sort_key(nobs))
-  sort_key = record_number + (impact_param / MAXVAL(impact_param))
+  missing = missing_value(missing)
+  allocate(sort_key(nobs * nlevels))
+  do iobs = 1, nobs
+    do ilevel = 1, nlevels
+      if (impact_param(ilevel+(iobs-1)*nlevels) == missing) then
+        sort_key(ilevel+(iobs-1)*nlevels) = record_number(iobs) + 0.9 + REAL(ilevel) / (100 * nLevels)
+      else
+        sort_key(ilevel+(iobs-1)*nlevels) = record_number(iobs) + &
+          0.5 * (impact_param(ilevel+(iobs-1)*nlevels) / MAXVAL(impact_param))
+      end if
+    end do
+  end do
+
   call Ops_RealSortQuick(sort_key, index_vals)
   call find_unique(record_number, unique)
 
@@ -249,46 +308,48 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   current_point = 1
   do iprofile = 1, size(unique)
     start_point = current_point
+    iobs = 1 + ((index_vals(start_point) - 1) / nlevels)
     WRITE (Message, '(A,I0)') 'ObNumber ', iprofile
     call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'Latitude ', obsLat(index_vals(start_point))
+    WRITE (Message, '(A,F12.2)') 'Latitude ', obsLat(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'Longitude ', obsLon(index_vals(start_point))
+    WRITE (Message, '(A,F12.2)') 'Longitude ', obsLon(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,I0)') 'Processing centre ', obsOrigC(index_vals(start_point))
+    WRITE (Message, '(A,I0)') 'Processing centre ', obsOrigC(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,I0)') 'Sat ID ', obsSatid(index_vals(start_point))
+    WRITE (Message, '(A,I0)') 'Sat ID ', obsSatid(iobs)
     call fckit_log % info(Message)
 
     ! Work out which observations belong to the current profile
-    do current_point = start_point, nobs
-      if (unique(iprofile) /= record_number(index_vals(current_point))) exit
+    do current_point = start_point, nobs * nlevels, nlevels
+      if (unique(iprofile) /= record_number(1 + ((index_vals(current_point) - 1) / nlevels))) exit
     end do
 
     ! Load the geovals into the background structure
     ! Reverse the order of the geovals, since this routine (and the forward
     ! operator) works bottom-to-top
-    Back % za(:) = rho_heights % vals(prs%nval:1:-1, index_vals(start_point))
-    Back % zb(:) = theta_heights % vals(q%nval:1:-1, index_vals(start_point))
-    Back % p(:) = prs % vals(prs % nval:1:-1, index_vals(start_point))
-    Back % q(:) = q % vals(q%nval:1:-1, index_vals(start_point))
+    Back % za(:) = rho_heights % vals(prs%nval:1:-1, iobs)
+    Back % zb(:) = theta_heights % vals(q%nval:1:-1, iobs)
+    Back % p(:) = prs % vals(prs % nval:1:-1, iobs)
+    Back % q(:) = q % vals(q%nval:1:-1, iobs)
 
     ! Allocate the observations structure
     nobs_profile = current_point - start_point
     call allocate_singleob(Ob, nobs_profile, prs % nval, q % nval)
 
     ! Load the observations information into the obsevations structure
-    Ob % id = record_number(index_vals(start_point))
-    Ob % latitude = obsLat(index_vals(start_point))
-    Ob % longitude = obsLon(index_vals(start_point))
+    Ob % id = record_number(index_vals(iobs))
+    Ob % latitude = obsLat(index_vals(iobs))
+    Ob % longitude = obsLon(index_vals(iobs))
     Ob % niter = 0  ! We haven't yet run 1DVar
     Ob % jcost = missing_value(Ob % jcost)
+
     Ob % bendingangle(:) % value = obs_bending_angle(index_vals(start_point:current_point-1))
     Ob % bendingangle(:) % oberr = obs_err(index_vals(start_point:current_point-1))
-    Ob % impactparam(:) % value = impact_param(index_vals(start_point:current_point-1))
-    Ob % qc_flags(:) = qc_flags(index_vals(start_point:current_point-1))
-    Ob % ro_rad_curv % value = radius_curv(index_vals(start_point))
-    Ob % ro_geoid_und % value = undulation(index_vals(start_point))
+    Ob % impactparam(:) % value =  impact_param(index_vals(start_point:current_point-1))
+    Ob % qc_flags(:) =             qc_flags(index_vals(start_point:current_point-1))
+    Ob % ro_rad_curv % value =     radius_curv(index_vals(iobs))
+    Ob % ro_geoid_und % value =    undulation(index_vals(iobs))
 
     ! Choose the latitude band and season of the B-matrix information
     iseason = 1    ! Temporary -only one season at present!
@@ -332,11 +393,6 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
       end if
     end do
 
-    write(Message,'(A,2I5,2F10.3,I5,E16.8)') 'Profile stats: ', obsSatid(index_vals(start_point)), &
-        obsOrigC(index_vals(start_point)), Ob % latitude, Ob % longitude, &
-        Ob % niter, Ob % jcost
-    call fckit_log % debug(Message)
-    
     if (verboseOutput) then
       do ipoint = 0, nobs_profile-1, 20
           write(Message,'(20I5)') qc_flags(index_vals(start_point+ipoint: &
@@ -350,9 +406,26 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
       end do
     end if
 
+    ! Save the diagnostic information
+    allocate(indices(1:nobs_profile))
+    do ipoint = 0, nobs_profile-1
+      indices(ipoint+1) = 1 + ((index_vals(start_point+ipoint) - 1) / nlevels)
+    end do
+    niter(indices) = Ob % niter
+    initial_cost(indices) = O_Bdiff
+    final_cost(indices) = Ob % jcost
+    dfs_list(indices) = DFS
+    deallocate(indices)
+
     call deallocate_singleob(Ob)
   end do
   call obsspace_put_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
+
+  ! Save the diagnostics to the obs-space
+  call obsspace_put_db(self % obsdb, "OneDVarDiags", "nIter", niter)
+  call obsspace_put_db(self % obsdb, "OneDVarDiags", "initialCost", initial_cost)
+  call obsspace_put_db(self % obsdb, "OneDVarDiags", "finalCost", final_cost)
+  call obsspace_put_db(self % obsdb, "OneDVarDiags", "DFS", dfs_list)
 
 end subroutine ufo_gnssroonedvarcheck_apply
 
