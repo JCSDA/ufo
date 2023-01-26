@@ -26,7 +26,7 @@ struct Constants {
   static constexpr double ttp            = 2.7316e+2;    // temperature at h2o triple point (K)
   static constexpr double rd             = 2.8705e2;
   static constexpr double rv             = 4.6150e2;
-  static constexpr double cp             = 1.005e3;     // heat capacity at constant pressure
+  static constexpr double cp             = 1.0046e3;     // heat capacity at constant pressure
                                                          //      for air
   static constexpr double cv             = 7.1760e2;     // heat capacity at constant volume
                                                          //      for air
