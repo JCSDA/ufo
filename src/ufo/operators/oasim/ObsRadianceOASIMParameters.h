@@ -8,6 +8,10 @@
 #ifndef UFO_OPERATORS_OASIM_OBSRADIANCEOASIMPARAMETERS_H_
 #define UFO_OPERATORS_OASIM_OBSRADIANCEOASIMPARAMETERS_H_
 
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
 
@@ -17,7 +21,9 @@ namespace ufo {
 /// oasim observation operator Parameters class
 class ObsRadianceOASIMParameters : public ObsOperatorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsRadianceOASIMParameters, ObsOperatorParametersBase)
-  //
+ public:
+  /// CoefficientPath
+  oops::RequiredParameter<std::string> CoefficientPath{"CoefficientPath", this};
 };
 // -----------------------------------------------------------------------------
 

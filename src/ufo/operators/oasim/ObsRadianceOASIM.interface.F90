@@ -37,6 +37,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radianceoasim_setup_c(c_key_self, c_conf) bind(c,name='ufo_radianceoasim_setup_f90')
+
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
 

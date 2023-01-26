@@ -46,8 +46,14 @@ type(fckit_configuration), intent(in)     :: f_conf
 
 character(len=*), parameter :: myname_="ufo_oasim_simobs"
 character(max_string) :: err_msg
+character(len=255) :: COEFFICIENT_PATH
+character(len=:), allocatable :: str
 
-call self%oasim_%create('../../oasim/test/data')
+!Path to coefficient files                                                                                                       
+call f_conf%get_or_die("CoefficientPath",str)
+COEFFICIENT_PATH = str
+
+call self%oasim_%create(COEFFICIENT_PATH)
 
 end subroutine ufo_oasim_setup
 
@@ -110,7 +116,7 @@ implicit none
     call ufo_geovals_get_var(geovals, var_aerosol_tau , ta_in )
     call ufo_geovals_get_var(geovals, var_scat_albedo , wa_in )
     call ufo_geovals_get_var(geovals, var_asym_par , asym )
-    call ufo_geovals_get_var(geovals, var_layer_thick , dh )
+    call ufo_geovals_get_var(geovals, var_ocn_lay_thick , dh )
     call ufo_geovals_get_var(geovals, var_carb_det , cdet )
     call ufo_geovals_get_var(geovals, var_inorg_carb , pic )
     call ufo_geovals_get_var(geovals, var_dis_carb , cdc )

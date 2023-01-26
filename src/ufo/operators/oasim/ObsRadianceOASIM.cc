@@ -40,7 +40,7 @@ ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_
                                       "aerosol_optical_thickness",
                                       "single_scattering_albedo",
                                       "asymmetry_parameter",
-                                      "layer_thickness",
+                                      "sea_water_cell_thickness",
                                       "Carbon_nitrogen_detritus_concentration",
                                       "Particulate_inorganic_carbon",
                                       "colored_dissolved_organic_carbon",
