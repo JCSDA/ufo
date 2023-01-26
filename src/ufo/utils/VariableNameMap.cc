@@ -27,7 +27,7 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
   Aliases_["seaSurfaceTemperature"] = "sea_surface_temperature";
   Aliases_["equivalentReflectivityFactor"] = "equivalent_reflectivity_factor";
   Aliases_["salinity"] = "sea_water_salinity";
-  Aliases_["seaSurfaceTemperature"] = "sea_surface_temperature";
+  Aliases_["seaSurfaceSalinity"] = "sea_surface_salinity";
   Aliases_["ozoneProfile"] = "mole_fraction_of_ozone_in_air";
 // The lines below (and yaml files) should be removed as all name are hard-wired because of
 // the obs and model naming conventions
