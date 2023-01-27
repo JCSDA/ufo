@@ -20,8 +20,7 @@ namespace ufo {
 
 PredictorBase::PredictorBase(const PredictorParametersBase & parameters,
                              const oops::Variables & vars)
-  : func_name_(parameters.name),
-    geovars_(), hdiags_(), vars_(vars) {
+  : vars_(vars), geovars_(), hdiags_(), func_name_(parameters.name) {
 }
 
 // -----------------------------------------------------------------------------

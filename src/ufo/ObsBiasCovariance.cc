@@ -38,10 +38,9 @@ namespace ufo {
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                      const Parameters_ & params)
-  : odb_(odb), prednames_(0), vars_(odb.assimvariables()), variances_(),
-    preconditioner_(0),
-    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0),
-    rank_(odb.distribution()->rank()) {
+  : odb_(odb), ht_rinv_h_(0), preconditioner_(0), obs_num_(0),
+    minimal_required_obs_number_(0), analysis_variances_(0), variances_(),
+    prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
