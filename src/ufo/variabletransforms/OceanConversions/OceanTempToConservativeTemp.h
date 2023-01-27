@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANDENSITY_H_
-#define UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANDENSITY_H_
+#ifndef UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANTEMPTOCONSERVATIVETEMP_H_
+#define UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANTEMPTOCONSERVATIVETEMP_H_
 
 #include <memory>
 #include <string>
@@ -14,6 +14,7 @@
 
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/OceanConversions/OceanConversions.interface.h"
@@ -24,9 +25,9 @@ namespace ufo {
 
 class ObsFilterData;
 
-/// \brief Options controlling OceanDensity variable transform
-class OceanDensityParameters : public VariableTransformParametersBase {
-  OOPS_CONCRETE_PARAMETERS(OceanDensityParameters, VariableTransformParametersBase)
+/// \brief Options controlling OceanTempToConservativeTemp variable transform
+class OceanTempToConservativeTempParameters : public VariableTransformParametersBase {
+  OOPS_CONCRETE_PARAMETERS(OceanTempToConservativeTempParameters, VariableTransformParametersBase)
 
  public:
   /// Input salinity
@@ -44,39 +45,40 @@ class OceanDensityParameters : public VariableTransformParametersBase {
                                                 "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
-  /// Density variable name
-  oops::Parameter<std::string> DensityVariable{"ocean density variable",
-                                               "waterDensity", this};
+  /// Potential temperature variable name
+  oops::Parameter<std::string> ConservativeTempVariable{"ocean conservative temperature name",
+                                                        "waterConservativeTemperature", this};
 };
 
 // -----------------------------------------------------------------------------
 
-/// \brief Outputs density calculated from salinity, temperature, pressure.
+/// \brief Outputs conservative temperature converted from in situ temperature,
+/// using TEOS-10 function gsw_ct_from_t.
 ///
 /// Example
 ///
 ///  obs filters:
 ///  - filter: Variable Transforms
-///    Transform: OceanDensity
+///    Transform: OceanTempToConservativeTemp
 ///    ocean pressure variable: waterPressure
 ///    ocean pressure group: DerivedObsValue
 ///    ocean temperature variable: waterTemperature
 ///    ocean temperature group: ObsValue
-///    ocean salinity variable: absoluteSalinity
+///    ocean salinity variable: salinity
 ///    ocean salinity group: ObsValue
 ///
-/// will return density (kg/m^3) in a variable named (by default) "DerivedObsValue/waterDensity",
-/// given salinity (g/kg), temperature (deg.C) and pressure (dbar), as given by TEOS-10
-/// function gsw_rho_t_exact.
+/// will return conservative temperature (deg.C) in a variable named (by default)
+/// "DerivedObsValue/waterConservativeTemperature",
+/// given absolute salinity (g/kg), in situ temperature (deg.C) and pressure (dbar).
 ///
 
-class OceanDensity : public TransformBase {
+class OceanTempToConservativeTemp : public TransformBase {
  public:
-  typedef OceanDensityParameters Parameters_;
-  OceanDensity(const Parameters_ &options,
-               const ObsFilterData &data,
-               const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-               const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+  typedef OceanTempToConservativeTempParameters Parameters_;
+  OceanTempToConservativeTemp(const Parameters_ &options,
+                              const ObsFilterData &data,
+                              const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                              const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
@@ -87,11 +89,11 @@ class OceanDensity : public TransformBase {
   std::string temperaturegroup_;
   std::string pressurevariable_;
   std::string pressuregroup_;
-  std::string densityvariable_;
+  std::string conservativetempvariable_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANDENSITY_H_
+#endif  // UFO_VARIABLETRANSFORMS_OCEANCONVERSIONS_OCEANTEMPTOCONSERVATIVETEMP_H_

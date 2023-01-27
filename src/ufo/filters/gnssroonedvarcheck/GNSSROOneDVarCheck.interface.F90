@@ -45,7 +45,9 @@ subroutine ufo_gnssroonedvarcheck_create_c(c_self, &
                                            pseudo_ops, &
                                            vert_interp_ops, &
                                            y_test, &
-                                           c_onedvarflag) &
+                                           c_onedvarflag, &
+                                           nchans, &
+                                           chanList) &
                         bind(c,name='ufo_gnssroonedvarcheck_create_f90')
 
 !> \brief Interface to the Fortran create method
@@ -73,9 +75,12 @@ logical(c_bool), intent(in)               :: pseudo_ops        !< Whether to use
 logical(c_bool), intent(in)               :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
 real(c_float), intent(in)                 :: y_test            !< Threshold on distance between observed and solution bending angles
 integer(c_int), intent(in)                :: c_onedvarflag     !< flag for qc manager logging - input
+integer(c_int), intent(in)                :: nchans            !< Number of channels (levels) to be used
+integer(c_int), intent(in)                :: chanList(nchans)  !< List of channels to use
 
 character(len=filename_length) :: bmatrix_filename  ! Location of the B-matrix file
-integer :: ifname                                   ! Loop variable for filename
+integer                        :: ifname            ! Loop variable for filename
+integer(c_int), allocatable    :: localChanList(:)  ! Allocated list of channels (even if nchans=0)
 
 type(ufo_gnssroonedvarcheck), pointer :: self
 
@@ -83,6 +88,14 @@ call ufo_gnssroonedvarcheck_registry%setup(c_self, self)
 
 ! copy over the char* into a Fortran character
 call c_f_string(input_filename, bmatrix_filename)
+
+if (nchans == 0) then
+  allocate(localChanList(1))
+  localChanList(1) = 0
+else
+  allocate(localChanList(nchans))
+  localChanList(1:nchans) = chanList(1:nchans)
+end if
 
 call ufo_gnssroonedvarcheck_create(self, &
                                    c_obspace, &
@@ -97,7 +110,8 @@ call ufo_gnssroonedvarcheck_create(self, &
                                    pseudo_ops, &
                                    vert_interp_ops, &
                                    y_test, &
-                                   c_onedvarflag)
+                                   c_onedvarflag, &
+                                   localChanList)
 
 end subroutine ufo_gnssroonedvarcheck_create_c
 

@@ -22,14 +22,27 @@ observations:
         name: ObsValue/waterTemperature
       is_defined:
     - variable:
-        name: ObsValue/salinity
+        name: TestReference/absoluteSalinity
       is_defined:
     Transform: OceanDensity
     ocean pressure group: TestReference
+    ocean salinity group: TestReference
   compareVariables:
     - reference:
         name: TestReference/waterDensity
       test:
         name: DerivedObsValue/waterDensity
       relTol: 2.0e-4
+    - reference:
+        name: TestReference/float_missing
+      test:
+        name: GrossErrorProbability/waterDensity
+    - reference:
+        name: TestReference/int_zeros
+      test:
+        name: QCFlags/waterDensity
+    - reference:
+        name: TestReference/float_ones
+      test:
+        name: DerivedObsError/waterDensity
       

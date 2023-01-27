@@ -12,7 +12,6 @@ obs space:
 monitoring only: true
 obs operator:
   name: Identity
-  observation alias file: $(observation_alias_file)
 obs filters:
 - filter: Domain Check
   where:
