@@ -35,10 +35,10 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
                        const VariableNameMap & nameMap)
   : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     filtervars_(),
+    nameMap_(nameMap),
     whereParameters_(parameters.where),
     whereOperator_(parameters.whereOperator),
-    actionsParameters_(parameters.actions()),
-    nameMap_(nameMap)
+    actionsParameters_(parameters.actions())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
 
