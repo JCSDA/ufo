@@ -80,8 +80,7 @@ class ObsSfcPCorrectedParameters : public ObsOperatorParametersBase {
      "surface_altitude", this};
 
   /// Note: "station_altitude" default value is "stationElevation"
-  /// in ufo_sfcpcorrected_mod.F90. It is set as "height" in the NASA/GEOS system.
-  oops::OptionalParameter<std::string> ObsHeightName{"station_altitude", this};
+  oops::Parameter<std::string> ObsHeightName{"station_altitude", "stationElevation", this};
 };
 
 // -----------------------------------------------------------------------------

@@ -72,8 +72,6 @@ self%da_psfc_scheme = str_psfc_scheme
 if (f_conf%has("station_altitude")) then
    call f_conf%get_or_die("station_altitude", str_obs_height)
    self%station_altitude = str_obs_height
-else
-   self%station_altitude = "stationElevation"
 end if
 
 end subroutine ufo_sfcpcorrected_setup
@@ -110,13 +108,6 @@ real(kind_real)                   :: model_znew
 
 missing = missing_value(missing)
 nobs    = obsspace_get_nlocs(obss)
-
-! check station_altitude
-if (trim(self%station_altitude) /= "height" .and. &
-    trim(self%station_altitude) /= "stationElevation"  ) then
-   write(err_msg,*) myname_, ' error: station_altitude has to be "height" or "stationElevation"!'
-   call abor1_ftn(err_msg)
-endif
 
 ! check if nobs is consistent in geovals & nlocs
 if (geovals%nlocs /= nobs) then
