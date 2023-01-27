@@ -46,7 +46,6 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
   // Initialize options
   options_ = parameters;
   const std::string &sensor = options_.sensor.value();
-  int order_ = 1;
 
   // Currently the code is designed only for SSMIS brightness temperatures from
   // channels 12 through 18, but a different sensor could use a different list of
@@ -384,7 +383,7 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
 
     std::vector<std::string> predictors_part = {"constant", "lapse_rate_order_2", "lapse_rate",
       "scan_angle_order_4", "scan_angle_order_3", "scan_angle_order_2", "scan_angle"};
-    int id_preds = predictors_part.size();
+    size_t id_preds = predictors_part.size();
     std::vector<int> id_pred(id_preds, -1);
     for (std::size_t kp = 0; kp < id_preds; ++kp) {
       for (std::size_t jp = 0; jp < npreds; ++jp) {
