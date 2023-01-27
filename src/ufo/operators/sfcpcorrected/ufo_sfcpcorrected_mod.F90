@@ -69,10 +69,8 @@ call self%geovars%push_back(geovars_list)
 call f_conf%get_or_die("da_psfc_scheme",str_psfc_scheme)
 self%da_psfc_scheme = str_psfc_scheme
 
-if (f_conf%has("station_altitude")) then
-   call f_conf%get_or_die("station_altitude", str_obs_height)
-   self%station_altitude = str_obs_height
-end if
+call f_conf%get_or_die("station_altitude", str_obs_height)
+self%station_altitude = str_obs_height
 
 end subroutine ufo_sfcpcorrected_setup
 
