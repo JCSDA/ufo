@@ -190,7 +190,7 @@ namespace ufo {
     if (options_.compareWithOPS.value()) {
       oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
       profileDataHandler.resetProfileIndices();
-      for (int jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
+      for (size_t jprof = 0; jprof < obsdb_.nrecs(); ++jprof) {
         oops::Log::debug() << " Profile " << jprof + 1 << std::endl;
         profileDataHandler.initialiseNextProfile();
         profileCheckValidator.validate(profileDataHandler, obsdb_.comm().size());
