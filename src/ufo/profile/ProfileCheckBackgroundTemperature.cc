@@ -33,7 +33,8 @@ namespace ufo {
     const std::vector <float> &tBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &tBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_air_temperature);
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_air_temperature.value());
     std::vector <float> &tPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_air_temperature);
     std::vector <int> &tFlags =
