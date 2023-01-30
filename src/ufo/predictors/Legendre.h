@@ -33,7 +33,7 @@ class LegendreParameters : public PredictorParametersBase {
   ///
   /// \note If this option is set, a suffix containing its value (even if it's equal to 1) will be
   /// appended to the predictor name.
-  oops::OptionalParameter<int> order{"order", this};
+  oops::OptionalParameter<size_t> order{"order", this};
 };
 
 // -----------------------------------------------------------------------------
