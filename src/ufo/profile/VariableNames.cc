@@ -39,15 +39,6 @@ constexpr const char* const ufo::VariableNames::hofx_eastward_wind;
 constexpr const char* const ufo::VariableNames::hofx_northward_wind;
 constexpr const char* const ufo::VariableNames::hofx_dew_point_temperature;
 
-// Background errors
-
-constexpr const char* const ufo::VariableNames::bkgerr_air_temperature;
-constexpr const char* const ufo::VariableNames::bkgerr_relative_humidity;
-constexpr const char* const ufo::VariableNames::bkgerr_eastward_wind;
-constexpr const char* const ufo::VariableNames::bkgerr_northward_wind;
-constexpr const char* const ufo::VariableNames::bkgerr_geopotential_height;
-constexpr const char* const ufo::VariableNames::bkgerr_dew_point_temperature;
-
 // Probability of gross error
 
 constexpr const char* const ufo::VariableNames::pge_air_temperature;

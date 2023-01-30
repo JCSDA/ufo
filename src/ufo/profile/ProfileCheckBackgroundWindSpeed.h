@@ -45,9 +45,15 @@ namespace ufo {
     bool requiresHofX() override {return true;}
 
     /// List of names of required obs diagnostics.
+    /// This list is only augmented if the background error group is ObsDiag;
+    /// if it has a different value then we assume that the background errors are retrieved
+    /// from the obs space.
     oops::Variables getObsDiagNames() override {
-      return oops::Variables({ufo::VariableNames::bkgerr_eastward_wind,
-            ufo::VariableNames::bkgerr_northward_wind});
+      if (options_.bkgErrGroup.value() == "ObsDiag")
+        return oops::Variables({"ObsDiag/" + options_.bkgErrName_eastward_wind.value(),
+              "ObsDiag/" + options_.bkgErrName_northward_wind.value()});
+      else
+        return oops::Variables();
     }
   };
 }  // namespace ufo

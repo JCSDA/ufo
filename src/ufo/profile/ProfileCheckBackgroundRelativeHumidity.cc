@@ -29,7 +29,8 @@ namespace ufo {
     const std::vector <float> &rhBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_relative_humidity);
     const std::vector <float> &rhBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_relative_humidity);
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_relative_humidity.value());
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_relative_humidity);
     std::vector <int> &rhFlags =
