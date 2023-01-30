@@ -7,8 +7,6 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  io pool:
-    write multiple files: true
   _source: noaa
   simulated variables: [brightnessTemperature]
   channels: &cowvr_iss_channels 1, 2, 5, 6, 9, 10
