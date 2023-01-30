@@ -248,7 +248,8 @@ namespace ufo {
     if (nlocs_obs <= 1) {
       return mod_vert_coord_increasing;
     }
-    const bool obs_vert_coord_equal = obs_vert_coord[locsOriginal[1]] == obs_vert_coord[locsOriginal[0]];
+    const bool obs_vert_coord_equal = obs_vert_coord[locsOriginal[1]] ==
+                                      obs_vert_coord[locsOriginal[0]];
     const bool obs_vert_coord_increasing = obs_vert_coord[locsOriginal[1]] >=
                                            obs_vert_coord[locsOriginal[0]];
 
