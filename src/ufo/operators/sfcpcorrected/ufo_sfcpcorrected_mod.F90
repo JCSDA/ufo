@@ -29,6 +29,7 @@ module ufo_sfcpcorrected_mod
                                                     ! allocated/deallocated at interface layer
    type(oops_variables), public :: geovars
    character(len=MAXVARLEN)     :: da_psfc_scheme
+   character(len=MAXVARLEN)     :: station_altitude
  contains
    procedure :: setup  => ufo_sfcpcorrected_setup
    procedure :: simobs => ufo_sfcpcorrected_simobs
@@ -46,6 +47,7 @@ implicit none
 class(ufo_sfcpcorrected), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: f_conf
 character(len=:), allocatable         :: str_psfc_scheme, str_var_sfc_geomz, str_var_geomz
+character(len=:), allocatable         :: str_obs_height
 character(max_string)             :: debug_msg
 
 !> In the case where a user wants to specify the geoVaLs variable name of model
@@ -66,6 +68,9 @@ call self%geovars%push_back(geovars_list)
 
 call f_conf%get_or_die("da_psfc_scheme",str_psfc_scheme)
 self%da_psfc_scheme = str_psfc_scheme
+
+call f_conf%get_or_die("station_altitude", str_obs_height)
+self%station_altitude = str_obs_height
 
 end subroutine ufo_sfcpcorrected_setup
 
@@ -115,7 +120,7 @@ cor_psfc = missing
 ! get obs variables
 allocate(obs_height(nobs))
 allocate(obs_psfc(nobs))
-call obsspace_get_db(obss, "MetaData",  "stationElevation",obs_height)
+call obsspace_get_db(obss, "MetaData",  trim(self%station_altitude),obs_height)
 call obsspace_get_db(obss, "ObsValue",  "stationPressure", obs_psfc)
 
 ! get model variables; geovars_list = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)

@@ -78,6 +78,9 @@ class ObsSfcPCorrectedParameters : public ObsOperatorParametersBase {
   oops::Parameter<std::string> geovarSfcGeomZ{"geovar_sfc_geomz",
      "Model variable for surface height",
      "surface_altitude", this};
+
+  /// Note: "station_altitude" default value is "stationElevation"
+  oops::Parameter<std::string> ObsHeightName{"station_altitude", "stationElevation", this};
 };
 
 // -----------------------------------------------------------------------------
