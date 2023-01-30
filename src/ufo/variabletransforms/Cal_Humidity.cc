@@ -195,12 +195,12 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         pressure = 100000.0;  // default pressure in Pascal
       }
 
-      // Cycle if observatoin are valid
-      if (temperature == missingValueFloat ||
-          pressure <= 1.0) continue;
-
       // if dewpoint temperature is reported (most stations)
       if (dewPoint > 1.0) {
+        // Cycle if observation are not valid
+        if (temperature == missingValueFloat ||
+            pressure <= 1.0) continue;
+
         // calculate saturated specific humidity wrt water and ice
         evaluateSatSpecHumidity(dewPoint, temperature);
 
@@ -214,14 +214,15 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         }
       // if relative humidity (Rh) is reported (small minority of stations)
       // update from Rh wrt water to Rh wrt ice for temperatures below freezing
-      } else if (relativeHumidity[iloc] != missingValueFloat &&
-                temperature < ufo::Constants::t0c) {
-        // calculate saturated specific humidity wrt water and ice
-        evaluateSatSpecHumidity(temperature, temperature);
-        // update from Rh wrt water to Rh wrt ice for temperatures below freezing
-        relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
-        if (!allowSuperSaturation_)
-          relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+      } else if (relativeHumidity[iloc] != missingValueFloat) {
+          if (temperature == missingValueFloat) relativeHumidity[iloc] = missingValueFloat;
+          else if (temperature < ufo::Constants::t0c) {
+            // calculate saturated specific humidity wrt water and ice
+            evaluateSatSpecHumidity(temperature, temperature);
+            // update from Rh wrt water to Rh wrt ice for temperatures below freezing
+            relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
+            if (!allowSuperSaturation_)
+              relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);}
 
         hasBeenUpdated = true;
       }
