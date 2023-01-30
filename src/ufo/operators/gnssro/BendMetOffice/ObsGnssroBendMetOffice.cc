@@ -5,13 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include <algorithm>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
@@ -40,10 +43,16 @@ ObsGnssroBendMetOffice::ObsGnssroBendMetOffice(const ioda::ObsSpace & odb,
   oops::Log::debug() << "nrecs " << odb.nrecs() << std::endl;
   oops::Log::debug() << "nvars " << odb.nvars() << std::endl;
 
+  std::set<int> channelset = oops::parseIntSet(parameters.channelList);
+  std::vector<int> channels;
+  std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
+
   ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_,
                                      parameters.vertInterpOPS,
                                      parameters.pseudoLevels,
-                                     parameters.minTempGrad);
+                                     parameters.minTempGrad,
+                                     channels.size(),
+                                     channels[0]);
 
   oops::Log::trace() << "ObsGnssroBendMetOffice created." << std::endl;
 }

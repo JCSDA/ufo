@@ -12,6 +12,25 @@
 
 namespace ufo {
 VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile) {
+  Aliases_["airTemperature"] = "air_temperature";
+  Aliases_["windEastward"] = "eastward_wind";
+  Aliases_["windNorthward"] = "northward_wind";
+  Aliases_["specificHumidity"] = "specific_humidity";
+  Aliases_["relativeHumidity"] = "relative_humidity";
+  Aliases_["pressure"] = "air_pressure";
+  Aliases_["virtualTemperature"] = "virtual_temperature";
+  Aliases_["potentialTemperature"] = "theta";
+  Aliases_["stationPressure"] = "surface_pressure";
+  Aliases_["depthBelowWaterSurface"] = "ocean_depth";
+  Aliases_["waterTemperature"] = "ocean_temperature";
+  Aliases_["surfacePressure"] = "surface_pressure";
+  Aliases_["seaSurfaceTemperature"] = "sea_surface_temperature";
+  Aliases_["equivalentReflectivityFactor"] = "equivalent_reflectivity_factor";
+  Aliases_["salinity"] = "sea_water_salinity";
+  Aliases_["seaSurfaceSalinity"] = "sea_surface_salinity";
+  Aliases_["ozoneProfile"] = "mole_fraction_of_ozone_in_air";
+// The lines below (and yaml files) should be removed as all name are hard-wired because of
+// the obs and model naming conventions
   if (aliasFile.is_initialized()) {
     eckit::YAMLConfiguration conf(eckit::PathName(aliasFile.value()));
     VariableMapParameters mappingParams;
@@ -25,31 +44,18 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
 
 VariableNameMap::~VariableNameMap() {}
 
-const std::string VariableNameMap::convertName(const std::string & name) {
-  if (!Aliases_.empty()) {
-    std::string alias;
-    const auto & it = Aliases_.find(name);
-    if (it == Aliases_.end()) {
-      oops::Log::debug() << "Alias file supplied, but no alias found for variable " + name
-                         << ". If your observation and GeoVaL names differ you will need to"
-                            " include an alias for " << name << " in your name mapping file."
-                         << std::endl;
-      return name;
-    } else {
-      alias = it->second;
-      oops::Log::debug() << "Variable " << name << " has been assigned alias "
-                         << alias << std::endl;
-    }
-    return alias;
-  } else {
-    oops::Log::debug() << "No name mapping file supplied. If your observation and GeoVaL"
-                          " names differ you will need to supply a name mapping file"
-                          " containing name aliases." << std::endl;
+std::string VariableNameMap::convertName(const std::string & name) const {
+  std::string alias;
+  const auto & it = Aliases_.find(name);
+  if (it == Aliases_.end()) {
     return name;
+  } else {
+    alias = it->second;
   }
+  return alias;
 }
 
-oops::Variables VariableNameMap::convertName(const oops::Variables &vars) {
+oops::Variables VariableNameMap::convertName(const oops::Variables & vars) const {
   std::vector<std::string> newvars;
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     std::string alias = convertName(vars[jv]);

@@ -29,3 +29,16 @@ observations:
       test:
         name: DerivedObsValue/waterPressure
       relTol: 2.0e-5
+    - reference:
+        name: TestReference/float_missing
+      test:
+        name: GrossErrorProbability/waterPressure
+    - reference:
+        name: TestReference/int_zeros
+      test:
+        name: QCFlags/waterPressure
+    - reference:
+        name: TestReference/float_ones
+      test:
+        name: DerivedObsError/waterPressure
+

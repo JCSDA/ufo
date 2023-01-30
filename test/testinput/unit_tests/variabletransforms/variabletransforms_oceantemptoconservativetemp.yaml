@@ -3,43 +3,43 @@ window end: 2030-01-01T03:00:00Z
 
 observations:
 - obs space:
-    name: Ocean temperature to potential temperature conversion
+    name: Ocean temperature to conservative temperature conversion
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    #obsdataout:
-    #  engine:
-    #    type: H5File
-    #    obsfile: Data/ocean_temptotheta_out.nc4
-    simulated variables: [waterTemperature, salinity, waterPotentialTemperature]
-    observed variables: [waterTemperature, salinity]
-    derived variables: [waterPotentialTemperature]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ocean_temptoconservativetemp_out.nc4
+    simulated variables: [waterTemperature, waterConservativeTemperature]
+    observed variables: [waterTemperature]
+    derived variables: [waterConservativeTemperature]
   obs filters:
   - filter: Variable Transforms
     where:
     - variable:
         name: ObsValue/waterTemperature
       is_defined:
-    Transform: OceanTempToTheta
+    Transform: OceanTempToConservativeTemp
     ocean pressure group: TestReference
     ocean salinity group: TestReference
   compareVariables:
     - reference:
-        name: TestReference/waterPotentialTemperature
+        name: TestReference/waterConservativeTemperature
       test:
-        name: DerivedObsValue/waterPotentialTemperature
+        name: DerivedObsValue/waterConservativeTemperature
       relTol: 2.0e-4
     - reference:
         name: TestReference/float_missing
       test:
-        name: GrossErrorProbability/waterPotentialTemperature
+        name: GrossErrorProbability/waterConservativeTemperature
     - reference:
         name: TestReference/int_zeros
       test:
-        name: QCFlags/waterPotentialTemperature
+        name: QCFlags/waterConservativeTemperature
     - reference:
         name: ObsError/waterTemperature
       test:
-        name: DerivedObsError/waterPotentialTemperature
-        
+        name: DerivedObsError/waterConservativeTemperature
+

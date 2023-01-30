@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"

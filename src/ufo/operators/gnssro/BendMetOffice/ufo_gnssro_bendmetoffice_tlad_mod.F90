@@ -41,9 +41,11 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   logical                       :: vert_interp_ops
   logical                       :: pseudo_ops
   real(kind_real)               :: min_temp_grad
+  integer, allocatable          :: chanList(:)
   integer                       :: nlevp
   integer                       :: nlevq
   integer                       :: nlocs
+  integer                       :: nlevels            ! Number of vertical levels in the observations
   real(kind_real), allocatable  :: K(:,:)
   contains
     procedure :: setup      => ufo_gnssro_bendmetoffice_setup
@@ -64,7 +66,8 @@ contains
 !! \date 26 Aug 2021
 !!
 !-------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, &
+                                          min_temp_grad, chanList)
 
 implicit none
 
@@ -72,10 +75,13 @@ class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self             !< The o
 logical(c_bool),                         intent(in) :: vert_interp_ops  !< Whether to vertically interpolate using ln(p)
 logical(c_bool),                         intent(in) :: pseudo_ops       !< Whether to use pseudo-levels in the calculation
 real(c_float),                           intent(in) :: min_temp_grad    !< The minimum temperature gradient in the vertical
+integer(c_int),                          intent(in) :: chanList(:)      !< List of channels (vertical levels) to use
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
+allocate(self % chanList(1:size(chanList)))
+self % chanList = chanList
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -114,6 +120,10 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer   :: rho_heights                   ! The model geovals - heights of the pressure-levels
   type(ufo_geoval), pointer   :: theta_heights                 ! The model geovals - heights of the theta-levels (stores q)
   integer                     :: iobs                          ! Loop variable, observation number
+  integer                     :: ilevel                        ! Loop variable, level number
+  integer                     :: min_ob                        ! Minimum observation number when passing
+  integer                     :: max_ob                        ! Maximum observation number when passing
+  integer                     :: this_ob                       ! Ob number, used in flipping geovals
 
   real(kind_real), allocatable       :: obsLat(:)              ! Latitude of the observation
   real(kind_real), allocatable       :: impact_param(:)        ! Impact parameter of the observation
@@ -142,20 +152,35 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
+  self % nlevels = max(1, obsspace_get_nchans(obss))
   
+! Check that the number of vertical levels in the observations is consistent
+! with what we were given in setup
+  if (self % nlevels > 1 .AND. self % nlevels /= size(self % chanList)) then
+    write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', self % nlevels, size(self%chanList)
+    call fckit_exception%throw(err_msg)
+  end if
+
 ! Get the meta-data from the observations
   allocate(obsLat(self%nlocs))
-  allocate(impact_param(self%nlocs))
+  allocate(impact_param(self%nlevels * self%nlocs))
   allocate(obsLocR(self%nlocs))
   allocate(obsGeoid(self%nlocs))
+
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param)
+  if (self % nlevels > 1) then
+    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param, self%chanList)
+  else
+    call obsspace_get_db(obss, "MetaData", "impactParameterRO", impact_param)
+  end if
   call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoidUndulation", obsGeoid)
-  ALLOCATE(self % K(1:self%nlocs, 1:prs%nval + q%nval))
+  ALLOCATE(self % K(1:self%nlevels * self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
+    min_ob = 1 + (iobs - 1) * self % nlevels
+    max_ob = iobs * self % nlevels
     ! Note: The Geovals are passed bottom-to-top as this is the way the bending angle code works
     CALL jacobian_interface(prs % nval, &                              ! Number of pressure levels
                             q % nval, &                                ! Number of specific humidity levels
@@ -169,12 +194,16 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
                             obsLocR(iobs), &                           ! Local radius of curvature of the earth
                             obsLat(iobs), &                            ! Latitude of the observation
                             obsGeoid(iobs), &                          ! Geoid undulation at the tangent point
-                            1, &                                       ! Number of observations in the profile
-                            impact_param(iobs:iobs), &                 ! Impact parameter for this observation
-                            self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
-    ! Flip the K-matrix back the right way around
-    self % K(iobs,1:prs%nval) = self % K(iobs, prs%nval:1:-1)
-    self % K(iobs,prs%nval+1:prs%nval+q%nval) = self % K(iobs, prs%nval+q%nval:prs%nval+1:-1)
+                            self % nlevels, &                          ! Number of observations in the profile
+                            impact_param(min_ob:max_ob), &             ! Impact parameter for these observations
+                            self % K(min_ob:max_ob, &
+                                     1:prs%nval+q%nval))               ! K-matrix (Jacobian of the observation with respect to the inputs)
+    do ilevel = 1, self % nlevels
+      this_ob = ilevel + (iobs - 1) * self % nlevels
+      ! Flip the K-matrix back the right way around
+      self % K(this_ob, 1:prs%nval) = self % K(this_ob, prs%nval:1:-1)
+      self % K(this_ob, prs%nval+1:prs%nval+q%nval) = self % K(this_ob, prs%nval+q%nval:prs%nval+1:-1)
+    end do
   end do obs_loop
 
 ! Note that this routine has been run.
@@ -360,6 +389,7 @@ subroutine ufo_gnssro_bendmetoffice_tlad_delete(self)
   self%nlevp = 0
   self%nlevq = 0
   if (allocated(self%K)) deallocate(self%K)
+  if (allocated(self%chanlist)) deallocate(self%chanlist)
   self%ltraj = .false. 
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_delete

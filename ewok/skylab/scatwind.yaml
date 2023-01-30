@@ -14,12 +14,10 @@ obs space:
 #
 obs operator:
   name: GSISfcModel
-  observation alias file: $(observation_alias_file)
   use_fact10: true
 #
 linear obs operator:
   name: Identity
-  observation alias file: $(observation_alias_file)
 #
 obs filters:
   #

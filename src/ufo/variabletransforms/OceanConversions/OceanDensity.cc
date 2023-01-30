@@ -90,9 +90,10 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
     obserr_[iv][jobs] = densityError[jobs];
   }
 
-  // copy PGEFinal and QCflags to new density
+  // copy ObsError, PGEFinal and QCflags to new density
   obsdb_.put_db("GrossErrorProbability", densityvariable_, densitypge);
   obsdb_.put_db("QCFlags", densityvariable_, densityflags);
+  obsdb_.put_db("DerivedObsError", densityvariable_, densityError);
 }
 
 // -----------------------------------------------------------------------------

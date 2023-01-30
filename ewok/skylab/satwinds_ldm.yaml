@@ -12,7 +12,6 @@ obs space:
   derived simulated variables: [windEastward, windNorthward]
 obs operator:
   name: VertInterp
-  observation alias file: $(observation_alias_file)
   variables:
   - name: windEastward
   - name: windNorthward
