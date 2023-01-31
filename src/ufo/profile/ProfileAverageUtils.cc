@@ -219,7 +219,7 @@ namespace ufo {
   // -----------------------------------------------------------------------------
 
   // Check model vertical coordinate non-zero and goes in same direction as observation
-  //  vertical coordinate.
+  //  vertical coordinate. Returns true if the vertical coordinates are increasing.
   bool validateVertCoords(const std::vector<size_t> &locsOriginal,
                           const std::vector<size_t> &locsExt,
                           const std::vector<float> &obs_vert_coord,
@@ -231,7 +231,7 @@ namespace ufo {
     std::vector<size_t> model_vert_coord_ext(nlocs_ext);
     for (size_t mlev = 0; mlev < nlocs_ext; ++mlev) {
       model_vert_coord_ext[mlev] = model_vert_coord[locsExt[mlev]];
-      oops::Log::debug() << "model_vert_coord[mlev]: " <<
+      oops::Log::debug() << "model_vert_coord[" << mlev << "]: " <<
                             model_vert_coord[locsExt[mlev]] << std::endl;
     }
     if (std::all_of(model_vert_coord_ext.begin(), model_vert_coord_ext.end(),
@@ -242,14 +242,52 @@ namespace ufo {
     }
 
     // Stop if model vertical coordinate not in same direction as obs vertical coordinate:
-    const bool mod_vert_coord_increasing = model_vert_coord[locsExt[1]] >
-                                           model_vert_coord[locsExt[0]];
+
+    // if no clear case is found, all levels are equal and default to increasing model levels
+    bool mod_vert_coord_increasing = true;
+    bool mod_vert_coord_equal = true;
+    // check every model level until a clear non-equal-levels case is found
+    for (size_t mLev = 0; mLev < nlocs_ext-1; ++mLev) {
+      if (model_vert_coord[locsExt[mLev+1]] > model_vert_coord[locsExt[mLev]]) {
+        mod_vert_coord_increasing = true;
+        mod_vert_coord_equal = false;
+        break;
+      } else if (model_vert_coord[locsExt[mLev+1]] < model_vert_coord[locsExt[mLev]]) {
+        mod_vert_coord_increasing = false;
+        mod_vert_coord_equal = false;
+        break;
+      }
+    }
+
     if (nlocs_obs <= 1) {
       return mod_vert_coord_increasing;
     }
-    const bool obs_vert_coord_increasing = obs_vert_coord[locsOriginal[1]] >
-                                           obs_vert_coord[locsOriginal[0]];
 
+    // if no clear case is found, all levels are equal and default to increasing obs levels
+    bool obs_vert_coord_increasing = true;
+    bool obs_vert_coord_equal = true;
+    // check every obs level until a clear non-equal-levels case is found
+    for (size_t oLev = 0; oLev < nlocs_obs-1; ++oLev) {
+      if (obs_vert_coord[locsOriginal[oLev+1]] > obs_vert_coord[locsOriginal[oLev]]) {
+        obs_vert_coord_increasing = true;
+        obs_vert_coord_equal = false;
+        break;
+      } else if (obs_vert_coord[locsOriginal[oLev+1]] < obs_vert_coord[locsOriginal[oLev]]) {
+        obs_vert_coord_increasing = false;
+        obs_vert_coord_equal = false;
+        break;
+      }
+    }
+
+    if (obs_vert_coord_equal) {
+      oops::Log::debug() << " obs_vert_coord_equal " << obs_vert_coord[locsOriginal[1]] << " == "
+                         << obs_vert_coord[locsOriginal[0]] << std::endl;
+      return mod_vert_coord_increasing;
+    } else if (mod_vert_coord_equal) {
+      oops::Log::debug() << " mod_vert_coord_equal " << model_vert_coord[locsExt[1]] << " == "
+                         << model_vert_coord[locsExt[0]] << std::endl;
+      return obs_vert_coord_increasing;
+    }
     if (obs_vert_coord_increasing && !mod_vert_coord_increasing) {
       throw eckit::UserError(": The model vertical coordinate is decreasing, but the observation "
             "vertical coordinate is increasing. They must go in the same direction.", Here());
