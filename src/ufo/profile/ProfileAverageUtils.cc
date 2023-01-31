@@ -219,7 +219,7 @@ namespace ufo {
   // -----------------------------------------------------------------------------
 
   // Check model vertical coordinate non-zero and goes in same direction as observation
-  //  vertical coordinate.
+  //  vertical coordinate. Returns true if the vertical coordinates are increasing.
   bool validateVertCoords(const std::vector<size_t> &locsOriginal,
                           const std::vector<size_t> &locsExt,
                           const std::vector<float> &obs_vert_coord,
