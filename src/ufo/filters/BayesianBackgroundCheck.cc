@@ -254,7 +254,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         std::vector<int> &qcflags2 = qcflags1;  // in old OPS, flags same for both components
         obsdb_.put_db("QCFlags", varname2, qcflags2);
         // Set flagged, for 2nd component:
-        int numFlagged = 0;
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::BackRejectFlag) {
             flagged[filterVarIndex-1][jobs] = true;
@@ -262,13 +261,11 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
           if (qcflags2[jobs] & ufo::MetOfficeQCFlags::Elem::BackRejectFlag) {
             flagged[filterVarIndex][jobs] = true;
           }
-          numFlagged+=2;
           oops::Log::debug() << "flagged(1)[" << jobs << "]: "
                              << flagged[filterVarIndex-1][jobs] << std::endl;
           oops::Log::debug() << "flagged(2)[" << jobs << "]: "
                              << flagged[filterVarIndex][jobs] << std::endl;
         }
-        oops::Log::debug() << "numFlagged: " << numFlagged << std::endl;
       } else {
         // Set flagged, for scalar:
         int numFlagged = 0;
@@ -279,9 +276,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
           }
           oops::Log::debug() << "flagged[" << jobs << "]: "
                              << flagged[filterVarIndex][jobs] << std::endl;
-          numFlagged++;
         }
-        oops::Log::debug() << "numFlagged: " << numFlagged << std::endl;
       }
       previousVariableWasFirstComponentOfTwo = false;
     }
