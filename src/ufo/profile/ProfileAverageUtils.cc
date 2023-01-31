@@ -242,8 +242,9 @@ namespace ufo {
     }
 
     // Stop if model vertical coordinate not in same direction as obs vertical coordinate:
-    bool mod_vert_coord_increasing = model_vert_coord[locsExt[1]] >
-                                     model_vert_coord[locsExt[0]];
+
+    // if no clear case is found, all levels are equal and default to increasing model levels
+    bool mod_vert_coord_increasing = true;
     bool mod_vert_coord_equal = true;
     // check every model level until a clear non-equal-levels case is found
     for (size_t mLev = 0; mLev < nlocs_ext-1; ++mLev) {
@@ -257,16 +258,13 @@ namespace ufo {
         break;
       }
     }
-    // if no clear case is found, all levels are equal and default to increasing model levels
-    if (mod_vert_coord_equal) {
-      mod_vert_coord_increasing = true;
-    }
+
     if (nlocs_obs <= 1) {
       return mod_vert_coord_increasing;
     }
 
-    bool obs_vert_coord_increasing = obs_vert_coord[locsOriginal[1]] >
-                                     obs_vert_coord[locsOriginal[0]];
+    // if no clear case is found, all levels are equal and default to increasing obs levels
+    bool obs_vert_coord_increasing = true;
     bool obs_vert_coord_equal = true;
     // check every obs level until a clear non-equal-levels case is found
     for (size_t oLev = 0; oLev < nlocs_obs-1; ++oLev) {
@@ -279,10 +277,6 @@ namespace ufo {
         obs_vert_coord_equal = false;
         break;
       }
-    }
-    // if no clear case is found, all levels are equal and default to increasing obs levels
-    if (obs_vert_coord_equal) {
-      obs_vert_coord_increasing = true;
     }
 
     if (obs_vert_coord_equal) {
