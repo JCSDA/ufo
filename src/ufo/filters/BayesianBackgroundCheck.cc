@@ -268,7 +268,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         }
       } else {
         // Set flagged, for scalar:
-        int numFlagged = 0;
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::BackRejectFlag ||
               qcflags1[jobs] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) {
