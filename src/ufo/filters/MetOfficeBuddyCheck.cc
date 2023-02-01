@@ -753,7 +753,7 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
         }  // verbose
       }  // jlev
     } else {  // single length scale
-      if (!options_.opsCompatibilityMode) {
+      if (!options_.useAllObservations) {
         // Check that observations are valid and buddy check is required
         if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
           continue;  // skip to next pair
@@ -859,7 +859,7 @@ void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> 
     const size_t jA = pair.obsIdA;
     const size_t jB = pair.obsIdB;
 
-    if (!options_.opsCompatibilityMode) {
+    if (!options_.useAllObservations) {
       // Check that observations are valid and buddy check is required
       if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
         continue;  // skip to next pair
