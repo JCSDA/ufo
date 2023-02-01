@@ -207,6 +207,10 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
                                                     "Name of background error group 2",
                                                     this};
 
+  /// Set this option to \c true to make the filter produce identical results as the Ops_QcBuddy
+  /// subroutine from the Met Office OPS system
+  oops::Parameter<bool> opsCompatibilityMode{"ops_compatibility_mode", false, this};
+
   /// @}
 };
 

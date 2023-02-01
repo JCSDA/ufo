@@ -753,9 +753,11 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
         }  // verbose
       }  // jlev
     } else {  // single length scale
-      // Check that observations are valid and buddy check is required
-      if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
-        continue;  // skip to next pair
+      if (!options_.opsCompatibilityMode) {
+        // Check that observations are valid and buddy check is required
+        if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
+          continue;  // skip to next pair
+      }
       // eqn 3.9
       // - hcScale: horizontal error scale for the pair of obs
       // - scaledDist: scaled Distance between observations
@@ -857,9 +859,11 @@ void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> 
     const size_t jA = pair.obsIdA;
     const size_t jB = pair.obsIdB;
 
-    // Check that observations are valid and buddy check is required
-    if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
-      continue;  // skip to next pair
+    if (!options_.opsCompatibilityMode) {
+      // Check that observations are valid and buddy check is required
+      if (flags[jA] != QCflags::pass || flags[jB] != QCflags::pass)
+        continue;  // skip to next pair
+    }
 
     // eqn 3.9
     // - hcScale: horizontal error scale for the pair of obs
