@@ -215,16 +215,16 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
       // if relative humidity (Rh) is reported (small minority of stations)
       // update from Rh wrt water to Rh wrt ice for temperatures below freezing
       } else if (relativeHumidity[iloc] != missingValueFloat) {
-          if (temperature == missingValueFloat) relativeHumidity[iloc] = missingValueFloat;
-          else if (temperature < ufo::Constants::t0c) {
-            // calculate saturated specific humidity wrt water and ice
-            evaluateSatSpecHumidity(temperature, temperature);
-            // update from Rh wrt water to Rh wrt ice for temperatures below freezing
-            relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
-            
-            if (!allowSuperSaturation_)
-              relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);}
-            }
+        if (temperature == missingValueFloat) relativeHumidity[iloc] = missingValueFloat;
+        else if (temperature < ufo::Constants::t0c) {
+          // calculate saturated specific humidity wrt water and ice
+          evaluateSatSpecHumidity(temperature, temperature);
+          // update from Rh wrt water to Rh wrt ice for temperatures below freezing
+          relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
+          
+          if (!allowSuperSaturation_)
+            relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);}
+          }
         hasBeenUpdated = true;
       }
     }
