@@ -54,6 +54,10 @@ class PointIndex {
 
   virtual bool isAnyPointInEllipsoidInterior(const Point &center,
                                              const Extent &semiAxes) const = 0;
+
+  virtual bool isAnyPointInBoxInterior(const Point &center,
+                                       const Extent &semiAxes) const = 0;
+
 };
 
 /// \brief An implementation of PointIndex storing the point set in a kd-tree.
@@ -76,6 +80,9 @@ class KDTree : public PointIndex<numDims_> {
 
   bool isAnyPointInEllipsoidInterior(const Point &center,
                                      const Extent &semiAxes) const override;
+
+  bool isAnyPointInBoxInterior(const Point &center,
+                               const Extent &semiAxes) const override;
 
  private:
   struct EmptyPayload {};
@@ -122,11 +129,24 @@ bool KDTree<numDims_>::isAnyPointInCylinderInterior(
   return util::isAnyPointInCylinderInterior(tree_, lbound, ubound, numSpatialDims);
 }
 
+template <int numDims_>
+bool KDTree<numDims_>::isAnyPointInBoxInterior(
+    const Point &center, const Extent &semiAxes) const {
+  KPoint lbound, ubound;
+  for (int d = 0; d < numDims; ++d) {
+    lbound.data()[d] = center[d] - semiAxes[d];
+    ubound.data()[d] = center[d] + semiAxes[d];
+  }
+  return util::isAnyPointInBoxInterior(tree_, lbound, ubound);
+}
+
 }  // namespace
 
 struct PoissonDiskThinning::ObsData
 {
   boost::optional<util::ScalarOrMap<int, float>> minHorizontalSpacings;
+  boost::optional<util::ScalarOrMap<int, float>> minLatitudeSpacings;
+  boost::optional<util::ScalarOrMap<int, float>> minLongitudeSpacings;
   boost::optional<std::vector<float>> latitudes;
   boost::optional<std::vector<float>> longitudes;
 
@@ -159,6 +179,25 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
     throw eckit::UserError(
       ": 'sort_vertical' can only take on string values 'ascending' or 'descending' "
       "(with respect to the pressure coordinate values).", Here());
+  } else if (options_.minHorizontalSpacing.value() != boost::none &&
+             (options_.minLatitudeSpacing.value() != boost::none ||
+              options_.minLongitudeSpacing.value() != boost::none)) {
+    throw eckit::UserError(
+       ": can only use either minHorizontalSpacing or both minLatitudeSpacing and "
+       "minLongitudeSpacing.", Here());
+  } else if ((options_.minLatitudeSpacing.value() != boost::none ||
+              options_.minLongitudeSpacing.value() != boost::none) &&
+             options_.exclusionVolumeShape != ExclusionVolumeShape::BOX) {
+    throw eckit::UserError(
+          ": can only use exclusion volume shape BOX with minLatitudeSpacing and "
+          "minLongitudeSpacing.", Here());
+  } else if ((options_.minLatitudeSpacing.value() != boost::none &&
+              options_.minLongitudeSpacing.value() == boost::none) ||
+             (options_.minLatitudeSpacing.value() == boost::none &&
+              options_.minLongitudeSpacing.value() != boost::none)) {
+    throw eckit::UserError(
+          ": must use both minLatitudeSpacing and "
+          "minLongitudeSpacing.", Here());
   }
 }
 
@@ -249,11 +288,20 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   numNonspatialDims = 0;
 
   obsData.minHorizontalSpacings = options_.minHorizontalSpacing.value();
+  obsData.minLatitudeSpacings = options_.minLatitudeSpacing.value();
+  obsData.minLongitudeSpacings = options_.minLongitudeSpacing.value();
   if (obsData.minHorizontalSpacings != boost::none) {
     validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
     obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
     obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
     numSpatialDims = 3;
+  } else if (obsData.minLatitudeSpacings != boost::none ||
+             obsData.minLongitudeSpacings != boost::none) {
+    validateSpacings(*obsData.minLatitudeSpacings, "min_latitude_spacing");
+    validateSpacings(*obsData.minLongitudeSpacings, "min_longitude_spacing");
+    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
+    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
+    numSpatialDims = 2;
   }
 
   obsData.minVerticalSpacings = options_.minVerticalSpacing.value();
@@ -404,7 +452,9 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
       if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
            pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
           (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
-           pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes))) {
+           pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes)) ||
+          (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX &&
+           pointIndex.isAnyPointInBoxInterior(point, semiAxes))) {
         isThinned[obsId] = true;
       } else {
         pointIndex.insert(point);
@@ -421,19 +471,24 @@ std::array<float, numDims> PoissonDiskThinning::getObservationPosition(
   unsigned int dim = 0;
 
   if (obsData.latitudes && obsData.longitudes) {
-    const float deg2rad = static_cast<float>(M_PI / 180.0);
-    const float earthRadius = Constants::mean_earth_rad;
+    if (obsData.minLatitudeSpacings && obsData.minLongitudeSpacings) {
+      position[dim++] = (*obsData.latitudes)[obsId];
+      position[dim++] = (*obsData.longitudes)[obsId];
+    } else {
+      const float deg2rad = static_cast<float>(M_PI / 180.0);
+      const float earthRadius = Constants::mean_earth_rad;
 
-    const float lon = deg2rad * (*obsData.longitudes)[obsId];
-    const float lat = deg2rad * (*obsData.latitudes)[obsId];
-    const float sinLat = std::sin(lat);
-    const float cosLat = std::cos(lat);
-    const float sinLon = std::sin(lon);
-    const float cosLon = std::cos(lon);
+      const float lon = deg2rad * (*obsData.longitudes)[obsId];
+      const float lat = deg2rad * (*obsData.latitudes)[obsId];
+      const float sinLat = std::sin(lat);
+      const float cosLat = std::cos(lat);
+      const float sinLon = std::sin(lon);
+      const float cosLon = std::cos(lon);
 
-    position[dim++] = earthRadius * cosLat * cosLon;
-    position[dim++] = earthRadius * cosLat * sinLon;
-    position[dim++] = earthRadius * sinLat;
+      position[dim++] = earthRadius * cosLat * cosLon;
+      position[dim++] = earthRadius * cosLat * sinLon;
+      position[dim++] = earthRadius * sinLat;
+    }
   }
 
   if (obsData.pressures) {
@@ -470,6 +525,9 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
     semiAxes[dim++] = minEuclideanDistance;
     semiAxes[dim++] = minEuclideanDistance;
     semiAxes[dim++] = minEuclideanDistance;
+  } else if (obsData.minLatitudeSpacings && obsData.minLongitudeSpacings) {
+    semiAxes[dim++] = obsData.minLatitudeSpacings->at(priority);
+    semiAxes[dim++] = obsData.minLongitudeSpacings->at(priority);
   }
 
   if (obsData.minVerticalSpacings) {
