@@ -57,7 +57,6 @@ class PointIndex {
 
   virtual bool isAnyPointInBoxInterior(const Point &center,
                                        const Extent &semiAxes) const = 0;
-
 };
 
 /// \brief An implementation of PointIndex storing the point set in a kd-tree.
