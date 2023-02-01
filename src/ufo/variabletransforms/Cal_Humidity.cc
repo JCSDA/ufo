@@ -221,9 +221,10 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
             evaluateSatSpecHumidity(temperature, temperature);
             // update from Rh wrt water to Rh wrt ice for temperatures below freezing
             relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_ice);
+            
             if (!allowSuperSaturation_)
               relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);}
-
+            }
         hasBeenUpdated = true;
       }
     }
