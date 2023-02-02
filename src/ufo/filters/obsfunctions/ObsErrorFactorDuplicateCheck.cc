@@ -8,26 +8,23 @@
 #include "ufo/filters/obsfunctions/ObsErrorFactorDuplicateCheck.h"
 
 #include <float.h>
-#include <math.h> 
+#include <math.h>
 
 #include <algorithm>
 #include <cmath>
-#include <chrono>
 
-#include "eckit/mpi/Comm.h"
 #include "eckit/exception/Exceptions.h"
+#include "eckit/mpi/Comm.h"
 #include "ioda/ObsDataVector.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/utils/Constants.h"
 #include "ufo/filters/ObsAccessor.h"
-#include "oops/util/DateTime.h"
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/utils/Constants.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 #include "ufo/variabletransforms/Formulas.h"
-
-using namespace std::chrono;
 
 namespace ufo {
 
@@ -72,9 +69,9 @@ std::vector<T> ObsErrorFactorDuplicateCheck::getGlobalVariable(const ObsFilterDa
   return values;
 }
 
-int ObsErrorFactorDuplicateCheck::getDispl(const ObsFilterData & data, const std::vector<int> & rank_nlocs) const{
-
-  //Retrieves displacement for a given rank
+int ObsErrorFactorDuplicateCheck::getDispl(const ObsFilterData & data,
+                                           const std::vector<int> & rank_nlocs) const {
+  // Retrieves displacement for a given rank
   auto & obsdb = data.obsspace();
   int rank = obsdb.comm().rank();
   if (rank == 0) return 0;
@@ -84,7 +81,6 @@ int ObsErrorFactorDuplicateCheck::getDispl(const ObsFilterData & data, const std
 // -----------------------------------------------------------------------------
 void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  
   auto & obsdb = data.obsspace();
   int nlocs = data.nlocs();
   int commsize = obsdb.comm().size();
@@ -94,26 +90,27 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
   const std::string var = options_->variable.value();
   const bool use_air_pres = options_->use_air_pressure.value();
 
-  //Get displacements
-  obsdb.comm().allGather(int(nlocs), rank_nlocs.begin(), rank_nlocs.end());
+  // Get displacements
+  obsdb.comm().allGather(nlocs, rank_nlocs.begin(), rank_nlocs.end());
   int displ = getDispl(data, rank_nlocs);
 
-  //Get local and global arrays for variables
+  // Get local and global arrays for variables
   std::vector<float> lat_local(nlocs);
   data.get(Variable("latitude@MetaData"), lat_local);
-  std::vector<float> lat_global = getGlobalVariable<float>(data,"MetaData", "latitude");
+  std::vector<float> lat_global = getGlobalVariable<float>(data, "MetaData", "latitude");
 
   std::vector<float> lon_local(nlocs);
   data.get(Variable("longitude@MetaData"), lon_local);
-  std::vector<float> lon_global = getGlobalVariable<float>(data,"MetaData", "longitude");
+  std::vector<float> lon_global = getGlobalVariable<float>(data, "MetaData", "longitude");
 
   std::vector<util::DateTime> datetime_local(nlocs);
   data.get(Variable("dateTime@MetaData"), datetime_local);
-  std::vector<util::DateTime> datetime_global = getGlobalVariable<util::DateTime>(data,"MetaData", "dateTime");
+  std::vector<util::DateTime> datetime_global =
+                          getGlobalVariable<util::DateTime>(data, "MetaData", "dateTime");
 
   std::vector<float> pres_local(nlocs);
   data.get(Variable("pressure@MetaData"), pres_local);
-  std::vector<float> pres_global = getGlobalVariable<float>(data,"MetaData", "pressure");
+  std::vector<float> pres_global = getGlobalVariable<float>(data, "MetaData", "pressure");
 
   std::vector<int> qcflag_local(nlocs);
   data.get(Variable(var+"@PreUseFlag"), qcflag_local);
@@ -127,7 +124,7 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
   const std::string flaggrp = options_->testQCflag.value();
   data.get(Variable(var+"@"+flaggrp), qcflagdata);
 
-  //Duplicate set up
+  // Duplicate set up
   std::vector<double> dup(qcflag_local.size(), 1);
   std::vector<int> inds;
   std::vector<int> inds_global;
@@ -137,57 +134,54 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
   double one = 1.0;
   double hours_to_seconds = 3600.0;
 
-  //Find indicies that pass through qc for global and local arrs
-  for (size_t i = 0; i < nlocs; ++i){
-    if(qcflag_local[i] < 1) inds.push_back(i);
+  // Find indicies that pass through qc for global and local arrs
+  for (size_t i = 0; i < nlocs; ++i) {
+    if (qcflag_local[i] < 1) inds.push_back(i);
     obserr[0][i] = 1.0;
   }
-  for (size_t i = 0; i < qcflag_global.size(); ++i){
-    if(qcflag_global[i] < 1) inds_global.push_back(i);
+  for (size_t i = 0; i < qcflag_global.size(); ++i) {
+    if (qcflag_global[i] < 1) inds_global.push_back(i);
   }
 
   int qc_len_local = inds.size();
   int qc_len_global = inds_global.size();
   int obserr_rank = obsdb.comm().rank();
 
-  //Option to use pressure
-  if(use_air_pres){
-
-    for (size_t iobs = 0; iobs < qc_len_local; ++iobs){
-      for (size_t jobs = 0; jobs < qc_len_global; ++jobs){
+  // Option to use pressure
+  if (use_air_pres) {
+    for (size_t iobs = 0; iobs < qc_len_local; ++iobs) {
+      for (size_t jobs = 0; jobs < qc_len_global; ++jobs) {
         if ( (lat_local[inds[iobs]] == lat_global[inds_global[jobs]]) &&
            (lon_local[inds[iobs]] == lon_global[inds_global[jobs]]) &&
-           (pres_local[inds[iobs]] == pres_global[inds_global[jobs]])){  
-          
-            //if not equal to itself
-            if(inds_global[jobs] != (inds[iobs] + displ)){
-               tfact = std::min(one, (abs( ((datetime_local[inds[iobs]] - datetime_global[inds_global[jobs]]).toSeconds()))/hours_to_seconds)/dfact1  );
+           (pres_local[inds[iobs]] == pres_global[inds_global[jobs]])) {
+            // If not equal to itself
+            if (inds_global[jobs] != (inds[iobs] + displ)) {
+               tfact = std::min(one, (abs(((datetime_local[inds[iobs]] -
+                                      datetime_global[inds_global[jobs]]).toSeconds()))/
+                                      hours_to_seconds)/dfact1);
                dup[inds[iobs]] = dup[inds[iobs]]+1.0-tfact*tfact*(1.0-dfact);
             }
         }
       }
-      if( (dup[inds[iobs]] > 1) ){
-        obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
-      }
+      if (dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
   }
-  }else{
-    for (size_t iobs = 0; iobs < qc_len_local; ++iobs){
-      for (size_t jobs = 0; jobs < qc_len_global; ++jobs){
+  } else {
+    for (size_t iobs = 0; iobs < qc_len_local; ++iobs) {
+      for (size_t jobs = 0; jobs < qc_len_global; ++jobs) {
         if ( (lat_local[inds[iobs]] == lat_global[inds_global[jobs]]) &&
              (lon_local[inds[iobs]] == lon_global[inds_global[jobs]]) ) {
-
-            if(inds_global[jobs] != (inds[iobs] + displ)){
-               tfact = std::min(one, (abs( ((datetime_local[inds[iobs]] - datetime_global[inds_global[jobs]]).toSeconds()))/hours_to_seconds)/dfact1  );
+            if (inds_global[jobs] != (inds[iobs] + displ)) {
+               tfact = std::min(one, (abs(((datetime_local[inds[iobs]] -
+                                      datetime_global[inds_global[jobs]]).toSeconds()))/
+                                      hours_to_seconds)/dfact1);
                dup[inds[iobs]] = dup[inds[iobs]]+1.0-tfact*tfact*(1.0-dfact);
             }
         }
       }
-      if( dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
+      if ( dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
     }
-
   }
 }
-
 // -----------------------------------------------------------------------------
 
 const ufo::Variables & ObsErrorFactorDuplicateCheck::requiredVariables() const {

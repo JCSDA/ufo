@@ -63,7 +63,6 @@ class ObsErrorFactorDuplicateCheck : public ObsFunctionBase<float> {
  private:
   ufo::Variables invars_;
   std::unique_ptr<ObsErrorFactorDuplicateCheckParameters> options_;
-  //const eckit::mpi::Comm & comm_;
 };
 
 // -----------------------------------------------------------------------------
