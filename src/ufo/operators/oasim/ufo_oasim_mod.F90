@@ -127,24 +127,32 @@ implicit none
     call ufo_geovals_get_var(geovals, var_phaeo_conc , phaeo )
     call ufo_geovals_get_var(geovals, var_dino_conc , dino )
 
+    ! To Do change this part later to read form obs file
     is_midnight = .FALSE.
-    km = 14
+    km = size(phaeo%vals,dim=1)
     day_of_year = 90
     cosz = 0.5
     dt = 86400/2.0
+    
+    allocate(tirrq(obss_nlocs,km))
+    allocate(cdomabsq(obss_nlocs,km))
+    allocate(avgq(obss_nlocs,km))
 
     do iobs = 1, obss_nlocs
+       ! check if the ocean thickness is positive (valid)
+       if (dh%vals(1,iobs) > 0) then
 
-    call self%oasim_%run(km, dt, is_midnight, day_of_year, &
-            cosz, slp%vals(iobs,1), wspd%vals(iobs,1), ozone%vals(iobs,1), wvapor%vals(iobs,1), &
-            rh%vals(iobs,1), cov%vals(iobs,1), cldtau%vals(iobs,1), clwp%vals(iobs,1), &
-            cldre%vals(iobs,1), ta_in%vals(iobs,:), wa_in%vals(iobs,:), asym%vals(iobs,:), &
-            dh%vals(iobs,:), cdet%vals(iobs,:), pic%vals(iobs,:), cdc%vals(iobs,:), &
-            diatom%vals(iobs,:), chloro%vals(iobs,:), cyano%vals(iobs,:), &
-            cocco%vals(iobs,:), dino%vals(iobs,:), phaeo%vals(iobs,:), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:))
-
+          call self%oasim_%run(km, dt, is_midnight, day_of_year, &
+               cosz, slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
+               rh%vals(1,iobs), cov%vals(1,iobs), cldtau%vals(1,iobs), clwp%vals(1,iobs), &
+               cldre%vals(1,iobs), ta_in%vals(:,iobs), wa_in%vals(:,iobs), asym%vals(:,iobs), &
+               dh%vals(:,iobs), cdet%vals(:,iobs), pic%vals(:,iobs), cdc%vals(:,iobs), &
+               diatom%vals(:,iobs), chloro%vals(:,iobs), cyano%vals(:,iobs), &
+               cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:))
+          hofx(iobs,:)=sum(avgq(iobs,:)) 
+       endif
     enddo
-    
+
 end subroutine ufo_oasim_simobs
 
 end module ufo_oasim_mod
