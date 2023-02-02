@@ -38,10 +38,9 @@ namespace ufo {
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                      const Parameters_ & params)
-  : odb_(odb), prednames_(0), vars_(odb.assimvariables()), variances_(),
-    preconditioner_(0),
-    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0),
-    rank_(odb.distribution()->rank()) {
+  : odb_(odb), ht_rinv_h_(0), preconditioner_(0), obs_num_(0),
+    minimal_required_obs_number_(0), analysis_variances_(0), variances_(),
+    prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
@@ -91,7 +90,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
 
     // Initialize analysis error variances to the upper limit
     analysis_variances_.resize(prednames_.size() * vars_.size());
-    std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
+    std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_analysis_variance_);
 
     // Initializes from given prior
     if (biasCovParams.prior.value() != boost::none) {
@@ -115,9 +114,12 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                  large_inflation_ratio : inflation_ratio;
         for (std::size_t p = 0; p < prednames_.size(); ++p) {
           ii = j*prednames_.size() + p;
-          if (inflation > inflation_ratio)
-            analysis_variances_[ii] = inflation * analysis_variances_[ii] + smallest_variance_;
-          variances_[ii] = inflation * analysis_variances_[ii] + smallest_variance_;
+          if (inflation > inflation_ratio) {
+             analysis_variances_[ii] = inflation * analysis_variances_[ii] + smallest_variance_;
+             variances_[ii] = analysis_variances_[ii];
+          } else {
+             variances_[ii] = inflation_ratio * analysis_variances_[ii] + smallest_variance_;
+          }
           if (variances_[ii] > largest_variance_) variances_[ii] = largest_variance_;
           if (analysis_variances_[ii] > largest_analysis_variance_)
             analysis_variances_[ii] = largest_analysis_variance_;
@@ -202,7 +204,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
     std::vector<std::string> predictors(prednames_.begin(), prednames_.end());
     // map coefficients to 2D for saving
     Eigen::Map<const Eigen::MatrixXd>
-        allbcerrors(variances_.data(), prednames_.size(), vars_.size());
+        allbcerrors(analysis_variances_.data(), prednames_.size(), vars_.size());
     const std::vector<int> channels = vars_.channels();
     std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
 
@@ -332,7 +334,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         // L = \mathrm{A}^{-1}
         if (obs_num_[j] > 0)
           preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-        if (obs_num_[j] > minimal_required_obs_number_) {
+//        preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
+       if (obs_num_[j] > minimal_required_obs_number_) {
           if (ht_rinv_h_[index] > 0.0) {
             analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
           } else {

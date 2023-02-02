@@ -1,0 +1,120 @@
+#
+#=== Profile processing for background QC on reported levels ==#
+#=== Tests with alternative sources of background errors ===#
+#
+
+window begin: 2019-06-14T21:00:00Z
+window end: 2019-06-15T02:59:59Z
+
+observations:
+# Assign new background errors and use them in the background check.
+- obs space: &obsspace
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_repobs.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature, relativeHumidity, windEastward, windNorthward, height]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_conventional_profile_processing_bkgqc_repobs_obsfilter_out.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: NewError/airTemperature
+      type: float
+      value: 2.0
+    - name: NewError/windEastward
+      type: float
+      value: 2.0
+    - name: NewError/windNorthward
+      type: float
+      value: 2.0
+    - name: NewError/relativeHumidity
+      type: float
+      value: 2.0
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: airTemperature
+    - name: relativeHumidity
+    - name: windEastward
+    - name: windNorthward
+    - name: height
+    Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    background error group: NewError
+    T background error name: airTemperature
+    u background error name: windEastward
+    v background error name: windNorthward
+    RH background error name: relativeHumidity
+  HofX: HofX
+  passedBenchmark: 454
+  benchmarkFlag: 24
+  flaggedBenchmark: 0
+# Request errors in the ObsDiag group without assigning them.
+- obs space: *obsspace
+  obs filters:
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: airTemperature
+    - name: relativeHumidity
+    - name: windEastward
+    - name: windNorthward
+    - name: height
+    Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    background error group: ObsDiag
+    T background error name: airTemperature
+    u background error name: windEastward
+    v background error name: windNorthward
+    RH background error name: relativeHumidity
+  HofX: HofX
+  expectExceptionWithMessage:  Element #2 of the 'observations' list requires an 'obs diagnostics.filename' section
+# Assign new background errors to the ObsDiag group rather than retrieving them correctly.
+- obs space: *obsspace
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: ObsDiag/airTemperature
+      type: float
+      value: 2.0
+    - name: ObsDiag/windEastward
+      type: float
+      value: 2.0
+    - name: ObsDiag/windNorthward
+      type: float
+      value: 2.0
+    - name: ObsDiag/relativeHumidity
+      type: float
+      value: 2.0
+  - filter: Conventional Profile Processing
+    filter variables:
+    - name: airTemperature
+    - name: relativeHumidity
+    - name: windEastward
+    - name: windNorthward
+    - name: height
+    Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    background error group: ObsDiag
+    T background error name: airTemperature
+    u background error name: windEastward
+    v background error name: windNorthward
+    RH background error name: relativeHumidity
+  HofX: HofX
+  expectExceptionWithMessage:  Element #3 of the 'observations' list requires an 'obs diagnostics.filename' section
+
