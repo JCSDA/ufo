@@ -56,7 +56,7 @@ class PointIndex {
                                              const Extent &semiAxes) const = 0;
 
   virtual bool isAnyPointInBoxInterior(const Point &center,
-                                       const Extent &semiAxes) const = 0;
+                                       const Extent &halfSideLength) const = 0;
 };
 
 /// \brief An implementation of PointIndex storing the point set in a kd-tree.
@@ -81,7 +81,7 @@ class KDTree : public PointIndex<numDims_> {
                                      const Extent &semiAxes) const override;
 
   bool isAnyPointInBoxInterior(const Point &center,
-                               const Extent &semiAxes) const override;
+                               const Extent &halfSideLength) const override;
 
  private:
   struct EmptyPayload {};
@@ -130,11 +130,11 @@ bool KDTree<numDims_>::isAnyPointInCylinderInterior(
 
 template <int numDims_>
 bool KDTree<numDims_>::isAnyPointInBoxInterior(
-    const Point &center, const Extent &semiAxes) const {
+    const Point &center, const Extent &halfSideLength) const {
   KPoint lbound, ubound;
   for (int d = 0; d < numDims; ++d) {
-    lbound.data()[d] = center[d] - semiAxes[d];
-    ubound.data()[d] = center[d] + semiAxes[d];
+    lbound.data()[d] = center[d] - halfSideLength[d];
+    ubound.data()[d] = center[d] + halfSideLength[d];
   }
   return util::isAnyPointInBoxInterior(tree_, lbound, ubound);
 }
@@ -190,10 +190,8 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
     throw eckit::UserError(
           ": can only use exclusion volume shape BOX with minLatitudeSpacing and "
           "minLongitudeSpacing.", Here());
-  } else if ((options_.minLatitudeSpacing.value() != boost::none &&
-              options_.minLongitudeSpacing.value() == boost::none) ||
-             (options_.minLatitudeSpacing.value() == boost::none &&
-              options_.minLongitudeSpacing.value() != boost::none)) {
+  } else if ((options_.minLatitudeSpacing.value() == boost::none) !=
+             (options_.minLongitudeSpacing.value() == boost::none)) {
     throw eckit::UserError(
           ": must use both minLatitudeSpacing and "
           "minLongitudeSpacing.", Here());
