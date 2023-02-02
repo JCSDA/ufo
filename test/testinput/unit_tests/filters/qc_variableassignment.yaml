@@ -960,3 +960,98 @@ observations:
       name: DerivedMetaData/modified_variable
     reference:
       name: TestReference/modified_variable
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign missing values to a pre-existing float variable, without a where clause
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/float_variable_1
+      value: missing
+  compareVariables:
+  - test:
+      name: MetaData/float_variable_1
+    reference:
+      name: TestReference/missing_float
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign missing values to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/new_variable
+      value: missing
+      type: float
+  compareVariables:
+  - test:
+      name: MetaData/new_variable
+    reference:
+      name: TestReference/missing_float
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign missing values to a pre-existing integer variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/int_variable_1
+      value: missing
+  compareVariables:
+  - test:
+      name: MetaData/int_variable_1
+    reference:
+      name: TestReference/missing_int
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign missing values to a pre-existing string variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/string_variable_1
+      value: missing
+  compareVariables:
+  - test:
+      name: MetaData/string_variable_1
+    reference:
+      name: TestReference/missing_string
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign missing values to a pre-existing datetime variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dateTime
+      value: missing
+  compareVariables:
+  - test:
+      name: MetaData/dateTime
+    reference:
+      name: TestReference/missing_dateTime
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign missing values to a pre-existing multichannel float variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/float_variable
+      channels: 1, 4
+      value: missing
+  compareVariables:
+  - test:
+      name: MetaData/float_variable_1
+    reference:
+       name: TestReference/missing_float
+  - test:
+      name: MetaData/float_variable_2 # shouldn't be modified
+    reference:
+      name: TestReference/float_variable_2
+  - test:
+      name: MetaData/float_variable_4
+    reference:
+      name: TestReference/missing_float
+
