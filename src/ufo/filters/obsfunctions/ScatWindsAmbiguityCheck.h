@@ -47,10 +47,10 @@ class ScatWindsAmbiguityCheckParameters : public oops::Parameters {
 /// ### Sample YAML configuration
 ///     - filter: Bounds Check
 ///       filter variables:
-///       - name: eastward_wind
-///       - name: northward_wind
+///       - name: windEastward
+///       - name: windNorthward
 ///       test variables:
-///       - name: ScatWindsAmbiguityCheck@ObsFunction
+///       - name: ObsFunction/ScatWindsAmbiguityCheck
 ///         options:
 ///           test_hofx: GsiHofX
 ///       maxvalue: 0.
