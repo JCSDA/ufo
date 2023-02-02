@@ -963,7 +963,7 @@ observations:
 
 - obs space:
     <<: *ObsSpace
-    name: Assign missing values to a pre-existing float variable, without a where clause
+    name: Assign missing values to a pre-existing float variable
   obs filters:
   - filter: Variable Assignment
     assignments:
