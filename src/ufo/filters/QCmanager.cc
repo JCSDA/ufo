@@ -57,7 +57,6 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
   const oops::Variables &allObservedVars = obsdb.obsvariables();
   const oops::Variables &initialObservedVars = obsdb.initial_obsvariables();
   const oops::Variables &derivedObservedVars = obsdb.derived_obsvariables();
-  const oops::Variables &simulatedVars = obsdb.assimvariables();
 
   ASSERT(allObservedVars.size() == initialObservedVars.size() + derivedObservedVars.size());
   ASSERT(flags_->nvars() == allObservedVars.size());
@@ -68,7 +67,7 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
 
   const ioda::ObsDataVector<float> obs(obsdb, initialObservedVars, "ObsValue");
 
-  // Iterate over initial simulated variables
+  // Iterate over initial observed variables
   for (size_t jv = 0; jv < initialObservedVars.size(); ++jv) {
     const ioda::ObsDataRow<float> &currentObsValues = obs[jv];
     ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[obs.varnames()[jv]];

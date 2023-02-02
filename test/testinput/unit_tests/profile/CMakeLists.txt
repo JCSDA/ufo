@@ -270,6 +270,17 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_obsfil
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_differenterrors_obsfilter
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/conventionalprofileprocessing_bkgqc_repobs_differenterrors_obsfilter.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests profile
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_obsfilter
               TIER    2
               ECBUILD

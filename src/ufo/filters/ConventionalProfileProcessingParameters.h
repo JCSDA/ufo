@@ -376,6 +376,21 @@ namespace ufo {
 
     /// @}
 
+    /// @name Background error names
+    /// @{
+
+    oops::Parameter<std::string> bkgErrGroup {"background error group", "ObsDiag", this};
+    oops::Parameter<std::string> bkgErrName_air_temperature
+      {"T background error name", "air_temperature_background_error", this};
+    oops::Parameter<std::string> bkgErrName_eastward_wind
+      {"u background error name", "eastward_wind_background_error", this};
+    oops::Parameter<std::string> bkgErrName_northward_wind
+      {"v background error name", "northward_wind_background_error", this};
+    oops::Parameter<std::string> bkgErrName_relative_humidity
+      {"RH background error name", "relative_humidity_background_error", this};
+
+    /// @}
+
     /// @name OPS comparison parameters
     /// @{
 

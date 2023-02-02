@@ -46,21 +46,6 @@ struct VariableNames
   static constexpr const char* const hofx_geopotential_height = "HofX/height";
   static constexpr const char* const hofx_dew_point_temperature = "HofX/dewPointTemperature";
 
-  // Background errors
-
-  static constexpr const char* const bkgerr_air_temperature =
-    "ObsDiag/air_temperature_background_error";
-  static constexpr const char* const bkgerr_relative_humidity =
-    "ObsDiag/relative_humidity_background_error";
-  static constexpr const char* const bkgerr_eastward_wind =
-    "ObsDiag/eastward_wind_background_error";
-  static constexpr const char* const bkgerr_northward_wind =
-    "ObsDiag/northward_wind_background_error";
-  static constexpr const char* const bkgerr_geopotential_height =
-    "ObsDiag/height_background_error";
-  static constexpr const char* const bkgerr_dew_point_temperature =
-    "ObsDiag/dew_point_temperature_background_error";
-
   // Probability of gross error
 
   static constexpr const char* const pge_air_temperature = "GrossErrorProbability/airTemperature";

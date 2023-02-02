@@ -24,10 +24,10 @@ void getOperatorVariables(const boost::optional<std::vector<ufo::Variable>> &lis
     operatorVariables = optionalvariables.toOopsVariables();
 
     std::map<std::string, int> simulatedVariableIndices;
-    for (int i = 0; i < simulatedVariables.size(); ++i)
+    for (size_t i = 0; i < simulatedVariables.size(); ++i)
       simulatedVariableIndices[simulatedVariables[i]] = i;
 
-    for (int i = 0; i < operatorVariables.size(); ++i) {
+    for (size_t i = 0; i < operatorVariables.size(); ++i) {
       auto it = simulatedVariableIndices.find(operatorVariables[i]);
       if (it == simulatedVariableIndices.end())
         throw eckit::BadValue("Operator variable '" + operatorVariables[i] +

@@ -29,7 +29,8 @@ namespace ufo {
     const std::vector <float> &uBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_eastward_wind);
     const std::vector <float> &uBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_eastward_wind.value());
     std::vector <float> &uPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_eastward_wind);
     std::vector <int> &uFlags =
@@ -41,7 +42,8 @@ namespace ufo {
     const std::vector <float> &vBkg =
       profileDataHandler.get<float>(ufo::VariableNames::hofx_northward_wind);
     const std::vector <float> &vBkgErr =
-      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_northward_wind);
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_northward_wind.value());
     std::vector <float> &vPGE =
       profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
     std::vector <int> &vFlags =
