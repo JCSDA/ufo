@@ -14,27 +14,28 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/sondes_obs_2020121500_out.nc
-    simulated variables: [eastward_wind, northward_wind, virtual_temperature, air_temperature, specific_humidity, surface_pressure]
+    simulated variables: [windEastward, windNorthward, virtualTemperature, airTemperature, specificHumidity, stationPressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020121500_m.nc
   obs operator:
     name: Composite
     components:
      - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
-       - name: virtual_temperature
-       - name: air_temperature
-       - name: specific_humidity
-       - name: eastward_wind
-       - name: northward_wind
+       - name: virtualTemperature
+       - name: airTemperature
+       - name: specificHumidity
+       - name: windEastward
+       - name: windNorthward
      - name: SfcPCorrected
        variables:
-       - name: surface_pressure
+       - name: stationPressure
        da_psfc_scheme: UKMO
        geovar_geomz: geopotential_height
        geovar_sfc_geomz: surface_geopotential_height
   # The reference value is calculated as
-  #     sqrt( (rms(air_temperature)^2 + rms(specific_humidity)^2 + rms(eastward_wind)^2
-  #            rms(northward_wind)^2 + rms(surface_pressure)^2) / 5)
+  #     sqrt( (rms(airTemperature)^2 + rms(specificHumidity)^2 + rms(windEastward)^2
+  #            rms(windNorthward)^2 + rms(stationPressure)^2) / 5)
   rms ref: 39934.25561
   tolerance: 1.0e-05

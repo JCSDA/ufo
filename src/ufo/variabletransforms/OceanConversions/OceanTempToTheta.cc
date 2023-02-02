@@ -94,9 +94,10 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
     obserr_[iv][jobs] = thetaError[jobs];
   }
 
-  // copy PGEFinal and QCflags to new potential temperature
+  // copy ObsError, PGEFinal and QCflags to new potential temperature
   obsdb_.put_db("GrossErrorProbability", thetavariable_, thetapge);
   obsdb_.put_db("QCFlags", thetavariable_, thetaflags);
+  obsdb_.put_db("DerivedObsError", thetavariable_, thetaError);
 }
 
 // -----------------------------------------------------------------------------

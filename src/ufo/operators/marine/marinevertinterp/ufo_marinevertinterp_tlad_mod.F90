@@ -46,13 +46,6 @@ contains
 subroutine ufo_marinevertinterp_tlad_setup(self)
    class(ufo_marinevertinterp_tlad), intent(inout) :: self
 
-   integer :: ivar, nvars
-
-   nvars = self%obsvars%nvars()
-   do ivar = 1, nvars
-      call self%geovars%push_back(self%obsvars%variable(ivar))
-   enddo
-
 end subroutine ufo_marinevertinterp_tlad_setup
 
 ! ------------------------------------------------------------------------------

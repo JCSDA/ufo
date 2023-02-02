@@ -36,10 +36,10 @@ ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
     operatorVars_, operatorVarIndices);
 
-  // sanity check to make sure sea_water_temperature is the ONLY variable
+  // sanity check to make sure waterTemperature is the ONLY variable
   ASSERT_MSG(
-    operatorVars_.size() == 1 && operatorVars_[0] == "sea_water_temperature",
-    "InsituTemperature can only work on variable \"sea_water_temperature\"");
+    operatorVars_.size() == 1 && operatorVars_[0] == "waterTemperature",
+    "InsituTemperature can only work on variable \"waterTemperature\"");
 
   ufo_insitutemperature_setup_f90(keyOper_, params.toConfiguration(),
     operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(), varin_);

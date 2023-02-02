@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/airs_aqua_obs_2018041500_m_unittest.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -43,7 +43,7 @@ observations:
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/airs_aqua_obsdiag_2018041500_m_unittest.nc4
   obs function:
-    name: CloudDetectMinResidualIR@ObsFunction
+    name: ObsFunction/CloudDetectMinResidualIR
     options:
       channels: *all_channels
       test_qcflag: PreQC

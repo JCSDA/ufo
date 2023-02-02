@@ -19,12 +19,12 @@ obs filters:
 
   - filter: Domain Check
     where:
-    - variable: {name: sea_area_fraction@GeoVaLs}
+    - variable: {name: GeoVaLs/sea_area_fraction}
       minvalue: 0.5
 
   - filter: Domain Check
     where:
-    - variable: {name: distance_from_coast@GeoVaLs}
+    - variable: {name: GeoVaLs/distance_from_coast}
       minvalue: 100e3
 
   - filter: Bounds Check
@@ -36,12 +36,12 @@ obs filters:
 
   - filter: Domain Check
     where:
-    - variable: { name: sea_surface_temperature@GeoVaLs}
+    - variable: { name: GeoVaLs/sea_surface_temperature}
       maxvalue: 2.0
 
   - filter: Domain Check
     where:
-    - variable: { name: sea_surface_temperature@GeoVaLs}
+    - variable: { name: GeoVaLs/sea_surface_temperature}
       maxvalue: 0.0
     action:
       name: inflate error

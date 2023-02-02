@@ -38,18 +38,18 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
   obsParams.validateAndDeserialize(obsSpaceConf);
   ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
-  std::vector<std::string> varnames {"air_pressure", "station_id", "observation_type",
-                                     "latitude_band", "channel_number", "processing_center",
-                                     "satellite_id"};
+  std::vector<std::string> varnames {"pressure", "stationIdentification", "observationTypeNum",
+                                     "latitudeBand", "sensorChannelNumber", "dataProviderOrigin",
+                                     "satelliteIdentifier"};
   for (std::string varname : varnames) {
     if (conf.has(varname)) {
       const std::vector<int> dat = conf.getIntVector(varname);
       obsspace.put_db("MetaData", varname, dat);
     }
   }
-  if (conf.has("StringVar")) {
-      const std::vector<std::string> dat = conf.getStringVector("StringVar");
-      obsspace.put_db("MetaData", "StringVar", dat);
+  if (conf.has("stringVar")) {
+      const std::vector<std::string> dat = conf.getStringVector("stringVar");
+      obsspace.put_db("MetaData", "stringVar", dat);
   }
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(

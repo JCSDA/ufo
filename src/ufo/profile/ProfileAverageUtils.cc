@@ -61,7 +61,7 @@ namespace ufo {
       // Ensure all vectors are the correct size to be saved to the ObsSpace.
       const size_t numModelLevels = profile.getNumProfileLevels();
       averaged_values.resize(numModelLevels, missing);
-      profile.set<float>("OPS_" + std::string(average_name), std::move(averaged_values));
+      profile.set<float>(ufo::addOPSPrefix(average_name), std::move(averaged_values));
       // The QC flags are stored as floats but are converted to integers here.
       // Due to the loss of precision, 5 must be added to the missing value.
       const std::vector <float>& average_qcflags_float =
@@ -75,11 +75,11 @@ namespace ufo {
                    -2147483643L);
       // Ensure all vectors are the correct size to be saved to the ObsSpace.
       average_qcflags_int.resize(numModelLevels, 0);
-      profile.set<int>("OPS_" + std::string(qcflags_name), std::move(average_qcflags_int));
+      profile.set<int>(ufo::addOPSPrefix(qcflags_name), std::move(average_qcflags_int));
     } else {
       // Create a copy here because the vector will be used later in the routine.
       std::vector <float> avg = profile.get<float>(average_name);
-      profile.set<float>("OPS_" + std::string(average_name), std::move(avg));
+      profile.set<float>(ufo::addOPSPrefix(average_name), std::move(avg));
     }
   }
 
@@ -259,5 +259,13 @@ namespace ufo {
     } else {
       return obs_vert_coord_increasing;
     }
+  }
+
+  std::string addOPSPrefix(const std::string & fullname)
+  {
+    std::string varname;
+    std::string groupname;
+    ufo::splitVarGroup(fullname, varname, groupname);
+    return groupname + std::string("/OPS_") + varname;
   }
 }  // namespace ufo

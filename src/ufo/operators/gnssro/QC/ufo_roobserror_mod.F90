@@ -170,16 +170,16 @@ call obsspace_get_db(self%obsdb, "FortranQC", trim(self%variable),QCflags )
 select case (trim(self%variable))
 
 !-------------------------------
-case ("bending_angle")
+case ("bendingAngle")
 
   allocate(obsImpP(nobs))
   allocate(obsGeoid(nobs))
   allocate(obsLocR(nobs))
   allocate(obsImpH(nobs))
   allocate(obsImpA(nobs))
-  call obsspace_get_db(self%obsdb, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(self%obsdb, "MetaData", "geoid_height_above_reference_ellipsoid",obsGeoid)
-  call obsspace_get_db(self%obsdb, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(self%obsdb, "MetaData", "impactParameterRO", obsImpP)
+  call obsspace_get_db(self%obsdb, "MetaData", "geoidUndulation",obsGeoid)
+  call obsspace_get_db(self%obsdb, "MetaData", "earthRadiusCurvature", obsLocR)
   obsImpH(:) = obsImpP(:) - obsLocR(:)
   obsImpA(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
 
@@ -201,7 +201,7 @@ case ("bending_angle")
   case ("NBAM")
     allocate(obsSaid(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSaid)
+    call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSaid)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NBAM(obsLat, obsImpA, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
@@ -213,7 +213,7 @@ case ("bending_angle")
 
   case ("ECMWF")
     allocate(obsValue(nobs))
-    call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
+    call obsspace_get_db(self%obsdb, "ObsValue", "bendingAngle", obsValue)
     call bending_angle_obserr_ECMWF(obsImpA, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ECMWF method"
     call fckit_log%debug(err_msg)
@@ -223,7 +223,7 @@ case ("bending_angle")
   case ("NRL")
     allocate(obsValue(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
+    call obsspace_get_db(self%obsdb, "ObsValue", "bendingAngle", obsValue)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NRL(obsLat, obsImpA, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NRL method"
@@ -243,9 +243,9 @@ case ("bending_angle")
     allocate(obsSatid(nobs))
     allocate(obsOrigC(nobs))
     allocate(obsValue(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSatid)
-    call obsspace_get_db(self%obsdb, "MetaData", "originating_center", obsOrigC)
-    call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
+    call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSatid)
+    call obsspace_get_db(self%obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
+    call obsspace_get_db(self%obsdb, "ObsValue", "bendingAngle", obsValue)
     call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), obsErr)
     if (self % err_variable == "latitude") then
       allocate(obsLat(nobs))
@@ -288,7 +288,7 @@ case ("bending_angle")
   deallocate(obsImpA)
 
 !-------------------------------
-case ("refractivity")
+case ("atmosphericRefractivity")
 
   select case (trim(self%errmodel))
 
@@ -296,7 +296,7 @@ case ("refractivity")
 
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "altitude",  obsZ) 
+    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ) 
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call refractivity_obserr_NCEP(obsLat, obsZ, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NCEP method" 

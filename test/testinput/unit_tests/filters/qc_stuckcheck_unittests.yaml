@@ -3,7 +3,7 @@ All observations' number and time stuck tolerated:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -15,7 +15,7 @@ All observations' number and time stuck tolerated:
         obs errors: [1.0]
   air_temperatures: [ 281.0, 281.0, 282.0, 282.0, 283.0, 283.0]
   Stuck Check: &referenceFilterArguments
-    filter variables: [air_temperature]
+    filter variables: [airTemperature]
     number stuck tolerance: 2
     time stuck tolerance: PT2H
   expected_rejected_obs_indices: []
@@ -25,7 +25,7 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -44,7 +44,7 @@ Time stuck tolerated, number stuck untolerated, 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -63,7 +63,7 @@ Time stuck tolerated, number stuck tolerated, 1 value:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -81,7 +81,7 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -100,7 +100,7 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -119,7 +119,7 @@ All temperatures different:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
     obsdatain:
       engine:
         type: GenList
@@ -138,8 +138,8 @@ Different variable streaks:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [ air_temperature, air_pressure ]
-    observed variables: [ air_temperature, air_pressure ]
+    simulated variables: [ airTemperature, pressure ]
+    observed variables: [ airTemperature, pressure ]
     obsdatain:
       engine:
         type: GenList
@@ -152,7 +152,7 @@ Different variable streaks:
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
   air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]
   Stuck Check:
-    filter variables: [ air_temperature, air_pressure ]
+    filter variables: [ airTemperature, pressure ]
     number stuck tolerance: 2
     time stuck tolerance: PT2H
   expected_rejected_obs_indices: [ 1, 2, 3, 4, 5 ]
@@ -161,8 +161,8 @@ Different variable streaks, 1 filter variable considered:
   window end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
-    simulated variables: [ air_temperature, air_pressure ]
-    observed variables: [ air_temperature, air_pressure ]
+    simulated variables: [ airTemperature, pressure ]
+    observed variables: [ airTemperature, pressure ]
     obsdatain:
       engine:
         type: GenList
@@ -175,7 +175,7 @@ Different variable streaks, 1 filter variable considered:
   air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
   air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]
   Stuck Check:
-    filter variables: [ air_temperature ]
+    filter variables: [ airTemperature ]
     number stuck tolerance: 2
     time stuck tolerance: PT2H
   expected_rejected_obs_indices: [ 3, 4, 5 ]

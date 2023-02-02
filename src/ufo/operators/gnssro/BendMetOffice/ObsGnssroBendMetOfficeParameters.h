@@ -41,6 +41,10 @@ class ObsGnssroBendMetOfficeParameters : public ObsOperatorParametersBase {
      "isothermal. Used if pseudo-levels are used, otherwise ignored.",
      1.0e-6,
      this};
+
+  /// List of channels available for assimilation - this is used for vertical
+  /// heights in the case where the observations are read in as profiles.
+  oops::Parameter<std::string> channelList{"channels", "", this};
 };
 
 }  // namespace ufo

@@ -30,7 +30,7 @@ class ObsFilterData;
 ///
 ///   - where:
 ///     - variable:
-///         name: float_variable_2@MetaData
+///         name: MetaData/float_variable_2
 ///       minvalue: 0
 ///     value: 0.5
 ///
@@ -81,56 +81,56 @@ class ConditionalParameters : public oops::Parameters {
 /// processWhere class can be used with this obs function.
 ///
 /// This template is used to define four ObsFunctions, each producing values of a different type:
-/// * `Conditional@ObsFunction` produces floats
-/// * `Conditional@IntObsFunction` produces ints
-/// * `Conditional@StringObsFunction` produces strings
-/// * `Conditional@DateTimeObsFunction` produces datetimes.
+/// * `ObsFunction/Conditional` produces floats
+/// * `IntObsFunction/Conditional` produces ints
+/// * `StringObsFunction/Conditional` produces strings
+/// * `DateTimeObsFunction/Conditional` produces datetimes.
 ///
-/// Example 1: Create a new floating-point variable `emissivity@ObsDerived` and assign values based
+/// Example 1: Create a new floating-point variable `ObsDerived/emissivity` and assign values based
 /// on the surface type.
 ///
 ///     - filter: Variable Assignment
 ///       assignments:
-///       - name: emissivity@ObsDerived
+///       - name: ObsDerived/emissivity
 ///         type: float
 ///         function:
-///           name: Conditional@ObsFunction
+///           name: ObsFunction/Conditional
 ///           options:
 ///             defaultvalue: 0.0 # default value - rttov to calculate.
 ///             cases:
 ///             - where:
 ///               - variable:
-///                   name: surface_type@MetaData
+///                   name: MetaData/surfaceQualifier
 ///                 is_in: 1
 ///               # if necessary, further conditions could be specified in extra items
 ///               # in the 'where' list
 ///               value: 0.3
 ///             - where:
 ///               - variable:
-///                   name: surface_type@MetaData
+///                   name: MetaData/surfaceQualifier
 ///                 is_in: 2
 ///               value: 0.5
 ///
-/// Example 2: Create a new string variable `surface_description@MetaData` and set it to `land`,
-/// `sea` or `unknown` depending on the value of the `surface_type@MetaData` variable.
+/// Example 2: Create a new string variable `MetaData/surfaceDescription` and set it to `land`,
+/// `sea` or `unknown` depending on the value of the `MetaData/surfaceQualifier` variable.
 ///
 ///     - filter: Variable Assignment
 ///       assignments:
-///       - name: surface_description@MetaData
+///       - name: MetaData/surfaceDescription
 ///         type: string
 ///         function:
-///           name: Conditional@StringObsFunction
+///           name: StringObsFunction/Conditional
 ///           options:
 ///             defaultvalue: unknown
 ///             cases:
 ///             - where:
 ///               - variable:
-///                   name: surface_type@MetaData
+///                   name: MetaData/surfaceQualifier
 ///                 is_in: 1
 ///               value: land
 ///             - where:
 ///               - variable:
-///                   name: surface_type@MetaData
+///                   name: MetaData/surfaceQualifier
 ///                 is_in: 2
 ///               value: sea
 

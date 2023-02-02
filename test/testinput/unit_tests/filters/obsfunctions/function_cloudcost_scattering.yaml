@@ -29,17 +29,17 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/delete.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-20
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_rttov_scatt.nc4
   obs post filters:
   - filter: Variable Assignment
     assignments:
-    - name: cloud_cost@MetaData
+    - name: CloudCostObsFunction/finalCost
       type: float
       function:
-        name: CloudCostFunction@ObsFunction
+        name: ObsFunction/CloudCostFunction
         options:
           cost channels list: 18, 19, 20
           background emissivity channels: 1, 2, 3, 16, 17
@@ -65,7 +65,7 @@ observations:
           skin temperature error: 10.0          # optional B-matrix scaling
   compareVariables:
   - reference:
-      name: cloud_cost@TestReference
+      name: TestReference/finalCost
     test:
-      name: cloud_cost@MetaData
+      name: CloudCostObsFunction/finalCost
     absTol: 1.0e-6

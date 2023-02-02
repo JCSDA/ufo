@@ -8,7 +8,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obs_2020120112.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels
               19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
               51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
@@ -49,17 +49,17 @@ observations:
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/cris-fsr_npp_obsdiag_2020120112.nc4
   obs function:
-    name: ObsErrorBoundIR@ObsFunction
+    name: ObsFunction/ObsErrorBoundIR
     options:
       channels: *all_channels
       test_qcflag: PreQC
       test_obserr: GsiObsError_grosschk
       obserr_bound_latitude:
-        name: ObsErrorFactorLatRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorLatRad
         options:
           latitude_parameters: [25.0, 0.5, 0.04, 1.0]
       obserr_bound_transmittop:
-        name: ObsErrorFactorTransmitTopRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTransmitTopRad
         channels: *all_channels
         options:
           channels: *all_channels

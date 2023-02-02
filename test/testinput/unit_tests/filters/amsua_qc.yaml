@@ -18,7 +18,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-15
 #   obsdataout:
 #     engine:
@@ -29,28 +29,28 @@ observations:
   obs filters:
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1
     minvalue: 50.0
     maxvalue: 400.0
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 2-15
     minvalue: 100.0
     maxvalue: 500.0
   - filter: DomainErr Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1
     infltparameter: 1.5
     where:
     - variable:
-        name: Scattering@ObsFunction
+        name: ObsFunction/Scattering
       maxvalue: 100.0
   - filter: Background Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1
     threshold: 2.0
 #  - filter: YDIAGsaver

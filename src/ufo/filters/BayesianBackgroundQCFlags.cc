@@ -65,7 +65,7 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
   if (obsdb_.has("QCFlags", varname))
     obsdb_.get_db("QCFlags", varname, QCflags);
   else
-    throw eckit::BadValue(varname + "@QCFlags not present", Here());
+    throw eckit::BadValue("QCFlags/" + varname + " not present", Here());
 
   // Get the PGE values that each observation had after
   // the Bayesian background and/or buddy checks were applied.
@@ -85,7 +85,7 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
     }
   } else {
     std::stringstream errormessage;
-    errormessage << varname + "@GrossErrorProbability must be present"
+    errormessage << "GrossErrorProbability/" + varname + " must be present"
                  << std::endl;
     throw eckit::BadValue(errormessage.str(), Here());
   }

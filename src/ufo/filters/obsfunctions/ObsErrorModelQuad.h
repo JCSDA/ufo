@@ -96,17 +96,17 @@ class ObsErrorModelQuadParameters : public oops::Parameters {
 /// #### ABI/AHI ####
 ///
 ///       filter variables:
-///       - name: brightness_temperature
+///       - name: brightnessTemperature
 ///         channels: &errassignchan 8-10
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: ObsErrorModelQuad@ObsFunction
+///           name: ObsFunction/ObsErrorModelQuad
 ///           channels: *errassignchan
 ///           options:
 ///             channels: *errassignchan
 ///             xvar:
-///               name: OkamotoSCIforIR@ObsFunction
+///               name: ObsFunction/OkamotoSCIforIR
 ///               channels: *errassignchan
 ///               options:
 ///                 channels: *errassignchan

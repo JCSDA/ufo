@@ -24,7 +24,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/amsr2_gcom-w1_obs_2020120100_m_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-14
   geovals:
     filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020120100_m.nc4

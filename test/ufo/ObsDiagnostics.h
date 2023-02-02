@@ -18,9 +18,13 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
 #include "test/TestEnvironment.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
@@ -41,36 +45,56 @@ namespace test {
 
 // -----------------------------------------------------------------------------
 
+class ObsDiagnosticsParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsDiagnosticsParameters, Parameters)
+
+ public:
+  /// \brief List of obs diagnostics to be calculated.
+  oops::RequiredParameter<oops::Variables> variables{"variables", this};
+};
+
+// -----------------------------------------------------------------------------
+
+/// \brief Top-level options taken by the ObsDiagnostics test.
+class TestParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(TestParameters, Parameters)
+
+ public:
+  /// Only observations taken at times lying in the (`window begin`, `window end`] interval
+  /// will be included in observation spaces.
+  oops::RequiredParameter<util::DateTime> windowBegin{"window begin", this};
+  oops::RequiredParameter<util::DateTime> windowEnd{"window end", this};
+
+  oops::RequiredParameter<ioda::ObsSpace::Parameters_> obsSpace{"obs space", this};
+  oops::RequiredParameter<ObsOperator::Parameters_> obsOperator{"obs operator", this};
+  oops::RequiredParameter<GeoVaLs::Parameters_> geovals{"geovals", this};
+  oops::Parameter<ObsBias::Parameters_> obsBias{"obs bias", {}, this};
+  oops::RequiredParameter<ObsDiagnosticsParameters> obsDiagnostics{"obs diagnostics", this};
+  oops::RequiredParameter<GeoVaLs::Parameters_> referenceObsDiagnostics{
+    "reference obs diagnostics", this};
+  oops::RequiredParameter<double> tolerance{"tolerance", this};
+};
+
+// -----------------------------------------------------------------------------
+
 void testObsDiagnostics() {
-  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+  TestParameters params;
+  params.validateAndDeserialize(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsTopLevelParameters obsparams;
-  obsparams.validateAndDeserialize(obsconf);
-  ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsSpace ospace(params.obsSpace, oops::mpi::world(), params.windowBegin, params.windowEnd,
+                        oops::mpi::myself());
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,
   // variables simulated by the observation operator, other init)
-  eckit::LocalConfiguration obsopconf(conf, "obs operator");
-  ObsOperatorParametersWrapper obsopparams;
-  obsopparams.validateAndDeserialize(obsopconf);
-  ObsOperator hop(ospace, obsopparams);
+  ObsOperator hop(ospace, params.obsOperator);
 
   // read geovals from the file
-  eckit::LocalConfiguration gconf(conf, "geovals");
-  GeoVaLsParameters geovalsparams;
-  geovalsparams.validateAndDeserialize(gconf);
-  const GeoVaLs gval(geovalsparams, ospace, hop.requiredVars());
+  const GeoVaLs gval(params.geovals, ospace, hop.requiredVars());
 
   // initialize bias correction
-  eckit::LocalConfiguration biasconf = conf.getSubConfiguration("obs bias");
-  ObsBiasParameters biasparams;
-  biasparams.validateAndDeserialize(biasconf);
-  const ObsBias ybias(ospace, biasparams);
+  const ObsBias ybias(ospace, params.obsBias);
 
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);
@@ -80,8 +104,7 @@ void testObsDiagnostics() {
   bias.zero();
 
   // create diagnostics to hold HofX diags
-  eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
-  oops::Variables diagvars(diagconf, "variables");
+  const oops::Variables &diagvars = params.obsDiagnostics.value().variables;
   EXPECT(diagvars.size() > 0);
   std::unique_ptr<Locations> locs(hop.locations());
   ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
@@ -90,11 +113,8 @@ void testObsDiagnostics() {
   hop.simulateObs(gval, hofx, ybias, bias, diags);
 
   // read tolerance and reference Diagnostics
-  const double tol = conf.getDouble("tolerance");
-  eckit::LocalConfiguration diagrefconf(conf, "reference obs diagnostics");
-  GeoVaLsParameters diagrefparams;
-  diagrefparams.validateAndDeserialize(diagrefconf);
-  ObsDiagnostics diagref(diagrefparams, ospace, diagvars);
+  const double tol = params.tolerance;
+  ObsDiagnostics diagref(params.referenceObsDiagnostics, ospace, diagvars);
 
   // loop over all diag variables and levels and compare with reference
   for (size_t ivar = 0; ivar < diagvars.size(); ivar++) {

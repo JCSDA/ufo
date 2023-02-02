@@ -70,7 +70,7 @@ class Cal_SatZenithAngleCorrectionParameters: public VariableTransformParameters
 * - filter: Variable Transforms
 *   Transform: SatZenithAngleCorrection
 *   transform variable:
-*     name: surface_emissivity@DerivedObsValue
+*     name: DerivedObsValue/emissivity
 *     channels: 1,2
 *   ## Test coeffs
 *   coefficient a: [-3.60E-03, -2.38E-03]

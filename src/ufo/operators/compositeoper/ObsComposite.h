@@ -43,12 +43,12 @@ namespace ufo {
 ///       components:
 ///       - name: VertInterp
 ///         variables:
-///         - name: relative_humidity
-///           name: northward_wind
-///           name: eastward_wind
+///         - name: relativeHumidity
+///           name: windNorthward
+///           name: windEastward
 ///       - name: Identity
 ///         variables:
-///         - name: surface_pressure
+///         - name: surfacePressure
 ///
 /// \note Only some operators (currently VertInterp and Identity) currently support the `variables`
 /// option and thus can be used to simulate only a subset of variables.

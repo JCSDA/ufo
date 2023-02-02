@@ -115,8 +115,8 @@ cor_psfc = missing
 ! get obs variables
 allocate(obs_height(nobs))
 allocate(obs_psfc(nobs))
-call obsspace_get_db(obss, "MetaData",  "station_elevation",obs_height)
-call obsspace_get_db(obss, "ObsValue",  "surface_pressure", obs_psfc)
+call obsspace_get_db(obss, "MetaData",  "stationElevation",obs_height)
+call obsspace_get_db(obss, "ObsValue",  "stationPressure", obs_psfc)
 
 ! get model variables; geovars_list = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
 write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                    &
@@ -227,18 +227,18 @@ case ("WRFDA")
    ! get extra obs values
    variable_present_t = .false.
    variable_present_q = .false.
-   if (obsspace_has(obss, "ObsValue", "virtual_temperature")) then
+   if (obsspace_has(obss, "ObsValue", "virtualTemperature")) then
       variable_present_t = .true.
       allocate(obs_t(nobs))
-      call obsspace_get_db(obss, "ObsValue", "virtual_temperature", obs_t)
-   else if (obsspace_has(obss, "ObsValue", "air_temperature")) then
+      call obsspace_get_db(obss, "ObsValue", "virtualTemperature", obs_t)
+   else if (obsspace_has(obss, "ObsValue", "airTemperature")) then
       variable_present_t = .true.
       allocate(obs_t(nobs))
-      call obsspace_get_db(obss, "ObsValue", "air_temperature", obs_t)
-      variable_present_q = obsspace_has(obss, "ObsValue", "specific_humidity")
+      call obsspace_get_db(obss, "ObsValue", "airTemperature", obs_t)
+      variable_present_q = obsspace_has(obss, "ObsValue", "specificHumidity")
       if (variable_present_q) then
          allocate(obs_q(nobs))
-         call obsspace_get_db(obss, "ObsValue", "specific_humidity", obs_q)
+         call obsspace_get_db(obss, "ObsValue", "specificHumidity", obs_q)
       end if
    end if
 
@@ -290,12 +290,12 @@ case ("GSI")
    ! get observed surface temperature (if exist) OR model temperature at obs_height
    allocate(obs_tv(nobs))
    obs_tv = missing
-   if (obsspace_has(obss, "ObsValue", "virtual_temperature")) then
-      call obsspace_get_db(obss, "ObsValue", "virtual_temperature", obs_tv)
+   if (obsspace_has(obss, "ObsValue", "virtualTemperature")) then
+      call obsspace_get_db(obss, "ObsValue", "virtualTemperature", obs_tv)
    end if
-   if (obsspace_has(obss, "ObsValue", "air_temperature")) then
+   if (obsspace_has(obss, "ObsValue", "airTemperature")) then
       allocate(obs_t(nobs))
-      call obsspace_get_db(obss, "ObsValue", "air_temperature", obs_t)
+      call obsspace_get_db(obss, "ObsValue", "airTemperature", obs_t)
       where (obs_tv == missing .and. obs_t /= missing)
          obs_tv = obs_t
       end where

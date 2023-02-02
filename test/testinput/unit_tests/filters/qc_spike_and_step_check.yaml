@@ -9,21 +9,21 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-        sort variable: "ocean_depth"
+        group variables: [ "stationIdentification", "dateTime" ]
+        sort variable: "depthBelowWaterSurface"
         sort group: "MetaData"
         sort order: "ascending" # surface to depth
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/spikestep_testout.nc4
-    simulated variables: [ocean_temperature, ocean_salinity]
-    observed variables: [ocean_temperature, ocean_salinity]
+    simulated variables: [waterTemperature, salinity]
+    observed variables: [waterTemperature, salinity]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
-      - name: ocean_salinity
+      - name: waterTemperature
+      - name: salinity
     flags:
     - name: spike
       initial value: false
@@ -31,9 +31,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/ocean_depth      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/depthBelowWaterSurface      # dx
     count spikes: true
     count steps: true
     tolerance:
@@ -50,9 +50,9 @@ observations:
       name: reject
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_salinity
-    dependent: ObsValue/ocean_salinity  # dy/
-    independent: MetaData/ocean_depth   # dx
+      - name: ObsValue/salinity
+    dependent: ObsValue/salinity  # dy/
+    independent: MetaData/depthBelowWaterSurface   # dx
     count spikes: true
     count steps: true
     tolerance:
@@ -68,7 +68,7 @@ observations:
   - filter: Perform Action  # where T spikes, reject both S and T
     where:
     - variable:
-        name: DiagnosticFlags/spike/ocean_temperature
+        name: DiagnosticFlags/spike/waterTemperature
       is_true:
     actions:
     - name: set
@@ -76,77 +76,77 @@ observations:
     - name: reject
   - filter: Variable Assignment  # create derived obs value containing only T spikes
     assignments:
-    - name: ocean_temperature_spikes@DerivedMetaData
+    - name: DerivedMetaData/waterTemperature_spikes
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: DiagnosticFlags/spike/ocean_temperature
+                name: DiagnosticFlags/spike/waterTemperature
               is_true:
   - filter: Variable Assignment  # create derived obs value containing only T steps
     assignments:
-    - name: ocean_temperature_steps@DerivedMetaData
+    - name: DerivedMetaData/waterTemperature_steps
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: DiagnosticFlags/step/ocean_temperature
+                name: DiagnosticFlags/step/waterTemperature
               is_true:
   - filter: Variable Assignment  # compute sum 2*spikes+steps
     assignments:
-    - name: ocean_temperature_rejections@DerivedMetaData
+    - name: DerivedMetaData/waterTemperature_rejections
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
-          variables: [ocean_temperature_spikes@DerivedMetaData,ocean_temperature_steps@DerivedMetaData]
+          variables: [DerivedMetaData/waterTemperature_spikes, DerivedMetaData/waterTemperature_steps]
           coefs: [2,1]
   - filter: Perform Action  # reject whole profile if 2*spikes+steps>=rejection threshold
     where:
     - variable:
-        name: ocean_temperature_rejections@DerivedMetaData
+        name: DerivedMetaData/waterTemperature_rejections
       minvalue: 3
     action:
       name: reject
   - filter: Variable Assignment  # create derived obs value containing only S spikes
     assignments:
-    - name: ocean_salinity_spikes@DerivedMetaData
+    - name: DerivedMetaData/salinity_spikes
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: DiagnosticFlags/spike/ocean_salinity
+                name: DiagnosticFlags/spike/salinity
               is_true:
   - filter: Variable Assignment  # create derived obs value containing only S steps
     assignments:
-    - name: ocean_salinity_steps@DerivedMetaData
+    - name: DerivedMetaData/salinity_steps
       type: int
       function:
-        name: ProfileLevelCount@IntObsFunction
+        name: IntObsFunction/ProfileLevelCount
         options:
           where:
             - variable:
-                name: DiagnosticFlags/step/ocean_salinity
+                name: DiagnosticFlags/step/salinity
               is_true:
   - filter: Variable Assignment  # compute sum 2*spikes+steps
     assignments:
-    - name: ocean_salinity_rejections@DerivedMetaData
+    - name: DerivedMetaData/salinity_rejections
       type: int
       function:
-        name: LinearCombination@IntObsFunction
+        name: IntObsFunction/LinearCombination
         options:
-          variables: [ocean_salinity_spikes@DerivedMetaData,ocean_salinity_steps@DerivedMetaData]
+          variables: [DerivedMetaData/salinity_spikes, DerivedMetaData/salinity_steps]
           coefs: [2,1]
   - filter: Perform Action  # reject whole profile if 2*spikes+steps>=rejection threshold
     where:
     - variable:
-        name: ocean_salinity_rejections@DerivedMetaData
+        name: DerivedMetaData/salinity_rejections
       minvalue: 3
     action:
       name: reject
@@ -173,20 +173,20 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-        sort variable: "ocean_depth"
+        group variables: [ "stationIdentification", "dateTime" ]
+        sort variable: "depthBelowWaterSurface"
         sort group: "MetaData"
         sort order: "descending" # depth to surface
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/spikestep_testout2.nc4
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs pre filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -195,12 +195,12 @@ observations:
   - filter: Spike and Step Check
     where:
     - variable:
-        name: ObsValue/ocean_temperature
+        name: ObsValue/waterTemperature
       minvalue: 1
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/ocean_depth      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/depthBelowWaterSurface      # dx
     count spikes: true
     count steps: true
     tolerance:
@@ -234,18 +234,18 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
+        group variables: [ "stationIdentification", "dateTime" ]
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/spikestep_testout3.nc4
-    simulated variables: [ocean_temperature, ocean_salinity]
-    observed variables: [ocean_temperature, ocean_salinity]
+    simulated variables: [waterTemperature, salinity]
+    observed variables: [waterTemperature, salinity]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
-      - name: ocean_salinity
+      - name: waterTemperature
+      - name: salinity
     flags:
     - name: spike
       initial value: false
@@ -253,9 +253,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10  # K nominal, in the case of temperature (not really)
       gradient x resolution: 100 # Pa - for the sake of code coverage
@@ -265,9 +265,9 @@ observations:
       name: reject
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_salinity
-    dependent: ObsValue/ocean_salinity  # dy/
-    independent: MetaData/air_pressure   # dx
+      - name: ObsValue/salinity
+    dependent: ObsValue/salinity  # dy/
+    independent: MetaData/pressure   # dx
     tolerance:
       nominal value: 1.0  # PSU nominal, in the case of salinity (not really)
     action:
@@ -288,7 +288,7 @@ observations:
       - 65  # ""; no temperature small spike as dT below tolerance 10K at this pressure
       # - 71  # not temperature bottom step, as dT below tolerance 10K at this pressure
   benchmarkFlag: 21 # track
-  passedBenchmark: 134  # 73*2 total T and S, minus 1 [13], minus 2 [13-14], minus 2 [17-18], 
+  passedBenchmark: 134  # 73*2 total T and S, minus 1 [13], minus 2 [13-14], minus 2 [17-18],
                         # minus 1 [27], minus 2 [43-44], minus 2 [50-51], minus 2 [64-65]:
                         #  146 -1 -2 -2 -1 -2 -2 -2 = 134
 - obs space:
@@ -298,13 +298,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -312,9 +312,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10  # K nominal, in the case of temperature (not really)
       factors: [0.9,0.15]     # multiply tolerance, for ranges bounded by...
@@ -329,13 +329,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -343,9 +343,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10
       factors: [0.9,0.15]
@@ -359,13 +359,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -373,9 +373,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10
       factors: [0.3,0.5,0.5]
@@ -390,13 +390,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -404,9 +404,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10
     boundary layer:
@@ -419,13 +419,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -433,9 +433,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10
     boundary layer:
@@ -448,13 +448,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/spikestep_testdata.nc4
       obsgrouping:
-        group variables: [ "station_id", "dateTime" ]
-    simulated variables: [ocean_temperature]
-    observed variables: [ocean_temperature]
+        group variables: [ "stationIdentification", "dateTime" ]
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
   obs filters:
   - filter: Create Diagnostic Flags
     filter variables:
-      - name: ocean_temperature
+      - name: waterTemperature
     flags:
     - name: spike
       initial value: false
@@ -462,9 +462,9 @@ observations:
       initial value: false
   - filter: Spike and Step Check
     filter variables:
-      - name: ObsValue/ocean_temperature
-    dependent: ObsValue/ocean_temperature  # dy/
-    independent: MetaData/air_pressure      # dx
+      - name: ObsValue/waterTemperature
+    dependent: ObsValue/waterTemperature  # dy/
+    independent: MetaData/pressure      # dx
     tolerance:
       nominal value: 10
     boundary layer:

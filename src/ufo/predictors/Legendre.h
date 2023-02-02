@@ -42,8 +42,8 @@ class LegendreParameters : public PredictorParametersBase {
  *scan extremes; thus, the scan position is rescaled between -1 and 1 (xscan variable).
  *Legendre polynomials are calculated with recurrence relations. Polynomials can be 
  *produced for an order (as addressed by input parameter of that name). The data must 
- *contain scan positions in the variable "scan_position@MetaData" and the number of scan 
- *positons in"sensor_numb_scan_position@MetaData". Both of these are vectors with length
+ *contain scan positions in the variable "MetaData/sensorScanPosition" and the number of scan 
+ *positons in"MetaData/sensorNumbScanPosition". Both of these are vectors with length
  *nlocs in the current implementation.
  */
 

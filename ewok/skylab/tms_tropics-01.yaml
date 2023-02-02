@@ -7,9 +7,11 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
-  _source: nasa
-  simulated variables: [brightness_temperature]
-  channels: 1-12
+  io pool:
+    write multiple files: true
+  _source: noaa
+  simulated variables: [brightnessTemperature]
+  channels: &tms_tropics-01_channels 1-12
 obs operator:
   name: CRTM
   Absorbers: [H2O,O3] #,CO2]
@@ -21,5 +23,20 @@ obs operator:
 obs filters:
 - filter: Background Check
   threshold: 3
+# Useflag check
+- filter: Bounds Check
+  filter variables:
+  - name: brightnessTemperature
+    channels: *tms_tropics-01_channels
+  test variables:
+  - name: ObsFunction/ChannelUseflagCheckRad
+    channels: *tms_tropics-01_channels
+    options:
+      channels: *tms_tropics-01_channels
+      use_flag: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+  minvalue: 1.0e-12
+  action:
+    name: reject
+# Thinning
 - filter: Gaussian Thinning
   horizontal_mesh: 145.0

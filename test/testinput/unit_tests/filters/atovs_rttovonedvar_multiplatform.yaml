@@ -25,7 +25,7 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atovs_obs_2021011512_multiplatform.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-20
     # obsdataout:
     #   engine:
@@ -39,10 +39,10 @@ observations:
 #---------------------------------------------------
   - filter: Variable Assignment
     assignments:
-    - name: surface_type@MetaData
+    - name: MetaData/surfaceQualifier
       type: int
       function:
-        name: SetSurfaceType@ObsFunction
+        name: ObsFunction/SetSurfaceType
         options:
           UseReportSurface: false
 #---------------------------------------------------
@@ -50,7 +50,7 @@ observations:
 #---------------------------------------------------
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature@ObsValue
+    - name: ObsValue/brightnessTemperature
       channels: *all_channels
     minvalue: 70.0
     maxvalue: 340.0
@@ -59,18 +59,18 @@ observations:
 #--------------------------------------------------
   - filter: RejectList
     filter variables:
-    - name: brightness_temperature@ObsValue
+    - name: ObsValue/brightnessTemperature
       channels: 7,15-17
 #---------------------------------------------------
 #Surface channels rejected over land,sea-ice
 #---------------------------------------------------
   - filter: RejectList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5,18-20
     where:
     - variable:
-        name: surface_type@MetaData
+        name: MetaData/surfaceQualifier
       is_not_in: 1
 #-------------------------------------------------
 # 1DVar
@@ -95,7 +95,7 @@ observations:
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat   #using atms to ignore emiss for now
     RMatrix: ../resources/rmatrix/rttov/atovs_metopb_rmatrix_test.nc4
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     retrieval variables from geovals:
     - air_temperature # 1
@@ -132,20 +132,20 @@ observations:
   - filter: Bounds Check
     where:
     - variable:
-        name: surface_type@MetaData
+        name: MetaData/surfaceQualifier
       is_in: 0-2
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: &humidity_chans 18-20
     test variables:
-    - name: transmittance@OneDVar
+    - name: OneDVar/transmittance
       channels: *humidity_chans
     maxvalue: 0.1
     minvalue: 0.0
   passedBenchmark: 98
   compareVariables:
     - reference:
-        name: transmittance@TestReferenceOneDVar
+        name: TestReferenceOneDVar/transmittance
       test:
-        name: transmittance@OneDVar
+        name: OneDVar/transmittance
       absTol: 1.0e-5

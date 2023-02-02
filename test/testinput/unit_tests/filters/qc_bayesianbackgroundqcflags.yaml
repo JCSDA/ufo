@@ -8,44 +8,44 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
-    simulated variables: [air_temperature, eastward_wind, northward_wind, geopotential_height]
+    simulated variables: [airTemperature, windEastward, windNorthward, geopotentialHeight]
   obs filters:
   - filter: Bayesian Background QC Flags
     filter variables:
-    - name: air_temperature
-    - name: eastward_wind
-    - name: northward_wind
-    - name: geopotential_height
+    - name: airTemperature
+    - name: windEastward
+    - name: windNorthward
+    - name: geopotentialHeight
   passedBenchmark: 1830
   compareVariables:
     - reference:
-        name: OPS_air_temperature@QCFlags
+        name: QCFlags/OPS_airTemperature
       test:
-        name: air_temperature@QCFlags
+        name: QCFlags/airTemperature
     - reference:
-        name: OPS_eastward_wind@QCFlags
+        name: QCFlags/OPS_windEastward
       test:
-        name: eastward_wind@QCFlags
+        name: QCFlags/windEastward
     - reference:
-        name: OPS_northward_wind@QCFlags
+        name: QCFlags/OPS_windNorthward
       test:
-        name: northward_wind@QCFlags
+        name: QCFlags/windNorthward
     - reference:
-        name: OPS_geopotential_height@QCFlags
+        name: QCFlags/OPS_geopotentialHeight
       test:
-        name: geopotential_height@QCFlags
+        name: QCFlags/geopotentialHeight
 - obs space:
     name: Missing QC flags
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Bayesian Background QC Flags
     filter variables:
-    - name: air_temperature
-  expectExceptionWithMessage: air_temperature@QCFlags not present
+    - name: airTemperature
+  expectExceptionWithMessage: QCFlags/airTemperature not present
   passedBenchmark: 0
 - obs space:
     name: Missing PGE
@@ -53,27 +53,27 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags_missing_variables.nc
-    simulated variables: [eastward_wind]
+    simulated variables: [windEastward]
   obs filters:
   - filter: Bayesian Background QC Flags
     filter variables:
-    - name: eastward_wind
-  expectExceptionWithMessage: eastward_wind@GrossErrorProbability must be present
+    - name: windEastward
+  expectExceptionWithMessage: GrossErrorProbability/windEastward must be present
 - obs space:
     name: Bayesian background QC flags with where clause
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_bayesian_background_qc_flags.nc
-    simulated variables: [air_temperature]
+    simulated variables: [airTemperature]
   obs filters:
   - filter: Bayesian Background QC Flags
     filter variables:
-    - name: air_temperature
+    - name: airTemperature
     # Applies the filter to all but the first profile in the sample.
     # As a result an extra 69 observations pass.
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       maxvalue: 0.0
   passedBenchmark: 93

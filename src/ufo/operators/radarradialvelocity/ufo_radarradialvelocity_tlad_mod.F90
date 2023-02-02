@@ -54,7 +54,7 @@ subroutine radarradialvelocity_tlad_setup_(self, yaml_conf)
   if( yaml_conf%has("VertCoord") ) then
       call yaml_conf%get_or_die("VertCoord",coord_name)
       self%v_coord = coord_name
-      if( trim(self%v_coord) .ne. var_z ) then
+      if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_zm ) then
         call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
       endif
   else  ! default
@@ -101,10 +101,10 @@ subroutine radarradialvelocity_tlad_settraj_(self, geovals, obss)
   allocate(self%sintilt(self%nlocs))
   allocate(self%vterminal(self%nlocs))
 
-  call obsspace_get_db(obss, "MetaData", "geometric_height", obsvcoord)
-  call obsspace_get_db(obss, "MetaData", "cosazm_costilt", self%cosazm_costilt)
-  call obsspace_get_db(obss, "MetaData", "sinazm_costilt", self%sinazm_costilt)
-  call obsspace_get_db(obss, "MetaData", "sintilt", self%sintilt)
+  call obsspace_get_db(obss, "MetaData", "height", obsvcoord)
+  call obsspace_get_db(obss, "MetaData", "cosAzimuthCosTilt", self%cosazm_costilt)
+  call obsspace_get_db(obss, "MetaData", "sinAzimuthCosTilt", self%sinazm_costilt)
+  call obsspace_get_db(obss, "MetaData", "sinTilt", self%sintilt)
 ! call obsspace_get_db(obss, "MetaData", "vterminal", self%vterminal)
 
   ! Allocate arrays for interpolation weights
@@ -198,8 +198,10 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
     do iobs=1,nlocs
      ! no vertical velocity and terminal velocity in GSI rw observer, it can add
      ! in future after acceptance test
+     if (hofx(ivar,iobs) .ne. missing) then
       vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
       vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
+     end if
     enddo
   end do
 

@@ -12,7 +12,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: &outfile Data/atovs_lwpfirstguess_20210701T1200Z_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 1-20
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atovs_lwpguess_20210701T1200Z.nc4
@@ -22,10 +22,10 @@ observations:
 #---------------------------------------------------
   - filter: Variable Assignment
     assignments:
-    - name: surface_type@MetaData
+    - name: MetaData/surfaceQualifier
       type: int
       function:
-        name: SetSurfaceType@ObsFunction
+        name: ObsFunction/SetSurfaceType
         options:
           UseReportSurface: false
 #---------------------------------------------------
@@ -33,23 +33,23 @@ observations:
 #---------------------------------------------------
   - filter: Variable Assignment
     assignments:
-    - name: lwp_back@MetaData
+    - name: MetaData/lwp_back
       type: float
       function:
-        name: LiquidWaterPathGuess@ObsFunction
+        name: ObsFunction/LiquidWaterPathGuess
 #---------------------------------------------------------------
 # test on max lwp over land
 #---------------------------------------------------------------
   - filter: Bounds Check
     where:
     - variable:
-        name: surface_type@MetaData
+        name: MetaData/surfaceQualifier
       is_in: 0
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-5
     test variables:
-    - name: lwp_back@MetaData
+    - name: MetaData/lwp_back
     maxvalue: 0.05
     minvalue: 0.0
   passedBenchmark: 37605
@@ -58,7 +58,7 @@ observations:
 #---------------------------------------------------------------
   compareVariables:
     - reference:
-        name: lwp_back@TestReference
+        name: TestReference/lwp_back
       test:
-        name: lwp_back@MetaData
+        name: MetaData/lwp_back
       absTol: 1.0e-6

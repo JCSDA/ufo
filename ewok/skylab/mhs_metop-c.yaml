@@ -6,9 +6,11 @@ obs space:
   obsdataout:
     engine:
       type: H5File
-      overwrite: true
+      allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
-  simulated variables: [brightness_temperature]
+  simulated variables: [brightnessTemperature]
   channels: &mhs_metop-c_channels 1-5
 obs operator:
   name: CRTM
@@ -46,10 +48,10 @@ obs filters:
 # Useflag check
 - filter: Bounds Check
   filter variables:
-  - name: brightness_temperature
+  - name: brightnessTemperature
     channels: *mhs_metop-c_channels
   test variables:
-  - name: ChannelUseflagCheckRad@ObsFunction
+  - name: ObsFunction/ChannelUseflagCheckRad
     channels: *mhs_metop-c_channels
     options:
       channels: *mhs_metop-c_channels

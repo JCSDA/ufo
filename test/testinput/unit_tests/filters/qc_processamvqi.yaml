@@ -12,42 +12,42 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_1d_2020100106_noinv_awvqiODB_out.nc4
-    simulated variables: [wind_from_direction]
+    simulated variables: [windDirection]
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: temporary_input_QI_recursive_filter_function@MetaData
+    - name: MetaData/temporary_input_QI_recursive_filter_function
       type: float
-      source variable: QI_recursive_filter_function@MetaData
+      source variable: MetaData/qiRecursiveFilterFunction
   - filter: Process AMV QI
     number of generating apps: 4
     # Test file contains GOES-16 data with generating applications=[2,4,5,6]
-    # Percent_confidence_1 => 6 => QI_with_forecast
-    # Percent_confidence_2 => 5 => QI_without_forecast
+    # Percent_confidence_1 => 6 => qiWithForecast
+    # Percent_confidence_2 => 5 => qiWithoutForecast
     # QI_with_/without_forecast are also present in input data,
     # dummy_input_... have been added to input to compare with modified
     # QI_with/without_forecast variables.
-    # Percent_confidence_3 => 4 => QI_common
-    # Percent_confidence_4 => 2 => QI_weighted_mixture_exc_forecast_comparison
-    # QI_recursive_filter_function is unmodified from input data
+    # Percent_confidence_3 => 4 => qiCommon
+    # Percent_confidence_4 => 2 => qiWeightedMixtureWithoutForecast
+    # qiRecursiveFilterFunction is unmodified from input data
   compareVariables:
     - reference:
-        name: temporary_input_QI_recursive_filter_function@MetaData
+        name: MetaData/temporary_input_QI_recursive_filter_function
       test:
-        name: QI_recursive_filter_function@MetaData
+        name: MetaData/qiRecursiveFilterFunction
     - reference:
-        name: dummy_input_QI_with_forecast@TestReference
+        name: TestReference/dummy_input_QI_with_forecast
       test:
-        name: QI_with_forecast@MetaData
+        name: MetaData/qiWithForecast
     - reference:
-        name: dummy_input_QI_without_forecast@TestReference
+        name: TestReference/dummy_input_QI_without_forecast
       test:
-        name: QI_without_forecast@MetaData
+        name: MetaData/qiWithoutForecast
     - reference:
-        name: percent_confidence_3@MetaData
+        name: MetaData/windPercentConfidence3
       test:
-        name: QI_common@MetaData
+        name: MetaData/qiCommon
     - reference:
-        name: percent_confidence_4@MetaData
+        name: MetaData/windPercentConfidence4
       test:
-        name: QI_weighted_mixture_exc_forecast_comparison@MetaData
+        name: MetaData/qiWeightedMixtureWithoutForecast

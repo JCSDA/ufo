@@ -33,8 +33,8 @@ MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
 
   const oops::Variables &invars = parameters_.clwVariables.value();
   ASSERT(invars.size() == 2);
-  const Variable var0(invars[0] + "@HofX");
-  const Variable var1(invars[1] + "@HofX");
+  const Variable var0("HofX/" + invars[0]);
+  const Variable var1("HofX/" + invars[1]);
   allvars_ += var0;
   allvars_ += var1;
 }
@@ -73,14 +73,14 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars, "ObsValue");
-  ioda::ObsDataVector<float> sza(obsdb_, "sensor_zenith_angle", "MetaData");
+  ioda::ObsDataVector<float> sza(obsdb_, "sensorZenithAngle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_guess_out(obsdb_, "clws_guess", "Diagnostic", false);
   ioda::ObsDataVector<float> clw_obs_out(obsdb_, "clw_obs", "Diagnostic", false);
 
 //  H(x)
-  const Variable var0(invars[0] + "@HofX");
-  const Variable var1(invars[1] + "@HofX");
+  const Variable var0("HofX/" + invars[0]);
+  const Variable var1("HofX/" + invars[1]);
   std::vector<float> hofx0;
   data_.get(var0, hofx0);
   std::vector<float> hofx1;

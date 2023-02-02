@@ -31,22 +31,22 @@ class OceanDensityParameters : public VariableTransformParametersBase {
  public:
   /// Input salinity
   oops::Parameter<std::string> SalinityVariable{"ocean salinity variable",
-                                                "ocean_salinity", this};
+                                                "absoluteSalinity", this};
   oops::Parameter<std::string> SalinityGroup{"ocean salinity group",
                                              "ObsValue", this};
   /// Input temperature
   oops::Parameter<std::string> TemperatureVariable{"ocean temperature variable",
-                                                   "ocean_temperature", this};
+                                                   "waterTemperature", this};
   oops::Parameter<std::string> TemperatureGroup{"ocean temperature group",
                                                 "ObsValue", this};
   /// Input pressure
   oops::Parameter<std::string> PressureVariable{"ocean pressure variable",
-                                                "ocean_pressure", this};
+                                                "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
   /// Density variable name
   oops::Parameter<std::string> DensityVariable{"ocean density variable",
-                                               "ocean_density", this};
+                                               "waterDensity", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -58,14 +58,14 @@ class OceanDensityParameters : public VariableTransformParametersBase {
 ///  obs filters:
 ///  - filter: Variable Transforms
 ///    Transform: OceanDensity
-///    ocean pressure variable: ocean_pressure
+///    ocean pressure variable: waterPressure
 ///    ocean pressure group: DerivedObsValue
-///    ocean temperature variable: ocean_temperature
+///    ocean temperature variable: waterTemperature
 ///    ocean temperature group: ObsValue
-///    ocean salinity variable: ocean_salinity
+///    ocean salinity variable: absoluteSalinity
 ///    ocean salinity group: ObsValue
 ///
-/// will return density (kg/m^3) in a variable named (by default) "DerivedObsValue/ocean_density",
+/// will return density (kg/m^3) in a variable named (by default) "DerivedObsValue/waterDensity",
 /// given salinity (g/kg), temperature (deg.C) and pressure (dbar), as given by TEOS-10
 /// function gsw_rho_t_exact.
 ///

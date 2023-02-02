@@ -38,8 +38,8 @@ ModelBestFitPressure::ModelBestFitPressure(ioda::ObsSpace & obsdb, const Paramet
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVals
   allvars_ += parameters_.model_pressure;
-  allvars_ += Variable("eastward_wind@GeoVaLs");
-  allvars_ += Variable("northward_wind@GeoVaLs");
+  allvars_ += Variable("GeoVaLs/eastward_wind");
+  allvars_ += Variable("GeoVaLs/northward_wind");
 }
 
 // -----------------------------------------------------------------------------
@@ -58,9 +58,9 @@ ModelBestFitPressure::~ModelBestFitPressure() {
  *  obs filter:
  *  - filter: Model Best Fit Pressure
  *    observation pressure:
- *      name: air_pressure@MetaData
+ *      name: MetaData/pressure
  *    model pressure:
- *      name: air_pressure_levels_minus_one@GeoVaLs
+ *      name: GeoVaLs/air_pressure_levels_minus_one
  *    top pressure: 10000
  *    pressure band half-width: 10000
  *    upper vector diff: 4
@@ -94,11 +94,12 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   const std::string model_pressure_name = parameters_.model_pressure.value().variable();
   const std::string model_eastvec_name = "eastward_wind";
   const std::string model_northvec_name = "northward_wind";
-
+  const std::string obs_eastvec_name = "windEastward";
+  const std::string obs_northvec_name = "windNorthward";
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
   // Get number of vertical levels in GeoVaLs
-  const size_t num_level = data_.nlevs(Variable(model_eastvec_name + "@GeoVaLs"));
+  const size_t num_level = data_.nlevs(Variable("GeoVaLs/" + model_eastvec_name));
 
   std::vector<float> satwind_best_fit_press(nlocs, missing);
   std::vector<float> satwind_best_fit_eastward_wind;
@@ -114,19 +115,19 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
 
   // wind vector obs
   std::vector<float> obs_eastward(nlocs);
-  obsdb_.get_db("ObsValue", model_eastvec_name, obs_eastward);
+  obsdb_.get_db("ObsValue", obs_eastvec_name, obs_eastward);
   std::vector<float> obs_northward(nlocs);
-  obsdb_.get_db("ObsValue", model_northvec_name, obs_northward);
+  obsdb_.get_db("ObsValue", obs_northvec_name, obs_northward);
 
   // Get flags
   std::vector<int> u_flags(obsdb_.nlocs());
   std::vector<int> v_flags(obsdb_.nlocs());
-  if (obsdb_.has("QCFlags", model_eastvec_name) &&
-      obsdb_.has("QCFlags", model_northvec_name)) {
-    obsdb_.get_db("QCFlags", model_eastvec_name, u_flags);
-    obsdb_.get_db("QCFlags", model_northvec_name, v_flags);
+  if (obsdb_.has("QCFlags", obs_eastvec_name) &&
+      obsdb_.has("QCFlags", obs_northvec_name)) {
+    obsdb_.get_db("QCFlags", obs_eastvec_name, u_flags);
+    obsdb_.get_db("QCFlags", obs_northvec_name, v_flags);
   } else {
-    throw eckit::Exception("eastward_wind@QCFlags or northward_wind@QCFlags not initialised",
+    throw eckit::Exception("QCFlags/windEastward or QCFlags/windNorthward not initialised",
                            Here());
   }
 
@@ -261,13 +262,13 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
                       << " observations with poorly constrained bestfit pressure" << std::endl;
   }
   // write back flags and best-fit pressure/ winds
-  obsdb_.put_db("QCFlags", model_eastvec_name, u_flags);
-  obsdb_.put_db("QCFlags", model_northvec_name, v_flags);
-  obsdb_.put_db("DerivedValue", "model_bestfit_pressure", satwind_best_fit_press);
+  obsdb_.put_db("QCFlags", obs_eastvec_name, u_flags);
+  obsdb_.put_db("QCFlags", obs_northvec_name, v_flags);
+  obsdb_.put_db("DerivedValue", "pressureBestFit", satwind_best_fit_press);
   if (calculate_best_fit_winds) {
-    obsdb_.put_db("DerivedValue", "model_bestfit_eastward_wind",
+    obsdb_.put_db("DerivedValue", "windEastwardBestFit",
                   satwind_best_fit_eastward_wind);
-    obsdb_.put_db("DerivedValue", "model_bestfit_northward_wind",
+    obsdb_.put_db("DerivedValue", "windNorthwardBestFit",
                   satwind_best_fit_northward_wind);
   }
 }

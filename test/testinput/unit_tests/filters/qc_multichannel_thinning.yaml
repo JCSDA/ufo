@@ -14,7 +14,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out1.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: Gaussian Thinning
@@ -32,12 +32,12 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out2.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-3
   - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
@@ -55,12 +55,12 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out3.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-3
   - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
@@ -79,12 +79,12 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out4.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-3
   - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
@@ -105,16 +105,16 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out5.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: Domain Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-3
     where:
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: 61.0
       maxvalue: 64.0  # 75 out of 100 obs fall outside domain for channels 1-3
   - filter: Gaussian Thinning
@@ -136,16 +136,16 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out6.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-3
   - filter: Gaussian Thinning
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 4-6
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
     retain_only_if_all_filter_variables_are_valid: true  # default is false
@@ -167,22 +167,22 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_multichannelthinning_out7.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: 1-22
   obs filters:
   - filter: BlackList
     where: &Where
     - variable:
-        name: latitude@MetaData
+        name: MetaData/latitude
       minvalue: 61.0
       maxvalue: 64.0
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 1-4
   - filter: Gaussian Thinning
     where: *Where
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 4-6  # channel 4 has been blacklisted for 25 obs
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
     retain_only_if_all_filter_variables_are_valid: true  # default is false

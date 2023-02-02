@@ -71,6 +71,10 @@ class GNSSROOneDVarCheckParameters : public FilterParametersBase {
   /// from the solution bending angle, then the observation (not the whole
   /// profile) is rejected.
   oops::Parameter<float> y_test{"y_test", 5, this};
+
+  /// List of channels available for assimilation - this is used for vertical
+  /// heights in the case where the observations are read in as profiles.
+  oops::Parameter<std::string> channelList{"channels", "", this};
 };
 
 }  // namespace ufo

@@ -24,7 +24,7 @@ ObsFunctionScattering::ObsFunctionScattering(const eckit::LocalConfiguration)
   : invars_() {
   // empiracal formula is used to calculate AMSU-A scattering over ocean
   std::vector<int> channels{1, 2, 15};
-  invars_ += Variable("brightness_temperature@ObsValue", channels);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels);
 }
 
 // -----------------------------------------------------------------------------
@@ -37,9 +37,12 @@ void ObsFunctionScattering::compute(const ObsFilterData & input,
                                     ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = input.nlocs();
   std::vector<float> bt1, bt2, bt15;
-  input.get(Variable("brightness_temperature_1@ObsValue"), bt1);
-  input.get(Variable("brightness_temperature_2@ObsValue"), bt2);
-  input.get(Variable("brightness_temperature_15@ObsValue"), bt15);
+  std::vector<int> channels{1, 2, 15};
+
+  input.get(Variable("ObsValue/brightnessTemperature", channels)[0], bt1);
+  input.get(Variable("ObsValue/brightnessTemperature", channels)[1], bt2);
+  input.get(Variable("ObsValue/brightnessTemperature", channels)[2], bt15);
+
   for (size_t jj = 0; jj < nlocs; ++jj) {
     out[0][jj] = -113.2+(2.41-0.0049*bt1[jj])*bt1[jj]+0.454*bt2[jj]-bt15[jj];
     oops::Log::debug() << "Tb1, Tb2, Tb15: " << bt1[jj] << ", " << bt2[jj] << ", " << bt15[jj]

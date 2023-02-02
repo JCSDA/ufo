@@ -86,7 +86,7 @@ class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase 
 ///       # operator used to evaluate background errors
 ///       - name: BackgroundErrorVertInterp
 ///         # vertical coordinate of observation locations
-///         observation vertical coordinate: air_pressure
+///         observation vertical coordinate: pressure
 ///         # GeoVaL storing interpolation levels of background errors
 ///         vertical coordinate: background_error_air_pressure
 ///
@@ -101,12 +101,12 @@ class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase 
 ///       # operator used to evaluate background errors
 ///       - name: BackgroundErrorVertInterp
 ///         variables:
-///         - name: air_temperature
-///         - name: northward_wind
-///         - name: eastward_wind
-///         - name: relative_humidity
+///         - name: airTemperature
+///         - name: windNorthward
+///         - name: windEastward
+///         - name: relativeHumidity
 ///         # vertical coordinate of observation locations
-///         observation vertical coordinate: air_pressure
+///         observation vertical coordinate: pressure
 ///         # GeoVaL storing interpolation levels of background errors
 ///         vertical coordinate: background_error_air_pressure
 

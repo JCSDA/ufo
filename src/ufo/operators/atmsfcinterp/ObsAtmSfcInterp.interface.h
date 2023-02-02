@@ -36,8 +36,8 @@ extern "C" {
   ///   GeoVaLs required for the simulation of the variables \p operatorVars.
   ///
   /// Example: if the list of simulated variables in the ObsSpace is
-  /// [air_temperature, northward_wind, eastward_wind] and \p operatorVars is
-  /// [northward_wind, eastward_wind], then \p operatorVarIndices should be set to [1, 2].
+  /// [airTemperature, windNorthward, windEastward] and \p operatorVars is
+  /// [windNorthward, windEastward], then \p operatorVarIndices should be set to [1, 2].
 
   void ufo_atmsfcinterp_setup_f90(F90hop &, const eckit::Configuration &,
                                   const oops::Variables &operatorVars,

@@ -47,7 +47,7 @@ class ObsErrorModelHumidityParameters : public oops::Parameters {
 /// assigns observation error for specific humidity observations in two steps.
 /// The first step is to interpolate errors from GSI fix-file prepobs_errtable.txt
 /// to observation pressure with parameters and routines borrowed from
-/// ObsErrorModelStepwiseLinear@ObsFunction. The second step is to scale the errors
+/// ObsFunction/ObsErrorModelStepwiseLinear. The second step is to scale the errors
 /// with saturation specific humidity estimated from model fields because humidity
 /// errors from prepobs_errtable.txt are for relative humidity observations.
 /// Forecast temperature and pressure fields are required to estimate saturation
@@ -58,7 +58,7 @@ class ObsErrorModelHumidityParameters : public oops::Parameters {
 ///   used in a filter, please make sure "filter variables" only contains the
 ///   variable name for specific humidity.
 /// - Required parameters (xvar, xvals, and errors) and routines utilizing them are
-///   borrowed from ObsErrorModelStepwiseLinear@ObsFunction, so YAML configuration
+///   borrowed from ObsFunction/ObsErrorModelStepwiseLinear, so YAML configuration
 ///   for this function must also follow that of ObsErrorModelStepwiseLinear. One
 ///   modification is to allow size-1 lists of xvals and errors to accommodate the
 ///   situation of fixed input error.
@@ -68,14 +68,14 @@ class ObsErrorModelHumidityParameters : public oops::Parameters {
 /// ### example configurations for using this obs function in a filter: ###
 ///   - filter: Perform Action
 ///     filter variables:
-///     - name: specific_humidity
+///     - name: specificHumidity
 ///     action:
 ///       name: assign error
 ///       error function:
-///         name: ObsErrorModelHumidity@ObsFunction
+///         name: ObsFunction/ObsErrorModelHumidity
 ///         options:
 ///           xvar:
-///             name: MetaData/air_pressure
+///             name: MetaData/pressure
 ///           xvals: [85000, 50000, 25000]   #Pressure (Pa)
 ///           errors: [0.18, 0.19, 0.2]      #RH error
 ///           Method: UKMO

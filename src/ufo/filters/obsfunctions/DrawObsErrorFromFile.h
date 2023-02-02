@@ -9,6 +9,7 @@
 #define UFO_FILTERS_OBSFUNCTIONS_DRAWOBSERRORFROMFILE_H_
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -65,6 +66,10 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
   oops::OptionalParameter<Variable> normvariable{"normalization variable", this};
   /// Set a minimum value for the observation uncertainty (default to zero)
   oops::Parameter<float> minValue{"minimum value", 0, this};
+  /// List of channel numbers (then deriving an observation error per channel)
+  /// If this option is provided, the channel number is implicitly prepended to the list of
+  /// interpolation variables and matched exactly.
+  oops::OptionalParameter<std::set<int>> chlist{"channels", this};
 };
 
 
@@ -83,22 +88,22 @@ class DrawObsErrorFromFileParameters : public oops::Parameters {
 /// \code{.yaml}
 ///     - Filter: Perform Action
 ///       filter variables:
-///       - name: air_temperature
+///       - name: airTemperature
 ///         channels: &all_channels 1-3
 ///       action:
 ///         name: assign error
 ///         error function:
-///           name: DrawObsErrorFromFile@ObsFunction
+///           name: ObsFunction/DrawObsErrorFromFile
 ///           channels: *all_channels
 ///           options:
 ///             file: <filepath>
 ///             channels: *all_channels
 ///             interpolation:
-///             - name: satellite_id@MetaData
+///             - name: MetaData/satelliteIdentifier
 ///               method: exact
-///             - name: processing_center@MetaData
+///             - name: MetaData/processingCenter
 ///               method: exact
-///             - name: air_pressure@MetaData
+///             - name: MetaData/pressure
 ///               method: linear
 /// \endcode
 ///
@@ -114,8 +119,9 @@ class DrawObsErrorFromFile : public ObsFunctionBase<float> {
  private:
   ufo::Variables invars_;
   std::unique_ptr<DrawValueFromFile<float>> drawValueFromFile_;
-  std::unique_ptr<DrawObsErrorFromFileParameters> options_;
+  DrawObsErrorFromFileParameters options_;
   bool multiplicative_ = false;
+  std::vector<int> channels_;
 };
 
 }  // namespace ufo

@@ -19,7 +19,7 @@ observations:
 #      engine:
 #        type: H5File
 #        obsfile: Data/avhrr_metop-a_obs_2020110112_qc_filters_out.nc4
-    simulated variables: [brightness_temperature]
+    simulated variables: [brightnessTemperature]
     channels: &all_channels 3,4,5
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/avhrr_metop-a_geoval_2020110112_m.nc4
@@ -45,37 +45,37 @@ observations:
 #  Wavenumber Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: 3
     where:
     - variable:
-        name: solar_zenith_angle@MetaData
+        name: MetaData/solarZenithAngle
       maxvalue: 88.9999
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       minvalue: 1.0e-12
     action:
       name: reject
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorWavenumIR@ObsFunction
+        name: ObsFunction/ObsErrorFactorWavenumIR
         channels: *all_channels
         options:
           channels: *all_channels
 #  Topography Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorTopoRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTopoRad
         channels: *all_channels
         options:
           channels: *all_channels
@@ -83,7 +83,7 @@ observations:
 #  Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     minvalue: 0.00001
     maxvalue: 1000.0
@@ -92,22 +92,22 @@ observations:
 #  Transmittance Top Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorTransmitTopRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorTransmitTopRad
         channels: *all_channels
         options:
           channels: *all_channels
 #  Cloud Detection Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: CloudDetectMinResidualAVHRR@ObsFunction
+    - name: ObsFunction/CloudDetectMinResidualAVHRR
       channels: *all_channels
       options:
         channels: *all_channels
@@ -120,10 +120,10 @@ observations:
 #  NSST Retrieval Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: NearSSTRetCheckIR@ObsFunction
+    - name: ObsFunction/NearSSTRetCheckIR
       channels: *all_channels
       options:
         channels: *all_channels
@@ -136,12 +136,12 @@ observations:
 #  Surface Jacobians Check
   - filter: BlackList
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorSurfJacobianRad@ObsFunction
+        name: ObsFunction/ObsErrorFactorSurfJacobianRad
         channels: *all_channels
         options:
           channels: *all_channels
@@ -151,19 +151,19 @@ observations:
 #  Gross check
   - filter: Background Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     function absolute threshold:
-    - name: ObsErrorBoundIR@ObsFunction
+    - name: ObsFunction/ObsErrorBoundIR
       channels: *all_channels
       options:
         channels: *all_channels
         obserr_bound_latitude:
-          name: ObsErrorFactorLatRad@ObsFunction
+          name: ObsFunction/ObsErrorFactorLatRad
           options:
             latitude_parameters: [25.0, 0.5, 0.04, 1.0]
         obserr_bound_transmittop:
-          name: ObsErrorFactorTransmitTopRad@ObsFunction
+          name: ObsFunction/ObsErrorFactorTransmitTopRad
           channels: *all_channels
           options:
             channels: *all_channels
@@ -173,10 +173,10 @@ observations:
 #  Useflag Check
   - filter: Bounds Check
     filter variables:
-    - name: brightness_temperature
+    - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: ChannelUseflagCheckRad@ObsFunction
+    - name: ObsFunction/ChannelUseflagCheckRad
       channels: *all_channels
       options:
         channels: *all_channels

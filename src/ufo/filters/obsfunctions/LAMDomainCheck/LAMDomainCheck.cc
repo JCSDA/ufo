@@ -26,9 +26,9 @@ LAMDomainCheck::LAMDomainCheck(const eckit::LocalConfiguration & conf)
   options_.deserialize(conf);
 
   // We must know the latitude of each observation
-  invars_ += Variable("latitude@MetaData");
+  invars_ += Variable("MetaData/latitude");
   // We must know the longitude of each observation
-  invars_ += Variable("longitude@MetaData");
+  invars_ += Variable("MetaData/longitude");
 }
 
 // -----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ LAMDomainCheck::~LAMDomainCheck() {}
 * * "gnomonic_ed" - the ESG grid used by FV3-LAM
 *
 * The option 'save: true' will save the computed value to the output IODA file as
-* 'LAMDomainCheck@DerivedValue' (default is false).
+* 'DerivedValue/LAMDomainCheck' (default is false).
 *
 * The additional parameters to be defined in the options section
 * of the obs function YAML will depend on the choice of map_projection used.
@@ -85,8 +85,8 @@ void LAMDomainCheck::compute(const ObsFilterData & in,
   // Retrieve the latitude and longitude.
   std::vector<float> latitude;
   std::vector<float> longitude;
-  in.get(Variable("latitude@MetaData"), latitude);
-  in.get(Variable("longitude@MetaData"), longitude);
+  in.get(Variable("MetaData/latitude"), latitude);
+  in.get(Variable("MetaData/longitude"), longitude);
 
   // get options based off the name of the map projection
   if (options_.mapproj.value() == "gnomonic_ed") {
