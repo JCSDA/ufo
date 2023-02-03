@@ -58,9 +58,13 @@ void assignValue(const std::string &valueAsString,
                  const std::vector<bool> &apply,
                  ioda::ObsDataVector<VariableType> &values) {
   VariableType newValue;
-  if (!boost::conversion::try_lexical_convert(valueAsString, newValue))
-    throw eckit::BadCast("Value '" + valueAsString +
-                         "' could not be converted to the required type", Here());
+  if (valueAsString == "missing") {
+    newValue = util::missingValue(newValue);
+  } else {
+    if (!boost::conversion::try_lexical_convert(valueAsString, newValue))
+      throw eckit::BadCast("Value '" + valueAsString +
+                           "' could not be converted to the required type", Here());
+  }
 
   for (size_t ival = 0; ival < values.nvars(); ++ival) {
     std::vector<VariableType> &currentValues = values[ival];
