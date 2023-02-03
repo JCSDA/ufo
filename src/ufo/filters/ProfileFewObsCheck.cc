@@ -36,6 +36,10 @@ ProfileFewObsCheck::ProfileFewObsCheck(
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileFewObsCheck constructor" << std::endl;
+  if ((!parameters_.threshold.value() && !parameters_.fraction.value()) ||
+      (parameters_.threshold.value() && parameters_.fraction.value())) {
+      throw eckit::BadParameter("Either threshold or fraction options must be specified.", Here());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -60,6 +64,8 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
   // to get the number of simulated variables.
   const size_t nActualVars = filtervars.nvars() / nchans;
 
+  bool belowThreshold = false;
+
   // Get the record numbers from the observation data.  These will be used to identify
   // which observations belong to which profile.
   const std::vector<size_t> & record_numbers = obsdb_.recidx_all_recnums();
@@ -75,20 +81,34 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
       const std::vector<size_t> & obs_numbers = obsdb_.recidx_vector(iProfile);
 
       int numValid = 0;
+      int numTotal = 0;
       // For each channel (vertical level) start counting the number of valid observations
       for (size_t ichan=0; ichan < nchans; ++ichan) {
         const size_t iFilterVar = ivar * nchans + ichan;
         const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
 
         // Count the number of valid observations in this profile
-        for (size_t jobs : obs_numbers)
-          if (apply[jobs] && (*flags_)[iVar][jobs] == QCflags::pass)
-            numValid++;
+        for (size_t jobs : obs_numbers) {
+          if (apply[jobs]) {
+            numTotal++;
+            if ((*flags_)[iVar][jobs] == QCflags::pass)
+              numValid++;
+          }
+        }
+      }
+
+      if (parameters_.threshold.value()) {
+        belowThreshold = (numValid < parameters_.threshold.value().value());
+      } else {
+        belowThreshold = (static_cast<float>(numValid) / static_cast<float>(std::max(numTotal, 1)))
+                         < parameters_.fraction.value().value();
       }
 
       oops::Log::debug() << "For var " << ivar << ", profile " << iProfile
-                         << " there are " << numValid << " valid observations " << std::endl;
-      if (numValid < parameters_.threshold.value()) {
+                         << " there are " << numValid << "/" << numTotal << " valid observations"
+                         << " belowThreshold = " << (belowThreshold ? "true" : "false")
+                         << std::endl;
+      if (belowThreshold) {
         // Reject profiles which don't contain sufficient observations
         for (size_t ichan=0; ichan < nchans; ++ichan) {
           // Note that this assumes that all the channels for each variable are
