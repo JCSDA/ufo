@@ -207,6 +207,10 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
                                                     "Name of background error group 2",
                                                     this};
 
+  /// Set this option to \c true to make the filter use all used and rejected data in the
+  /// PGE calculation. Default  \c false
+  oops::Parameter<bool> useAllObservations{"use_all_observations", false, this};
+
   /// @}
 };
 
