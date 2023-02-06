@@ -82,6 +82,12 @@ class SetFlagParameters : public FilterActionParametersBase {
   ///   (missing observed value, rejection at the pre-processing stage or inability to compute the
   ///   model equivalent).
   oops::Parameter<IgnoredObservations> ignore{"ignore", IgnoredObservations::NONE, this};
+
+  /// If true, this will set/unset diagnostic flags for the observation report as
+  /// well as the filter variables. The observation report flag is set at a particular
+  /// location if at least one filter variable has been flagged at that location.
+  oops::Parameter<bool> setObservationReportFlags{"set observation report flags",
+      false, this};
 };
 
 // -----------------------------------------------------------------------------
