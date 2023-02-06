@@ -196,11 +196,7 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
       }
 
       // if dewpoint temperature is reported (most stations)
-      if (dewPoint > 1.0) {
-        // Cycle if observation are not valid
-        if (temperature == missingValueFloat ||
-            pressure <= 1.0) continue;
-
+      if (dewPoint > 1.0 && temperature != missingValueFloat && pressure > 1.0) {
         // calculate saturated specific humidity wrt water and ice
         evaluateSatSpecHumidity(dewPoint, temperature);
 
