@@ -73,16 +73,16 @@ void SetFlag<value>::apply(const Variables &vars,
 
   const size_t nlocs = data.nlocs();
   std::vector<DiagnosticFlag> diagnosticFlags(nlocs);
-  std::unique_ptr<std::vector<DiagnosticFlag>> diagnosticFlagsObsRep;
+  std::vector<DiagnosticFlag> diagnosticFlagsObsRep;
 
   if (parameters_.setObservationReportFlags) {
     if (!data.obsspace().has(group, "observationReport"))
       throw eckit::UserError("Variable '" + group + "/observationReport does not exist yet. "
                              "It needs to be set up with the 'Create Diagnostic Flags' filter "
                              "prior to using the 'set' or 'unset' action.");
-    diagnosticFlagsObsRep.reset(new std::vector<DiagnosticFlag>(nlocs));
+    diagnosticFlagsObsRep.resize(nlocs);
     // Retrieve the current values of the diagnostic flag attached to the observation report.
-    data.get(ufo::Variable(group + "/observationReport"), *diagnosticFlagsObsRep);
+    data.get(ufo::Variable(group + "/observationReport"), diagnosticFlagsObsRep);
   }
 
   // Loop over all filter variables
@@ -101,8 +101,8 @@ void SetFlag<value>::apply(const Variables &vars,
       // the action hasn't been told to skip it
       if (flagged[ifiltervar][iobs] && !isIgnored(filterVarQcFlags[iobs])) {
         diagnosticFlags[iobs] = value;
-        if (parameters_.setObservationReportFlags && !(*diagnosticFlagsObsRep)[iobs])
-          (*diagnosticFlagsObsRep)[iobs] = true;
+        if (parameters_.setObservationReportFlags && !diagnosticFlagsObsRep[iobs])
+          diagnosticFlagsObsRep[iobs] = true;
       }
     }
     // Save the modified values of the diagnostic flag to the ObsSpace
@@ -110,7 +110,7 @@ void SetFlag<value>::apply(const Variables &vars,
   }
 
   if (parameters_.setObservationReportFlags)
-    data.obsspace().put_db(group, "observationReport", *diagnosticFlagsObsRep);
+    data.obsspace().put_db(group, "observationReport", diagnosticFlagsObsRep);
 }
 
 // -----------------------------------------------------------------------------
