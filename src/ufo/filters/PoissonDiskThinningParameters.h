@@ -23,7 +23,7 @@
 namespace ufo {
 
 enum class ExclusionVolumeShape {
-  CYLINDER, ELLIPSOID
+  CYLINDER, ELLIPSOID, BOX
 };
 
 struct ExclusionVolumeShapeParameterTraitsHelper {
@@ -31,7 +31,8 @@ struct ExclusionVolumeShapeParameterTraitsHelper {
   static constexpr char enumTypeName[] = "ExclusionVolumeShape";
   static constexpr util::NamedEnumerator<ExclusionVolumeShape> namedValues[] = {
     { ExclusionVolumeShape::CYLINDER, "cylinder" },
-    { ExclusionVolumeShape::ELLIPSOID, "ellipsoid" }
+    { ExclusionVolumeShape::ELLIPSOID, "ellipsoid" },
+    { ExclusionVolumeShape::BOX, "box" }
   };
 };
 
@@ -92,6 +93,14 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   oops::OptionalParameter<util::ScalarOrMap<Priority, float>> minHorizontalSpacing{
     "min_horizontal_spacing", this};
 
+  /// Latitude distance in degrees. Must be used with volumeshape \c box.
+  oops::OptionalParameter<util::ScalarOrMap<Priority, float>> minLatitudeSpacing{
+    "min_latitude_spacing", this};
+
+  /// Longitude distance in degrees. Must be used with volumeshape \c box.
+  oops::OptionalParameter<util::ScalarOrMap<Priority, float>> minLongitudeSpacing{
+    "min_longitude_spacing", this};
+
   /// Size of the exclusion volume in the vertical direction (in Pa).
   ///
   /// Like min_horizontal_spacing, this can be either a constant or a map.
@@ -119,6 +128,13 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   ///   the following condition is met:
   ///   * geodesic_distance((lat, lon), (lat', lon'))^2 / min_horizontal_spacing^2 +
   ///     (p - p')^2 / min_vertical_spacing^2 + (t - t')^2 / min_time_spacing^2 < 1.
+  ///  - \c box: the exclusion volume of an observation taken at latitude lat, longitude lon,
+  ///   pressure p and time t is the set of all locations (lat', lon', p', t') for which the
+  ///   following conditions are met:
+  ///   * |lat - lat'| < minLatitudeSpacing
+  ///   * |lon - lon'| < minLongitudeSpacing
+  ///   * |p - p'| < min_vertical_spacing
+  ///   * |t - t'| < min_time_spacing.
   oops::Parameter<ExclusionVolumeShape> exclusionVolumeShape{"exclusion_volume_shape",
                                                              ExclusionVolumeShape::CYLINDER, this};
 
