@@ -8,6 +8,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_surface.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "dateTime"
+        sort order: "descending"
     simulated variables: [dewPointTemperatureAt2M, airTemperatureAt2M, surfacePressure]
   obs filters:
   - filter: Variable Transforms
@@ -23,4 +27,58 @@ observations:
         name: TestReference/relativeHumidity
       test:
         name: DerivedObsValue/relativeHumidityAt2M
+      relTol: 1.0e-5
+- obs space:
+    name: Relative humidity calculation, upper-air variables
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_upperair.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [dewPointTemperature, airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMO
+    AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    dew point temperature variable: "dewPointTemperature"
+  compareVariables:
+    - reference:
+        name: TestReference/relativeHumidity
+      test:
+        name: DerivedObsValue/relativeHumidity
+      relTol: 1.0e-5
+- obs space:
+    name: Relative humidity calculation, RH initially missing
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conversion_td2Rh_missing_rh.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "dateTime"
+        sort order: "descending"
+    simulated variables: [dewPointTemperature, airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: RelativeHumidity
+    Method: UKMO
+    AllowSuperSaturation: true
+    pressure group variable: "MetaData"
+    pressure variable: "pressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    dew point temperature variable: "dewPointTemperature"
+  compareVariables:
+    - reference:
+        name: TestReference/relativeHumidity
+      test:
+        name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5
