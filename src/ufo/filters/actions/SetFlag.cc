@@ -51,6 +51,12 @@ void SetFlag<value>::apply(const Variables &vars,
                            int,
                            ioda::ObsDataVector<int> &qcFlags,
                            ioda::ObsDataVector<float> &) const {
+  if (parameters_.setFlagsToObservationReport && !parameters_.setObservationReportFlags) {
+    throw eckit::UserError
+      ("The option 'set variable flags to observation report' cannot be set to true if "
+       "'set observation report flags' is set to false.", Here());
+  }
+
   const std::string group = "DiagnosticFlags/" + parameters_.flag.value();
 
   typedef bool (*Predicate)(int);
@@ -109,8 +115,15 @@ void SetFlag<value>::apply(const Variables &vars,
     data.obsspace().put_db(group, variableName, diagnosticFlags);
   }
 
-  if (parameters_.setObservationReportFlags)
+  if (parameters_.setObservationReportFlags) {
     data.obsspace().put_db(group, "observationReport", diagnosticFlagsObsRep);
+    if (parameters_.setFlagsToObservationReport) {
+      for (size_t ifiltervar = 0, nvars = vars.nvars(); ifiltervar < nvars; ++ifiltervar) {
+        const std::string variableName = vars.variable(ifiltervar).variable();
+        data.obsspace().put_db(group, variableName, diagnosticFlagsObsRep);
+      }
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------

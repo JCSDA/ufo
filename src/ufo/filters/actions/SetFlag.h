@@ -88,6 +88,12 @@ class SetFlagParameters : public FilterActionParametersBase {
   /// location if at least one filter variable has been flagged at that location.
   oops::Parameter<bool> setObservationReportFlags{"set observation report flags",
       false, this};
+
+  /// If true, set all filter variable diagnostic flags to the value
+  /// of the observation report diagnostic flag. This option can only be used if
+  /// `set observation report flags` is set to true.
+  oops::Parameter<bool> setFlagsToObservationReport
+    {"set variable flags to observation report", false, this};
 };
 
 // -----------------------------------------------------------------------------
