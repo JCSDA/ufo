@@ -69,6 +69,7 @@ namespace ufo {
 /// Options taken by the `set` or `unset` action.
 class SetFlagParameters : public FilterActionParametersBase {
   OOPS_CONCRETE_PARAMETERS(SetFlagParameters, FilterActionParametersBase);
+
  public:
   /// Name of the diagnostic flag to set or unset.
   oops::RequiredParameter<std::string> flag{"flag", this};
