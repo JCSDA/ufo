@@ -33,7 +33,9 @@ class ProfileFewObsCheckParameters : public FilterParametersBase {
  public:
   /// The filter will flag profiles which contain fewer than `threshold` number
   /// of observations
-  oops::RequiredParameter<int> threshold{"threshold", this, {oops::minConstraint(0)}};
+  oops::OptionalParameter<int> threshold{"threshold", this, {oops::minConstraint(0)}};
+  oops::OptionalParameter<float> fraction{"fraction", this,
+    {oops::minConstraint<float>(0), oops::maxConstraint<float>(1)}};
 };
 
 /// ProfileFewObsCheck: Check the number of observations in a profile
