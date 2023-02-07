@@ -36,6 +36,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   const double missing = util::missingValue(missing);
   const Predictors & predictors = biascoeffs.predictors();
   const std::size_t npreds = predictors.size();
+
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
     predictors[p]->compute(odb_, geovals, ydiags, biascoeffs, predData[p]);
@@ -47,8 +48,8 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   ASSERT(correctedVars.channels().empty() ||
          correctedVars.variables().size() == correctedVars.channels().size());
 
-  const std::size_t nlocs  = ybias.nlocs();
-  const std::size_t nvars  = ybias.nvars();
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t nvars  = correctedVars.variables().size();
 
   std::vector<int> chidxBC;
   const std::vector<int> & chNoBC = biascoeffs.chlistNoBC();
@@ -57,6 +58,20 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
     for (std::size_t it = 0; it < chNoBC.size(); ++it) {
       std::size_t jvar = chNoBC[it] - 1;
       chidxBC[jvar] = 0;
+    }
+  }
+
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    double wpred = 1.0;
+    if (chNoBC.size() > 0) {
+      if (chidxBC[jvar] == 0) wpred = 0.0;
+    }
+    for (std::size_t jp = 0; jp < npreds; ++jp) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        if (predData[jp][jl*nvars+jvar] != missing) {
+          predData[jp][jl*nvars+jvar] *= wpred;
+        }
+      }
     }
   }
 
@@ -76,11 +91,6 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   std::vector<double> biasTerm(nlocs);
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    double wpred = 1.0;
-    if (chNoBC.size() > 0) {
-      if (chidxBC[jvar] == 0) wpred = 0.0;
-    }
-
     std::string predictorSuffix;
     if (correctedVars.channels().empty())
       predictorSuffix = correctedVars[jvar];
@@ -92,7 +102,6 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
       const double beta = biascoeffs(jp, jvar);
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
         if (predData[jp][jl*nvars+jvar] != missing) {
-          predData[jp][jl*nvars+jvar] *= wpred;
           biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
           ybias[jl*nvars+jvar] += biasTerm[jl];
         }
