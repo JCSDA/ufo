@@ -32,6 +32,8 @@ LinearObsBiasOperator::LinearObsBiasOperator(ioda::ObsSpace & odb)
 void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                           ObsDiagnostics & ydiags) {
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory starts." << std::endl;
+
+  const double missing = util::missingValue(missing);
   const std::vector<std::shared_ptr<const PredictorBase>> variablePredictors =
       bias.variablePredictors();
   const std::size_t npreds = variablePredictors.size();
@@ -39,6 +41,39 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
   predData_.resize(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
     variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
+  }
+
+  const oops::Variables &correctedVars = bias.correctedVars();
+  // At present we can label predictors with either the channel number or the variable name, but not
+  // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
+  ASSERT(correctedVars.channels().empty() ||
+         correctedVars.variables().size() == correctedVars.channels().size());
+
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t nvars  = correctedVars.variables().size();
+
+  std::vector<int> chidxBC;
+  const std::vector<int> & chNoBC = bias.chlistNoBC();
+  if (chNoBC.size() > 0) {
+    chidxBC.resize(nvars, 1);
+    for (std::size_t it = 0; it < chNoBC.size(); ++it) {
+      std::size_t jvar = chNoBC[it] - 1;
+      chidxBC[jvar] = 0;
+    }
+  }
+
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    double wpred = 1.0;
+    if (chNoBC.size() > 0) {
+      if (chidxBC[jvar] == 0) wpred = 0.0;
+    }
+    for (std::size_t jp = 0; jp < npreds; ++jp) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        if (predData_[jp][jl*nvars+jvar] != missing) {
+          predData_[jp][jl*nvars+jvar] *= wpred;
+        }
+      }
+    }
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory done." << std::endl;
