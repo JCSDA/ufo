@@ -8,6 +8,9 @@
 #ifndef UFO_OPERATORS_OASIM_OBSRADIANCEOASIMPARAMETERS_H_
 #define UFO_OPERATORS_OASIM_OBSRADIANCEOASIMPARAMETERS_H_
 
+#include <string>
+#include <vector>
+
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
