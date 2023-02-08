@@ -104,3 +104,70 @@ observations:
     flags:
     - name: FlagA
   expectExceptionWithMessage: Filter variable 'variable3' is not an observed variable
+
+# Tests setting the observationReport flag and no other flags
+- obs space:
+    name: Test data 4
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables: []
+    create observation report flags: true
+    flags:
+    - name: FlagA
+    - name: FlagB
+      initial value: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/observationReport
+    reference:
+      name: TestReference/trues
+  expectVariablesNotToExist:
+  - name: DiagnosticFlags/FlagA/variable1
+  - name: DiagnosticFlags/FlagB/variable1
+
+# Tests setting flags for the observation report and variable1
+- obs space:
+    name: Test data 5
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    filter variables: [variable1]
+    create observation report flags: true
+    flags:
+    - name: FlagA
+    - name: FlagB
+      initial value: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/observationReport
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/variable1
+    reference:
+      name: TestReference/trues
+  expectVariablesNotToExist:
+  - name: DiagnosticFlags/FlagA/variable2
+  - name: DiagnosticFlags/FlagB/variable2
+
