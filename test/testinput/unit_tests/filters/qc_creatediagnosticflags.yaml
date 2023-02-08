@@ -136,7 +136,7 @@ observations:
 
 # Tests setting flags for the observation report and variable1
 - obs space:
-    name: Test data 4
+    name: Test data 5
     obsdatain:
       engine:
         type: H5File
