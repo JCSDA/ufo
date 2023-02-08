@@ -111,8 +111,11 @@ void SetFlag<value>::apply(const Variables &vars,
           diagnosticFlagsObsRep[iobs] = true;
       }
     }
-    // Save the modified values of the diagnostic flag to the ObsSpace
-    data.obsspace().put_db(group, variableName, diagnosticFlags);
+    // Save the modified values of the diagnostic flag to the ObsSpace.
+    // Do not do this if the flag will later be set to the value of the observation report
+    // diagnostic flag.
+    if (!parameters_.setFlagsToObservationReport)
+      data.obsspace().put_db(group, variableName, diagnosticFlags);
   }
 
   if (parameters_.setObservationReportFlags) {
