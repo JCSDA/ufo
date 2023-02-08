@@ -69,6 +69,7 @@ namespace ufo {
 /// Options taken by the `set` or `unset` action.
 class SetFlagParameters : public FilterActionParametersBase {
   OOPS_CONCRETE_PARAMETERS(SetFlagParameters, FilterActionParametersBase);
+
  public:
   /// Name of the diagnostic flag to set or unset.
   oops::RequiredParameter<std::string> flag{"flag", this};
@@ -82,6 +83,18 @@ class SetFlagParameters : public FilterActionParametersBase {
   ///   (missing observed value, rejection at the pre-processing stage or inability to compute the
   ///   model equivalent).
   oops::Parameter<IgnoredObservations> ignore{"ignore", IgnoredObservations::NONE, this};
+
+  /// If true, this will set/unset diagnostic flags for the observation report as
+  /// well as the filter variables. The observation report flag is set at a particular
+  /// location if at least one filter variable has been flagged at that location.
+  oops::Parameter<bool> setObservationReportFlags{"set observation report flags",
+      false, this};
+
+  /// If true, set all filter variable diagnostic flags to the value
+  /// of the observation report diagnostic flag. This option can only be used if
+  /// `set observation report flags` is set to true.
+  oops::Parameter<bool> setFlagsToObservationReport
+    {"set variable flags to observation report", false, this};
 };
 
 // -----------------------------------------------------------------------------

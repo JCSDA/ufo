@@ -68,21 +68,15 @@ void CreateDiagnosticFlags::doFilter() const {
   // Loop over the names of flags we've been asked to create.
   for (const DiagnosticFlagParameters &params : parameters_.flags.value()) {
     const std::string &flagName = params.name;
-    const std::string groupName = "DiagnosticFlags/" + flagName;
     // Loop over observed variables.
     for (size_t jv = 0; jv < filterVars.size(); ++jv) {
       const std::string &varName = filterVars[jv];
-      bool createOrReinitializeVar = true;
-      if (obsdb_.has("DiagnosticFlags/" + flagName, varName)) {
-        if (!params.forceReinitialization)
-          createOrReinitializeVar = false;
-      }
-      if (createOrReinitializeVar) {
-        // We need to create or reinitialize the Boolean variable corresponding to the
-        // current flag and observed variable.
-        obsdb_.put_db(groupName, varName,
-                      std::vector<DiagnosticFlag>(obsdb_.nlocs(), params.initialValue));
-      }
+      createFlag(flagName, varName, params.forceReinitialization, params.initialValue);
+    }
+    // Create observation report flags if required.
+    if (parameters_.observationReportFlags) {
+      const std::string varName = "observationReport";
+      createFlag(flagName, varName, params.forceReinitialization, params.initialValue);
     }
   }
 
@@ -93,6 +87,24 @@ void CreateDiagnosticFlags::doFilter() const {
 
 void CreateDiagnosticFlags::print(std::ostream & os) const {
   os << "Create Diagnostic Flags: config = " << parameters_ << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+void CreateDiagnosticFlags::createFlag(const std::string & flagName, const std::string & varName,
+                                       bool forceReinitialization, bool initialValue) const {
+  bool createOrReinitializeVar = true;
+  if (obsdb_.has("DiagnosticFlags/" + flagName, varName)) {
+    if (!forceReinitialization)
+      createOrReinitializeVar = false;
+  }
+  if (createOrReinitializeVar) {
+    const std::string groupName = "DiagnosticFlags/" + flagName;
+    // We need to create or reinitialize the Boolean variable corresponding to the
+    // current flag and observed variable.
+    obsdb_.put_db(groupName, varName,
+                  std::vector<DiagnosticFlag>(obsdb_.nlocs(), initialValue));
+  }
 }
 
 // -----------------------------------------------------------------------------
