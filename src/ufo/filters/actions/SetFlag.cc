@@ -107,8 +107,8 @@ void SetFlag<value>::apply(const Variables &vars,
       // the action hasn't been told to skip it
       if (flagged[ifiltervar][iobs] && !isIgnored(filterVarQcFlags[iobs])) {
         diagnosticFlags[iobs] = value;
-        if (parameters_.setObservationReportFlags && !diagnosticFlagsObsRep[iobs])
-          diagnosticFlagsObsRep[iobs] = true;
+        if (parameters_.setObservationReportFlags && diagnosticFlagsObsRep[iobs] != value)
+          diagnosticFlagsObsRep[iobs] = value;
       }
     }
     // Save the modified values of the diagnostic flag to the ObsSpace.

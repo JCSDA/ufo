@@ -691,6 +691,53 @@ observations:
     reference:
       name: TestReference/bool_variable_11111
 
+# Test "unset" with the observationReport flag
+- obs space:
+    name: "Test data for 'unset' observationReport"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs filters:
+  # reject all observations (this should have no effect on the behaviour of subsequent filters)
+  - filter: RejectList
+  # Must create the flag
+  - filter: Create Diagnostic Flags
+    filter variables: []
+    create observation report flags: true
+    flags:
+    - name: FlagA
+      initial value: false
+  # set the diagnostic flag FlagA everywhere
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      set observation report flags: true
+  # unset the diagnostic flag FlagA for the observation report given latitude >= 0
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: 0
+    filter variables: [airTemperature]
+    # The observation report flag is set to false whenever any of the individual
+    # filter variables' flags are set to false.
+    action:
+      name: unset
+      flag: FlagA
+      set observation report flags: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+  - test:
+      name: DiagnosticFlags/FlagA/airTemperature
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+
 # Test "flag original and averaged profiles"
 # Grouping into records according to MetaData/intvar3 produces two records.
 # The ObsSpace extension produces 71 new locations per record, so there are
