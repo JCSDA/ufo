@@ -46,14 +46,11 @@ type(fckit_configuration), intent(in)     :: f_conf
 
 character(len=*), parameter :: myname_="ufo_oasim_simobs"
 character(max_string) :: err_msg
-character(len=255) :: COEFFICIENT_PATH
 character(len=:), allocatable :: str
 
 !Path to coefficient files                                                                                                       
 call f_conf%get_or_die("CoefficientPath",str)
-COEFFICIENT_PATH = str
-
-call self%oasim_%create(COEFFICIENT_PATH)
+call self%oasim_%create(str)
 
 end subroutine ufo_oasim_setup
 
