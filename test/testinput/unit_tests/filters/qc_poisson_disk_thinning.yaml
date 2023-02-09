@@ -133,6 +133,56 @@ observations:
   passedBenchmark: 34
   passedObservationsBenchmark: *referencePassedObsIds
 - obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_poisson_disk_thinning_out1.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: airTemperature
+    where:
+    - variable:
+        name: MetaData/superObservation
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    min_latitude_spacing: { "0": 50, "1": 40 }
+    min_longitude_spacing: { "0": 50, "1": 40 }
+    exclusion_volume_shape: box
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: MetaData/scan_index
+    priority_variable:
+      name: MetaData/thinningPriority
+  passedBenchmark: 20
+  passedObservationsBenchmark:
+      - 2500
+      - 2501
+      - 2502
+      - 2507
+      - 2509
+      - 2514
+      - 3333
+      - 3334
+      - 3335
+      - 3336
+      - 3712
+      - 7500
+      - 7501
+      - 7503
+      - 7504
+      - 7506
+      - 7511
+      - 7513
+      - 7514
+      - 7884
+- obs space:
     name: Ocean Profile, sort vertical descending (bottom to surface)
     obsdatain:
       engine:

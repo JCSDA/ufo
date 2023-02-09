@@ -101,6 +101,13 @@ else( ${geos-aero_FOUND} )
     message(STATUS "GEOS-AERO NOT FOUND: Excluding  AOD operator from GEOS")
 endif( ${geos-aero_FOUND} )
 
+# OASIM
+find_package( oasim QUIET )
+if( ${oasim_FOUND} )
+    message(STATUS "OASIM FOUND; Including Ocean Atmosphere Spectral Irradiance Model")
+else( ${oasim_FOUND} )
+    message(STATUS "OASIM NOT FOUND: Excluding Ocean Atmosphere Spectral Irradiance Model")
+endif( ${oasim_FOUND} )
 ################################################################################
 # Sources
 ################################################################################
