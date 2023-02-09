@@ -41,7 +41,7 @@ InterChannelConsistencyCheck::InterChannelConsistencyCheck(const eckit::LocalCon
 
   // TODO(EL) the following two lines will be removed when the revised filter behavior is in place
   // Include required variables from ObsDiag (note: included here to trigger posterFilter)
-  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  // invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
 }
 
 // -----------------------------------------------------------------------------

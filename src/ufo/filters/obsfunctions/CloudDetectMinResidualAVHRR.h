@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -41,6 +42,11 @@ class CloudDetectMinResidualAVHRRParameters : public oops::Parameters {
   /// Observation error scale factors applied to surface temperature jacobians
   /// over 5 surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorTsfc{"obserr_dtempf", this};
+
+  //>>emily
+  /// Parameter for original observation error
+  oops::RequiredParameter<std::vector<float>> obserrOriginal{"error parameter vector", this};
+  //<<emily
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};

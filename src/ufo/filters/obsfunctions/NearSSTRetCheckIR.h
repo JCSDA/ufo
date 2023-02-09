@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -43,6 +44,9 @@ class NearSSTRetCheckIRParameters : public oops::Parameters {
 
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
+
+  /// Parameter for original observation error
+  oops::OptionalParameter<std::vector<float>> obserrOriginal{"error parameter vector", this};
 };
 
 ///

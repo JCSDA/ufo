@@ -56,7 +56,7 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable("ObsValue/brightnessTtemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTtemperature", channels_);
+//invars_ += Variable("ObsError/brightnessTtemperature", channels_);  //orig
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -84,6 +84,15 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   // Get tuning parameters for surface sensitivity over sea/land/oce/snow/mixed from options
   std::vector<float> dtempf_in = options_.obserrScaleFactorTsfc.value();
 
+  //>>emily
+  // Get original observation error (uninflated) from ObsSpace
+  std::vector<float> obserr = options_.obserrOriginal.value();
+  oops::Log::debug() << "emily checking: obserr "         << obserr << std::endl;
+  oops::Log::debug() << "emily checking: use_flag "        << use_flag << std::endl;
+  oops::Log::debug() << "emily checking: use_flag_clddet " << use_flag_clddet << std::endl;
+  oops::Log::debug() << "emily checking: dtempf_in "       << dtempf_in << std::endl;
+  //>>emily
+
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
@@ -107,7 +116,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
        dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      const int level = nlevs - ilev - 1;
+//    const int level = nlevs - ilev - 1;    // orig
+      size_t level = nlevs - ilev - 1;       // emily
       in.get(Variable("ObsDiag/brightness_temperature_jacobian_air_temperature",
                        channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
@@ -118,7 +128,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
        tao(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      const int level = nlevs - ilev - 1;
+//    const int level = nlevs - ilev - 1;  // orig
+      size_t level = nlevs - ilev - 1;     // emily
       in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer",
              channels_)[ichan], level,  tao[ichan][ilev]);
     }
@@ -161,11 +172,13 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     }
   }
 
+  //>>orig
   // Get original observation error (uninflated) from ObsSpace
-  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
-  }
+  // std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
+  // for (size_t ichan = 0; ichan < nchans; ++ichan) {
+  //  in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+  // }
+  //>>orig
 
   // Get tropopause pressure [Pa]
   std::vector<float> tropprs(nlocs);
@@ -195,14 +208,16 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
   // Get air pressure [Pa]
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = nlevs - ilev - 1;
+//  const size_t level = nlevs - ilev - 1;   // orig
+    size_t level = nlevs - ilev - 1;         // emily
     in.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
   // Get air temperature
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = nlevs - ilev - 1;
+//  const size_t level = nlevs - ilev - 1;  // orig
+    size_t level = nlevs - ilev - 1;        // emily
     in.get(Variable("GeoVaLs/air_temperature"), level, tair[ilev]);
   }
 
@@ -288,7 +303,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
       size_t ilev;
       out[ichan][iloc] = 0;
       for (ilev = 0; ilev < lcloud; ++ilev) {
-        if (fabs(cldfrac * dbt[ichan][ilev]) > obserr[ichan][iloc]) {
+//      if (fabs(cldfrac * dbt[ichan][ilev]) > obserr[ichan][iloc]) {  // orig
+        if (fabs(cldfrac * dbt[ichan][ilev]) > obserr[ichan]) {        // emily
           out[ichan][iloc]= 1;
           varinv_use[ichan][iloc]= 0.0;
           break;
@@ -315,7 +331,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
         dts = std::min(dts_threshold, dts);
       }
       for (size_t ichan=0; ichan < nchans; ++ichan) {
-        delta = obserr[ichan][iloc];
+//      delta = obserr[ichan][iloc];  // orig 
+        delta = obserr[ichan];        // emily
         if (std::abs(dts * dbtdts[ichan][iloc]) > delta) out[ichan][iloc] = 2;
       }
     }

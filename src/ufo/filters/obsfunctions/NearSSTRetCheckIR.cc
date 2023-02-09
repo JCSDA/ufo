@@ -53,8 +53,12 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTemperature", channels_);
+//invars_ += Variable("ObsError/brightnessTemperature", channels_);
   invars_ += Variable("MetaData/sensorCentralWavenumber");
+
+  if (options_.obserrOriginal.value() != boost::none) {
+    const std::vector<float> &obserr = options_.obserrOriginal.value().get();
+  }
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -145,11 +149,20 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get original observation error (uninflated)
-  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+  //>>orig
+  //Get original observation error (uninflated)
+  //std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
+  //for (size_t ichan = 0; ichan < nchans; ++ichan) {
+  //  in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+  //}
+  //<<orig
+
+  //>>emily
+  std::vector<float> obserr(nchans);
+  if (options_.obserrOriginal.value() != boost::none) {
+    const std::vector<float> obserr = options_.obserrOriginal.value().get();
   }
+  //<<emily
 
   // Get variables from GeoVaLS
   // Get solar zenith angle
@@ -218,7 +231,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                  && dbtdts[ichan][iloc] >= tschk) {
           icount = icount + 1;
           ts_ave = ts_ave + dbtdts[ichan][iloc];
-          float w_rad = pow((1.0 / obserr[ichan][iloc]), 2);
+          float w_rad = pow((1.0 / obserr[ichan]), 2);
           a11 = a11 + w_rad * dbtdts[ichan][iloc] * dbtdts[ichan][iloc];
           a12 = a12 + w_rad * dbtdts[ichan][iloc] * tb_ta[ichan];
           a13 = a13 + w_rad * dbtdts[ichan][iloc] * tb_qa[ichan];

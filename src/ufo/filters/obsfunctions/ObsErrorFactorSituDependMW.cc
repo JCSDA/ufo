@@ -74,6 +74,11 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
 
   const Variable &clwmatchidx = options_.clwmatchidxFunction.value();
   invars_ += clwmatchidx;
+
+  //>>emily
+  const Variable &obserrfunc = options_.obserrFunction.value();
+  invars_ += obserrfunc;
+  //<<emily
 }
 
 // -----------------------------------------------------------------------------
@@ -124,10 +129,18 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   in.get(clwmatchidxvar, clwmatchidx);
 
   // Get Original Observation Error
-  std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
-  }
+  //>>emily
+  // Get all-sky observation error from ObsFunction 
+  const Variable &obserrvar = options_.obserrFunction.value();
+  ioda::ObsDataVector<float> obserr0(in.obsspace(), obserrvar.toOopsVariables());
+  in.get(obserrvar, obserr0);
+  //<<emily
+  //>>orig
+  //  std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
+  //  for (size_t ichan = 0; ichan < nchans; ++ichan) {
+  //    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
+  //  }
+  //<<orig
 
   // Get ObsErrorData (obs error from previous QC step) and convert to inverse of error variance
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
@@ -191,7 +204,8 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
                                  0.5 * obserr0[ichan][iloc]);
           float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
           term = term + std::min(13.0 * clwtmp * obserr0[ichan][iloc], 3.5 * obserr0[ichan][iloc]);
-          if (scatobs[0][iloc] > 9.0) {
+       // if (scatobs[0][iloc] > 9.0) {                      // orig
+          if (scatobs[0][iloc] > 9.0 && inst == "amsua") {   // emily
             term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * obserr0[ichan][iloc],
                                    2.5 * obserr0[ichan][iloc]);
           }

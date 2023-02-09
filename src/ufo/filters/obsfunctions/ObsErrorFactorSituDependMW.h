@@ -38,6 +38,9 @@ class ObsErrorFactorSituDependMWParameters : public oops::Parameters {
   /// Observation error for each channel under the clear-sky condition
   oops::RequiredParameter<std::vector<float>> obserrClearSky{"obserr_clearsky", this};
 
+  /// Function used to estimate observation error based on symmetric cloud amount (ObsErrorModelRamp)
+  oops::RequiredParameter<Variable> obserrFunction{"obserr_function", this};
+
   /// Function to retrieve the cloud liquid water from the observation
   oops::RequiredParameter<Variable> clwobsFunction{"clwobs_function", this};
 
