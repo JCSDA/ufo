@@ -1,5 +1,6 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2023 United States Government as represented by the Administrator of the
+ * National Aeronautics and Space Administration. All Rights Reserved.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -34,7 +35,6 @@ static ObsFunctionMaker<ObsErrorFactorDuplicateCheck> makerSteps_("ObsErrorFacto
 
 ObsErrorFactorDuplicateCheck::ObsErrorFactorDuplicateCheck(const eckit::Configuration &config)
   : invars_() {
-  oops::Log::debug() << "ObsErrorFactorDuplicateCheck: config = " << config << std::endl;
   // Initialize options
   options_.reset(new ObsErrorFactorDuplicateCheckParameters());
   options_->deserialize(config);
