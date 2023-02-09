@@ -92,6 +92,9 @@ phases:
       # ufo-test
       - ./clone.sh jcsda-internal/ufo-data $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle ufo-data ${GIT_BASE_BRANCH} develop
 
+      # oasim
+      - ./clone.sh jcsda-internal/oasim $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle oasim ${GIT_BASE_BRANCH} develop
+
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
