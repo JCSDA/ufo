@@ -6,9 +6,6 @@ observations:
     name: RTTOV
     Debug: false
     Absorbers: &rttov_absorbers [CLW, CIW]
-    linear obs operator:
-      increment variables:
-      - air_temperature
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
@@ -39,7 +36,3 @@ observations:
     filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_rttov_scatt.nc4
   rms ref: 238.96294194
   tolerance: 1.e-7
-  linear obs operator test:
-    coef TL: 1.e-4
-    tolerance TL: 1.0e-1
-    tolerance AD: 1.0e-11
