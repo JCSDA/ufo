@@ -75,7 +75,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
   for (size_t ivar = 0; ivar < var_idx.size(); ++ivar) {
     if (var_idx[ivar] < 0) {
       oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
-                           << "variable " << obspace.obsvariables()[ivar] << " in "
+                           << "variable " << vars_[ivar] << " in "
                            << options.inputFile.value() << ", correlations set to zero."
                            << std::endl;
     } else {

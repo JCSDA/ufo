@@ -64,6 +64,10 @@ if(@geos-aero_FOUND@ AND NOT geos-aero_FOUND)
     find_dependency(geos-aero REQUIRED)
 endif()
 
+if(@oasim_FOUND@ AND NOT oasim_FOUND)
+    find_dependency(oasim REQUIRED)
+endif()
+
 # Export Fortran compiler version for checking module compatibility
 set(@PROJECT_NAME@_MODULES_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@)
 set(@PROJECT_NAME@_MODULES_Fortran_COMPILER_VERSION @CMAKE_Fortran_COMPILER_VERSION@)
