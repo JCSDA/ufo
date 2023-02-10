@@ -10,7 +10,14 @@ observations:
      name: RTTOV
      Debug: false # default
      Absorbers: []
-     linear model absorbers: []
+     linear obs operator:
+       increment variables:
+       - air_temperature
+       - surface_temperature
+       - specific_humidity_at_two_meters_above_surface
+       - uwind_at_10m
+       - vwind_at_10m
+       - skin_temperature
      obs options:
        WMO_ID: [225]
        Sat_ID: [noaa_20]
@@ -99,7 +106,8 @@ observations:
      name: RTTOV
      Debug: false # default
      Absorbers: []
-     linear model absorbers: []
+     linear obs operator:
+       increment variables: [air_temperature]
      obs options:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility

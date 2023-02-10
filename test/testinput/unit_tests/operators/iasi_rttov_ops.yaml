@@ -27,7 +27,8 @@ observations:
 - obs operator:
     name: RTTOV
     Absorbers: [Ozone]
-    linear model absorbers: [Ozone]
+    linear obs operator:
+      increment variables: [air_temperature]
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
