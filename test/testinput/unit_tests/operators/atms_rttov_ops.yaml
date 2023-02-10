@@ -9,10 +9,12 @@ observations:
 - obs operator:
      name: RTTOV
      Debug: false # default
-     Absorbers: []
+     Absorbers: [CLW]
      linear obs operator:
        increment variables:
        - air_temperature
+       - specific_humidity
+       - mass_content_of_cloud_liquid_water_in_atmosphere_layer
        - surface_temperature
        - specific_humidity_at_two_meters_above_surface
        - uwind_at_10m
