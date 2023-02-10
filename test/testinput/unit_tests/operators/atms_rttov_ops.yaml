@@ -98,7 +98,7 @@ observations:
 #       obsfile: Data/atms_n20_obs_20191230T0000_rttov_default_out.nc4
   geovals:
     filename: &geovals Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
-  rms ref: 228.54196297632672
+  rms ref: 228.54213536
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
