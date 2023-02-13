@@ -237,6 +237,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
       obsfunctions/ObsErrorBoundMW.h
+      obsfunctions/ObsErrorFactorDuplicateCheck.cc
+      obsfunctions/ObsErrorFactorDuplicateCheck.h
       obsfunctions/ObsErrorFactorSituDependMW.cc
       obsfunctions/ObsErrorFactorSituDependMW.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc

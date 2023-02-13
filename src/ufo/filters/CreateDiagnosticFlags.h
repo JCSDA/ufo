@@ -67,6 +67,11 @@ class CreateDiagnosticFlagsParameters : public oops::ObsFilterParametersBase {
   oops::OptionalParameter<std::vector<Variable>> filterVariables{
     "filter variables", this};
 
+  /// If set to true, creates diagnostic flag with variable name
+  /// `DiagnosticFlags/<flag>/observationReport` for each flag `<flag>` specified in the
+  /// `flags` list.
+  oops::Parameter<bool> observationReportFlags{"create observation report flags", false, this};
+
   /// If set to true, the filter will be executed only after the obs operator has been invoked.
   oops::Parameter<bool> deferToPost{"defer to post", false, this};
 };
@@ -95,6 +100,9 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
   void print(std::ostream &) const override;
 
   oops::Variables getFilterVariables() const;
+
+  void createFlag(const std::string & flagName, const std::string & varName,
+                  bool forceReinitialization, bool initialValue) const;
 
  private:
   Parameters_ parameters_;

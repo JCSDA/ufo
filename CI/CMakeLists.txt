@@ -31,6 +31,7 @@ ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA-internal/ioda.git" )
 ecbuild_bundle( PROJECT rttov  GIT "https://github.com/JCSDA-internal/rttov.git" )
 ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA-internal/ropp-test.git" )
 ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA-internal/geos-aero.git" )
+ecbuild_bundle( PROJECT oasim  GIT "https://github.com/JCSDA-internal/oasim.git" )
 ecbuild_bundle( PROJECT ufo  GIT "https://github.com/JCSDA-internal/ufo.git" )
 
 # Don't need ioda-data in CI because we are only testing ufo

@@ -32,6 +32,9 @@ add_subdirectory( operators/groundgnss )
 add_subdirectory( operators/identity )
 add_subdirectory( operators/insitupm )
 add_subdirectory( operators/marine )
+if(oasim_FOUND)
+    add_subdirectory( operators/oasim)
+endif()
 add_subdirectory( operators/radarradialvelocity )
 if( rttov_FOUND )
     add_subdirectory( operators/rttov )
@@ -41,7 +44,6 @@ add_subdirectory( operators/sattcwv )
 add_subdirectory( operators/scatwind )
 add_subdirectory( operators/sfcpcorrected )
 add_subdirectory( operators/timeoper )
-
 
 
 # Base files
@@ -127,6 +129,7 @@ list( APPEND ufo_src_files
     ${categoricaloper_src_files}
     ${fov_src_files}
     ${marine_src_files}
+    ${oasim_src_files}
 )
 
 ## Create Library target
@@ -172,6 +175,9 @@ if(rttov_FOUND)
     target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
 endif()
 
+if(oasim_FOUND)
+    target_link_libraries(ufo PUBLIC oasim)
+endif()
 
 
 ## Include paths

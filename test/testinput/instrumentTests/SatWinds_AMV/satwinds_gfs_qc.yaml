@@ -236,5 +236,37 @@ observations:
     threshold: 6.0
     action:
       name: reject
+  # Duplicate check exercising both use_air_pressure options
+  - filter: BlackList
+    filter variables:
+    - name: windEastward
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsErrorFactorDuplicateCheck@ObsFunction
+        options:
+          use_air_pressure: true
+          variable: windEastward
+    where:
+    - variable:
+        name: windEastward@ObsType
+      is_in:  240-260
+    defer to post: true
+  - filter: BlackList
+    filter variables: 
+    - name: windEastward
+    action: 
+      name: inflate error 
+      inflation variable:
+        name: ObsErrorFactorDuplicateCheck@ObsFunction
+        options:
+          use_air_pressure: false
+          variable: windEastward
+    where:
+    - variable:
+        name: windEastward@ObsType
+      is_in:  240-260
+    defer to post: true
+
 
   passedBenchmark: 5940

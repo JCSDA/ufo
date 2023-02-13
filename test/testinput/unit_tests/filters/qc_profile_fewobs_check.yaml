@@ -82,3 +82,51 @@ observations:
         name: MetaData/sequenceNumber
       maxvalue: 4       # First five profiles
   passedBenchmark: 50   # Rejects all profiles, except those removed by where
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Perform Action
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/variable
+      is_true:
+    actions:
+    - name: reject
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    fraction: 0.5
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/variable
+      is_false:       # don't reject based on sub-sampled obs
+  passedBenchmark: 93   # accepts all profiles except those removed by Perform Action
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [variable]
+  obs filters:
+  - filter: Perform Action
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/variable
+      is_true:
+    actions:
+    - name: reject
+  - filter: Profile Few Observations Check
+    filter variables:
+    - name: variable
+    fraction: 0.5
+  passedBenchmark: 89   # accepts all profiles except the last
