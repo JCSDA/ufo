@@ -49,7 +49,7 @@ namespace ufo {
     }
 
     if (options_.UseSurfaceWaterFraction.value()) {
-      invars_ += Variable("MetaData/waterFraction");
+      invars_ += Variable("MetaData/waterAreaFraction");
     }
   }
 
@@ -133,9 +133,9 @@ namespace ufo {
 
     // if available and requested, set closest appropriate surface type using water_fraction
     if (options_.UseSurfaceWaterFraction.value()) {
-      if (in.has(Variable("MetaData/waterFraction"))) {
+      if (in.has(Variable("MetaData/waterAreaFraction"))) {
         std::vector<float> water_fraction(nlocs);
-        in.get(Variable("MetaData/waterFraction"), water_fraction);
+        in.get(Variable("MetaData/waterAreaFraction"), water_fraction);
 
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           if (water_fraction[iloc] > options_.MinWaterFrac.value()) {
@@ -145,7 +145,7 @@ namespace ufo {
           }
         }
       } else {
-        oops::Log::warning() << "UseSurfaceWaterFraction is true but MetaData/waterFraction "
+        oops::Log::warning() << "UseSurfaceWaterFraction is true but MetaData/waterAreaFraction "
                              << "not present. Ignoring\n";
           }
     }
