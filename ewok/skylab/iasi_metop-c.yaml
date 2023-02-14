@@ -64,6 +64,9 @@ obs operator:
   obs options:
     Sensor_ID: iasi_metop-c
     EndianType: little_endian
+obs error:
+  covariance model: cross variable covariances
+  input file: $(static_data)/skylab-4.0.0/obserrors/Rcov.iasi_metop-c.nc
 obs bias:
   variational bc:
     predictors:
