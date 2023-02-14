@@ -43,63 +43,70 @@ void OceanPracticalSalinityToAbsoluteSalinity::runTransform(const std::vector<bo
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Get all required data
-  std::vector<float> pressure;
-  std::vector<float> psal;
-  std::vector<float> lats;
-  std::vector<float> lons;
-  std::vector<float> asal(nlocs, missingValueFloat);
-  std::vector<float> asalError(nlocs, missingValueFloat);
-  std::vector<float> asalpge;
-  std::vector<int> asalflags;
-  getObservation(practicalsalinitygroup_,
-                 practicalsalinityvariable_,
-                 psal, true);
-  getObservation(pressuregroup_,
-                 pressurevariable_,
-                 pressure, true);
-  getObservation("MetaData",
-                 "latitude",
-                 lats, true);
-  getObservation("MetaData",
-                 "longitude",
-                 lons, true);
-  data_.get(Variable(std::string("ObsErrorData/") + practicalsalinityvariable_), asalError);
-  getObservation("GrossErrorProbability", practicalsalinityvariable_,
-                 asalpge);
-  getObservation("QCFlags", practicalsalinityvariable_,
-                 asalflags);
-
-  if (asalpge.empty()) {
-    asalpge.assign(nlocs, missingValueFloat);
+  // Copy across observation error
+  {
+    std::vector<float> asalError(nlocs, missingValueFloat);
+    getObservation("ObsError", practicalsalinityvariable_, asalError);
+    const size_t iv = obserr_.varnames().find(absolutesalinityvariable_);
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!apply[jobs])
+        continue;
+      obserr_[iv][jobs] = asalError[jobs];
+    }
+    putObservation(absolutesalinityvariable_, asalError, "DerivedObsError");
   }
-  if (asalflags.empty()) {
-    asalflags.assign(nlocs, 0);
+
+  // Copy across GrossErrorProbability if present
+  {
+    std::vector<float> asalpge;
+    getObservation("GrossErrorProbability", practicalsalinityvariable_,
+                   asalpge);
+    if(!asalpge.empty())
+      putObservation(absolutesalinityvariable_, asalpge, "GrossErrorProbability");
+  }
+
+  // Copy across QCflags
+  {
+    std::vector<int> asalflags;
+    getObservation("QCFlags", practicalsalinityvariable_,
+                   asalflags);
+    if (asalflags.empty()) {
+      asalflags.assign(nlocs, 0);
+    }
+    putObservation(absolutesalinityvariable_, asalflags, "QCFlags");
   }
 
   // compute absolute salinity as a function of practical salinity, pressure, longitude and latitude
-  for (size_t loc = 0; loc < nlocs; ++loc) {
-    if (!apply[loc]) continue;
-    if (psal[loc] != missingValueFloat &&
-        pressure[loc] != missingValueFloat) {
-      asal[loc] = gsw_sa_from_sp_f90(psal[loc],
-                                     pressure[loc],
-                                     lons[loc],
-                                     lats[loc]);
+  {
+    std::vector<float> pressure;
+    std::vector<float> psal;
+    std::vector<float> lats;
+    std::vector<float> lons;
+    std::vector<float> asal(nlocs, missingValueFloat);
+    getObservation(practicalsalinitygroup_,
+                   practicalsalinityvariable_,
+                   psal, true);
+    getObservation(pressuregroup_,
+                   pressurevariable_,
+                   pressure, true);
+    getObservation("MetaData",
+                   "latitude",
+                   lats, true);
+    getObservation("MetaData",
+                   "longitude",
+                   lons, true);
+    for (size_t loc = 0; loc < nlocs; ++loc) {
+      if (!apply[loc]) continue;
+      if (psal[loc] != missingValueFloat &&
+          pressure[loc] != missingValueFloat) {
+        asal[loc] = gsw_sa_from_sp_f90(psal[loc],
+                                       pressure[loc],
+                                       lons[loc],
+                                       lats[loc]);
+      }
     }
+    putObservation(absolutesalinityvariable_, asal, "DerivedObsValue");
   }
-  obsdb_.put_db("DerivedObsValue", absolutesalinityvariable_, asal);
-  const size_t iv = obserr_.varnames().find(absolutesalinityvariable_);
-  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    if (!apply[jobs])
-      continue;
-    obserr_[iv][jobs] = asalError[jobs];
-  }
-
-  // copy ObsError, PGEFinal and QCflags to new conservative temperature
-  obsdb_.put_db("GrossErrorProbability", absolutesalinityvariable_, asalpge);
-  obsdb_.put_db("QCFlags", absolutesalinityvariable_, asalflags);
-  obsdb_.put_db("DerivedObsError", absolutesalinityvariable_, asalError);
 }
 
 // -----------------------------------------------------------------------------

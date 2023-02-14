@@ -45,59 +45,72 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Get all required data
-  std::vector<float> pressure;
-  std::vector<float> temp;
-  std::vector<float> sal;
-  std::vector<float> theta(nlocs, missingValueFloat);
-  std::vector<float> thetaError(nlocs, missingValueFloat);
-  std::vector<float> thetapge;
-  std::vector<int> thetaflags;
-  getObservation(salinitygroup_,
-                 salinityvariable_,
-                 sal, true);
-  getObservation(temperaturegroup_,
-                 temperaturevariable_,
-                 temp, true);
-  getObservation(pressuregroup_,
-                 pressurevariable_,
-                 pressure, true);
-  data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), thetaError);
-  getObservation("GrossErrorProbability", temperaturevariable_,
-                 thetapge);
-  getObservation("QCFlags", temperaturevariable_,
-                 thetaflags);
-
-  if (thetapge.empty()) {
-    thetapge.assign(nlocs, missingValueFloat);
+  // First copy across the ObsError information to derived variable if present,
+  // by doing everything before adding the derived obs we will set
+  // QCflag::missing based on the presence or absence of theta rather than the
+  // auxillary variables.
+  {
+    std::vector<float> thetaError;
+    //data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), thetaError);
+    getObservation("ObsError", temperaturevariable_, thetaError);
+    const size_t iv = obserr_.varnames().find(thetavariable_);
+    if(!thetaError.empty()) {
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        if (!apply[jobs])
+          continue;
+        obserr_[iv][jobs] = thetaError[jobs];
+      }
+      putObservation(thetavariable_, thetaError, "DerivedObsError");
+    }
   }
-  if (thetaflags.empty()) {
-    thetaflags.assign(nlocs, 0);
+
+  // Copy across the GrossErrorProbability information to derived variable if present
+  {
+    std::vector<float> thetapge;
+    getObservation("GrossErrorProbability", temperaturevariable_,
+                   thetapge);
+    if(!thetapge.empty())
+      putObservation(thetavariable_, thetapge, "GrossErrorProbability");
+  }
+
+  // Copy across QC flag information
+  {
+    std::vector<int> thetaflags;
+    getObservation("QCFlags", temperaturevariable_,
+                   thetaflags);
+    if (thetaflags.empty()) {
+      thetaflags.assign(nlocs, 0);
+    }
+    putObservation(thetavariable_, thetaflags, "QCFlags");
   }
 
   // compute theta as function of temperature, pressure and salinity
-  for (size_t loc = 0; loc < nlocs; ++loc) {
-    if (!apply[loc]) continue;
-    if (sal[loc] != missingValueFloat &&
-        temp[loc] != missingValueFloat &&
-        pressure[loc] != missingValueFloat) {
-      theta[loc] = gsw_pt_from_t_f90(sal[loc],
-                                     temp[loc],
-                                     pressure[loc]);
+  {
+    std::vector<float> pressure;
+    std::vector<float> temp;
+    std::vector<float> sal;
+    std::vector<float> theta(nlocs, missingValueFloat);
+    getObservation(salinitygroup_,
+                   salinityvariable_,
+                   sal, true);
+    getObservation(temperaturegroup_,
+                   temperaturevariable_,
+                   temp, true);
+    getObservation(pressuregroup_,
+                   pressurevariable_,
+                   pressure, true);
+    for (size_t loc = 0; loc < nlocs; ++loc) {
+      if (!apply[loc]) continue;
+      if (sal[loc] != missingValueFloat &&
+          temp[loc] != missingValueFloat &&
+          pressure[loc] != missingValueFloat) {
+        theta[loc] = gsw_pt_from_t_f90(sal[loc],
+                                       temp[loc],
+                                       pressure[loc]);
+      }
     }
+    putObservation(thetavariable_, theta, "DerivedObsValue");
   }
-  obsdb_.put_db("DerivedObsValue", thetavariable_, theta);
-  const size_t iv = obserr_.varnames().find(thetavariable_);
-  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    if (!apply[jobs])
-      continue;
-    obserr_[iv][jobs] = thetaError[jobs];
-  }
-
-  // copy ObsError, PGEFinal and QCflags to new potential temperature
-  obsdb_.put_db("GrossErrorProbability", thetavariable_, thetapge);
-  obsdb_.put_db("QCFlags", thetavariable_, thetaflags);
-  obsdb_.put_db("DerivedObsError", thetavariable_, thetaError);
 }
 
 // -----------------------------------------------------------------------------

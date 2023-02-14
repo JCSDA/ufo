@@ -31,10 +31,6 @@ observations:
         name: DerivedObsValue/waterConservativeTemperature
       relTol: 2.0e-4
     - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/waterConservativeTemperature
-    - reference:
         name: TestReference/int_zeros
       test:
         name: QCFlags/waterConservativeTemperature

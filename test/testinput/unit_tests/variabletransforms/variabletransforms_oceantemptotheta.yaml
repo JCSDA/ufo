@@ -8,10 +8,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    #obsdataout:
-    #  engine:
-    #    type: H5File
-    #    obsfile: Data/ocean_temptotheta_out.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ocean_temptotheta_out.nc4
     simulated variables: [waterTemperature, salinity, waterPotentialTemperature]
     observed variables: [waterTemperature, salinity]
     derived variables: [waterPotentialTemperature]
@@ -31,10 +31,6 @@ observations:
         name: DerivedObsValue/waterPotentialTemperature
       relTol: 2.0e-4
     - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/waterPotentialTemperature
-    - reference:
         name: TestReference/int_zeros
       test:
         name: QCFlags/waterPotentialTemperature
@@ -42,4 +38,4 @@ observations:
         name: ObsError/waterTemperature
       test:
         name: DerivedObsError/waterPotentialTemperature
-        
+

@@ -45,59 +45,68 @@ void OceanTempToConservativeTemp::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Get all required data
-  std::vector<float> pressure;
-  std::vector<float> temp;
-  std::vector<float> sal;
-  std::vector<float> conservativetemp(nlocs, missingValueFloat);
-  std::vector<float> conservativetempError(nlocs, missingValueFloat);
-  std::vector<float> conservativetemppge;
-  std::vector<int> conservativetempflags;
-  getObservation(salinitygroup_,
-                 salinityvariable_,
-                 sal, true);
-  getObservation(temperaturegroup_,
-                 temperaturevariable_,
-                 temp, true);
-  getObservation(pressuregroup_,
-                 pressurevariable_,
-                 pressure, true);
-  data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), conservativetempError);
-  getObservation("GrossErrorProbability", temperaturevariable_,
-                 conservativetemppge);
-  getObservation("QCFlags", temperaturevariable_,
-                 conservativetempflags);
-
-  if (conservativetemppge.empty()) {
-    conservativetemppge.assign(nlocs, missingValueFloat);
+  // First copy across the ObsError information to derived variable if present,
+  // by doing everything before adding the derived obs we will set
+  // QCflag::missing based on the presence or absence of theta rather than the
+  // auxillary variables.
+  {
+    std::vector<float> conservativetempError(nlocs, missingValueFloat);
+    getObservation("ObsError", temperaturevariable_, conservativetempError);
+    const size_t iv = obserr_.varnames().find(conservativetempvariable_);
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!apply[jobs])
+        continue;
+      obserr_[iv][jobs] = conservativetempError[jobs];
+    }
+    putObservation(conservativetempvariable_, conservativetempError, "DerivedObsError");
   }
-  if (conservativetempflags.empty()) {
-    conservativetempflags.assign(nlocs, 0);
+
+  // Copy across the GrossErrorProbability information to derived variable if present
+  {
+    std::vector<float> conservativetemppge;
+    getObservation("GrossErrorProbability", temperaturevariable_,
+                   conservativetemppge);
+    if (!conservativetemppge.empty())
+      putObservation(conservativetempvariable_, conservativetemppge, "GrossErrorProbability");
+  }
+
+  // Copy across QC flag information
+  {
+    std::vector<int> conservativetempflags;
+    getObservation("QCFlags", temperaturevariable_, conservativetempflags);
+    if (conservativetempflags.empty()) {
+      conservativetempflags.assign(nlocs, 0);
+    }
+    putObservation(conservativetempvariable_, conservativetempflags, "QCFlags");
   }
 
   // compute conservative temp as function of temperature, pressure and salinity
-  for (size_t loc = 0; loc < nlocs; ++loc) {
-    if (!apply[loc]) continue;
-    if (sal[loc] != missingValueFloat &&
-        temp[loc] != missingValueFloat &&
-        pressure[loc] != missingValueFloat) {
-      conservativetemp[loc] = gsw_ct_from_t_f90(sal[loc],
-                                                temp[loc],
-                                                pressure[loc]);
+  {
+    std::vector<float> pressure;
+    std::vector<float> temp;
+    std::vector<float> sal;
+    std::vector<float> conservativetemp(nlocs, missingValueFloat);
+    getObservation(salinitygroup_,
+                   salinityvariable_,
+                   sal, true);
+    getObservation(temperaturegroup_,
+                   temperaturevariable_,
+                   temp, true);
+    getObservation(pressuregroup_,
+                   pressurevariable_,
+                   pressure, true);
+    for (size_t loc = 0; loc < nlocs; ++loc) {
+      if (!apply[loc]) continue;
+      if (sal[loc] != missingValueFloat &&
+          temp[loc] != missingValueFloat &&
+          pressure[loc] != missingValueFloat) {
+        conservativetemp[loc] = gsw_ct_from_t_f90(sal[loc],
+                                                  temp[loc],
+                                                  pressure[loc]);
+      }
     }
+    putObservation(conservativetempvariable_, conservativetemp, "DerivedObsValue");
   }
-  obsdb_.put_db("DerivedObsValue", conservativetempvariable_, conservativetemp);
-  const size_t iv = obserr_.varnames().find(conservativetempvariable_);
-  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    if (!apply[jobs])
-      continue;
-    obserr_[iv][jobs] = conservativetempError[jobs];
-  }
-
-  // copy ObsError, PGEFinal and QCflags to new conservative temperature
-  obsdb_.put_db("GrossErrorProbability", conservativetempvariable_, conservativetemppge);
-  obsdb_.put_db("QCFlags", conservativetempvariable_, conservativetempflags);
-  obsdb_.put_db("DerivedObsError", conservativetempvariable_, conservativetempError);
 }
 
 // -----------------------------------------------------------------------------

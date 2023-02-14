@@ -34,10 +34,6 @@ observations:
         name: DerivedObsValue/waterDensity
       relTol: 2.0e-4
     - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/waterDensity
-    - reference:
         name: TestReference/int_zeros
       test:
         name: QCFlags/waterDensity

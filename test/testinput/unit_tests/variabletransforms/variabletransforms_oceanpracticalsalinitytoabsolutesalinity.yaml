@@ -30,10 +30,6 @@ observations:
         name: DerivedObsValue/absoluteSalinity
       relTol: 2.0e-4
     - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/absoluteSalinity
-    - reference:
         name: TestReference/int_zeros
       test:
         name: QCFlags/absoluteSalinity

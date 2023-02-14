@@ -43,57 +43,65 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Get all required data
-  std::vector<float> pressure;
-  std::vector<float> temp;
-  std::vector<float> sal;
-  std::vector<float> density(nlocs, missingValueFloat);
-  std::vector<float> densityError(nlocs, 1.0);
-  std::vector<float> densitypge;
-  std::vector<int> densityflags;
-  getObservation(salinitygroup_,
-                 salinityvariable_,
-                 sal, true);
-  getObservation(temperaturegroup_,
-                 temperaturevariable_,
-                 temp, true);
-  getObservation(pressuregroup_,
-                 pressurevariable_,
-                 pressure, true);
-  getObservation("GrossErrorProbability", densityvariable_,
-                 densitypge);
-  getObservation("QCFlags", densityvariable_,
-                 densityflags);
-
-  if (densitypge.empty()) {
-    densitypge.assign(nlocs, missingValueFloat);
-  }
-  if (densityflags.empty()) {
-    densityflags.assign(nlocs, 0);
-  }
-
-  for (size_t loc = 0; loc < nlocs; ++loc) {
-    if (!apply[loc]) continue;
-    if (sal[loc] != missingValueFloat &&
-        temp[loc] != missingValueFloat &&
-        pressure[loc] != missingValueFloat) {
-      density[loc] = gsw_rho_t_exact_f90(sal[loc],
-                                           temp[loc],
-                                           pressure[loc]);
+  // Set default ObsError information
+  {
+    std::vector<float> densityError(nlocs, 1.0);
+    const size_t iv = obserr_.varnames().find(densityvariable_);
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!apply[jobs])
+        continue;
+      obserr_[iv][jobs] = densityError[jobs];
     }
-  }
-  obsdb_.put_db("DerivedObsValue", densityvariable_, density);
-  const size_t iv = obserr_.varnames().find(densityvariable_);
-  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    if (!apply[jobs])
-      continue;
-    obserr_[iv][jobs] = densityError[jobs];
+    putObservation(densityvariable_, densityError, "DerivedObsError");
   }
 
-  // copy ObsError, PGEFinal and QCflags to new density
-  obsdb_.put_db("GrossErrorProbability", densityvariable_, densitypge);
-  obsdb_.put_db("QCFlags", densityvariable_, densityflags);
-  obsdb_.put_db("DerivedObsError", densityvariable_, densityError);
+  // Copy across the GrossErrorProbability information to derived variable if present
+  {
+    std::vector<float> densitypge;
+    getObservation("GrossErrorProbability", densityvariable_,
+                   densitypge);
+    if (!densitypge.empty())
+      putObservation(densityvariable_, densitypge, "GrossErrorProbability");
+  }
+
+  // Copy across QC information to derived variable if present
+  {
+    std::vector<int> densityflags;
+    getObservation("QCFlags", densityvariable_,
+                   densityflags);
+    if (densityflags.empty()) {
+      densityflags.assign(nlocs, 0);
+    }
+    putObservation(densityvariable_, densityflags, "QCFlags");
+  }
+
+  // compute density as function of temperature, pressure and salinity
+  {
+    std::vector<float> pressure;
+    std::vector<float> temp;
+    std::vector<float> sal;
+    std::vector<float> density(nlocs, missingValueFloat);
+    getObservation(salinitygroup_,
+                   salinityvariable_,
+                   sal, true);
+    getObservation(temperaturegroup_,
+                   temperaturevariable_,
+                   temp, true);
+    getObservation(pressuregroup_,
+                   pressurevariable_,
+                   pressure, true);
+    for (size_t loc = 0; loc < nlocs; ++loc) {
+      if (!apply[loc]) continue;
+      if (sal[loc] != missingValueFloat &&
+          temp[loc] != missingValueFloat &&
+          pressure[loc] != missingValueFloat) {
+        density[loc] = gsw_rho_t_exact_f90(sal[loc],
+                                             temp[loc],
+                                             pressure[loc]);
+      }
+    }
+    putObservation(densityvariable_, density, "DerivedObsValue");
+  }
 }
 
 // -----------------------------------------------------------------------------
