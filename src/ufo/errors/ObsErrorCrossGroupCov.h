@@ -96,6 +96,7 @@ class ObsErrorCrossGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
  private:
   /// Print covariance details (for logging)
   void print(std::ostream &) const override;
+  const ioda::ObsSpace & obspace_;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
   /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
