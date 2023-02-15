@@ -51,10 +51,9 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   // auxillary variables.
   {
     std::vector<float> thetaError;
-    //data_.get(Variable(std::string("ObsErrorData/") + temperaturevariable_), thetaError);
     getObservation("ObsError", temperaturevariable_, thetaError);
     const size_t iv = obserr_.varnames().find(thetavariable_);
-    if(!thetaError.empty()) {
+    if (!thetaError.empty()) {
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (!apply[jobs])
           continue;
@@ -69,7 +68,7 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
     std::vector<float> thetapge;
     getObservation("GrossErrorProbability", temperaturevariable_,
                    thetapge);
-    if(!thetapge.empty())
+    if (!thetapge.empty())
       putObservation(thetavariable_, thetapge, "GrossErrorProbability");
   }
 

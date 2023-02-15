@@ -8,10 +8,6 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    #obsdataout:
-    #  engine:
-    #    type: H5File
-    #    obsfile: Data/ocean_practicalsalinitytoabsolutesalinity_out.nc4
     simulated variables: [salinity, absoluteSalinity]
     observed variables: [salinity]
     derived variables: [absoluteSalinity]

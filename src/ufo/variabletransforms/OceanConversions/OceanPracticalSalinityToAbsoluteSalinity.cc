@@ -61,7 +61,7 @@ void OceanPracticalSalinityToAbsoluteSalinity::runTransform(const std::vector<bo
     std::vector<float> asalpge;
     getObservation("GrossErrorProbability", practicalsalinityvariable_,
                    asalpge);
-    if(!asalpge.empty())
+    if (!asalpge.empty())
       putObservation(absolutesalinityvariable_, asalpge, "GrossErrorProbability");
   }
 
