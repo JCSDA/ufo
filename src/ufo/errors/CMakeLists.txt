@@ -6,6 +6,8 @@
 set ( errors_files
     ObsErrorCrossVarCov.cc
     ObsErrorCrossVarCov.h
+    ObsErrorCrossGroupCov.cc
+    ObsErrorCrossGroupCov.h
     ObsErrorDiagonal.cc
     ObsErrorDiagonal.h
 )

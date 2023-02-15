@@ -38,7 +38,19 @@ ufo_add_test( NAME    test_ufo_obserrorcrossvarcov
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+
 #
+ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorwithingroupcorr.yaml"
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
+
 ufo_add_test( NAME    test_ufo_obserrordiagonal
               TIER    1
               ECBUILD
