@@ -56,7 +56,7 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTemperature", channels_);
+//invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -83,6 +83,15 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
 
   // Get tuning parameters for surface sensitivity over sea/land/oce/snow/mixed from options
   std::vector<float> dtempf_in = options_.obserrScaleFactorTsfc.value();
+
+  //>>emily
+  // Get original observation error (uninflated) from ObsSpace
+  std::vector<float> obserr = options_.obserrOriginal.value();
+  oops::Log::debug() << "emily checking: obserr "          << obserr << std::endl;
+  oops::Log::debug() << "emily checking: use_flag "        << use_flag << std::endl;
+  oops::Log::debug() << "emily checking: use_flag_clddet " << use_flag_clddet << std::endl;
+  oops::Log::debug() << "emily checking: dtempf_in "       << dtempf_in << std::endl;
+  //>>emily
 
   // Get dimensions
   size_t nlocs = in.nlocs();
@@ -161,11 +170,13 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get original observation error (uninflated) from ObsSpaec
-  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
-  }
+//>>emily
+//  // Get original observation error (uninflated) from ObsSpaec
+//  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
+//  for (size_t ichan = 0; ichan < nchans; ++ichan) {
+//    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+//  }
+//<<emily
 
   // Get variables from GeoVaLS
   // Get tropopause pressure [Pa]
@@ -341,7 +352,8 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
           dts = std::min(dts_threshold, dts);
         }
         for (size_t ichan=0; ichan < nchans; ++ichan) {
-          delta = std::max(0.05 * obserr[ichan][iloc], 0.02);
+//        delta = std::max(0.05 * obserr[ichan][iloc], 0.02);  // orig
+          delta = std::max(0.05 * obserr[ichan], 0.02);        // emily
           if (std::abs(dts * dbtdts[ichan][iloc]) > delta) out[ichan][iloc] = 2;
         }
       }

@@ -42,6 +42,11 @@ class CloudDetectMinResidualIRParameters : public oops::Parameters {
   /// over 5 surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorTsfc{"obserr_dtempf", this};
 
+  //>>emily
+  /// Parameter for original observation error
+  oops::RequiredParameter<std::vector<float>> obserrOriginal{"error parameter vector", this};
+  //<<emily
+
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 
