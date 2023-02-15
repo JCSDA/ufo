@@ -66,24 +66,21 @@ void testObsBiasCovarianceDetails() {
     ObsBiasIncrement ybias_inc_2(ybias_inc);
     ObsBiasIncrement ybias_inc_3(ybias_inc);
 
-    // linearize for first outer loop
+    // linearize for first outer loop - expect to throw a message
+    // since QC flags and effective errors weren't set yet
     biaserrconf.set("iteration", 0);
-    ybias_cov.linearize(ybias, biaserrconf);
-
-    // linearize for second outer loop
-    biaserrconf.set("iteration", 1);
     EXPECT_THROWS(ybias_cov.linearize(ybias, biaserrconf));
 
     // mimic QC flags from first outer loop
     const std::vector<int> qc_flags(odb.nlocs(), 50);
     const std::vector<std::string> vars = odb.obsvariables().variables();
     for ( const auto & var : vars)
-     odb.put_db("EffectiveQC0", var , qc_flags);
+      odb.put_db("EffectiveQC0", var , qc_flags);
 
     // mimic effective errors
     const std::vector<float> errs(odb.nlocs(), 1.0);
     for ( const auto & var : vars)
-     odb.put_db("EffectiveError0", var , errs);
+      odb.put_db("EffectiveError0", var , errs);
 
     // mimic predictors
     ioda::ObsVector predx(odb);
@@ -129,7 +126,7 @@ void testObsBiasCovarianceDetails() {
     // Randomize increments again
     ybias_cov.randomize(ybias_inc);
 
-    // linearize for second outer loop
+    // linearize for the first outer loop again -- now QC and errors are set
     ybias_cov.linearize(ybias, biaserrconf);
 
     // delta_bias * B
