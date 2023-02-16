@@ -73,11 +73,11 @@ void OceanTempToConservativeTemp::runTransform(const std::vector<bool> &apply) {
   // Copy across QC flag information
   {
     std::vector<int> conservativetempflags;
-    getObservation("QCFlags", temperaturevariable_, conservativetempflags);
+    getObservation("QCflagsData", temperaturevariable_, conservativetempflags);
     if (conservativetempflags.empty()) {
       conservativetempflags.assign(nlocs, 0);
     }
-    putObservation(conservativetempvariable_, conservativetempflags, "QCFlags");
+    putObservation(conservativetempvariable_, conservativetempflags, "QCflagsData");
   }
 
   // compute conservative temp as function of temperature, pressure and salinity

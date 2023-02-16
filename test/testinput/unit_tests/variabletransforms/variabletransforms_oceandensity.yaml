@@ -32,7 +32,7 @@ observations:
     - reference:
         name: TestReference/int_zeros
       test:
-        name: QCFlags/waterDensity
+        name: QCflagsData/waterDensity
     - reference:
         name: TestReference/float_ones
       test:

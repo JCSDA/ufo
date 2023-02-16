@@ -68,12 +68,12 @@ void OceanPracticalSalinityToAbsoluteSalinity::runTransform(const std::vector<bo
   // Copy across QCflags
   {
     std::vector<int> asalflags;
-    getObservation("QCFlags", practicalsalinityvariable_,
+    getObservation("QCflagsData", practicalsalinityvariable_,
                    asalflags);
     if (asalflags.empty()) {
       asalflags.assign(nlocs, 0);
     }
-    putObservation(absolutesalinityvariable_, asalflags, "QCFlags");
+    putObservation(absolutesalinityvariable_, asalflags, "QCflagsData");
   }
 
   // compute absolute salinity as a function of practical salinity, pressure, longitude and latitude

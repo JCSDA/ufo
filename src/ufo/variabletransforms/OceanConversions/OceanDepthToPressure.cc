@@ -63,12 +63,12 @@ void OceanDepthToPressure::runTransform(const std::vector<bool> &apply) {
   // Copy across QC information to derived variable if present
   {
     std::vector<int> pressureflags;
-    getObservation("QCFlags", depthvariable_,
+    getObservation("QCflagsData", depthvariable_,
                    pressureflags);
     if (pressureflags.empty()) {
       pressureflags.assign(nlocs, 0);
     }
-    putObservation(pressurevariable_, pressureflags, "QCFlags");
+    putObservation(pressurevariable_, pressureflags, "QCflagsData");
   }
 
   // compute pressure as function of depth and latitude

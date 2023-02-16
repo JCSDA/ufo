@@ -203,11 +203,12 @@ observations:
     - 2509
     - 2510
   benchmarkFlag: 21 # track, i.e. density spike/step reject
-  passedBenchmark: 1028   # temp: 378 (profile 2: 1 spike and 1 step out of 381)
+  passedBenchmark: 1555   # temp: 378 (profile 2: 1 spike and 1 step out of 381)
                           #      + 23 (profile 4: no inversions out of 23)
                           #     + 100 (profile 6: 0 spikes and 24 steps out of 124) +
                           # sal.: 380 (profile 2: 1 spike out of 381)
                           #      + 23 (profile 4: 0 spikes out of 23)
                           #     + 124 (profile 6: 0 spikes out of 124, sal. doesn't reject steps)
-                          #    = 1028 pass
+                          # pres: 527 (QC flags set based on depthBelowWaterSurface)
+                          #    = 1555 pass
                           # (profiles 0, 1, 3, 5, all rejected because too many inversions)

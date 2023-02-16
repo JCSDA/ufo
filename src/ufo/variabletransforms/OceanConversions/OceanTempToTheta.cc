@@ -75,12 +75,12 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   // Copy across QC flag information
   {
     std::vector<int> thetaflags;
-    getObservation("QCFlags", temperaturevariable_,
+    getObservation("QCflagsData", temperaturevariable_,
                    thetaflags);
     if (thetaflags.empty()) {
       thetaflags.assign(nlocs, 0);
     }
-    putObservation(thetavariable_, thetaflags, "QCFlags");
+    putObservation(thetavariable_, thetaflags, "QCflagsData");
   }
 
   // compute theta as function of temperature, pressure and salinity

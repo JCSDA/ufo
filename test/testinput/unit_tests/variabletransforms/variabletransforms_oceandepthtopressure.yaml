@@ -28,7 +28,7 @@ observations:
     - reference:
         name: TestReference/int_zeros
       test:
-        name: QCFlags/waterPressure
+        name: QCflagsData/waterPressure
     - reference:
         name: TestReference/float_ones
       test:

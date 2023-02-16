@@ -29,7 +29,7 @@ observations:
     - reference:
         name: TestReference/int_zeros
       test:
-        name: QCFlags/waterPotentialTemperature
+        name: QCflagsData/waterPotentialTemperature
     - reference:
         name: ObsError/waterTemperature
       test:

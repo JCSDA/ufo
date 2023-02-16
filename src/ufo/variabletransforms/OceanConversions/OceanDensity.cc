@@ -67,12 +67,12 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
   // Copy across QC information to derived variable if present
   {
     std::vector<int> densityflags;
-    getObservation("QCFlags", densityvariable_,
+    getObservation("QCflagsData", densityvariable_,
                    densityflags);
     if (densityflags.empty()) {
       densityflags.assign(nlocs, 0);
     }
-    putObservation(densityvariable_, densityflags, "QCFlags");
+    putObservation(densityvariable_, densityflags, "QCflagsData");
   }
 
   // compute density as function of temperature, pressure and salinity

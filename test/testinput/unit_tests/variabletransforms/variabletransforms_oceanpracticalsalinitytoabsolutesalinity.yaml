@@ -28,7 +28,7 @@ observations:
     - reference:
         name: TestReference/int_zeros
       test:
-        name: QCFlags/absoluteSalinity
+        name: QCflagsData/absoluteSalinity
     - reference:
         name: ObsError/salinity
       test:
