@@ -107,7 +107,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
 
   real(kind_real), allocatable :: obsvcoord(:)
   type(ufo_geoval), pointer :: vcoordprofile
-  integer :: iobs
+  integer :: ilev, iobs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
   real(kind_real) :: missing
@@ -137,7 +137,15 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   allocate(tmp(vcoordprofile%nval))
   do iobs = 1, self%nlocs
     if (self%use_ln) then
-      tmp = log(vcoordprofile%vals(:,iobs))
+      ! the lines below are computing a "missing value safe" log, that passes missing value inputs
+      ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
+      do ilev = 1, vcoordprofile%nval
+        if (vcoordprofile%vals(ilev,iobs) /= missing) then
+          tmp(ilev) = log(vcoordprofile%vals(ilev,iobs))
+        else
+          tmp(ilev) = missing
+        end if
+      end do
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
