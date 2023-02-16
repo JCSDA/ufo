@@ -6,6 +6,7 @@
  */
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <memory>
@@ -24,6 +25,7 @@
 
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/Random.h"
 
 #include "ufo/ObsBias.h"
@@ -124,6 +126,25 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
           if (analysis_variances_[ii] > largest_analysis_variance_)
             analysis_variances_[ii] = largest_analysis_variance_;
         }
+      }
+    }
+
+    // Set member variables to missing for channels opted out of bias correction
+    if (params.channelsNoBC.value() != boost::none) {
+      std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
+      std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+      const double missing = util::missingValue(missing);
+      const int missing_int = util::missingValue(missing_int);
+      for (std::size_t it = 0; it < chlistNoBC_.size(); ++it) {
+        std::size_t jvar = chlistNoBC_[it] - 1;
+        for (std::size_t p = 0; p < prednames_.size(); ++p) {
+          std::size_t ii = jvar * prednames_.size() + p;
+          variances_[ii] = missing;
+          ht_rinv_h_[ii] = missing;
+          preconditioner_[ii] = missing;
+          analysis_variances_[ii] = missing;
+        }
+        obs_num_[jvar] = missing_int;
       }
     }
   }
@@ -342,6 +363,24 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       }
     }
   }
+
+// Set member variables to missing for channels opted out of bias correction
+  if (chlistNoBC_.size() > 0) {
+    const double missing = util::missingValue(missing);
+    const int missing_int = util::missingValue(missing_int);
+    for (std::size_t it = 0; it < chlistNoBC_.size(); ++it) {
+      std::size_t jvar = chlistNoBC_[it] - 1;
+      for (std::size_t p = 0; p < prednames_.size(); ++p) {
+        std::size_t ii = jvar * prednames_.size() + p;
+        variances_[ii] = missing;
+        ht_rinv_h_[ii] = missing;
+        preconditioner_[ii] = missing;
+        analysis_variances_[ii] = missing;
+      }
+      obs_num_[jvar] = missing_int;
+    }
+  }
+
   oops::Log::trace() << "ObsBiasCovariance::linearize is done" << std::endl;
 }
 
