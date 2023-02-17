@@ -33,7 +33,16 @@ OceanTempToTheta::OceanTempToTheta(
       pressurevariable_(options.PressureVariable),
       pressuregroup_(options.PressureGroup),
       thetavariable_(options.ThetaVariable)
-{}
+{
+    if (!obserr_.varnames().has(temperaturevariable_) ||
+        !obserr_.varnames().has(thetavariable_) ||
+        !flags_.varnames().has(temperaturevariable_) ||
+        !flags_.varnames().has(thetavariable_)) {
+        throw eckit::BadValue("Both `" + thetavariable_ + "` and `"
+            + temperaturevariable_ + "` must be observed or derived variables " +
+            "for the OceanTempToTheta variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -45,21 +54,20 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // First copy across the ObsError information to derived variable if present,
-  // by doing everything before adding the derived obs we will set
-  // QCflag::missing based on the presence or absence of theta rather than the
-  // auxillary variables.
+  // First copy across the ObsErrorData and QCflagsData information to derived
+  // variable if present, by doing everything before adding the derived obs we
+  // will set QCflag::missing based on the presence or absence of the
+  // observation rather than the auxillary variables.
   {
-    std::vector<float> thetaError;
-    getObservation("ObsError", temperaturevariable_, thetaError);
-    const size_t iv = obserr_.varnames().find(thetavariable_);
-    if (!thetaError.empty()) {
-      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (!apply[jobs])
-          continue;
-        obserr_[iv][jobs] = thetaError[jobs];
-      }
-      putObservation(thetavariable_, thetaError, "DerivedObsError");
+    const size_t iErrTemp = obserr_.varnames().find(temperaturevariable_);
+    const size_t iErrTheta = obserr_.varnames().find(thetavariable_);
+    const size_t iFlagTemp = flags_.varnames().find(temperaturevariable_);
+    const size_t iFlagTheta = flags_.varnames().find(thetavariable_);
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!apply[jobs])
+        continue;
+      obserr_[iErrTheta][jobs] = obserr_[iErrTemp][jobs];
+      flags_[iFlagTheta][jobs] = flags_[iFlagTemp][jobs];
     }
   }
 
@@ -70,17 +78,6 @@ void OceanTempToTheta::runTransform(const std::vector<bool> &apply) {
                    thetapge);
     if (!thetapge.empty())
       putObservation(thetavariable_, thetapge, "GrossErrorProbability");
-  }
-
-  // Copy across QC flag information
-  {
-    std::vector<int> thetaflags;
-    getObservation("QCflagsData", temperaturevariable_,
-                   thetaflags);
-    if (thetaflags.empty()) {
-      thetaflags.assign(nlocs, 0);
-    }
-    putObservation(thetavariable_, thetaflags, "QCflagsData");
   }
 
   // compute theta as function of temperature, pressure and salinity

@@ -31,7 +31,16 @@ OceanPracticalSalinityToAbsoluteSalinity::OceanPracticalSalinityToAbsoluteSalini
       practicalsalinitygroup_(options.PracticalSalinityGroup),
       pressurevariable_(options.PressureVariable),
       pressuregroup_(options.PressureGroup)
-{}
+{
+    if (!obserr_.varnames().has(practicalsalinityvariable_) ||
+        !obserr_.varnames().has(absolutesalinityvariable_) ||
+        !flags_.varnames().has(practicalsalinityvariable_) ||
+        !flags_.varnames().has(absolutesalinityvariable_)) {
+        throw eckit::BadValue("Both `" + absolutesalinityvariable_ + "` and `"
+            + practicalsalinityvariable_ + "` must be observed or derived variables" +
+            " for the `OceanPracticalSalinityToAbsoluteSalinity` variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -43,17 +52,18 @@ void OceanPracticalSalinityToAbsoluteSalinity::runTransform(const std::vector<bo
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Copy across observation error
+  // Copy across observation error and QC flag info
   {
-    std::vector<float> asalError(nlocs, missingValueFloat);
-    getObservation("ObsError", practicalsalinityvariable_, asalError);
-    const size_t iv = obserr_.varnames().find(absolutesalinityvariable_);
+    const size_t iErrASal = obserr_.varnames().find(absolutesalinityvariable_);
+    const size_t iErrPSal = obserr_.varnames().find(practicalsalinityvariable_);
+    const size_t iFlagASal = flags_.varnames().find(absolutesalinityvariable_);
+    const size_t iFlagPSal = flags_.varnames().find(practicalsalinityvariable_);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (!apply[jobs])
         continue;
-      obserr_[iv][jobs] = asalError[jobs];
+      obserr_[iErrASal][jobs] = obserr_[iErrPSal][jobs];
+      flags_[iFlagASal][jobs] = flags_[iFlagPSal][jobs];
     }
-    putObservation(absolutesalinityvariable_, asalError, "DerivedObsError");
   }
 
   // Copy across GrossErrorProbability if present
@@ -63,17 +73,6 @@ void OceanPracticalSalinityToAbsoluteSalinity::runTransform(const std::vector<bo
                    asalpge);
     if (!asalpge.empty())
       putObservation(absolutesalinityvariable_, asalpge, "GrossErrorProbability");
-  }
-
-  // Copy across QCflags
-  {
-    std::vector<int> asalflags;
-    getObservation("QCflagsData", practicalsalinityvariable_,
-                   asalflags);
-    if (asalflags.empty()) {
-      asalflags.assign(nlocs, 0);
-    }
-    putObservation(absolutesalinityvariable_, asalflags, "QCflagsData");
   }
 
   // compute absolute salinity as a function of practical salinity, pressure, longitude and latitude

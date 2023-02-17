@@ -33,7 +33,14 @@ OceanDensity::OceanDensity(
       pressurevariable_(options.PressureVariable),
       pressuregroup_(options.PressureGroup),
       densityvariable_(options.DensityVariable)
-{}
+{
+    if (!obserr_.varnames().has(densityvariable_) ||
+        !flags_.varnames().has(densityvariable_)) {
+        throw eckit::BadValue("`" + densityvariable_ +
+                              "` must be an observed or derived variable for the `OceanDensity`" +
+                              " variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -43,16 +50,16 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Set default ObsError information
+  // Set default ObsErrorData and QCflagsData information
   {
-    std::vector<float> densityError(nlocs, 1.0);
-    const size_t iv = obserr_.varnames().find(densityvariable_);
+    const size_t iErrDensity = obserr_.varnames().find(densityvariable_);
+    const size_t iFlagDensity = flags_.varnames().find(densityvariable_);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (!apply[jobs])
         continue;
-      obserr_[iv][jobs] = densityError[jobs];
+      obserr_[iErrDensity][jobs] = 1.0;
+      flags_[iFlagDensity][jobs] = 0;
     }
-    putObservation(densityvariable_, densityError, "DerivedObsError");
   }
 
   // Copy across the GrossErrorProbability information to derived variable if present
@@ -62,17 +69,6 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
                    densitypge);
     if (!densitypge.empty())
       putObservation(densityvariable_, densitypge, "GrossErrorProbability");
-  }
-
-  // Copy across QC information to derived variable if present
-  {
-    std::vector<int> densityflags;
-    getObservation("QCflagsData", densityvariable_,
-                   densityflags);
-    if (densityflags.empty()) {
-      densityflags.assign(nlocs, 0);
-    }
-    putObservation(densityvariable_, densityflags, "QCflagsData");
   }
 
   // compute density as function of temperature, pressure and salinity

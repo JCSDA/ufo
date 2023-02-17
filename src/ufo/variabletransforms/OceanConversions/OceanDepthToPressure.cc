@@ -29,7 +29,14 @@ OceanDepthToPressure::OceanDepthToPressure(
       depthvariable_(options.DepthVariable),
       depthgroup_(options.DepthGroup),
       pressurevariable_(options.PressureVariable)
-{}
+{
+    if (!obserr_.varnames().has(pressurevariable_) ||
+        !flags_.varnames().has(pressurevariable_)) {
+        throw eckit::BadValue("`" + pressurevariable_ +
+            "` must be an observed or derived variable for the " +
+            "`OceanDepthToPressure` variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -39,16 +46,16 @@ void OceanDepthToPressure::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Set default ObsError information
+  // Set ObsErrorData and QCflagsData
   {
-    std::vector<float> pressureError(nlocs, 1.0);
-    const size_t iv = obserr_.varnames().find(pressurevariable_);
+    const size_t iErrPres = obserr_.varnames().find(pressurevariable_);
+    const size_t iFlagPres = flags_.varnames().find(pressurevariable_);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (!apply[jobs])
         continue;
-      obserr_[iv][jobs] = pressureError[jobs];
+      obserr_[iErrPres][jobs] = 1;
+      flags_[iFlagPres][jobs] = 0;
     }
-    putObservation(pressurevariable_, pressureError, "DerivedObsError");
   }
 
   // Copy across the GrossErrorProbability information to derived variable if present
@@ -58,17 +65,6 @@ void OceanDepthToPressure::runTransform(const std::vector<bool> &apply) {
                    pressurepge);
     if (!pressurepge.empty())
       putObservation(pressurevariable_, pressurepge, "GrossErrorProbability");
-  }
-
-  // Copy across QC information to derived variable if present
-  {
-    std::vector<int> pressureflags;
-    getObservation("QCflagsData", depthvariable_,
-                   pressureflags);
-    if (pressureflags.empty()) {
-      pressureflags.assign(nlocs, 0);
-    }
-    putObservation(pressurevariable_, pressureflags, "QCflagsData");
   }
 
   // compute pressure as function of depth and latitude

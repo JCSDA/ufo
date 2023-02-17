@@ -33,7 +33,16 @@ OceanTempToConservativeTemp::OceanTempToConservativeTemp(
       pressurevariable_(options.PressureVariable),
       pressuregroup_(options.PressureGroup),
       conservativetempvariable_(options.ConservativeTempVariable)
-{}
+{
+    if (!obserr_.varnames().has(temperaturevariable_) ||
+        !obserr_.varnames().has(conservativetempvariable_) ||
+        !flags_.varnames().has(temperaturevariable_) ||
+        !flags_.varnames().has(conservativetempvariable_)) {
+        throw eckit::BadValue("Both `" + conservativetempvariable_ + "` and `"
+            + temperaturevariable_ + "` must be observed or derived variables for" +
+            " the `OceanTempToConservativeTemp` variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -45,20 +54,21 @@ void OceanTempToConservativeTemp::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // First copy across the ObsError information to derived variable if present,
-  // by doing everything before adding the derived obs we will set
-  // QCflag::missing based on the presence or absence of theta rather than the
-  // auxillary variables.
+  // Copy across the ObsErrorData and QCflagsData information to derived
+  // variable if present, by doing everything before adding the derived obs we
+  // will set QCflag::missing based on the presence or absence of the
+  // observation rather than the auxillary variables.
   {
-    std::vector<float> conservativetempError(nlocs, missingValueFloat);
-    getObservation("ObsError", temperaturevariable_, conservativetempError);
-    const size_t iv = obserr_.varnames().find(conservativetempvariable_);
+    const size_t iErrTemp = obserr_.varnames().find(temperaturevariable_);
+    const size_t iErrConTemp = obserr_.varnames().find(conservativetempvariable_);
+    const size_t iFlagTemp = flags_.varnames().find(temperaturevariable_);
+    const size_t iFlagConTemp = flags_.varnames().find(conservativetempvariable_);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (!apply[jobs])
         continue;
-      obserr_[iv][jobs] = conservativetempError[jobs];
+      obserr_[iErrConTemp][jobs] = obserr_[iErrTemp][jobs];
+      flags_[iFlagConTemp][jobs] = flags_[iFlagTemp][jobs];
     }
-    putObservation(conservativetempvariable_, conservativetempError, "DerivedObsError");
   }
 
   // Copy across the GrossErrorProbability information to derived variable if present
@@ -68,16 +78,6 @@ void OceanTempToConservativeTemp::runTransform(const std::vector<bool> &apply) {
                    conservativetemppge);
     if (!conservativetemppge.empty())
       putObservation(conservativetempvariable_, conservativetemppge, "GrossErrorProbability");
-  }
-
-  // Copy across QC flag information
-  {
-    std::vector<int> conservativetempflags;
-    getObservation("QCflagsData", temperaturevariable_, conservativetempflags);
-    if (conservativetempflags.empty()) {
-      conservativetempflags.assign(nlocs, 0);
-    }
-    putObservation(conservativetempvariable_, conservativetempflags, "QCflagsData");
   }
 
   // compute conservative temp as function of temperature, pressure and salinity
