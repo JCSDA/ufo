@@ -411,9 +411,14 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & dx1,
 void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   oops::Log::trace() << "ObsBiasCovariance::randomize starts" << std::endl;
   if (dx) {
+    const double missing = util::missingValue(missing);
     static util::NormalDistribution<double> dist(variances_.size());
     for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-      dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      if (variances_[jj] != missing) {
+        dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      } else {
+        dx.data()[jj] = missing;
+      }
     }
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;
