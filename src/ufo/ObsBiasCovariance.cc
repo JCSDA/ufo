@@ -248,7 +248,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::linearize(const eckit::Configuration & innerConf) {
+void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
   if (prednames_.size() * vars_.size() > 0) {
     const int jouter = innerConf.getInt("iteration");
