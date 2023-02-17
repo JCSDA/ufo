@@ -47,13 +47,10 @@ void testObsBiasCovarianceDetails() {
     obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
     ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
-    // Setup ObsBias
+    // Setup ObsBiasIncrements
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
     ObsBiasParameters biasparams;
     biasparams.validateAndDeserialize(biasconf);
-    ObsBias ybias(odb, biasparams);
-
-    // Setup ObsBiasIncrements
     eckit::LocalConfiguration biaserrconf = biasconf.getSubConfiguration("covariance");
     ObsBiasIncrement ybias_inc(odb, biasparams);
 
@@ -69,7 +66,7 @@ void testObsBiasCovarianceDetails() {
     // linearize for first outer loop - expect to throw a message
     // since QC flags and effective errors weren't set yet
     biaserrconf.set("iteration", 0);
-    EXPECT_THROWS(ybias_cov.linearize(ybias, biaserrconf));
+    EXPECT_THROWS(ybias_cov.linearize(biaserrconf));
 
     // mimic QC flags from first outer loop
     const std::vector<int> qc_flags(odb.nlocs(), 50);
@@ -127,7 +124,7 @@ void testObsBiasCovarianceDetails() {
     ybias_cov.randomize(ybias_inc);
 
     // linearize for the first outer loop again -- now QC and errors are set
-    ybias_cov.linearize(ybias, biaserrconf);
+    ybias_cov.linearize(biaserrconf);
 
     // delta_bias * B
     ybias_cov.multiply(ybias_inc, ybias_inc_2);
