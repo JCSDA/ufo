@@ -271,7 +271,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
-  if (bias) {
+  if (prednames_.size() * vars_.size() > 0) {
     const int jouter = innerConf.getInt("iteration");
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
         odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
@@ -335,30 +335,30 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // Sum the hessian contributions across the tasks
     ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
-  }
 
-  // reset variances for bias predictor coeff. based on current data count
-  for (std::size_t j = 0; j < obs_num_.size(); ++j) {
-    if (obs_num_[j] <= minimal_required_obs_number_) {
-      for (std::size_t p = 0; p < prednames_.size(); ++p)
-        variances_[j*prednames_.size() + p] = smallest_variance_;
+    // reset variances for bias predictor coeff. based on current data count
+    for (std::size_t j = 0; j < obs_num_.size(); ++j) {
+      if (obs_num_[j] <= minimal_required_obs_number_) {
+        for (std::size_t p = 0; p < prednames_.size(); ++p)
+          variances_[j*prednames_.size() + p] = smallest_variance_;
+      }
     }
-  }
 
-  // set a coeff. factor for variances of control variables
-  for (std::size_t j = 0; j < vars_.size(); ++j) {
-    for (std::size_t p = 0; p < prednames_.size(); ++p) {
-      const std::size_t index = j*prednames_.size() + p;
-      preconditioner_[index] = step_size_;
-      // L = \mathrm{A}^{-1}
-      if (obs_num_[j] > 0)
-        preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-//      preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
-      if (obs_num_[j] > minimal_required_obs_number_) {
-        if (ht_rinv_h_[index] > 0.0) {
-          analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-        } else {
-          analysis_variances_[index] = largest_analysis_variance_;
+    // set a coeff. factor for variances of control variables
+    for (std::size_t j = 0; j < vars_.size(); ++j) {
+      for (std::size_t p = 0; p < prednames_.size(); ++p) {
+        const std::size_t index = j*prednames_.size() + p;
+        preconditioner_[index] = step_size_;
+        // L = \mathrm{A}^{-1}
+        if (obs_num_[j] > 0)
+          preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+//        preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
+        if (obs_num_[j] > minimal_required_obs_number_) {
+          if (ht_rinv_h_[index] > 0.0) {
+            analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+          } else {
+            analysis_variances_[index] = largest_analysis_variance_;
+          }
         }
       }
     }
