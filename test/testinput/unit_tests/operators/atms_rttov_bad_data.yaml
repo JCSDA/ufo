@@ -11,7 +11,7 @@ observations:
      Debug: false # default
      Absorbers: []
      linear obs operator:
-       increment variables: [air_temperature]
+       increment variables: [air_temperature, specific_humidity]
      obs options:
        WMO_ID: [225]
        Sat_ID: [noaa_20]

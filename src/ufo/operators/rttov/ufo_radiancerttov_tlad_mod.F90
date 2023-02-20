@@ -450,10 +450,15 @@ end subroutine ufo_radiancerttov_tlad_settraj
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % t(self % nlevels:1:-1) * &
                       geoval_d % vals(1:geoval_d % nval, prof))
               else if (trim(varname) == var_q) then
+                ! scale_fac = 1 if Jacobain is in kg/kg
+                ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * &
                       geoval_d % vals(1:geoval_d % nval, prof)) * self%conf%scale_fac(gas_id_watervapour)
               else if (trim(varname) == var_mixr) then
+                ! scale_fac = 1 if Jacobain is in kg/kg
+                ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
+                ! humidity_mixing_ratio (var_mixr) is in g/kg therefore need additional conversion factor
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * &
                       geoval_d % vals(1:geoval_d % nval, prof)) * self%conf%scale_fac(gas_id_watervapour) / g_to_kg
@@ -475,6 +480,8 @@ end subroutine ufo_radiancerttov_tlad_settraj
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % t * geoval_d % vals(1, prof)
               else if (trim(varname) == var_sfc_q2m) then
+                ! scale_fac = 1 if Jacobain is in kg/kg
+                ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * &
                   geoval_d % vals(1,prof) * self%conf%scale_fac(gas_id_watervapour)
@@ -552,10 +559,15 @@ end subroutine ufo_radiancerttov_tlad_settraj
                   geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                     self % RTprof_K % profiles_k(ichan+jchan-1) % t(self % nlevels:1:-1) * hofx(jchan, prof)
                 else if (trim(varname) == var_q) then
+                  ! scale_fac = 1 if Jacobain is in kg/kg
+                  ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
                   geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                     self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan, prof) * &
                     self%conf%scale_fac(gas_id_watervapour)
                 else if (trim(varname) == var_mixr) then
+                  ! scale_fac = 1 if Jacobain is in kg/kg
+                  ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
+                  ! humidity_mixing_ratio (var_mixr) is in g/kg therefore need additional conversion factor
                   geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                     (self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan, prof)) * &
                     self%conf%scale_fac(gas_id_watervapour) / g_to_kg
@@ -578,6 +590,8 @@ end subroutine ufo_radiancerttov_tlad_settraj
                   geoval_d % vals(1, prof) = geoval_d % vals(1, prof) + &
                     self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % t * hofx(jchan, prof)
                 else if (trim(varname) == var_sfc_q2m) then
+                  ! scale_fac = 1 if Jacobain is in kg/kg
+                  ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
                   geoval_d % vals(1, prof) = geoval_d % vals(1, prof) + &
                     self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * &
                     hofx(jchan, prof) * self%conf%scale_fac(gas_id_watervapour)

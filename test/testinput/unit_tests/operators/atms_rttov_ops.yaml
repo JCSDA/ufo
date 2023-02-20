@@ -109,7 +109,7 @@ observations:
      Debug: false # default
      Absorbers: []
      linear obs operator:
-       increment variables: [air_temperature]
+       increment variables: [air_temperature, specific_humidity]
      obs options:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility
