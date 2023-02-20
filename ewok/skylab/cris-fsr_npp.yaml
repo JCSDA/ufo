@@ -47,6 +47,9 @@ obs operator:
   obs options:
     Sensor_ID: cris-fsr_npp
     EndianType: little_endian
+obs error:
+  covariance model: cross variable covariances
+  input file: $(static_data)/skylab-4.0.0/obserrors/Rcov.cris-fsr_npp.nc
 obs bias:
   variational bc:
     predictors:

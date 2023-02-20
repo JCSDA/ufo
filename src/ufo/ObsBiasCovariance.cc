@@ -250,73 +250,70 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
-  if (bias) {
-    // Retrieve the QC flags and do statistics from second outer loop
+  if (prednames_.size() * vars_.size() > 0) {
     const int jouter = innerConf.getInt("iteration");
-    if (jouter >= 1) {
-      std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
-          odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
+    std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
+        odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
 
-      // Retrieve the QC flags of previous outer loop and recalculate the number of effective obs.
-      const std::string qc_group_name = "EffectiveQC" + std::to_string(jouter-1);
-      const std::vector<std::string> vars = odb_.obsvariables().variables();
-      std::vector<int> qc_flags(odb_.nlocs(), 999);
-      for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
-        if (odb_.has(qc_group_name, vars[jvar])) {
-          odb_.get_db(qc_group_name, vars[jvar], qc_flags);
-          for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
-            if (qc_flags[jloc] == 0)
-              obs_num_accumulator->addTerm(jloc, jvar, 1);
-        } else {
-          throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + qc_group_name);
-        }
+    // Retrieve the QC flags of the current outer loop and recalculate the number of
+    // effective obs
+    const std::string qc_group_name = "EffectiveQC" + std::to_string(jouter);
+    const std::vector<std::string> vars = odb_.obsvariables().variables();
+    std::vector<int> qc_flags(odb_.nlocs(), 999);
+    for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
+      if (odb_.has(qc_group_name, vars[jvar])) {
+        odb_.get_db(qc_group_name, vars[jvar], qc_flags);
+        for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
+          if (qc_flags[jloc] == 0)
+            obs_num_accumulator->addTerm(jloc, jvar, 1);
+      } else {
+        throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + qc_group_name);
       }
-
-      // Sum across the processors
-      obs_num_ = obs_num_accumulator->computeResult();
-
-      const float missing = util::missingValue(missing);
-
-      // compute the hessian contribution from Jo bias terms channel by channel
-      // retrieve the effective error (after QC) for this channel
-      const std::string err_group_name = "EffectiveError" + std::to_string(jouter-1);
-      ioda::ObsVector r_inv(odb_, err_group_name);
-
-      // compute \mathrm{R}^{-1}
-      std::size_t nvars = r_inv.nvars();
-      for (size_t vv = 0; vv < nvars; ++vv) {
-        for (size_t ii = 0; ii < r_inv.nlocs(); ++ii) {
-          if (r_inv[ii*nvars + vv] != missing) {
-            r_inv[ii*nvars + vv] = 1.0f / pow(r_inv[ii*nvars + vv], 2);
-          } else {
-            r_inv[ii*nvars + vv] = 0.0f;
-          }
-        }
-      }
-
-      // compute \mathrm{H}_\beta^\intercal \mathrm{R}^{-1} \mathrm{H}_\beta
-      // -----------------------------------------
-      std::unique_ptr<ioda::Accumulator<std::vector<double>>> ht_rinv_h_accumulator =
-          odb_.distribution()->createAccumulator<double>(ht_rinv_h_.size());
-      for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        // retrieve the predictors
-        const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
-
-        // for each variable
-        ASSERT(r_inv.nlocs() == predx.nlocs());
-        std::size_t nvars = predx.nvars();
-        // only keep the diagnoal
-        for (size_t vv = 0; vv < nvars; ++vv) {
-          for (size_t ii = 0; ii < predx.nlocs(); ++ii)
-            ht_rinv_h_accumulator->addTerm(ii,
-                                           vv*prednames_.size() + p,
-                                           pow(predx[ii*nvars + vv], 2) * r_inv[ii*nvars + vv]);
-        }
-      }
-
-      // Sum the hessian contributions across the tasks
-      ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
     }
+
+    // Sum across the processors
+    obs_num_ = obs_num_accumulator->computeResult();
+
+    const float missing = util::missingValue(missing);
+
+    // compute the hessian contribution from Jo bias terms channel by channel
+    // retrieve the effective error (after QC) for this channel
+    const std::string err_group_name = "EffectiveError" + std::to_string(jouter);
+    ioda::ObsVector r_inv(odb_, err_group_name);
+
+    // compute \mathrm{R}^{-1}
+    std::size_t nvars = r_inv.nvars();
+    for (size_t vv = 0; vv < nvars; ++vv) {
+      for (size_t ii = 0; ii < r_inv.nlocs(); ++ii) {
+        if (r_inv[ii*nvars + vv] != missing) {
+          r_inv[ii*nvars + vv] = 1.0f / pow(r_inv[ii*nvars + vv], 2);
+        } else {
+          r_inv[ii*nvars + vv] = 0.0f;
+        }
+      }
+    }
+
+    // compute \mathrm{H}_\beta^\intercal \mathrm{R}^{-1} \mathrm{H}_\beta
+    // -----------------------------------------
+    std::unique_ptr<ioda::Accumulator<std::vector<double>>> ht_rinv_h_accumulator =
+        odb_.distribution()->createAccumulator<double>(ht_rinv_h_.size());
+    for (std::size_t p = 0; p < prednames_.size(); ++p) {
+      // retrieve the predictors
+      const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
+      // for each variable
+      ASSERT(r_inv.nlocs() == predx.nlocs());
+      std::size_t nvars = predx.nvars();
+      // only keep the diagnoal
+      for (size_t vv = 0; vv < nvars; ++vv) {
+        for (size_t ii = 0; ii < predx.nlocs(); ++ii)
+          ht_rinv_h_accumulator->addTerm(ii,
+                                         vv*prednames_.size() + p,
+                                         pow(predx[ii*nvars + vv], 2) * r_inv[ii*nvars + vv]);
+      }
+    }
+
+    // Sum the hessian contributions across the tasks
+    ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
 
     // reset variances for bias predictor coeff. based on current data count
     for (std::size_t j = 0; j < obs_num_.size(); ++j) {
@@ -335,7 +332,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         if (obs_num_[j] > 0)
           preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
 //        preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
-       if (obs_num_[j] > minimal_required_obs_number_) {
+        if (obs_num_[j] > minimal_required_obs_number_) {
           if (ht_rinv_h_[index] > 0.0) {
             analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
           } else {
