@@ -28,7 +28,8 @@ class ScatWindsAmbiguityCheckParameters : public oops::Parameters {
  public:
   /// Name of the HofX group used to replace the default group (default is HofX)
   oops::Parameter<std::string> test_hofx{"test_hofx", "HofX", this};
-  oops::Parameter<float> minimum_uv{"minimum_uv", 0.5, this};
+  /// minimum_uv default value set to minimum allowable value 0.0001
+  oops::Parameter<float> minimum_uv{"minimum_uv", 0.0001, this};
 };
 
 // -----------------------------------------------------------------------------
