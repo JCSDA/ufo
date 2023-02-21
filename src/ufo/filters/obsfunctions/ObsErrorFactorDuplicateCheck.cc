@@ -136,11 +136,11 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
 
   // Find indicies that pass through qc for global and local arrs
   for (size_t i = 0; i < nlocs; ++i) {
-    if (qcflag_local[i] < 1) inds.push_back(i);
+    if (qcflag_local[i] == 0) inds.push_back(i);
     obserr[0][i] = 1.0;
   }
   for (size_t i = 0; i < qcflag_global.size(); ++i) {
-    if (qcflag_global[i] < 1) inds_global.push_back(i);
+    if (qcflag_global[i] == 0) inds_global.push_back(i);
   }
 
   int qc_len_local = inds.size();

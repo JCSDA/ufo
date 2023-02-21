@@ -395,7 +395,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_linopr_average
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/conventionalprofileprocessing_opr_average.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/conventionalprofileprocessing_linopr_average.yaml"
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
