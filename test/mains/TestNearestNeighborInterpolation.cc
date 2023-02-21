@@ -5,11 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "../ufo/SoilInterpolation.h"
+#include "../ufo/NearestNeighborInterpolation.h"
 #include "oops/runs/Run.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::test::SoilInterpolation tests;
+  ufo::test::NearestNeighborInterpolation tests;
   return run.execute(tests);
 }

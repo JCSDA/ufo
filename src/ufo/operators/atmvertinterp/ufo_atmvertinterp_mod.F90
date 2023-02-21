@@ -27,15 +27,16 @@ use ufo_vars_mod
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
      logical, public :: use_fact10 ! Apply scaling factor to winds below lowest model level
 
-     integer, public :: interp_method
-     integer, parameter, public :: UNSPECIFIED_INTERP = -1
-     integer, parameter, public :: LINEAR_INTERP = 1
-     integer, parameter, public :: LN_LINEAR_INTERP = 2
-     integer, parameter, public :: NEAREST_NEIGHBOR_INTERP = 3
+     integer, public :: selected_interp
    contains
      procedure :: setup  => atmvertinterp_setup_
      procedure :: simobs => atmvertinterp_simobs_
   end type ufo_atmvertinterp
+
+  integer, parameter :: UNSPECIFIED_INTERP = -1
+  integer, parameter :: LINEAR_INTERP = 1
+  integer, parameter :: LN_LINEAR_INTERP = 2
+  integer, parameter :: NEAREST_NEIGHBOR_INTERP = 3
 
 ! ------------------------------------------------------------------------------
 contains
@@ -76,15 +77,26 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   self%interp_method = interp_method
 
   !> Linear interpolation is used by default.
-  self%use_ln = .false.
-  !> Log-linear interpolation is used either if it is explicitly requested
-  !  or the method is automatically determined based on the vertical coordinate used.
-  if ((trim(self%interp_method) == "automatic" .and. (.not. self%use_constant_vcoord) &
-       .and. ((trim(self%v_coord) .eq. var_prs) .or. &
-              (trim(self%v_coord) .eq. var_prsi) .or. &
-              (trim(self%v_coord) .eq. var_prsimo))) .or. &
-      (trim(self%interp_method) == "log-linear")) then
-     self%use_ln = .true.
+  self%selected_interp = LINEAR_INTERP
+  if(trim(self%interp_method) == "linear") then
+    self%selected_interp = LINEAR_INTERP
+  else if(trim(self%interp_method) == "log-linear") then
+    self%selected_interp = LN_LINEAR_INTERP
+  else if(trim(self%interp_method) == "nearest-neighbor") then
+    self%selected_interp = NEAREST_NEIGHBOR_INTERP
+  else
+    !> the method is automatic
+    if (trim(self%interp_method) == "automatic") then
+       !> Log-linear interpolation is used when v_coord is pressure
+       if ((trim(self%v_coord) .eq. var_prs) .or. &
+           (trim(self%v_coord) .eq. var_prsi) .or. &
+           (trim(self%v_coord) .eq. var_prsimo)) then
+         self%selected_interp = LN_LINEAR_INTERP
+       !> Nearest-Neighbor is used when const vertical coordinate used.
+       else if (self%use_constant_vcoord) then
+         self%selected_interp = NEAREST_NEIGHBOR_INTERP
+       endif
+    endif
   endif
 
   !> Apply scaling to winds below lowest model level
@@ -103,8 +115,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   else
     self%o_v_group = "MetaData"
   endif
-
-  call self%geovars%push_back(self%v_coord)
 
 end subroutine atmvertinterp_setup_
 
@@ -168,7 +178,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     nlevs = size(self%const_v_coord)
     allocate(tmp(nlevs))
     tmp = self%const_v_coord
-    if (self%use_ln) then
+    if (self%selected_interp == LN_LINEAR_INTERP) then
       do ilev = 1, nlevs
         tmp(ilev) = log(tmp(ilev))
       enddo
@@ -179,7 +189,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   do iobs = 1, nlocs
     if (.not. self%use_constant_vcoord) then
-      if (self%use_ln) then
+      if (self%selected_interp == LN_LINEAR_INTERP) then
         ! the lines below are computing a "missing value safe" log, that passes missing value inputs
         ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
         do ilev = 1, vcoordprofile%nval
@@ -194,7 +204,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       endif
     endif
 
-    if (self%use_ln) then
+    if (self%selected_interp == LN_LINEAR_INTERP) then
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
@@ -203,7 +213,19 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     else
       tmp2 = obsvcoord(iobs)
     end if
-    call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
+    if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
+      if (self%use_constant_vcoord) then
+         call nearestneighbor_interp_index(nlevs, tmp2, tmp, wi(iobs))
+      else
+         call nearestneighbor_interp_index(vcoordprofile%nval, tmp2, tmp, wi(iobs))
+      endif
+    else
+      if (self%use_constant_vcoord) then
+         call nearestneighbor_interp_index(nlevs, tmp2, tmp, wi(iobs))
+      else
+         call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
+      endif
+    end if
 
     ! Set scaling factor
     if (self%use_fact10) then
@@ -222,10 +244,17 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
-    do iobs = 1, nlocs
-      call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                             & hofx(ivar,iobs), wi(iobs), wf(iobs))
-    enddo
+    if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
+      do iobs = 1, nlocs
+        call nearestneighbor_interp_apply(profile%nval, profile%vals(:,iobs), &
+                                          hofx(ivar,iobs), wi(iobs))
+      enddo
+    else
+      do iobs = 1, nlocs
+        call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
+                               hofx(ivar,iobs), wi(iobs), wf(iobs))
+      enddo
+    end if
   enddo
 
   ! Apply a scaling to winds below lowest model level

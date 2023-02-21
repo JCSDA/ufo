@@ -239,9 +239,9 @@ real(kind_real), intent(in)  :: fvec_tl(nlev)
 integer,         intent(in)  :: idx
 real(kind_real), intent(out) :: f_tl
 
-if (wi == missing_value(nlev)) then
+if (idx== missing_value(nlev)) then
   f_tl = missing_value(f_tl)
-elseif (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
+else if (fvec_tl(idx) == missing_value(f_tl)) then
   f_tl = missing_value(f_tl)
 else
   f_tl = fvec_tl(idx)
@@ -264,9 +264,9 @@ missing = missing_value(missing)
 
 ! Do not modify the adjoint if the weight index is missing.
 ! This occurs when the observed vertical coordinate is missing.
-if (wi == missing_value(nlev)) return
+if (idx == missing_value(nlev)) return
 
-if (fvec_ad(wi) == missing .or. f_ad == missing) then
+if (fvec_ad(idx) == missing .or. f_ad == missing) then
   fvec_ad(idx) = 0.0_kind_real
 else
   fvec_ad(idx) = fvec_ad(idx) + f_ad
