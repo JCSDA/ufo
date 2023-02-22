@@ -246,12 +246,12 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
       do iobs = 1, nlocs
         call nearestneighbor_interp_apply(profile%nval, profile%vals(:,iobs), &
-                                          hofx(ivar,iobs), wi(iobs))
+                                        & hofx(ivar,iobs), wi(iobs))
       enddo
     else
       do iobs = 1, nlocs
         call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                               hofx(ivar,iobs), wi(iobs), wf(iobs))
+                             & hofx(ivar,iobs), wi(iobs), wf(iobs))
       enddo
     end if
   enddo
