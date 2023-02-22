@@ -19,6 +19,15 @@
 
 namespace ufo {
 
+class RTTOVLinearOperatorParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(RTTOVLinearOperatorParameters, Parameters)
+
+ public:
+  /// This is the list of model variables to use in the linear model.  All should be listed
+  /// including air_temperature.
+  oops::Parameter<std::vector<std::string>> incrementVariables{"increment variables", {}, this};
+};
+
 class RTTOVObsOptionsParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(RTTOVObsOptionsParameters, Parameters)
 
@@ -440,9 +449,9 @@ class ObsRadianceRTTOVParameters : public ObsOperatorParametersBase {
   /// The absorbers needed by RTTOV for this observation type and RTTOV model.
   oops::OptionalParameter<std::vector<std::string>> absorbers{"Absorbers", this};
 
-  /// Options specific to the Linear observation operator
-  oops::OptionalParameter<std::vector<std::string>> linearModelAbsorbers{
-      "linear model absorbers", this};
+  /// Options specific to the linear observation operator
+  oops::OptionalParameter<RTTOVLinearOperatorParameters> linearObsOperator{
+      "linear obs operator", this};
 };
 
 }  // namespace ufo

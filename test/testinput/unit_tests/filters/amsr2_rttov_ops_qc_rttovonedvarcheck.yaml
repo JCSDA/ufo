@@ -7,7 +7,6 @@ observations:
     name: RTTOV
     Debug: true
     Absorbers: &rttov_absorbers [CLW, CIW]
-    linear model absorbers: []
     obs options:
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
