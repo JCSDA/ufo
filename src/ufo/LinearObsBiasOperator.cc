@@ -66,8 +66,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
 // -----------------------------------------------------------------------------
 
-void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
-                                             const ObsBiasIncrement & biascoeffinc,
+void LinearObsBiasOperator::computeObsBiasTL(const ObsBiasIncrement & biascoeffinc,
                                              ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasTL starts." << std::endl;
 
@@ -83,8 +82,7 @@ void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
-                                             ObsBiasIncrement & biascoeffinc,
+void LinearObsBiasOperator::computeObsBiasAD(ObsBiasIncrement & biascoeffinc,
                                              const ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD starts." << std::endl;
 
@@ -94,7 +92,7 @@ void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
     biascoeffinc.updateCoeff(jpred, predData_[jpred].multivar_dot_product_with(ybiasinc));
   }
 
-  oops::Log::trace() << "LinearObsBiasOperator::computeAD done." << std::endl;
+  oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
