@@ -6,7 +6,6 @@ observations:
 - obs operator: &ObsOperator
     name: RTTOV
     Absorbers: &rttov_absorbers [CLW, CIW]
-    linear model absorbers: []
     obs options:
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
@@ -164,7 +163,6 @@ observations:
 - obs operator:
     name: RTTOV
     Absorbers: &rttov_absorbers [CLW, CIW]
-    linear model absorbers: []
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS43
       SatRad_compatibility: true
