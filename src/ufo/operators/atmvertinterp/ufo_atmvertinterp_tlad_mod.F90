@@ -20,6 +20,10 @@ module ufo_atmvertinterp_tlad_mod
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                      ! simulated variables in the ObsSpace.
                                                      ! allocated/deallocated at interface layer
+    logical, public :: use_constant_vcoord ! if T, use constant vertical coordinate specified
+                                           ! in configuration instead of geoval
+    real, allocatable, public :: const_v_coord(:) ! if use_constant_vcoord, holds values of
+                                                  ! constant vertical coordinate
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
     real(kind_real), allocatable :: wf(:)
@@ -29,7 +33,7 @@ module ufo_atmvertinterp_tlad_mod
     character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
     character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
 
-    logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
+    integer, public :: selected_interp
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
     procedure :: cleanup => atmvertinterp_tlad_cleanup_
@@ -38,6 +42,11 @@ module ufo_atmvertinterp_tlad_mod
     procedure :: simobs_ad => atmvertinterp_simobs_ad_
     final :: destructor
   end type ufo_atmvertinterp_tlad
+
+  integer, parameter :: UNSPECIFIED_INTERP = -1
+  integer, parameter :: LINEAR_INTERP = 1
+  integer, parameter :: LOG_LINEAR_INTERP = 2
+  integer, parameter :: NEAREST_NEIGHBOR_INTERP = 3
 
 ! ------------------------------------------------------------------------------
 contains
@@ -52,25 +61,46 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: coord_group
   character(kind=c_char,len=:), allocatable :: interp_method
-  integer :: ivar
+  integer :: ivar, nlevs
 
   !> grab what vertical coordinate/variable to use from the config
-  call grid_conf%get_or_die("vertical coordinate",coord_name)
-  self%v_coord = coord_name
+  !> check if constant vertical coordinate is provided
+  self%use_constant_vcoord = grid_conf%has("constant vertical coordinate values")
+  if (self%use_constant_vcoord) then
+    nlevs = grid_conf%get_size("constant vertical coordinate values")
+    allocate(self%const_v_coord(nlevs))
+    call grid_conf%get_or_die("constant vertical coordinate values", self%const_v_coord)
+  !> if constant values aren't provided, get geoval name for vertical coordinate
+  else
+    call grid_conf%get_or_die("vertical coordinate",coord_name)
+    self%v_coord = coord_name
+    call self%geovars%push_back(self%v_coord)
+  endif
 
   call grid_conf%get_or_die("interpolation method",interp_method)
   self%interp_method = interp_method
 
   !> Linear interpolation is used by default.
-  self%use_ln = .false.
-  !> Log-linear interpolation is used either if it is explicitly requested
-  !  or the method is automatically determined based on the vertical coordinate used.
-  if ((trim(self%interp_method) == "automatic" .and. &
-       ((trim(self%v_coord) .eq. var_prs) .or. &
-        (trim(self%v_coord) .eq. var_prsi) .or. &
-        (trim(self%v_coord) .eq. var_prsimo))) .or. &
-      (trim(self%interp_method) == "log-linear")) then
-     self%use_ln = .true.
+  self%selected_interp = LINEAR_INTERP
+  if(trim(self%interp_method) == "linear") then
+    self%selected_interp = LINEAR_INTERP
+  else if(trim(self%interp_method) == "log-linear") then
+    self%selected_interp = LOG_LINEAR_INTERP
+  else if(trim(self%interp_method) == "nearest-neighbor") then
+    self%selected_interp = NEAREST_NEIGHBOR_INTERP
+  else
+    !> the method is automatic
+    if (trim(self%interp_method) == "automatic") then
+       !> Log-linear interpolation is used when v_coord is pressure
+       if ((trim(self%v_coord) .eq. var_prs) .or. &
+           (trim(self%v_coord) .eq. var_prsi) .or. &
+           (trim(self%v_coord) .eq. var_prsimo)) then
+         self%selected_interp = LOG_LINEAR_INTERP
+       !> Nearest-Neighbor is used when const vertical coordinate used.
+       else if (self%use_constant_vcoord) then
+         self%selected_interp = NEAREST_NEIGHBOR_INTERP
+       endif
+    endif
   endif
 
   !> Determine observation vertical coordinate.
@@ -107,7 +137,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
 
   real(kind_real), allocatable :: obsvcoord(:)
   type(ufo_geoval), pointer :: vcoordprofile
-  integer :: ilev, iobs
+  integer :: ilev, iobs, nlevs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
   real(kind_real) :: missing
@@ -136,26 +166,44 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   ! Calculate the interpolation weights
   allocate(tmp(vcoordprofile%nval))
   do iobs = 1, self%nlocs
-    if (self%use_ln) then
-      ! the lines below are computing a "missing value safe" log, that passes missing value inputs
-      ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
-      do ilev = 1, vcoordprofile%nval
-        if (vcoordprofile%vals(ilev,iobs) /= missing) then
-          tmp(ilev) = log(vcoordprofile%vals(ilev,iobs))
-        else
-          tmp(ilev) = missing
-        end if
-      end do
+    if (.not. self%use_constant_vcoord) then
+      if (self%selected_interp == LOG_LINEAR_INTERP) then
+        ! the lines below are computing a "missing value safe" log, that passes missing value inputs
+        ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
+        do ilev = 1, vcoordprofile%nval
+          if (vcoordprofile%vals(ilev,iobs) /= missing) then
+            tmp(ilev) = log(vcoordprofile%vals(ilev,iobs))
+          else
+            tmp(ilev) = missing
+          end if
+        end do
+      else
+        tmp = vcoordprofile%vals(:,iobs)
+      endif
+    endif
+
+    if (self%selected_interp == LOG_LINEAR_INTERP) then
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
          tmp2 = missing
       end if
     else
-      tmp = vcoordprofile%vals(:,iobs)
       tmp2 = obsvcoord(iobs)
     end if
-    call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
+    if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
+      if (self%use_constant_vcoord) then
+         call nearestneighbor_interp_index(nlevs, tmp2, tmp, self%wi(iobs))
+      else
+         call nearestneighbor_interp_index(vcoordprofile%nval, tmp2, tmp, self%wi(iobs))
+      endif
+    else
+      if (self%use_constant_vcoord) then
+         call nearestneighbor_interp_index(nlevs, tmp2, tmp, self%wi(iobs))
+      else
+         call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
+      endif
+    end if
   enddo
 
   ! Cleanup memory
@@ -189,10 +237,18 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
-    do iobs = 1, nlocs
-      call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
-    enddo
+    ! Interpolate from geovals to observational location into hofx
+    if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
+      do iobs = 1, nlocs
+        call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                                          hofx(ivar,iobs), self%wi(iobs))
+      enddo
+    else
+      do iobs = 1, nlocs
+        call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                                  hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
+      enddo
+    end if
   enddo
 end subroutine atmvertinterp_simobs_tl_
 
@@ -224,12 +280,22 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Adjoint of interpolate, from hofx into geovals
-    do iobs = 1, self%nlocs
-      if (hofx(ivar,iobs) /= missing) then
-        call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
-                                & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
-      endif
-    enddo
+    ! Interpolate from geovals to observational location into hofx
+    if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
+      do iobs = 1, nlocs
+        if (hofx(ivar,iobs) /= missing) then
+          call nearestneighbor_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
+                                             & hofx(ivar,iobs), self%wi(iobs))
+        endif
+      enddo
+    else
+      do iobs = 1, nlocs
+        if (hofx(ivar,iobs) /= missing) then
+          call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
+                                  & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
+        endif
+      enddo
+    end if
   enddo
 end subroutine atmvertinterp_simobs_ad_
 

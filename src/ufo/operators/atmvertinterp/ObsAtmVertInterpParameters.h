@@ -20,7 +20,7 @@
 namespace ufo {
 
 enum class InterpolationMethod {
-  AUTOMATIC, LINEAR, LOGLINEAR
+  AUTOMATIC, LINEAR, LOGLINEAR, NEARESTNEIGHBOR
 };
 
 struct InterpolationMethodParameterTraitsHelper {
@@ -29,7 +29,8 @@ struct InterpolationMethodParameterTraitsHelper {
   static constexpr util::NamedEnumerator<InterpolationMethod> namedValues[] = {
     { InterpolationMethod::AUTOMATIC, "automatic" },
     { InterpolationMethod::LINEAR, "linear" },
-    { InterpolationMethod::LOGLINEAR, "log-linear"}
+    { InterpolationMethod::LOGLINEAR, "log-linear"},
+    { InterpolationMethod::NEARESTNEIGHBOR, "nearest-neighbor"}
   };
 };
 

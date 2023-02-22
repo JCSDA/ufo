@@ -24,7 +24,6 @@ use ufo_vars_mod
      character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
      character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
 
-     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
      logical, public :: use_fact10 ! Apply scaling factor to winds below lowest model level
 
      integer, public :: selected_interp
@@ -35,7 +34,7 @@ use ufo_vars_mod
 
   integer, parameter :: UNSPECIFIED_INTERP = -1
   integer, parameter :: LINEAR_INTERP = 1
-  integer, parameter :: LN_LINEAR_INTERP = 2
+  integer, parameter :: LOG_LINEAR_INTERP = 2
   integer, parameter :: NEAREST_NEIGHBOR_INTERP = 3
 
 ! ------------------------------------------------------------------------------
@@ -81,7 +80,7 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   if(trim(self%interp_method) == "linear") then
     self%selected_interp = LINEAR_INTERP
   else if(trim(self%interp_method) == "log-linear") then
-    self%selected_interp = LN_LINEAR_INTERP
+    self%selected_interp = LOG_LINEAR_INTERP
   else if(trim(self%interp_method) == "nearest-neighbor") then
     self%selected_interp = NEAREST_NEIGHBOR_INTERP
   else
@@ -91,7 +90,7 @@ subroutine atmvertinterp_setup_(self, grid_conf)
        if ((trim(self%v_coord) .eq. var_prs) .or. &
            (trim(self%v_coord) .eq. var_prsi) .or. &
            (trim(self%v_coord) .eq. var_prsimo)) then
-         self%selected_interp = LN_LINEAR_INTERP
+         self%selected_interp = LOG_LINEAR_INTERP
        !> Nearest-Neighbor is used when const vertical coordinate used.
        else if (self%use_constant_vcoord) then
          self%selected_interp = NEAREST_NEIGHBOR_INTERP
@@ -178,7 +177,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     nlevs = size(self%const_v_coord)
     allocate(tmp(nlevs))
     tmp = self%const_v_coord
-    if (self%selected_interp == LN_LINEAR_INTERP) then
+    if (self%selected_interp == LOG_LINEAR_INTERP) then
       do ilev = 1, nlevs
         tmp(ilev) = log(tmp(ilev))
       enddo
@@ -189,7 +188,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   do iobs = 1, nlocs
     if (.not. self%use_constant_vcoord) then
-      if (self%selected_interp == LN_LINEAR_INTERP) then
+      if (self%selected_interp == LOG_LINEAR_INTERP) then
         ! the lines below are computing a "missing value safe" log, that passes missing value inputs
         ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
         do ilev = 1, vcoordprofile%nval
@@ -204,7 +203,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       endif
     endif
 
-    if (self%selected_interp == LN_LINEAR_INTERP) then
+    if (self%selected_interp == LOG_LINEAR_INTERP) then
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
