@@ -133,6 +133,18 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
     if (params.channelsNoBC.value() != boost::none) {
       std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
       std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+      // The opting out of channels from bias-correction is currently only compatible with the
+      // case where the full list of channels (whether bias-corrected or not) is a consecutive
+      // list running from 1 to nvars.  While the following block of code makes sure that this
+      // is the case, such compatibility restriction should be removed in the future.
+      if (chlistNoBC_.size() > 0 && !vars_.channels().empty()) {
+        oops::Variables vartmp(vars_);
+        vartmp.sort();
+        ASSERT(vartmp.channels() == vars_.channels());
+        for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+          ASSERT(vars_.channels()[jvar] == jvar + 1);
+        }
+      }
       const double missing = util::missingValue(missing);
       const int missing_int = util::missingValue(missing_int);
       for (std::size_t it = 0; it < chlistNoBC_.size(); ++it) {
