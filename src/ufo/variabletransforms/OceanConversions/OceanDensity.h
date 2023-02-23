@@ -44,7 +44,7 @@ class OceanDensityParameters : public VariableTransformParametersBase {
                                                 "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
-  /// Density variable name
+  /// Output density variable name
   oops::Parameter<std::string> DensityVariable{"ocean density variable",
                                                "waterDensity", this};
 };
@@ -55,15 +55,17 @@ class OceanDensityParameters : public VariableTransformParametersBase {
 ///
 /// Example
 ///
-///  obs filters:
-///  - filter: Variable Transforms
-///    Transform: OceanDensity
-///    ocean pressure variable: waterPressure
-///    ocean pressure group: DerivedObsValue
-///    ocean temperature variable: waterTemperature
-///    ocean temperature group: ObsValue
-///    ocean salinity variable: absoluteSalinity
-///    ocean salinity group: ObsValue
+/// \code{.yaml}
+/// obs filters:
+/// - filter: Variable Transforms
+///   Transform: OceanDensity
+///   ocean pressure variable: waterPressure
+///   ocean pressure group: DerivedObsValue
+///   ocean temperature variable: waterTemperature
+///   ocean temperature group: ObsValue
+///   ocean salinity variable: absoluteSalinity
+///   ocean salinity group: ObsValue
+/// \endcode
 ///
 /// will return density (kg/m^3) in a variable named (by default) "DerivedObsValue/waterDensity",
 /// given salinity (g/kg), temperature (deg.C) and pressure (dbar), as given by TEOS-10
