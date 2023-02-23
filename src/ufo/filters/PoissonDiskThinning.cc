@@ -507,7 +507,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
 
         // If there is more than one observation in the exclusion volume, find
         // the median observation. If there is an even number of observations,
-        // keep the first of the two central pair. Thin the rest.
+        // keep the first of the central pair. Thin the rest.
         if (nMedianObs > 1) {
           std::vector<float> medianObsSorted(medianObs);
           std::stable_sort(medianObsSorted.begin(), medianObsSorted.end());

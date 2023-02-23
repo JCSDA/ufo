@@ -1,6 +1,6 @@
 # This test compares the results produced by the Poisson-disk thinning filter against ones
 # obtained with the Ops_PoissonThinning function from the Met Office observation processing system.
-# Also ocean profile level subsample.
+# Also ocean profile level subsample and median value selection.
 window begin: 2000-01-01T00:00:00Z
 window end: 2030-12-31T23:59:59Z
 
@@ -283,4 +283,24 @@ observations:
       - 44
       - 47
       - 49
+      - 50
+- obs space:
+    name: Simple ocean horizontal thinning median selection example
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+    simulated variables: [waterTemperature]
+  obs pre filters:
+  - filter: Poisson Disk Thinning # To test selection of median value.
+    filter variables:
+    - name: waterTemperature
+    min_horizontal_spacing: 50
+    shuffle: false
+    select_median: true
+  passedBenchmark: 4
+  passedObservationsBenchmark:
+      - 5
+      - 19
+      - 38
       - 50
