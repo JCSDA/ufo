@@ -62,15 +62,6 @@ void OceanDensity::runTransform(const std::vector<bool> &apply) {
     }
   }
 
-  // Copy across the GrossErrorProbability information to derived variable if present
-  {
-    std::vector<float> densitypge;
-    getObservation("GrossErrorProbability", densityvariable_,
-                   densitypge);
-    if (!densitypge.empty())
-      putObservation(densityvariable_, densitypge, "GrossErrorProbability");
-  }
-
   // compute density as function of temperature, pressure and salinity
   {
     std::vector<float> pressure;
