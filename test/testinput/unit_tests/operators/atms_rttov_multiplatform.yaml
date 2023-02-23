@@ -6,7 +6,8 @@ observations:
      Debug: true
      name: RTTOV
      Absorbers: [CLW]
-     linear model absorbers: []
+     linear obs operator:
+       increment variables: [air_temperature, specific_humidity]
      obs options:
        WMO_ID: [225] # Only process NOAA-20
        Sat_ID: [noaa_20]
@@ -42,7 +43,8 @@ observations:
      Debug: true
      name: RTTOV
      Absorbers: [CLW]
-     linear model absorbers: []
+     linear obs operator:
+       increment variables: [air_temperature, specific_humidity]
      obs options:
        WMO_ID: [224,225] # Process JPSS-0/S-NPP and NOAA-20
        Sat_ID: [noaa_20]
@@ -78,7 +80,8 @@ observations:
      Debug: true
      name: RTTOV
      Absorbers: [CLW]
-     linear model absorbers: []
+     linear obs operator:
+       increment variables: [air_temperature, specific_humidity]
      obs options:
        WMO_ID: [224,225] # Process JPSS-0/S-NPP and NOAA-20
        Sat_ID: [jpss_0,noaa_20]

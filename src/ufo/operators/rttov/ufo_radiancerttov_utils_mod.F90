@@ -263,12 +263,7 @@ contains
 
     ! q is mandatory and us expected to be present so is not required to be present in the list of absorbers
     conf%ngas = 1
-
-    if (linear_model) then
-      absorber_name = "linear model absorbers"
-    else
-      absorber_name = "Absorbers"
-    end if
+    absorber_name = "Absorbers"
 
     ! add additional requested absorbers
     if (f_confOper%has(trim(absorber_name))) &
