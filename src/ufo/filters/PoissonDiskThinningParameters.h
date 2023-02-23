@@ -164,6 +164,11 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// If this parameter is not set, all observations are assumed to have equal priority.
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
 
+  /// True to accept the observation within an exclusion zone whose value is closest to the median.
+  /// If false or unspecified, observations are retained in the order they are found if they
+  /// are not within the exclusion zone of another retained observation.
+  oops::Parameter<bool> selectMedian{"select_median", false, this};
+
   /// If true, observations will be randomly shuffled before being inspected as candidates
   /// for retaining.
   ///

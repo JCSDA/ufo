@@ -157,6 +157,8 @@ struct PoissonDiskThinning::ObsData
 
   boost::optional<std::vector<int>> priorities;
 
+  boost::optional<std::vector<float>> obsForMedian;
+
   // Total number of observations held by all MPI tasks
   size_t totalNumObs = 0;
 };
@@ -261,7 +263,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
     // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
-                 isThinned);
+                 options_.selectMedian.value(), isThinned);
   }
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
@@ -320,6 +322,13 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   if (priorityVariable != boost::none) {
     obsData.priorities = obsAccessor.getIntVariableFromObsSpace(
           priorityVariable.get().group(), priorityVariable.get().variable());
+  }
+
+  if (options_.selectMedian) {
+    ASSERT(filtervars_.size() == 1);  // only works on one variable at a time
+    const size_t filterVarIndex = 0;
+    obsData.obsForMedian = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
+                                filtervars_.variable(filterVarIndex).variable());
   }
 
   obsData.totalNumObs = obsAccessor.totalNumObservations();
@@ -414,20 +423,26 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                                        const RecursiveSplitter &prioritySplitter,
                                        int numSpatialDims,
                                        int numNonspatialDims,
+                                       const bool &selectMedian,
                                        std::vector<bool> &isThinned) const {
   switch (numSpatialDims + numNonspatialDims) {
   case 0:
     return;  // nothing to do
   case 1:
-    return thinCategory<1>(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, isThinned);
+    return thinCategory<1>(obsData, obsIdsInCategory, prioritySplitter,
+                           numSpatialDims, selectMedian, isThinned);
   case 2:
-    return thinCategory<2>(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, isThinned);
+    return thinCategory<2>(obsData, obsIdsInCategory, prioritySplitter,
+                           numSpatialDims, selectMedian, isThinned);
   case 3:
-    return thinCategory<3>(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, isThinned);
+    return thinCategory<3>(obsData, obsIdsInCategory, prioritySplitter,
+                           numSpatialDims, selectMedian, isThinned);
   case 4:
-    return thinCategory<4>(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, isThinned);
+    return thinCategory<4>(obsData, obsIdsInCategory, prioritySplitter,
+                           numSpatialDims, selectMedian, isThinned);
   case 5:
-    return thinCategory<5>(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, isThinned);
+    return thinCategory<5>(obsData, obsIdsInCategory, prioritySplitter,
+                           numSpatialDims, selectMedian, isThinned);
   }
 
   ABORT("Unexpected number of thinning dimensions");
@@ -438,23 +453,97 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                                        const std::vector<size_t> &obsIdsInCategory,
                                        const RecursiveSplitter &prioritySplitter,
                                        int numSpatialDims,
+                                       const bool &selectMedian,
                                        std::vector<bool> &isThinned) const {
   KDTree<numDims> pointIndex;
 
-  for (auto priorityGroup : prioritySplitter.groups()) {
-    for (size_t obsIndex : priorityGroup) {
-      const size_t obsId = obsIdsInCategory[obsIndex];
-      std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
-      std::array<float, numDims> semiAxes = getExclusionVolumeSemiAxes<numDims>(obsId, obsData);
-      if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
-           pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
-          (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
-           pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes)) ||
-          (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX &&
-           pointIndex.isAnyPointInBoxInterior(point, semiAxes))) {
-        isThinned[obsId] = true;
-      } else {
+  if (selectMedian) {
+    // If selectMedian is true, find all observations enclosed in the exclusion volume
+    // that have not previously been found and retain the one closest to the median
+    // and thin the rest.
+    std::vector<bool> isUsed(obsData.totalNumObs, false);
+    for (auto priorityGroup : prioritySplitter.groups()) {
+      for (size_t obsIndex : priorityGroup) {
+        const size_t obsId = obsIdsInCategory[obsIndex];
+        if (isUsed[obsId]) {
+          continue;
+        }
+        // An observation has been found that was not previously used to find a
+        // median. Other observations within the exclusion volume of this observation
+        // are now found and the median calculated.
+
+        // Store the information about this observation.
+        std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
+        std::vector<size_t> medianIndices;
+        std::vector<float> medianObs;
         pointIndex.insert(point);
+        medianIndices.push_back(obsId);
+        medianObs.push_back((*obsData.obsForMedian)[obsId]);
+        isUsed[obsId] = true;
+        size_t nMedianObs = 1;
+
+        // Find additional observations within the exclusion volume of the
+        // observation.
+        for (size_t obsIndex2 : priorityGroup) {
+          const size_t obsId2 = obsIdsInCategory[obsIndex2];
+          if (isUsed[obsId2]) {
+            continue;
+          }
+          std::array<float, numDims> point = getObservationPosition<numDims>(obsId2, obsData);
+          std::array<float, numDims> semiAxes =
+                                         getExclusionVolumeSemiAxes<numDims>(obsId2, obsData);
+          if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
+             pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
+            (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
+             pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes)) ||
+            (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX &&
+             pointIndex.isAnyPointInBoxInterior(point, semiAxes))) {
+            medianIndices.push_back(obsId2);
+            medianObs.push_back((*obsData.obsForMedian)[obsId2]);
+            isUsed[obsId2] = true;
+            nMedianObs++;
+          }
+        }
+
+        // If there is more than one observation in the exclusion volume, find
+        // the median observation. If there is an even number of observations,
+        // keep the first of the two central pair. Thin the rest.
+        if (nMedianObs > 1) {
+          std::vector<float> medianObsSorted(medianObs);
+          std::stable_sort(medianObsSorted.begin(), medianObsSorted.end());
+          size_t obsIndexMedian1 = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
+          size_t obsIndexMedian2 = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
+          float obsValueMedian1 = medianObsSorted[obsIndexMedian2];
+          float obsValueMedian2 = medianObsSorted[obsIndexMedian2];
+          bool stillToFindMedian = true;
+          for (size_t medianIndex = 0; medianIndex < nMedianObs; medianIndex++) {
+            if (((medianObs[medianIndex] == obsValueMedian1) ||
+                 (medianObs[medianIndex] == obsValueMedian2)) &&
+                 stillToFindMedian) {
+              stillToFindMedian = false;
+            } else {
+              isThinned[medianIndices[medianIndex]] = true;
+            }
+          }
+        }
+      }  // Loop over observations in the priority group.
+    }  // Loop over priority groups.
+  } else {
+    for (auto priorityGroup : prioritySplitter.groups()) {
+      for (size_t obsIndex : priorityGroup) {
+        const size_t obsId = obsIdsInCategory[obsIndex];
+        std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
+        std::array<float, numDims> semiAxes = getExclusionVolumeSemiAxes<numDims>(obsId, obsData);
+        if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
+             pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
+            (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
+             pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes)) ||
+            (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX &&
+             pointIndex.isAnyPointInBoxInterior(point, semiAxes))) {
+          isThinned[obsId] = true;
+        } else {
+          pointIndex.insert(point);
+        }
       }
     }
   }
