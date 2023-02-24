@@ -455,28 +455,42 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                                        int numSpatialDims,
                                        const bool &selectMedian,
                                        std::vector<bool> &isThinned) const {
-  KDTree<numDims> pointIndex;
-
   if (selectMedian) {
     // If selectMedian is true, find all observations enclosed in the exclusion volume
     // that have not previously been found and retain the one closest to the median
     // and thin the rest.
     std::vector<bool> isUsed(obsData.totalNumObs, false);
     for (auto priorityGroup : prioritySplitter.groups()) {
+      // Generate vectors of quantities to avoid having to recalculate them
+      // repeatedly.
+      std::vector<std::array<float, numDims>> allPoints;
+      std::vector<std::array<float, numDims>> allSemiAxes;
+      std::vector<size_t> allObsIds;
       for (size_t obsIndex : priorityGroup) {
         const size_t obsId = obsIdsInCategory[obsIndex];
+        std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
+        std::array<float, numDims> semiAxes = getExclusionVolumeSemiAxes<numDims>(obsId, obsData);
+        allPoints.push_back(point);
+        allSemiAxes.push_back(semiAxes);
+        allObsIds.push_back(obsId);
+      }
+      // Loop through the observations until one is found that has not previously
+      // been used to calculate a median. Other observations within the exclusion
+      // volume of that observation that were not previously used are then used
+      // to find the median observation.
+      size_t iCount = -1;
+      for (size_t obsIndex : priorityGroup) {
+        const size_t obsId = allObsIds[++iCount];
         if (isUsed[obsId]) {
           continue;
         }
-        // An observation has been found that was not previously used to find a
-        // median. Other observations within the exclusion volume of this observation
-        // are now found and the median calculated.
 
         // Store the information about this observation.
-        std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
+        std::array<float, numDims> point = allPoints[iCount];
+        KDTree<numDims> pointIndex;
+        pointIndex.insert(point);
         std::vector<size_t> medianIndices;
         std::vector<float> medianObs;
-        pointIndex.insert(point);
         medianIndices.push_back(obsId);
         medianObs.push_back((*obsData.obsForMedian)[obsId]);
         isUsed[obsId] = true;
@@ -484,20 +498,23 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
 
         // Find additional observations within the exclusion volume of the
         // observation.
+        size_t jCount = -1;
         for (size_t obsIndex2 : priorityGroup) {
-          const size_t obsId2 = obsIdsInCategory[obsIndex2];
+          const size_t obsId2 = allObsIds[++jCount];
           if (isUsed[obsId2]) {
             continue;
           }
-          std::array<float, numDims> point = getObservationPosition<numDims>(obsId2, obsData);
-          std::array<float, numDims> semiAxes =
-                                         getExclusionVolumeSemiAxes<numDims>(obsId2, obsData);
-          if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
-             pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
-            (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
-             pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes)) ||
-            (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX &&
-             pointIndex.isAnyPointInBoxInterior(point, semiAxes))) {
+          std::array<float, numDims> point = allPoints[jCount];
+          std::array<float, numDims> semiAxes = allSemiAxes[jCount];
+          bool isMatch = false;
+          if (options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER) {
+            isMatch = pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims);
+          } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID) {
+            isMatch = pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes);
+          } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX) {
+            isMatch = pointIndex.isAnyPointInBoxInterior(point, semiAxes);
+          }
+          if (isMatch) {
             medianIndices.push_back(obsId2);
             medianObs.push_back((*obsData.obsForMedian)[obsId2]);
             isUsed[obsId2] = true;
@@ -513,7 +530,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
           std::stable_sort(medianObsSorted.begin(), medianObsSorted.end());
           size_t obsIndexMedian1 = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
           size_t obsIndexMedian2 = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
-          float obsValueMedian1 = medianObsSorted[obsIndexMedian2];
+          float obsValueMedian1 = medianObsSorted[obsIndexMedian1];
           float obsValueMedian2 = medianObsSorted[obsIndexMedian2];
           bool stillToFindMedian = true;
           for (size_t medianIndex = 0; medianIndex < nMedianObs; medianIndex++) {
@@ -529,6 +546,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
       }  // Loop over observations in the priority group.
     }  // Loop over priority groups.
   } else {
+    KDTree<numDims> pointIndex;
     for (auto priorityGroup : prioritySplitter.groups()) {
       for (size_t obsIndex : priorityGroup) {
         const size_t obsId = obsIdsInCategory[obsIndex];
