@@ -5,7 +5,6 @@ observations:
 - obs operator:
     name: RTTOV
     Absorbers: &rttov_absorbers []
-    linear model absorbers: []
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true

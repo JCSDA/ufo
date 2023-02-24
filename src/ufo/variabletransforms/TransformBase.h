@@ -170,16 +170,35 @@ class TransformBase {
                       const std::vector<T> &obsVector,
                       const std::vector<std::string> & dimList,
                       const std::string &outputTag = "DerivedObsValue") {
-    obsdb_.put_db(outputTag, varName + "_" + channel, obsVector, dimList);
+    std::vector<T> outputObsVector(obsVector);
+    // Fill in missing values with values of non-derived group
+    if (options_.FillMissingDerivedFromOriginal &&
+        outputTag.substr(0, 7) == "Derived") {
+      std::string originalTag = outputTag;
+      originalTag.erase(0, 7);  // Remove Derived from group name
+      if (obsdb_.has(originalTag, varName + "_" + channel)) {
+        std::vector <T> originalValues(obsdb_.nlocs());
+        // Need to skipDerived so we pickup original ObsValues
+        obsdb_.get_db(originalTag, varName + "_" + channel, originalValues, {}, true);
+        const T missing = util::missingValue(missing);
+        for (size_t jloc = 0; jloc < obsdb_.nlocs(); ++jloc) {
+          if (outputObsVector[jloc] == missing &&
+              originalValues[jloc] != missing) {
+            outputObsVector[jloc] = originalValues[jloc];
+          }
+        }
+      }
+    }
+    obsdb_.put_db(outputTag, varName + "_" + channel, outputObsVector, dimList);
     if (flags_.has(varName + "_" + channel)) {
       std::vector<int> &varFlags = flags_[varName + "_" + channel];
-      ASSERT(varFlags.size() == obsVector.size());
+      ASSERT(varFlags.size() == outputObsVector.size());
 
       const T missing = util::missingValue(T());
-      for (size_t iloc = 0; iloc < obsVector.size(); ++iloc) {
-        if (varFlags[iloc] == QCflags::missing && obsVector[iloc] != missing)
+      for (size_t iloc = 0; iloc < outputObsVector.size(); ++iloc) {
+        if (varFlags[iloc] == QCflags::missing && outputObsVector[iloc] != missing)
           varFlags[iloc] = QCflags::pass;
-        else if (varFlags[iloc] == QCflags::pass && obsVector[iloc] == missing)
+        else if (varFlags[iloc] == QCflags::pass && outputObsVector[iloc] == missing)
           varFlags[iloc] = QCflags::missing;
       }
     }
