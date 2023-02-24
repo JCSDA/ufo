@@ -7,6 +7,8 @@ module ufo_atmvertinterp_mod
 
 use oops_variables_mod
 use ufo_vars_mod
+use ufo_interp_param_mod
+
 ! ------------------------------------------------------------------------------
 
   type, public :: ufo_atmvertinterp
@@ -31,11 +33,6 @@ use ufo_vars_mod
      procedure :: setup  => atmvertinterp_setup_
      procedure :: simobs => atmvertinterp_simobs_
   end type ufo_atmvertinterp
-
-  integer, parameter :: UNSPECIFIED_INTERP = -1
-  integer, parameter :: LINEAR_INTERP = 1
-  integer, parameter :: LOG_LINEAR_INTERP = 2
-  integer, parameter :: NEAREST_NEIGHBOR_INTERP = 3
 
 ! ------------------------------------------------------------------------------
 contains
@@ -65,7 +62,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   else
     call grid_conf%get_or_die("vertical coordinate",coord_name)
     self%v_coord = coord_name
-    call self%geovars%push_back(self%v_coord)
   endif
 
   !> check which obs vertical coordinate and interpolation method to use
@@ -114,6 +110,8 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   else
     self%o_v_group = "MetaData"
   endif
+
+  call self%geovars%push_back(self%v_coord)
 
 end subroutine atmvertinterp_setup_
 
@@ -183,6 +181,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       enddo
     endif
   else
+    nlevs = vcoordprofile%nval
     allocate(tmp(vcoordprofile%nval))
   endif
 
@@ -213,17 +212,9 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       tmp2 = obsvcoord(iobs)
     end if
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
-      if (self%use_constant_vcoord) then
-         call nearestneighbor_interp_index(nlevs, tmp2, tmp, wi(iobs))
-      else
-         call nearestneighbor_interp_index(vcoordprofile%nval, tmp2, tmp, wi(iobs))
-      endif
+      call nearestneighbor_interp_index(nlevs, tmp2, tmp, wi(iobs))
     else
-      if (self%use_constant_vcoord) then
-         call nearestneighbor_interp_index(nlevs, tmp2, tmp, wi(iobs))
-      else
-         call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
-      endif
+      call vert_interp_weights(nlevs, tmp2, tmp, wi(iobs), wf(iobs))
     end if
 
     ! Set scaling factor

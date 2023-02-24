@@ -10,7 +10,7 @@ module ufo_atmvertinterp_tlad_mod
   use ufo_geovals_mod
   use vert_interp_mod
   use missing_values_mod
-
+  use ufo_interp_param_mod
 
 ! ------------------------------------------------------------------------------
 
@@ -43,11 +43,6 @@ module ufo_atmvertinterp_tlad_mod
     final :: destructor
   end type ufo_atmvertinterp_tlad
 
-  integer, parameter :: UNSPECIFIED_INTERP = -1
-  integer, parameter :: LINEAR_INTERP = 1
-  integer, parameter :: LOG_LINEAR_INTERP = 2
-  integer, parameter :: NEAREST_NEIGHBOR_INTERP = 3
-
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
@@ -74,7 +69,6 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
   else
     call grid_conf%get_or_die("vertical coordinate",coord_name)
     self%v_coord = coord_name
-    call self%geovars%push_back(self%v_coord)
   endif
 
   call grid_conf%get_or_die("interpolation method",interp_method)
@@ -164,7 +158,20 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   allocate(self%wf(self%nlocs))
 
   ! Calculate the interpolation weights
-  allocate(tmp(vcoordprofile%nval))
+  if (self%use_constant_vcoord) then
+    nlevs = size(self%const_v_coord)
+    allocate(tmp(nlevs))
+    tmp = self%const_v_coord
+    if (self%selected_interp == LOG_LINEAR_INTERP) then
+      do ilev = 1, nlevs
+        tmp(ilev) = log(tmp(ilev))
+      enddo
+    endif
+  else
+    nlevs = vcoordprofile%nval
+    allocate(tmp(vcoordprofile%nval))
+  endif
+
   do iobs = 1, self%nlocs
     if (.not. self%use_constant_vcoord) then
       if (self%selected_interp == LOG_LINEAR_INTERP) then
@@ -191,18 +198,11 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
     else
       tmp2 = obsvcoord(iobs)
     end if
+
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
-      if (self%use_constant_vcoord) then
-         call nearestneighbor_interp_index(nlevs, tmp2, tmp, self%wi(iobs))
-      else
-         call nearestneighbor_interp_index(vcoordprofile%nval, tmp2, tmp, self%wi(iobs))
-      endif
+      call nearestneighbor_interp_index(nlevs, tmp2, tmp, self%wi(iobs))
     else
-      if (self%use_constant_vcoord) then
-         call nearestneighbor_interp_index(nlevs, tmp2, tmp, self%wi(iobs))
-      else
-         call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
-      endif
+      call vert_interp_weights(nlevs, tmp2, tmp, self%wi(iobs), self%wf(iobs))
     end if
   enddo
 
@@ -237,16 +237,15 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
-    ! Interpolate from geovals to observational location into hofx
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
       do iobs = 1, nlocs
         call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                          hofx(ivar,iobs), self%wi(iobs))
+                                           & hofx(ivar,iobs), self%wi(iobs))
       enddo
     else
       do iobs = 1, nlocs
         call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                  hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
+                                & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
       enddo
     end if
   enddo
