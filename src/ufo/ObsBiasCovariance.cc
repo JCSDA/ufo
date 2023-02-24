@@ -138,25 +138,23 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
       // list running from 1 to nvars.  While the following block of code makes sure that this
       // is the case, such compatibility restriction should be removed in the future.
       if (chlistNoBC_.size() > 0 && !vars_.channels().empty()) {
-        oops::Variables vartmp(vars_);
-        vartmp.sort();
-        ASSERT(vartmp.channels() == vars_.channels());
-        for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
-          ASSERT(vars_.channels()[jvar] == jvar + 1);
-        }
+        std::vector<int> tmp(vars_.size());
+        std::iota(tmp.begin(), tmp.end(), 1);
+        ASSERT(vars_.channels() == tmp);
       }
       const double missing = util::missingValue(missing);
       const int missing_int = util::missingValue(missing_int);
-      for (std::size_t it = 0; it < chlistNoBC_.size(); ++it) {
-        std::size_t jvar = chlistNoBC_[it] - 1;
-        for (std::size_t p = 0; p < prednames_.size(); ++p) {
-          std::size_t ii = jvar * prednames_.size() + p;
-          variances_[ii] = missing;
-          ht_rinv_h_[ii] = missing;
-          preconditioner_[ii] = missing;
-          analysis_variances_[ii] = missing;
+      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+        if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
+          obs_num_[jvar] = missing_int;
+          for (std::size_t p = 0; p < prednames_.size(); ++p) {
+            const std::size_t ii = jvar * prednames_.size() + p;
+            variances_[ii] = missing;
+            ht_rinv_h_[ii] = missing;
+            preconditioner_[ii] = missing;
+            analysis_variances_[ii] = missing;
+          }
         }
-        obs_num_[jvar] = missing_int;
       }
     }
   }
@@ -380,16 +378,17 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
   if (chlistNoBC_.size() > 0) {
     const double missing = util::missingValue(missing);
     const int missing_int = util::missingValue(missing_int);
-    for (std::size_t it = 0; it < chlistNoBC_.size(); ++it) {
-      std::size_t jvar = chlistNoBC_[it] - 1;
-      for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        std::size_t ii = jvar * prednames_.size() + p;
-        variances_[ii] = missing;
-        ht_rinv_h_[ii] = missing;
-        preconditioner_[ii] = missing;
-        analysis_variances_[ii] = missing;
+    for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
+        obs_num_[jvar] = missing_int;
+        for (std::size_t p = 0; p < prednames_.size(); ++p) {
+          const std::size_t ii = jvar * prednames_.size() + p;
+          variances_[ii] = missing;
+          ht_rinv_h_[ii] = missing;
+          preconditioner_[ii] = missing;
+          analysis_variances_[ii] = missing;
+        }
       }
-      obs_num_[jvar] = missing_int;
     }
   }
 

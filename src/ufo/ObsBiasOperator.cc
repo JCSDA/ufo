@@ -56,18 +56,15 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   // list running from 1 to nvars.  While the following block of code makes sure that this
   // is the case, such compatibility restriction should be removed in the future.
   if (chNoBC.size() > 0 && !correctedVars.channels().empty()) {
-    oops::Variables vartmp(correctedVars);
-    vartmp.sort();
-    ASSERT(vartmp.channels() == correctedVars.channels());
-    for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      ASSERT(correctedVars.channels()[jvar] == jvar + 1);
-    }
+    std::vector<int> tmp(nvars);
+    std::iota(tmp.begin(), tmp.end(), 1);
+    ASSERT(correctedVars.channels() == tmp);
   }
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
     if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) != chNoBC.end()) {
       for (std::size_t jp = 0; jp < npreds; ++jp) {
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          predData[jp][jl*nvars+jvar] = 0.0;
+          predData[jp][jl * nvars + jvar] = 0.0;
         }
       }
     }
@@ -100,9 +97,9 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
         // axpy
         const double beta = biascoeffs(jp, jvar);
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          if (predData[jp][jl*nvars+jvar] != missing) {
-            biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
-            ybias[jl*nvars+jvar] += biasTerm[jl];
+          if (predData[jp][jl * nvars + jvar] != missing) {
+            biasTerm[jl] = predData[jp][jl * nvars + jvar] * beta;
+            ybias[jl * nvars + jvar] += biasTerm[jl];
           }
         }
         // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
