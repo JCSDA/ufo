@@ -62,6 +62,7 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   else
     call grid_conf%get_or_die("vertical coordinate",coord_name)
     self%v_coord = coord_name
+    call self%geovars%push_back(self%v_coord)
   endif
 
   !> check which obs vertical coordinate and interpolation method to use
@@ -110,8 +111,6 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   else
     self%o_v_group = "MetaData"
   endif
-
-  call self%geovars%push_back(self%v_coord)
 
 end subroutine atmvertinterp_setup_
 
