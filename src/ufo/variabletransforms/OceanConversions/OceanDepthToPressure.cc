@@ -29,7 +29,14 @@ OceanDepthToPressure::OceanDepthToPressure(
       depthvariable_(options.DepthVariable),
       depthgroup_(options.DepthGroup),
       pressurevariable_(options.PressureVariable)
-{}
+{
+    if (!obserr_.varnames().has(pressurevariable_) ||
+        !flags_.varnames().has(pressurevariable_)) {
+        throw eckit::BadValue("`" + pressurevariable_ +
+            "` must be an observed or derived variable for the " +
+            "`OceanDepthToPressure` variable transform.", Here());
+    }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -39,52 +46,47 @@ void OceanDepthToPressure::runTransform(const std::vector<bool> &apply) {
   // dimension
   const size_t nlocs = obsdb_.nlocs();
 
-  // Get all required data
-  std::vector<float> depth;
-  std::vector<float> lats(nlocs);
-  std::vector<float> pressure(nlocs, missingValueFloat);
-  std::vector<float> pressureError(nlocs, 1.0);
-  std::vector<float> pressurepge;
-  std::vector<int> pressureflags;
-  getObservation(depthgroup_,
-                 depthvariable_,
-                 depth, true);
-  // Get latitude
-  getObservation("MetaData",
-                 "latitude",
-                 lats, true);
-  getObservation("GrossErrorProbability", depthvariable_,
-                 pressurepge);
-  getObservation("QCFlags", depthvariable_,
-                 pressureflags);
-
-  if (pressurepge.empty()) {
-    pressurepge.assign(nlocs, missingValueFloat);
+  // Set ObsErrorData and QCflagsData
+  {
+    const size_t iErrPres = obserr_.varnames().find(pressurevariable_);
+    const size_t iFlagPres = flags_.varnames().find(pressurevariable_);
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!apply[jobs])
+        continue;
+      obserr_[iErrPres][jobs] = 1;
+      flags_[iFlagPres][jobs] = 0;
+    }
   }
-  if (pressureflags.empty()) {
-    pressureflags.assign(nlocs, 0);
+
+  // Copy across the GrossErrorProbability information to derived variable if present
+  {
+    std::vector<float> pressurepge;
+    getObservation("GrossErrorProbability", depthvariable_,
+                   pressurepge);
+    if (!pressurepge.empty())
+      putObservation(pressurevariable_, pressurepge, "GrossErrorProbability");
   }
 
   // compute pressure as function of depth and latitude
-  for (size_t loc = 0; loc < nlocs; ++loc) {
-    if (!apply[loc]) continue;
-    if (depth[loc] != missingValueFloat) {
-      pressure[loc] = gsw_p_from_z_f90(-1.0*depth[loc],
-                                       lats[loc]);
+  {
+    std::vector<float> depth;
+    std::vector<float> lats(nlocs);
+    std::vector<float> pressure(nlocs, missingValueFloat);
+    getObservation(depthgroup_,
+                   depthvariable_,
+                   depth, true);
+    getObservation("MetaData",
+                   "latitude",
+                   lats, true);
+    for (size_t loc = 0; loc < nlocs; ++loc) {
+      if (!apply[loc]) continue;
+      if (depth[loc] != missingValueFloat) {
+        pressure[loc] = gsw_p_from_z_f90(-1.0*depth[loc],
+                                         lats[loc]);
+      }
     }
+    putObservation(pressurevariable_, pressure, "DerivedObsValue");
   }
-  obsdb_.put_db("DerivedObsValue", pressurevariable_, pressure);
-  const size_t iv = obserr_.varnames().find(pressurevariable_);
-  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    if (!apply[jobs])
-      continue;
-    obserr_[iv][jobs] = pressureError[jobs];
-  }
-
-  // copy ObsError, PGEFinal and QCflags to new pressure
-  obsdb_.put_db("GrossErrorProbability", pressurevariable_, pressurepge);
-  obsdb_.put_db("QCFlags", pressurevariable_, pressureflags);
-  obsdb_.put_db("DerivedObsError", pressurevariable_, pressureError);
 }
 
 // -----------------------------------------------------------------------------

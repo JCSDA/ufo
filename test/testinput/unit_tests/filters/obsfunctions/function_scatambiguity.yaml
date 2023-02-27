@@ -1,0 +1,25 @@
+window begin: 2021-07-31T20:59:00Z
+window end: 2021-08-01T03:00:00Z
+
+observations:
+- obs space:
+    name: scatambiguity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_components_2021080100_small.nc4
+    simulated variables: [windEastward, windNorthward]
+  obs filters:
+# If a hypothetical wind pointing in the opposite direction is a better fit to the model than the ob,
+# which is indicated by ObsFunction/ScatWindAmbiguityCheck returning >0., reject ob.
+  - filter: Bounds Check
+    filter variables:
+    - name: windEastward
+    - name: windNorthward
+    test variables:
+    - name: ObsFunction/ScatWindsAmbiguityCheck
+      options:
+        test_hofx: GsiHofX
+        minimum_uv: 0.0001
+    maxvalue: 0.  
+  passedBenchmark: 1060 # 2 variables each: 536 total, 530 pass, 6 rejected by filter, 0 missing
