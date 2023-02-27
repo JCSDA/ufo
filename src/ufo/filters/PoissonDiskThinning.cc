@@ -460,6 +460,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
     // that have not previously been found and retain the one closest to the median
     // and thin the rest.
     std::vector<bool> isUsed(obsData.totalNumObs, false);
+    const float deg2rad = static_cast<float>(M_PI / 180.0);
     for (auto priorityGroup : prioritySplitter.groups()) {
       // Generate vectors of quantities to avoid having to recalculate them
       // repeatedly.
@@ -474,19 +475,68 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
         allSemiAxes.push_back(semiAxes);
         allObsIds.push_back(obsId);
       }
+      // Split the observations into latitude, longitude boxes to avoid having to
+      // check all observations repeatedly.
+      std::vector<int> latBins;
+      std::vector<int> lonBins;
+      float latBinSize = 5.0;
+      float lonBinSize = 5.0;
+      if (obsData.minHorizontalSpacings != boost::none) {
+        // Set bin size to be approximately the horizontal spacing at the equator.
+        float binSize = allSemiAxes[0][0] / 111.0;
+        latBinSize = binSize;
+        lonBinSize = binSize;
+      }
+      if (obsData.minLatitudeSpacings != boost::none) {
+        latBinSize = allSemiAxes[0][0];
+      }
+      if (obsData.minLongitudeSpacings != boost::none) {
+        lonBinSize = allSemiAxes[0][1];
+      }
+      for (size_t obsIndex : priorityGroup) {
+        const size_t obsId = obsIdsInCategory[obsIndex];
+        if ((obsData.latitudes != boost::none) &&
+            (obsData.longitudes != boost::none)) {
+          latBins.push_back(
+                         static_cast<int>(std::floor((*obsData.latitudes)[obsId]/latBinSize)));
+          lonBins.push_back(
+                         static_cast<int>(std::floor((*obsData.longitudes)[obsId]/lonBinSize)));
+        } else {
+          latBins.push_back(0);
+          lonBins.push_back(0);
+        }
+      }
+      bool lonWrapping = true;
+      std::vector<float> longitudes = *obsData.longitudes;
+      float minLon = *std::min_element(longitudes.begin(), longitudes.end());
+      float maxLon = *std::max_element(longitudes.begin(), longitudes.end());
+//      if ((360.0 - (maxLon - minLon)) <= (2.0 * lonBinSize)) {
+//        lonWrapping = true;
+//      }
+      // Arrange the observations into bins.
+      int minLatBins = *std::min_element(latBins.begin(), latBins.end());
+      int maxLatBins = *std::max_element(latBins.begin(), latBins.end());
+      size_t nLatBins = maxLatBins - minLatBins + 1;
+      int minLonBins = *std::min_element(lonBins.begin(), lonBins.end());
+      int maxLonBins = *std::max_element(lonBins.begin(), lonBins.end());
+      size_t nLonBins = maxLonBins - minLonBins + 1;
+      std::vector<size_t> obsBins[nLatBins][nLonBins];
+      for (size_t iObsId = 0; iObsId < allObsIds.size(); iObsId++) {
+        obsBins[latBins[iObsId]-minLatBins][lonBins[iObsId]-minLonBins].push_back(iObsId);
+      }
+
       // Loop through the observations until one is found that has not previously
       // been used to calculate a median. Other observations within the exclusion
       // volume of that observation that were not previously used are then used
       // to find the median observation.
-      size_t iCount = -1;
-      for (size_t obsIndex : priorityGroup) {
-        const size_t obsId = allObsIds[++iCount];
+      for (size_t iObsId = 0; iObsId < allObsIds.size(); iObsId++) {
+        const size_t obsId = allObsIds[iObsId];
         if (isUsed[obsId]) {
           continue;
         }
 
         // Store the information about this observation.
-        std::array<float, numDims> point = allPoints[iCount];
+        std::array<float, numDims> point = allPoints[iObsId];
         KDTree<numDims> pointIndex;
         pointIndex.insert(point);
         std::vector<size_t> medianIndices;
@@ -497,30 +547,63 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
         size_t nMedianObs = 1;
 
         // Find additional observations within the exclusion volume of the
-        // observation.
-        size_t jCount = -1;
-        for (size_t obsIndex2 : priorityGroup) {
-          const size_t obsId2 = allObsIds[++jCount];
-          if (isUsed[obsId2]) {
+        // observation. Only check the latitude, longitude bins surrounding the
+        // observation to speed up the processing.
+        int latBin = latBins[iObsId] - minLatBins;
+        int lonBin = lonBins[iObsId] - minLonBins;
+        float upperLat = std::abs((*obsData.latitudes)[obsId]) + 2.0 * latBinSize;
+        if (upperLat > (90.0 - (latBinSize / 2.0))) {
+          upperLat = 90.0 - (latBinSize / 2.0);
+        }
+        int lonOffsetRange = static_cast<int>(std::ceil(2.0 / std::cos(deg2rad * upperLat)));
+        size_t halfNLonBins = static_cast<size_t>(std::floor(nLonBins / 2.0));
+        if (lonOffsetRange > halfNLonBins) {
+          lonOffsetRange = halfNLonBins;
+        }
+        for (int latOffset = -2; latOffset <= 2; latOffset++) {
+          int latBinOffset = latBin + latOffset;
+          if ((latBinOffset < 0) ||
+              (latBinOffset >= nLatBins)) {
             continue;
           }
-          std::array<float, numDims> point = allPoints[jCount];
-          std::array<float, numDims> semiAxes = allSemiAxes[jCount];
-          bool isMatch = false;
-          if (options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER) {
-            isMatch = pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims);
-          } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID) {
-            isMatch = pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes);
-          } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX) {
-            isMatch = pointIndex.isAnyPointInBoxInterior(point, semiAxes);
-          }
-          if (isMatch) {
-            medianIndices.push_back(obsId2);
-            medianObs.push_back((*obsData.obsForMedian)[obsId2]);
-            isUsed[obsId2] = true;
-            nMedianObs++;
-          }
-        }
+          for (int lonOffset = -lonOffsetRange; lonOffset <= lonOffsetRange; lonOffset++) {
+            int lonBinOffset = lonBin + lonOffset;
+            if (((lonBinOffset < 0) ||
+                 (lonBinOffset >= nLonBins)) &&
+                 !lonWrapping) {
+              continue;
+            }
+            if (lonBinOffset < 0) {
+              lonBinOffset += nLonBins;
+            }
+            if (lonBinOffset >= nLonBins) {
+              lonBinOffset -= nLonBins;
+            }
+
+            for (size_t jObsId : obsBins[latBinOffset][lonBinOffset]) {
+              const size_t obsId2 = allObsIds[jObsId];
+              if (isUsed[obsId2]) {
+                continue;
+              }
+              std::array<float, numDims> point = allPoints[jObsId];
+              std::array<float, numDims> semiAxes = allSemiAxes[jObsId];
+              bool isMatch = false;
+              if (options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER) {
+                isMatch = pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims);
+              } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID) {
+                isMatch = pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes);
+              } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX) {
+                isMatch = pointIndex.isAnyPointInBoxInterior(point, semiAxes);
+              }
+              if (isMatch) {
+                medianIndices.push_back(obsId2);
+                medianObs.push_back((*obsData.obsForMedian)[obsId2]);
+                isUsed[obsId2] = true;
+                nMedianObs++;
+              }
+            }  // Loop over observations in search bin.
+          }  // Loop over search bins in longitude.
+        }  // Loop over search bins in latitude.
 
         // If there is more than one observation in the exclusion volume, find
         // the median observation. If there is an even number of observations,
