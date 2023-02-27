@@ -6,6 +6,7 @@
  */
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <memory>
@@ -24,6 +25,7 @@
 
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/Random.h"
 
 #include "ufo/ObsBias.h"
@@ -123,6 +125,35 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
           if (variances_[ii] > largest_variance_) variances_[ii] = largest_variance_;
           if (analysis_variances_[ii] > largest_analysis_variance_)
             analysis_variances_[ii] = largest_analysis_variance_;
+        }
+      }
+    }
+
+    // Set member variables to missing for channels opted out of bias correction
+    if (params.channelsNoBC.value() != boost::none) {
+      std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
+      std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+      // The opting out of channels from bias-correction is currently only compatible with the
+      // case where the full list of channels (whether bias-corrected or not) is a consecutive
+      // list running from 1 to nvars.  While the following block of code makes sure that this
+      // is the case, such compatibility restriction should be removed in the future.
+      if (chlistNoBC_.size() > 0 && !vars_.channels().empty()) {
+        std::vector<int> tmp(vars_.size());
+        std::iota(tmp.begin(), tmp.end(), 1);
+        ASSERT(vars_.channels() == tmp);
+      }
+      const double missing = util::missingValue(missing);
+      const int missing_int = util::missingValue(missing_int);
+      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+        if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
+          obs_num_[jvar] = missing_int;
+          for (std::size_t p = 0; p < prednames_.size(); ++p) {
+            const std::size_t ii = jvar * prednames_.size() + p;
+            variances_[ii] = missing;
+            ht_rinv_h_[ii] = missing;
+            preconditioner_[ii] = missing;
+            analysis_variances_[ii] = missing;
+          }
         }
       }
     }
@@ -251,6 +282,8 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
   if (prednames_.size() * vars_.size() > 0) {
+    const float missing = util::missingValue(missing);
+    const int missing_int = util::missingValue(missing_int);
     const int jouter = innerConf.getInt("iteration");
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
         odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
@@ -273,8 +306,6 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // Sum across the processors
     obs_num_ = obs_num_accumulator->computeResult();
-
-    const float missing = util::missingValue(missing);
 
     // compute the hessian contribution from Jo bias terms channel by channel
     // retrieve the effective error (after QC) for this channel
@@ -315,33 +346,46 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     // Sum the hessian contributions across the tasks
     ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
 
-    // reset variances for bias predictor coeff. based on current data count
-    for (std::size_t j = 0; j < obs_num_.size(); ++j) {
-      if (obs_num_[j] <= minimal_required_obs_number_) {
-        for (std::size_t p = 0; p < prednames_.size(); ++p)
-          variances_[j*prednames_.size() + p] = smallest_variance_;
+    // Set obs_num_ and ht_rinv_h_ to missing for channels opted out of bias correction
+    if (chlistNoBC_.size() > 0) {
+      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+        if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
+          obs_num_[jvar] = missing_int;
+          for (std::size_t p = 0; p < prednames_.size(); ++p) {
+            ht_rinv_h_[jvar * prednames_.size() + p] = missing;
+          }
+        }
       }
     }
 
-    // set a coeff. factor for variances of control variables
-    for (std::size_t j = 0; j < vars_.size(); ++j) {
-      for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        const std::size_t index = j*prednames_.size() + p;
-        preconditioner_[index] = step_size_;
-        // L = \mathrm{A}^{-1}
-        if (obs_num_[j] > 0)
-          preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-//        preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
-        if (obs_num_[j] > minimal_required_obs_number_) {
-          if (ht_rinv_h_[index] > 0.0) {
-            analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-          } else {
-            analysis_variances_[index] = largest_analysis_variance_;
+    for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      if (obs_num_[jvar] != missing_int) {
+        for (std::size_t p = 0; p < prednames_.size(); ++p) {
+          const std::size_t index = jvar * prednames_.size() + p;
+
+          // Reset variances for bias predictor coeff. based on current data count
+          if (obs_num_[jvar] <= minimal_required_obs_number_) {
+            variances_[index] = smallest_variance_;
+          }
+
+          // Reset preconditioner L = \mathrm{A}^{-1}
+          if (obs_num_[jvar] > 0)
+            preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+//          preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
+
+          // Reset analysis variances
+          if (obs_num_[jvar] > minimal_required_obs_number_) {
+            if (ht_rinv_h_[index] > 0.0) {
+              analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+            } else {
+              analysis_variances_[index] = largest_analysis_variance_;
+            }
           }
         }
       }
     }
   }
+
   oops::Log::trace() << "ObsBiasCovariance::linearize is done" << std::endl;
 }
 
@@ -372,9 +416,14 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & dx1,
 void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   oops::Log::trace() << "ObsBiasCovariance::randomize starts" << std::endl;
   if (dx) {
+    const double missing = util::missingValue(missing);
     static util::NormalDistribution<double> dist(variances_.size());
     for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
-      dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      if (variances_[jj] != missing) {
+        dx.data()[jj] = dist[jj] * std::sqrt(variances_[jj]);
+      } else {
+        dx.data()[jj] = missing;
+      }
     }
   }
   oops::Log::trace() << "ObsBiasCovariance::randomize is done" << std::endl;
