@@ -63,7 +63,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
-    biasoper_->computeObsBiasTL(gvals, bias, ybiasinc);
+    biasoper_->computeObsBiasTL(bias, ybiasinc);
     yy += ybiasinc;
   }
 }
@@ -75,7 +75,7 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
-    biasoper_->computeObsBiasAD(gvals, bias, ybiasinc);
+    biasoper_->computeObsBiasAD(bias, ybiasinc);
   }
 }
 

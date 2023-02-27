@@ -32,13 +32,42 @@ LinearObsBiasOperator::LinearObsBiasOperator(ioda::ObsSpace & odb)
 void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                           ObsDiagnostics & ydiags) {
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory starts." << std::endl;
+
   const std::vector<std::shared_ptr<const PredictorBase>> variablePredictors =
       bias.variablePredictors();
   const std::size_t npreds = variablePredictors.size();
-
   predData_.resize(npreds, ioda::ObsVector(odb_));
   for (std::size_t p = 0; p < npreds; ++p) {
     variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
+  }
+
+  const oops::Variables &correctedVars = bias.correctedVars();
+  // At present we can label predictors with either the channel number or the variable name, but not
+  // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
+  ASSERT(correctedVars.channels().empty() ||
+         correctedVars.variables().size() == correctedVars.channels().size());
+
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t nvars  = correctedVars.variables().size();
+
+  const std::vector<int> & chNoBC = bias.chlistNoBC();
+  // The opting out of channels from bias-correction is currently only compatible with the
+  // case where the full list of channels (whether bias-corrected or not) is a consecutive
+  // list running from 1 to nvars.  While the following block of code makes sure that this
+  // is the case, such compatibility restriction should be removed in the future.
+  if (chNoBC.size() > 0 && !correctedVars.channels().empty()) {
+    std::vector<int> tmp(nvars);
+    std::iota(tmp.begin(), tmp.end(), 1);
+    ASSERT(correctedVars.channels() == tmp);
+  }
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) != chNoBC.end()) {
+      for (std::size_t jp = 0; jp < npreds; ++jp) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
+          predData_[jp][jl * nvars + jvar] = 0.0;
+        }
+      }
+    }
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory done." << std::endl;
@@ -46,8 +75,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
 // -----------------------------------------------------------------------------
 
-void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
-                                             const ObsBiasIncrement & biascoeffinc,
+void LinearObsBiasOperator::computeObsBiasTL(const ObsBiasIncrement & biascoeffinc,
                                              ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasTL starts." << std::endl;
 
@@ -63,8 +91,7 @@ void LinearObsBiasOperator::computeObsBiasTL(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
-                                             ObsBiasIncrement & biascoeffinc,
+void LinearObsBiasOperator::computeObsBiasAD(ObsBiasIncrement & biascoeffinc,
                                              const ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD starts." << std::endl;
 
@@ -74,7 +101,7 @@ void LinearObsBiasOperator::computeObsBiasAD(GeoVaLs & geovals,
     biascoeffinc.updateCoeff(jpred, predData_[jpred].multivar_dot_product_with(ybiasinc));
   }
 
-  oops::Log::trace() << "LinearObsBiasOperator::computeAD done." << std::endl;
+  oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
