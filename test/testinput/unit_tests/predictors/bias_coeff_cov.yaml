@@ -16,6 +16,7 @@ observations:
 #       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_covariance_out.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    channels without bc: 14
     variational bc:
       predictors:
       - name: constant

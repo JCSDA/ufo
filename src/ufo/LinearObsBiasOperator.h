@@ -31,11 +31,9 @@ class LinearObsBiasOperator : public util::Printable {
   /// Set trajectory (save predictors)
   void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &);
   /// Compute TL of bias correction
-  void computeObsBiasTL(const GeoVaLs &, const ObsBiasIncrement &,
-                        ioda::ObsVector &) const;
+  void computeObsBiasTL(const ObsBiasIncrement &, ioda::ObsVector &) const;
   /// Compute adjoint of bias correction
-  void computeObsBiasAD(GeoVaLs &, ObsBiasIncrement &,
-                        const ioda::ObsVector &) const;
+  void computeObsBiasAD(ObsBiasIncrement &, const ioda::ObsVector &) const;
 
  private:
   /// Print used for logging

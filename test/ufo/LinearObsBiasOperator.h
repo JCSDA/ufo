@@ -86,7 +86,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
 
     // apply the linear obs bias operator
     ioda::ObsVector dy(odb);
-    biasOperator.computeObsBiasTL(geovals, biasInc, dy);
+    biasOperator.computeObsBiasTL(biasInc, dy);
 
     // verify results
     const double dy_rms = dy.rms();
