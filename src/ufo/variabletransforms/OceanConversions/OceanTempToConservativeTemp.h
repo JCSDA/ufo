@@ -35,7 +35,7 @@ class OceanTempToConservativeTempParameters : public VariableTransformParameters
                                                 "absoluteSalinity", this};
   oops::Parameter<std::string> SalinityGroup{"ocean salinity group",
                                              "ObsValue", this};
-  /// Input temperature
+  /// Input in-situ temperature
   oops::Parameter<std::string> TemperatureVariable{"ocean temperature variable",
                                                    "waterTemperature", this};
   oops::Parameter<std::string> TemperatureGroup{"ocean temperature group",
@@ -45,7 +45,7 @@ class OceanTempToConservativeTempParameters : public VariableTransformParameters
                                                 "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
-  /// Potential temperature variable name
+  /// Output water conservative temperature variable name
   oops::Parameter<std::string> ConservativeTempVariable{"ocean conservative temperature name",
                                                         "waterConservativeTemperature", this};
 };
@@ -57,15 +57,17 @@ class OceanTempToConservativeTempParameters : public VariableTransformParameters
 ///
 /// Example
 ///
-///  obs filters:
-///  - filter: Variable Transforms
-///    Transform: OceanTempToConservativeTemp
-///    ocean pressure variable: waterPressure
-///    ocean pressure group: DerivedObsValue
-///    ocean temperature variable: waterTemperature
-///    ocean temperature group: ObsValue
-///    ocean salinity variable: salinity
-///    ocean salinity group: ObsValue
+/// \code{.yaml}
+/// obs filters:
+/// - filter: Variable Transforms
+///   Transform: OceanTempToConservativeTemp
+///   ocean pressure variable: waterPressure
+///   ocean pressure group: DerivedObsValue
+///   ocean temperature variable: waterTemperature
+///   ocean temperature group: ObsValue
+///   ocean salinity variable: salinity
+///   ocean salinity group: ObsValue
+/// \endcode
 ///
 /// will return conservative temperature (deg.C) in a variable named (by default)
 /// "DerivedObsValue/waterConservativeTemperature",
