@@ -521,7 +521,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
         isUsed[obsId] = true;
         size_t nMedianObs = 1;
         // Find additional observations within the exclusion volume of the
-        // observation. Only check the latitude, longitude bins surrounding the
+        // observation. Only check the latitude bins surrounding the
         // observation to speed up the processing.
         int latBin = latBins[iObsId] - minLatBins;
         std::vector<size_t> obsToCheck;
