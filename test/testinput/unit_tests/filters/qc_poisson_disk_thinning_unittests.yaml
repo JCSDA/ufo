@@ -103,7 +103,7 @@ Horizontal thinning with median selection, min spacing smaller than nearest neig
                                   43, 44, 45, 46, 47, 48, 49, 50, 51,
                                   52, 53, 54, 55, 56, 57, 58, 59, 60,
                                   61, 62, 63, 64, 65, 66, 67, 68, 69,
-                                  70, 71, 72, 73, 75, 76, 77, 78, 80 ]
+                                  70, 71, 72, 73, 75, 76, 77, 78, 80  ]
 
 Horizontal thinning with median selection, min spacing larger than nearest neighbor spacing:
   window begin: 2000-01-01T00:00:00Z
@@ -129,7 +129,7 @@ Horizontal thinning with median selection, min spacing larger than nearest neigh
                                   49, 50, 51, 52, 53, 55, 56, 57, 58,
                                   59, 60, 61, 62, 63, 64, 65, 66, 67,
                                   68, 69, 70, 71, 72, 73, 74, 75, 76,
-                                  77, 78, 79, 80]
+                                  77, 78, 79, 80                      ]
 
 Vertical thinning, min spacing smaller than nearest neighbor spacing:
   window begin: 2000-01-01T00:00:00Z
