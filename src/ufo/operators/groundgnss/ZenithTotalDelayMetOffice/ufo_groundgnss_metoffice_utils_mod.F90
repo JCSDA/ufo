@@ -136,9 +136,9 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
     REAL(kind_real)                  :: pwt1               ! Weighting variable
     REAL(kind_real)                  :: pwt2               ! Weighting variable
     REAL(kind_real)                  :: TCconstant         ! Top correction constant
-    REAL(kind_real), PARAMETER       :: hpa_to_pa = 100.0  ! hPa to Pascal conversion
 
-
+    WRITE(*,*) "Pressure", P
+    WRITE(*,*) "Pressure(1)=", P(1)
     DO Level = 1, nlevq
 
         pwt1 = (za(Level) - zb(Level)) / (za(Level) - za(Level+1))
@@ -147,8 +147,9 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
         pN(Level) = EXP (pwt1 * LOG (P(Level + 1)) + pwt2 * LOG (P(Level)))
 
     END DO
-
-    TCconstant = (refrac_scale * n_alpha * rd)/ (hpa_to_pa * grav)
+    WRITE(*,*) "pN = ", pN
+    WRITE(*,*) "pN(1) =", pN(1)
+    TCconstant = (refrac_scale * n_alpha * rd)/ grav
 
     TopCorrection = TCconstant * pN(1) !pN at the model top
 

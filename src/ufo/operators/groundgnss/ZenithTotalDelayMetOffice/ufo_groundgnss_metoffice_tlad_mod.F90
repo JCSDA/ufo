@@ -529,7 +529,6 @@ REAL(kind_real), ALLOCATABLE :: dztd_dref(:)           ! derivative of ZTD wrt r
 REAL(kind_real), ALLOCATABLE :: x1(:,:)                ! Matrix placeholder
 REAL(kind_real), ALLOCATABLE :: x2(:)                  ! Matrix placeholder
 
-REAL(kind_real), PARAMETER   :: hpa_to_pa = 100.0      ! hPa to Pascal conversion
 REAL(kind_real), PARAMETER   :: PressScale = 6000.0    ! Pressure scale height
 CHARACTER(LEN=200)           :: err_msg                ! Output message
 integer, parameter           :: max_string = 800
@@ -754,7 +753,7 @@ dztd_dp(:) = MATMUL(dztd_dp,dp_local_dPin)
 
 ! First add in dZTD/dp for the top correction, which only depends on top level theta pressure
 
-dztd_dpN(1) = refrac_scale * n_alpha * rd / (hpa_to_pa * grav)
+dztd_dpN(1) = refrac_scale * n_alpha * rd / grav
 x1 = MATMUL(dPb_dP, dp_local_dPin)
 x2 = MATMUL(dztd_dpN, x1)
 dztd_dp = x2 + dztd_dp
