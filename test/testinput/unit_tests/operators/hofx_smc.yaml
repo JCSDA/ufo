@@ -33,7 +33,7 @@ observations:
  #vector ref: ombg
   tolerance: 1.0e-02
 
-# Tests with explicit specification of the interpolation method
+# Tests with not specified the interpolation method, automatic
 - obs operator:
     name: VertInterp
     constant vertical coordinate values: [0.1, 0.5, 1.0, 2.0]
