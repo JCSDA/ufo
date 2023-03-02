@@ -15,6 +15,8 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: navy
   simulated variables: [sea_waterTemperature, salinity]
 obs operator:
