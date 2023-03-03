@@ -228,9 +228,6 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   real(kind_real), allocatable       :: final_cost(:)         ! Final cost-function value
   real(kind_real), allocatable       :: dfs_list(:)           ! Degrees of freedom for signal
 
-  write(Message,'(a)') 'Starting fortran code'
-  call fckit_log%debug(Message)
-
   ! Get the obs-space information
   nobs = obsspace_get_nlocs(self % obsdb)
   nlevels = max(1, obsspace_get_nchans(self % obsdb))
