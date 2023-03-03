@@ -86,6 +86,7 @@ void GNSSROOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
   // Save qc flags to database for retrieval in fortran - needed for channel selection
   flags_->save("FortranQC");    // temporary measure as per ROobserror qc
+  obserr_->save("ObsError");    // Hello?
 
   // Pass it all to fortran
   ufo_gnssroonedvarcheck_apply_f90(key_,

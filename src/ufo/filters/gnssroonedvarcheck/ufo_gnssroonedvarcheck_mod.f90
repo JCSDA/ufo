@@ -228,6 +228,9 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   real(kind_real), allocatable       :: final_cost(:)         ! Final cost-function value
   real(kind_real), allocatable       :: dfs_list(:)           ! Degrees of freedom for signal
 
+  write(Message,'(a)') 'Starting fortran code'
+  call fckit_log%debug(Message)
+
   ! Get the obs-space information
   nobs = obsspace_get_nlocs(self % obsdb)
   nlevels = max(1, obsspace_get_nchans(self % obsdb))
@@ -270,7 +273,9 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
     call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
     call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
-    call obsspace_get_db(self % obsdb, "ObsError", "bendingAngle", obs_err)
+    call obsspace_get_db(self % obsdb, "GetObsErr", "bendingAngle", obs_err)
+    print*, 'Obs errors from caller '
+    WRITE(*,'(10F16.8)') obs_err
   end if
   call obsspace_get_db(self % obsdb, "MetaData", "satelliteIdentifier", obsSatid)
   call obsspace_get_db(self % obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
