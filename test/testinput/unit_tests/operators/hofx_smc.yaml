@@ -9,10 +9,6 @@ observations:
     observation vertical coordinate: depthBelowSoilSurface
     observation vertical coordinate group: MetaData
     interpolation method: nearest-neighbor
-  linear obs operator test:
-    coef TL: 0.1
-    tolerance TL: 1.0e-13
-    tolerance AD: 1.0e-11
   obs space:
     name: SoilMoisture with nearest-neighbor
     obsdatain:
@@ -38,10 +34,6 @@ observations:
     observation vertical coordinate: depthBelowSoilSurface
     observation vertical coordinate group: MetaData
     interpolation method: automatic
-  linear obs operator test:
-    coef TL: 0.1
-    tolerance TL: 1.0e-13
-    tolerance AD: 1.0e-11
   obs space:
     name: SoilMoisture with automatic determination of interpolation method
     obsdatain:
