@@ -18,7 +18,6 @@ observations:
     obsdatain:
       engine:
         type: H5File
-       #obsfile: Data/ufo/testinput_tier_1/smap_smc_ioda_20191215.nc
         obsfile: Data/ufo/testinput_tier_1/letkf_hofx_smap_20191215.nc
 #   obsdataout:
 #     engine:
@@ -28,7 +27,6 @@ observations:
     observed variables: [soilMoistureVolumetric]
   geovals:
     filename: Data/ufo/testinput_tier_1/smap_smc_geoval_20191215.nc
- #vector ref: GsiHofX
   vector ref: hofx_y_mean_xb0
  #vector ref: ombg
   tolerance: 1.0e-02
@@ -49,7 +47,6 @@ observations:
     obsdatain:
       engine:
         type: H5File
-       #obsfile: Data/ufo/testinput_tier_1/smap_smc_ioda_20191215.nc
         obsfile: Data/ufo/testinput_tier_1/letkf_hofx_smap_20191215.nc
 #   obsdataout:
 #     engine:
@@ -59,7 +56,6 @@ observations:
     observed variables: [soilMoistureVolumetric]
   geovals:
     filename: Data/ufo/testinput_tier_1/smap_smc_geoval_20191215.nc
- #vector ref: GsiHofX
   vector ref: hofx_y_mean_xb0
  #vector ref: ombg
   tolerance: 1.0e-02
