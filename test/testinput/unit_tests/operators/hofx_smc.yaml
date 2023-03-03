@@ -14,7 +14,7 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/letkf_hofx_smap_20191215.nc
+        obsfile: Data/ufo/testinput_tier_1/smap_smc_obs_20191215.nc
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -25,7 +25,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/smap_smc_geoval_20191215.nc
   vector ref: hofx_y_mean_xb0
  #vector ref: ombg
-  tolerance: 1.0e-02
+  tolerance: 0.5e-02
 
 # Tests with not specified the interpolation method, automatic
 - obs operator:
@@ -39,7 +39,7 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/letkf_hofx_smap_20191215.nc
+        obsfile: Data/ufo/testinput_tier_1/smap_smc_obs_20191215.nc
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -50,5 +50,30 @@ observations:
     filename: Data/ufo/testinput_tier_1/smap_smc_geoval_20191215.nc
   vector ref: hofx_y_mean_xb0
  #vector ref: ombg
-  tolerance: 1.0e-02
+  tolerance: 0.5e-02
+
+# Tests with not specified the interpolation method, automatic
+- obs operator:
+    name: VertInterp
+    constant vertical coordinate values: [0.1, 0.5, 1.0, 2.0]
+    observation vertical coordinate: depthBelowSoilSurface
+    observation vertical coordinate group: MetaData
+    interpolation method: linear
+  obs space:
+    name: SoilMoisture with automatic determination of interpolation method
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/smap_smc_obs_20191215.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_m_opr_out3.nc4
+    simulated variables: [soilMoistureVolumetric]
+    observed variables: [soilMoistureVolumetric]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/smap_smc_geoval_20191215.nc
+  vector ref: hofx_y_mean_xb0
+ #vector ref: ombg
+  tolerance: 0.5e-02
 
