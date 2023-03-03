@@ -273,9 +273,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
     call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
     call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
-    call obsspace_get_db(self % obsdb, "GetObsErr", "bendingAngle", obs_err)
-    print*, 'Obs errors from caller '
-    WRITE(*,'(10F16.8)') obs_err
+    call obsspace_get_db(self % obsdb, "ObsError", "bendingAngle", obs_err)
   end if
   call obsspace_get_db(self % obsdb, "MetaData", "satelliteIdentifier", obsSatid)
   call obsspace_get_db(self % obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
