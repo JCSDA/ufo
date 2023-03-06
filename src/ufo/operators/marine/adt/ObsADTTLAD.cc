@@ -29,9 +29,12 @@ ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const Parameters_ & params)
   : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
     odb_(odb)
 {
+  oops::Log::trace() << "ObsADTTLAD constructor starting" << std::endl;
+
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
-    operatorVars_, operatorVarIndices)
+    operatorVars_, operatorVarIndices);
+  requiredVars_.push_back("sea_surface_height_above_geoid");
 
   // sanity check to make sure adt is the only variable
   ASSERT_MSG(
@@ -40,7 +43,7 @@ ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const Parameters_ & params)
   ASSERT(operatorVarIndices.size() == 1);
   operatorVarIndex_ = operatorVarIndices[0];
 
-  requiredVars_.push_back("sea_surface_height_above_geoid");
+  oops::Log::trace() << "ObsADTTLAD constructor finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,11 +59,12 @@ void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  std::vector<double> vec(ovec.nlocs());
+  oops::Log::trace() << "ObsADTTLAD: simulateObsTL starting" << std::endl;
+
   const double missing = util::missingValue(missing);
 
-  // get geoval
-  const std::string varname = ovec.varnames().variables()[operatorVarIndex_];
+  // get geovals
+  std::vector<double> vec(ovec.nlocs());
   geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
 
   // calculate global offsets
@@ -77,7 +81,7 @@ void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) 
   if (count > 0) {
     offset = accumVal->computeResult() / count;
   }
-  oops::Log::debug() << "ObsADT simulateObsTL offset: " << offset<<std::endl;
+  oops::Log::debug() << "ObsADT simulateObsTL offset: " << offset << std::endl;
 
   // subtract offset from geoval
   for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
@@ -85,16 +89,19 @@ void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) 
     ovec[idx] = vec[jloc];
     if (ovec[idx] != missing) ovec[idx] -= offset;
   }
+
+  oops::Log::trace() << "ObsADTTLAD: simulateObsTL finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  std::vector<double> vec(ovec.nlocs());
+  oops::Log::trace() << "ObsADTTLAD: simulateObsAD starting" << std::endl;
+
   const double missing = util::missingValue(missing);
 
-  // get geoval
-  const std::string varname = ovec.varnames().variables()[operatorVarIndex_];
+  // get geovals
+  std::vector<double> vec(ovec.nlocs());
   geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
 
   // calculate global offsets
@@ -111,7 +118,7 @@ void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) 
   if (count > 0) {
     offset = accumVal->computeResult() / count;
   }
-  oops::Log::debug() << "ObsADT simulateObsAD offset: " << offset<<std::endl;
+  oops::Log::debug() << "ObsADT simulateObsAD offset: " << offset << std::endl;
 
   // subtract offset from geoval
   for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
@@ -120,12 +127,14 @@ void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) 
       vec[idx] += ovec[jloc] - offset;
   }
   geovals.putAtLevel(vec, "sea_surface_height_above_geoid", 0);
+
+  oops::Log::trace() << "ObsADTTLAD: simulateObsAD finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::print(std::ostream & os) const {
-  os << "ObsADTTLAD::print not implemented" << std::endl;
+  os << "ObsADTTLAD operator" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

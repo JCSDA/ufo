@@ -16,7 +16,7 @@ namespace ufo {
 
 class ObsADTParameters : public ObsOperatorParametersBase  {
   OOPS_CONCRETE_PARAMETERS(ObsADTParameters, ObsOperatorParametersBase )
-  public:
+ public:
   /// An optional `variables` parameter, which controls which ObsSpace
   /// variables will be simulated. This option should only be set if this operator is used as a
   /// component of the Composite operator. If `variables` is not set, the operator will simulate
@@ -28,4 +28,4 @@ class ObsADTParameters : public ObsOperatorParametersBase  {
      this};
 };
 
-}
+}  // namespace ufo

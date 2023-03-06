@@ -31,9 +31,12 @@ ObsADT::ObsADT(const ioda::ObsSpace & odb, const ObsADTParameters & params)
   : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
     odb_(odb)
 {
+  oops::Log::trace() << "ObsADT constructor starting" << std::endl;
+
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
     operatorVars_, operatorVarIndices);
+  requiredVars_.push_back("sea_surface_height_above_geoid");
 
   // sanity check to make sure adt is the only variable
   ASSERT_MSG(
@@ -42,7 +45,7 @@ ObsADT::ObsADT(const ioda::ObsSpace & odb, const ObsADTParameters & params)
   ASSERT(operatorVarIndices.size() == 1);
   operatorVarIndex_ = operatorVarIndices[0];
 
-  requiredVars_.push_back("sea_surface_height_above_geoid");
+  oops::Log::trace() << "ObsADT constructor finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,16 +57,17 @@ ObsADT::~ObsADT() {
 
 void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                          ObsDiagnostics &) const {
-  oops::Log::trace() << "ObsADT:simulateObs starting" << std::endl;
+  oops::Log::trace() << "ObsADT: simulateObs starting" << std::endl;
 
-  std::vector<double> vec(ovec.nlocs());
   const double missing = util::missingValue(missing);
 
-  // get geoval
-  const std::string varname = ovec.varnames().variables()[operatorVarIndex_];
+  // get geovals
+  std::vector<double> vec(ovec.nlocs());
   geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
+
+  // get obs
   std::vector<double> obs;
-  odb_.get_db("ObsValue", varname, obs);
+  odb_.get_db("ObsValue", ovec.varnames().variables()[operatorVarIndex_], obs);
 
   // calculate global offsets
   double offset = 0;
@@ -81,7 +85,7 @@ void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
   if (count > 0) {
     offset = accumVal->computeResult() / count;
   }
-  oops::Log::debug() << "ObsADT simulateObs offset: " << offset<<std::endl;
+  oops::Log::debug() << "ObsADT: simulateObs offset: " << offset << std::endl;
 
   // subtract offset from geoval
   for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
@@ -89,12 +93,14 @@ void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
     ovec[idx] = vec[jloc];
     if (ovec[idx] != missing) ovec[idx] -= offset;
   }
+
+  oops::Log::trace() << "ObsADT: simulateObs finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADT::print(std::ostream & os) const {
-  os << "ObsADT::print not implemented";
+  os << "ObsADT operator" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
