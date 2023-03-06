@@ -50,7 +50,7 @@ class ObsADT : public ObsOperatorBase,
   oops::Variables requiredVars_;
   const ioda::ObsSpace& odb_;
   oops::Variables operatorVars_;
-  std::vector<int> operatorVarIndices_;
+  int operatorVarIndex_;
 };
 
 // -----------------------------------------------------------------------------

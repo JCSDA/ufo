@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2017-2023 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,11 +8,5 @@ set ( adt_files
     ObsADT.cc
     ObsADTTLAD.h
     ObsADTTLAD.cc
-    ObsADT.interface.F90
-    ObsADT.interface.h
-    ObsADTTLAD.interface.F90
-    ObsADTTLAD.interface.h
-    ufo_adt_mod.F90
-    ufo_adt_tlad_mod.F90
     PARENT_SCOPE
 )
