@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/errors/ObsErrorCrossGroupCov.h"
+#include "ufo/errors/ObsErrorWithinGroupCov.h"
 
 #include <math.h>
 #include <vector>
@@ -23,7 +23,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsErrorCrossGroupCov::ObsErrorCrossGroupCov(const Parameters_ & params,
+ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const Parameters_ & params,
                                              ioda::ObsSpace & obspace,
                                              const eckit::mpi::Comm &timeComm)
   : ObsErrorBase(timeComm), obspace_(obspace),
@@ -50,13 +50,13 @@ ObsErrorCrossGroupCov::ObsErrorCrossGroupCov(const Parameters_ & params,
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorCrossGroupCov::update(const ioda::ObsVector & obserr) {
+void ObsErrorWithinGroupCov::update(const ioda::ObsVector & obserr) {
   stddev_ = obserr;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorCrossGroupCov::multiply(ioda::ObsVector & dy) const {
+void ObsErrorWithinGroupCov::multiply(ioda::ObsVector & dy) const {
   // R * dy = D^{1/2} * C * D^{1/2} * dy
   // where D^{1/2} - diagonal matrix with stddev_ on the diagonal
   //       C - correlations
@@ -110,7 +110,7 @@ void ObsErrorCrossGroupCov::multiply(ioda::ObsVector & dy) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorCrossGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
+void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
   // R^{-1} * dy = D^{-1/2} * C^{-1} * D^{-1/2} * dy
   // where D^{1/2} - diagonal matrix with stddev_ on the diagonal
   //       C - correlations
@@ -165,26 +165,26 @@ void ObsErrorCrossGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorCrossGroupCov::randomize(ioda::ObsVector & dy) const {
+void ObsErrorWithinGroupCov::randomize(ioda::ObsVector & dy) const {
   dy.random();
   multiply(dy);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorCrossGroupCov::save(const std::string & name) const {
+void ObsErrorWithinGroupCov::save(const std::string & name) const {
   stddev_.save(name);
 }
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<ioda::ObsVector> ObsErrorCrossGroupCov::getObsErrors() const {
+std::unique_ptr<ioda::ObsVector> ObsErrorWithinGroupCov::getObsErrors() const {
   return std::make_unique<ioda::ObsVector>(stddev_);
 }
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<ioda::ObsVector> ObsErrorCrossGroupCov::getInverseVariance() const {
+std::unique_ptr<ioda::ObsVector> ObsErrorWithinGroupCov::getInverseVariance() const {
   std::unique_ptr<ioda::ObsVector> inverseVariance = std::make_unique<ioda::ObsVector>(stddev_);
   *inverseVariance *= stddev_;
   inverseVariance->invert();
@@ -192,7 +192,7 @@ std::unique_ptr<ioda::ObsVector> ObsErrorCrossGroupCov::getInverseVariance() con
 }
 
 // -----------------------------------------------------------------------------
-void ObsErrorCrossGroupCov::print(std::ostream & os) const {
+void ObsErrorWithinGroupCov::print(std::ostream & os) const {
   os << "Observation error covariance with correlations within group." << std::endl;
   os << " Obs error stddev: " << stddev_ << std::endl;
   os << " Cross-variable correlations for the first record (lower triangle): " << std::endl;

@@ -14,6 +14,6 @@ observations:
         sort order: ascending
     simulated variables: [airTemperature]
   obs error:
-    covariance model: cross group covariances
+    covariance model: within group covariances
     correlation variable name: pressure
     correlation lengthscale: 5000.

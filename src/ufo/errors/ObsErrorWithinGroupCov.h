@@ -30,8 +30,8 @@ namespace ufo {
 
 /// \brief Parameters for obs errors with correlations between obs in one group
 ///        set by obs space.obsgrouping
-class ObsErrorCrossGroupCovParameters : public oops::ObsErrorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsErrorCrossGroupCovParameters, ObsErrorParametersBase)
+class ObsErrorWithinGroupCovParameters : public oops::ObsErrorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorWithinGroupCovParameters, ObsErrorParametersBase)
  public:
   /// GrouInput file containing correlations or covariances. If covariances are
   /// specified, they will be converted to correlations.
@@ -53,14 +53,14 @@ class ObsErrorCrossGroupCovParameters : public oops::ObsErrorParametersBase {
 ///          Full observation error covariance matrix is R = D^{1/2} * C * D^{1/2}
 ///          where D^{1/2} is a diagonal matrix with stddev_ (ObsError group)
 ///          on the diagonal, and C is the correlation matrix.
-class ObsErrorCrossGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
+class ObsErrorWithinGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
  public:
   /// The type of parameters passed to the constructor.
   /// This typedef is used by the ObsErrorFactory.
-  typedef ObsErrorCrossGroupCovParameters Parameters_;
+  typedef ObsErrorWithinGroupCovParameters Parameters_;
 
   /// Initialize observation errors
-  ObsErrorCrossGroupCov(const Parameters_ &, ioda::ObsSpace &,
+  ObsErrorWithinGroupCov(const Parameters_ &, ioda::ObsSpace &,
                         const eckit::mpi::Comm &timeComm);
 
   /// Update obs error standard deviations to be equal to \p stddev
