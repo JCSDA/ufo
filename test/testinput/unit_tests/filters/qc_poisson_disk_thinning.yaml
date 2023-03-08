@@ -298,6 +298,7 @@ observations:
     min_horizontal_spacing: 50
     shuffle: false
     select_median: true
+    write_median: true
   passedBenchmark: 4
   passedObservationsBenchmark:
       - 5

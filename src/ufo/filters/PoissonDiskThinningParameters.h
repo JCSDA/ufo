@@ -169,6 +169,13 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// are not within the exclusion zone of another retained observation.
   oops::Parameter<bool> selectMedian{"select_median", false, this};
 
+  /// If select_median is true, write_median can be set to true to write the median values to the
+  /// DerivedObsValue group. The values written will be the central observation value if there
+  /// is an odd number of values going into the median, the mean of the two central observation
+  /// values if there is an even number going into the median or a fill value if the observation
+  /// was used to find a median but is not the median observation. Defaults to false.
+  oops::Parameter<bool> writeMedian{"write_median", false, this};
+
   /// If true, observations will be randomly shuffled before being inspected as candidates
   /// for retaining.
   ///

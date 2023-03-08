@@ -22,6 +22,7 @@
 #include "oops/util/Duration.h"
 #include "oops/util/IsAnyPointInVolumeInterior.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/PoissonDiskThinningParameters.h"
@@ -234,6 +235,12 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     synchroniseRandomNumberGenerators(obsdb_.comm());
   }
 
+  // Set up for selecting median observation if required.
+  std::vector<float> obsForMedian;
+  if (options_.selectMedian) {
+    obsForMedian = *obsData.obsForMedian;
+  }
+
   // Thin points from each category separately.
   RecursiveSplitter categorySplitter =
       obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
@@ -263,10 +270,13 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
     // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
-                 options_.selectMedian.value(), isThinned);
+                 options_.selectMedian.value(), obsForMedian, isThinned);
   }
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
+  if (options_.writeMedian) {
+    obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), obsForMedian);
+  }
 }
 
 ObsAccessor PoissonDiskThinning::createObsAccessor() const {
@@ -424,25 +434,26 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                                        int numSpatialDims,
                                        int numNonspatialDims,
                                        const bool &selectMedian,
+                                       std::vector<float> &obsForMedian,
                                        std::vector<bool> &isThinned) const {
   switch (numSpatialDims + numNonspatialDims) {
   case 0:
     return;  // nothing to do
   case 1:
     return thinCategory<1>(obsData, obsIdsInCategory, prioritySplitter,
-                           numSpatialDims, selectMedian, isThinned);
+                           numSpatialDims, selectMedian, obsForMedian, isThinned);
   case 2:
     return thinCategory<2>(obsData, obsIdsInCategory, prioritySplitter,
-                           numSpatialDims, selectMedian, isThinned);
+                           numSpatialDims, selectMedian, obsForMedian, isThinned);
   case 3:
     return thinCategory<3>(obsData, obsIdsInCategory, prioritySplitter,
-                           numSpatialDims, selectMedian, isThinned);
+                           numSpatialDims, selectMedian, obsForMedian, isThinned);
   case 4:
     return thinCategory<4>(obsData, obsIdsInCategory, prioritySplitter,
-                           numSpatialDims, selectMedian, isThinned);
+                           numSpatialDims, selectMedian, obsForMedian, isThinned);
   case 5:
     return thinCategory<5>(obsData, obsIdsInCategory, prioritySplitter,
-                           numSpatialDims, selectMedian, isThinned);
+                           numSpatialDims, selectMedian, obsForMedian, isThinned);
   }
 
   ABORT("Unexpected number of thinning dimensions");
@@ -454,12 +465,19 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                                        const RecursiveSplitter &prioritySplitter,
                                        int numSpatialDims,
                                        const bool &selectMedian,
+                                       std::vector<float> &obsForMedian,
                                        std::vector<bool> &isThinned) const {
   if (selectMedian) {
     // If selectMedian is true, find all observations enclosed in the exclusion volume
     // that have not previously been found and retain the one closest to the median
     // and thin the rest.
+    //
+    // Please note that the overlap of exclusion volumes of retained observations may
+    // mean that the shape and size of the exclusion volume from which the median is
+    // calculated is not consistent with what might be expected.
+    //
     std::vector<bool> isUsed(obsData.totalNumObs, false);
+    float medianMissingValue = util::missingValue(obsForMedian[0]);
     for (auto priorityGroup : prioritySplitter.groups()) {
       // Generate vectors of quantities to avoid having to recalculate them
       // repeatedly.
@@ -517,7 +535,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
         std::vector<size_t> medianIndices;
         std::vector<float> medianObs;
         medianIndices.push_back(obsId);
-        medianObs.push_back((*obsData.obsForMedian)[obsId]);
+        medianObs.push_back(obsForMedian[obsId]);
         isUsed[obsId] = true;
         size_t nMedianObs = 1;
         // Find additional observations within the exclusion volume of the
@@ -553,7 +571,7 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
           }
           if (isMatch) {
             medianIndices.push_back(obsId2);
-            medianObs.push_back((*obsData.obsForMedian)[obsId2]);
+            medianObs.push_back(obsForMedian[obsId2]);
             isUsed[obsId2] = true;
             nMedianObs++;
           }
@@ -574,8 +592,10 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
                  (medianObs[medianIndex] == obsValueMedian2)) &&
                  stillToFindMedian) {
               stillToFindMedian = false;
+              obsForMedian[medianIndices[medianIndex]] = 0.5 * (obsValueMedian1 + obsValueMedian2);
             } else {
               isThinned[medianIndices[medianIndex]] = true;
+              obsForMedian[medianIndices[medianIndex]] = medianMissingValue;
             }
           }
         }
