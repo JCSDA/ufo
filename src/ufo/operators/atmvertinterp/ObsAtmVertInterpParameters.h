@@ -20,7 +20,7 @@
 namespace ufo {
 
 enum class InterpolationMethod {
-  AUTOMATIC, LINEAR, LOGLINEAR
+  AUTOMATIC, LINEAR, LOGLINEAR, NEARESTNEIGHBOR
 };
 
 struct InterpolationMethodParameterTraitsHelper {
@@ -29,7 +29,8 @@ struct InterpolationMethodParameterTraitsHelper {
   static constexpr util::NamedEnumerator<InterpolationMethod> namedValues[] = {
     { InterpolationMethod::AUTOMATIC, "automatic" },
     { InterpolationMethod::LINEAR, "linear" },
-    { InterpolationMethod::LOGLINEAR, "log-linear"}
+    { InterpolationMethod::LOGLINEAR, "log-linear"},
+    { InterpolationMethod::NEARESTNEIGHBOR, "nearest-neighbor"}
   };
 };
 
@@ -62,6 +63,11 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
     {"vertical coordinate",
      "vertical coordinate used by the model",
      "air_pressure",  // this should be consistent with var_prs defined in ufo_vars_mod
+     this};
+
+  oops::OptionalParameter<std::vector<double>> vertCoordValues
+    {"constant vertical coordinate values",
+     "constant vertical coordinate values to be used for interpolation for all observations",
      this};
 
   oops::Parameter<std::string> ObsVertCoord

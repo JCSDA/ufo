@@ -35,7 +35,7 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
                                                 "absoluteSalinity", this};
   oops::Parameter<std::string> SalinityGroup{"ocean salinity group",
                                              "ObsValue", this};
-  /// Input temperature
+  /// Input in-situ temperature
   oops::Parameter<std::string> TemperatureVariable{"ocean temperature variable",
                                                    "waterTemperature", this};
   oops::Parameter<std::string> TemperatureGroup{"ocean temperature group",
@@ -45,7 +45,7 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
                                                 "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
-  /// Potential temperature variable name
+  /// Output water potential temperature variable name
   oops::Parameter<std::string> ThetaVariable{"ocean potential temperature name",
                                                "waterPotentialTemperature", this};
 };
@@ -57,15 +57,17 @@ class OceanTempToThetaParameters : public VariableTransformParametersBase {
 ///
 /// Example
 ///
-///  obs filters:
-///  - filter: Variable Transforms
-///    Transform: OceanTempToTheta
-///    ocean pressure variable: waterPressure
-///    ocean pressure group: DerivedObsValue
-///    ocean temperature variable: waterTemperature
-///    ocean temperature group: ObsValue
-///    ocean salinity variable: absoluteSalinity
-///    ocean salinity group: ObsValue
+/// \code{.yaml}
+/// obs filters:
+/// - filter: Variable Transforms
+///   Transform: OceanTempToTheta
+///   ocean pressure variable: waterPressure
+///   ocean pressure group: DerivedObsValue
+///   ocean temperature variable: waterTemperature
+///   ocean temperature group: ObsValue
+///   ocean salinity variable: absoluteSalinity
+///   ocean salinity group: ObsValue
+/// \endcode
 ///
 /// will return potential temperature (deg.C) in a variable named (by default)
 /// "DerivedObsValue/waterPotentialTemperature",

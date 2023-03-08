@@ -54,6 +54,30 @@ observations:
       absTol: 5.0e-5
 
 - obs space:
+    name: Satwind
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_missing_values_2d_2018041500.nc4
+    simulated variables: [windSpeed, windDirection]
+    channels: 1-4
+  obs filters:
+  - filter: Variable Transforms
+    Transform: WindComponents
+    FillMissingDerivedFromOriginal: true
+  compareVariables:                #  test output matches precalculated values
+    - reference:
+        name: TestReference/windEastward
+      test:
+        name: DerivedObsValue/windEastward
+      absTol: 5.0e-5
+    - reference:
+        name: TestReference/windNorthward
+      test:
+        name: DerivedObsValue/windNorthward
+      absTol: 5.0e-5
+
+- obs space:
     name: Surface
     obsdatain:
       engine:

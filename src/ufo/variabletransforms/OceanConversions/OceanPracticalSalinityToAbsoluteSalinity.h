@@ -42,7 +42,7 @@ class OceanPracticalSalinityToAbsoluteSalinityParameters : public VariableTransf
                                                 "waterPressure", this};
   oops::Parameter<std::string> PressureGroup{"ocean pressure group",
                                              "ObsValue", this};
-  /// Absolute salinity variable name
+  /// Output absolute salinity variable name
   oops::Parameter<std::string> AbsoluteSalinityVariable{"ocean absolute salinity name",
                                                         "absoluteSalinity", this};
 };
@@ -54,14 +54,16 @@ class OceanPracticalSalinityToAbsoluteSalinityParameters : public VariableTransf
 ///
 /// Example
 ///
-///  obs filters:
-///  - filter: Variable Transforms
-///    Transform: OceanPracticalSalinityToAbsoluteSalinity
-///    ocean pressure variable: waterPressure
-///    ocean pressure group: DerivedObsValue
-///    ocean practical salinity variable: salinity
-///    ocean practical salinity group: ObsValue
-///    ocean absolute salinity variable: absoluteSalinity
+/// \code{.yaml}
+/// obs filters:
+/// - filter: Variable Transforms
+///   Transform: OceanPracticalSalinityToAbsoluteSalinity
+///   ocean pressure variable: waterPressure
+///   ocean pressure group: DerivedObsValue
+///   ocean practical salinity variable: salinity
+///   ocean practical salinity group: ObsValue
+///   ocean absolute salinity variable: absoluteSalinity
+/// \endcode
 ///
 /// will return absolute salinity (g/kg) in a variable named (by default)
 /// "DerivedObsValue/absoluteSalinity",
