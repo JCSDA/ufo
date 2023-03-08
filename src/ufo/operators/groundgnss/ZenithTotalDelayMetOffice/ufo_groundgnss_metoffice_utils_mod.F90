@@ -16,8 +16,7 @@ use missing_values_mod
 use ufo_constants_mod, only: &
     rd,                      &   ! Gas constant for dry air
     grav,                    &   ! Gravitational field strength
-    n_alpha,                 &   ! Refractivity constant a
-    n_beta                       ! Refractivity constant b
+    n_alpha                      ! Refractivity constant a
 
 implicit none
 public                      :: Ops_Groundgnss_ZTD

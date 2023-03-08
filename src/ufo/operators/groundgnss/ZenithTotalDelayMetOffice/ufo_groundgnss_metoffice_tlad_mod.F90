@@ -25,8 +25,8 @@ use ufo_utils_refractivity_calculator, only: &
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
-    n_alpha,                 &    ! Refractivity constant a
-    n_beta
+    n_alpha                       ! Refractivity constant a
+
 
 integer, parameter             :: max_string=800
 
