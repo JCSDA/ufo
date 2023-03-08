@@ -166,7 +166,9 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
 
   /// True to accept the observation within an exclusion zone whose value is closest to the median.
   /// If false or unspecified, observations are retained in the order they are found if they
-  /// are not within the exclusion zone of another retained observation.
+  /// are not within the exclusion zone of another retained observation. This option should be used
+  /// with caution. The effection exclusion volume from which the median is found will often not
+  /// be the shape or size that is anticipated because of overlap with other exclusion volumes.
   oops::Parameter<bool> selectMedian{"select_median", false, this};
 
   /// If select_median is true, write_median can be set to true to write the median values to the
