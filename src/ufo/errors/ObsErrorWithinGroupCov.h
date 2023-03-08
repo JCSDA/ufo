@@ -84,6 +84,12 @@ class ObsErrorWithinGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
   /// Save obs error standard deviations under \p name group name
   void save(const std::string & name) const override;
 
+  /// Save the correlations for record \p irec in the file with
+  /// \p filename for diagnostics, as well as random vector \p randomVec
+  /// and \p randomVec multiplied by the covariance
+  void saveCorrelations(const std::string & filename, size_t irec,
+                        ioda::ObsVector & randomVec) const;
+
   /// Return RMS of obs error standard deviations
   double getRMSE() const override {return stddev_.rms();}
 
@@ -96,13 +102,16 @@ class ObsErrorWithinGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
  private:
   /// Print covariance details (for logging)
   void print(std::ostream &) const override;
+  /// Multiply only by correlations (diagnostics)
+  void multiplyCorrelations(ioda::ObsVector & y) const;
   const ioda::ObsSpace & obspace_;
+  /// Coordinate used for correlation computations
+  std::vector<double> coord_;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
-  /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
-  const oops::Variables vars_;
-  /// Correlations between variables
-  std::vector<Eigen::MatrixXd> varcorrelations_;
+  /// Each element holds a lower-triangle of the correlation matrix for all locations
+  /// within one group
+  std::vector<Eigen::MatrixXd> correlations_;
 };
 
 // -----------------------------------------------------------------------------
