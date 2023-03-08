@@ -49,4 +49,34 @@ end subroutine vert_interp_apply_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine nearestneighbor_interp_index_c(c_nlev, c_obl, c_vec, c_idx) &
+  bind(c,name='nearestneighbor_interp_index_f90')
+
+implicit none
+integer(c_int), intent(in ) :: c_nlev         !Number of model levels
+real(c_double), intent(in ) :: c_obl          !Observation location
+real(c_double), intent(in ) :: c_vec(c_nlev)  !Structured vector of grid points
+integer(c_int), intent(out) :: c_idx          !Index for interpolation
+
+call nearestneighbor_interp_index(c_nlev, c_obl, c_vec, c_idx)
+
+end subroutine nearestneighbor_interp_index_c
+
+! ------------------------------------------------------------------------------
+
+subroutine nearestneighbor_interp_apply_c(c_nlev, c_fvec, c_f, c_idx) &
+  bind(c,name='nearestneighbor_interp_apply_f90')
+
+implicit none
+integer(c_int), intent(in ) :: c_nlev          !Number of model levels
+real(c_double), intent(in ) :: c_fvec(c_nlev)  !Field at grid points
+real(c_double), intent(out) :: c_f             !Output at obs location using linear interp
+integer(c_int), intent(in ) :: c_idx           !Index for interpolation
+
+call nearestneighbor_interp_apply(c_nlev, c_fvec, c_f, c_idx)
+
+end subroutine nearestneighbor_interp_apply_c
+
+! ------------------------------------------------------------------------------
+
 end module vert_interp_mod_c

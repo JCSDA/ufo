@@ -237,7 +237,9 @@ if (config % cloud_retrieval) then
   variable_present = obsspace_has(config % obsdb, "MetaData", "pressureAtTopOfCloud")
   if (variable_present) then
     call obsspace_get_db(config % obsdb, "MetaData", "pressureAtTopOfCloud", self % cloudtopp(:))
-    self % cloudtopp(:) = self % cloudtopp(:) * Pa_to_hPa
+    where (self % cloudtopp /= missing_real)
+      self % cloudtopp = self % cloudtopp * Pa_to_hPa
+    end where
   end if
 
   variable_present = obsspace_has(config % obsdb, "MetaData", "cloudAmount")
@@ -541,7 +543,7 @@ integer, intent(in)                   :: nchans         ! number of channels in 
 integer :: jvar ! counter
 integer :: nobs ! number of observations to be written to database
 character(len=max_string)    :: var
-real(kind_real), allocatable :: surface_pressure(:)
+real(kind_real), allocatable :: surface_pressure(:), ctp(:)
 real(kind_real) :: missing_real
 
 missing_real = missing_value(missing_real)
@@ -645,10 +647,16 @@ end if
 
 !--
 ! 11) Cloud top pressure
+! In the 1D-Var its hPa but needs to be Pa for the ObsSpace
 !--
 if (prof_index % cloudtopp > 0) then
-  call put_1d_indb(self % output_to_db(:), obsdb, "pressureAtTopOfCloud", "OneDVar", &
-                   self % output_profile(prof_index % cloudtopp, :))
+  allocate(ctp(nobs))
+  ctp(:) = self % output_profile(prof_index % cloudtopp, :)
+  where (ctp /= missing_real)
+    ctp = ctp / Pa_to_hPa ! hPa to Pa
+  end where
+  call put_1d_indb(self % output_to_db(:), obsdb, "pressureAtTopOfCloud", "OneDVar", ctp)
+  deallocate(ctp)
 end if
 
 ! 12) Cloud fraction

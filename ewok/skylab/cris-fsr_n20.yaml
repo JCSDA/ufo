@@ -7,6 +7,8 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [brightnessTemperature]
   channels: &cris-fsr_n20_channels 19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,

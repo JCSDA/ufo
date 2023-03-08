@@ -206,7 +206,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 !   hack -- handling ropp missing value 
 
 !   deallocate ropp structures  
-    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
+    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
+           obsAzim(iobs) /= missing ) then
       call ropp_tidy_up_2d(x,y)
     else
       call ropp_tidy_up_1d(x1d,y)

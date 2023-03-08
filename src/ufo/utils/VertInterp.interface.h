@@ -19,6 +19,11 @@ void vert_interp_weights_f90(const int &nlev, const double &obl, const double *v
 void vert_interp_apply_f90(const int &nlev, const double *fvec,
                            double &f,
                            const int &wi, const double &wf);
+void nearestneighbor_interp_index_f90(const int &nlev, const double &obl, const double *vec,
+                                      int &idx);
+
+void nearestneighbor_interp_apply_f90(const int &nlev, const double *fvec,
+                                      double &f, const int &idx);
 }  // extern C
 
 }  // namespace ufo
