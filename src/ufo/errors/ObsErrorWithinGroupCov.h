@@ -33,8 +33,6 @@ namespace ufo {
 class ObsErrorWithinGroupCovParameters : public oops::ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorWithinGroupCovParameters, ObsErrorParametersBase)
  public:
-  /// GrouInput file containing correlations or covariances. If covariances are
-  /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> var{"correlation variable name",
         "Group/Name obs variable that correlations should be computed for (note: "
         "this variable should be the same variable as obs space is grouped on", this};
@@ -46,10 +44,10 @@ class ObsErrorWithinGroupCovParameters : public oops::ObsErrorParametersBase {
 /// \brief Observation error covariance matrix with correlations between
 ///        obs in one group (set by obs space.obsgrouping)
 /// \details Correlations are computed as GC(x1-x2) where x1, x2 are values of
-///          Group/Name variable `var`. Only correlations between variables in
-///          the same record are considered, variables in different records are
-///          considered uncorrelated. Obs error standard
-///          deviations are read from ObsSpace as ObsError group.
+///          Group/Name variable `var`. Only correlations between locations in
+///          the same record are considered, locations in different records are
+///          considered uncorrelated. Different variables are considered uncorrelated.
+///          Obs error standard deviations are read from ObsSpace as ObsError group.
 ///          Full observation error covariance matrix is R = D^{1/2} * C * D^{1/2}
 ///          where D^{1/2} is a diagonal matrix with stddev_ (ObsError group)
 ///          on the diagonal, and C is the correlation matrix.
@@ -86,7 +84,7 @@ class ObsErrorWithinGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
 
   /// Save the correlations for record \p irec in the file with
   /// \p filename for diagnostics, as well as random vector \p randomVec
-  /// and \p randomVec multiplied by the covariance
+  /// and \p randomVec multiplied by the correlation matrix
   void saveCorrelations(const std::string & filename, size_t irec,
                         ioda::ObsVector & randomVec) const;
 
