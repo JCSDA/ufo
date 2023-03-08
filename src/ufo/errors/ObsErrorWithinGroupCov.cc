@@ -86,9 +86,10 @@ void ObsErrorWithinGroupCov::multiplyCorrelations(ioda::ObsVector & dy) const {
   const size_t nvars = dy.nvars();
   const double missing = util::missingValue(double());
 
-  for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end(); ++irec) {
+  size_t recnumLocal = 0;
+  for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end();
+       ++irec, ++recnumLocal) {
     std::vector<size_t> rec_idx = obspace_.recidx_vector(irec);
-    size_t recnum = obspace_.recidx_recnum(irec);
     size_t rec_nobs = rec_idx.size();
     // preallocate containers
     std::vector<int> usedobs_indices(rec_nobs);
@@ -107,7 +108,7 @@ void ObsErrorWithinGroupCov::multiplyCorrelations(ioda::ObsVector & dy) const {
         dy_at_rec(iloc) = dy[rec_idx[ind]*nvars + jvar];
         for (size_t jloc = iloc+1; jloc < nused; ++jloc) {
           int ind2 = usedobs_indices[jloc];
-          corr(jloc, iloc) = correlations_[recnum](ind2, ind);
+          corr(jloc, iloc) = correlations_[recnumLocal](ind2, ind);
         }
       }
 
@@ -137,9 +138,10 @@ void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
   const size_t nvars = dy.nvars();
   const double missing = util::missingValue(double());
 
-  for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end(); ++irec) {
+  size_t recnumLocal = 0;
+  for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end();
+       ++irec, ++recnumLocal) {
     std::vector<size_t> rec_idx = obspace_.recidx_vector(irec);
-    size_t recnum = obspace_.recidx_recnum(irec);
     size_t rec_nobs = rec_idx.size();
     // preallocate containers
     std::vector<int> usedobs_indices(rec_nobs);
@@ -159,7 +161,7 @@ void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
         for (size_t jloc = iloc+1; jloc < nused; ++jloc) {
           int ind2 = usedobs_indices[jloc];
           // only need the lower triangle for llt() below; not filling upper triangle
-          corr(jloc, iloc) = correlations_[recnum](ind2, ind);
+          corr(jloc, iloc) = correlations_[recnumLocal](ind2, ind);
         }
       }
       // Multiply by inverse of C, using standard Cholesky decomposition from Eigen library
@@ -193,56 +195,62 @@ void ObsErrorWithinGroupCov::save(const std::string & name) const {
 
 void ObsErrorWithinGroupCov::saveCorrelations(const std::string & filename,
                              size_t recnum, ioda::ObsVector & randomVec) const {
-  // Create a file, overwrite if exists
-  ioda::Group group = ioda::Engines::HH::createFile(filename,
-                      ioda::Engines::BackendCreateModes::Truncate_If_Exists);
-  std::vector<size_t> rec_idx = obspace_.recidx_vector(recnum);
-  size_t rec_nlocs = rec_idx.size();
+  if (obspace_.recidx_has(recnum)) {
+    // find the index of the correlation matrix for this record on the local task
+    const std::vector<size_t> recnums = obspace_.recidx_all_recnums();
+    const size_t recnumLocal = std::find(recnums.begin(), recnums.end(), recnum) -
+                               recnums.begin();
+    // Create a file, overwrite if exists
+    ioda::Group group = ioda::Engines::HH::createFile(filename,
+                        ioda::Engines::BackendCreateModes::Truncate_If_Exists);
+    std::vector<size_t> rec_idx = obspace_.recidx_vector(recnum);
+    size_t rec_nlocs = rec_idx.size();
 
-  ioda::NewDimensionScales_t dims {ioda::NewDimensionScale<int>("nlocs", rec_nlocs)};
-  ioda::ObsGroup ogrp = ioda::ObsGroup::generate(group, dims);
+    ioda::NewDimensionScales_t dims {ioda::NewDimensionScale<int>("nlocs", rec_nlocs)};
+    ioda::ObsGroup ogrp = ioda::ObsGroup::generate(group, dims);
 
-  // save the coordinate used for correlation computation
-  ioda::Variable coordVar = ogrp.vars.createWithScales<float>(
-                            "correlationCoordinate", {ogrp.vars["nlocs"]});
-  std::vector<float> recCoord(rec_nlocs);
-  for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
-    recCoord[jloc] = coord_[rec_idx[jloc]];
+    // save the coordinate used for correlation computation
+    ioda::Variable coordVar = ogrp.vars.createWithScales<float>(
+                              "correlationCoordinate", {ogrp.vars["nlocs"]});
+    std::vector<float> recCoord(rec_nlocs);
+    for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
+      recCoord[jloc] = coord_[rec_idx[jloc]];
+    }
+    coordVar.write(recCoord);
+
+    // Set up the creation parameters for the correlation matrix
+    ioda::VariableCreationParameters float_params;
+    float_params.chunk = true;               // allow chunking
+    float_params.compressWithGZIP();         // compress using gzip
+    float missing_value = util::missingValue(float());
+    float_params.setFillValue<float>(missing_value);
+
+    // Create a variable for correlations, save the values to the variable
+    ioda::Variable corrVar = ogrp.vars.createWithScales<float>("correlations",
+                         {ogrp.vars["nlocs"], ogrp.vars["nlocs"]}, float_params);
+    corrVar.writeWithEigenRegular(
+            Eigen::MatrixXd(correlations_[recnumLocal].selfadjointView<Eigen::Lower>()));
+
+    // For diagnostics, output the random vector, and the random vector multiplied
+    // by the covariance
+    const size_t nvars = randomVec.nvars();
+    ioda::Variable randVar = ogrp.vars.createWithScales<float>(
+                              "randomVector", {ogrp.vars["nlocs"]});
+    std::vector<float> randVect(rec_nlocs);
+    for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
+      randVect[jloc] = randomVec[rec_idx[jloc]*nvars];
+    }
+    randVar.write(randVect);
+
+    multiplyCorrelations(randomVec);
+    ioda::Variable randMultVar = ogrp.vars.createWithScales<float>(
+                              "randomVectorMultipliedByCov", {ogrp.vars["nlocs"]});
+    std::vector<float> randMultVect(rec_nlocs);
+    for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
+      randMultVect[jloc] = randomVec[rec_idx[jloc]*nvars];
+    }
+    randMultVar.write(randMultVect);
   }
-  coordVar.write(recCoord);
-
-  // Set up the creation parameters for the correlation matrix
-  ioda::VariableCreationParameters float_params;
-  float_params.chunk = true;               // allow chunking
-  float_params.compressWithGZIP();         // compress using gzip
-  float missing_value = util::missingValue(float());
-  float_params.setFillValue<float>(missing_value);
-
-  // Create a variable for correlations, save the values to the variable
-  ioda::Variable corrVar = ogrp.vars.createWithScales<float>("correlations",
-                       {ogrp.vars["nlocs"], ogrp.vars["nlocs"]}, float_params);
-  corrVar.writeWithEigenRegular(
-          Eigen::MatrixXd(correlations_[recnum].selfadjointView<Eigen::Lower>()));
-
-  // For diagnostics, output the random vector, and the random vector multiplied
-  // by the covariance
-  const size_t nvars = randomVec.nvars();
-  ioda::Variable randVar = ogrp.vars.createWithScales<float>(
-                            "randomVector", {ogrp.vars["nlocs"]});
-  std::vector<float> randVect(rec_nlocs);
-  for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
-    randVect[jloc] = randomVec[rec_idx[jloc]*nvars];
-  }
-  randVar.write(randVect);
-
-  multiplyCorrelations(randomVec);
-  ioda::Variable randMultVar = ogrp.vars.createWithScales<float>(
-                            "randomVectorMultipliedByCov", {ogrp.vars["nlocs"]});
-  std::vector<float> randMultVect(rec_nlocs);
-  for (size_t jloc = 0; jloc < rec_nlocs; ++jloc) {
-    randMultVect[jloc] = randomVec[rec_idx[jloc]*nvars];
-  }
-  randMultVar.write(randMultVect);
 }
 
 // -----------------------------------------------------------------------------

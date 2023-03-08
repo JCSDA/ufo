@@ -71,10 +71,10 @@ class ObsErrorWithinGroupCovDiags : public oops::Application {
                          params.windowEnd, this->getComm());
     ioda::ObsVector randomVec(obsdb);
     randomVec.random();
+
     ObsErrorWithinGroupCov obserr(params.obsError, obsdb, this->getComm());
     obserr.saveCorrelations(params.diags.value().filename, params.diags.value().recnum,
                             randomVec);
-
     return 0;
   }
 

@@ -45,6 +45,7 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
               ECBUILD
               SOURCES ../../../mains/TestObsErrorCovariance.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorwithingroupcorr.yaml"
+              MPI     2
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../

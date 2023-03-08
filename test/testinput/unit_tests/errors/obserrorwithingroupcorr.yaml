@@ -12,7 +12,7 @@ observations:
         group variables: [sequenceNumber]
         sort variable: pressure
         sort order: ascending
-    simulated variables: [airTemperature]
+    simulated variables: [airTemperature, windEastward, windNorthward]
   obs error:
     covariance model: within group covariances
     correlation variable name: pressure
