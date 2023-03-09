@@ -16,8 +16,7 @@ use missing_values_mod
 use ufo_constants_mod, only: &
     rd,                      &   ! Gas constant for dry air
     grav,                    &   ! Gravitational field strength
-    n_alpha,                 &   ! Refractivity constant a
-    n_beta                       ! Refractivity constant b
+    n_alpha                      ! Refractivity constant a
 
 implicit none
 public                      :: Ops_Groundgnss_ZTD
@@ -136,8 +135,6 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
     REAL(kind_real)                  :: pwt1               ! Weighting variable
     REAL(kind_real)                  :: pwt2               ! Weighting variable
     REAL(kind_real)                  :: TCconstant         ! Top correction constant
-    REAL(kind_real), PARAMETER       :: hpa_to_pa = 100.0  ! hPa to Pascal conversion
-
 
     DO Level = 1, nlevq
 
@@ -148,7 +145,7 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
 
     END DO
 
-    TCconstant = (refrac_scale * n_alpha * rd)/ (hpa_to_pa * grav)
+    TCconstant = (refrac_scale * n_alpha * rd)/ grav
 
     TopCorrection = TCconstant * pN(1) !pN at the model top
 
