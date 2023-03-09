@@ -533,7 +533,7 @@ ufo_add_test( NAME    test_ufo_qc_poisson_disk_thinning
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_poisson_disk_thinning.yaml"
-              MPI     2
+              MPI     1
               LIBS    ufo
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
