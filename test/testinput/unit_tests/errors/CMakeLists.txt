@@ -50,8 +50,20 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
-#
 
+# Test the diagnostics application
+ufo_add_test( NAME    test_ufo_obserrorwithingroupcorrdiags
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/ufo_obserrorcov_diags.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorwithingroupcorrdiags.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+
+#
 ufo_add_test( NAME    test_ufo_obserrordiagonal
               TIER    1
               ECBUILD
