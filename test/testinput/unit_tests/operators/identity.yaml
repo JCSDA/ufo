@@ -78,8 +78,8 @@ observations:
   rms ref: 294.79799709699643
   tolerance: 1.0e-06
 
-# Reveal level index 0 is nearest to the Earth's surface (levels_are_top_down is false)
-# in the GeoVal file. Then, levels in GeoVal are changed to be top_down after being read.
+# Set levels_are_top_down: false (level index 0 is nearest to the Earth's surface
+# in the GeoVal file), so that levels in GeoVal are made top_down after being read.
 - obs space:
     name: Radiosonde
     obsdatain:
