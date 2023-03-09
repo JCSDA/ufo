@@ -77,3 +77,29 @@ observations:
     tolerance AD: 1.0e-13
   rms ref: 294.79799709699643
   tolerance: 1.0e-06
+
+# Reveal level index 0 is nearest to the Earth's surface (levels_are_top_down is false)
+# in the GeoVal file. Then, levels in GeoVal are changed to be top_down after being read.
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [airTemperature]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_s_identity_opr_reversed_geovals_out.nc4
+  obs operator:
+    name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s_reversed.nc4
+    levels_are_top_down: false
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 294.79799709699643
+  tolerance: 1.0e-06
