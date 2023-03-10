@@ -750,6 +750,7 @@ type(c_ptr), value, intent(in) :: c_vars
 type(ufo_geovals), pointer :: self
 character(max_string)      :: filename
 integer :: loc_multiplier
+logical :: levels_are_top_down
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
 type(oops_variables)      :: vars
@@ -769,9 +770,15 @@ else
   loc_multiplier = 1
 endif
 
+if (f_conf%has("levels_are_top_down")) then
+  call f_conf%get_or_die("levels_are_top_down", levels_are_top_down)
+else
+  levels_are_top_down = .True.
+endif
+
 vars = oops_variables(c_vars)
 ! read geovals
-call ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, vars)
+call ufo_geovals_read_netcdf(self, filename, loc_multiplier, levels_are_top_down, c_obspace, vars)
 
 end subroutine ufo_geovals_read_file_c
 
