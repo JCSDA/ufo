@@ -994,13 +994,14 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, vars)
+subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, levels_are_top_down, c_obspace, vars)
 use netcdf
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 integer, intent(in)               :: loc_multiplier
+logical, intent(in)               :: levels_are_top_down
 type(c_ptr), intent(in)           :: c_obspace
 type(oops_variables), intent(in)  :: vars
 
@@ -1127,7 +1128,11 @@ do ivar = 1, self%nvar
     allocate(self%geovals(ivar)%vals(nval,nlocs))
     allocate(field2d(nval, nlocs_var))
     call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
-    self%geovals(ivar)%vals(:,:) = field2d(:,dist_indx)
+    if (.not. levels_are_top_down) then 
+      self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,dist_indx)
+    else
+      self%geovals(ivar)%vals(:,:) = field2d(:,dist_indx)
+    endif
     deallocate(field2d)
   !> only 1d & 2d vars
   else
