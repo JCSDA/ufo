@@ -290,10 +290,6 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/poisson_disk_thinning_median_testout.nc4
     simulated variables: [waterTemperature]
   obs pre filters:
   - filter: Poisson Disk Thinning # To test selection of median value.
@@ -311,7 +307,7 @@ observations:
       - 50
   compareVariables:
     - reference:
-        name: ObsValue/waterTemperature
+        name: TestReferenceMedian/waterTemperature
       test:
         name: DerivedObsValue/waterTemperature
 - obs space:

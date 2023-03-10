@@ -278,8 +278,18 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
   }
 
   obsAccessor.flagRejectedObservations(isThinned, flagged);
+
   if (options_.writeMedian) {
-    obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), obsForMedian);
+    std::vector<float> localObs;
+    obsdb_.get_db("ObsValue", filtervars_.variable(0).variable(), localObs);
+    for (size_t localObsId = 0; localObsId < obsdb_.nlocs(); localObsId++) {
+      if (apply[localObsId]) {
+        const size_t globalObsId =
+          obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(localObsId);
+        localObs[localObsId] = obsForMedian[globalObsId];
+      }
+    }
+    obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), localObs);
   }
 }
 
