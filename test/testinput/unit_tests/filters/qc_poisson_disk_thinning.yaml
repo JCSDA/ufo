@@ -290,6 +290,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/poisson_disk_thinning_median_testout.nc4
     simulated variables: [waterTemperature]
   obs pre filters:
   - filter: Poisson Disk Thinning # To test selection of median value.
@@ -305,3 +309,23 @@ observations:
       - 19
       - 38
       - 50
+  compareVariables:
+    - reference:
+        name: ObsValue/waterTemperature
+      test:
+        name: DerivedObsValue/waterTemperature
+- obs space:
+    name: Simple ocean horizontal thinning median selection example - options exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+    simulated variables: [waterTemperature]
+  obs pre filters:
+  - filter: Poisson Disk Thinning # To test selection of median value.
+    filter variables:
+    - name: waterTemperature
+    min_horizontal_spacing: 50
+    shuffle: false
+    write_median: true
+  expectExceptionWithMessage: "UserError: : write_median has no effect if select_median is not set."

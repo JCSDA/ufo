@@ -198,6 +198,10 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
     throw eckit::UserError(
           ": must use both minLatitudeSpacing and "
           "minLongitudeSpacing.", Here());
+  } else if ((options_.selectMedian.value() == false) &&
+             (options_.writeMedian.value() == true)) {
+    throw eckit::UserError(
+          ": write_median has no effect if select_median is not set.", Here());
   }
 }
 
