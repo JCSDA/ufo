@@ -26,7 +26,7 @@ module ufo_columnretrieval_tlad_mod
    integer :: nlayers_retrieval
    integer :: nlocs, nvars, nval
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar
-   character(kind=c_char,len=:), allocatable :: tracervars(:), stretch
+   character(kind=c_char,len=:), allocatable :: tracervars, stretch
    logical :: isaveragingkernel
    real(kind_real) :: convert_factor_model
    real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
@@ -50,8 +50,8 @@ subroutine columnretrieval_tlad_setup_(self, f_conf)
   class(ufo_columnretrieval_tlad), intent(inout) :: self
   type(fckit_configuration), intent(in)  :: f_conf
   integer :: nlevs_yaml
-  integer :: ivar, nvars
   character(len=max_string) :: err_msg
+  character(len=:), allocatable :: value(:)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_retrieval", self%nlayers_retrieval)
@@ -76,10 +76,7 @@ subroutine columnretrieval_tlad_setup_(self, f_conf)
 
   ! add variables to geovars that are needed
   ! specified tracers
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%tracervars(ivar))
-  end do
+  call self%geovars%push_back(self%tracervars)
 
 end subroutine columnretrieval_tlad_setup_
 
@@ -105,7 +102,7 @@ subroutine columnretrieval_tlad_settraj_(self, geovals_in, obss)
 
   ! Local variables
   type(ufo_geoval), pointer :: prsi
-  integer :: ivar, iobs, ilev
+  integer :: iobs, ilev
   character(len=MAXVARLEN) :: varstring
   character(len=4) :: levstr
   type(ufo_geovals) :: geovals
@@ -181,22 +178,19 @@ subroutine columnretrieval_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx
 
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
 
-  ! loop through all variables
-  do ivar = 1, nvars
-    geovar = self%tracervars(ivar)
-    call ufo_geovals_get_var(geovals, geovar, tracer)
-    do iobs = 1, nlocs
-      if (self%avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
-        call simulate_column_ob_tl(self%nlayers_retrieval, tracer%nval, & 
-                                   self%avgkernel_obs(:,iobs), &
-                                   self%prsi_obs(:,iobs), self%prsi(:,iobs),&
-                                   tracer%vals(:,iobs)*self%convert_factor_model, &
-                                   hofx_tmp, self%stretch)
-        hofx(ivar,iobs) = hofx_tmp
-      else
-        hofx(ivar,iobs) = missing
-      end if
-    end do
+  ! nvars is always 1 for this operator
+  call ufo_geovals_get_var(geovals, self%tracervars, tracer)
+  do iobs = 1, nlocs
+    if (self%avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
+      call simulate_column_ob_tl(self%nlayers_retrieval, tracer%nval, & 
+                                 self%avgkernel_obs(:,iobs), &
+                                 self%prsi_obs(:,iobs), self%prsi(:,iobs),&
+                                 tracer%vals(:,iobs)*self%convert_factor_model, &
+                                 hofx_tmp, self%stretch)
+      hofx(nvars,iobs) = hofx_tmp
+    else
+      hofx(nvars,iobs) = missing
+    end if
   end do
   call ufo_geovals_delete(geovals)
 
@@ -215,31 +209,27 @@ subroutine columnretrieval_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx
   real(c_double),          intent(in)    :: hofx(nvars, nlocs)
   type(c_ptr), value,      intent(in)    :: obss
   type(ufo_geoval), pointer :: tracer
-  character(len=MAXVARLEN) :: geovar
   type(ufo_geovals) :: geovals
   real(kind_real) :: hofx_tmp
-  integer :: ivar, iobs
+  integer :: iobs
   real(c_double) :: missing
 
   missing = missing_value(missing)
 
   if (.not. geovals_in%linit ) geovals_in%linit=.true. ! need this for var exe
 
-  ! loop through all variables
-  do ivar = 1, nvars
-    geovar = self%tracervars(ivar)
-    call ufo_geovals_get_var(geovals_in, geovar, tracer)
+  ! nvars is always 1 for this operator
+  call ufo_geovals_get_var(geovals_in, self%tracervars, tracer)
 
-    do iobs = 1, nlocs
-      if (hofx(ivar,iobs) /= missing) then ! take care of missing obs
-        hofx_tmp = hofx(ivar,iobs)
-        call simulate_column_ob_ad(self%nlayers_retrieval, tracer%nval, &
-                                   self%avgkernel_obs(:,iobs), &
-                                   self%prsi_obs(:,iobs), self%prsi(:,iobs),&
-                                   tracer%vals(:,iobs), hofx_tmp, self%stretch)
-        tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
-      end if
-    end do
+  do iobs = 1, nlocs
+    if (hofx(nvars,iobs) /= missing) then ! take care of missing obs
+      hofx_tmp = hofx(nvars,iobs)
+      call simulate_column_ob_ad(self%nlayers_retrieval, tracer%nval, &
+                                 self%avgkernel_obs(:,iobs), &
+                                 self%prsi_obs(:,iobs), self%prsi(:,iobs),&
+                                 tracer%vals(:,iobs), hofx_tmp, self%stretch)
+      tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
+    end if
   end do
 
 end subroutine columnretrieval_simobs_ad_
