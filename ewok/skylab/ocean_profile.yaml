@@ -26,6 +26,8 @@ obs operator:
     variables:
     - name: waterTemperature
   - name: MarineVertInterp
+    # note: alias file is needed for now because of a conflict with "waterTemperature".
+    # The built-in alias maps to "ocean_temperature", but soca uses "sea_water_temperature"
     observation alias file: !ENV ${JEDI_SRC}/soca/test/testinput/obsop_name_map.yml
     variables:
     - name: salinity

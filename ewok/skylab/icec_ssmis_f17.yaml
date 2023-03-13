@@ -15,7 +15,6 @@ obs space:
   simulated variables: [seaIceFraction]
 obs operator:
   name: Identity
-  observation alias file: !ENV ${JEDI_SRC}/soca/test/testinput/obsop_name_map.yml
 obs error:
   covariance model: diagonal
 obs filters:
