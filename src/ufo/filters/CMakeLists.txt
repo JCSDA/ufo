@@ -87,6 +87,8 @@ set ( filters_files
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
+      ProfileUnFlagObsCheck.cc
+      ProfileUnFlagObsCheck.h
       SatName.h
       SatName.cc
       SatwindInversionCorrection.cc
