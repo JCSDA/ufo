@@ -12,9 +12,10 @@ obs space:
   io pool:
     write multiple files: true
   _source: noaa
-  simulated variables: [sea_ice_area_fraction]
+  simulated variables: [seaIceFraction]
 obs operator:
   name: Identity
+  observation alias file: !ENV ${JEDI_SRC}/soca/test/testinput/obsop_name_map.yml
 obs error:
   covariance model: diagonal
 obs filters:
