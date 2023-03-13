@@ -12,7 +12,7 @@ obs space:
   io pool:
     write multiple files: true
   _source: noaa
-  simulated variables: [sea_ice_area_fraction]
+  simulated variables: [seaIceFraction]
 obs operator:
   name: Identity
 obs error:

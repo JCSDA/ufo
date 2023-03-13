@@ -18,14 +18,17 @@ obs space:
   io pool:
     write multiple files: true
   _source: navy
-  simulated variables: [sea_waterTemperature, salinity]
+  simulated variables: [waterTemperature, salinity]
 obs operator:
   name: Composite
   components:
   - name: InsituTemperature
     variables:
-    - name: sea_waterTemperature
+    - name: waterTemperature
   - name: MarineVertInterp
+    # note: alias file is needed for now because of a conflict with "waterTemperature".
+    # The built-in alias maps to "ocean_temperature", but soca uses "sea_water_temperature"
+    observation alias file: !ENV ${JEDI_SRC}/soca/test/testinput/obsop_name_map.yml
     variables:
     - name: salinity
 obs error:
@@ -40,12 +43,12 @@ obs filters:
 
   ## Filters for T:
   - filter: Bounds Check
-    filter variables: [{name: sea_waterTemperature}]
+    filter variables: [{name: waterTemperature}]
     minvalue: -2.0
     maxvalue: 36.0
 
   - filter: Background Check
-    filter variables: [{name: sea_waterTemperature}]
+    filter variables: [{name: waterTemperature}]
     threshold: 5.0
     absolute threshold: 5.0
 
@@ -64,7 +67,7 @@ obs filters:
   # If T was bad, remove S as well regardless
   - filter: RejectList
     where:
-    - variable: QCflagsData/sea_waterTemperature
+    - variable: QCflagsData/waterTemperature
       minvalue: 1
     defer to post: true
 
