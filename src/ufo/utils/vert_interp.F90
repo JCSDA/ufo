@@ -152,4 +152,128 @@ end subroutine vert_interp_apply_ad
 
 ! ------------------------------------------------------------------------------
 
+subroutine nearestneighbor_interp_index(nlev,obl,vec,idx)
+
+implicit none
+integer,         intent(in ) :: nlev       !Number of model levels
+real(kind_real), intent(in ) :: obl        !Observation location
+real(kind_real), intent(in ) :: vec(nlev)  !Structured vector of grid points
+integer,         intent(out) :: idx        !Index for interpolation
+
+integer         :: k
+real(kind_real) :: missing
+
+missing = missing_value(obl)
+
+! If the observation is missing then set both the index and weight to missing.
+if (obl == missing) then
+   idx= missing_value(nlev)
+   return
+end if
+
+if (vec(1) < vec(nlev)) then !increases with index
+
+  if (obl <= vec(1)) then
+     idx = 1
+  else
+     idx = nlev
+     do k = 2, nlev
+        if (obl <= vec(k)) then
+           if((obl - vec(k-1)) <= (vec(k)-obl)) then
+             idx = k - 1
+           else
+             idx = k
+           endif
+           exit
+        endif
+     enddo
+  endif
+
+else !decreases with index
+
+  if (obl >= vec(1)) then
+     idx = 1
+  else
+     idx = nlev
+     do k = 2, nlev
+        if (obl >= vec(k)) then
+           if((vec(k-1)-obl) <= (obl-vec(k))) then
+             idx = k - 1
+           else
+             idx = k
+           endif
+           exit
+        endif
+     enddo
+  endif
+
+endif
+
+end subroutine nearestneighbor_interp_index
+
+! ------------------------------------------------------------------------------
+
+subroutine nearestneighbor_interp_apply(nlev, fvec, f, idx)
+
+implicit none
+integer,         intent(in ) :: nlev        !Number of model levels
+real(kind_real), intent(in ) :: fvec(nlev)  !Field at grid points
+integer,         intent(in ) :: idx         !Index for interpolation
+real(kind_real), intent(out) :: f           !Output at obs location using linear interp
+
+if (idx == missing_value(nlev)) then
+  f = missing_value(f)
+else
+  f = fvec(idx)
+endif
+
+end subroutine nearestneighbor_interp_apply
+
+! ------------------------------------------------------------------------------
+
+subroutine nearestneighbor_interp_apply_tl(nlev, fvec_tl, f_tl, idx)
+
+implicit none
+integer,         intent(in)  :: nlev
+real(kind_real), intent(in)  :: fvec_tl(nlev)
+integer,         intent(in)  :: idx
+real(kind_real), intent(out) :: f_tl
+
+if (idx== missing_value(nlev)) then
+  f_tl = missing_value(f_tl)
+else if (fvec_tl(idx) == missing_value(f_tl)) then
+  f_tl = missing_value(f_tl)
+else
+  f_tl = fvec_tl(idx)
+endif
+
+end subroutine nearestneighbor_interp_apply_tl
+
+! ------------------------------------------------------------------------------
+
+subroutine nearestneighbor_interp_apply_ad(nlev, fvec_ad, f_ad, idx)
+
+implicit none
+integer,         intent(in)    :: nlev
+real(kind_real), intent(inout) :: fvec_ad(nlev)
+integer,         intent(in)    :: idx
+real(kind_real), intent(in)    :: f_ad
+real(kind_real) :: missing
+
+missing = missing_value(missing)
+
+! Do not modify the adjoint if the weight index is missing.
+! This occurs when the observed vertical coordinate is missing.
+if (idx == missing_value(nlev)) return
+
+if (fvec_ad(idx) == missing .or. f_ad == missing) then
+  fvec_ad(idx) = 0.0_kind_real
+else
+  fvec_ad(idx) = fvec_ad(idx) + f_ad
+endif
+
+end subroutine nearestneighbor_interp_apply_ad
+
+! ------------------------------------------------------------------------------
+
 end module vert_interp_mod

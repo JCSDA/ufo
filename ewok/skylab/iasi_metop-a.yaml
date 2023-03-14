@@ -7,6 +7,8 @@ obs space:
     engine:
       type: H5File
       allow overwrite: true
+  io pool:
+    write multiple files: true
   _source: noaa
   simulated variables: [brightnessTemperature]
   channels: &iasi_metop-a_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -64,6 +66,9 @@ obs operator:
   obs options:
     Sensor_ID: iasi_metop-a
     EndianType: little_endian
+obs error:
+  covariance model: cross variable covariances
+  input file: $(static_data)/skylab-4.0.0/obserrors/Rcov.iasi_metop-a.nc
 obs bias:
   variational bc:
     predictors:

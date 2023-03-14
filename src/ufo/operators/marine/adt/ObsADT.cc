@@ -1,8 +1,8 @@
 /*
- * (C) Copyright 2017-2018 UCAR
- * 
+ * (C) Copyright 2017-2023 UCAR
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/operators/marine/adt/ObsADT.h"
@@ -11,11 +11,15 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
 
+#include "ioda/distribution/Accumulator.h"
+#include "ioda/distribution/Distribution.h"
+#include "ioda/ObsVector.h"
+
+#include "ufo/filters/Variable.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/utils/OperatorUtils.h"
 
 namespace ufo {
 
@@ -24,33 +28,79 @@ static ObsOperatorMaker<ObsADT> makerADT_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADT::ObsADT(const ioda::ObsSpace & odb, const ObsADTParameters & params)
-  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
+  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+    odb_(odb)
 {
-  const std::vector<std::string> vvin{"sea_surface_height_above_geoid"};
-  varin_.reset(new oops::Variables(vvin));
-  ufo_adt_setup_f90(keyOper_, params.toConfiguration());
-  oops::Log::trace() << "ObsADT created." << std::endl;
+  oops::Log::trace() << "ObsADT constructor starting" << std::endl;
+
+  std::vector<int> operatorVarIndices;
+  getOperatorVariables(params.variables.value(), odb.assimvariables(),
+    operatorVars_, operatorVarIndices);
+  requiredVars_.push_back("sea_surface_height_above_geoid");
+
+  // sanity check to make sure adt is the only variable
+  ASSERT_MSG(
+    operatorVars_.size() == 1 && operatorVars_[0] == "absoluteDynamicTopography",
+    "ADT can only work on variable \"absoluteDynamicTopography\"");
+  ASSERT(operatorVarIndices.size() == 1);
+  operatorVarIndex_ = operatorVarIndices[0];
+
+  oops::Log::trace() << "ObsADT constructor finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsADT::~ObsADT() {
-  ufo_adt_delete_f90(keyOper_);
-  oops::Log::trace() << "ObsADT destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsADT::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                          ObsDiagnostics &) const {
-  ufo_adt_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
-  oops::Log::trace() << "ObsADT: observation operator run" << std::endl;
+  oops::Log::trace() << "ObsADT: simulateObs starting" << std::endl;
+
+  const double missing = util::missingValue(missing);
+
+  // get geovals
+  std::vector<double> vec(ovec.nlocs());
+  geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
+
+  // get obs
+  std::vector<double> obs;
+  odb_.get_db("ObsValue", ovec.varnames().variables()[operatorVarIndex_], obs);
+
+  // calculate global offsets
+  double offset = 0;
+  auto accumVal = odb_.distribution()->createAccumulator<double>();
+  auto accumCnt = odb_.distribution()->createAccumulator<int>();
+  for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
+    // TODO(travis) also remove obs that have failed QC before this point?
+    // Not doing it now to keep answers from changing with this PR.
+    if (obs[jloc] != missing && vec[jloc] != missing) {
+      accumVal->addTerm(jloc, vec[jloc] - obs[jloc]);
+      accumCnt->addTerm(jloc, 1);
+    }
+  }
+  auto count = accumCnt->computeResult();
+  if (count > 0) {
+    offset = accumVal->computeResult() / count;
+  }
+  oops::Log::debug() << "ObsADT: simulateObs offset: " << offset << std::endl;
+
+  // subtract offset from geoval
+  for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
+    const size_t idx = jloc * ovec.nvars() + operatorVarIndex_;
+    ovec[idx] = vec[jloc];
+    if (ovec[idx] != missing) ovec[idx] -= offset;
+  }
+
+  oops::Log::trace() << "ObsADT: simulateObs finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsADT::print(std::ostream & os) const {
-  os << "ObsADT::print not implemented";
+  os << "ObsADT operator" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

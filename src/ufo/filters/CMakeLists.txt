@@ -87,6 +87,8 @@ set ( filters_files
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
+      ProfileUnFlagObsCheck.cc
+      ProfileUnFlagObsCheck.h
       SatName.h
       SatName.cc
       SatwindInversionCorrection.cc
@@ -237,6 +239,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
       obsfunctions/ObsErrorBoundMW.h
+      obsfunctions/ObsErrorFactorDuplicateCheck.cc
+      obsfunctions/ObsErrorFactorDuplicateCheck.h
       obsfunctions/ObsErrorFactorSituDependMW.cc
       obsfunctions/ObsErrorFactorSituDependMW.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
@@ -277,6 +281,8 @@ set ( filters_files
       obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SatWindsSPDBCheck.cc
       obsfunctions/SatWindsSPDBCheck.h
+      obsfunctions/ScatWindsAmbiguityCheck.cc
+      obsfunctions/ScatWindsAmbiguityCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc

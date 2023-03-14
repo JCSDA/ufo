@@ -30,12 +30,12 @@ class OceanDepthToPressureParameters : public VariableTransformParametersBase {
   OOPS_CONCRETE_PARAMETERS(OceanDepthToPressureParameters, VariableTransformParametersBase)
 
  public:
-  /// Input variable of the ocean depth to pressure conversion
+  /// Input depth variable of the ocean depth to pressure conversion
   oops::Parameter<std::string> DepthVariable{"ocean depth variable",
                                              "depthBelowWaterSurface", this};
   oops::Parameter<std::string> DepthGroup{"ocean depth group",
                                           "MetaData", this};
-  /// Pressure variable name
+  /// Output pressure variable name
   oops::Parameter<std::string> PressureVariable{"ocean pressure name",
                                                "waterPressure", this};
 };
@@ -46,11 +46,13 @@ class OceanDepthToPressureParameters : public VariableTransformParametersBase {
 ///
 /// Example
 ///
-///  obs filters:
-///  - filter: Variable Transforms
-///    Transform: OceanDepthToPressure
-///    ocean depth variable: depthBelowWaterSurface
-///    ocean depth group: DerivedObsValue
+/// \code{.yaml}
+/// obs filters:
+/// - filter: Variable Transforms
+///   Transform: OceanDepthToPressure
+///   ocean depth variable: depthBelowWaterSurface
+///   ocean depth group: DerivedObsValue
+/// \endcode
 ///
 /// will return pressure (dbar) in a variable named (by default) "DerivedObsValue/waterPressure",
 /// as a function of depth (m) and latitude (deg).

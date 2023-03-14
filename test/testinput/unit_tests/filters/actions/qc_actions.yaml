@@ -551,6 +551,193 @@ observations:
       ignore: defective observations
   expectExceptionWithMessage: Actions modifying QC flags, such as 'accept', must not be followed by any other actions performed by the same filter
 
+# Test "set" with the observationReport flag
+- obs space:
+    name: "Test data for 'set' observationReport"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs filters:
+  # reject all observations (this should have no effect on the behaviour of subsequent filters)
+  - filter: RejectList
+  # Must create the flag
+  - filter: Create Diagnostic Flags
+    filter variables: []
+    create observation report flags: true
+    flags:
+    - name: FlagA
+      initial value: false
+  # set the diagnostic flag FlagA for the observation report given latitude >= 0
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: 0
+    filter variables: [airTemperature]
+    # The observation report flag is set to true whenever any of the individual
+    # filter variables' flags are set to true.
+    action:
+      name: set
+      flag: FlagA
+      set observation report flags: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+  - test:
+      name: DiagnosticFlags/FlagA/airTemperature
+    reference:
+      name: TestReference/bool_variable_00111  # = 0, 0, 1, 1, 1
+
+# Try to set the observation report flag before it has been produced
+- obs space:
+    name: "Test data for 'set' of nonexistant observation report flag"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      set observation report flags: true
+  expectExceptionWithMessage: Variable 'DiagnosticFlags/FlagA/observationReport does not exist yet. It needs to be set up with the 'Create Diagnostic Flags' filter prior to using the 'set' or 'unset' action.
+
+# Try to set 'set variable flags to observation report' to true without setting 'set observation report flags' to true
+- obs space:
+    name: "Test data for 'set variable flags to observation report' without 'set observation report flags'"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      set variable flags to observation report: true
+  expectExceptionWithMessage: The option 'set variable flags to observation report' cannot be set to true if 'set observation report flags' is set to false.
+
+# Set the observation report flag and the filter variable flags to the same value
+- obs space:
+    name: "Test data for setting the observation report and the variable flags to the same value"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    observed variables: [airTemperature]
+    simulated variables: [airTemperature]
+    derived variables: [airTemperatureOffset]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/offset
+      type: float
+      value: 610.0
+    # values of ObsValue/airTemperature are 300.0, 302.5, 305.0, 307.5, 310.0
+    # set values of DerivedObsValue/airTemperatureOffset to 310.0, 307.5, 305.0, 302.5, 300.0
+    - name: DerivedObsValue/airTemperatureOffset
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: ObsValue/airTemperature
+          - name: MetaData/offset
+          coefs: [-1.0, 1.0]
+  # Create diagnostic flags for the filter variables and the report flags
+  - filter: Create Diagnostic Flags
+    filter variables: [airTemperature, airTemperatureOffset]
+    create observation report flags: true
+    flags:
+    - name: failedBoundsCheck
+      initial value: false
+  # The options chosen for the 'set' filter action cause the following to occur:
+  # (1) Set the diagnostic flag failedBoundsCheck for filter variables whose values are
+  # smaller than 306, i.e.:
+  #   airTemperature: 1, 1, 1, 0, 0
+  #   airTemperatureOffset: 0, 0, 1, 1, 1
+  # (2) Set the observation report flags to the logical or of the filter variables' flags:
+  #   observationReport: 1, 1, 1, 1, 1
+  # (3) Set the filter variables' flags equal to the observation report flags.
+  - filter: Bounds Check
+    filter variables: [airTemperature, airTemperatureOffset]
+    minvalue: 306
+    # The observation report flag is set to true whenever any of the individual
+    # filter variables' flags are set to true.
+    # The filter variables' flags are then set to the same value.
+    action:
+      name: set
+      flag: failedBoundsCheck
+      set observation report flags: true
+      set variable flags to observation report: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/failedBoundsCheck/airTemperature
+    reference:
+      name: TestReference/bool_variable_11111
+  - test:
+      name: DiagnosticFlags/failedBoundsCheck/airTemperatureOffset
+    reference:
+      name: TestReference/bool_variable_11111
+  - test:
+      name: DiagnosticFlags/failedBoundsCheck/observationReport
+    reference:
+      name: TestReference/bool_variable_11111
+
+# Test "unset" with the observationReport flag
+- obs space:
+    name: "Test data for 'unset' observationReport"
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs filters:
+  # reject all observations (this should have no effect on the behaviour of subsequent filters)
+  - filter: RejectList
+  # Must create the flag
+  - filter: Create Diagnostic Flags
+    filter variables: []
+    create observation report flags: true
+    flags:
+    - name: FlagA
+      initial value: false
+  # set the diagnostic flag FlagA everywhere
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      set observation report flags: true
+  # unset the diagnostic flag FlagA for the observation report given latitude >= 0
+  - filter: Perform Action
+    where:
+    - variable:
+        name: MetaData/latitude  # = -2.5, -1.25, 0, 1.25, 2.5
+      minvalue: 0
+    filter variables: [airTemperature]
+    # The observation report flag is set to false whenever any of the individual
+    # filter variables' flags are set to false.
+    action:
+      name: unset
+      flag: FlagA
+      set observation report flags: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+  - test:
+      name: DiagnosticFlags/FlagA/airTemperature
+    reference:
+      name: TestReference/bool_variable_11000  # = 1, 1, 0, 0, 0
+
 # Test "flag original and averaged profiles"
 # Grouping into records according to MetaData/intvar3 produces two records.
 # The ObsSpace extension produces 71 new locations per record, so there are

@@ -47,16 +47,26 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   ASSERT(correctedVars.channels().empty() ||
          correctedVars.variables().size() == correctedVars.channels().size());
 
-  const std::size_t nlocs  = ybias.nlocs();
-  const std::size_t nvars  = ybias.nvars();
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t nvars  = correctedVars.variables().size();
 
-  std::vector<int> chidxBC;
   const std::vector<int> & chNoBC = biascoeffs.chlistNoBC();
-  if (chNoBC.size() > 0) {
-    chidxBC.resize(nvars, 1);
-    for (std::size_t it = 0; it < chNoBC.size(); ++it) {
-      std::size_t jvar = chNoBC[it] - 1;
-      chidxBC[jvar] = 0;
+  // The opting out of channels from bias-correction is currently only compatible with the
+  // case where the full list of channels (whether bias-corrected or not) is a consecutive
+  // list running from 1 to nvars.  While the following block of code makes sure that this
+  // is the case, such compatibility restriction should be removed in the future.
+  if (chNoBC.size() > 0 && !correctedVars.channels().empty()) {
+    std::vector<int> tmp(nvars);
+    std::iota(tmp.begin(), tmp.end(), 1);
+    ASSERT(correctedVars.channels() == tmp);
+  }
+  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) != chNoBC.end()) {
+      for (std::size_t jp = 0; jp < npreds; ++jp) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
+          predData[jp][jl * nvars + jvar] = 0.0;
+        }
+      }
     }
   }
 
@@ -76,35 +86,31 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   std::vector<double> biasTerm(nlocs);
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    double wpred = 1.0;
-    if (chNoBC.size() > 0) {
-      if (chidxBC[jvar] == 0) wpred = 0.0;
-    }
+    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) == chNoBC.end()) {
+      std::string predictorSuffix;
+      if (correctedVars.channels().empty())
+        predictorSuffix = correctedVars[jvar];
+      else
+        predictorSuffix = std::to_string(correctedVars.channels()[jvar]);
 
-    std::string predictorSuffix;
-    if (correctedVars.channels().empty())
-      predictorSuffix = correctedVars[jvar];
-    else
-      predictorSuffix = std::to_string(correctedVars.channels()[jvar]);
-
-    for (std::size_t jp = 0; jp < npreds; ++jp) {
-      // axpy
-      const double beta = biascoeffs(jp, jvar);
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        if (predData[jp][jl*nvars+jvar] != missing) {
-          predData[jp][jl*nvars+jvar] *= wpred;
-          biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
-          ybias[jl*nvars+jvar] += biasTerm[jl];
+      for (std::size_t jp = 0; jp < npreds; ++jp) {
+        // axpy
+        const double beta = biascoeffs(jp, jvar);
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
+          if (predData[jp][jl * nvars + jvar] != missing) {
+            biasTerm[jl] = predData[jp][jl * nvars + jvar] * beta;
+            ybias[jl * nvars + jvar] += biasTerm[jl];
+          }
         }
-      }
-      // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
-      const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
-      if (ydiags.has(varname)) {
-        ydiags.allocate(1, oops::Variables({varname}));
-        ydiags.save(biasTerm, varname, 0);
-      } else {
-        oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
-        ABORT("ObsBiasOperatorTerm variable is not reserved in ydiags");
+        // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
+        const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
+        if (ydiags.has(varname)) {
+          ydiags.allocate(1, oops::Variables({varname}));
+          ydiags.save(biasTerm, varname, 0);
+        } else {
+          oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
+          ABORT("ObsBiasOperatorTerm variable is not reserved in ydiags");
+        }
       }
     }
   }

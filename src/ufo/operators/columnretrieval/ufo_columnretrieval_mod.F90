@@ -24,7 +24,7 @@ module ufo_columnretrieval_mod
    type(oops_variables), public :: geovars
    integer :: nlayers_retrieval
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar
-   character(kind=c_char,len=:), allocatable :: tracervars(:), stretch
+   character(kind=c_char,len=:), allocatable :: tracervars, stretch
    logical :: isapriori, isaveragingkernel
    real(kind_real) :: convert_factor_model
  contains
@@ -71,10 +71,7 @@ subroutine ufo_columnretrieval_setup(self, f_conf)
 
   ! add variables to geovars that are needed
   ! specified tracers
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%tracervars(ivar))
-  end do
+  call self%geovars%push_back(self%tracervars)
   ! column pressure at interface
   call self%geovars%push_back(var_prsi)
 
@@ -111,8 +108,8 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
 
   ! Local variables
   type(ufo_geoval), pointer :: prsi, tracer
-  integer :: ivar, iobs, ilev
-  character(len=MAXVARLEN) :: geovar, varstring
+  integer :: iobs, ilev
+  character(len=MAXVARLEN) :: varstring
   character(len=4) :: levstr
   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
   real(kind_real), allocatable, dimension(:) :: apriori_term
@@ -162,21 +159,18 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
     call obsspace_get_db(obss, "RtrvlAncData", "apriori_term", apriori_term)
   end if
 
-  ! loop through all variables
-  do ivar = 1, nvars
-    geovar = self%tracervars(ivar)
-    call ufo_geovals_get_var(geovals, geovar, tracer)
-    do iobs = 1, nlocs
-      if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
-        call simulate_column_ob(self%nlayers_retrieval, tracer%nval, avgkernel_obs(:,iobs), &
-                                prsi_obs(:,iobs), prsi%vals(:,iobs), &
-                                tracer%vals(:,iobs)*self%convert_factor_model, &
-                                hofx_tmp, self%stretch)
-        hofx(ivar,iobs) = hofx_tmp + apriori_term(iobs)
-      else
-        hofx(ivar,iobs) = missing ! default if we are unable to compute averaging kernel
-      end if
-    end do
+  ! nvars is always 1 for this operator
+  call ufo_geovals_get_var(geovals, self%tracervars, tracer)
+  do iobs = 1, nlocs
+    if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
+      call simulate_column_ob(self%nlayers_retrieval, tracer%nval, avgkernel_obs(:,iobs), &
+                              prsi_obs(:,iobs), prsi%vals(:,iobs), &
+                              tracer%vals(:,iobs)*self%convert_factor_model, &
+                              hofx_tmp, self%stretch)
+      hofx(nvars,iobs) = hofx_tmp + apriori_term(iobs)
+    else
+      hofx(nvars,iobs) = missing ! default if we are unable to compute averaging kernel
+    end if
   end do
 
 

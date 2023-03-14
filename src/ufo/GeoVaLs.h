@@ -47,6 +47,8 @@ class GeoVaLsParameters : public oops::Parameters {
   /// a single location in the obs file. There needs to be at least
   /// loc_multiplier * obs_all_nlocs locations in the geovals file.
   oops::Parameter<int> loc_multiplier{"loc_multiplier", 1, this};
+  /// Flip GeoVals levels after reading the geoval file when levels_are_top_down is false.
+  oops::Parameter<bool> levels_are_top_down{"levels_are_top_down", true, this};
 };
 
 // -----------------------------------------------------------------------------
