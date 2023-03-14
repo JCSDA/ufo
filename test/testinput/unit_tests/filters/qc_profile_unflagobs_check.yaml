@@ -1,0 +1,138 @@
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Unflag obs check ignores where-clause obs
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_fake_obsdata.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+    simulated variables: [waterTemperature, depthBelowWaterSurface]
+    observed variables: [waterTemperature, depthBelowWaterSurface]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: ObsValue/waterTemperature
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
+      is_true:
+    actions:
+    - name: reject
+  - filter: Profile Unflag Observations Check
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
+      is_false:  # this condition ignores data rejected by subsample reject during the unflagging
+    filter variables:
+    - name: ObsValue/waterTemperature
+    absolute tolerance: 0.1
+    vertical tolerance scale: { "0": 1, "1": 1, "10": 0.1, "99999": 0.1}
+    actions:
+      - name: accept
+  passedBenchmark: 26 # No affect on where clause obs:
+                      # waterTemperature: 8/18 pass
+                      #                   7 missing
+                      #                   3 fail subsample
+                      # depthBelowWaterSurface: 18/18 pass
+- obs space:
+    name: Unflag obs check ignores passive obs
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_fake_obsdata.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+    simulated variables: [waterTemperature, depthBelowWaterSurface]
+    observed variables: [waterTemperature, depthBelowWaterSurface]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: ObsValue/waterTemperature
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
+      is_true:
+    actions:
+    - name: passivate
+  - filter: Profile Unflag Observations Check
+    filter variables:
+    - name: ObsValue/waterTemperature
+    absolute tolerance: 0.1
+    vertical tolerance scale: { "0": 1, "1": 1, "10": 0.1, "99999": 0.1}
+    actions:
+      - name: accept
+  passedBenchmark: 26 # No affect on passive obs:
+                      # waterTemperature: 8/18 pass
+                      #                   7 missing
+                      #                   3 fail subsample
+                      # depthBelowWaterSurface: 18/18 pass
+- obs space:
+    name: Unflag obs check unflags based on absolute tolerance
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_fake_obsdata.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+    simulated variables: [waterTemperature, depthBelowWaterSurface]
+    observed variables: [waterTemperature, depthBelowWaterSurface]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: ObsValue/waterTemperature
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
+      is_true:
+    actions:
+    - name: reject
+  - filter: Profile Unflag Observations Check
+    filter variables:
+    - name: ObsValue/waterTemperature
+    absolute tolerance: 10
+    actions:
+      - name: accept
+  passedBenchmark: 29 # Unreject [0, 2, 7]
+                      # waterTemperature: 11/18 pass
+                      #                   7 missing,
+                      #                   3 fail subsample
+                      #                   -3 accepted by unflagging
+                      # depthBelowWaterSurface: 18/18 pass
+- obs space:
+    name: Unflag obs check unflags based on piecewise absolute tolerance
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_fake_obsdata.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+    simulated variables: [waterTemperature, depthBelowWaterSurface]
+    observed variables: [waterTemperature, depthBelowWaterSurface]
+  obs filters:
+  - filter: Perform Action
+    filter variables:
+    - name: ObsValue/waterTemperature
+    where:
+    - variable:
+        name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
+      is_true:
+    actions:
+    - name: reject
+  - filter: Profile Unflag Observations Check
+    filter variables:
+    - name: ObsValue/waterTemperature
+    absolute tolerance: 10
+    vertical tolerance scale: { "0": 1, "3": 1, "8": 0.00001}
+    vertical coordinate: ObsValue/depthBelowWaterSurface
+    actions:
+      - name: accept
+  passedBenchmark: 28 # Unreject [0, 2]
+                      # waterTemperature: 11/18 pass
+                      #                   7 missing
+                      #                   3 fail subsample
+                      #                   -2 shallow obs accepted by unflagging
+                      # depthBelowWaterSurface: 18 pass
