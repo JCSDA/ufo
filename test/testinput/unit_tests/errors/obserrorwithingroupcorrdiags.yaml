@@ -18,4 +18,4 @@ obs error:
   correlation lengthscale: 15000.
 obs error diagnostics:
   output filename: Data/sondes_obserrorcorr_diags.nc4
-  record number: 0
+  record number: 2

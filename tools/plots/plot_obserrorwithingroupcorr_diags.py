@@ -15,14 +15,16 @@ randMult = ds.variables['randomVectorMultipliedByCov'][:]
 plt.imshow(corrs,cmap='hot')
 plt.title('correlation matrix for selected record')
 plt.colorbar()
-plt.show()
+plt.savefig("corr_record.png")
+plt.clf()
 # plot several different correlations as function of coordinate
 for icorr in range(0, len(coords), 10):
   plt.plot(coords, corrs[icorr])
 plt.title('correlations between different locations in one record')
-plt.show()
+plt.savefig("corr_location.png")
+plt.clf()
 # plot random vector, and random vector multiplied by correlation
 plt.plot(coords, rand, label='Random vector')
 plt.plot(coords, randMult, label='Random vector multiplied by covariance')
 plt.legend()
-plt.show()
+plt.savefig("corr_random.png")
