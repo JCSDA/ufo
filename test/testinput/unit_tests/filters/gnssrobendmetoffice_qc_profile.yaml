@@ -96,13 +96,15 @@ observations:
     - name: bendingAngle
       channels: *all_levels
     threshold: 10
-  - filter: Variable Assignment
-    assignments:
-    - name: ObsError/bendingAngle
-      type: float
+  - filter: Perform Action
+    filter variables:
+    - name: bendingAngle
       channels: *all_levels
-      function:
+    action:
+      name: assign error
+      error function:
         name: ObsFunction/DrawObsErrorFromFile
+        channels: *all_levels
         options:
           channels: *all_levels
           dispersion measure: fractional standard deviation
