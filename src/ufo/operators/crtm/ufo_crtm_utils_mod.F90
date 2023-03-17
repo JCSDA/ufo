@@ -70,11 +70,14 @@ type crtm_conf
 
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
- character(len=255) :: COEFFICIENT_PATH
+ character(len=510) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
+ character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format, &
+                       SpcCoeff_Format, TauCoeff_Format
+ character(len=255) :: Aerosol_Model, Cloud_Model
  character(len=255) :: &
     IRwaterCoeff_File, IRlandCoeff_File, IRsnowCoeff_File, IRiceCoeff_File, &
     VISwaterCoeff_File, VISlandCoeff_File, VISsnowCoeff_File, VISiceCoeff_File, &
-    MWwaterCoeff_File
+    MWwaterCoeff_File, CloudCoeff_File, AerosolCoeff_File
  integer, allocatable :: Land_WSI(:)
  real(kind_real) :: Cloud_Fraction = -1.0_kind_real
  integer :: inspect
@@ -82,6 +85,7 @@ type crtm_conf
  character(len=255) :: salinity_option
  character(len=MAXVARLEN) :: sfc_wind_geovars
 end type crtm_conf
+
 
 INTERFACE calculate_aero_layer_factor
 
@@ -125,25 +129,62 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
 
+ !character(len=MAXVARLEN), parameter :: &
+ !     UFO_Clouds(N_VALID_CLOUD_CATEGORIES,2) = &
+ !        reshape( &
+ !           [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
+ !             var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
+ !           , [N_VALID_CLOUD_CATEGORIES,2] )
+
+
  character(len=MAXVARLEN), parameter :: &
-      UFO_Clouds(N_VALID_CLOUD_CATEGORIES,2) = &
-         reshape( &
-            [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
-              var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
-            , [N_VALID_CLOUD_CATEGORIES,2] )
+      UFO_CLOUDS(N_VALID_CLOUD_CATEGORIES, 2) = &
+       reshape( &
+         [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg, &      ! 1- 5
+           var_clh,    var_cls,    var_cls,    var_cls,    var_cls, &      ! 5-10
+           var_cls,    var_cli,    var_cls,    var_cls,    var_cls, &      ! 11-15
+           var_cls,    var_cls,    var_cls,    var_cls,    var_clh, &      ! 16-20
+           var_clg,    var_cls,    var_clh,    var_cli,    var_clw, &      ! 21-25 
+           var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, &   ! 1- 5
+           var_clhefr, var_clsefr, var_clsefr, var_clsefr, var_clsefr, &   ! 5-10
+           var_clsefr, var_cliefr, var_clsefr, var_clsefr, var_clsefr, &   ! 11-15
+           var_clsefr, var_clsefr, var_clsefr, var_clsefr, var_clhefr, &   ! 16-20
+           var_clgefr, var_clsefr, var_clhefr, var_cliefr, var_clwefr] &   ! 21-25
+           , [N_VALID_CLOUD_CATEGORIES,2] )           
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
  character(len=MAXVARLEN), parameter :: &
       CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
          CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
+
  integer, parameter :: &
       CRTM_Cloud_Id(N_VALID_CLOUD_CATEGORIES) = &
-         [   WATER_CLOUD, &
-               ICE_CLOUD, &
-              RAIN_CLOUD, &
-              SNOW_CLOUD, &
-           GRAUPEL_CLOUD, &
-              HAIL_CLOUD  ]
+         [ WATER_CLOUD                   , &   ! 1
+           ICE_CLOUD                     , &   ! 2
+           RAIN_CLOUD                    , &   ! 3
+           SNOW_CLOUD                    , &   ! 4
+           GRAUPEL_CLOUD                 , &   ! 5
+           HAIL_CLOUD                    , &   ! 6
+           PlateType1                    , &   ! 7
+           ColumnType1                   , &   ! 8
+           SixBulletRosette              , &   ! 9
+           Perpendicular4_BulletRosette  , &   ! 10
+           Flat3_BulletRosette           , &   ! 11
+           IconCloudIce                  , &   ! 12
+           SectorSnowflake               , &   ! 13
+           EvansSnowAggregate            , &   ! 14
+           EightColumnAggregate          , &   ! 15
+           LargePlateAggregate           , &   ! 16
+           LargeColumnAggregate          , &   ! 17
+           LargeBlockAggregate           , &   ! 18
+           IconSnow                      , &   ! 19
+           IconHail                      , &   ! 20
+           GemGraupel                    , &   ! 21
+           GemSnow                       , &   ! 22
+           GemHail                       , &   ! 23
+           IceSphere                     , &   ! 24    
+           LiquidSphere                  ]   ! 25                 
+
 
 ! Surface Variables
 
@@ -271,6 +312,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
      write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Clouds(jspec,1)),' not supported by UFO_Clouds'
      call abor1_ftn(message)
    end if
+   
    conf%Clouds(jspec,1:2) = UFO_Clouds(ivar,1:2)
    conf%Cloud_Id(jspec)   = CRTM_Cloud_Id(ivar)
  end do
@@ -355,12 +397,70 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  call f_confOpts%get_or_die("CoefficientPath",str)
  conf%COEFFICIENT_PATH = str
 
+ !Path to NetCDF coefficient files
+ if (f_confOpts%has("NC_CoefficientPath")) then
+    call f_confOpts%get_or_die("NC_CoefficientPath",str)
+    conf%NC_COEFFICIENT_PATH = str
+ endif
+ 
+ ! Cloud coefficient file, model, and format
+ conf%Cloud_Model = "crtm"
+ if (f_confOpts%has("Cloud_Model")) then
+    call f_confOpts%get_or_die("Cloud_Model",str)
+    conf%Cloud_Model = str
+ end if
+ 
+ conf%CloudCoeff_File = "CloudCoeff" 
+ if (f_confOpts%has("CloudCoeff_File")) then
+    call f_confOpts%get_or_die("CloudCoeff_File",str)
+    conf%CloudCoeff_File = str
+ end if
+
+ conf%CloudCoeff_Format = "netCDF"
+ if (f_confOpts%has("CloudCoeff_Format")) then
+    call f_confOpts%get_or_die("CloudCoeff_Format",str)
+    conf%CloudCoeff_Format = str
+ end if
+                       
+ ! Aerosol coefficient file, format, and format
+ if (f_confOpts%has("Aerosol_Model")) then
+    call f_confOpts%get_or_die("Aerosol_Model",str)
+    conf%Aerosol_Model = str
+ end if
+ 
+ conf%AerosolCoeff_File = "AerosolCoeff" 
+ if (f_confOpts%has("AerosolCoeff_File")) then
+    call f_confOpts%get_or_die("AerosolCoeff_File",str)
+    conf%AerosolCoeff_File = str
+ end if
+
+ conf%AerosolCoeff_Format = "netCDF"
+ if (f_confOpts%has("AerosolCoeff_Format")) then
+    call f_confOpts%get_or_die("AerosolCoeff_Format",str)
+    conf%AerosolCoeff_Format = str
+ end if                       
+
+ ! Coefficient format for SpcCoeff and TauCoeff
+ conf%SpcCoeff_Format = "Binary"
+ if (f_confOpts%has("SpcCoeff_Format")) then
+    call f_confOpts%get_or_die("SpcCoeff_Format",str)
+    conf%SpcCoeff_Format = str
+ end if
+
+ conf%TauCoeff_Format = "Binary"
+ if (f_confOpts%has("TauCoeff_Format")) then
+    call f_confOpts%get_or_die("TauCoeff_Format",str)
+    conf%TauCoeff_Format = str
+ end if 
+
+ 
  ! Coefficient file prefixes
  IRwaterCoeff = "Nalli"
  if (f_confOpts%has("IRwaterCoeff")) then
     call f_confOpts%get_or_die("IRwaterCoeff",str)
     IRwaterCoeff = str
  end if
+ 
  VISwaterCoeff = "NPOESS"
  if (f_confOpts%has("VISwaterCoeff")) then
     call f_confOpts%get_or_die("VISwaterCoeff",str)
@@ -403,6 +503,8 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
                         trim(IRVISlandCoeff)
        call abor1_ftn(message)
  end select
+ 
+ 
 
  ! IR emissivity coeff files
  conf%IRwaterCoeff_File = trim(IRwaterCoeff)//".IRwater.EmisCoeff.bin"
@@ -423,7 +525,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  if (f_confOpts%has("InspectProfileNumber")) then
    call f_confOpts%get_or_die("InspectProfileNumber",conf%inspect)
  endif
-
+ 
 end subroutine crtm_conf_setup
 
 ! -----------------------------------------------------------------------------

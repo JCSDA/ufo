@@ -4,3 +4,4 @@ _static
 _templates
 *.swp
 test-data-release
+.ipynb_*

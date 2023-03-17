@@ -300,18 +300,28 @@ character(len=1) :: angle_hf
  !**       CRTM_Lifecycle.f90 for more details.
 
  ! write( *,'(/5x,"Initializing the CRTM...")' )
- err_stat = CRTM_Init( self%conf%SENSOR_ID, chinfo, &
-                       File_Path=trim(self%conf%COEFFICIENT_PATH), &
-                       IRwaterCoeff_File=trim(self%conf%IRwaterCoeff_File), &
-                       IRlandCoeff_File=trim(self%conf%IRlandCoeff_File), &
-                       IRsnowCoeff_File=trim(self%conf%IRsnowCoeff_File), &
-                       IRiceCoeff_File=trim(self%conf%IRiceCoeff_File), &
-                       VISwaterCoeff_File=trim(self%conf%VISwaterCoeff_File), &
-                       VISlandCoeff_File=trim(self%conf%VISlandCoeff_File), &
-                       VISsnowCoeff_File=trim(self%conf%VISsnowCoeff_File), &
-                       VISiceCoeff_File=trim(self%conf%VISiceCoeff_File), &
-                       MWwaterCoeff_File=trim(self%conf%MWwaterCoeff_File), &
-                       Quiet=.TRUE.)
+ err_stat = CRTM_Init( self%conf%SENSOR_ID                                      , &
+                       chinfo                                                   , &
+                       File_Path           = trim(self%conf%COEFFICIENT_PATH)   , &
+                       NC_File_Path        = trim(self%conf%NC_COEFFICIENT_PATH), &
+                       Aerosol_Model       = trim(self%conf%Aerosol_Model)      , &
+                       AerosolCoeff_Format = trim(self%conf%AerosolCoeff_Format), &
+                       AerosolCoeff_File   = trim(self%conf%AerosolCoeff_File)  , &
+                       Cloud_Model         = trim(self%conf%Cloud_Model)        , &
+                       CloudCoeff_Format   = trim(self%conf%CloudCoeff_Format)  , &
+                       CloudCoeff_File     = trim(self%conf%CloudCoeff_File)    , &
+                       SpcCoeff_Format     = trim(self%conf%SpcCoeff_Format)    , &
+                       TauCoeff_Format     = trim(self%conf%TauCoeff_Format)    , &
+                       IRwaterCoeff_File   = trim(self%conf%IRwaterCoeff_File)  , &
+                       IRlandCoeff_File    = trim(self%conf%IRlandCoeff_File)   , &
+                       IRsnowCoeff_File    = trim(self%conf%IRsnowCoeff_File)   , &
+                       IRiceCoeff_File     = trim(self%conf%IRiceCoeff_File)    , &
+                       VISwaterCoeff_File  = trim(self%conf%VISwaterCoeff_File) , &
+                       VISlandCoeff_File   = trim(self%conf%VISlandCoeff_File)  , &
+                       VISsnowCoeff_File   = trim(self%conf%VISsnowCoeff_File)  , &
+                       VISiceCoeff_File    = trim(self%conf%VISiceCoeff_File)   , &
+                       MWwaterCoeff_File   = trim(self%conf%MWwaterCoeff_File)  , &
+                       Quiet               = .TRUE.)
  message = 'Error initializing CRTM'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
