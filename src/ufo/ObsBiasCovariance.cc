@@ -371,7 +371,6 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
           // Reset preconditioner L = \mathrm{A}^{-1}
           if (obs_num_[jvar] > 0)
             preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-//          preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
 
           // Reset analysis variances
           if (obs_num_[jvar] > minimal_required_obs_number_) {
