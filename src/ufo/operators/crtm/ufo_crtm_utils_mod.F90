@@ -70,7 +70,7 @@ type crtm_conf
 
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
- character(len=510) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
+ character(len=255) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
  character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format, &
                        SpcCoeff_Format, TauCoeff_Format
  character(len=255) :: Aerosol_Model, Cloud_Model
@@ -398,6 +398,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  conf%COEFFICIENT_PATH = str
 
  !Path to NetCDF coefficient files
+ conf%NC_COEFFICIENT_PATH = conf%COEFFICIENT_PATH
  if (f_confOpts%has("NC_CoefficientPath")) then
     call f_confOpts%get_or_die("NC_CoefficientPath",str)
     conf%NC_COEFFICIENT_PATH = str
@@ -410,7 +411,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
     conf%Cloud_Model = str
  end if
  
- conf%CloudCoeff_File = "CloudCoeff" 
+ conf%CloudCoeff_File = "CloudCoeff.nc4" 
  if (f_confOpts%has("CloudCoeff_File")) then
     call f_confOpts%get_or_die("CloudCoeff_File",str)
     conf%CloudCoeff_File = str
@@ -428,7 +429,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
     conf%Aerosol_Model = str
  end if
  
- conf%AerosolCoeff_File = "AerosolCoeff" 
+ conf%AerosolCoeff_File = "AerosolCoeff.nc4" 
  if (f_confOpts%has("AerosolCoeff_File")) then
     call f_confOpts%get_or_die("AerosolCoeff_File",str)
     conf%AerosolCoeff_File = str
