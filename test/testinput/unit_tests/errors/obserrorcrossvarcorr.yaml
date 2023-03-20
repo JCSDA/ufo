@@ -45,3 +45,51 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+
+- obs space:
+    name: testReader (cross-var corr with four vars, three vars simulated)
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs values: [0, 1, 0]
+        obs errors: [ 1, 1, 1]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reference: [0.1, 1, 0.15]
+
+- obs space:
+    name: testReader (cross-var corr, five vars, one var missing in corr)
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs values: [0, 0, 1, 0, 0]
+        obs errors: [ 1, 1, 1, 1, 1]
+    simulated variables: [variable1, variable2, variable3, variable4, variable5]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reference: [0.2,0.15, 1, 0.7, 0]
+
+- obs space:
+    name: testReader (cross-var corr, one var)
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs values: [1]
+        obs errors: [ 1]
+    simulated variables: [variable1]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reference: [1]
