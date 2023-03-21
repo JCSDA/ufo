@@ -41,31 +41,20 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
     variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
   }
 
-  const oops::Variables &correctedVars = bias.correctedVars();
+  const oops::Variables &simVars = bias.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
-  ASSERT(correctedVars.channels().empty() ||
-         correctedVars.variables().size() == correctedVars.channels().size());
+  ASSERT(simVars.channels().empty() ||
+         simVars.variables().size() == simVars.channels().size());
 
   const std::size_t nlocs  = odb_.nlocs();
-  const std::size_t nvars  = correctedVars.variables().size();
+  const std::size_t nvars  = simVars.variables().size();
 
-  const std::vector<int> & chNoBC = bias.chlistNoBC();
-  // The opting out of channels from bias-correction is currently only compatible with the
-  // case where the full list of channels (whether bias-corrected or not) is a consecutive
-  // list running from 1 to nvars.  While the following block of code makes sure that this
-  // is the case, such compatibility restriction should be removed in the future.
-  if (chNoBC.size() > 0 && !correctedVars.channels().empty()) {
-    std::vector<int> tmp(nvars);
-    std::iota(tmp.begin(), tmp.end(), 1);
-    ASSERT(correctedVars.channels() == tmp);
-  }
-  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) != chNoBC.end()) {
-      for (std::size_t jp = 0; jp < npreds; ++jp) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          predData_[jp][jl * nvars + jvar] = 0.0;
-        }
+  const std::vector<int> & varIndexNoBC = bias.varIndexNoBC();
+  for (const int jvar : varIndexNoBC) {
+    for (std::size_t jp = 0; jp < npreds; ++jp) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        predData_[jp][jl * nvars + jvar] = 0.0;
       }
     }
   }
