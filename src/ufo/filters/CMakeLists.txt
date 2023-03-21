@@ -54,6 +54,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      MetOfficeDuplicateCheck.cc
+      MetOfficeDuplicateCheck.h
       ModelBestFitPressure.cc
       ModelBestFitPressure.h
       ModelObThreshold.cc
