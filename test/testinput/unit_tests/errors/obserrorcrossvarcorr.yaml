@@ -87,7 +87,7 @@ observations:
         lons: [1]
         dateTimes: [300]
         obs values: [1]
-        obs errors: [ 1]
+        obs errors: [1]
     simulated variables: [variable1]
   obs error:
     covariance model: cross variable covariances
