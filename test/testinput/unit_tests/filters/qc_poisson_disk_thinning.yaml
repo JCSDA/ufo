@@ -1,6 +1,7 @@
 # This test compares the results produced by the Poisson-disk thinning filter against ones
 # obtained with the Ops_PoissonThinning function from the Met Office observation processing system.
-# Also ocean profile level subsample and median value selection.
+# This file also contains tests pertaining to ocean profile level sub-sampling and the hybrid 
+# Poisson median averaging thinning used by legacy Met Office sea surface temperature configurations.
 window begin: 2000-01-01T00:00:00Z
 window end: 2030-12-31T23:59:59Z
 
@@ -292,16 +293,32 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
     simulated variables: [waterTemperature]
   obs pre filters:
+  - filter: Perform Action # Reject one observation to test calculation of median from even number.
+    where:
+    - variable:
+        name: MetaData/latitude
+      is_close_to_any_of: [50]
+      absolute_tolerance: 1
+    - variable:
+        name: MetaData/longitude
+      is_close_to_any_of: [-146]
+      absolute_tolerance: 1
+    - variable:
+        name: MetaData/depthBelowWaterSurface
+      is_close_to_any_of: [150]
+      absolute_tolerance: 1
+    action:
+      name: reject
   - filter: Poisson Disk Thinning # To test selection of median value.
     filter variables:
     - name: waterTemperature
     min_horizontal_spacing: 50
     shuffle: false
-    select_median: true
-    write_median: true
+    select median: true
+    write median: true
   passedBenchmark: 4
   passedObservationsBenchmark:
-      - 5
+      - 4
       - 19
       - 38
       - 50
@@ -318,10 +335,26 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
     simulated variables: [waterTemperature]
   obs pre filters:
-  - filter: Poisson Disk Thinning # To test selection of median value.
+  - filter: Poisson Disk Thinning 
     filter variables:
     - name: waterTemperature
     min_horizontal_spacing: 50
     shuffle: false
-    write_median: true
-  expectExceptionWithMessage: "UserError: : write_median has no effect if select_median is not set."
+    write median: true
+  expectExceptionWithMessage: "UserError: : write median has no effect if select median is not set."
+- obs space:
+    name: Simple ocean horizontal thinning median selection example - number of variables exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning_sort.nc4
+    simulated variables: [waterTemperature]
+  obs pre filters:
+  - filter: Poisson Disk Thinning 
+    filter variables:
+    - name: waterTemperature
+    - name: waterTemperature
+    min_horizontal_spacing: 50
+    shuffle: false
+    select median: true
+  expectExceptionWithMessage: "UserError: PoissonDiskThinning error: The select median option will only work when the filter is used with a single filter variable."
