@@ -243,6 +243,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundMW.h
       obsfunctions/ObsErrorFactorDuplicateCheck.cc
       obsfunctions/ObsErrorFactorDuplicateCheck.h
+      obsfunctions/ObsErrorFactorPressureCheck.cc
+      obsfunctions/ObsErrorFactorPressureCheck.h
       obsfunctions/ObsErrorFactorSituDependMW.cc
       obsfunctions/ObsErrorFactorSituDependMW.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
