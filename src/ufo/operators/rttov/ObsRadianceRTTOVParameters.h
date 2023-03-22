@@ -452,6 +452,12 @@ class ObsRadianceRTTOVParameters : public ObsOperatorParametersBase {
   /// Options specific to the linear observation operator
   oops::OptionalParameter<RTTOVLinearOperatorParameters> linearObsOperator{
       "linear obs operator", this};
+
+  /// An optional argument to specify variables that need to be read from the obsspace
+  /// rather than the GeoVaLs.  This is specifically to be able to use retrieved variables
+  /// from OneDVar but might have wider uses.
+  oops::OptionalParameter<std::vector<std::string>> variablesFromOneDVar{
+                                              "variables to use from obsspace", this};
 };
 
 }  // namespace ufo

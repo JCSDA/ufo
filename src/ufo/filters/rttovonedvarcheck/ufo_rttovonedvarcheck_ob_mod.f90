@@ -58,6 +58,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
   logical              :: QC_SlowConvChans !< qc flag for slow converging channels
+  logical              :: rterror !< error when running rttov => exit and reject profile
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
   type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object !< pointer to the IR pc emissivity object
 
@@ -135,6 +136,7 @@ self % recalc_BT(:) = missing_real
 self % background_BT(:) = missing_real
 self % calc_emiss(:) = .true.
 self % QC_SlowConvChans = .false.
+self % rterror = .false.
 
 end subroutine ufo_rttovonedvarcheck_InitOb
 
@@ -179,6 +181,7 @@ self % retrievecloud = .false.
 self % mwscatt = .false.
 self % mwscatt_totalice = .false.
 self % QC_SlowConvChans = .false.
+self % rterror = .false.
 
 if (allocated(self % yobs))             deallocate(self % yobs)
 if (allocated(self % final_bt_diff))    deallocate(self % final_bt_diff)

@@ -95,6 +95,7 @@ real(c_double)    :: BT(size(ob % channels_all)) !< BTs produced for all channel
 select case (trim(ob % forward_mod_name))
   case ("RTTOV")
     call rttov_simobs % simobs(geovals, config % obsdb, size(ob % channels_all), 1, BT, empty_hofxdiags, ob_info=ob)
+    if (ob % rterror) return
     call ufo_rttovonedvarcheck_all_to_subset_by_channels(ob % channels_all, BT, channels, hofx)
   case default
     call abor1_ftn("rttovonedvarcheck get jacobian: no suitable forward model => exiting")
@@ -149,14 +150,17 @@ real(kind_real), allocatable :: dBT_dqi(:)
 real(kind_real), allocatable :: emissivity_k(:)
 real(kind_real), allocatable :: emissivity(:)
 character(len=max_string)    :: varname
-real(c_double)               :: BT(size(ob % channels_all))
+real(c_double), allocatable  :: BT(:)
 real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
 
 ! Setup varibales
 nchans = size(channels)
 H_matrix(:,:) = zero
+allocate(BT(size(ob % channels_all)))
 
+! Run rttov and check it works any failures return here
 call rttov_data % simobs(geovals, config % obsdb, size(ob % channels_all), 1, BT, hofxdiags, ob_info=ob)
+if (ob % rterror) return
 
 ! -------------------------------
 !Get hofx for just channels used

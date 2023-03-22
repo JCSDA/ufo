@@ -161,6 +161,7 @@ contains
 
     integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan
     integer                                      :: nprof_sim, nprof_max_sim, nchan_total
+    integer                                      :: nchan_sim
     integer                                      :: prof_start, prof_end
     integer                                      :: sensor_index
 
