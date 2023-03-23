@@ -1,0 +1,522 @@
+# This test compares the results produced by the Met Office Duplicate check filter against
+# those obtained with the equivalent routine in the Met Office OPS system.
+# The input data set consists of 1000 points at random spatial and temporal locations.
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-12-31T23:59:59Z
+
+observations:
+# All observations have the same priority.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_duplicate_check_out.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Met Office Duplicate Check
+    priority name: priority_1
+    latitude band width: 1.5
+    latitude bin half-width: 1.0
+    longitude bin half-width: 1.0
+    time bin half-width: 30.0
+    pressure bin half-width: 250.0
+  passedBenchmark: 226
+  passedObservationsBenchmark:
+    - 0
+    - 2
+    - 10
+    - 15
+    - 16
+    - 19
+    - 28
+    - 35
+    - 39
+    - 42
+    - 43
+    - 48
+    - 50
+    - 52
+    - 53
+    - 55
+    - 58
+    - 60
+    - 61
+    - 64
+    - 73
+    - 74
+    - 82
+    - 85
+    - 89
+    - 94
+    - 96
+    - 102
+    - 110
+    - 111
+    - 118
+    - 125
+    - 127
+    - 137
+    - 139
+    - 149
+    - 150
+    - 155
+    - 156
+    - 162
+    - 163
+    - 174
+    - 175
+    - 176
+    - 182
+    - 184
+    - 189
+    - 190
+    - 191
+    - 196
+    - 200
+    - 205
+    - 207
+    - 217
+    - 221
+    - 223
+    - 225
+    - 227
+    - 228
+    - 229
+    - 234
+    - 235
+    - 236
+    - 243
+    - 245
+    - 246
+    - 254
+    - 258
+    - 259
+    - 261
+    - 263
+    - 277
+    - 279
+    - 283
+    - 291
+    - 300
+    - 307
+    - 311
+    - 320
+    - 321
+    - 324
+    - 327
+    - 329
+    - 330
+    - 331
+    - 337
+    - 343
+    - 346
+    - 357
+    - 358
+    - 361
+    - 367
+    - 375
+    - 387
+    - 388
+    - 389
+    - 391
+    - 420
+    - 422
+    - 424
+    - 425
+    - 426
+    - 427
+    - 434
+    - 446
+    - 447
+    - 449
+    - 454
+    - 455
+    - 459
+    - 469
+    - 471
+    - 473
+    - 481
+    - 484
+    - 486
+    - 489
+    - 491
+    - 493
+    - 500
+    - 501
+    - 504
+    - 506
+    - 507
+    - 509
+    - 516
+    - 518
+    - 525
+    - 535
+    - 547
+    - 552
+    - 553
+    - 555
+    - 558
+    - 562
+    - 570
+    - 574
+    - 575
+    - 576
+    - 577
+    - 587
+    - 605
+    - 608
+    - 614
+    - 615
+    - 622
+    - 625
+    - 628
+    - 631
+    - 635
+    - 636
+    - 641
+    - 655
+    - 656
+    - 658
+    - 660
+    - 662
+    - 673
+    - 690
+    - 691
+    - 692
+    - 694
+    - 700
+    - 703
+    - 704
+    - 706
+    - 710
+    - 711
+    - 716
+    - 721
+    - 722
+    - 724
+    - 737
+    - 738
+    - 750
+    - 751
+    - 753
+    - 754
+    - 764
+    - 765
+    - 786
+    - 787
+    - 792
+    - 793
+    - 800
+    - 804
+    - 812
+    - 816
+    - 823
+    - 827
+    - 839
+    - 841
+    - 845
+    - 855
+    - 866
+    - 869
+    - 870
+    - 872
+    - 876
+    - 878
+    - 881
+    - 893
+    - 901
+    - 905
+    - 910
+    - 920
+    - 927
+    - 928
+    - 929
+    - 930
+    - 935
+    - 940
+    - 947
+    - 951
+    - 957
+    - 959
+    - 961
+    - 973
+    - 978
+    - 980
+    - 981
+    - 982
+    - 984
+    - 992
+    - 993
+    - 995
+
+# All observations have the same priority.
+# Only observations with latitude < 2 are considered in the duplicate check.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Met Office Duplicate Check
+    where:
+    - variable:
+        name: MetaData/latitude
+      maxvalue: 2
+    priority name: priority_1
+    latitude band width: 1.5
+    latitude bin half-width: 1.0
+    longitude bin half-width: 1.0
+    time bin half-width: 30.0
+    pressure bin half-width: 250.0
+  passedBenchmark: 633
+
+# All observations have the same priority.
+# Only one observation is processed by the duplicate check. This is designed to ensure
+# the duplicate check still works on multiple processors.
+# All observations pass because the observation in question is not thinned.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Met Office Duplicate Check
+    where:
+    - variable:
+        name: MetaData/latitude
+      maxvalue: 0.1
+    - variable:
+        name: MetaData/longitude
+      maxvalue: 0.1
+    priority name: priority_1
+    latitude band width: 1.5
+    latitude bin half-width: 1.0
+    longitude bin half-width: 1.0
+    time bin half-width: 30.0
+    pressure bin half-width: 250.0
+  passedBenchmark: 1000
+
+# Some observations have priority 1 and some have priority 2.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Met Office Duplicate Check
+    priority name: priority_1_2
+    latitude band width: 1.5
+    latitude bin half-width: 1.0
+    longitude bin half-width: 1.0
+    time bin half-width: 30.0
+    pressure bin half-width: 250.0
+  passedBenchmark: 197
+  passedObservationsBenchmark:
+    -  44
+    -  60
+    -  61
+    -  65
+    -  84
+    -  89
+    -  96
+    - 108
+    - 110
+    - 111
+    - 122
+    - 135
+    - 137
+    - 189
+    - 191
+    - 206
+    - 219
+    - 220
+    - 234
+    - 246
+    - 259
+    - 261
+    - 320
+    - 330
+    - 347
+    - 361
+    - 458
+    - 481
+    - 493
+    - 500
+    - 501
+    - 502
+    - 504
+    - 505
+    - 506
+    - 509
+    - 510
+    - 516
+    - 518
+    - 525
+    - 535
+    - 536
+    - 541
+    - 546
+    - 552
+    - 553
+    - 555
+    - 560
+    - 561
+    - 562
+    - 565
+    - 570
+    - 574
+    - 575
+    - 576
+    - 577
+    - 580
+    - 583
+    - 584
+    - 585
+    - 589
+    - 591
+    - 592
+    - 603
+    - 604
+    - 608
+    - 611
+    - 614
+    - 615
+    - 616
+    - 619
+    - 621
+    - 625
+    - 631
+    - 635
+    - 637
+    - 638
+    - 639
+    - 641
+    - 642
+    - 643
+    - 650
+    - 655
+    - 658
+    - 661
+    - 662
+    - 663
+    - 666
+    - 671
+    - 673
+    - 678
+    - 679
+    - 680
+    - 683
+    - 686
+    - 690
+    - 692
+    - 696
+    - 697
+    - 700
+    - 705
+    - 706
+    - 707
+    - 710
+    - 711
+    - 716
+    - 718
+    - 720
+    - 721
+    - 724
+    - 727
+    - 730
+    - 737
+    - 738
+    - 739
+    - 744
+    - 751
+    - 753
+    - 754
+    - 755
+    - 758
+    - 759
+    - 764
+    - 765
+    - 769
+    - 774
+    - 776
+    - 778
+    - 779
+    - 787
+    - 788
+    - 789
+    - 792
+    - 795
+    - 804
+    - 805
+    - 806
+    - 812
+    - 816
+    - 817
+    - 819
+    - 823
+    - 825
+    - 827
+    - 831
+    - 839
+    - 845
+    - 851
+    - 855
+    - 856
+    - 857
+    - 859
+    - 866
+    - 867
+    - 868
+    - 870
+    - 871
+    - 872
+    - 876
+    - 877
+    - 878
+    - 879
+    - 880
+    - 881
+    - 887
+    - 888
+    - 889
+    - 893
+    - 897
+    - 902
+    - 905
+    - 910
+    - 915
+    - 917
+    - 920
+    - 926
+    - 928
+    - 929
+    - 930
+    - 940
+    - 948
+    - 949
+    - 950
+    - 951
+    - 957
+    - 958
+    - 959
+    - 966
+    - 967
+    - 972
+    - 978
+    - 981
+    - 983
+    - 984
+    - 986
+    - 992
+    - 995

@@ -99,9 +99,6 @@ class ObsBiasCovariance : public util::Printable,
   /// variables for which bias correction coefficients will be updated
   oops::Variables vars_;
 
-  /// channel list not bias corrected
-  std::vector<int> chlistNoBC_;
-
   /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
   size_t rank_;
 };

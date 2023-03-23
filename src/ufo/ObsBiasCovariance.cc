@@ -128,35 +128,6 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
         }
       }
     }
-
-    // Set member variables to missing for channels opted out of bias correction
-    if (params.channelsNoBC.value() != boost::none) {
-      std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
-      std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
-      // The opting out of channels from bias-correction is currently only compatible with the
-      // case where the full list of channels (whether bias-corrected or not) is a consecutive
-      // list running from 1 to nvars.  While the following block of code makes sure that this
-      // is the case, such compatibility restriction should be removed in the future.
-      if (chlistNoBC_.size() > 0 && !vars_.channels().empty()) {
-        std::vector<int> tmp(vars_.size());
-        std::iota(tmp.begin(), tmp.end(), 1);
-        ASSERT(vars_.channels() == tmp);
-      }
-      const double missing = util::missingValue(missing);
-      const int missing_int = util::missingValue(missing_int);
-      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
-        if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
-          obs_num_[jvar] = missing_int;
-          for (std::size_t p = 0; p < prednames_.size(); ++p) {
-            const std::size_t ii = jvar * prednames_.size() + p;
-            variances_[ii] = missing;
-            ht_rinv_h_[ii] = missing;
-            preconditioner_[ii] = missing;
-            analysis_variances_[ii] = missing;
-          }
-        }
-      }
-    }
   }
 
   oops::Log::trace() << "ObsBiasCovariance::Constructor is done" << std::endl;
@@ -346,15 +317,12 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     // Sum the hessian contributions across the tasks
     ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
 
-    // Set obs_num_ and ht_rinv_h_ to missing for channels opted out of bias correction
-    if (chlistNoBC_.size() > 0) {
-      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
-        if (std::find(chlistNoBC_.begin(), chlistNoBC_.end(), jvar + 1) != chlistNoBC_.end()) {
-          obs_num_[jvar] = missing_int;
-          for (std::size_t p = 0; p < prednames_.size(); ++p) {
-            ht_rinv_h_[jvar * prednames_.size() + p] = missing;
-          }
-        }
+    // Set obs_num_ and ht_rinv_h_ to missing for variables opted out of bias correction
+    const std::vector<int> & varIndexNoBC = bias.varIndexNoBC();
+    for (const int jvar : varIndexNoBC) {
+      obs_num_[jvar] = missing_int;
+      for (std::size_t p = 0; p < prednames_.size(); ++p) {
+        ht_rinv_h_[jvar * prednames_.size() + p] = missing;
       }
     }
 
@@ -371,7 +339,6 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
           // Reset preconditioner L = \mathrm{A}^{-1}
           if (obs_num_[jvar] > 0)
             preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-//          preconditioner_[index] = 1.0 / (1.0 + variances_[index] * ht_rinv_h_[index]);
 
           // Reset analysis variances
           if (obs_num_[jvar] > minimal_required_obs_number_) {
@@ -381,6 +348,15 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
               analysis_variances_[index] = largest_analysis_variance_;
             }
           }
+        }
+      } else {
+        // Set variances, preconditioner and analysis variances to missing
+        // for variables opted out of bias correction
+        for (std::size_t p = 0; p < prednames_.size(); ++p) {
+          const std::size_t index = jvar * prednames_.size() + p;
+          variances_[index] = missing;
+          preconditioner_[index] = missing;
+          analysis_variances_[index] = missing;
         }
       }
     }
