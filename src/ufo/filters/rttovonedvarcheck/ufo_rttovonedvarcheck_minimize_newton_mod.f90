@@ -112,7 +112,6 @@ logical                         :: outOfRange
 logical                         :: Converged
 logical                         :: Error
 integer                         :: iter
-integer                         :: RTerrorcode
 integer                         :: nchans
 integer                         :: nprofelements
 integer                         :: usedchan, allchans ! counters
@@ -191,10 +190,9 @@ Iterations: do iter = 1, config % max1DVarIterations
     JcostOld = Jcost
   end if
 
-  ! initialise RTerrorcode and profile increments on first iteration
+  ! initialise profile increments on first iteration
   if (iter == 1) then
 
-    RTerrorcode = 0
     Diffprofile(:) = zero
     JcostOld = 1.0e4_kind_real
 
@@ -215,17 +213,16 @@ Iterations: do iter = 1, config % max1DVarIterations
                                           profile_index, GuessProfile(:), &
                                           hofxdiags, rttov_simobs, Y(:), H_matrix)
 
+  if (ob % rterror) then
+    call fckit_log % warning("Radiative transfer error exit and reject profile")
+    exit Iterations
+  end if
+
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
     call ufo_rttovonedvarcheck_subset_to_all_by_channels(ob % channels_used, Y0, &
                                      ob % channels_all, ob % background_BT)
-  end if
-
-  ! exit on error
-  if (RTerrorcode /= 0) then
-    write(*,*) "Radiative transfer error"
-    exit Iterations
   end if
 
   !-----------------------------------------------------
@@ -334,7 +331,7 @@ Iterations: do iter = 1, config % max1DVarIterations
 
   if (inversionStatus /= 0) then
     inversionStatus = 1
-    write(*,*) "inversion failed"
+    call fckit_log % warning("inversion failed exiting iterations")
     exit Iterations
   end if
 

@@ -13,6 +13,7 @@ module ufo_radiancerttov_utils_mod
 
   use datetime_mod, only : datetime, datetime_to_yyyymmddhhmmss
   use fckit_configuration_module, only : fckit_configuration
+  use fckit_exception_module, only: fckit_exception
   use fckit_log_module, only : fckit_log
   use kinds, only : kind_real ! from oops
   use missing_values_mod, only : missing_value
@@ -116,7 +117,6 @@ module ufo_radiancerttov_utils_mod
     'mole_fraction_of_sulfur_dioxide_in_air', var_clw, var_cli]
 
   integer, public :: nchan_inst ! number of channels being simulated (may be less than full instrument)
-  integer, public :: nchan_sim  ! total number of 'obs' = nprofiles * nchannels
   integer, public :: nlocs_total ! nprofiles (including skipped)
   logical, public :: debug
 
@@ -219,6 +219,7 @@ module ufo_radiancerttov_utils_mod
     integer                               :: nchan_max_sim
 
     character(len=255)                    :: surface_emissivity_group
+    character(len=MAXVARLEN), allocatable :: variablesFromObsSpace(:)
 
   contains
 
@@ -465,6 +466,14 @@ contains
 
     call f_confOpts % get_or_die("surface emissivity group", str)
     conf % surface_emissivity_group = str
+
+    if (f_confOper%has("variables to use from obsspace")) then
+      call f_confOper % get_or_die("variables to use from obsspace", tmp_str_array)
+      allocate(conf % variablesFromObsSpace(size(tmp_str_array)))
+      conf % variablesFromObsSpace(:) = tmp_str_array(:)
+    else
+      allocate(conf % variablesFromObsSpace(0))
+    end if
 
   end subroutine rttov_conf_setup
 
@@ -879,7 +888,7 @@ contains
     type(ufo_geoval), pointer          :: geoval
     type(datetime), allocatable        :: date_temp(:)
 
-    integer                            :: jspec, ilev, isensor
+    integer                            :: jspec, ilev, isensor, ivar
     integer                            :: nlevels
     integer                            :: nprofiles
 
@@ -889,6 +898,10 @@ contains
     real(kind_real)                    :: s2m_t(1), s2m_p(1)
 
     logical                            :: variable_present
+
+    integer                            :: skinTIndexFromObsSpace
+    integer                            :: ctpIndexFromObsSpace
+    integer                            :: ecaIndexFromObsSpace
 
     integer                            :: top_level, bottom_level, stride
     integer                            :: level_1000hPa, level_950hpa
@@ -918,6 +931,25 @@ contains
 
     allocate(self % sensor_index_array(nprofiles))
     self % sensor_index_array = -1
+
+    ! Setup variables that need to be read from ObsSpace rather than GeoVaLs
+    ! note emissivity is done via the `surface emissivity group` in the yaml
+    skinTIndexFromObsSpace = 0 ! initialise
+    ctpIndexFromObsSpace = 0 ! initialise
+    ecaIndexFromObsSpace = 0 ! initialise
+    do ivar = 1, size(conf % variablesFromObsSpace)
+      if (index(conf % variablesFromObsSpace(ivar), "skinTemperature") > 0) then
+        skinTIndexFromObsSpace = ivar
+      else if (index(conf % variablesFromObsSpace(ivar), "pressureAtTopOfCloud") > 0) then
+        ctpIndexFromObsSpace = ivar
+      else if (index(conf % variablesFromObsSpace(ivar), "cloudAmount") > 0) then
+        ecaIndexFromObsSpace = ivar
+      else
+        write(message,'(3A)') 'ERROR: ', trim(conf % variablesFromObsSpace(ivar)), &
+                              ' not setup to be read from ObsSpace => Aborting'
+        call fckit_exception % throw(message)
+      end if
+    end do
 
     ! store which sensor we will be using to process the observation. 
     ! Primarily for choosing an RTTOV coefficient    
@@ -1150,14 +1182,35 @@ contains
 
     allocate(TmpVar(nlocs_total))
 
-!Get Skin (surface) temperature (K)
-    varname = var_sfc_tskin 
-    call ufo_geovals_get_var(geovals, varname, geoval)
-    profiles(1:nprofiles)%skin%t = geoval%vals(1,1:nprofiles)
+    ! Get Skin (surface) temperature (K)
+    if (skinTIndexFromObsSpace > 0) then
+      call get_from_obsspace(conf % variablesFromObsSpace(skinTIndexFromObsSpace), &
+                             obss, profiles(1:nprofiles)%skin%t)
+    else
+      varname = var_sfc_tskin
+      call ufo_geovals_get_var(geovals, varname, geoval)
+      profiles(1:nprofiles)%skin%t = geoval%vals(1,1:nprofiles)
+    end if
 
-    ! MCC: Defaults for cloud
-    profiles(1:nprofiles) % ctp = 850.0_kind_real
-    profiles(1:nprofiles) % cfraction = zero
+    ! Setup cloud values
+    ! presuure at the top of cloud - ctp
+    ! pressureAtTopOfCloud is stored in the ObsSpace in Pa conversion needed as
+    ! rttov needs hPa.
+    if (ctpIndexFromObsSpace > 0) then
+      call get_from_obsspace(conf % variablesFromObsSpace(ctpIndexFromObsSpace), &
+                             obss, profiles(1:nprofiles) % ctp)
+      profiles(1:nprofiles) % ctp = profiles(1:nprofiles) % ctp * pa_to_hpa
+    else
+      profiles(1:nprofiles) % ctp = 850.0_kind_real
+    end if
+
+    ! cloudAmount - eca
+    if (ecaIndexFromObsSpace > 0) then
+      call get_from_obsspace(conf % variablesFromObsSpace(ecaIndexFromObsSpace), &
+                             obss, profiles(1:nprofiles) % cfraction)
+    else
+      profiles(1:nprofiles) % cfraction = zero
+    end if
 
 !RTTOV-Scatt profile setup
 
@@ -2621,5 +2674,30 @@ contains
     end do
 
   end subroutine ufo_rttov_calculate_tc_ozone
-  
+
+  subroutine get_from_obsspace(name, obss, outarray)
+    implicit none
+    character(len=*), intent(in)   :: name
+    type(c_ptr), value, intent(in) :: obss
+    real(kind_real), intent(out)   :: outarray(:)
+
+    integer                        :: groupindex
+    character(len=MAXVARLEN)       :: groupname, varname
+    logical                        :: variable_present
+
+    groupindex = index(name, "/")
+    groupname = name(1:groupindex-1)
+    varname = name(groupindex+1:)
+    variable_present = obsspace_has(obss, trim(groupname), trim(varname))
+    if (variable_present) then
+      call obsspace_get_db(obss, trim(groupname), trim(varname), outarray(:))
+    else
+      write(message,'(3A)') 'Requested variable ', &
+                            trim(name), &
+                            ' not in ObsSpace => Aborting'
+      call fckit_exception % throw(message)
+    end if
+
+  end subroutine get_from_obsspace
+
 end module ufo_radiancerttov_utils_mod
