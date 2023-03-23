@@ -12,6 +12,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+  obs error test:
+    test reader: false
 
 - obs space:
     name: Sondes (cross-var corr, two vars)
@@ -23,6 +25,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+  obs error test:
+    test reader: false
 
 - obs space:
     name: Sondes (cross-var corr, three vars)
@@ -34,6 +38,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+  obs error test:
+    test reader: false
 
 - obs space:
     name: Sondes (cross-var corr, four vars, one is missing from the corr file)
@@ -45,6 +51,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+  obs error test:
+    test reader: false
 
 - obs space:
     name: testReader (cross-var corr with four vars, three vars simulated)
@@ -60,6 +68,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+  obs error test:
+    test reader: true
     reference: [0.1, 1, 0.15]
 
 - obs space:
@@ -76,6 +86,8 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+  obs error test:
+    test reader: true
     reference: [0.2,0.15, 1, 0.7, 0]
 
 - obs space:
@@ -92,4 +104,6 @@ observations:
   obs error:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+  obs error test:
+    test reader: true
     reference: [1]
