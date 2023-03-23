@@ -10,18 +10,42 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
     simulated variables: [windEastward, windNorthward]
   obs filters:
-  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+  - filter: Background Check
     filter variables:
     - name: windEastward
-    - name: windNorthward
-    test variables:
+    function absolute threshold:
     - name: ObsFunction/SatWindsSPDBCheck
       options:
-        error_min: 1.4
-        error_max: 20.0
+        wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
+                  250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
+        cgross: [1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75,
+                 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75]
+        error_min: [1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,
+                    1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4]
+        error_max: [20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                    20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0]
+        variable: windEastward
         test_hofx: GsiHofX
-    maxvalue: 1.75
-  passedBenchmark: 144
+    action:
+      name: reject
+  - filter: Background Check
+    filter variables:
+    - name: windNorthward
+    function absolute threshold:
+    - name: ObsFunction/SatWindsSPDBCheck
+      options:
+        wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
+                  250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
+        cgross: [1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75,
+                 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75]
+        error_min: [1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,
+                    1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4]
+        error_max: [20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                    20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0]
+        variable: windNorthward
+        test_hofx: GsiHofX
+    action:
+      name: reject
+  passedBenchmark: 148
 #  In the test data set of 100 possible values, 1 ob is 2100UTC exactly since time test is (2100-0300].
 #  There are 74 valid (non-missing) observed winds (times 2 wind components making 148 possible).
-#  There are 2 locations where the calculated threshold test is greater than max so 148-4=144.

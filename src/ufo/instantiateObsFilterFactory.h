@@ -25,6 +25,7 @@
 #include "ufo/filters/HistoryCheck.h"
 #include "ufo/filters/ImpactHeightCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
+#include "ufo/filters/MetOfficeDuplicateCheck.h"
 #include "ufo/filters/ModelBestFitPressure.h"
 #include "ufo/filters/ModelObThreshold.h"
 #include "ufo/filters/MWCLWCheck.h"
@@ -112,6 +113,8 @@ void instantiateObsFilterFactory() {
            historyCheckMaker("History Check");
   static oops::interface::FilterMaker<ObsTraits, MetOfficeBuddyCheck>
            MetOfficeBuddyCheckMaker("Met Office Buddy Check");
+  static oops::interface::FilterMaker<ObsTraits, MetOfficeDuplicateCheck>
+           MetOfficeDuplicateCheckMaker("Met Office Duplicate Check");
   static oops::interface::FilterMaker<ObsTraits, ModelBestFitPressure>
            ModelBestFitPressureMaker("Model Best Fit Pressure");
   static oops::interface::FilterMaker<ObsTraits, ModelObThreshold>

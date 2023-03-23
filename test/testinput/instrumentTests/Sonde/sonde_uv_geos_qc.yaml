@@ -1,0 +1,150 @@
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
+
+observations:
+
+- obs space:
+    name: SondeComposite
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_uv_obs_2020121500.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Output/sondes_qc_2020121500.nc4
+    simulated variables: [windEastward, windNorthward]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_uv_geoval_2020121500.nc4
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       apply near surface wind scaling: true
+       variables:
+       - name: windEastward
+       - name: windNorthward
+  obs filters:
+  #
+  - filter: Perform Action
+    filter variables:
+    - name: windEastward
+    where:
+    - variable: PreUseFlag/windEastward
+      is_in: 100
+    action:
+      name: reject
+  #
+  - filter: Perform Action
+    filter variables:
+    - name: windNorthward
+    where:
+    - variable: PreUseFlag/windNorthward
+      is_in: 100
+    action:
+      name: reject
+  ## a tempporary solution: Replace error by GsiAdjustObsError
+  ## overwite above error assignments and inflation.
+  - filter: Perform Action
+    filter variables:
+    - name: windEastward
+    action:
+      name: assign error
+      error function: GsiAdjustObsError/windEastward
+    where:
+    - variable:
+        name: GsiAdjustObsError/windEastward
+      is_defined:
+##    defer to post: true
+  - filter: Perform Action
+    filter variables:
+    - name: windNorthward
+    action:
+      name: assign error
+      error function: GsiAdjustObsError/windNorthward
+    where:
+    - variable:
+        name: GsiAdjustObsError/windNorthward
+      is_defined:
+##    defer to post: true
+  #wgu
+  - filter: Perform Action
+    filter variables:
+    - name: windEastward
+    where:
+      - variable:
+          name: ObsType/windEastward
+        is_in: 220,221
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsFunction/ObsErrorFactorPressureCheck
+        options:
+          variable: windEastward
+          inflation factor: 4.0
+  #wgu
+  - filter: Perform Action
+    filter variables:
+    - name: windNorthward
+    where:
+      - variable:
+          name: ObsType/windNorthward
+        is_in: 220,221
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsFunction/ObsErrorFactorPressureCheck
+        options:
+          variable: windNorthward
+          inflation factor: 4.0
+  #wgu
+  #Gross Check
+  - filter: Background Check
+    filter variables:
+    - name: windEastward
+    function absolute threshold:
+    - name: ObsFunction/SatWindsSPDBCheck
+      options:
+        wndtype:    [ 220, 221 ]
+        cgross:     [ 8.0, 8.0 ]
+        error_min:  [ 1.4, 1.4 ]
+        error_max:  [ 6.1, 6.1 ]
+        variable: windEastward
+    action:
+      name: reject
+  # Gross Check
+  - filter: Background Check
+    filter variables:
+    - name: windNorthward
+    function absolute threshold:
+    - name: ObsFunction/SatWindsSPDBCheck
+      options:
+        wndtype:    [ 220, 221 ]
+        cgross:     [ 8.0, 8.0 ]
+        error_min:  [ 1.4, 1.4 ]
+        error_max:  [ 6.1, 6.1 ]
+        variable: windNorthward
+    action:
+      name: reject
+
+  - filter: Bounds Check
+    filter variables:
+    - name: windEastward
+    test variables:
+    - name: ObsErrorData/windEastward
+    maxvalue: 100.0
+    action:
+      name: reject
+    defer to post: true
+
+  - filter: Bounds Check
+    filter variables:
+    - name: windNorthward
+    test variables:
+    - name: ObsErrorData/windNorthward
+    maxvalue: 100.0
+    action:
+      name: reject
+    defer to post: true
+
+  passedBenchmark: 200

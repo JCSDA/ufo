@@ -58,7 +58,52 @@ observations:
 #       obsfile: Data/iasi_metopb_obs_2021011500_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
-  rms ref: 245.93588588866368
+  rms ref: 245.9358858
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11
+
+# Test iasi with variables produced from 1D-Var
+- obs operator:
+    name: RTTOV
+    Absorbers: [Ozone]
+    linear obs operator:
+      increment variables: [air_temperature, specific_humidity]
+    variables to use from obsspace:
+    - TestReference/pressureAtTopOfCloud
+    - TestReference/cloudAmount
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      WMO_ID: &wmo_id [3]
+      Sat_ID: &sat_id [metop_1]
+      Instrument_Name: &instrument_id IASI
+      CoefficientPath: &coefpath Data/
+      RTTOV_GasUnitConv: &gasunitconv true
+      UseRHwaterForQC: &UseRHwaterForQC true
+      UseColdSurfaceCheck: &UseColdSurfaceCheck false
+      RTTOV_clw_data: false
+      RTTOV_profile_checkinput: true
+      RTTOV_ScaleRefOzone: false
+      surface emissivity group: SurfEmiss
+      max_channels_per_batch: 10
+  obs space:
+    name: Test the forward and linear model with output from OneDVar
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+    simulated variables: [brightnessTemperature]
+    channels: *all_channels
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/iasi_metopb_obs_2021011500_varsfromOneDVar_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
+  rms ref: 244.5034315
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
