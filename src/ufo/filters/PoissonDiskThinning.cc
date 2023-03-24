@@ -545,7 +545,8 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
   //
   // Please note that the overlap of exclusion volumes of retained observations may
   // mean that the shape and size of the exclusion volume from which the median is
-  // calculated is not consistent with what might be expected.
+  // calculated is not consistent with what might be expected. It is expected that
+  // this code will be deprecated in the future.
   //
   std::vector<bool> isUsed(obsData.totalNumObs, false);
   float medianMissingValue = util::missingValue(medianMissingValue);
