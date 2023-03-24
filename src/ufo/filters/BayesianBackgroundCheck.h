@@ -102,8 +102,20 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
 /// the optional logical parameter (default false):
 ///   * save total pd: save the total (combined) probability distribution to the ObsSpace,
 ///
+/// the optional logical parameter (default true):
+///   * perform obs minus BG threshold check: check whether \f$([y-H(x)]/{\sigma})^2\f$
+/// exceeds obs minus BG threshold,
+///
+/// the optional parameters allowing specification of the name of the
+/// background error suffix and group:
+///   * bg error suffix: (default: "background_error")
+///   * bg error group: (default: "ObsDiag")
+///
 /// or the optional float parameter (default -1.0):
 ///   * max error variance: set a maximum for the error variance.
+///
+/// For vectors, such as wind, the two components must be specified one after the other,
+/// and the first must have the option first_component_of_two set to true.
 class BayesianBackgroundCheck : public FilterBase,
                         private util::ObjectCounter<BayesianBackgroundCheck> {
  public:
