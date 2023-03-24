@@ -65,10 +65,6 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   getObservation("MetaData", "standardElevation",
                  ZStd, true);
 
-  std::vector<std::string> statID;
-  getObservation("MetaData", "stationIdentification",
-                 statID, true);
-
   // Errors
   std::vector<float> PStn_error, PStd_error, Pmsl_error;
   data_.get(Variable("ObsErrorData/stationPressure"), PStn_error);
