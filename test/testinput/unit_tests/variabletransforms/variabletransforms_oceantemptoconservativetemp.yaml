@@ -8,10 +8,6 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/ocean_temptoconservativetemp_out.nc4
     simulated variables: [waterTemperature, waterConservativeTemperature]
     observed variables: [waterTemperature]
     derived variables: [waterConservativeTemperature]
@@ -24,6 +20,13 @@ observations:
     Transform: OceanTempToConservativeTemp
     ocean pressure group: TestReference
     ocean salinity group: TestReference
+  # Make the ObsErrorData a normal variable for the purposes of
+  # the test comparison
+  - filter: Variable Assignment
+    assignments:
+    - name: TestObsError/waterConservativeTemperature
+      type: float
+      source variable: ObsErrorData/waterConservativeTemperature
   compareVariables:
     - reference:
         name: TestReference/waterConservativeTemperature
@@ -31,15 +34,28 @@ observations:
         name: DerivedObsValue/waterConservativeTemperature
       relTol: 2.0e-4
     - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/waterConservativeTemperature
-    - reference:
-        name: TestReference/int_zeros
-      test:
-        name: QCFlags/waterConservativeTemperature
-    - reference:
         name: ObsError/waterTemperature
       test:
-        name: DerivedObsError/waterConservativeTemperature
-
+        name: TestObsError/waterConservativeTemperature
+  passedBenchmark: 446  # 227 + Non-missing waterTemperature
+                        # 219 + Non-missing waterConservativeTemperature (non-missing salinity)
+                        # = 446
+- obs space:
+    name: Ocean temperature to conservative temperature conversion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: ObsValue/waterTemperature
+      is_defined:
+    Transform: OceanTempToConservativeTemp
+    ocean pressure group: TestReference
+    ocean salinity group: TestReference
+  passedBenchmark: 1
+  expectExceptionWithMessage: "Both `waterConservativeTemperature` and `waterTemperature` must be observed or derived variables for the `OceanTempToConservativeTemp` variable transform."

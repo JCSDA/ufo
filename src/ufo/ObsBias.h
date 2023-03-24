@@ -72,11 +72,11 @@ class ObsBias : public util::Printable,
   /// Return the vector of variable predictors.
   std::vector<std::shared_ptr<const PredictorBase>> variablePredictors() const;
 
-  /// Return the list of bias-corrected variables.
-  const oops::Variables & correctedVars() const {return vars_;}
+  /// Return the list of simulated variables.
+  const oops::Variables & simVars() const {return vars_;}
 
-  /// Return the list of channels that don't need bias correction
-  const std::vector<int> & chlistNoBC() const {return chlistNoBC_;}
+  /// Return the indices of variables (or channels) that don't need bias correction
+  const std::vector<int> & varIndexNoBC() const {return varIndexNoBC_;}
 
   /// Set all variable predictors coefficients to zero (used in the test)
   void zero();
@@ -106,11 +106,10 @@ class ObsBias : public util::Printable,
   /// number of variable predictors (i.e. predictors with variable coefficients)
   std::size_t numVariablePredictors_;
 
-  /// channel list not bias corrected
-  std::vector<int> chlistNoBC_;
-
-  /// corrected variables names (for now has to be same as "simulated variables")
+  /// list of simulated variables
   oops::Variables vars_;
+  /// indices of variables (or channels) that don't need bias correction
+  std::vector<int> varIndexNoBC_;
 
   /// Variables that need to be requested from the model (for computation of predictors)
   oops::Variables geovars_;

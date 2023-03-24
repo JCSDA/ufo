@@ -54,6 +54,8 @@ set ( filters_files
       MetOfficeBuddyPair.h
       MetOfficeBuddyPairFinder.cc
       MetOfficeBuddyPairFinder.h
+      MetOfficeDuplicateCheck.cc
+      MetOfficeDuplicateCheck.h
       ModelBestFitPressure.cc
       ModelBestFitPressure.h
       ModelObThreshold.cc
@@ -87,6 +89,8 @@ set ( filters_files
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
+      ProfileUnFlagObsCheck.cc
+      ProfileUnFlagObsCheck.h
       SatName.h
       SatName.cc
       SatwindInversionCorrection.cc
@@ -239,6 +243,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundMW.h
       obsfunctions/ObsErrorFactorDuplicateCheck.cc
       obsfunctions/ObsErrorFactorDuplicateCheck.h
+      obsfunctions/ObsErrorFactorPressureCheck.cc
+      obsfunctions/ObsErrorFactorPressureCheck.h
       obsfunctions/ObsErrorFactorSituDependMW.cc
       obsfunctions/ObsErrorFactorSituDependMW.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
@@ -279,6 +285,8 @@ set ( filters_files
       obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SatWindsSPDBCheck.cc
       obsfunctions/SatWindsSPDBCheck.h
+      obsfunctions/ScatWindsAmbiguityCheck.cc
+      obsfunctions/ScatWindsAmbiguityCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc

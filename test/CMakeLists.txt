@@ -232,6 +232,11 @@ ecbuild_add_executable( TARGET  test_RecordHandler.x
                         LIBS    ufo
                        )
 
+ecbuild_add_executable( TARGET  test_NearestNeighborInterpolation.x
+                        SOURCES mains/TestNearestNeighborInterpolation.cc
+                        LIBS    ufo
+                       )
+
 ####################################################################
 # Establish test tiering
 
@@ -266,6 +271,14 @@ ecbuild_add_test( TARGET  test_ufo_dataextractor
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+# Test nearest_neighbor interpolation
+ecbuild_add_test( TARGET  test_ufo_nearest_neighbor_interpolation
+                  SOURCES mains/TestNearestNeighborInterpolation.cc
+                  ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS test_NearestNeighborInterpolation.x)
 
 # Test Parameters
 if (eckit_VERSION VERSION_GREATER_EQUAL 1.16)

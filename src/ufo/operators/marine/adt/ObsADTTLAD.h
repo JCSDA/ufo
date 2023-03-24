@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2023 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -16,8 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/marine/adt/ObsADT.h"
-#include "ufo/operators/marine/adt/ObsADTTLAD.interface.h"
+#include "ufo/operators/marine/adt/ObsADTParameters.h"
 
 // Forward declarations
 namespace ioda {
@@ -46,15 +45,15 @@ class ObsADTTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & requiredVars() const override {return *varin_;}
-
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  const oops::Variables & requiredVars() const override {return requiredVars_;}
+  oops::Variables simulatedVars() const override { return operatorVars_; }
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOper_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables requiredVars_;
+  const ioda::ObsSpace& odb_;
+  oops::Variables operatorVars_;
+  int operatorVarIndex_;
 };
 
 // -----------------------------------------------------------------------------

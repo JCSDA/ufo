@@ -8,10 +8,6 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
-    #obsdataout:
-    #  engine:
-    #    type: H5File
-    #    obsfile: Data/ocean_depthtopressure_out.nc4
     simulated variables: [waterPressure]
     observed variables: []
     derived variables: [waterPressure]
@@ -29,16 +25,23 @@ observations:
       test:
         name: DerivedObsValue/waterPressure
       relTol: 2.0e-5
-    - reference:
-        name: TestReference/float_missing
-      test:
-        name: GrossErrorProbability/waterPressure
-    - reference:
-        name: TestReference/int_zeros
-      test:
-        name: QCFlags/waterPressure
-    - reference:
-        name: TestReference/float_ones
-      test:
-        name: DerivedObsError/waterPressure
+  passedBenchmark: 227  # 418 Non-missing depthBelowWaterSurface
 
+- obs space:
+    name: Ocean depth to pressure conversion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_theta_pressure_testdata.nc4
+    simulated variables: [waterTemperature]
+    observed variables: [waterTemperature]
+    derived variables: []
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: MetaData/depthBelowWaterSurface
+      is_defined:
+    Transform: OceanDepthToPressure
+    ocean depth variable: MetaData/depthBelowWaterSurface
+  expectExceptionWithMessage: "`waterPressure` must be an observed or derived variable for the `OceanDepthToPressure` variable transform."

@@ -168,6 +168,7 @@ contains
 
     integer                                 :: iprof_rttov, iprof, ichan, ichan_sim, jchan
     integer                                 :: nprof_sim, nprof_max_sim, nchan_total
+    integer                                 :: nchan_sim
     integer                                 :: prof_start, prof_end
     integer                                 :: sensor_index
 
@@ -325,10 +326,20 @@ contains
 
       end do ! loop over profiles in chunk
 
+      ! If there has been an rttov check error then nchan_sim will equal zero for
+      ! the 1DVar and the flag needs setting.
+      if (present(ob_info)) then
+        if (nchan_sim == 0) then
+          ob_info % rterror = .true.
+        end if
+      end if
+
       ! Set surface emissivity
       if (present(ob_info)) then
-        self % RTprof % calcemis(1:nchan_sim) = ob_info % calc_emiss(:)
-        self % RTprof % emissivity(1:nchan_sim) % emis_in = ob_info % emiss(:)
+        if (.not. ob_info % rterror) then
+          self % RTprof % calcemis(1:nchan_sim) = ob_info % calc_emiss(:)
+          self % RTprof % emissivity(1:nchan_sim) % emis_in = ob_info % emiss(:)
+        end if
       else
         if (allocated(sfc_emiss)) then
           self % RTprof % calcemis(:) = .false.
@@ -444,10 +455,11 @@ contains
             write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
                                          ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
             call fckit_log%info(message)
+            if (present(ob_info)) ob_info % rterror = .true.
           end if
 
         end if
-      
+
         ! Put simulated brightness temperature into hofx
         if ( errorstatus == errorstatus_success ) then
           do ichan = 1, nchan_sim, size(self%channels)

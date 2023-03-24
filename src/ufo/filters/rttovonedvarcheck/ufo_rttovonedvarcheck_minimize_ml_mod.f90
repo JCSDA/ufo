@@ -114,7 +114,6 @@ logical                         :: outOfRange      ! out of range flag for check
 logical                         :: Converged       ! converged flag
 logical                         :: Error           ! error flag
 integer                         :: iter            ! iteration counter
-integer                         :: RTerrorcode     ! error code for RTTOV
 integer                         :: nchans          ! number of satellite channels used
 integer                         :: ii, jj          ! counters
 integer                         :: usedchan, allchans ! counters
@@ -200,19 +199,17 @@ Iterations: do iter = 1, config % max1DVarIterations
                                        profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, Y(:), H_matrix)
 
-  if (iter == 1) then
-    RTerrorcode = 0
+  if (ob % rterror) then
+    call fckit_log % warning("Radiative transfer error exit and reject profile")
+    exit Iterations
+  end if
+
+  if (iter == 1) then    
     Diffprofile(:) = zero
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
     call ufo_rttovonedvarcheck_subset_to_all_by_channels(ob % channels_used, Y0, &
                                      ob % channels_all, ob % background_BT)
-  end if
-
-  ! exit on error
-  if (RTerrorcode /= 0) then
-    write(*,*) "Radiative transfer error"
-    exit Iterations
   end if
 
   ! Calculate Obs diff and initial cost
@@ -301,7 +298,7 @@ Iterations: do iter = 1, config % max1DVarIterations
 
   if (inversionStatus /= 0) then
     inversionStatus = 1
-    write(*,*) "inversion failed"
+    call fckit_log % warning("inversion failed exiting iterations")
     exit Iterations
   end if
 
@@ -572,10 +569,11 @@ real(kind_real)                     :: Xdiff(nprofelements)
 real(kind_real)                     :: Emiss(nchans)
 real(kind_real)                     :: H_matrix_tmp(nchans,nprofelements)
 logical                             :: CalcEmiss(nchans)
-integer                             :: StatusOK = 0
-integer                             :: RTStatus = 0
+integer, parameter                  :: StatusOK = 0
+integer                             :: RTStatus
 
 Status = StatusOK
+RTStatus = 0
 
 !---------------------------------------------------------------------------
 ! 1. Calculate HTR-1 for the three allowed forms of R matrix. if required, the
@@ -638,7 +636,7 @@ DescentLoop : do while (JCost > JOld .and.                       &
                      New_DeltaProfile, &
                      Status)
   if (Status /= 0) then
-     write(*,*) 'Error in Cholesky decomposition'
+     call fckit_log % warning("Error in Cholesky decomposition")
   end if
 
   !------------------------------------------------------------------------
@@ -661,6 +659,7 @@ DescentLoop : do while (JCost > JOld .and.                       &
     ! Get new hofx
     call ufo_rttovonedvarcheck_get_bts(config, geovals, ob, ob % channels_used, &
                                        rttov_simobs, BriTemp(:))
+    if (ob % rterror) RTStatus = 1
 
     !------------------------------------------------------------------------
     ! 5.6. Calculate the new cost function.
@@ -677,7 +676,7 @@ DescentLoop : do while (JCost > JOld .and.                       &
       Ydiff(:) = ob % yobs(:) - BriTemp(:)
       call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
       Jcost = Jout(1)
-      if (Status /= StatusOK) goto 9999
+      if (Status /= StatusOK) return
     end if
 
   else
@@ -702,8 +701,6 @@ end do DescentLoop
 DeltaProfile = New_DeltaProfile
 Gamma = Gamma / ten
 JOld = JCost
-
-9999 continue
 
 end subroutine ufo_rttovonedvarcheck_ML
 

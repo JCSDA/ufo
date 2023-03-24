@@ -51,6 +51,8 @@ set ( utils_files
       RecursiveSplitter.h
       RefractivityCalculator.F90
       RoundingEquispacedBinSelector.h
+      NearestNeighborInterpolation.cc
+      NearestNeighborInterpolation.h
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc

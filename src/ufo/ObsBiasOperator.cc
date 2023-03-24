@@ -41,22 +41,21 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
     predictors[p]->compute(odb_, geovals, ydiags, biascoeffs, predData[p]);
   }
 
-  const oops::Variables &correctedVars = biascoeffs.correctedVars();
+  const oops::Variables &simVars = biascoeffs.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
-  ASSERT(correctedVars.channels().empty() ||
-         correctedVars.variables().size() == correctedVars.channels().size());
+  ASSERT(simVars.channels().empty() ||
+         simVars.variables().size() == simVars.channels().size());
 
-  const std::size_t nlocs  = ybias.nlocs();
-  const std::size_t nvars  = ybias.nvars();
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t nvars  = simVars.variables().size();
 
-  std::vector<int> chidxBC;
-  const std::vector<int> & chNoBC = biascoeffs.chlistNoBC();
-  if (chNoBC.size() > 0) {
-    chidxBC.resize(nvars, 1);
-    for (std::size_t it = 0; it < chNoBC.size(); ++it) {
-      std::size_t jvar = chNoBC[it] - 1;
-      chidxBC[jvar] = 0;
+  const std::vector<int> & varIndexNoBC = biascoeffs.varIndexNoBC();
+  for (const int jvar : varIndexNoBC) {
+    for (std::size_t jp = 0; jp < npreds; ++jp) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        predData[jp][jl * nvars + jvar] = 0.0;
+      }
     }
   }
 
@@ -76,35 +75,31 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   std::vector<double> biasTerm(nlocs);
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    double wpred = 1.0;
-    if (chNoBC.size() > 0) {
-      if (chidxBC[jvar] == 0) wpred = 0.0;
-    }
+    if (std::find(varIndexNoBC.begin(), varIndexNoBC.end(), jvar) == varIndexNoBC.end()) {
+      std::string predictorSuffix;
+      if (simVars.channels().empty())
+        predictorSuffix = simVars[jvar];
+      else
+        predictorSuffix = std::to_string(simVars.channels()[jvar]);
 
-    std::string predictorSuffix;
-    if (correctedVars.channels().empty())
-      predictorSuffix = correctedVars[jvar];
-    else
-      predictorSuffix = std::to_string(correctedVars.channels()[jvar]);
-
-    for (std::size_t jp = 0; jp < npreds; ++jp) {
-      // axpy
-      const double beta = biascoeffs(jp, jvar);
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        if (predData[jp][jl*nvars+jvar] != missing) {
-          predData[jp][jl*nvars+jvar] *= wpred;
-          biasTerm[jl] = predData[jp][jl*nvars+jvar] * beta;
-          ybias[jl*nvars+jvar] += biasTerm[jl];
+      for (std::size_t jp = 0; jp < npreds; ++jp) {
+        // axpy
+        const double beta = biascoeffs(jp, jvar);
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
+          if (predData[jp][jl * nvars + jvar] != missing) {
+            biasTerm[jl] = predData[jp][jl * nvars + jvar] * beta;
+            ybias[jl * nvars + jvar] += biasTerm[jl];
+          }
         }
-      }
-      // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
-      const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
-      if (ydiags.has(varname)) {
-        ydiags.allocate(1, oops::Variables({varname}));
-        ydiags.save(biasTerm, varname, 0);
-      } else {
-        oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
-        ABORT("ObsBiasOperatorTerm variable is not reserved in ydiags");
+        // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
+        const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
+        if (ydiags.has(varname)) {
+          ydiags.allocate(1, oops::Variables({varname}));
+          ydiags.save(biasTerm, varname, 0);
+        } else {
+          oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
+          ABORT("ObsBiasOperatorTerm variable is not reserved in ydiags");
+        }
       }
     }
   }

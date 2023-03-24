@@ -151,15 +151,14 @@ observations:
       type: principalcomponent
       EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
     RecalculateBT: true
-  passedBenchmark: 536
+  passedBenchmark: 477
   compareVariables:
     - reference:
         name: TestReference/numberOfIterations
       test:
         name: OneDVar/numberOfIterations
-  compareVariables:
     - reference:
         name: TestReference/pressureAtTopOfCloud
       test:
         name: OneDVar/pressureAtTopOfCloud
-      absTol: 1.0e-3
+      absTol: 1.0e-2

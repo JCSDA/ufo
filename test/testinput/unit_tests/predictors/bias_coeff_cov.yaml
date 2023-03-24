@@ -9,13 +9,15 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
     simulated variables: [brightnessTemperature]
-    channels: &channels 1-15
+    channels: &channels 2-15
 #   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/amsua_n19_obs_2018041500_m_bias_coeff_covariance_out.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
+    variables without bc: [brightnessTemperature]
+    channels: 14
     variational bc:
       predictors:
       - name: constant

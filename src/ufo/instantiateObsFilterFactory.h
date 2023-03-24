@@ -25,6 +25,7 @@
 #include "ufo/filters/HistoryCheck.h"
 #include "ufo/filters/ImpactHeightCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
+#include "ufo/filters/MetOfficeDuplicateCheck.h"
 #include "ufo/filters/ModelBestFitPressure.h"
 #include "ufo/filters/ModelObThreshold.h"
 #include "ufo/filters/MWCLWCheck.h"
@@ -42,6 +43,7 @@
 #include "ufo/filters/ProfileAverageObsToModLevels.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
+#include "ufo/filters/ProfileUnFlagObsCheck.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
@@ -111,6 +113,8 @@ void instantiateObsFilterFactory() {
            historyCheckMaker("History Check");
   static oops::interface::FilterMaker<ObsTraits, MetOfficeBuddyCheck>
            MetOfficeBuddyCheckMaker("Met Office Buddy Check");
+  static oops::interface::FilterMaker<ObsTraits, MetOfficeDuplicateCheck>
+           MetOfficeDuplicateCheckMaker("Met Office Duplicate Check");
   static oops::interface::FilterMaker<ObsTraits, ModelBestFitPressure>
            ModelBestFitPressureMaker("Model Best Fit Pressure");
   static oops::interface::FilterMaker<ObsTraits, ModelObThreshold>
@@ -133,6 +137,8 @@ void instantiateObsFilterFactory() {
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::interface::FilterMaker<ObsTraits, ProfileFewObsCheck>
            ProfileFewObsCheckMaker("Profile Few Observations Check");
+  static oops::interface::FilterMaker<ObsTraits, ProfileUnFlagObsCheck>
+           ProfileUnFlagObsCheckMaker("Profile Unflag Observations Check");
   static oops::interface::FilterMaker<ObsTraits, BlackList>
            rejectListMaker("RejectList");  // same as BlackList
   static oops::interface::FilterMaker<ObsTraits, ROobserror>

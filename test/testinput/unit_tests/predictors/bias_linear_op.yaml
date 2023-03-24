@@ -37,7 +37,7 @@ observations:
   rms ref: 1.0222204
   relative tolerance: 1.0e-6
 
-# One static and one variable predictor
+# Two variable predictors, but all variables are opted out of bias correction
 - obs space:
     name: Aircraft
     obsdatain:
@@ -56,28 +56,22 @@ observations:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias.nc4
-    static bc:
-      # All static BC predictors have unit cofficients.
-      predictors:
-      - name: sine_of_latitude
+    variables without bc: [airTemperature, specificHumidity]
     variational bc:
-      # The initial coefficients of predictors used in VarBC are loaded from the input file.
       predictors:
-      - name: constant
+        - name: constant
+        - name: sine_of_latitude
   target obs bias:
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
-    static bc:
-    # All static BC predictors have unit cofficients.
-      predictors:
-      - name: sine_of_latitude
-      # The coefficients of variable predictors are loaded from the input file.
+    variables without bc: [airTemperature, specificHumidity]
     variational bc:
       predictors:
-      - name: constant
-  rms ref: 0.3535534
+        - name: constant
+        - name: sine_of_latitude
+  rms ref: 0
   relative tolerance: 1.0e-6
 
-# Two static predictors
+# One static and one variable predictor
 - obs space:
     name: Aircraft
     obsdatain:
@@ -95,13 +89,55 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
   obs bias:
+    input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias.nc4
+    variables without bc: [airTemperature]
+    static bc:
+      # All static BC predictors have unit cofficients.
+      predictors:
+      - name: sine_of_latitude
+    variational bc:
+      # The initial coefficients of predictors used in VarBC are loaded from the input file.
+      predictors:
+      - name: constant
+  target obs bias:
+    input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
+    variables without bc: [airTemperature]
+    static bc:
+    # All static BC predictors have unit cofficients.
+      predictors:
+      - name: sine_of_latitude
+      # The coefficients of variable predictors are loaded from the input file.
+    variational bc:
+      predictors:
+      - name: constant
+  rms ref: 0.2121320
+  relative tolerance: 1.0e-6
+
+# Two static predictors
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+    simulated variables: [airTemperature, specificHumidity]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_s_bias_linear_op_out4.nc4
+  obs operator:
+    name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_s.nc4
+  obs bias:
     # This file should effectively be ignored, since there are no variable coefficients
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias.nc4
     static bc:
       predictors:
       - name: constant
       - name: sine_of_latitude
-  obs bias:
+  target obs bias:
     # This file should effectively be ignored, since there are no variable coefficients
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
     static bc:

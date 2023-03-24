@@ -56,11 +56,20 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     this->read(params);
   }
 
-  if (params.channelsNoBC.value() != boost::none) {
-    std::set<int> chNoBC = oops::parseIntSet(*params.channelsNoBC.value());
-    std::copy(chNoBC.begin(), chNoBC.end(), std::back_inserter(chlistNoBC_));
+  oops::Variables varsNoBC = params.variablesNoBC;
+  varsNoBC.intersection(vars_);  // Safeguard to make sure that varsNoBC is a subset of vars_
+  for (size_t ii = 0; ii < varsNoBC.size(); ++ii) {
+    size_t index = vars_.find(varsNoBC[ii]);
+    varIndexNoBC_.push_back(index);
+  }
+
+  if (varIndexNoBC_.empty()) {
+    oops::Log::info() << "All variables / channels are bias-corrected." << std::endl;
+  } else if (varsNoBC == vars_) {
+    oops::Log::warning() << "None of the variables / channels is bias-corrected." << std::endl;
   } else {
-    oops::Log::trace() << "ObsBias::all channels are bias corrected" << std::endl;
+    oops::Log::info() << "The following variables / channels are not bias-corrected: "
+                      << varsNoBC << std::endl;
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
