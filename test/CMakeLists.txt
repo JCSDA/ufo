@@ -37,9 +37,10 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
+#set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
 
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.5.0.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.6.0.tar.gz)
 set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
