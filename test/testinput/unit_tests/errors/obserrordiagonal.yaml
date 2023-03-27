@@ -15,7 +15,6 @@ observations:
     simulated variables: [airTemperature]
   obs error:
     covariance model: diagonal ufo
-
 - obs space:
     name: Aircraft
     obsdatain:
@@ -29,7 +28,6 @@ observations:
     simulated variables: [airTemperature,specificHumidity]
   obs error:
     covariance model: diagonal ufo
-
 - obs space:
     name: Satwind
     obsdatain:
