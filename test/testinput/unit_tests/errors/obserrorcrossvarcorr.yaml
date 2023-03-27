@@ -35,7 +35,6 @@ observations:
     covariance model: cross variable covariances
     input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
 
-
 - obs space:
     name: Sondes (cross-var corr, four vars, one is missing from the corr file)
     obsdatain:
