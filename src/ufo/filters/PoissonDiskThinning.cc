@@ -549,7 +549,7 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
   // this code will be deprecated in the future.
   //
   std::vector<bool> isUsed(obsData.totalNumObs, false);
-  float medianMissingValue = util::missingValue(medianMissingValue);
+  const float medianMissingValue = util::missingValue(medianMissingValue);
   for (auto priorityGroup : prioritySplitter.groups()) {
     // Generate vectors of quantities to avoid having to recalculate them
     // repeatedly.
@@ -567,17 +567,18 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
     // Split the observations into latitude bins to avoid having to
     // check all observations repeatedly.
     std::vector<int> latBins;
-    float latBinSize;
     // Set bin size to be approximately the horizontal spacing in degrees with
     // 10 per cent extra in case of observation spacing falling on the boundary.
     // If horizontal spacing is not specified, by default the bin size is set to
-    // be a large number.
+    // be a large number which results in all observations being put into either
+    // one or two bins.
+    float latBinSize = 180.0;
     if (obsData.minHorizontalSpacings != boost::none) {
+      // Convert from km to degrees using the approximate length (in km) of one
+      // degree at the equator.
       latBinSize = 1.1 * allSemiAxes[0][0] / 111.0;
     } else if (obsData.minLatitudeSpacings != boost::none) {
       latBinSize = 1.1 * allSemiAxes[0][0];
-    } else {
-      latBinSize = 180.0;
     }
     for (size_t obsIndex : priorityGroup) {
       const size_t obsId = obsIdsInCategory[obsIndex];
@@ -587,9 +588,9 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
         latBins.emplace_back(0);
       }
     }
-    int minLatBins = *std::min_element(latBins.begin(), latBins.end());
-    int maxLatBins = *std::max_element(latBins.begin(), latBins.end());
-    size_t nLatBins = maxLatBins - minLatBins + 1;
+    const int minLatBins = *std::min_element(latBins.begin(), latBins.end());
+    const int maxLatBins = *std::max_element(latBins.begin(), latBins.end());
+    const size_t nLatBins = maxLatBins - minLatBins + 1;
     std::vector<size_t> obsBins[nLatBins];
     for (size_t iObsId = 0; iObsId < allObsIds.size(); iObsId++) {
       obsBins[latBins[iObsId]-minLatBins].emplace_back(iObsId);
@@ -616,10 +617,10 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
       // Find additional observations within the exclusion volume of the
       // observation. Only check the latitude bins surrounding the
       // observation to speed up the processing.
-      int latBin = latBins[iObsId] - minLatBins;
+      const int latBin = latBins[iObsId] - minLatBins;
       std::vector<size_t> obsToCheck;
       for (int latOffset = -1; latOffset <= 1; latOffset++) {
-        int latBinOffset = latBin + latOffset;
+        const int latBinOffset = latBin + latOffset;
         if ((latBinOffset < 0) ||
             (latBinOffset >= nLatBins)) {
           continue;
@@ -634,15 +635,15 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
         if (isUsed[obsId2]) {
           continue;
         }
-        std::array<float, numDims> point = allPoints[jObsId];
+        std::array<float, numDims> jPoint = allPoints[jObsId];
         std::array<float, numDims> semiAxes = allSemiAxes[jObsId];
         bool isMatch = false;
         if (options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER) {
-          isMatch = pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims);
+          isMatch = pointIndex.isAnyPointInCylinderInterior(jPoint, semiAxes, numSpatialDims);
         } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID) {
-          isMatch = pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes);
+          isMatch = pointIndex.isAnyPointInEllipsoidInterior(jPoint, semiAxes);
         } else if (options_.exclusionVolumeShape == ExclusionVolumeShape::BOX) {
-          isMatch = pointIndex.isAnyPointInBoxInterior(point, semiAxes);
+          isMatch = pointIndex.isAnyPointInBoxInterior(jPoint, semiAxes);
         }
         if (isMatch) {
           medianIndices.emplace_back(obsId2);
@@ -657,10 +658,10 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
       if (nMedianObs > 1) {
         std::vector<float> medianObsSorted(medianObs);
         std::stable_sort(medianObsSorted.begin(), medianObsSorted.end());
-        size_t obsIndexMedian1 = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
-        size_t obsIndexMedian2 = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
-        float obsValueMedian1 = medianObsSorted[obsIndexMedian1];
-        float obsValueMedian2 = medianObsSorted[obsIndexMedian2];
+        const size_t obsIndexMedian1 = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
+        const size_t obsIndexMedian2 = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
+        const float obsValueMedian1 = medianObsSorted[obsIndexMedian1];
+        const float obsValueMedian2 = medianObsSorted[obsIndexMedian2];
         bool stillToFindMedian = true;
         for (size_t medianIndex = 0; medianIndex < nMedianObs; medianIndex++) {
           if (((medianObs[medianIndex] == obsValueMedian1) ||
