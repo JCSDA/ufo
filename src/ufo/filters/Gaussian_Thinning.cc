@@ -73,12 +73,20 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     recordHandler.checkRecordCategories(Variable(*options_.categoryVariable.value()));
   }
 
-  std::vector<size_t> validObsIds =
-    obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
-                                       recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
-                                       apply,
-                                       *flags_,
-                                       filtervars, !retainOnlyIfAllFilterVariablesAreValid);
+  std::vector<size_t> validObsIds;
+  if (options_.ignoreExistingQCFlags) {
+    validObsIds =
+      this->getValidObservationIds(options_.recordsAreSingleObs ?
+                                   recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+                                   apply);
+  } else {
+    validObsIds =
+      obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
+                                         recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
+                                         apply,
+                                         *flags_,
+                                         filtervars, !retainOnlyIfAllFilterVariablesAreValid);
+  }
 
   if (options_.opsCompatibilityMode) {
     // Sort observations by latitude
@@ -559,6 +567,17 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
                             distancesToBinCenter[validObsIndexB]);
     };
   }
+}
+
+std::vector<std::size_t> Gaussian_Thinning::getValidObservationIds
+  (const std::vector<bool> & apply) const {
+  std::vector<int> globalApply(apply.begin(), apply.end());
+  obsdb_.distribution()->allGatherv(globalApply);
+  std::vector<std::size_t> validObsIds;
+  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
+    if (globalApply[obsId])
+      validObsIds.push_back(obsId);
+  return validObsIds;
 }
 
 // -----------------------------------------------------------------------------

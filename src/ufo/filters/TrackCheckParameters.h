@@ -88,6 +88,15 @@ class TrackCheckParameters : public TrackCheckUtilsParameters {
                                              "Name of air pressure group",
                                              "ObsValue",
                                              this};
+
+  /// Consider all observations in the track check regardless of QC flags.
+  /// If this option is true then only the `where` clause has an impact on the observations used.
+  /// This option should be set to `true` in order to ensure compatibility with the Met Office
+  /// OPS system.
+  oops::Parameter<bool> ignoreExistingQCFlags
+    {"ignore existing QC flags",
+     "Do not consider QC flags when selecting observations to use in the track check.",
+     false, this};
 };
 
 }  // namespace ufo

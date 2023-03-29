@@ -114,9 +114,10 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                                                                obsdb_,
                                                                false);
 
-  const std::vector<size_t> validObsIds
-                                   = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
-
+  const std::vector<size_t> validObsIds =
+    options_.ignoreExistingQCFlags ?
+    this->getValidObservationIds(apply) :
+    obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 
@@ -294,6 +295,18 @@ void TrackCheck::flagRejectedTrackObservations(
     if (trackObsIt->rejected())
       isRejected[validObsIds[*trackObsIndexIt]] = true;
 }
+
+std::vector<std::size_t> TrackCheck::getValidObservationIds
+  (const std::vector<bool> & apply) const {
+  std::vector<int> globalApply(apply.begin(), apply.end());
+  obsdb_.distribution()->allGatherv(globalApply);
+  std::vector<std::size_t> validObsIds;
+  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
+    if (globalApply[obsId])
+      validObsIds.push_back(obsId);
+  return validObsIds;
+}
+
 
 void TrackCheck::print(std::ostream & os) const {
   os << "TrackCheck: config = " << options_ << std::endl;
