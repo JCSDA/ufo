@@ -82,7 +82,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     prednames_(other.prednames_),
     numStaticPredictors_(other.numStaticPredictors_),
     numVariablePredictors_(other.numVariablePredictors_),
-    vars_(other.vars_),
+    vars_(other.vars_), varIndexNoBC_(other.varIndexNoBC_),
     geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
