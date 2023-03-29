@@ -67,12 +67,9 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
 
   // Errors
   std::vector<float> PStn_error, PStd_error, Pmsl_error;
-  getObservation("ObsError", "stationPressure",
-                 PStn_error, true);
-  getObservation("ObsError", "standardPressure",
-                 PStd_error, true);
-  getObservation("ObsError", "pressureReducedToMeanSeaLevel",
-                 Pmsl_error, true);
+  data_.get(Variable("ObsErrorData/stationPressure"), PStn_error);
+  data_.get(Variable("ObsErrorData/standardPressure"), PStd_error);
+  data_.get(Variable("ObsErrorData/pressureReducedToMeanSeaLevel"), Pmsl_error);
 
   // PGEs
   std::vector<float> PStn_PGE, PStd_PGE, Pmsl_PGE;
