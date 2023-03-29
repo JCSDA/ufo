@@ -239,6 +239,7 @@ class GaussianThinningParameters : public FilterParametersBase {
     {"ignore existing QC flags",
      "Do not consider QC flags when selecting observations to use in the Gaussian thinning.",
      false, this};
+
  private:
   static float defaultHorizontalMesh() {
     return static_cast<float>(2 * M_PI * Constants::mean_earth_rad / 360.0);
