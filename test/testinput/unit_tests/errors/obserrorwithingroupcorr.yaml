@@ -1,0 +1,19 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Sondes (within group covariances for one variable)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsgrouping:
+        group variables: [sequenceNumber]
+        sort variable: pressure
+        sort order: ascending
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  obs error:
+    covariance model: within group covariances
+    correlation variable name: pressure
+    correlation lengthscale: 5000.

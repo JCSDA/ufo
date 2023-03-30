@@ -13,6 +13,7 @@
 
 #include "ufo/errors/ObsErrorCrossVarCov.h"
 #include "ufo/errors/ObsErrorDiagonal.h"
+#include "ufo/errors/ObsErrorWithinGroupCov.h"
 #include "ufo/ObsTraits.h"
 
 namespace ufo {
@@ -22,6 +23,8 @@ void instantiateObsErrorFactory() {
               makerDiagUFO("diagonal ufo");
   static oops::interface::ObsErrorMaker<ObsTraits, ObsErrorCrossVarCov>
               makerCrossVarCov("cross variable covariances");
+  static oops::interface::ObsErrorMaker<ObsTraits, ObsErrorWithinGroupCov>
+              makerWithinGroupCov("within group covariances");
 }
 
 }  // namespace ufo
