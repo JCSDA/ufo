@@ -404,7 +404,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  endif
  
  ! Cloud coefficient file, model, and format
- conf%Cloud_Model = "crtm"
+ conf%Cloud_Model = "CRTM"
  if (f_confOpts%has("Cloud_Model")) then
     call f_confOpts%get_or_die("Cloud_Model",str)
     conf%Cloud_Model = str
@@ -423,6 +423,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  end if
                        
  ! Aerosol coefficient file, format, and format
+ conf%Aerosol_Model = 'CRTM'
  if (f_confOpts%has("Aerosol_Model")) then
     call f_confOpts%get_or_die("Aerosol_Model",str)
     conf%Aerosol_Model = str
