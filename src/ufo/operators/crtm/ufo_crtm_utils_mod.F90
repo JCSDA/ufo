@@ -71,8 +71,7 @@ type crtm_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
- character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format, &
-                       SpcCoeff_Format, TauCoeff_Format
+ character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format
  character(len=255) :: Aerosol_Model, Cloud_Model
  character(len=255) :: &
     IRwaterCoeff_File, IRlandCoeff_File, IRsnowCoeff_File, IRiceCoeff_File, &
@@ -411,13 +410,13 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
     conf%Cloud_Model = str
  end if
  
- conf%CloudCoeff_File = "CloudCoeff.nc4" 
+ conf%CloudCoeff_File = "CloudCoeff.bin" 
  if (f_confOpts%has("CloudCoeff_File")) then
     call f_confOpts%get_or_die("CloudCoeff_File",str)
     conf%CloudCoeff_File = str
  end if
 
- conf%CloudCoeff_Format = "netCDF"
+ conf%CloudCoeff_Format = "Binary"
  if (f_confOpts%has("CloudCoeff_Format")) then
     call f_confOpts%get_or_die("CloudCoeff_Format",str)
     conf%CloudCoeff_Format = str
@@ -429,31 +428,17 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
     conf%Aerosol_Model = str
  end if
  
- conf%AerosolCoeff_File = "AerosolCoeff.nc4" 
+ conf%AerosolCoeff_File = "AerosolCoeff.bin" 
  if (f_confOpts%has("AerosolCoeff_File")) then
     call f_confOpts%get_or_die("AerosolCoeff_File",str)
     conf%AerosolCoeff_File = str
  end if
 
- conf%AerosolCoeff_Format = "netCDF"
+ conf%AerosolCoeff_Format = "Binary"
  if (f_confOpts%has("AerosolCoeff_Format")) then
     call f_confOpts%get_or_die("AerosolCoeff_Format",str)
     conf%AerosolCoeff_Format = str
  end if                       
-
- ! Coefficient format for SpcCoeff and TauCoeff
- conf%SpcCoeff_Format = "Binary"
- if (f_confOpts%has("SpcCoeff_Format")) then
-    call f_confOpts%get_or_die("SpcCoeff_Format",str)
-    conf%SpcCoeff_Format = str
- end if
-
- conf%TauCoeff_Format = "Binary"
- if (f_confOpts%has("TauCoeff_Format")) then
-    call f_confOpts%get_or_die("TauCoeff_Format",str)
-    conf%TauCoeff_Format = str
- end if 
-
  
  ! Coefficient file prefixes
  IRwaterCoeff = "Nalli"

@@ -46,10 +46,6 @@ namespace ufo
     oops::OptionalParameter<std::string> AerosolCoeff_File{"AerosolCoeff_File", this};      
     /// AerosolCoeff_Format
     oops::OptionalParameter<std::string> AerosolCoeff_Format{"AerosolCoeff_Format", this};  
-    /// SpcCoeff_Format
-    oops::OptionalParameter<std::string> SpcCoeff_Format{"SpcCoeff_Format", this};     
-    /// TauCoeff_Format
-    oops::OptionalParameter<std::string> TauCoeff_Format{"TauCoeff_Format", this};  
     /// AerosolOption
     oops::OptionalParameter<std::string> AerosolOption{"AerosolOption", this};
     /// Surfaces
