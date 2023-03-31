@@ -128,16 +128,13 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
 
- !character(len=MAXVARLEN), parameter :: &
- !     UFO_Clouds(N_VALID_CLOUD_CATEGORIES,2) = &
- !        reshape( &
- !           [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
- !             var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
- !           , [N_VALID_CLOUD_CATEGORIES,2] )
-
+ ! MAX_VALID_CLOUD_CATEGORIES is defined to declare the following variables that can 
+ ! work with both CRTM 2.4.1 and future version such as V3.0 - the CRTM interface 
+ ! generally requires some considerations in terms of how clouds are defined
+ integer, parameter :: MAX_VALID_CLOUD_CATEGORIES = 25  ! 6 default + 19 from DDA tables
 
  character(len=MAXVARLEN), parameter :: &
-      UFO_CLOUDS(N_VALID_CLOUD_CATEGORIES, 2) = &
+      UFO_CLOUDS(MAX_VALID_CLOUD_CATEGORIES, 2) = &
        reshape( &
          [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg, &      ! 1- 5
            var_clh,    var_cls,    var_cls,    var_cls,    var_cls, &      ! 5-10
@@ -156,33 +153,36 @@ END INTERFACE qsmith
       CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
          CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
 
+ ! The hydrometeor types from the DDA tables are defined using corresponding integer
+ ! values so  the ufo interface does not break for the current version of CRTM 
+ ! implemented in the UFO
  integer, parameter :: &
-      CRTM_Cloud_Id(N_VALID_CLOUD_CATEGORIES) = &
+      CRTM_Cloud_Id(MAX_VALID_CLOUD_CATEGORIES) = &
          [ WATER_CLOUD                   , &   ! 1
            ICE_CLOUD                     , &   ! 2
            RAIN_CLOUD                    , &   ! 3
            SNOW_CLOUD                    , &   ! 4
            GRAUPEL_CLOUD                 , &   ! 5
            HAIL_CLOUD                    , &   ! 6
-           PlateType1                    , &   ! 7
-           ColumnType1                   , &   ! 8
-           SixBulletRosette              , &   ! 9
-           Perpendicular4_BulletRosette  , &   ! 10
-           Flat3_BulletRosette           , &   ! 11
-           IconCloudIce                  , &   ! 12
-           SectorSnowflake               , &   ! 13
-           EvansSnowAggregate            , &   ! 14
-           EightColumnAggregate          , &   ! 15
-           LargePlateAggregate           , &   ! 16
-           LargeColumnAggregate          , &   ! 17
-           LargeBlockAggregate           , &   ! 18
-           IconSnow                      , &   ! 19
-           IconHail                      , &   ! 20
-           GemGraupel                    , &   ! 21
-           GemSnow                       , &   ! 22
-           GemHail                       , &   ! 23
-           IceSphere                     , &   ! 24    
-           LiquidSphere                  ]   ! 25                 
+           7                             , &   ! PlateType1                     7
+           8                             , &   ! ColumnType1                    8
+           9                             , &   ! SixBulletRosette               9
+           10                            , &   ! Perpendicular4_BulletRosette   10
+           11                            , &   ! Flat3_BulletRosette            11
+           12                            , &   ! IconCloudIce                   12
+           13                            , &   ! SectorSnowflake                13
+           14                            , &   ! EvansSnowAggregate             14
+           15                            , &   ! EightColumnAggregate           15
+           16                            , &   ! LargePlateAggregate            16
+           17                            , &   ! LargeColumnAggregate           17
+           18                            , &   ! LargeBlockAggregate            18
+           19                            , &   ! IconSnow                       19
+           20                            , &   ! IconHail                       20
+           21                            , &   ! GemGraupel                     21
+           22                            , &   ! GemSnow                        22
+           23                            , &   ! GemHail                        23
+           24                            , &   ! IceSphere                      24    
+           25                            ]     ! LiquidSphere                   25                 
 
 
 ! Surface Variables
