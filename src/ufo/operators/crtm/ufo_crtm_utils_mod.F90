@@ -146,7 +146,7 @@ END INTERFACE qsmith
            var_clsefr, var_cliefr, var_clsefr, var_clsefr, var_clsefr, &   ! 11-15
            var_clsefr, var_clsefr, var_clsefr, var_clsefr, var_clhefr, &   ! 16-20
            var_clgefr, var_clsefr, var_clhefr, var_cliefr, var_clwefr] &   ! 21-25
-           , [N_VALID_CLOUD_CATEGORIES,2] )           
+           , [MAX_VALID_CLOUD_CATEGORIES,2] )           
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
  character(len=MAXVARLEN), parameter :: &
