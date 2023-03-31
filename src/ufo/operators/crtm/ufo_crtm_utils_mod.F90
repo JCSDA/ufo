@@ -423,7 +423,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  end if
                        
  ! Aerosol coefficient file, format, and format
- conf%Aerosol_Model = 'CRTM'
+ conf%Aerosol_Model = 'GOCART'
  if (f_confOpts%has("Aerosol_Model")) then
     call f_confOpts%get_or_die("Aerosol_Model",str)
     conf%Aerosol_Model = str
