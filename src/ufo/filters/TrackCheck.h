@@ -180,10 +180,6 @@ class TrackCheck : public FilterBase,
       const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
       std::vector<float> &workspace) const;
 
-  /// Returns all observation locations irrespective of existing QC flags.
-  /// Only the `where` clause (if present) will affect which locations are returned.
-  std::vector<std::size_t> getValidObservationIds(const std::vector<bool> & apply) const;
-
  private:
   Parameters_ options_;
 };

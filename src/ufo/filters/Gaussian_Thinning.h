@@ -126,10 +126,6 @@ class Gaussian_Thinning : public FilterBase,
   static std::unique_ptr<DistanceCalculator> makeDistanceCalculator(
       const GaussianThinningParameters &options);
 
-  /// Returns all observation locations irrespective of existing QC flags.
-  /// Only the `where` clause (if present) will affect which locations are returned.
-  std::vector<std::size_t> getValidObservationIds(const std::vector<bool> & apply) const;
-
  private:
   GaussianThinningParameters options_;
 };
