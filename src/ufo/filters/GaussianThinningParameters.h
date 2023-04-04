@@ -234,7 +234,7 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// Consider all observations in the Gaussian thinning regardless of QC flags.
   /// If this option is true then only the `where` clause has an impact on the observations used.
   /// This option should be set to `true` in order to ensure compatibility with the Met Office
-  /// OPS system.
+  /// OPS system for aircraft processing.
   oops::Parameter<bool> ignoreExistingQCFlags
     {"ignore existing QC flags",
      "Do not consider QC flags when selecting observations to use in the Gaussian thinning.",
