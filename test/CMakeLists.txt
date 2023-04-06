@@ -127,6 +127,16 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
 
     set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
 
+  elseif( DEFINED ENV{UFO_TESTFILES} )
+    # Any branch of ufo is being built.
+    # ufo-data repository is already cloned by bundle/CMakeLists.txt.
+    # Link test files in ufo-data repo to build directory.
+    # get_ufo_test_data checks the existence of test file directory.
+    set( TESTFILE_DIR_REPO $ENV{UFO_TESTFILES} )
+    list( APPEND REPO_DATA_DOWNLOADER_ARGS
+          ${TESTFILE_DIR_REPO} )
+    set (REPO_DATA_DOWNLOADER ufo_data_checker.py )
+
   # Any branch of REPO is being built.
   # repo-data repository is already cloned by bundle/CMakeLists.txt.
   # Link test files in repo-data repo to build directory.
