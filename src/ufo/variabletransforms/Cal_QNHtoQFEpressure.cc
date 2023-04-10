@@ -54,8 +54,9 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
     getObservation("MetaData", "stationElevation",
                      ZStn);
   }
-  data_.get(Variable("ObsError/stationPressure"),
-            PStn_error);
+  // Error statistics
+  data_.get(Variable("ObsErrorData/stationPressure"), PStn_error);
+
   // Flags
   std::vector<bool> notRounded_flag;
   std::vector<bool> QNHinHg_flag;
@@ -122,6 +123,12 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
   obsdb_.put_db("DiagnosticFlags/QNHhPa", "stationPressure", QNHhPa_flag);
   obsdb_.put_db("DiagnosticFlags/QNHinHg", "stationPressure", QNHinHg_flag);
   obsdb_.put_db("DerivedObsError", "stationPressure", PStn_error);
+  const size_t iv = obserr_.varnames().find("stationPressure");
+  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+    if (!apply[jobs])
+      continue;
+    obserr_[iv][jobs] = PStn_error[jobs];
+  }
 }
 }  // namespace ufo
 
