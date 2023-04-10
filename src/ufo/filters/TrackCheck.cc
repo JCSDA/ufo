@@ -114,9 +114,10 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                                                                obsdb_,
                                                                false);
 
-  const std::vector<size_t> validObsIds
-                                   = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
-
+  const std::vector<size_t> validObsIds =
+    options_.ignoreExistingQCFlags ?
+    obsAccessor.getValidObservationIds(apply) :
+    obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 

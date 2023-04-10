@@ -98,7 +98,6 @@ class MetOfficeDuplicateCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::thinned;}
   ObsAccessor createObsAccessor() const;
-  std::vector<std::size_t> getValidObservationIds(const std::vector<bool> & apply) const;
 
  private:
   Parameters_ options_;
