@@ -80,7 +80,7 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
         // Define errnorm as ratio of exError to windSpeed
         if (windSpeed < 0.1) {
           errnorm = 100.;
-        else
+        } else {
           errnorm = exError/windSpeed;
         }
         // Output errnrom
