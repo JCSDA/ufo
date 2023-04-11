@@ -17,6 +17,17 @@
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
+
+///
+/// \brief An optional parameter for minimum wind components
+///      (default=0.0001 m/s).
+class SatWindsErrnormCheckParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SatWindsErrnormCheckParameters, Parameters)
+
+ public:
+  /// minimum_uv default value set to minimum allowable value 0.0001
+  oops::Parameter<float> minimum_uv{"minimum_uv", 0.0001, this};
+};
 // -----------------------------------------------------------------------------
 
 /// \brief Compute and return the ratio of the expected error to the observed
