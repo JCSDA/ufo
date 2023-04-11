@@ -452,7 +452,7 @@ contains
           end if
           
           if ( errorstatus /= errorstatus_success ) then
-            write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
+            write(message,'(A, A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
                                          ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
             call fckit_log%info(message)
             if (present(ob_info)) ob_info % rterror = .true.
