@@ -64,9 +64,9 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
   std::vector<float> ee;
   in.get(Variable("MetaData/expectedError"), ee);
   // Variables to store exError, windSpeed, and errnorm 
-  double exError
-  double windSpeed
-  double errnorm
+  double exError;
+  double windSpeed;
+  double errnorm;
 
   for (size_t jj = 0; jj < nlocs; ++jj) {
     if (u[jj] != missing && v[jj] != missing) {
@@ -76,7 +76,7 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
         // Define windSpeed from wind components
         windSpeed = std::sqrt(std::pow(u[jj], 2.0) + std::pow(v[jj], 2.0));
         // Define exError from ee
-        exError = 10.0 - 0.1*ee[jj]
+        exError = 10.0 - 0.1*ee[jj];
         // Define errnorm as ratio of exError to windSpeed
         if (windSpeed < 0.1) {
           errnorm = 100.;
