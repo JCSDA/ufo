@@ -41,31 +41,20 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
     predictors[p]->compute(odb_, geovals, ydiags, biascoeffs, predData[p]);
   }
 
-  const oops::Variables &correctedVars = biascoeffs.correctedVars();
+  const oops::Variables &simVars = biascoeffs.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
-  ASSERT(correctedVars.channels().empty() ||
-         correctedVars.variables().size() == correctedVars.channels().size());
+  ASSERT(simVars.channels().empty() ||
+         simVars.variables().size() == simVars.channels().size());
 
   const std::size_t nlocs  = odb_.nlocs();
-  const std::size_t nvars  = correctedVars.variables().size();
+  const std::size_t nvars  = simVars.variables().size();
 
-  const std::vector<int> & chNoBC = biascoeffs.chlistNoBC();
-  // The opting out of channels from bias-correction is currently only compatible with the
-  // case where the full list of channels (whether bias-corrected or not) is a consecutive
-  // list running from 1 to nvars.  While the following block of code makes sure that this
-  // is the case, such compatibility restriction should be removed in the future.
-  if (chNoBC.size() > 0 && !correctedVars.channels().empty()) {
-    std::vector<int> tmp(nvars);
-    std::iota(tmp.begin(), tmp.end(), 1);
-    ASSERT(correctedVars.channels() == tmp);
-  }
-  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) != chNoBC.end()) {
-      for (std::size_t jp = 0; jp < npreds; ++jp) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          predData[jp][jl * nvars + jvar] = 0.0;
-        }
+  const std::vector<int> & varIndexNoBC = biascoeffs.varIndexNoBC();
+  for (const int jvar : varIndexNoBC) {
+    for (std::size_t jp = 0; jp < npreds; ++jp) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        predData[jp][jl * nvars + jvar] = 0.0;
       }
     }
   }
@@ -86,12 +75,12 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   std::vector<double> biasTerm(nlocs);
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    if (std::find(chNoBC.begin(), chNoBC.end(), jvar + 1) == chNoBC.end()) {
+    if (std::find(varIndexNoBC.begin(), varIndexNoBC.end(), jvar) == varIndexNoBC.end()) {
       std::string predictorSuffix;
-      if (correctedVars.channels().empty())
-        predictorSuffix = correctedVars[jvar];
+      if (simVars.channels().empty())
+        predictorSuffix = simVars[jvar];
       else
-        predictorSuffix = std::to_string(correctedVars.channels()[jvar]);
+        predictorSuffix = std::to_string(simVars.channels()[jvar]);
 
       for (std::size_t jp = 0; jp < npreds; ++jp) {
         // axpy

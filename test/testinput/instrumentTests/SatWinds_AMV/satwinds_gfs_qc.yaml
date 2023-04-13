@@ -4,11 +4,11 @@ window end: 2020-12-15T03:30:00Z
 observations:
 - obs space:
     name: satwinds_QC
-    obsdatain: 
+    obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/satwind_obs_2020121500_m.nc
-#   obsdataout: 
+#   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/satwind_obs_2020121500_m_out.nc
@@ -188,54 +188,43 @@ observations:
     action:
       name: reject
     defer to post: true
-  # AVHRR and MODIS (ObsType=244,257,258,259) use a SPDB check.
-  - filter: Bounds Check
-    filter variables:
-    - name: windEastward
-    - name: windNorthward
-    test variables:
-    - name: ObsFunction/SatWindsSPDBCheck
-      options:
-        error_min: 1.4
-        error_max: 20.0
-    maxvalue: 1.75
-    where:
-      - variable:
-          name: ObsType/windEastward
-        is_in: 244, 257, 258, 259
-    action:
-      name: reject
-    defer to post: true
-  # GOES (ObsType=245,246,253,254) use a SPDB check only between 300-400 mb.
-  - filter: Bounds Check
-    filter variables:
-    - name: windEastward
-    - name: windNorthward
-    test variables:
-    - name: ObsFunction/SatWindsSPDBCheck
-      options:
-        error_min: 1.4
-        error_max: 20.0
-    maxvalue: 1.75
-    where:
-      - variable:
-          name: ObsType/windEastward
-        is_in: 245, 256, 253, 254
-      - variable:
-          name: MetaData/pressure
-        minvalue: 30000
-        maxvalue: 40000
-    action:
-      name: reject
-    defer to post: true
-  # Gross error check with (O - B) / ObsError greater than threshold.
+  # Gross Check
   - filter: Background Check
     filter variables:
     - name: windEastward
-    - name: windNorthward
-    threshold: 6.0
+    function absolute threshold:
+    - name: ObsFunction/SatWindsSPDBCheck
+      options:
+        wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
+                  250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
+        cgross:    [2.5,  2.5,  2.5,  1.5,  2.5,  1.3,  1.3,  2.5,  2.5,  2.5,
+                    2.5,  1.3,  2.5,  1.5,  1.5,  2.5,  2.5,  2.5,  2.5,  2.5]
+        error_min: [1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,
+                    1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4]
+        error_max: [6.1,  6.1, 15.0, 15.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                   20.0, 20.0, 20.0, 20.0, 20.0, 20.1, 20.1, 20.1, 20.1, 20.1]
+        variable: windEastward
     action:
       name: reject
+    defer to post: true
+  - filter: Background Check
+    filter variables:
+    - name: windNorthward
+    function absolute threshold:
+    - name: ObsFunction/SatWindsSPDBCheck
+      options:
+        wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
+                  250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
+        cgross:    [2.5,  2.5,  2.5,  1.5,  2.5,  1.3,  1.3,  2.5,  2.5,  2.5,
+                    2.5,  1.3,  2.5,  1.5,  1.5,  2.5,  2.5,  2.5,  2.5,  2.5]
+        error_min: [1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,
+                    1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4,  1.4]
+        error_max: [6.1,  6.1, 15.0, 15.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0,
+                   20.0, 20.0, 20.0, 20.0, 20.0, 20.1, 20.1, 20.1, 20.1, 20.1]
+        variable: windNorthward
+    action:
+      name: reject
+    defer to post: true
   # Duplicate check exercising both use_air_pressure options
   - filter: BlackList
     filter variables:
@@ -253,10 +242,10 @@ observations:
       is_in:  240-260
     defer to post: true
   - filter: BlackList
-    filter variables: 
+    filter variables:
     - name: windEastward
-    action: 
-      name: inflate error 
+    action:
+      name: inflate error
       inflation variable:
         name: ObsErrorFactorDuplicateCheck@ObsFunction
         options:
@@ -269,4 +258,4 @@ observations:
     defer to post: true
 
 
-  passedBenchmark: 5940
+  passedBenchmark: 3322

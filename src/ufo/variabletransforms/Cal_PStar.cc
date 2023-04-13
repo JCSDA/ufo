@@ -67,12 +67,9 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
 
   // Errors
   std::vector<float> PStn_error, PStd_error, Pmsl_error;
-  getObservation("ObsError", "stationPressure",
-                 PStn_error, true);
-  getObservation("ObsError", "standardPressure",
-                 PStd_error, true);
-  getObservation("ObsError", "pressureReducedToMeanSeaLevel",
-                 Pmsl_error, true);
+  data_.get(Variable("ObsErrorData/stationPressure"), PStn_error);
+  data_.get(Variable("ObsErrorData/standardPressure"), PStd_error);
+  data_.get(Variable("ObsErrorData/pressureReducedToMeanSeaLevel"), Pmsl_error);
 
   // PGEs
   std::vector<float> PStn_PGE, PStd_PGE, Pmsl_PGE;
@@ -175,6 +172,12 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
 
   putObservation("surfacePressure", PStar);
   obsdb_.put_db("DerivedObsError", "surfacePressure", PStar_error);
+  const size_t iv = obserr_.varnames().find("surfacePressure");
+  for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+    if (!apply[jobs])
+      continue;
+    obserr_[iv][jobs] = PStar_error[jobs];
+  }
   obsdb_.put_db("GrossErrorProbability", "surfacePressure", PStar_PGE);
   obsdb_.put_db("DiagnosticFlags/PmslUsed", "surfacePressure", PmslUsed_flag);
   obsdb_.put_db("DiagnosticFlags/PstdUsed", "surfacePressure", PstdUsed_flag);

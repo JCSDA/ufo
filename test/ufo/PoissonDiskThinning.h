@@ -109,6 +109,20 @@ CASE("ufo/PoissonDiskThinning/"
 }
 
 CASE("ufo/PoissonDiskThinning/"
+  "Horizontal thinning with median selection, min spacing smaller than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Horizontal thinning with median selection, min "
+                                                 "spacing smaller than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+   "Horizontal thinning with median selection, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                  "Horizontal thinning with median selection, min "
+                                                  "spacing larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
      "Vertical thinning, min spacing smaller than nearest neighbor spacing") {
   testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
                                                  "Vertical thinning, min spacing "
