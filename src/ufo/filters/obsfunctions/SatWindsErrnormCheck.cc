@@ -60,7 +60,15 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
   std::vector<float> u, v;
   in.get(Variable("ObsValue/windEastward"), u);
   in.get(Variable("ObsValue/windNorthward"), v);
-  // Retrieve observation expected error
+  // Retrieve observation expected error:
+  // This value is packed in the obs file in the same format as
+  // a quality indicator value, with discrete values between
+  // 0. and 100. A value > 100. indicates a missing value. These
+  // packed values can be unpacked into an expected observation
+  // error value in m/s via: 10. - 0.1*ee. A missing value for
+  // ee assigned to > 100. will generate a negative unpacked
+  // expected error value, which needs to be accounted for
+  // in the errnorm test.
   std::vector<float> ee;
   in.get(Variable("MetaData/expectedError"), ee);
   // Variables to store exError, windSpeed, and errnorm 
@@ -77,11 +85,17 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
         windSpeed = std::sqrt(std::pow(u[jj], 2.0) + std::pow(v[jj], 2.0));
         // Define exError from ee
         exError = 10.0 - 0.1*ee[jj];
-        // Define errnorm as ratio of exError to windSpeed
-        if (windSpeed > 0.1) {
+        // Define errnorm as ratio of exError to windSpeed:
+        // Automatically assign a value of missing if:
+        //    (1) windSpeed <= 0.1, or:
+        //    (2) exError < 0.
+        // The first indicates a wind too slow to generate a comparison,
+        // the second indicates a missing-value for ee generated a negative
+        // exError value, and should be rejected for missing data
+        if (windSpeed > 0.1 || exError >= 0.) {
           errnorm = exError/windSpeed;
         } else {
-          errnorm = 100.;
+          errnorm = missing;
         }
         // Output errnrom
         out[0][jj] = errnorm;
