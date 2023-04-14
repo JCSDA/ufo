@@ -10,6 +10,17 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/satwind_obs_errnorm.nc4
     simulated variables: [windEastward, windNorthward]
   obs filters:
+  # Consider only those observations in the dataset that are subject to the SatWindsErrnormCheck
+  - filter: Perform Action
+    filter variables:
+    - name: windEastward
+    - name: windNorthward
+    where:
+    - variable: MetaData/satelliteIdentifier
+      is_not_in: 250-299
+    action:
+      name: reject
+  # Perform SatWindsErrnormCheck on remaining obs, use 0.9 cutoff
   - filter: Bounds Check
     filter variables:
     - name: windEastward
