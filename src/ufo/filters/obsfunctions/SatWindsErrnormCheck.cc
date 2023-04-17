@@ -71,7 +71,7 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
   // in the errnorm test.
   std::vector<float> ee;
   in.get(Variable("MetaData/expectedError"), ee);
-  // Variables to store exError, windSpeed, and errnorm 
+  // Variables to store exError, windSpeed, and errnorm
   double exError;
   double windSpeed;
   double errnorm;
