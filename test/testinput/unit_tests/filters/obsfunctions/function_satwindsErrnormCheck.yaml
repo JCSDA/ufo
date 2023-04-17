@@ -33,4 +33,4 @@ observations:
     maxvalue: 0.9
     action:
       name: reject
-  passedBenchmark: 884 # 916 total obs in satelliteIdentifier range, 32 fail check, 884 pass 
+  passedBenchmark: 1768 # 2 variables (u,v): 916 total obs in satelliteIdentifier range, 32 fail check, 884 pass 
