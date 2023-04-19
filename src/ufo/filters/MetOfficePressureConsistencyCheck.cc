@@ -76,7 +76,6 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
       // pressure souce as the main observation
       for (std::vector<size_t>::const_iterator it = group.begin(); it != group.end(); ++it) {
         const size_t validObsIndex = *it;
-
         if (PmslUsed) {
           if (!PmslUsedFlag[validObsIds[validObsIndex]])
             isRejected[validObsIds[validObsIndex]] = true;
@@ -143,5 +142,4 @@ ObsAccessor MetOfficePressureConsistencyCheck::createObsAccessor() const {
 void MetOfficePressureConsistencyCheck::print(std::ostream & os) const {
   os << "MetOfficePressureConsistencyCheck: config = " << options_ << std::endl;
 }
-
 }  // namespace ufo
