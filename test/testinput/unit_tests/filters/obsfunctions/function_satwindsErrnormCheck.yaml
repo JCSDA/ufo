@@ -1,0 +1,36 @@
+window begin: 2021-07-31T20:59:00Z
+window end: 2021-08-01T03:00:00Z
+
+observations:
+- obs space:
+    name: satwindsErrnormCheck
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_errnorm.nc4
+    simulated variables: [windEastward, windNorthward]
+  obs filters:
+  # Consider only those observations in the dataset that are subject to the SatWindsErrnormCheck
+  - filter: Perform Action
+    filter variables:
+    - name: windEastward
+    - name: windNorthward
+    where:
+    - variable: MetaData/satelliteIdentifier
+      is_not_in: 250-299
+    action:
+      name: reject
+  # Perform SatWindsErrnormCheck on remaining obs, use 0.9 cutoff
+  - filter: Bounds Check
+    filter variables:
+    - name: windEastward
+    - name: windNorthward
+    where:
+    - variable: MetaData/satelliteIdentifier
+      is_in: 250-299
+    test variables:
+    - name: ObsFunction/SatWindsErrnormCheck
+    maxvalue: 0.9
+    action:
+      name: reject
+  passedBenchmark: 1768 # 2 variables (u,v): 916 total obs in satelliteIdentifier range, 32 fail check, 884 pass 
