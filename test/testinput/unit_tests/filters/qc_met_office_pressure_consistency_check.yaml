@@ -25,5 +25,4 @@ observations:
     category_variable:
       name: MetaData/stationIdentification
 
-  passedBenchmark: 13 #(15 without consistency)
-
+  passedBenchmark: 13

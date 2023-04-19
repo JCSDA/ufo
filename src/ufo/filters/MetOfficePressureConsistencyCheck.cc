@@ -34,7 +34,8 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
                                           std::vector<std::vector<bool>> & flagged) const {
     ObsAccessor obsAccessor = createObsAccessor();
 
-    const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
+    const std::vector<size_t> validObsIds =
+            obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
     RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
@@ -67,9 +68,9 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
       bool PstdUsed = false;
       bool PstnUsed = false;
 
-      if (PmslUsedFlag[validObsIds[*seedIt]] == 1) {PmslUsed = true;}
-      else if (PstdUsedFlag[validObsIds[*seedIt]] == 1) {PstdUsed = true;}
-      else if (PstnUsedFlag[validObsIds[*seedIt]] == 1) {PstnUsed = true;}
+      if (PmslUsedFlag[validObsIds[*seedIt]] == 1) PmslUsed = true;
+      else if (PstdUsedFlag[validObsIds[*seedIt]] == 1) PstdUsed = true;
+      else if (PstnUsedFlag[validObsIds[*seedIt]] == 1) PstnUsed = true;
 
       // Then check that all other accepted observations in the group use the same originating
       // pressure souce as the main observation
@@ -77,13 +78,13 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
         const size_t validObsIndex = *it;
 
         if (PmslUsed) {
-          if (not PmslUsedFlag[validObsIds[validObsIndex]])
+          if (!PmslUsedFlag[validObsIds[validObsIndex]])
             isRejected[validObsIds[validObsIndex]] = true;
         } else if (PstnUsed) {
-          if (not PstnUsedFlag[validObsIds[validObsIndex]])
+          if (!PstnUsedFlag[validObsIds[validObsIndex]])
             isRejected[validObsIds[validObsIndex]] = true;
         } else if (PstdUsed) {
-          if (not PstdUsedFlag[validObsIds[validObsIndex]])
+          if (!PstdUsedFlag[validObsIds[validObsIndex]])
             isRejected[validObsIds[validObsIndex]] = true;
         }
       }
@@ -107,7 +108,6 @@ std::vector<size_t>::const_iterator MetOfficePressureConsistencyCheck::findSeed(
     return (times[validObsIds[validObsIndexA]] < timeB);
   };
 
-
   const std::vector<size_t>::const_iterator firstGreaterOrEqualToTargetIt =
       std::lower_bound(validObsIndicesBegin, validObsIndicesEnd, targetTime, isEarlierThan);
   if (firstGreaterOrEqualToTargetIt == validObsIndicesBegin) {
@@ -122,7 +122,8 @@ std::vector<size_t>::const_iterator MetOfficePressureConsistencyCheck::findSeed(
   const std::vector<size_t>::const_iterator lastLessThanTargetIt =
       firstGreaterOrEqualToTargetIt - 1;
 
-  util::DateTime firstGreaterOrEqualToTargetTime = times[validObsIds[*firstGreaterOrEqualToTargetIt]];
+  util::DateTime firstGreaterOrEqualToTargetTime =
+          times[validObsIds[*firstGreaterOrEqualToTargetIt]];
   util::DateTime lastLessThanTargetTime = times[validObsIds[*lastLessThanTargetIt]];
 
   // Prefer the later observation if there's a tie
