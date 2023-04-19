@@ -8,10 +8,6 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_pressure_consistency_check.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/PStar_obs_out.nc4
     simulated variables: [surfacePressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/PStar_geovals_20210521T1200Z.nc4
@@ -24,5 +20,10 @@ observations:
       name: MetaData/stationIdentification
     seed_time: 2021-05-21T12:00:00Z
 
-  passedBenchmark: 15
+  - filter: Met Office Pressure Consistency Check
+    seed_time: 2021-05-21T12:00:00Z
+    category_variable:
+      name: MetaData/stationIdentification
+
+  passedBenchmark: 13 #(15 without consistency)
 
