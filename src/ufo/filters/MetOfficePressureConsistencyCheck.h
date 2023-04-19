@@ -25,21 +25,16 @@ class MetOfficePressureConsistencyCheckParameters : public FilterParametersBase 
   OOPS_CONCRETE_PARAMETERS(MetOfficePressureConsistencyCheckParameters, FilterParametersBase)
 
  public:
-  /// If not set, the thinning filter will consider observations as candidates for retaining
-  /// in chronological order.
-  ///
-  /// If set, the filter will start from the observation taken as close as possible to \c seed_time,
-  /// then consider all successive observations in chronological order, and finally all preceding
-  /// observations in reverse chronological order.
+  /// If set, the filter will use the observation taken as close as possible to \c seed_time, as 
+  /// the reference observation. If not set, the filter will use the first observation as the 
+  /// reference observation.
   oops::OptionalParameter<util::DateTime> seedTime{"seed_time", this};
 
   /// A string- or integer-valued variable. Observations with different values of that variable will
   /// be thinned separately. If not set all observations will be thinned together.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 };
-
 }  // namespace ufo
-
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -47,12 +42,12 @@ namespace ioda {
 }
 
 namespace ufo {
-
 class ObsAccessor;
 class RecursiveSplitter;
 
 /// \brief Checks that all surface pressure observations for a given location duting the
-/// assimilation window have been calculated using the same source of observed pressure.
+/// assimilation window have been calculated using the same source of observed pressure 
+/// as the reference observation.
 
 class MetOfficePressureConsistencyCheck : public FilterBase,
   private util::ObjectCounter<MetOfficePressureConsistencyCheck> {
@@ -73,7 +68,8 @@ class MetOfficePressureConsistencyCheck : public FilterBase,
   ObsAccessor createObsAccessor() const;
   void print(std::ostream &) const override;
   int qcFlag() const override {return QCflags::black;}
-  /// Return an iterator to the main observation.
+  
+  /// Return an iterator to the reference observation.
   std::vector<size_t>::const_iterator findSeed(
       std::vector<size_t> validObsIds,
       std::vector<util::DateTime> times,
