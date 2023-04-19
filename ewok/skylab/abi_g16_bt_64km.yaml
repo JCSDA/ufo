@@ -21,27 +21,27 @@ obs operator:
     Sensor_ID: abi_g16
     EndianType: little_endian
 monitoring only: true
-obs bias:
-  variational bc:
-    predictors:
-    - name: constant
-    - name: emissivity
-    - name: scan_angle
-      order: 4
-    - name: scan_angle
-      order: 3
-    - name: scan_angle
-      order: 2
-    - name: scan_angle
-  covariance:
-    minimal required obs number: 20
-    variance range: [1.0e-6, 10.0]
-    step size: 1.0e-4
-    largest analysis variance: 10000.0
-    prior:
-      inflation:
-        ratio: 1.1
-        ratio for small dataset: 2.0
+#obs bias:
+#  variational bc:
+#    predictors:
+#    - name: constant
+#    - name: emissivity
+#    - name: scan_angle
+#      order: 4
+#    - name: scan_angle
+#      order: 3
+#    - name: scan_angle
+#      order: 2
+#    - name: scan_angle
+#  covariance:
+#    minimal required obs number: 20
+#    variance range: [1.0e-6, 10.0]
+#    step size: 1.0e-4
+#    largest analysis variance: 10000.0
+#    prior:
+#      inflation:
+#        ratio: 1.1
+#        ratio for small dataset: 2.0
 obs filters:
 ## Data Quality Flags (DQF) from original data are in PreQC (0=good, 1=conditionally_usable, 2 or 3 are bad) # TODO: activate it back when files change PreQC to be integer
 #- filter: PreQC
