@@ -25,8 +25,8 @@ class MetOfficePressureConsistencyCheckParameters : public FilterParametersBase 
   OOPS_CONCRETE_PARAMETERS(MetOfficePressureConsistencyCheckParameters, FilterParametersBase)
 
  public:
-  /// If set, the filter will use the observation taken as close as possible to \c seed_time, as 
-  /// the reference observation. If not set, the filter will use the first observation as the 
+  /// If set, the filter will use the observation taken as close as possible to \c seed_time, as
+  /// the reference observation. If not set, the filter will use the first observation as the
   /// reference observation.
   oops::OptionalParameter<util::DateTime> seedTime{"seed_time", this};
 
@@ -46,7 +46,7 @@ class ObsAccessor;
 class RecursiveSplitter;
 
 /// \brief Checks that all surface pressure observations for a given location duting the
-/// assimilation window have been calculated using the same source of observed pressure 
+/// assimilation window have been calculated using the same source of observed pressure
 /// as the reference observation.
 
 class MetOfficePressureConsistencyCheck : public FilterBase,
@@ -68,7 +68,7 @@ class MetOfficePressureConsistencyCheck : public FilterBase,
   ObsAccessor createObsAccessor() const;
   void print(std::ostream &) const override;
   int qcFlag() const override {return QCflags::black;}
-  
+
   /// Return an iterator to the reference observation.
   std::vector<size_t>::const_iterator findSeed(
       std::vector<size_t> validObsIds,
