@@ -54,7 +54,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
                           { return times[validObsIds[obsIndex]]; });
 
     for (RecursiveSplitter::Group group : splitter.multiElementGroups()) {
-      // First find the time of the main observation
+      // First find the time of the reference observation
       std::vector<size_t>::const_iterator seedIt;
       if (options_.seedTime.value() == boost::none) {
         seedIt = group.begin();
@@ -63,7 +63,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
               times, group.begin(), group.end(), *options_.seedTime.value());
       }
 
-      // Then find the originating pressure source of the main observation
+      // Then find the originating pressure source of the reference observation
       bool PmslUsed = false;
       bool PstdUsed = false;
       bool PstnUsed = false;
@@ -73,7 +73,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
       else if (PstnUsedFlag[validObsIds[*seedIt]] == 1) PstnUsed = true;
 
       // Then check that all other accepted observations in the group use the same originating
-      // pressure souce as the main observation
+      // pressure souce as the reference observation
       for (std::vector<size_t>::const_iterator it = group.begin(); it != group.end(); ++it) {
         const size_t validObsIndex = *it;
         if (PmslUsed) {
@@ -90,7 +90,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
     }
 
     // Finally reject any of the obsrvations where the originating pressure souce differes
-    // from the main observation
+    // from the reference observation
     obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
