@@ -32,34 +32,36 @@ MetOfficePressureConsistencyCheck::~MetOfficePressureConsistencyCheck()
 void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & apply,
                                           const Variables & filtervars,
                                           std::vector<std::vector<bool>> & flagged) const {
-    ObsAccessor obsAccessor = createObsAccessor();
+    const ObsAccessor obsAccessor = createObsAccessor();
 
     const std::vector<size_t> validObsIds =
             obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
-    RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+    RecursiveSplitter splitter =
+            obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
-    std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+    const std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
           "MetaData", "dateTime");
-    std::vector<bool> PmslUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
+    const std::vector<bool> PmslUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
         "DiagnosticFlags/PmslUsed", "surfacePressure");
-    std::vector<bool> PstdUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
+    const std::vector<bool> PstdUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
         "DiagnosticFlags/PstdUsed", "surfacePressure");
-    std::vector<bool> PstnUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
+    const std::vector<bool> PstnUsedFlag = obsAccessor.getBoolVariableFromObsSpace(
         "DiagnosticFlags/PstnUsed", "surfacePressure");
 
     std::vector<bool> isRejected(times.size(), false);
 
+    // Sort data into groups based on the stationIdentification
     splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
                           { return times[validObsIds[obsIndex]]; });
 
-    for (RecursiveSplitter::Group group : splitter.multiElementGroups()) {
+    for (auto group : splitter.multiElementGroups()) {
       // First find the time of the reference observation
-      std::vector<size_t>::const_iterator seedIt;
+      ObsIndexIterator seedIt;
       if (options_.seedTime.value() == boost::none) {
         seedIt = group.begin();
       } else {
-        seedIt = findSeed(validObsIds,
+        seedIt = findReferenceObservation(validObsIds,
               times, group.begin(), group.end(), *options_.seedTime.value());
       }
 
@@ -68,13 +70,13 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
       bool PstdUsed = false;
       bool PstnUsed = false;
 
-      if (PmslUsedFlag[validObsIds[*seedIt]] == 1) PmslUsed = true;
-      else if (PstdUsedFlag[validObsIds[*seedIt]] == 1) PstdUsed = true;
-      else if (PstnUsedFlag[validObsIds[*seedIt]] == 1) PstnUsed = true;
+      if (PmslUsedFlag[validObsIds[*seedIt]]) PmslUsed = true;
+      else if (PstdUsedFlag[validObsIds[*seedIt]]) PstdUsed = true;
+      else if (PstnUsedFlag[validObsIds[*seedIt]]) PstnUsed = true;
 
       // Then check that all other accepted observations in the group use the same originating
-      // pressure souce as the reference observation
-      for (std::vector<size_t>::const_iterator it = group.begin(); it != group.end(); ++it) {
+      // pressure source as the reference observation
+      for (ObsIndexIterator it = group.begin(); it != group.end(); ++it) {
         const size_t validObsIndex = *it;
         if (PmslUsed) {
           if (!PmslUsedFlag[validObsIds[validObsIndex]])
@@ -94,12 +96,13 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
     obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
-std::vector<size_t>::const_iterator MetOfficePressureConsistencyCheck::findSeed(
-    std::vector<size_t> validObsIds,
-    std::vector<util::DateTime> times,
-    std::vector<size_t>::const_iterator validObsIndicesBegin,
-    std::vector<size_t>::const_iterator validObsIndicesEnd,
-    util::DateTime targetTime) const {
+MetOfficePressureConsistencyCheck::ObsIndexIterator
+  MetOfficePressureConsistencyCheck::findReferenceObservation(
+    const std::vector<size_t> & validObsIds,
+    const std::vector<util::DateTime> & times,
+    const ObsIndexIterator & validObsIndicesBegin,
+    const ObsIndexIterator & validObsIndicesEnd,
+    const util::DateTime & targetTime) const {
   ASSERT_MSG(validObsIndicesEnd - validObsIndicesBegin != 0,
              "The range of observation indices must not be empty");
 
@@ -107,23 +110,22 @@ std::vector<size_t>::const_iterator MetOfficePressureConsistencyCheck::findSeed(
     return (times[validObsIds[validObsIndexA]] < timeB);
   };
 
-  const std::vector<size_t>::const_iterator firstGreaterOrEqualToTargetIt =
+  const ObsIndexIterator firstGreaterOrEqualToTargetIt =
       std::lower_bound(validObsIndicesBegin, validObsIndicesEnd, targetTime, isEarlierThan);
   if (firstGreaterOrEqualToTargetIt == validObsIndicesBegin) {
     return firstGreaterOrEqualToTargetIt;
-  }
-  if (firstGreaterOrEqualToTargetIt == validObsIndicesEnd) {
+  } else if (firstGreaterOrEqualToTargetIt == validObsIndicesEnd) {
     // All observations were taken before targetTime. Return the iterator pointing to the
     // last valid element of the range.
     return validObsIndicesEnd - 1;
   }
 
-  const std::vector<size_t>::const_iterator lastLessThanTargetIt =
+  const ObsIndexIterator lastLessThanTargetIt =
       firstGreaterOrEqualToTargetIt - 1;
 
-  util::DateTime firstGreaterOrEqualToTargetTime =
+  const util::DateTime firstGreaterOrEqualToTargetTime =
           times[validObsIds[*firstGreaterOrEqualToTargetIt]];
-  util::DateTime lastLessThanTargetTime = times[validObsIds[*lastLessThanTargetIt]];
+  const util::DateTime lastLessThanTargetTime = times[validObsIds[*lastLessThanTargetIt]];
 
   // Prefer the later observation if there's a tie
   if ((firstGreaterOrEqualToTargetTime - targetTime).toSeconds() <=
@@ -135,8 +137,9 @@ std::vector<size_t>::const_iterator MetOfficePressureConsistencyCheck::findSeed(
 }
 
 ObsAccessor MetOfficePressureConsistencyCheck::createObsAccessor() const {
+    const Variable ID("MetaData/stationIdentification");
   return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
-            obsdb_, *options_.categoryVariable.value() );
+            obsdb_, ID);
 }
 
 void MetOfficePressureConsistencyCheck::print(std::ostream & os) const {

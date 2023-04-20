@@ -25,14 +25,10 @@ class MetOfficePressureConsistencyCheckParameters : public FilterParametersBase 
   OOPS_CONCRETE_PARAMETERS(MetOfficePressureConsistencyCheckParameters, FilterParametersBase)
 
  public:
-  /// If set, the filter will use the observation taken as close as possible to \c seed_time, as 
-  /// the reference observation. If not set, the filter will use the first observation as the 
+  /// If set, the filter will use the observation taken as close as possible to \c seed_time, as
+  /// the reference observation. If not set, the filter will use the first observation as the
   /// reference observation.
   oops::OptionalParameter<util::DateTime> seedTime{"seed_time", this};
-
-  /// A string- or integer-valued variable. Observations with different values of that variable will
-  /// be thinned separately. If not set all observations will be thinned together.
-  oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 };
 }  // namespace ufo
 
@@ -42,17 +38,20 @@ namespace ioda {
 }
 
 namespace ufo {
+class Variables;
 class ObsAccessor;
 class RecursiveSplitter;
 
-/// \brief Checks that all surface pressure observations for a given location duting the
-/// assimilation window have been calculated using the same source of observed pressure 
-/// as the reference observation.
+/// \brief Checks that all surface pressure observations for a given location throughout the
+/// assimilation window have been calculated using the same source of observed pressure
+/// as the chosen reference observation. The reference observation is chosen based on proximity
+/// to a specific time, either the beginning of the window, or one specified by the user.
 
 class MetOfficePressureConsistencyCheck : public FilterBase,
   private util::ObjectCounter<MetOfficePressureConsistencyCheck> {
  public:
   typedef MetOfficePressureConsistencyCheckParameters Parameters_;
+  typedef std::vector<size_t>::const_iterator ObsIndexIterator;
 
   static const std::string classname() {return "ufo::MetOfficePressureConsistencyCheck";}
 
@@ -68,14 +67,14 @@ class MetOfficePressureConsistencyCheck : public FilterBase,
   ObsAccessor createObsAccessor() const;
   void print(std::ostream &) const override;
   int qcFlag() const override {return QCflags::black;}
-  
+
   /// Return an iterator to the reference observation.
-  std::vector<size_t>::const_iterator findSeed(
-      std::vector<size_t> validObsIds,
-      std::vector<util::DateTime> times,
-      std::vector<size_t>::const_iterator validObsIndicesBegin,
-      std::vector<size_t>::const_iterator validObsIndicesEnd,
-      util::DateTime seedTime) const;
+  typename MetOfficePressureConsistencyCheck::ObsIndexIterator findReferenceObservation(
+      const std::vector<size_t> & validObsIds,
+      const std::vector<util::DateTime> & times,
+      const std::vector<size_t>::const_iterator & validObsIndicesBegin,
+      const std::vector<size_t>::const_iterator & validObsIndicesEnd,
+      const util::DateTime & seedTime) const;
 
  private:
   Parameters_ options_;

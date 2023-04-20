@@ -149,6 +149,7 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
   return validObsIds;
 }
 
+
 /// Get valid (non-missing, where-included) obs indices for a given profile.
 const std::vector<size_t> ObsAccessor::getValidObsIdsInProfile(const size_t & iProfile,
                                       const std::vector<bool> & apply,
@@ -205,7 +206,7 @@ std::vector<size_t> ObsAccessor::getRecordIds() const {
 }
 
 std::vector<bool> ObsAccessor::getBoolVariableFromObsSpace(
-    const std::string &group, const std::string &variable) const {
+  const std::string &group, const std::string &variable) const {
   std::vector<bool> requestedVariable;
   obsdb_->get_db(group, variable, requestedVariable);
   std::vector<int> globalrequestedVariable(requestedVariable.begin(), requestedVariable.end());
