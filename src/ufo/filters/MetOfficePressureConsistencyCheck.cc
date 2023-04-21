@@ -51,7 +51,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
 
     std::vector<bool> isRejected(times.size(), false);
 
-    // Sort data into groups based on the stationIdentification
+    // Sort the observations within each group by time.
     splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndex)
                           { return times[validObsIds[obsIndex]]; });
 
