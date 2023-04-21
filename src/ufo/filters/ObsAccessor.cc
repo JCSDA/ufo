@@ -211,8 +211,8 @@ std::vector<bool> ObsAccessor::getBoolVariableFromObsSpace(
   obsdb_->get_db(group, variable, requestedVariable);
   std::vector<int> globalrequestedVariable(requestedVariable.begin(), requestedVariable.end());
   obsDistribution_->allGatherv(globalrequestedVariable);
-  std::vector<bool> globalrequestedVariableBool(globalrequestedVariable.begin(),
-                                                  globalrequestedVariable.end());
+  std::vector<bool> globalrequestedVariableBool(globalRequestedVariable.begin(),
+                                                globalRequestedVariable.end());
   return globalrequestedVariableBool;
 }
 
