@@ -206,12 +206,12 @@ std::vector<TrackCheck::TrackObservation> TrackCheck::collectTrackObservations(
   for (std::vector<size_t>::const_iterator it = trackObsIndicesBegin;
        it != trackObsIndicesEnd; ++it) {
     const size_t obsId = validObsIds[*it];
-    trackObservations.push_back(TrackObservation(obsPressureLocTime.locationTimes.latitudes[obsId],
-                                                 obsPressureLocTime.locationTimes.longitudes[obsId],
-                                                 obsPressureLocTime.locationTimes.datetimes[obsId],
-                                                 obsPressureLocTime.pressures[obsId],
-                                                 obsPressureLocTime.speeds[obsId],
-                                                 obsPressureLocTime.timeOffsets[obsId]));
+    trackObservations.emplace_back(obsPressureLocTime.locationTimes.latitudes[obsId],
+                                   obsPressureLocTime.locationTimes.longitudes[obsId],
+                                   obsPressureLocTime.locationTimes.datetimes[obsId],
+                                   obsPressureLocTime.pressures[obsId],
+                                   obsPressureLocTime.speeds[obsId],
+                                   obsPressureLocTime.timeOffsets[obsId]);
   }
   return trackObservations;
 }
