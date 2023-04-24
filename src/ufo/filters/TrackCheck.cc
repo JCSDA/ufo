@@ -145,7 +145,7 @@ TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocation
   obsPressureLocTime.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
   obsPressureLocTime.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
                                                                       options_.pressureCoord);
-  // Cmopute speed from pressure and offset relative to epoch.
+  // Compute speed from pressure and offset relative to epoch.
   const util::DateTime epoch(1970, 1, 1, 0, 0, 0);
   for (size_t jloc = 0; jloc < obsPressureLocTime.pressures.size(); ++jloc) {
     obsPressureLocTime.speeds.push_back(maxValidSpeedAtPressure
