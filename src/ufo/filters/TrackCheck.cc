@@ -149,7 +149,8 @@ TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocation
   const util::DateTime epoch(1970, 1, 1, 0, 0, 0);
   for (size_t jloc = 0; jloc < obsPressureLoc.pressures.size(); ++jloc) {
     obsPressureLoc.speeds.push_back(maxValidSpeedAtPressure(obsPressureLoc.pressures[jloc]));
-    obsPressureLoc.timeOffsets.push_back((obsPressureLoc.locationTimes.datetimes[jloc] - epoch).toSeconds());
+    obsPressureLoc.timeOffsets.push_back((obsPressureLoc.locationTimes.datetimes[jloc] -
+                                          epoch).toSeconds());
   }
 
   return obsPressureLoc;
