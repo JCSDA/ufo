@@ -91,7 +91,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
       }
     }
 
-    // Finally reject any of the obsrvations where the originating pressure souce differes
+    // Finally reject any of the observations where the originating pressure souce differs
     // from the reference observation
     obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
