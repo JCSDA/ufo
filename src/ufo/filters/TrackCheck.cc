@@ -31,8 +31,10 @@
 namespace ufo {
 
 TrackCheck::TrackObservation::TrackObservation(float latitude, float longitude,
-                                               const util::DateTime &time, float pressure)
+                                               const util::DateTime &time, float pressure,
+                                               float speed, int64_t timeOffset)
   : obsLocationTime_(latitude, longitude, time),  pressure_(pressure),
+    speed_(speed), timeOffset_(timeOffset),
     rejectedInPreviousSweep_(false), rejectedBeforePreviousSweep_(false),
     numNeighborsVisitedInPreviousSweep_{NO_PREVIOUS_SWEEP, NO_PREVIOUS_SWEEP}
 {}
@@ -40,27 +42,30 @@ TrackCheck::TrackObservation::TrackObservation(float latitude, float longitude,
 void TrackCheck::TrackObservation::checkAgainstBuddy(
     const TrackObservation &buddyObs,
     const TrackCheckParameters &options,
-    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-    float referencePressure,
+    float maxSpeed,
     CheckResults & results) const {
   results = CheckResults();
-  util::Duration temporalDistance = abs(buddyObs.obsLocationTime_.time() -
-                                        this->obsLocationTime_.time());
+  const float temporalDistance =
+    std::abs(static_cast<float>(buddyObs.timeOffset() - this->timeOffset()));
+
   const float spatialDistance = TrackCheckUtils::distance(this->obsLocationTime_.location(),
                                                           buddyObs.obsLocationTime_.location());
 
+  const float temporalResolutionSeconds =
+    static_cast<float>(options.temporalResolution.value().toSeconds());
+
   // Estimate the speed and check if it is within the allowed range
   const float conservativeSpeedEstimate =
-      (spatialDistance - options.spatialResolution) /
-      (temporalDistance + options.temporalResolution).toSeconds();
-  const float maxSpeed = maxValidSpeedAtPressure(referencePressure);
+    (spatialDistance - options.spatialResolution) /
+    (temporalDistance + temporalResolutionSeconds);
+
   results.speedCheckResult = TrackCheckUtils::CheckResult(conservativeSpeedEstimate <= maxSpeed);
 
   // Estimate the climb rate and check if it is within the allowed range
   if (options.maxClimbRate.value() != boost::none) {
     const float pressureDiff = std::abs(pressure_ - buddyObs.pressure_);
     const float conservativeClimbRateEstimate =
-        pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
+      pressureDiff / (temporalDistance + temporalResolutionSeconds);
     results.climbRateCheckResult =
         TrackCheckUtils::CheckResult
         (conservativeClimbRateEstimate <= *options.maxClimbRate.value());
@@ -68,7 +73,7 @@ void TrackCheck::TrackObservation::checkAgainstBuddy(
 
   const int resolutionMultiplier = options.distinctBuddyResolutionMultiplier;
   results.isBuddyDistinct =
-      temporalDistance > resolutionMultiplier * options.temporalResolution &&
+      temporalDistance > resolutionMultiplier * temporalResolutionSeconds &&
       spatialDistance > resolutionMultiplier * options.spatialResolution;
 
   return;
@@ -121,23 +126,32 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 
-  ObsGroupPressureLocationTime obsPressureLoc = collectObsPressuresLocationsTimes(obsAccessor);
   PiecewiseLinearInterpolation maxSpeedByPressure = makeMaxSpeedByPressureInterpolation();
+  ObsGroupPressureLocationTime obsPressureLoc
+    = collectObsPressuresLocationsTimes(obsAccessor, maxSpeedByPressure);
 
   std::vector<bool> isRejected(obsPressureLoc.pressures.size(), false);
   for (auto track : splitter.multiElementGroups()) {
     identifyRejectedObservationsInTrack(track.begin(), track.end(), validObsIds,
-                                        obsPressureLoc, maxSpeedByPressure, isRejected);
+                                        obsPressureLoc, isRejected);
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
-TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes(
-    const ObsAccessor &obsAccessor) const {
+TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes
+(const ObsAccessor &obsAccessor,
+ const PiecewiseLinearInterpolation &maxValidSpeedAtPressure) const {
   ObsGroupPressureLocationTime obsPressureLoc;
   obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
   obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
                                                                       options_.pressureCoord);
+  // Cmpute speed from pressure and offset relative to epoch.
+  const util::DateTime epoch(1970, 1, 1, 0, 0, 0);
+  for (size_t jloc = 0; jloc < obsPressureLoc.pressures.size(); ++jloc) {
+    obsPressureLoc.speeds.push_back(maxValidSpeedAtPressure(obsPressureLoc.pressures[jloc]));
+    obsPressureLoc.timeOffsets.push_back((obsPressureLoc.locationTimes.datetimes[jloc] - epoch).toSeconds());
+  }
+
   return obsPressureLoc;
 }
 
@@ -165,14 +179,13 @@ void TrackCheck::identifyRejectedObservationsInTrack(
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
     const ObsGroupPressureLocationTime &obsPressureLoc,
-    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<bool> &isRejected) const {
 
   std::vector<TrackObservation> trackObservations = collectTrackObservations(
         trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsPressureLoc);
 
   std::vector<float> workspace;
-  while (sweepOverObservations(trackObservations, maxValidSpeedAtPressure, workspace) ==
+  while (sweepOverObservations(trackObservations, workspace) ==
          TrackCheckUtils::SweepResult::ANOTHER_SWEEP_REQUIRED) {
     // can't exit the loop yet
   }
@@ -194,14 +207,15 @@ std::vector<TrackCheck::TrackObservation> TrackCheck::collectTrackObservations(
     trackObservations.push_back(TrackObservation(obsPressureLoc.locationTimes.latitudes[obsId],
                                                  obsPressureLoc.locationTimes.longitudes[obsId],
                                                  obsPressureLoc.locationTimes.datetimes[obsId],
-                                                 obsPressureLoc.pressures[obsId]));
+                                                 obsPressureLoc.pressures[obsId],
+                                                 obsPressureLoc.speeds[obsId],
+                                                 obsPressureLoc.timeOffsets[obsId]));
   }
   return trackObservations;
 }
 
 TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
     std::vector<TrackObservation> &trackObservations,
-    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<float> &workspace) const {
 
   TrackCheck::CheckResults results;
@@ -229,6 +243,7 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
       };
 
       float minPressureBetween = obs.pressure();
+      float maxSpeed = obs.speed();
       int neighborIdx = 1;
       const TrackObservation *neighborObs = getNthNeighbor(neighborIdx);
       for (; neighborIdx <= numNeighborsVisitedInPreviousSweep && neighborObs != nullptr;
@@ -237,10 +252,13 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
         // been rejected. However, that would force us to check each pair of observations anew
         // whenever an observation between them is rejected, whereas as things stand, we only
         // need to "undo" checks against rejected observations.
+
+        if (minPressureBetween >= neighborObs->pressure())
+          maxSpeed = neighborObs->speed();
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
+
         if (neighborObs->rejectedInPreviousSweep()) {
-          obs.checkAgainstBuddy(*neighborObs, options_, maxValidSpeedAtPressure,
-                                minPressureBetween, results);
+          obs.checkAgainstBuddy(*neighborObs, options_, maxSpeed, results);
           obs.unregisterCheckResults(results);
           if (results.isBuddyDistinct) {
             // The rejected distinct buddy needs to be replaced with another
@@ -251,10 +269,12 @@ TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
 
       for (; numNewDistinctBuddiesToVisit > 0 && neighborObs != nullptr;
            neighborObs = getNthNeighbor(++neighborIdx)) {
+        if (minPressureBetween >= neighborObs->pressure())
+          maxSpeed = neighborObs->speed();
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
+
         if (!neighborObs->rejected()) {
-          obs.checkAgainstBuddy(*neighborObs, options_, maxValidSpeedAtPressure,
-                                minPressureBetween, results);
+          obs.checkAgainstBuddy(*neighborObs, options_, maxSpeed, results);
           obs.registerCheckResults(results);
           if (results.isBuddyDistinct)
             --numNewDistinctBuddiesToVisit;
