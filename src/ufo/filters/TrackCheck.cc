@@ -127,13 +127,13 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 
   PiecewiseLinearInterpolation maxSpeedByPressure = makeMaxSpeedByPressureInterpolation();
-  ObsGroupPressureLocationTime obsPressureLoc
+  ObsGroupPressureLocationTime obsPressureLocTime
     = collectObsPressuresLocationsTimes(obsAccessor, maxSpeedByPressure);
 
-  std::vector<bool> isRejected(obsPressureLoc.pressures.size(), false);
+  std::vector<bool> isRejected(obsPressureLocTime.pressures.size(), false);
   for (auto track : splitter.multiElementGroups()) {
     identifyRejectedObservationsInTrack(track.begin(), track.end(), validObsIds,
-                                        obsPressureLoc, isRejected);
+                                        obsPressureLocTime, isRejected);
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
@@ -141,19 +141,20 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
 TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes
 (const ObsAccessor &obsAccessor,
  const PiecewiseLinearInterpolation &maxValidSpeedAtPressure) const {
-  ObsGroupPressureLocationTime obsPressureLoc;
-  obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
-  obsPressureLoc.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
+  ObsGroupPressureLocationTime obsPressureLocTime;
+  obsPressureLocTime.locationTimes = TrackCheckUtils::collectObservationsLocations(obsAccessor);
+  obsPressureLocTime.pressures = obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
                                                                       options_.pressureCoord);
-  // Cmpute speed from pressure and offset relative to epoch.
+  // Cmopute speed from pressure and offset relative to epoch.
   const util::DateTime epoch(1970, 1, 1, 0, 0, 0);
-  for (size_t jloc = 0; jloc < obsPressureLoc.pressures.size(); ++jloc) {
-    obsPressureLoc.speeds.push_back(maxValidSpeedAtPressure(obsPressureLoc.pressures[jloc]));
-    obsPressureLoc.timeOffsets.push_back((obsPressureLoc.locationTimes.datetimes[jloc] -
+  for (size_t jloc = 0; jloc < obsPressureLocTime.pressures.size(); ++jloc) {
+    obsPressureLocTime.speeds.push_back(maxValidSpeedAtPressure
+                                        (obsPressureLocTime.pressures[jloc]));
+    obsPressureLocTime.timeOffsets.push_back((obsPressureLocTime.locationTimes.datetimes[jloc] -
                                           epoch).toSeconds());
   }
 
-  return obsPressureLoc;
+  return obsPressureLocTime;
 }
 
 PiecewiseLinearInterpolation TrackCheck::makeMaxSpeedByPressureInterpolation() const {
@@ -179,11 +180,11 @@ void TrackCheck::identifyRejectedObservationsInTrack(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
-    const ObsGroupPressureLocationTime &obsPressureLoc,
+    const ObsGroupPressureLocationTime &obsPressureLocTime,
     std::vector<bool> &isRejected) const {
 
   std::vector<TrackObservation> trackObservations = collectTrackObservations(
-        trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsPressureLoc);
+        trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsPressureLocTime);
 
   std::vector<float> workspace;
   while (sweepOverObservations(trackObservations, workspace) ==
@@ -199,18 +200,18 @@ std::vector<TrackCheck::TrackObservation> TrackCheck::collectTrackObservations(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
-    const ObsGroupPressureLocationTime &obsPressureLoc) const {
+    const ObsGroupPressureLocationTime &obsPressureLocTime) const {
   std::vector<TrackObservation> trackObservations;
   trackObservations.reserve(trackObsIndicesEnd - trackObsIndicesBegin);
   for (std::vector<size_t>::const_iterator it = trackObsIndicesBegin;
        it != trackObsIndicesEnd; ++it) {
     const size_t obsId = validObsIds[*it];
-    trackObservations.push_back(TrackObservation(obsPressureLoc.locationTimes.latitudes[obsId],
-                                                 obsPressureLoc.locationTimes.longitudes[obsId],
-                                                 obsPressureLoc.locationTimes.datetimes[obsId],
-                                                 obsPressureLoc.pressures[obsId],
-                                                 obsPressureLoc.speeds[obsId],
-                                                 obsPressureLoc.timeOffsets[obsId]));
+    trackObservations.push_back(TrackObservation(obsPressureLocTime.locationTimes.latitudes[obsId],
+                                                 obsPressureLocTime.locationTimes.longitudes[obsId],
+                                                 obsPressureLocTime.locationTimes.datetimes[obsId],
+                                                 obsPressureLocTime.pressures[obsId],
+                                                 obsPressureLocTime.speeds[obsId],
+                                                 obsPressureLocTime.timeOffsets[obsId]));
   }
   return trackObservations;
 }
