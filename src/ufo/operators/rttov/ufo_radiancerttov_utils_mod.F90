@@ -855,20 +855,6 @@ contains
     end subroutine ufo_rttov_setup
 
   ! ------------------------------------------------------------------------------
-
-  subroutine get_var_name(n,varname)
-
-    integer, intent(in) :: n
-    character(len=*), intent(out) :: varname
-
-    character(len=6) :: chan
-
-    write(chan, '(I0)') n
-    varname = 'brightnessTemperature_' // trim(chan)
-
-  end subroutine get_var_name
-
-
   !ufo_rttov_alloc is a wrapper for RTTOV12/13 allocation
   subroutine ufo_rttov_setup_rtprof(self,geovals,obss,conf,ob_info)
 
