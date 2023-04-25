@@ -1974,7 +1974,7 @@ contains
     integer                          :: PS_Number
     logical                          :: PS_configuration
 
-    write(message,'(A, A)') 'Setting RTTOV default options to ', default_opts_set
+    write(message,'(2A)') 'Setting RTTOV default options to ', default_opts_set
     call fckit_log%info(message)
 
     ! Get PS number if it exists
