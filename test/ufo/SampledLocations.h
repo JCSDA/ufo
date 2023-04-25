@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef TEST_UFO_LOCATIONS_H_
-#define TEST_UFO_LOCATIONS_H_
+#ifndef TEST_UFO_SAMPLEDLOCATIONS_H_
+#define TEST_UFO_SAMPLEDLOCATIONS_H_
 
 #include <memory>
 #include <string>
@@ -25,49 +25,51 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "test/TestEnvironment.h"
-#include "ufo/Locations.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 namespace test {
 
-/// Parameters describing Locations/TimeMask test
-class LocationsTimeTestParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(LocationsTimeTestParameters, Parameters)
+/// Parameters describing SampledLocations/TimeMask test
+class SampledLocationsTimeTestParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SampledLocationsTimeTestParameters, Parameters)
  public:
-  /// t1 & t2 for subsetting locations
+  /// t1 & t2 for subsetting interpolation paths
   oops::RequiredParameter<util::DateTime> t1{"t1", this};
   oops::RequiredParameter<util::DateTime> t2{"t2", this};
   /// reference mask
   oops::RequiredParameter<std::vector<bool>> refTimeMask{"reference mask", this};
 };
 
-/// Parameters describing Locations test
-class LocationsTestParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(LocationsTestParameters, Parameters)
+/// Parameters describing SampledLocations test
+class SampledLocationsTestParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SampledLocationsTestParameters, Parameters)
  public:
   /// reference longitudes
   oops::RequiredParameter<std::vector<float>> refLons{"reference lons", this};
   /// reference latitudes
   oops::RequiredParameter<std::vector<float>> refLats{"reference lats", this};
   /// set of tests for time masks
-  oops::RequiredParameter<std::vector<LocationsTimeTestParameters>>
+  oops::RequiredParameter<std::vector<SampledLocationsTimeTestParameters>>
         timeMaskTests{"time mask tests", this};
 };
 
-/// Code shared by all Locations tests
-class LocationsTestFixture : private boost::noncopyable {
+/// Code shared by all SampledLocations tests
+class SampledLocationsTestFixture : private boost::noncopyable {
  public:
   static const ioda::ObsSpace & obsspace() {return *getInstance().obsspace_;}
   static const eckit::LocalConfiguration & testconfig() {return getInstance().testconfig_;}
-  static const LocationsTestParameters & testparams() {return getInstance().testparams_;}
-
- private:
-  static LocationsTestFixture & getInstance() {
-    static LocationsTestFixture theLocationsTestFixture;
-    return theLocationsTestFixture;
+  static const SampledLocationsTestParameters & testparams() {
+    return getInstance().testparams_;
   }
 
-  LocationsTestFixture() {
+ private:
+  static SampledLocationsTestFixture & getInstance() {
+    static SampledLocationsTestFixture theSampledLocationsTestFixture;
+    return theSampledLocationsTestFixture;
+  }
+
+  SampledLocationsTestFixture() {
     const eckit::Configuration & conf = ::test::TestEnvironment::config();
     util::DateTime bgn(conf.getString("window begin"));
     util::DateTime end(conf.getString("window end"));
@@ -82,37 +84,39 @@ class LocationsTestFixture : private boost::noncopyable {
 
   std::shared_ptr<ioda::ObsSpace> obsspace_;
   eckit::LocalConfiguration       testconfig_;
-  LocationsTestParameters         testparams_;
+  SampledLocationsTestParameters         testparams_;
 };
 
 // -----------------------------------------------------------------------------
-/// Tests Locations constructors and method size()
-void testLocations() {
-  typedef LocationsTestFixture Test_;
+/// Tests SampledLocations constructors and method size()
+void testSampledLocations() {
+  typedef SampledLocationsTestFixture Test_;
 
   const size_t nlocs = Test_::obsspace().nlocs();
 
-  // testConstructor:: Locations(const eckit::Configuration &)
+  // testConstructor:: SampledLocations(const eckit::Configuration &)
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs1(conf, oops::mpi::world());
+  SampledLocations locs1(conf, oops::mpi::world());
   EXPECT(locs1.size() == nlocs);
-  oops::Log::test() << "Locations(configuration, eckit mpi communicator): " << locs1 << std::endl;
+  oops::Log::test() << "SampledLocations(configuration, eckit mpi communicator): "
+                    << locs1 << std::endl;
 
-  // testConstructor::Locations(const ioda::ObsSpace &);
-/*  Locations locs2(Test_::obsspace());
+  // testConstructor::SampledLocations(const ioda::ObsSpace &);
+/*  SampledLocations locs2(Test_::obsspace());
   EXPECT(locs2.size() == nlocs);
-  oops::Log::test() << "Locations(obsspace) constructor: " << locs2 << std::endl;*/
+  oops::Log::test() << "SampledLocations(obsspace) constructor: "
+                    << locs2 << std::endl;*/
 }
 
 // -----------------------------------------------------------------------------
-/// Tests Locations accessors lons() and lats()
+/// Tests SampledLocations accessors lons() and lats()
 void testLonsLats() {
-  typedef LocationsTestFixture Test_;
+  typedef SampledLocationsTestFixture Test_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs(conf, oops::mpi::world());
+  SampledLocations locs(conf, oops::mpi::world());
 
-  const LocationsTestParameters & params = Test_::testparams();
+  const SampledLocationsTestParameters & params = Test_::testparams();
   const float abstol = 1.0e-8;
   EXPECT(oops::are_all_close_absolute(params.refLons.value(), locs.lons(), abstol));
   EXPECT(oops::are_all_close_absolute(params.refLats.value(), locs.lats(), abstol));
@@ -122,28 +126,29 @@ void testLonsLats() {
 extern "C" {
   /// similar to LonsLats test, on Fortran level
   /// Returns 1 if the test passes, 0 if the test fails
-  int test_locations_lonslats_f90(const Locations &, const eckit::Configuration &);
+  int test_sampled_locations_lonslats_f90(const SampledLocations &,
+                                                      const eckit::Configuration &);
 }
 
-/// Tests Locations accessors lons() and lats() from Fortran
+/// Tests SampledLocations accessors lons() and lats() from Fortran
 void testFortranLonsLats() {
-  typedef LocationsTestFixture Test_;
+  typedef SampledLocationsTestFixture Test_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs(conf, oops::mpi::world());
+  SampledLocations locs(conf, oops::mpi::world());
 
-  EXPECT(test_locations_lonslats_f90(locs, Test_::testconfig()));
+  EXPECT(test_sampled_locations_lonslats_f90(locs, Test_::testconfig()));
 }
 
 // -----------------------------------------------------------------------------
-/// Tests Locations::isInTimeWindow method
+/// Tests SampledLocations::isInTimeWindow method
 void testTimeMask() {
-  typedef LocationsTestFixture Test_;
+  typedef SampledLocationsTestFixture Test_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs(conf, oops::mpi::world());
+  SampledLocations locs(conf, oops::mpi::world());
 
-  const LocationsTestParameters & params = Test_::testparams();
+  const SampledLocationsTestParameters & params = Test_::testparams();
   for (const auto & test : params.timeMaskTests.value()) {
     EXPECT_EQUAL(test.refTimeMask.value(), locs.isInTimeWindow(test.t1, test.t2));
   }
@@ -153,27 +158,28 @@ void testTimeMask() {
 extern "C" {
   /// similar to TimeMask test, on Fortran level
   /// Returns 1 if the test passes, 0 if the test fails
-  int test_locations_timemask_f90(const Locations &, const eckit::Configuration &);
+  int test_sampled_locations_timemask_f90(const SampledLocations &,
+                                                      const eckit::Configuration &);
 }
 
-/// Tests Locations::isInTimeWindow method from Fortran
+/// Tests SampledLocations::isInTimeWindow method from Fortran
 void testFortranTimeMask() {
-  typedef LocationsTestFixture Test_;
+  typedef SampledLocationsTestFixture Test_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs(conf, oops::mpi::world());
+  SampledLocations locs(conf, oops::mpi::world());
 
-  EXPECT(test_locations_timemask_f90(locs, Test_::testconfig()));
+  EXPECT(test_sampled_locations_timemask_f90(locs, Test_::testconfig()));
 }
 
 // -----------------------------------------------------------------------------
-/// Tests operator+= (concatenation of two Locations)
+/// Tests operator+= (concatenation of two SampledLocations)
 void testConcatenate() {
-  typedef LocationsTestFixture Test_;
+  typedef SampledLocationsTestFixture Test_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  Locations locs1(conf, oops::mpi::world());
-  Locations locs2(conf, oops::mpi::world());
+  SampledLocations locs1(conf, oops::mpi::world());
+  SampledLocations locs2(conf, oops::mpi::world());
   const size_t nlocs = locs1.size();
 
   locs1 += locs2;
@@ -199,28 +205,28 @@ void testConcatenate() {
 
 // -----------------------------------------------------------------------------
 
-class Locations : public oops::Test {
+class SampledLocations : public oops::Test {
  public:
-  Locations() {}
-  virtual ~Locations() = default;
+  SampledLocations() {}
+  virtual ~SampledLocations() = default;
 
  private:
-  std::string testid() const override {return "ufo::test::Locations";}
+  std::string testid() const override {return "ufo::test::SampledLocations";}
 
   void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
-    ts.emplace_back(CASE("ufo/Locations/testLocations")
-      { testLocations(); });
-    ts.emplace_back(CASE("ufo/Locations/testLonsLats")
+    ts.emplace_back(CASE("ufo/SampledLocations/testSampledLocations")
+      { testSampledLocations(); });
+    ts.emplace_back(CASE("ufo/SampledLocations/testLonsLats")
       { testLonsLats(); });
-    ts.emplace_back(CASE("ufo/Locations/testFortranLonsLats")
+    ts.emplace_back(CASE("ufo/SampledLocations/testFortranLonsLats")
       { testFortranLonsLats(); });
-    ts.emplace_back(CASE("ufo/Locations/testTimeMask")
+    ts.emplace_back(CASE("ufo/SampledLocations/testTimeMask")
       { testTimeMask(); });
-    ts.emplace_back(CASE("ufo/Locations/testFortranTimeMask")
+    ts.emplace_back(CASE("ufo/SampledLocations/testFortranTimeMask")
       { testFortranTimeMask(); });
-    ts.emplace_back(CASE("ufo/Locations/testConcatenation")
+    ts.emplace_back(CASE("ufo/SampledLocations/testConcatenation")
       { testConcatenate(); });
   }
 
@@ -232,4 +238,4 @@ class Locations : public oops::Test {
 }  // namespace test
 }  // namespace ufo
 
-#endif  // TEST_UFO_LOCATIONS_H_
+#endif  // TEST_UFO_SAMPLEDLOCATIONS_H_

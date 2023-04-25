@@ -28,7 +28,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 /// \brief Categorical observation operator.

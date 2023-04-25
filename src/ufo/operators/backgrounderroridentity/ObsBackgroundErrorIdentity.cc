@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/backgrounderroridentity/ObsBackgroundErrorIdentity.interface.h"

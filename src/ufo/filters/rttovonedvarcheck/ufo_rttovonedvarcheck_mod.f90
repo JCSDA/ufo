@@ -140,6 +140,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   logical                            :: reject_profile
   type(ufo_radiancerttov)            :: rttov_simobs
   integer(c_size_t), allocatable     :: ret_nlevs(:)
+  integer(c_size_t)                  :: npaths_by_method(1)
+  integer(c_size_t), allocatable     :: sampling_method_by_var(:)
 
   ! ------------------------------------------
   ! 1. Setup
@@ -195,6 +197,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
 
   ! Calculate hofxdiags levels for each variable
   call ufo_rttovonedvarcheck_hofxdiags_levels(hofxdiags_vars, self % nlevels, ret_nlevs)
+
+  ! Define a set of interpolation paths containing just a single path
+  npaths_by_method(1) = 1
+  allocate(sampling_method_by_var(hofxdiags_vars%nvars()))
+  sampling_method_by_var(:) = 1
 
   ! ------------------------------------------
   ! 2. Beginning main observation loop
@@ -301,7 +308,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
 
       ! Setup hofxdiags for this retrieval
-      call ufo_geovals_setup(hofxdiags, hofxdiags_vars, 1, hofxdiags_vars % nvars(), ret_nlevs)
+      call ufo_geovals_setup(hofxdiags, 1, hofxdiags_vars, hofxdiags_vars % nvars(), ret_nlevs, &
+                             size(npaths_by_method), npaths_by_method, &
+                             sampling_method_by_var)
+      call ufo_geovals_setup_trivial_sampling_method(hofxdiags, sampling_method = 1)
 
       if (self % FullDiagnostics) then
         call ob % info()

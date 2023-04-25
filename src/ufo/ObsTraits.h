@@ -13,7 +13,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "Locations.h"
+#include "SampledLocations.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsBiasCovariance.h"
@@ -30,7 +30,7 @@ struct ObsTraits {
 
   typedef ufo::GeoVaLs               GeoVaLs;
   typedef ufo::ObsDiagnostics        ObsDiagnostics;
-  typedef ufo::Locations             Locations;
+  typedef ufo::SampledLocations SampledLocations;
   typedef ioda::ObsSpace             ObsSpace;
   typedef ioda::ObsVector            ObsVector;
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;

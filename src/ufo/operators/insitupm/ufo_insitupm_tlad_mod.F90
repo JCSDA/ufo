@@ -327,9 +327,9 @@ character(len=MAXVARLEN) :: err_msg
    geovar = self%geovars%variable(iq)                   
    call ufo_geovals_get_var(geovals, geovar, aer_profile)
    if (.not. allocated(aer_profile%vals)) then
-       aer_profile%nlocs = self%nlocs
+       aer_profile%nprofiles = self%nlocs
        aer_profile%nval  = self%nlayers
-       allocate(aer_profile%vals(aer_profile%nval, aer_profile%nlocs))
+       allocate(aer_profile%vals(aer_profile%nval, aer_profile%nprofiles))
        aer_profile%vals(:,:) = 0.0_kind_real
    endif
 

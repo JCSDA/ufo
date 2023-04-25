@@ -5,11 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "../ufo/Locations.h"
+#include "../ufo/SampledLocations.h"
 #include "oops/runs/Run.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::test::Locations tests;
+  ufo::test::SampledLocations tests;
   return run.execute(tests);
 }

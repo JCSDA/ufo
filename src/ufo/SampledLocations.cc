@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/Locations.h"
+#include "ufo/SampledLocations.h"
 
 #include <utility>
 #include <vector>
@@ -26,22 +26,25 @@ namespace ufo {
 
 // -------------------------------------------------------------------------------------------------
 
-Locations::Locations(const std::vector<float> & lons, const std::vector<float> & lats,
-                     const std::vector<util::DateTime> & times,
-                     std::shared_ptr<const ioda::Distribution> dist)
-  : dist_(std::move(dist)), times_(std::move(times)), lons_(), lats_() {
-  oops::Log::trace() << "ufo::Locations::Locations start" << std::endl;
-  const size_t nlocs = times_.size();
-  ASSERT(nlocs == lons.size());
-  ASSERT(nlocs == lats.size());
-  lons_.resize(nlocs);
-  lats_.resize(nlocs);
-  for (size_t jj = 0; jj < nlocs; ++jj) {
+SampledLocations::SampledLocations(
+    const std::vector<float> & lons, const std::vector<float> & lats,
+    const std::vector<util::DateTime> & times, std::shared_ptr<const ioda::Distribution> dist,
+    std::vector<util::Range<size_t>> pathsGroupedByLocation)
+  : dist_(std::move(dist)), times_(std::move(times)), lons_(), lats_(),
+    pathsGroupedByLocation_(std::move(pathsGroupedByLocation)) {
+  oops::Log::trace() << "ufo::SampledLocations::SampledLocations start"
+                     << std::endl;
+  const size_t npaths = times_.size();
+  ASSERT(npaths == lons.size());
+  ASSERT(npaths == lats.size());
+  lons_.resize(npaths);
+  lats_.resize(npaths);
+  for (size_t jj = 0; jj < npaths; ++jj) {
     lons_[jj] = lons[jj];
     lats_[jj] = lats[jj];
   }
 
-  initializeObsGroup(nlocs);
+  initializeObsGroup(npaths);
 
   // Set float_params that add safety in case of missing values and optimize the
   // potential future use of hdf5's "memory file" as the ObsGroup backend.
@@ -51,35 +54,35 @@ Locations::Locations(const std::vector<float> & lons, const std::vector<float> &
   float_params.compressWithGZIP();
   float_params.setFillValue<float>(floatMissing);
 
-  const ioda::Variable nlocsVar = og_.vars["nlocs"];
-  og_.vars.createWithScales<float>("longitude", {nlocsVar}, float_params).write(lons);
-  og_.vars.createWithScales<float>("latitude", {nlocsVar}, float_params).write(lats);
+  const ioda::Variable npathsVar = og_.vars["npaths"];
+  og_.vars.createWithScales<float>("longitude", {npathsVar}, float_params).write(lons);
+  og_.vars.createWithScales<float>("latitude", {npathsVar}, float_params).write(lats);
 
-  oops::Log::trace() << "ufo::Locations::Locations done" << std::endl;
+  oops::Log::trace() << "ufo::SampledLocations::SampledLocations done"
+                     << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
-/*! UFO Locations Constructor with Configuration
+/*! UFO SampledLocations constructor with Configuration
  *
  * \details This constructor can be used to generate user-specified
- * and/or random locations for use with interpolation or other tests
+ * and/or random paths for use with interpolation or other tests
  *
- * To generate random locations, the relevant parameters specified in
- * **StateTest.Locations** section of the config file are:
+ * To generate random paths, the relevant parameters specified in
+ * **StateTest.SampledLocations** section of the config file are:
  *
  * * **lats** user-specified latitudes (degrees)
  * * **lons** user-specified longitudes (degrees)
- * * **Nrandom** number of random locations desired
+ * * **Nrandom** number of random paths desired
  * * **random_seed** (optional) random seed for reproducibility of results
  *
  * \date May, 2018 Created (M. Miesch, JCSDA)
  *
- * \sa ufo::ufo_locs_create() ufo::ufo_loc_test() test::testStateInterpolation()
+ * \sa test::testStateInterpolation()
  *
  */
 
-Locations::Locations(const eckit::Configuration & conf,
-                     const eckit::mpi::Comm & comm)
+SampledLocations::SampledLocations(const eckit::Configuration & conf, const eckit::mpi::Comm & comm)
   : dist_(), times_(), lons_(), lats_() {
   const eckit::LocalConfiguration obsconf(conf, "obs space");
   const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
@@ -101,18 +104,18 @@ Locations::Locations(const eckit::Configuration & conf,
   float_params.compressWithGZIP();
   float_params.setFillValue<float>(floatMissing);
 
-  const ioda::Variable nlocsVar = og_.vars["nlocs"];
+  const ioda::Variable npathsVar = og_.vars["npaths"];
   std::vector<float> buffer(nlocs);
   lons_.resize(nlocs);
   lats_.resize(nlocs);
 
   obspace.get_db("MetaData", "longitude", buffer);
   for (size_t jj = 0; jj < nlocs; ++jj) lons_[jj] = buffer[jj];
-  og_.vars.createWithScales<float>("longitude", {nlocsVar}, float_params).write(buffer);
+  og_.vars.createWithScales<float>("longitude", {npathsVar}, float_params).write(buffer);
 
   obspace.get_db("MetaData", "latitude", buffer);
   for (size_t jj = 0; jj < nlocs; ++jj) lats_[jj] = buffer[jj];
-  og_.vars.createWithScales<float>("latitude", {nlocsVar}, float_params).write(buffer);
+  og_.vars.createWithScales<float>("latitude", {npathsVar}, float_params).write(buffer);
 
   times_.resize(nlocs);
   obspace.get_db("MetaData", "dateTime", times_);
@@ -120,26 +123,27 @@ Locations::Locations(const eckit::Configuration & conf,
 
 // -------------------------------------------------------------------------------------------------
 
-Locations & Locations::operator+=(const Locations & other) {
+SampledLocations & SampledLocations::operator+=(
+    const SampledLocations & other) {
   // Resize ObsGroup to new total size
-  const ioda::Variable nlocsVar = og_.vars["nlocs"];
-  const size_t nlocs = nlocsVar.getDimensions().dimsCur[0];
-  const size_t other_nlocs = other.og_.vars["nlocs"].getDimensions().dimsCur[0];
-  const ioda::Dimensions_t total_nlocs = nlocs + other_nlocs;
+  const ioda::Variable npathsVar = og_.vars["npaths"];
+  const size_t npaths = npathsVar.getDimensions().dimsCur[0];
+  const size_t other_npaths = other.og_.vars["npaths"].getDimensions().dimsCur[0];
+  const ioda::Dimensions_t total_npaths = npaths + other_npaths;
 
-  og_.resize({std::make_pair(nlocsVar, total_nlocs)});
+  og_.resize({std::make_pair(npathsVar, total_npaths)});
 
   // Append variables from other's ObsGroup to end of local ObsGroup variables
-  const std::vector<ioda::Dimensions_t> start(1, nlocs);
+  const std::vector<ioda::Dimensions_t> start(1, npaths);
   const std::vector<ioda::Dimensions_t> other_start(1, 0);
-  const std::vector<ioda::Dimensions_t> counts(1, other_nlocs);
+  const std::vector<ioda::Dimensions_t> counts(1, other_npaths);
 
   ioda::Selection feSelect;
-  feSelect.extent({total_nlocs}).select({ioda::SelectionOperator::SET, other_start, counts});
+  feSelect.extent({total_npaths}).select({ioda::SelectionOperator::SET, other_start, counts});
   ioda::Selection beSelect;
   beSelect.select({ioda::SelectionOperator::SET, start, counts});
 
-  std::vector<float> buffer(other_nlocs);
+  std::vector<float> buffer(other_npaths);
   other.og_.vars["longitude"].read<float>(gsl::make_span(buffer));
   og_.vars["longitude"].write<float>(buffer, feSelect, beSelect);
 
@@ -155,8 +159,8 @@ Locations & Locations::operator+=(const Locations & other) {
 
 // -------------------------------------------------------------------------------------------------
 
-std::vector<bool> Locations::isInTimeWindow(const util::DateTime & t1,
-                                            const util::DateTime & t2) const {
+std::vector<bool> SampledLocations::isInTimeWindow(const util::DateTime & t1,
+                                                              const util::DateTime & t2) const {
   std::vector<bool> isIn(times_.size(), false);
   for (size_t ii = 0; ii < times_.size(); ++ii) {
     if (t1 < times_[ii] && times_[ii] <= t2) isIn[ii] = true;
@@ -166,44 +170,53 @@ std::vector<bool> Locations::isInTimeWindow(const util::DateTime & t1,
 
 // -------------------------------------------------------------------------------------------------
 
-size_t Locations::size() const {
+size_t SampledLocations::size() const {
   return times_.size();
 }
 
 // -------------------------------------------------------------------------------------------------
 
-std::vector<float> Locations::lons() const {
+std::vector<float> SampledLocations::lons() const {
   ASSERT(og_.vars.exists("longitude"));
-  const size_t nlocs = size();
-  std::vector<float> lons(nlocs);
+  const size_t npaths = size();
+  std::vector<float> lons(npaths);
   og_.vars["longitude"].read<float>(gsl::make_span(lons));
   return lons;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-std::vector<float> Locations::lats() const {
+std::vector<float> SampledLocations::lats() const {
   ASSERT(og_.vars.exists("latitude"));
-  const size_t nlocs = size();
-  std::vector<float> lats(nlocs);
+  const size_t npaths = size();
+  std::vector<float> lats(npaths);
   og_.vars["latitude"].read<float>(gsl::make_span(lats));
   return lats;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void Locations::initializeObsGroup(const size_t nlocs) {
+size_t SampledLocations::nlocs() const {
+  if (pathsGroupedByLocation_.empty())
+    return size();
+  else
+    return pathsGroupedByLocation_.size();
+}
+
+// -------------------------------------------------------------------------------------------------
+
+void SampledLocations::initializeObsGroup(const size_t npaths) {
   ioda::Engines::BackendCreationParameters params;
   ioda::Group g = constructBackend(ioda::Engines::BackendNames::ObsStore, params);
   const ioda::NewDimensionScales_t dimScales{{
-      ioda::NewDimensionScale<int>("nlocs", nlocs, ioda::Unlimited, nlocs)}};
+      ioda::NewDimensionScale<int>("npaths", npaths, ioda::Unlimited, npaths)}};
   og_ = ioda::ObsGroup::generate(g, dimScales);
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void Locations::print(std::ostream & os) const {
-  os << "Lat/lon/time locations: " << size() << " locations on this task " << std::endl;
+void SampledLocations::print(std::ostream & os) const {
+  os << "Lat/lon/time paths: " << size() << " paths on this task " << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------

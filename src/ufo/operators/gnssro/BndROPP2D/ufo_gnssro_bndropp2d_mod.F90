@@ -94,12 +94,6 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%debug(err_msg)
-! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)*n_horiz) then
-      write(err_msg,*) myname_, ' error: 2d nlocs inconsistent! geovals%nlocs, size(hofx), &
-                                  and n_horiz are', geovals%nlocs, size(hofx), n_horiz
-      call abor1_ftn(err_msg)
-  endif
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -107,6 +101,14 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
   call ufo_geovals_get_var(geovals, var_sfc_geomz, gph_sfc)   ! surface geopotential height
+
+! check if the number of geoval profiles is correct
+  if (t%nprofiles /= size(hofx)*n_horiz .or. q%nprofiles /= size(hofx)*n_horiz .or. &
+      prs%nprofiles /= size(hofx)*n_horiz .or. gph%nprofiles /= size(hofx)*n_horiz .or. &
+      gph_sfc%nprofiles /= size(hofx)*n_horiz) then
+     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     call abor1_ftn(err_msg)
+  endif
 
   missing = missing_value(missing)
   nlev    = t%nval ! number of model levels
