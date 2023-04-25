@@ -312,10 +312,8 @@ void GeoVaLs::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 /*! \brief Return number of levels for a specified variable */
 size_t GeoVaLs::nlevs(const std::string & var) const {
-  oops::Log::trace() << "GeoVaLs::nlevs starting" << std::endl;
   int nlevs;
   ufo_geovals_nlevs_f90(keyGVL_, var.size(), var.c_str(), nlevs);
-  oops::Log::trace() << "GeoVaLs::nlevs done" << std::endl;
   return nlevs;
 }
 // -----------------------------------------------------------------------------
@@ -383,34 +381,28 @@ void GeoVaLs::get(std::vector<int> & vals, const std::string & var) const {
 void GeoVaLs::getAtLocation(std::vector<double> & vals,
                             const std::string & var,
                             const int loc) const {
-  oops::Log::trace() << "GeoVaLs::getAtLocation(double) starting" << std::endl;
   const size_t nlevs = this->nlevs(var);
   ASSERT(vals.size() == nlevs);
   ASSERT(loc >= 0 && loc < this->nlocs());
   ufo_geovals_get_loc_f90(keyGVL_, var.size(), var.c_str(), loc, nlevs, vals[0]);
-  oops::Log::trace() << "GeoVaLs::getAtLocation(double) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location and convert to float */
 void GeoVaLs::getAtLocation(std::vector<float> & vals,
                             const std::string & var,
                             const int loc) const {
-  oops::Log::trace() << "GeoVaLs::getAtLocation(float) starting" << std::endl;
   std::vector <double> doubleVals(vals.size());
   this->getAtLocation(doubleVals, var, loc);
   this->cast(doubleVals, vals);
-  oops::Log::trace() << "GeoVaLs::getAtLocation(float) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location and convert to int */
 void GeoVaLs::getAtLocation(std::vector<int> & vals,
                             const std::string & var,
                             const int loc) const {
-  oops::Log::trace() << "GeoVaLs::getAtLocation(int) starting" << std::endl;
   std::vector <double> doubleVals(vals.size());
   this->getAtLocation(doubleVals, var, loc);
   this->cast(doubleVals, vals);
-  oops::Log::trace() << "GeoVaLs::getAtLocation(int) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Put double values for a specific variable and level */
@@ -537,10 +529,8 @@ void GeoVaLs::write(const Parameters_ & params) const {
 // -----------------------------------------------------------------------------
 /*! \brief Return the number of geovals */
 size_t GeoVaLs::nlocs() const {
-  oops::Log::trace() << "GeoVaLs::nlocs starting" << std::endl;
   size_t nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
-  oops::Log::trace() << "GeoVaLs::nlocs done" << std::endl;
   return nlocs;
 }
 // -----------------------------------------------------------------------------

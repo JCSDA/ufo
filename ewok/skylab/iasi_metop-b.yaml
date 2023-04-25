@@ -73,9 +73,9 @@ obs bias:
   variational bc:
     predictors:
     - name: constant
-    - name: lapse_rate
-      order: 2
-    - name: lapse_rate
+#   - name: lapse_rate # uncomment when lapse_rate files are written out
+#     order: 2
+#   - name: lapse_rate
     - name: emissivity
     - name: scan_angle
       order: 4

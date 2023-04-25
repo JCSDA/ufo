@@ -68,10 +68,13 @@ class TrackCheck : public FilterBase,
   struct ObsGroupPressureLocationTime {
     TrackCheckUtils::ObsGroupLocationTimes locationTimes;
     std::vector<float> pressures;
+    std::vector<float> speeds;
+    std::vector<int64_t> timeOffsets;
   };
 
-  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes(
-      const ObsAccessor &obsAccessor) const;
+  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes
+    (const ObsAccessor &obsAccessor,
+     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure) const;
 
  public:
   typedef TrackCheckParameters Parameters_;
@@ -88,8 +91,11 @@ class TrackCheck : public FilterBase,
   /// \brief Attributes of an observation belonging to a track.
   class TrackObservation {
    public:
-    TrackObservation(float latitude, float longitude, const util::DateTime &time, float pressure);
+    TrackObservation(float latitude, float longitude, const util::DateTime &time,
+                     float pressure, float speed, int64_t timeOffset);
     float pressure() const { return pressure_; }
+    float speed() const { return speed_; }
+    int64_t timeOffset() const { return timeOffset_; }
     bool rejectedInPreviousSweep() const { return rejectedInPreviousSweep_; }
     bool rejectedBeforePreviousSweep() const { return rejectedBeforePreviousSweep_; }
     bool rejected() const {
@@ -109,16 +115,14 @@ class TrackCheck : public FilterBase,
     ///
     /// \param buddyObs Observation to compare against.
     /// \param options Track check options.
-    /// \param maxValidSpeedAtPressure
-    ///   Function mapping air pressure (in Pa) to the maximum realistic speed (in m/s).
+    /// \param maxSpeed Maximum realistic speed (in m/s).
     /// \param referencePressure
     ///   Pressure at which the maximum speed should be evaluated.
     ///
     /// \returns An object enapsulating the check results.
     void checkAgainstBuddy(const TrackObservation &buddyObs,
                            const TrackCheckParameters &options,
-                           const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-                           float referencePressure,
+                           float maxSpeed,
                            CheckResults &results) const;
     void registerCheckResults(const CheckResults &result);
     void unregisterCheckResults(const CheckResults &result);
@@ -129,6 +133,8 @@ class TrackCheck : public FilterBase,
     TrackCheckUtils::ObsLocationTime obsLocationTime_;
     TrackCheckUtils::CheckCounter checkCounter_;
     float pressure_;
+    float speed_;
+    int64_t timeOffset_;
     bool rejectedInPreviousSweep_;
     bool rejectedBeforePreviousSweep_;
     int numNeighborsVisitedInPreviousSweep_[NUM_DIRECTIONS];
@@ -156,7 +162,6 @@ class TrackCheck : public FilterBase,
       std::vector<size_t>::const_iterator trackObsIndicesEnd,
       const std::vector<size_t> &validObsIds,
       const ObsGroupPressureLocationTime &obsPressureLoc,
-      const PiecewiseLinearInterpolation &maxSpeedByPressure,
       std::vector<bool> &isRejected) const;
 
   std::vector<TrackObservation> collectTrackObservations(
@@ -177,7 +182,6 @@ class TrackCheck : public FilterBase,
   ///   allocations and deallocations.
   TrackCheckUtils::SweepResult sweepOverObservations(
       std::vector<TrackObservation> &trackObservations,
-      const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
       std::vector<float> &workspace) const;
 
  private:

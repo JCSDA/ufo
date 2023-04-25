@@ -197,6 +197,8 @@ class ObsAccessor {
   /// Otherwise the vector is a concatenation of vectors obtained on all ranks.
   std::vector<int> getIntVariableFromObsSpace(const std::string &group,
                                               const std::string &variable) const;
+  std::vector<bool> getBoolVariableFromObsSpace(const std::string &group,
+                                                const std::string &variable) const;
   std::vector<float> getFloatVariableFromObsSpace(const std::string &group,
                                                   const std::string &variable) const;
   std::vector<double> getDoubleVariableFromObsSpace(const std::string &group,

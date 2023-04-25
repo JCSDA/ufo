@@ -56,6 +56,8 @@ set ( filters_files
       MetOfficeBuddyPairFinder.h
       MetOfficeDuplicateCheck.cc
       MetOfficeDuplicateCheck.h
+      MetOfficePressureConsistencyCheck.cc
+      MetOfficePressureConsistencyCheck.h
       ModelBestFitPressure.cc
       ModelBestFitPressure.h
       ModelObThreshold.cc
@@ -285,6 +287,8 @@ set ( filters_files
       obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SatWindsSPDBCheck.cc
       obsfunctions/SatWindsSPDBCheck.h
+      obsfunctions/SatWindsErrnormCheck.cc
+      obsfunctions/SatWindsErrnormCheck.h
       obsfunctions/ScatWindsAmbiguityCheck.cc
       obsfunctions/ScatWindsAmbiguityCheck.h
       obsfunctions/SCATRetMW.cc
