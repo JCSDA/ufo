@@ -13,15 +13,16 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/Locations.h"
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsTraits.h"
 #include "ufo/operators/timeoper/ObsTimeOperUtil.h"
 
 namespace ufo {
@@ -62,14 +63,9 @@ ObsTimeOper::~ObsTimeOper() {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsTimeOper::locations() const {
+ObsTimeOper::Locations_ ObsTimeOper::locations() const {
   oops::Log::trace() << "entered ObsOperatorTime::locations" << std::endl;
-
-  std::unique_ptr<Locations> locs = actualoperator_->locations();
-  // concatenate locations with itself (double the size)
-  *locs += *locs;
-
-  return locs;
+  return actualoperator_->locations();
 }
 
 // -----------------------------------------------------------------------------
@@ -80,10 +76,8 @@ void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   oops::Log::trace() << gv <<  std::endl;
 
-  GeoVaLs gv1(odb_.distribution(), gv.getVars());
-  GeoVaLs gv2(odb_.distribution(), gv.getVars());
-
-  gv.split(gv1, gv2);
+  GeoVaLs gv1(gv);
+  GeoVaLs gv2(gv);
 
   oops::Log::trace() << gv1 << std::endl;
   oops::Log::trace() << gv2 << std::endl;

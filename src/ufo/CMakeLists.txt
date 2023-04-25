@@ -65,8 +65,6 @@ list( APPEND ufo_src_files
     LinearObsOperator.h
     LinearObsOperatorBase.cc
     LinearObsOperatorBase.h
-    Locations.cc
-    Locations.h
     ObsBias.cc
     ObsBias.h
     ObsBiasCovariance.cc
@@ -86,10 +84,12 @@ list( APPEND ufo_src_files
     ObsOperatorBase.h
     ObsOperatorParametersBase.h
     ObsTraits.h
-    locations_f.cc
-    locations_f.h
+    SampledLocations.cc
+    SampledLocations.h
+    sampled_locations_f.cc
+    sampled_locations_f.h
     ufo_geovals_mod.F90
-    ufo_locations_mod.F90
+    ufo_sampled_locations_mod.F90
     ufo_variables_mod.F90
     ufo_constants_mod.F90
 )
@@ -117,7 +117,6 @@ list( APPEND ufo_src_files
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
     ${radarradialvelocity_src_files}
-    ${timeoper_src_files}
     ${profile_src_files}
     ${groundgnss_src_files}
     ${variabletransforms_src_files}
@@ -130,6 +129,7 @@ list( APPEND ufo_src_files
     ${fov_src_files}
     ${marine_src_files}
     ${oasim_src_files}
+    ${timeoper_src_files}
 )
 
 ## Create Library target

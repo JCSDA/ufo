@@ -13,6 +13,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -41,6 +42,7 @@ namespace test {
 void testPredictor() {
   typedef ::test::ObsTestsFixture<ObsTraits> Test_;
   typedef oops::ObsDiagnostics<ufo::ObsTraits>    ObsDiags_;
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
   std::vector<eckit::LocalConfiguration> typeconfs;
   ::test::TestEnvironment::config().get("observations", typeconfs);
@@ -81,8 +83,8 @@ void testPredictor() {
     ospace.get_db("MetaData", "latitude", lats);
     ospace.get_db("MetaData", "longitude", lons);
     ospace.get_db("MetaData", "dateTime", times);
-    Locations locs(lons, lats, times, ospace.distribution());
-    ObsDiagnostics ydiags(ospace, locs, diagvars);
+    auto locs = std::make_unique<SampledLocations>(lons, lats, times, ospace.distribution());
+    ObsDiagnostics ydiags(ospace, SampledLocations_(std::move(locs)), diagvars);
 
     bool expect_error_message = false;
 

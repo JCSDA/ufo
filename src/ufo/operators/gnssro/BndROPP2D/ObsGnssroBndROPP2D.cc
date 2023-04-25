@@ -9,16 +9,20 @@
 
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/Locations.h"
 #include "oops/base/Variables.h"
+#include "oops/interface/SampledLocations.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsTraits.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 
@@ -56,7 +60,10 @@ void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec
 }
 
 // -----------------------------------------------------------------------------
-std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations() const {
+ObsGnssroBndROPP2D::Locations_
+ObsGnssroBndROPP2D::locations() const {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   std::vector<float> lons(odb_.nlocs()*nhoriz_);
   std::vector<float> lats(odb_.nlocs()*nhoriz_);
   std::vector<util::DateTime> times(odb_.nlocs()*nhoriz_);
@@ -69,9 +76,16 @@ std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations() const {
     }
   }
   ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, odb_, lons.size(), lons[0], lats[0]);
-  std::unique_ptr<Locations> locs(new Locations(lons, lats, times, odb_.distribution()));
 
-  return locs;
+  std::vector<util::Range<size_t>> pathsGroupedByLocation(odb_.nlocs());
+  for (size_t jloc = 0; jloc < odb_.nlocs(); ++jloc) {
+    pathsGroupedByLocation[jloc].begin = jloc * nhoriz_;
+    pathsGroupedByLocation[jloc].end = (jloc + 1) * nhoriz_;
+  }
+
+  return SampledLocations_(
+          std::make_unique<SampledLocations>(lons, lats, times, odb_.distribution(),
+                                             std::move(pathsGroupedByLocation)));
 }
 
 // -----------------------------------------------------------------------------

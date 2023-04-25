@@ -19,6 +19,7 @@
 
 // Forward declarations
 namespace oops {
+  template <typename OBS> class Locations;
   class Variables;
 }
 
@@ -29,15 +30,16 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsBias;
   class ObsDiagnostics;
+  struct ObsTraits;
 
 // -----------------------------------------------------------------------------
 
 class ObsOperator : public util::Printable,
                     private boost::noncopyable {
  public:
+  typedef oops::Locations<ObsTraits> Locations_;
   typedef ObsOperatorParametersWrapper Parameters_;
 
   ObsOperator(ioda::ObsSpace &, const Parameters_ &);
@@ -49,8 +51,8 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;
 
-/// Operator locations
-  std::unique_ptr<Locations> locations() const;
+/// Model variable interpolation paths
+  Locations_ locations() const;
 
  private:
   void print(std::ostream &) const;

@@ -31,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 /// \brief Options controlling the ObsBackgroundErrorIdentity observation operator.

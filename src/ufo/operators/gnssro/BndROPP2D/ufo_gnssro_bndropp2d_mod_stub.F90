@@ -74,17 +74,18 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
   n_horiz = self%roconf%n_horiz
 
-! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)*n_horiz) then
-      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-      call abor1_ftn(err_msg)
-  endif
-
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
+
+! check if the number of geoval profiles is correct
+  if (t%nprofiles /= size(hofx)*n_horiz .or. q%nprofiles /= size(hofx)*n_horiz .or. &
+      prs%nprofiles /= size(hofx)*n_horiz .or. gph%nprofiles /= size(hofx)*n_horiz) then
+     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     call abor1_ftn(err_msg)
+  endif
 
   missing = missing_value(missing)
 

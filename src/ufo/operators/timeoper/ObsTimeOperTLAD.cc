@@ -55,15 +55,8 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
-  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
-  geovals.split(gv1, gv2);
-
-  oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory split geovals gv1 "
-                     << gv1 << std::endl;
-
-  oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory split geovals gv2 "
-                     << gv2 << std::endl;
+  GeoVaLs gv1(geovals);
+  GeoVaLs gv2(geovals);
 
   gv1 *= timeWeights_[0];
   gv2 *= timeWeights_[1];
@@ -87,15 +80,8 @@ void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
-  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
-  geovals.split(gv1, gv2);
-
-  oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL split geovals gv1 "
-                     << gv1 << std::endl;
-
-  oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL split geovals gv2 "
-                     << gv2 << std::endl;
+  GeoVaLs gv1(geovals);
+  GeoVaLs gv2(geovals);
 
   gv1 *= timeWeights_[0];
   gv2 *= timeWeights_[1];
@@ -117,23 +103,14 @@ void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & o
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD input geovals "
                      << geovals << std::endl;
 
-  GeoVaLs gv1(obsspace().distribution(), geovals.getVars());
-  GeoVaLs gv2(obsspace().distribution(), geovals.getVars());
-  geovals.split(gv1, gv2);
+  actualoperator_->simulateObsAD(geovals, ovec);
 
-  oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD split geovals gv1 "
-                     << gv1 << std::endl;
+  GeoVaLs gv2(geovals);
 
-  oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD split geovals gv2 "
-                     << gv2 << std::endl;
-
-  actualoperator_->simulateObsAD(gv1, ovec);
-
-  gv2 = gv1;
-  gv1 *= timeWeights_[0];
+  geovals *= timeWeights_[0];
   gv2 *= timeWeights_[1];
 
-  geovals.merge(gv1, gv2);
+  geovals += gv2;
 
   oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD final geovals "
                      << geovals << std::endl;
