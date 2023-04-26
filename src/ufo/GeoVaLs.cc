@@ -406,10 +406,8 @@ size_t GeoVaLs::nlevs(const std::string & var) const {
 /*! \brief Return the number of paths along which the specified variable has/will been
  *  interpolated. */
 size_t GeoVaLs::nprofiles(const std::string & var) const {
-  oops::Log::trace() << "GeoVaLs::nprofiles starting" << std::endl;
   size_t nprofiles;
   ufo_geovals_nprofiles_f90(keyGVL_, var.size(), var.c_str(), nprofiles);
-  oops::Log::trace() << "GeoVaLs::nprofiles done" << std::endl;
   return nprofiles;
 }
 // -----------------------------------------------------------------------------
