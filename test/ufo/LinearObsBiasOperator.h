@@ -11,12 +11,15 @@
 #include <iomanip>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/base/Locations.h"
+#include "oops/interface/SampledLocations.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "test/interface/ObsTestsFixture.h"
@@ -38,6 +41,7 @@ namespace test {
 // by subtracting two obs biases from each other produces the expected results.
 CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
   typedef ::test::ObsTestsFixture<ObsTraits> Test_;
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
   std::vector<eckit::LocalConfiguration> typeconfs;
   ::test::TestEnvironment::config().get("observations", typeconfs);
@@ -73,8 +77,8 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     odb.get_db("MetaData", "latitude", lats);
     odb.get_db("MetaData", "longitude", lons);
     odb.get_db("MetaData", "dateTime", times);
-    ObsDiagnostics ydiags(odb, Locations(lons, lats, times, odb.distribution()),
-                          requiredHdiagnostics);
+    auto locs = std::make_unique<SampledLocations>(lons, lats, times, odb.distribution());
+    ObsDiagnostics ydiags(odb, SampledLocations_(std::move(locs)), requiredHdiagnostics);
 
     // set TL trajectory to the geovals and the bias coeff. from the files
     LinearObsBiasOperator biasOperator(odb);

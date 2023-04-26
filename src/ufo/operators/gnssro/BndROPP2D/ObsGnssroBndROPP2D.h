@@ -24,7 +24,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 class GnssroBndROPP2DOptionsParameters: public oops::Parameters {
@@ -60,7 +59,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  std::unique_ptr<Locations> locations() const override;
+  Locations_ locations() const override;
 
   int & toFortran() {return keyOperGnssroBndROPP2D_;}
   const int & toFortran() const {return keyOperGnssroBndROPP2D_;}

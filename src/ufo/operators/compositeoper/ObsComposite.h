@@ -27,7 +27,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 /// \brief A collection of observation operators used to simulate different variables.

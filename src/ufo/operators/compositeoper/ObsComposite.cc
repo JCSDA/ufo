@@ -18,7 +18,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/operators/compositeoper/ObsCompositeParameters.h"
 

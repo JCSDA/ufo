@@ -138,9 +138,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
-  write(message, '(A,10I6)') 'Q: ', q%nval, q%nlocs, shape(q%vals)
+  write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
   call fckit_log%info(message)
-  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nlocs, shape(prs%vals)
+  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
   call fckit_log%info(message)
 
   nlocs_check = obsspace_get_nlocs(obss)
