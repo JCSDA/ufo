@@ -78,7 +78,7 @@ contains
     !DAR what is the RTTOV equivalant of making sure that humidity and ozone data are present
     if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 .and. &
       ufo_vars_getindex(self%conf%Absorbers, var_q)    < 1 ) then
-      write(message,*) 'ufo_radiancerttov_setup error: H2O must be included in RTTOV Absorbers'
+      message = 'ufo_radiancerttov_setup error: H2O must be included in RTTOV Absorbers'
       call abor1_ftn(message)
     end if
 
@@ -92,7 +92,7 @@ contains
     ! which RTTOV needs to index the entry in the coefficient file.  This allows cut down
     ! coefficient files to be used.
     if (self % conf % nSensors /= 1) then
-      write(message,*) 'ufo_radiancerttov_setup error: more than 1 sensor => coef indexing will not work'
+      message = 'ufo_radiancerttov_setup error: more than 1 sensor => coef indexing will not work'
       call abor1_ftn(message)
     end if
 
@@ -114,7 +114,7 @@ contains
     end do coefloop
 
     if ( any(self % coefindex == 0) ) then
-      write(message,*) 'ufo_radiancerttov_setup error: input channels not in the coefficient file'
+      message = 'ufo_radiancerttov_setup error: input channels not in the coefficient file'
       call abor1_ftn(message)
     end if
 
@@ -198,7 +198,7 @@ contains
     call self % RTprof_K % alloc_profiles(errorstatus, self % conf, self % nprofiles, self % nlevels, init=.true., asw=1)
 
     !Assign the atmospheric and surface data from the GeoVaLs
-    write(message,'(2A)') trim(routine_name), ': Creating RTTOV profiles from geovals'
+    message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
     call fckit_log%debug(message)
     call self % RTprof_K % setup_rtprof(geovals,obss,self % conf)
 
@@ -417,13 +417,13 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     ! Check if trajectory was set
     if (.not. self % ltraj) then
-      write(message, *) myname_, ' trajectory wasnt set!'
+      message = myname_ // ' trajectory wasnt set!'
       call abor1_ftn(message)
     end if
 
     ! Check if nlocs is consistent in geovals & hofx
     if (geovals % nlocs /= self % nprofiles) then
-      write(message, *) myname_, ' error: nlocs inconsistent!'
+      message = myname_ // ' error: nlocs inconsistent!'
       call abor1_ftn(message)
     end if
 
@@ -440,7 +440,7 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
           ! Check model levels is consistent in geovals
           if (geoval_d % nval /= self % nlevels) then
-            write(message, *) myname_, ' error: layers inconsistent!'
+            message = myname_ // ' error: layers inconsistent!'
             call abor1_ftn(message)
           end if
 
@@ -501,7 +501,7 @@ end subroutine ufo_radiancerttov_tlad_settraj
           end do
 
         case default
-          write(message,*) trim(varname), ' in increment list but not setup in ', myname_
+          message = trim(varname) // ' in increment list but not setup in ' // myname_
           call abor1_ftn(message)
       end select
 
@@ -536,13 +536,13 @@ end subroutine ufo_radiancerttov_tlad_settraj
 
     ! Check if trajectory was set
     if (.not. self % ltraj) then
-      write(message,*) myname_, ' trajectory wasnt set!'
+      message = myname_ // ' trajectory was not set!'
       call abor1_ftn(message)
     end if
 
     ! Check if nlocs is consistent in geovals & hofx
     if (geovals % nlocs /= self % nprofiles) then
-      write(message,*) myname_, ' error: nlocs inconsistent!'
+      message = myname_ // ' error: nlocs inconsistent!'
       call abor1_ftn(message)
     end if
 
@@ -612,7 +612,7 @@ end subroutine ufo_radiancerttov_tlad_settraj
           end do
 
         case default
-          write(message,*) trim(varname), ' in increment list but not setup in ', myname_
+          message = trim(varname) // ' in increment list but not setup in ' // myname_
           call abor1_ftn(message)
       end select
 
