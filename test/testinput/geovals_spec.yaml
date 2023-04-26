@@ -76,9 +76,9 @@ geovals test:
 
 # section for testGeoVaLsAllocatePutGet
 geovals get test:
-  window begin: 2018-04-14T21:00:00Z  # required for initializing Locations from the obs space below
-  window end: 2018-04-15T03:00:00Z    # required for initializing Locations from the obs space below
-  obs space:                          # required for initializing Locations to locations from this file
+  window begin: 2018-04-14T21:00:00Z  # required for initializing SampledLocations from the obs space below
+  window end: 2018-04-15T03:00:00Z    # required for initializing SampledLocations from the obs space below
+  obs space:                          # required for initializing SampledLocations to locations from this file
     name: amsua_n19
     obsdatain:
       engine:
@@ -90,3 +90,33 @@ geovals get test:
 #       obsfile: Data/amsua_n19_obs_2018041500_m_geovals_spec_out.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-10,15
+
+multiple sampling methods test:
+  gnlocs: 4
+  sampling methods:
+  - longitudes: [1, 2, 3, 4, 5]
+    latitudes:  [6, 7, 8, 9, 10]
+    datetimes:  ["2001-01-01T00:00:00Z", "2001-01-02T00:00:00Z", "2001-01-03T00:00:00Z",
+                 "2001-01-04T00:00:00Z", "2001-01-05T00:00:00Z"]
+    # This means: Location #0 is sampled by path #0 ("from 0 up to be not including 1"),
+    # location #1 by path #1, location #2 by paths #2 and #3, and location #3 by path #4.
+    paths grouped by location: [[0, 1], [1, 2], [2, 4], [4, 5]]
+  - longitudes: [1, 2, 3, 4, 5, 6]
+    latitudes:  [7, 8, 9, 10, 11, 12]
+    datetimes:  ["2001-01-01T00:00:00Z", "2001-01-02T00:00:00Z", "2001-01-03T00:00:00Z",
+                 "2001-01-04T00:00:00Z", "2001-01-05T00:00:00Z", "2001-01-06T00:00:00Z"]
+    # This collection contains paths sampling multiple locations.
+    paths grouped by location: [[0, 2], [2, 6], [0, 2], [2, 6]]
+  geovals:
+  - variable: air_temperature
+    nlevels: 2
+    sampling method: 0
+  - variable: eastward_wind
+    nlevels: 3
+    sampling method: 1
+  - variable: northward_wind
+    nlevels: 3
+    sampling method: 1
+  - variable: relative_humidity
+    nlevels: 4
+    sampling method: 0

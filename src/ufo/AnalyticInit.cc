@@ -11,7 +11,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/GeoVaLs.interface.h"
-#include "ufo/Locations.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 
@@ -40,7 +40,7 @@ AnalyticInit::AnalyticInit(const Parameters_ & options) : options_(options)
  * \date June, 2018: Split off from constructor into independent method
  *                   (M. Miesch, JCSDA)
  */
-void AnalyticInit::fillGeoVaLs(const Locations & locs, GeoVaLs & geovals) const
+void AnalyticInit::fillGeoVaLs(const SampledLocations & locs, GeoVaLs & geovals) const
 {
   oops::Log::trace() << "AnalyticInit::analytic_init starting" << std::endl;
   ufo_geovals_analytic_init_f90(geovals.toFortran(), locs, options_.toConfiguration());

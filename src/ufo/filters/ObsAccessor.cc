@@ -205,6 +205,17 @@ std::vector<size_t> ObsAccessor::getRecordIds() const {
   return recordIds;
 }
 
+std::vector<bool> ObsAccessor::getBoolVariableFromObsSpace(
+  const std::string &group, const std::string &variable) const {
+  std::vector<bool> requestedVariable;
+  obsdb_->get_db(group, variable, requestedVariable);
+  std::vector<int> globalRequestedVariable(requestedVariable.begin(), requestedVariable.end());
+  obsDistribution_->allGatherv(globalRequestedVariable);
+  std::vector<bool> globalRequestedVariableBool(globalRequestedVariable.begin(),
+                                                globalRequestedVariable.end());
+  return globalRequestedVariableBool;
+}
+
 size_t ObsAccessor::totalNumObservations() const {
   return obsdb_->globalNumLocs();
 }

@@ -21,7 +21,6 @@ observations:
     simulated variables: [airTemperature]
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_vs.nc4
-    loc_multiplier: -2
   vector ref: GsiHofX
   tolerance: 1.0e-06
   linear obs operator test:
