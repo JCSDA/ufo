@@ -18,47 +18,72 @@ implicit none
 private
 integer, parameter :: max_string=800
 
-public :: ufo_geovals, ufo_geoval
+public :: ufo_geovals, ufo_geoval, ufo_index_range
 public :: ufo_geovals_get_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
+public :: ufo_geovals_setup_sampling_method, ufo_geovals_setup_trivial_sampling_method
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
 public :: ufo_geovals_allocate, ufo_geovals_print
 public :: ufo_geovals_profmult
 public :: ufo_geovals_reorderzdir
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
-public :: ufo_geovals_split, ufo_geovals_merge
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
 public :: ufo_geovals_rms, ufo_geovals_copy, ufo_geovals_copy_one
 public :: ufo_geovals_fill, ufo_geovals_fillad
 public :: ufo_geovals_analytic_init
 
-private :: ufo_geovals_reset_sec_arg
-
 ! ------------------------------------------------------------------------------
 
-!> type to hold interpolated field for one variable, one observation
+!> Half-open range of indices.
+!>
+!> The range consists of the indices i fulfilling the conditions begin <= i and i < end.
+type, bind(c) :: ufo_index_range
+  integer(c_size_t) :: begin
+  integer(c_size_t) :: end
+end type ufo_index_range
+
+!> A method of sampling observation locations with a set of interpolation paths.
+!>
+!> Unlike in ufo_sampled_locations, here we aren't interested in the geometry of these paths
+!> (their latitude, longitude etc.), but just in their mapping to obs locations.
+type :: ufo_location_sampling_method
+  !> Number of interpolation paths produced by this sampling method.
+  integer :: npaths = 0
+  !> Maps the index of each observation to the range of indices of the interpolation paths sampling
+  !> its location (i.e. the region of space probed by that observation).
+  type(ufo_index_range), allocatable :: paths_by_loc(:)
+end type ufo_location_sampling_method
+
+!> holds values of a model variable interpolated along a set of paths
 type :: ufo_geoval
-  real(kind_real), allocatable :: vals(:,:) !< values (nval, nlocs)
-  integer :: nval = 0                !< number of values in profile
-  integer :: nlocs = 0               !< number of observations
+  real(kind_real), allocatable :: vals(:,:) !< values (nval, nprofiles)
+  integer :: nval = 0               !< number of values in a profile (collected along a single path)
+  integer :: nprofiles = 0          !< number of profiles
 end type ufo_geoval
 
 !> type to hold interpolated fields required by the obs operators
 type :: ufo_geovals
   integer :: nlocs  = 0          !< number of observations
-  integer :: nvar  = 0           !< number of variables (supposed to be the
-                                 !  same for same obs operator
+  integer :: nvar  = 0           !< number of variables stored in `geovals`
 
   type(ufo_geoval), allocatable :: geovals(:)  !< array of interpolated
-                                               !  vertical profiles for all obs (nvar)
+                                               !< vertical profiles for all obs (nvar)
 
   character(len=MAXVARLEN), allocatable :: variables(:)  !< variable list
+
+  !< number of available methods of sampling observation locations with sets of interpolation paths
+  integer :: nsampling_methods = 0
+  type(ufo_location_sampling_method), allocatable :: sampling_methods(:)
+  !> sampling_method_by_var(i) is the index of the observation location sampling method that
+  !> produced the set of paths along which the ith variable has been or will be interpolated
+  integer, allocatable :: sampling_method_by_var(:)
 
   real(c_double) :: missing_value !< obsspace missing value mark
 
   logical :: linit = .false.     !< .true. if all the ufo_geoval arrays inside geovals
-                                 !  were allocated and have data
+                                 !< were allocated and have data and if all sampling methods have
+                                 !< been set up
 end type ufo_geovals
 
 ! ------------------------------------------------------------------------------
@@ -72,23 +97,89 @@ type(ufo_geovals), intent(inout) :: self
 self%nlocs = 0
 self%missing_value = missing_value(0.0)
 self%nvar = 0
+self%nsampling_methods = 0
 self%linit = .false.
 
 end subroutine ufo_geovals_default_constr
 
+!> ------------------------------------------------------------------------------
+!> Sets self%linit to .true. if and only if all variables have been allocated and all location
+!> sampling methods set up.
+subroutine ufo_geovals_update_linit(self)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+
+logical :: linit
+integer :: i
+
+linit = .true.
+do i = 1, self%nvar
+  if (.not. allocated(self%geovals(i)%vals)) linit = .false.
+enddo
+
+do i = 1, self%nsampling_methods
+  if (.not. allocated(self%sampling_methods(i)%paths_by_loc)) linit = .false.
+enddo
+
+self%linit = linit
+
+end subroutine ufo_geovals_update_linit
+
 ! ------------------------------------------------------------------------------
-!> Initializes and allocates \p self GeoVaLs with \p nlocs number of locations for
-!> \p vars variables. \p nvals array contains number of values to allocate for
-!> each of the variables
-subroutine ufo_geovals_setup(self, vars, nlocs, nvars, nvals)
+!> Initializes GeoVaLs and allocates storage for variables \p vars.
+!>
+!> @param self
+!>   The GeoVaLs object to initialize.
+!> @param nlocs
+!>   Number of observation locations.
+!> @param vars
+!>   Names of variables to be stored in the new GeoVaLs object.
+!> @param nvars
+!>   Number of variables.
+!> @param nvals
+!>   Array indicating how many values per interpolation path will be allocated for each variable.
+!> @param nsampling_methods
+!>   Number of distinct methods of sampling observation locations with sets of interpolation paths.
+!> @param npaths_by_method
+!>   An array of length `nsampling_methods` whose ith element is the number of paths in the set
+!>   of interpolation paths obtained with the ith sampling method.
+!> @param sampling_method_by_var
+!>   An array of length `nvars` whose ith element is the index of the observation location
+!>   sampling method producing the set of paths along which the ith variable will be
+!>   interpolated. Valid values are integers from 1 to `nsampling_methods`.
+!>
+!> This call must be followed by calls to ufo_geovals_setup_(trivial_)sampling_method() mapping
+!> locations to interpolation paths.
+subroutine ufo_geovals_setup(self, nlocs, vars, nvars, nvals, &
+                             nsampling_methods, npaths_by_method, sampling_method_by_var)
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(oops_variables), intent(in) :: vars
 integer, intent(in) :: nlocs, nvars
 integer(c_size_t), intent(in) :: nvals(nvars)
+integer, intent(in) :: nsampling_methods
+integer(c_size_t), intent(in) :: npaths_by_method(nsampling_methods)
+integer(c_size_t), intent(in) :: sampling_method_by_var(nvars)
 
-integer :: ivar
+character(max_string) :: err_msg
+integer :: i
+
+if (nvars /= vars%nvars()) then
+  write(err_msg,*) "ufo_geovals_setup: mismatch in the number of variables (nvars = ", &
+    nvars, ", vars%nvars() = ", vars%nvars(), ")"
+  call abor1_ftn(err_msg)
+endif
+if (any(sampling_method_by_var < 1)) then
+  write(err_msg,*) "ufo_geovals_setup: sampling method ", &
+    minval(sampling_method_by_var), " does not exist"
+  call abor1_ftn(err_msg)
+endif
+if (any(sampling_method_by_var > nsampling_methods)) then
+  write(err_msg,*) "ufo_geovals_setup: sampling method ", &
+    maxval(sampling_method_by_var), " does not exist"
+  call abor1_ftn(err_msg)
+endif
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -97,29 +188,76 @@ self%missing_value = missing_value(self%missing_value)
 self%nvar = vars%nvars()
 allocate(self%geovals(self%nvar))
 allocate(self%variables(self%nvar))
-do ivar = 1, self%nvar
-  self%variables(ivar) = vars%variable(ivar)
-  self%geovals(ivar)%nlocs = nlocs
-  self%geovals(ivar)%nval = nvals(ivar)
-  allocate(self%geovals(ivar)%vals(nvals(ivar), nlocs))
-  self%geovals(ivar)%vals(:,:) = 0.0
+do i = 1, self%nvar
+  self%variables(i) = vars%variable(i)
+  self%geovals(i)%nprofiles = npaths_by_method(sampling_method_by_var(i))
+  self%geovals(i)%nval = nvals(i)
+  allocate(self%geovals(i)%vals(self%geovals(i)%nval, self%geovals(i)%nprofiles))
+  self%geovals(i)%vals(:,:) = 0.0
 enddo
-self%linit = .true.
+
+self%nsampling_methods = nsampling_methods
+allocate(self%sampling_methods(self%nsampling_methods))
+do i = 1, self%nsampling_methods
+  self%sampling_methods(i)%npaths = npaths_by_method(i)
+enddo
+
+allocate(self%sampling_method_by_var(self%nvar))
+self%sampling_method_by_var(:) = sampling_method_by_var
 
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
 !> Deprecated, use ufo_geovals_setup instead.
-!> Partially initializes \p self GeoVaLs with \p nlocs number of locations
-!> \p vars variables. Does not allocate geovals(i)%vals.
-subroutine ufo_geovals_partial_setup(self, vars, nlocs)
+!>
+!> Initializes GeoVaLs for variables `vars` but does not allocate storage (the `vals` array in each
+!> ufo_geoval).
+!>
+!> @param self
+!>   The GeoVaLs object to initialize.
+!> @param nlocs
+!>   Number of observation locations.
+!> @param vars
+!>   Names of variables to be stored in the new GeoVaLs object.
+!> @param nvars
+!>   Number of variables.
+!> @param nsampling_methods
+!>   Number of distinct methods of sampling observation locations with sets of interpolation paths.
+!> @param sampling_method_by_var
+!>   An array of length `nvars` whose ith element is the index of the observation location
+!>   sampling method producing the set of paths along which the ith variable will be
+!>   interpolated. Valid values are integers from 1 to `nsampling_methods`.
+!>
+!> This call must be followed by calls to ufo_geovals_setup_(trivial_)sampling_method() mapping
+!> locations to interpolation paths and ufo_geovals_allocate() allocating specific GeoVaLs.
+subroutine ufo_geovals_partial_setup(self, nlocs, vars, nvars, nsampling_methods, &
+                                     sampling_method_by_var)
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(oops_variables), intent(in) :: vars
-integer, intent(in) :: nlocs
+integer, intent(in) :: nlocs, nvars
+integer, intent(in) :: nsampling_methods
+integer(c_size_t), intent(in) :: sampling_method_by_var(nvars)
 
-integer :: ivar
+character(max_string) :: err_msg
+integer :: i
+
+if (nvars /= vars%nvars()) then
+  write(err_msg,*) "ufo_geovals_partial_setup: mismatch in the number of variables (nvars = ", &
+    nvars, ", vars%nvars() = ", vars%nvars(), ")"
+  call abor1_ftn(err_msg)
+endif
+if (any(sampling_method_by_var < 1)) then
+  write(err_msg,*) "ufo_geovals_partial_setup: sampling method ", &
+    minval(sampling_method_by_var), " does not exist"
+  call abor1_ftn(err_msg)
+endif
+if (any(sampling_method_by_var > nsampling_methods)) then
+  write(err_msg,*) "ufo_geovals_partial_setup: sampling method ", &
+    maxval(sampling_method_by_var), " does not exist"
+  call abor1_ftn(err_msg)
+endif
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -128,11 +266,17 @@ self%missing_value = missing_value(self%missing_value)
 self%nvar = vars%nvars()
 allocate(self%geovals(self%nvar))
 allocate(self%variables(self%nvar))
-do ivar = 1, self%nvar
-  self%variables(ivar) = vars%variable(ivar)
-  self%geovals(ivar)%nlocs = nlocs
-  self%geovals(ivar)%nval = 0
+do i = 1, self%nvar
+  self%variables(i) = vars%variable(i)
+  self%geovals(i)%nprofiles = 0
+  self%geovals(i)%nval = 0
 enddo
+
+self%nsampling_methods = nsampling_methods
+allocate(self%sampling_methods(self%nsampling_methods))
+
+allocate(self%sampling_method_by_var(self%nvar))
+self%sampling_method_by_var(:) = sampling_method_by_var
 
 end subroutine ufo_geovals_partial_setup
 
@@ -168,17 +312,106 @@ do ivar = 1, vars%nvars()
   ! only allocate if not already allocated
   elseif (.not. allocated(self%geovals(ivar_gvals)%vals)) then
     self%geovals(ivar_gvals)%nval  = nlevels
-    allocate(self%geovals(ivar_gvals)%vals(nlevels, self%nlocs))
+    allocate(self%geovals(ivar_gvals)%vals(nlevels, self%geovals(ivar_gvals)%nprofiles))
   endif
 enddo
 
-! check if all variables are now allocated, and set self%linit accordingly
-self%linit = .true.
-do ivar = 1, self%nvar
-  if (.not. allocated(self%geovals(ivar)%vals)) self%linit = .false.
-enddo
+! check if all variables are now allocated and all sampling methods set up, and set self%linit
+! accordingly
+call ufo_geovals_update_linit(self)
 
 end subroutine ufo_geovals_allocate
+
+! ------------------------------------------------------------------------------
+!> @brief Specify which interpolation paths produced by a given method sample which observation
+!> locations.
+!>
+!> @param self
+!>   The GeoVaLs object to modify.
+!> @param sampling_method
+!>   Index of the observation location sampling method to set up: an integer from 1 to
+!>   `self%nsampling_methods`.
+!> @param npaths
+!>   Number of interpolation paths produced by this sampling method.
+!> @param nlocs
+!>   Number of observation locations. Must match self%nlocs.
+!> @param paths_by_loc
+!>   An array mapping the index of each observation location to the range of (1-based) indices of
+!>   the paths sampling that location. Specifically, the ith location is deemed to be sampled by
+!>   the paths with indices ranging from `paths_by_loc(i)%begin` up to but not including
+!>   `paths_by_loc(i)%end`.
+subroutine ufo_geovals_setup_sampling_method(self, sampling_method, npaths, nlocs, paths_by_loc)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer, intent(in) :: sampling_method, npaths, nlocs
+type(ufo_index_range), intent(in) :: paths_by_loc(nlocs)
+
+character(max_string) :: err_msg
+integer :: ivar, iloc
+
+if (sampling_method < 1 .or. sampling_method > self%nsampling_methods) then
+  write(err_msg,*) "ufo_geovals_setup_sampling_method: sampling method ", sampling_method, &
+    " does not exist"
+  call abor1_ftn(err_msg)
+endif
+if (nlocs /= self%nlocs) then
+  write(err_msg,*) "ufo_geovals_setup_sampling_method: mismatch in nlocs"
+  call abor1_ftn(err_msg)
+endif
+
+self%sampling_methods(sampling_method)%npaths = npaths
+do ivar = 1, self%nvar
+  if (self%sampling_method_by_var(ivar) == sampling_method) then
+    self%geovals(ivar)%nprofiles = npaths
+  endif
+enddo
+
+allocate(self%sampling_methods(sampling_method)%paths_by_loc(self%nlocs))
+self%sampling_methods(sampling_method)%paths_by_loc(:) = paths_by_loc(:)
+
+call ufo_geovals_update_linit(self)
+
+end subroutine ufo_geovals_setup_sampling_method
+
+! ------------------------------------------------------------------------------
+!> @brief Designate an observation location sampling method as "trivial", i.e. one producing a set
+!> of interpolation paths such that each location is sampled solely by the path with the same index.
+!>
+!> @param self
+!>   The GeoVaLs object to modify.
+!> @param sampling_method
+!>   Index of the observation location sampling method to set up: an integer from 1 to
+!>   `self%nsampling_methods`.
+subroutine ufo_geovals_setup_trivial_sampling_method(self, sampling_method)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer, intent(in) :: sampling_method
+
+character(max_string) :: err_msg
+integer :: ivar, iloc
+
+if (sampling_method < 1 .or. sampling_method > self%nsampling_methods) then
+  write(err_msg,*) "ufo_geovals_setup_trivial_sampling_method: sampling method ", sampling_method, &
+    " does not exist"
+  call abor1_ftn(err_msg)
+endif
+
+self%sampling_methods(sampling_method)%npaths = self%nlocs
+do ivar = 1, self%nvar
+  if (self%sampling_method_by_var(ivar) == sampling_method) then
+    self%geovals(ivar)%nprofiles = self%nlocs
+  endif
+enddo
+
+allocate(self%sampling_methods(sampling_method)%paths_by_loc(self%nlocs))
+do iloc = 1, self%nlocs
+  self%sampling_methods(sampling_method)%paths_by_loc(iloc)%begin = iloc
+  self%sampling_methods(sampling_method)%paths_by_loc(iloc)%end = iloc + 1
+enddo
+
+call ufo_geovals_update_linit(self)
+
+end subroutine ufo_geovals_setup_trivial_sampling_method
 
 ! ------------------------------------------------------------------------------
 
@@ -195,8 +428,11 @@ if (allocated(self%geovals)) then
   deallocate(self%geovals)
 endif
 if (allocated(self%variables)) deallocate(self%variables)
+if (allocated(self%sampling_methods)) deallocate(self%sampling_methods)
+if (allocated(self%sampling_method_by_var)) deallocate(self%sampling_method_by_var)
 self%nvar = 0
 self%nlocs = 0
+self%nsampling_methods = 0
 self%linit = .false.
 
 end subroutine ufo_geovals_delete
@@ -281,7 +517,7 @@ endif
 vrms=0.0_kind_real
 N=0.0_kind_real
 do jv = 1, self%nvar
-   do jo = 1, self%nlocs
+   do jo = 1, self%geovals(jv)%nprofiles
       vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
       N=N+self%geovals(jv)%nval
    enddo
@@ -322,7 +558,7 @@ if (.not. self%linit) then
 endif
 
 do jv=1,self%nvar
-  do jo=1,self%nlocs
+  do jo=1,self%geovals(jv)%nprofiles
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = zz * self%geovals(jv)%vals(jz,jo)
     enddo
@@ -338,15 +574,23 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 integer(c_int), intent(in) :: nlocs
 real(c_float), intent(in) :: values(nlocs)
-integer :: jv, jo
+integer :: jv, jp, jl, jm
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_profmult: geovals not allocated")
 endif
 
-do jv=1,self%nvar
-  do jo=1,self%nlocs
-     self%geovals(jv)%vals(:,jo) = values(jo) * self%geovals(jv)%vals(:,jo)
+if (nlocs /= self%nlocs) then
+  call abor1_ftn("ufo_geovals_profmult: nlocs mismatch")
+endif
+
+do jv = 1, self%nvar
+  jm = self%sampling_method_by_var(jv)
+  do jl = 1, self%nlocs
+    do jp = self%sampling_methods(jm)%paths_by_loc(jl)%begin, &
+            self%sampling_methods(jm)%paths_by_loc(jl)%end - 1
+      self%geovals(jv)%vals(:,jp) = values(jl) * self%geovals(jv)%vals(:,jp)
+    enddo
   enddo
 enddo
 
@@ -364,10 +608,10 @@ integer :: iv
 character(max_string) :: err_msg
 
 if (.not. self%linit) then
-  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+  call abor1_ftn("ufo_geovals_assign: geovals not allocated")
 endif
 if (.not. rhs%linit) then
-  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+  call abor1_ftn("ufo_geovals_assign: geovals not allocated")
 endif
 
 if (self%nlocs /= rhs%nlocs) then
@@ -384,7 +628,11 @@ do jv=1,self%nvar
     write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
     call abor1_ftn(trim(err_msg))
   endif
-  do jo=1,self%nlocs
+  if (self%geovals(jv)%nprofiles /= rhs%geovals(iv)%nprofiles) then
+    write(err_msg,*) 'ufo_geovals_assign: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+    call abor1_ftn(trim(err_msg))
+  endif
+  do jo=1,self%geovals(jv)%nprofiles
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = rhs%geovals(iv)%vals(jz,jo)
     enddo
@@ -466,18 +714,18 @@ if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
 
-if (self%nlocs /= other%nlocs) then
-  call abor1_ftn("ufo_geovals_add: nlocs different between lhs and rhs")
-endif
-
 do jv=1,self%nvar
   iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only add if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
       write(err_msg,*) 'ufo_geovals_add: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
+    endif    
+    if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
+      write(err_msg,*) 'ufo_geovals_add: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
     endif
-    do jo=1,self%nlocs
+    do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(iv)%vals(jz,jo)
       enddo
@@ -505,10 +753,6 @@ if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
 endif
 
-if (self%nlocs /= other%nlocs) then
-  call abor1_ftn("ufo_geovals_diff: nlocs different between lhs and rhs")
-endif
-
 do jv=1,self%nvar
   iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only subtract if exists in RHS
@@ -516,7 +760,11 @@ do jv=1,self%nvar
       write(err_msg,*) 'ufo_geovals_diff: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
-    do jo=1,self%nlocs
+    if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
+      write(err_msg,*) 'ufo_geovals_diff: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
+    endif
+    do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(iv)%vals(jz,jo)
       enddo
@@ -544,10 +792,6 @@ if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
 endif
 
-if (self%nlocs /= other%nlocs) then
-  call abor1_ftn("ufo_geovals_schurmult: nlocs different between lhs and rhs")
-endif
-
 do jv=1,self%nvar
   iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only mult if exists in RHS
@@ -555,7 +799,11 @@ do jv=1,self%nvar
       write(err_msg,*) 'ufo_geovals_schurmult: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
-    do jo=1,self%nlocs
+    if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
+      write(err_msg,*) 'ufo_geovals_schurmult: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
+    endif
+    do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) * other%geovals(iv)%vals(jz,jo)
       enddo
@@ -573,7 +821,7 @@ subroutine ufo_geovals_copy(self, other)
 implicit none
 type(ufo_geovals), intent(in) :: self
 type(ufo_geovals), intent(inout) :: other
-integer :: jv
+integer :: jv, jc
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_copy: geovals not defined")
@@ -586,11 +834,21 @@ other%nvar = self%nvar
 allocate(other%variables(other%nvar))
 other%variables(:) = self%variables(:)
 
+other%nsampling_methods = self%nsampling_methods
+allocate(other%sampling_methods(size(self%sampling_methods)))
+do jc = 1, size(other%sampling_methods)
+  other%sampling_methods(jc)%npaths = self%sampling_methods(jc)%npaths
+  allocate(other%sampling_methods(jc)%paths_by_loc(size(self%sampling_methods(jc)%paths_by_loc)))
+  other%sampling_methods(jc)%paths_by_loc(:) = self%sampling_methods(jc)%paths_by_loc(:)
+enddo
+allocate(other%sampling_method_by_var(size(self%sampling_method_by_var)))
+other%sampling_method_by_var(:) = self%sampling_method_by_var(:)
+
 allocate(other%geovals(other%nvar))
 do jv = 1, other%nvar
   other%geovals(jv)%nval = self%geovals(jv)%nval
-  other%geovals(jv)%nlocs = self%geovals(jv)%nlocs
-  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nlocs))
+  other%geovals(jv)%nprofiles = self%geovals(jv)%nprofiles
+  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nprofiles))
   other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
 enddo
 
@@ -608,7 +866,9 @@ implicit none
 type(ufo_geovals), intent(inout) :: self !> GeoVaLs for one location
 type(ufo_geovals), intent(in) :: other   !> GeoVaLs for many location
 integer, intent(in) :: loc_index !> Index of the location in the "other" geoval
-integer :: jv
+
+integer :: jv, jc
+type(ufo_index_range) :: path_index_range
 
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
@@ -621,12 +881,27 @@ self%nvar = other%nvar
 allocate(self%variables(self%nvar))
 self%variables(:) = other%variables(:)
 
+self%nsampling_methods = other%nsampling_methods
+allocate(self%sampling_methods(size(other%sampling_methods)))
+do jc = 1, size(self%sampling_methods)
+  path_index_range = other%sampling_methods(jc)%paths_by_loc(loc_index)
+  self%sampling_methods(jc)%npaths = path_index_range%end - path_index_range%begin
+  allocate(self%sampling_methods(jc)%paths_by_loc(1))
+  self%sampling_methods(jc)%paths_by_loc(1)%begin = 1
+  self%sampling_methods(jc)%paths_by_loc(1)%end = 1 + self%sampling_methods(jc)%npaths
+enddo
+allocate(self%sampling_method_by_var(size(other%sampling_method_by_var)))
+self%sampling_method_by_var(:) = other%sampling_method_by_var(:)
+
 allocate(self%geovals(self%nvar))
 do jv = 1, self%nvar
+  jc = other%sampling_method_by_var(jv)
   self%geovals(jv)%nval = other%geovals(jv)%nval
-  self%geovals(jv)%nlocs = 1
-  allocate(self%geovals(jv)%vals(self%geovals(jv)%nval, self%geovals(jv)%nlocs))
-  self%geovals(jv)%vals(:,self%nlocs) = other%geovals(jv)%vals(:,loc_index)
+  self%geovals(jv)%nprofiles = self%sampling_methods(jc)%npaths
+  allocate(self%geovals(jv)%vals(self%geovals(jv)%nval, self%geovals(jv)%nprofiles))
+  path_index_range = other%sampling_methods(jc)%paths_by_loc(loc_index)
+  self%geovals(jv)%vals(:,:) = &
+    other%geovals(jv)%vals(:, path_index_range%begin : path_index_range%end-1)
 enddo
 
 self%missing_value = other%missing_value
@@ -662,16 +937,16 @@ end subroutine ufo_geovals_copy_one
 !! \sa test::TestStateInterpolation()
 !!
 
-subroutine ufo_geovals_analytic_init(self, locs, ic)
+subroutine ufo_geovals_analytic_init(self, sampled_locations, ic)
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
-use ufo_locations_mod
+use ufo_sampled_locations_mod
 use ufo_utils_mod, only: cmp_strings
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(ufo_locations), intent(in)  :: locs
+type(ufo_sampled_locations), intent(in)  :: sampled_locations
 character(*), intent(in)         :: ic
 
 real(kind_real) :: pi = acos(-1.0_kind_real)
@@ -679,7 +954,7 @@ real(kind_real) :: deg_to_rad,rlat, rlon
 real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
 real(kind_real) :: q1, q2, q3, q4
 real(kind_real), allocatable, dimension(:) :: lons, lats
-integer :: nlocs, ivar, iloc, ival
+integer :: npaths, ivar, iprofile, ival
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
@@ -694,31 +969,31 @@ endif
 
 deg_to_rad = pi/180.0_kind_real
 
-nlocs = locs%nlocs()
-allocate(lons(nlocs), lats(nlocs))
-call locs%get_lons(lons)
-call locs%get_lats(lats)
+npaths = sampled_locations%npaths()
+allocate(lons(npaths), lats(npaths))
+call sampled_locations%get_lons(lons)
+call sampled_locations%get_lats(lats)
 
 do ivar = 1, self%nvar-1
 
-   do iloc = 1, self%geovals(ivar)%nlocs
+   do iprofile = 1, self%geovals(ivar)%nprofiles
 
       ! convert lat and lon to radians
-      rlat = deg_to_rad * lats(iloc)
-      rlon = deg_to_rad*modulo(lons(iloc)+180.0_kind_real,360.0_kind_real) - pi
+      rlat = deg_to_rad * lats(iprofile)
+      rlon = deg_to_rad*modulo(lons(iprofile)+180.0_kind_real,360.0_kind_real) - pi
 
       do ival = 1, self%geovals(ivar)%nval
 
          ! obtain height from the existing GeoVaLs object, which should be an
          ! output of the State::getValues() method
          ! should be delivered in units of Pa
-         p0 = self%geovals(self%nvar)%vals(ival,iloc)
+         p0 = self%geovals(self%nvar)%vals(ival,iprofile)
 
          init_option: select case (trim(ic))
 
          case ("invent_state")
 
-           t0 = cos(deg_to_rad * lons(iloc) ) * cos(rlat)
+           t0 = cos(deg_to_rad * lons(iprofile) ) * cos(rlat)
 
          case ("dcmip-test-1-1")
 
@@ -750,7 +1025,7 @@ do ivar = 1, self%nvar-1
          if (cmp_strings(self%variables(ivar), var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
-            self%geovals(ivar)%vals(ival,iloc) = t0
+            self%geovals(ivar)%vals(ival,iprofile) = t0
          endif
 
       enddo
@@ -802,10 +1077,10 @@ do jv=1,self%nvar
    !! object as a reference, since this may be the exact analytic answer
 
    over_nloc = 1.0_kind_real / &
-        (real(other%nlocs,kind_real)*real(other%geovals(jv)%nval,kind_real))
+        (real(other%geovals(jv)%nprofiles,kind_real)*real(other%geovals(jv)%nval,kind_real))
 
    vrms = 0.0_kind_real
-   do jo = 1, other%nlocs
+   do jo = 1, other%geovals(jv)%nprofiles
       do jz = 1, other%geovals(jv)%nval
          vrms = vrms + other%geovals(jv)%vals(jz,jo)**2
       enddo
@@ -818,7 +1093,7 @@ do jv=1,self%nvar
    endif
 
    ! Now loop through the LHS locations to compute the normalized value
-   do jo=1,self%nlocs
+   do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
          self%geovals(jv)%vals(jz,jo) = norm*self%geovals(jv)%vals(jz,jo)
       enddo
@@ -829,93 +1104,6 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_reset_sec_arg(self, other, nlocs)
-implicit none
-type(ufo_geovals), intent(in) :: self
-type(ufo_geovals), intent(inout) :: other
-integer, intent(in) :: nlocs
-integer :: ivar
-
-if (other%linit) call abor1_ftn("ufo_geovals_reset_sec_arg: other already have data")
-
-other%nlocs = nlocs
-other%nvar = self%nvar
-other%missing_value = self%missing_value
-allocate(other%variables(self%nvar))
-allocate(other%geovals(self%nvar))
-do ivar = 1, self%nvar
-  other%variables(ivar) = self%variables(ivar)
-  other%geovals(ivar)%nlocs = nlocs
-  other%geovals(ivar)%nval = self%geovals(ivar)%nval
-  allocate(other%geovals(ivar)%vals(self%geovals(ivar)%nval, nlocs))
-  other%geovals(ivar)%vals(:,:) = 0.0
-enddo
-other%linit = .false.
-
-end subroutine ufo_geovals_reset_sec_arg
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_split(self, other1, other2)
-implicit none
-type(ufo_geovals), intent(in) :: self
-type(ufo_geovals), intent(inout) :: other1
-type(ufo_geovals), intent(inout) :: other2
-
-integer :: ivar, iobs
-
-if (.not. self%linit) &
-  call abor1_ftn("ufo_geovals_split: geovals self is not allocated or has no data")
-
-if (other1%linit .or. other2%linit) &
-  call abor1_ftn("ufo_geovals_split: geovals other1 or other2 already have data")
-
-call ufo_geovals_delete(other1)
-call ufo_geovals_delete(other2)
-call ufo_geovals_reset_sec_arg(self, other1, self%nlocs/2)
-call ufo_geovals_reset_sec_arg(self, other2, self%nlocs - self%nlocs/2)
-
-do ivar = 1, self%nvar
-  do iobs = 1, self%nlocs/2
-    other1%geovals(ivar)%vals(:,iobs) = self%geovals(ivar)%vals(:,iobs)
-  enddo
-  do iobs = self%nlocs/2 + 1, self%nlocs
-    other2%geovals(ivar)%vals(:,iobs - self%nlocs/2) = self%geovals(ivar)%vals(:,iobs)
-  enddo
-enddo
-other1%linit = .true.
-other2%linit = .true.
-
-end subroutine ufo_geovals_split
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_merge(self, other1, other2)
-implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_geovals), intent(in) :: other1
-type(ufo_geovals), intent(in) :: other2
-
-integer :: ivar, iobs
-
-if ((.not. other1%linit) .or. (.not. other2%linit)) &
-  call abor1_ftn("ufo_geovals_merge: geovals other1 or other2 is not allocated or has no data")
-
-call ufo_geovals_delete(self)
-call ufo_geovals_reset_sec_arg(other1, self, other1%nlocs + other2%nlocs)
-
-do ivar = 1, self%nvar
-  do iobs = 1, other1%nlocs
-    self%geovals(ivar)%vals(:,iobs) = other1%geovals(ivar)%vals(:,iobs)
-  enddo
-  do iobs = other1%nlocs + 1, self%nlocs
-    self%geovals(ivar)%vals(:,iobs) = &
-      other2%geovals(ivar)%vals(:,iobs - other1%nlocs)
-  enddo
-enddo
-self%linit = .true.
-
-end subroutine ufo_geovals_merge
-! ------------------------------------------------------------------------------
-
 subroutine ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms)
 implicit none
 integer, intent(inout) :: kobs
@@ -924,12 +1112,16 @@ real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
 integer :: jo, jz, jv
 
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_minmaxavg: geovals not initialized")
+endif
+
 jv = kvar+1
 kobs = 0
 pmin = huge(pmin)
 pmax = -huge(pmax)
 prms = 0.0_kind_real
-do jo = 1, self%nlocs
+do jo = 1, self%geovals(jv)%nprofiles
   do jz = 1, self%geovals(jv)%nval
     if (self%geovals(jv)%vals(jz,jo) .ne. self%missing_value) then
       kobs = kobs + 1
@@ -970,7 +1162,7 @@ iobs = 1
 ivar = 1
 
 do jv = 1,self%nvar
-   do jo = 1, self%nlocs
+   do jo = 1, self%geovals(jv)%nprofiles
 
       vrms = 0.0_kind_real
       do jz = 1, self%geovals(jv)%nval
@@ -1005,13 +1197,11 @@ logical, intent(in)               :: levels_are_top_down
 type(c_ptr), intent(in)           :: c_obspace
 type(oops_variables), intent(in)  :: vars
 
-integer :: nlocs, gv_all_nlocs, nlocs_var
+integer :: global_npaths, var_global_npaths
 integer :: nval
 integer :: obs_nlocs
 integer :: obs_all_nlocs
-integer :: iloc
-integer :: jloc, jloc_start, jloc_end
-integer :: iloc_new
+integer :: my_npaths, my_loc, global_loc, my_path, global_path, global_path_start, global_path_end
 
 integer :: ncid, dimid, varid, vartype, ndims
 integer, dimension(3) :: dimids
@@ -1022,10 +1212,16 @@ character(max_string) :: err_msg
 character(len=30) :: obs_nlocs_str
 character(len=30) :: geo_nlocs_str
 
-integer(c_size_t), allocatable, dimension(:) :: dist_indx
-integer(c_size_t), allocatable, dimension(:) :: obs_dist_indx
-
+integer(c_size_t), allocatable, dimension(:) :: global_loc_by_my_loc
+integer(c_size_t), allocatable, dimension(:) :: global_path_by_my_path
+type(ufo_index_range), allocatable :: path_ranges_by_loc(:)
 real, allocatable :: field2d(:,:), field1d(:)
+
+! At the time being, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
+! along the same set of paths composed of as many paths as there are observation locations.
+! The format will be made more general in future.
+integer(c_size_t) :: npaths_by_method(1)
+integer(c_size_t), allocatable :: sampling_method_by_var(:)
 
 ! open netcdf file
 call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
@@ -1037,22 +1233,22 @@ if(ierr /= nf90_noerr) then
   call abor1_ftn(err_msg)
 endif
 call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
-call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = gv_all_nlocs))
+call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = global_npaths))
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
 obs_all_nlocs = obsspace_get_gnlocs(c_obspace)
 obs_nlocs = obsspace_get_nlocs(c_obspace)
-allocate(obs_dist_indx(obs_nlocs))
-call obsspace_get_index(c_obspace, obs_dist_indx)
+allocate(global_loc_by_my_loc(obs_nlocs))
+call obsspace_get_index(c_obspace, global_loc_by_my_loc)
 
 ! loc_multiplier specifies how many locations in the geovals file per
 ! single location in the obs file. There needs to be at least
 ! loc_multiplier * obs_all_nlocs locations in the geovals file.
 
-if (gv_all_nlocs .lt. (loc_multiplier * obs_all_nlocs)) then
+if (global_npaths .lt. (loc_multiplier * obs_all_nlocs)) then
   write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
-  write(geo_nlocs_str, *) gv_all_nlocs
+  write(geo_nlocs_str, *) global_npaths
   write(err_msg,'(7a)') &
      "Error: Number of locations in the geovals file (", &
      trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
@@ -1062,34 +1258,43 @@ if (gv_all_nlocs .lt. (loc_multiplier * obs_all_nlocs)) then
 endif
 
 ! We have enough locations in the geovals file to cover the span of the
-! number of locations in the obs file. Generate the dist_indx according
+! number of locations in the obs file. Generate the global_path_by_my_path map according
 ! to the loc_multiplier and obs_nlocs values.
-if (loc_multiplier >= 0) then
-  nlocs = loc_multiplier * obs_nlocs
-  allocate(dist_indx(nlocs))
-  iloc_new = 1
-  do iloc = 1,obs_nlocs
-    jloc_start = ((obs_dist_indx(iloc) - 1) * loc_multiplier) + 1
-    jloc_end = obs_dist_indx(iloc) * loc_multiplier
-    do jloc = jloc_start, jloc_end
-      dist_indx(iloc_new) = jloc
-      iloc_new = iloc_new + 1
+allocate(path_ranges_by_loc(obs_nlocs))
+if (loc_multiplier > 0) then
+  my_npaths = loc_multiplier * obs_nlocs
+  allocate(global_path_by_my_path(my_npaths))
+  my_path = 1
+  do my_loc = 1,obs_nlocs
+    global_path_start = ((global_loc_by_my_loc(my_loc) - 1) * loc_multiplier) + 1
+    global_path_end = global_loc_by_my_loc(my_loc) * loc_multiplier
+    path_ranges_by_loc(my_loc)%begin = my_path
+    do global_path = global_path_start, global_path_end
+      global_path_by_my_path(my_path) = global_path
+      my_path = my_path + 1
     enddo
+    path_ranges_by_loc(my_loc)%end = my_path
   enddo
 else
-  nlocs = - loc_multiplier * obs_nlocs
-  allocate(dist_indx(nlocs))
-  iloc_new = 1
-  do jloc = 1, - loc_multiplier
-    do iloc = 1, obs_nlocs
-      dist_indx(iloc_new) = obs_dist_indx(iloc) + (jloc - 1) * obs_all_nlocs
-      iloc_new = iloc_new + 1
-    enddo
-  enddo
+  ! Negative loc_multipliers are no longer supported. They used to map each location to a set
+  ! of paths with non-consecutive indices, which cannot be represented with the current data
+  ! structures.
+  write(err_msg, *) "Error: loc_multiplier must be positive"
+  call abor1_ftn(err_msg)
 end if
 
+! define a common sampling method for all variables
+allocate(sampling_method_by_var(vars%nvars()))
+sampling_method_by_var(:) = 1
+
 ! allocate geovals structure
-call ufo_geovals_partial_setup(self, vars, nlocs)
+call ufo_geovals_partial_setup(self, obs_nlocs, vars, vars%nvars(), 1, sampling_method_by_var)
+
+! specify which paths sample which locations
+call ufo_geovals_setup_sampling_method(self, 1, my_npaths, obs_nlocs, path_ranges_by_loc)
+
+deallocate(path_ranges_by_loc)
+deallocate(sampling_method_by_var)
 
 do ivar = 1, self%nvar
 
@@ -1103,35 +1308,35 @@ do ivar = 1, self%nvar
                                          ndims = ndims, dimids = dimids))
   !> read 1d variable
   if (ndims == 1) then
-    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nlocs_var))
-    if (nlocs_var /= gv_all_nlocs) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
+    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = var_global_npaths))
+    if (var_global_npaths /= global_npaths) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
     endif
     nval = 1
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
-    allocate(self%geovals(ivar)%vals(nval,nlocs))
+    allocate(self%geovals(ivar)%vals(nval,my_npaths))
 
-    allocate(field1d(nlocs_var))
+    allocate(field1d(var_global_npaths))
     call check('nf90_get_var', nf90_get_var(ncid, varid, field1d))
-    self%geovals(ivar)%vals(1,:) = field1d(dist_indx)
+    self%geovals(ivar)%vals(1,:) = field1d(global_path_by_my_path)
     deallocate(field1d)
   !> read 2d variable
   elseif (ndims == 2) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
-    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = nlocs_var))
-    if (nlocs_var /= gv_all_nlocs) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
+    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = var_global_npaths))
+    if (var_global_npaths /= global_npaths) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
     endif
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
-    allocate(self%geovals(ivar)%vals(nval,nlocs))
-    allocate(field2d(nval, nlocs_var))
+    allocate(self%geovals(ivar)%vals(nval,my_npaths))
+    allocate(field2d(nval, var_global_npaths))
     call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
     if (.not. levels_are_top_down) then 
-      self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,dist_indx)
+      self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,global_path_by_my_path)
     else
-      self%geovals(ivar)%vals(:,:) = field2d(:,dist_indx)
+      self%geovals(ivar)%vals(:,:) = field2d(:,global_path_by_my_path)
     endif
     deallocate(field2d)
   !> only 1d & 2d vars
@@ -1144,12 +1349,13 @@ do ivar = 1, self%nvar
 
 enddo
 
-if (allocated(dist_indx)) deallocate(dist_indx)
-if (allocated(obs_dist_indx)) deallocate(obs_dist_indx)
-
-self%linit = .true.
-
 call check('nf90_close', nf90_close(ncid))
+
+call ufo_geovals_update_linit(self)
+if (.not. self%linit) then
+  write(err_msg,*) "ufo_geovals_read_netcdf: internal error: not all data structures have been properly initialized"
+  call abor1_ftn(err_msg)
+endif
 
 end subroutine ufo_geovals_read_netcdf
 
@@ -1167,6 +1373,8 @@ integer, allocatable :: ncid_var(:)
 allocate(ncid_var(self%nvar))
 
 call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
+! TODO(wsmigaj): define a new format with nlocs replaced by nprofiles and stored
+! separately for each variable
 call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
 dims(2) = dimid_nlocs
 
@@ -1191,18 +1399,18 @@ end subroutine ufo_geovals_write_netcdf
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fill(self, varname, c_nloc, c_indx, c_nlev, c_vals, levels_top_down)
+subroutine ufo_geovals_fill(self, varname, c_nprofiles, c_indx, c_nlev, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 character(len=*), intent(in) :: varname
-integer(c_int), intent(in) :: c_nloc
-integer(c_int), intent(in) :: c_indx(c_nloc)
+integer(c_int), intent(in) :: c_nprofiles
+integer(c_int), intent(in) :: c_indx(c_nprofiles)
 integer(c_int), intent(in) :: c_nlev
-real(c_double), intent(in) :: c_vals(c_nloc, c_nlev)
+real(c_double), intent(in) :: c_vals(c_nprofiles, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, ilev, iloc
+integer :: jlev, jprofile, ilev, iprofile
 integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fill: geovals not initialized")
@@ -1222,10 +1430,10 @@ endif
 
 ilev = lbgn
 do jlev=1, c_nlev
-  do jloc=1, c_nloc
-    iloc = c_indx(jloc) + 1
-    if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fill: error iloc")
-    geoval%vals(ilev,iloc) = c_vals(jloc,jlev)
+  do jprofile=1, c_nprofiles
+    iprofile = c_indx(jprofile) + 1
+    if (iprofile<1 .or. iprofile> geoval%nprofiles) call abor1_ftn("ufo_geovals_fill: error iprofile")
+    geoval%vals(ilev,iprofile) = c_vals(jprofile,jlev)
   enddo
   ilev = ilev + linc
 enddo
@@ -1234,18 +1442,18 @@ end subroutine ufo_geovals_fill
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_fillad(self, varname, c_nloc, c_indx, c_nlev, c_vals, levels_top_down)
+subroutine ufo_geovals_fillad(self, varname, c_nprofiles, c_indx, c_nlev, c_vals, levels_top_down)
 implicit none
 type(ufo_geovals), intent(in) :: self
 character(len=*), intent(in) :: varname
-integer(c_int), intent(in) :: c_nloc
-integer(c_int), intent(in) :: c_indx(c_nloc)
+integer(c_int), intent(in) :: c_nprofiles
+integer(c_int), intent(in) :: c_indx(c_nprofiles)
 integer(c_int), intent(in) :: c_nlev
-real(c_double), intent(inout) :: c_vals(c_nloc, c_nlev)
+real(c_double), intent(inout) :: c_vals(c_nprofiles, c_nlev)
 logical(c_bool), intent(in) :: levels_top_down
 
 type(ufo_geoval), pointer :: geoval
-integer :: jlev, jloc, ilev, iloc
+integer :: jlev, jprofile, ilev, iprofile
 integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fillad: geovals not initialized")
@@ -1265,10 +1473,10 @@ endif
 
 ilev = lbgn
 do jlev = 1, geoval%nval
-  do jloc=1, c_nloc
-    iloc = c_indx(jloc) + 1
-    if (iloc<1 .or. iloc> self%nlocs) call abor1_ftn("ufo_geovals_fillad: error iloc")
-    c_vals(jloc, jlev) = geoval%vals(jlev,iloc)
+  do jprofile=1, c_nprofiles
+    iprofile = c_indx(jprofile) + 1
+    if (iprofile<1 .or. iprofile>geoval%nprofiles) call abor1_ftn("ufo_geovals_fillad: error iprofile")
+    c_vals(jprofile, jlev) = geoval%vals(jlev,iprofile)
   enddo
   ilev = ilev + linc
 enddo

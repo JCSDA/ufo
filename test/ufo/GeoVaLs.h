@@ -11,23 +11,38 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
+#include "ioda/distribution/RoundRobin.h"
 #include "ioda/ObsSpace.h"
+#include "oops/base/Locations.h"
+#include "oops/base/SamplingMethodSelector.h"
+#include "oops/interface/SampledLocations.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/FloatCompare.h"
 #include "oops/util/Logger.h"
 #include "test/TestEnvironment.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsOperator.h"
+#include "ufo/ObsTraits.h"
+#include "ufo/SampledLocations.h"
+
+namespace eckit
+{
+  // Don't use the contracted output for this type: the current implementation works only
+  // with integer types.
+  template <typename T>
+  struct VectorPrintSelector<util::Range<T>> { typedef VectorPrintSimple selector; };
+}  // namespace eckit
 
 namespace ufo {
 namespace test {
@@ -114,42 +129,11 @@ void testGeoVaLs() {
       EXPECT(abs(sum) < tol);
     }
 
-/// Check that GeoVaLs merge followed by a split gives back the original geovals
-    oops::Log::trace() <<
-      "GeoVaLs merge followed by a split gives back the original geovals" << std::endl;
-
-    double dp_gval = gval.dot_product_with(gval);
-    oops::Log::debug()<< "initial gval dot product with itself " << dp_gval << std::endl;
-
-    gv.zero();
-    gv.merge(gval, gval);
-
-    double dp_gv_merged = gv.dot_product_with(gv);
-    oops::Log::debug()<< "gv dot product with itself after merge " << dp_gv_merged << std::endl;
-    EXPECT(abs(dp_gv_merged - 2.0 * dp_gval)/dp_gv_merged < tol);
-
-    GeoVaLs gv1(ospace.distribution(), gv.getVars());
-    GeoVaLs gv2(ospace.distribution(), gv.getVars());
-    gv.split(gv1, gv2);
-
-    double dp_gv1_split = gv1.dot_product_with(gv1);
-    double dp_gv2_split = gv2.dot_product_with(gv2);
-
-    oops::Log::debug()<< "gv1 gv2 dot products with itself after split "
-                      << dp_gv1_split << " " << dp_gv2_split << std::endl;
-
-    EXPECT(gv1.rms() == gv2.rms());
-    EXPECT(gv1.rms() == gval.rms());
-    EXPECT(abs(dp_gv1_split - dp_gv2_split)/dp_gv1_split < tol);
-    EXPECT(abs(dp_gv1_split - dp_gval)/dp_gv1_split < tol);
-
-    oops::Log::trace() <<
-      "GeoVaLs merge followed by a split test succeeded" << std::endl;
-
 ///  Check that  GeoVaLs & operator *= (const std::vector<float>);
     oops::Log::trace() <<
       "Check that GeoVaLs & operator *= (const std::vector<float>);" << std::endl;
 
+    GeoVaLs gv1(gval);
     std::size_t nlocs = ospace.nlocs();
     {
       std::vector<float> tw(nlocs, 1.0f);
@@ -170,10 +154,146 @@ void testGeoVaLs() {
   }
 }
 
+enum class GetMethod {
+  GET_PROFILE,
+  GET_AT_LOCATION
+};
+
+/// Helper function checking that the getProfile or getAtLocation method returns what we put in the
+/// GeoVaLs.
+/// The reference GeoVaLs at indices (jlev, jprofile) are equal to seed + jlev + jprofile.
+void testPutAtLevelAndGetProfileOrGetAtLocation(
+    GeoVaLs &gval, const std::string &var, double seed, GetMethod getMethodToTest) {
+  const size_t nprofiles = gval.nprofiles(var);
+  const size_t nlevs = gval.nlevs(var);
+  for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+    std::vector<double> refvalues_path_double(nprofiles);
+    std::iota(refvalues_path_double.begin(), refvalues_path_double.end(), seed + jlev);
+    gval.putAtLevel(refvalues_path_double, var, jlev);
+  }
+  for (size_t jprofile = 0; jprofile < nprofiles; ++jprofile) {
+    // Get the test vector at this location.
+    std::vector<double> testvalues_path_double(nlevs);
+    if (getMethodToTest == GetMethod::GET_PROFILE)
+      gval.getProfile(testvalues_path_double, var, jprofile);
+    else
+      gval.getAtLocation(testvalues_path_double, var, jprofile);
+    // Recreate reference vector for this location.
+    std::vector<double> refvalues_path_double(nlevs);
+    std::iota(refvalues_path_double.begin(), refvalues_path_double.end(), seed + jprofile);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_path_double, refvalues_path_double);
+
+    // Repeat the test for floats.
+    std::vector<float> testvalues_path_float(nlevs);
+    if (getMethodToTest == GetMethod::GET_PROFILE)
+      gval.getProfile(testvalues_path_float, var, jprofile);
+    else
+      gval.getAtLocation(testvalues_path_float, var, jprofile);
+    std::vector<float> refvalues_path_float(refvalues_path_double.begin(),
+                                           refvalues_path_double.end());
+    EXPECT_EQUAL(testvalues_path_float, refvalues_path_float);
+
+    // Repeat the test for ints.
+    std::vector<int> testvalues_path_int(nlevs);
+    if (getMethodToTest == GetMethod::GET_PROFILE)
+      gval.getProfile(testvalues_path_int, var, jprofile);
+    else
+      gval.getAtLocation(testvalues_path_int, var, jprofile);
+    std::vector<int> refvalues_path_int(refvalues_path_double.begin(),
+                                       refvalues_path_double.end());
+    EXPECT_EQUAL(testvalues_path_int, refvalues_path_int);
+  }
+}
+
+enum class PutMethod {
+  PUT_PROFILE,
+  PUT_AT_LOCATION
+};
+
+/// Helper function checking that the putProfile or putAtLocation method puts correct values in
+/// the GeoVaLs. This is similar to the function above, but the putting and getting routines
+/// are transposed.
+/// This is done separately for each data type, using different fill values each time.
+void testPutProfileOrPutAtLocationAndGetAtLevel(
+    GeoVaLs &gval, const std::string &var, double seed, PutMethod putMethodToTest) {
+  const size_t nprofiles = gval.nprofiles(var);
+  const size_t nlevs = gval.nlevs(var);
+
+  /// (1) doubles
+  /// The reference GeoVaLs at indices (jlev, jprofile) are equal to seed + jlev + jprofile.
+  oops::Log::test() << "putProfile/putAtLocation with doubles" << std::endl;
+  for (size_t jprofile = 0; jprofile < nprofiles; ++jprofile) {
+    std::vector<double> refvalues_double(nlevs);
+    std::iota(refvalues_double.begin(), refvalues_double.end(), seed + jprofile);
+    if (putMethodToTest == PutMethod::PUT_PROFILE)
+      gval.putProfile(refvalues_double, var, jprofile);
+    else
+      gval.putAtLocation(refvalues_double, var, jprofile);
+  }
+  oops::Log::test() << "testing putProfile/putAtLocation with doubles" << std::endl;
+  for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+    // Get the test vector on this level.
+    std::vector <double> testvalues_double(nprofiles);
+    gval.getAtLevel(testvalues_double, var, jlev);
+    // Recreate reference vector for this level.
+    std::vector <double> refvalues_double(nprofiles);
+    std::iota(refvalues_double.begin(), refvalues_double.end(), seed + jlev);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_double, refvalues_double);
+  }
+  /// (2) floats
+  /// The reference GeoVaLs at indices (jlev, jprofile) are equal to seed + jlev + jprofile + 1.
+  oops::Log::test() << "putProfile/putAtLocation with floats" << std::endl;
+  for (size_t jprofile = 0; jprofile < nprofiles; ++jprofile) {
+    std::vector<float> refvalues_float(nlevs);
+    std::iota(refvalues_float.begin(), refvalues_float.end(), seed + jprofile + 1);
+    if (putMethodToTest == PutMethod::PUT_PROFILE)
+      gval.putProfile(refvalues_float, var, jprofile);
+    else
+      gval.putAtLocation(refvalues_float, var, jprofile);
+  }
+  oops::Log::test() << "testing putProfile/putAtLocation with floats" << std::endl;
+  for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+    // Get the test vector on this level.
+    std::vector <float> testvalues_float(nprofiles);
+    gval.getAtLevel(testvalues_float, var, jlev);
+    // Recreate reference vector for this level.
+    std::vector <float> refvalues_float(nprofiles);
+    std::iota(refvalues_float.begin(), refvalues_float.end(), seed + jlev + 1);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_float, refvalues_float);
+  }
+  /// (3) ints
+  /// The reference GeoVaLs at indices (jlev, jprofile) are equal to seed + jlev + jprofile + 2.
+  oops::Log::test() << "putProfile/putAtLocation with ints" << std::endl;
+  for (size_t jprofile = 0; jprofile < nprofiles; ++jprofile) {
+    std::vector<int> refvalues_int(nlevs);
+    std::iota(refvalues_int.begin(), refvalues_int.end(), seed + jprofile + 2);
+    if (putMethodToTest == PutMethod::PUT_PROFILE)
+      gval.putProfile(refvalues_int, var, jprofile);
+    else
+      gval.putAtLocation(refvalues_int, var, jprofile);
+  }
+  oops::Log::test() << "testing putProfile/putAtLocation with ints" << std::endl;
+  for (size_t jlev = 0; jlev < nlevs; ++jlev) {
+    // Get the test vector on this level.
+    std::vector <int> testvalues_int(nprofiles);
+    gval.getAtLevel(testvalues_int, var, jlev);
+    // Recreate reference vector for this level.
+    std::vector <int> refvalues_int(nprofiles);
+    std::iota(refvalues_int.begin(), refvalues_int.end(), seed + jlev + 2);
+    // Compare the two vectors.
+    EXPECT_EQUAL(testvalues_int, refvalues_int);
+  }
+}
+
 /// \brief Tests GeoVaLs::allocate, GeoVals::put, GeoVaLs::get,
 /// GeoVaLs::putAtLevel, GeoVaLs::getAtLevel,
-/// GeoVaLs::putAtLocation and GeoVaLs::getAtLocation.
+/// GeoVaLs::putProfile and GeoVaLs::getProfile.
 void testGeoVaLsAllocatePutGet() {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   const eckit::LocalConfiguration testconf(conf, "geovals get test");
 
@@ -183,12 +303,17 @@ void testGeoVaLsAllocatePutGet() {
   const oops::Variables testvars({var1, var2});
 
   /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
-  const Locations locs(testconf, oops::mpi::world());
-  GeoVaLs gval(locs, testvars);
+  SampledLocations_ sampledLocations(testconf, oops::mpi::world());
+  const size_t nprofiles = sampledLocations.sampledLocations().size();
+  GeoVaLs gval(std::move(sampledLocations), testvars);
   oops::Log::test() << "GeoVals allocate test: created empty GeoVaLs with " << testvars <<
-                       " variables and nlocs=" << gval.nlocs() << std::endl;
+                       " variables " << std::endl;
   EXPECT_EQUAL(gval.nlevs(var1), 0);
   EXPECT_EQUAL(gval.nlevs(var2), 0);
+  std::cout << "gval.nprofiles(var1): " << gval.nprofiles(var1) << std::endl;
+
+  EXPECT_EQUAL(gval.nprofiles(var1), nprofiles);
+  EXPECT_EQUAL(gval.nprofiles(var2), nprofiles);
 
   /// Allocate only the first variable, and test that it's allocated correctly
   const oops::Variables testvar1({var1});
@@ -214,142 +339,62 @@ void testGeoVaLsAllocatePutGet() {
   /// (1) doubles
   const double fillvalue_double = 3.01234567890123;
   oops::Log::test() << "Put(double) fill value: " << fillvalue_double << std::endl;
-  const std::vector<double> refvalues_double(gval.nlocs(), fillvalue_double);
+  const std::vector<double> refvalues_double(nprofiles, fillvalue_double);
   gval.putAtLevel(refvalues_double, var2, 0);
-  std::vector<double> testvalues_double(gval.nlocs(), 0);
+  std::vector<double> testvalues_double(nprofiles, 0);
   gval.get(testvalues_double, var2);
   oops::Log::test() << "Get(double) result: " << testvalues_double << std::endl;
   EXPECT_EQUAL(testvalues_double, refvalues_double);
   /// (2) floats
   const float fillvalue_float = 4.1f;
   oops::Log::test() << "Put(float) fill value: " << fillvalue_float << std::endl;
-  const std::vector<float> refvalues_float(gval.nlocs(), fillvalue_float);
+  const std::vector<float> refvalues_float(nprofiles, fillvalue_float);
   gval.putAtLevel(refvalues_float, var2, 0);
-  std::vector<float> testvalues_float(gval.nlocs(), 0);
+  std::vector<float> testvalues_float(nprofiles, 0);
   gval.get(testvalues_float, var2);
   oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
   EXPECT_EQUAL(testvalues_float, refvalues_float);
   /// (3) ints
   const int fillvalue_int = 5;
   oops::Log::test() << "Put(int) fill value: " << fillvalue_int << std::endl;
-  const std::vector<int> refvalues_int(gval.nlocs(), fillvalue_int);
+  const std::vector<int> refvalues_int(nprofiles, fillvalue_int);
   gval.putAtLevel(refvalues_int, var2, 0);
-  std::vector<int> testvalues_int(gval.nlocs(), 0);
+  std::vector<int> testvalues_int(nprofiles, 0);
   gval.get(testvalues_int, var2);
   oops::Log::test() << "Get(int) result: " << testvalues_int << std::endl;
   EXPECT_EQUAL(testvalues_int, refvalues_int);
 
-  /// Check that the getAtLocation method returns what we put in the GeoVaLs.
-  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc.
-  for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
-    std::vector<double> refvalues_loc_double(gval.nlocs());
-    std::iota(refvalues_loc_double.begin(), refvalues_loc_double.end(), jlev);
-    gval.putAtLevel(refvalues_loc_double, var1, jlev);
-  }
-  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
-    // Get the test vector at this location.
-    std::vector<double> testvalues_loc_double(gval.nlevs(var1));
-    gval.getAtLocation(testvalues_loc_double, var1, jloc);
-    // Recreate reference vector for this location.
-    std::vector<double> refvalues_loc_double(gval.nlevs(var1));
-    std::iota(refvalues_loc_double.begin(), refvalues_loc_double.end(), jloc);
-    // Compare the two vectors.
-    EXPECT_EQUAL(testvalues_loc_double, refvalues_loc_double);
-    // Repeat the test for floats.
-    std::vector<float> testvalues_loc_float(gval.nlevs(var1));
-    gval.getAtLocation(testvalues_loc_float, var1, jloc);
-    std::vector<float> refvalues_loc_float(refvalues_loc_double.begin(),
-                                           refvalues_loc_double.end());
-    EXPECT_EQUAL(testvalues_loc_float, refvalues_loc_float);
-    // Repeat the test for ints.
-    std::vector<int> testvalues_loc_int(gval.nlevs(var1));
-    gval.getAtLocation(testvalues_loc_int, var1, jloc);
-    std::vector<int> refvalues_loc_int(refvalues_loc_double.begin(),
-                                       refvalues_loc_double.end());
-    EXPECT_EQUAL(testvalues_loc_int, refvalues_loc_int);
-  }
+  // Test the putAtLevel and getProfile methods.
+  testPutAtLevelAndGetProfileOrGetAtLocation(gval, var1, 1.3 /*seed*/, GetMethod::GET_PROFILE);
+  // When each location is sampled only by a single interpolation path (as in this test case),
+  // getProfile and getAtLocation are equivalent, so let's test the latter too.
+  testPutAtLevelAndGetProfileOrGetAtLocation(gval, var1, 2.7 /*seed*/, GetMethod::GET_AT_LOCATION);
 
-  /// Check that the putAtLocation method correctly puts values in the GeoVaLs.
-  /// This is similar to the previous test but the putting and getting routines
-  /// are transposed.
-  /// This is done separately for each data type, using different fill values each time.
-  /// (1) doubles
-  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc.
-  oops::Log::test() << "putAtLoction with doubles" << std::endl;
-  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
-    std::vector<double> refvalues_double(gval.nlevs(var1));
-    std::iota(refvalues_double.begin(), refvalues_double.end(), jloc);
-    gval.putAtLocation(refvalues_double, var1, jloc);
-  }
-  oops::Log::test() << "testing putAtLoction with doubles" << std::endl;
-  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
-    // Get the test vector on this level.
-    std::vector <double> testvalues_double(gval.nlocs());
-    gval.getAtLevel(testvalues_double, var1, jlev);
-    // Recreate reference vector for this level.
-    std::vector <double> refvalues_double(gval.nlocs());
-    std::iota(refvalues_double.begin(), refvalues_double.end(), jlev);
-    // Compare the two vectors.
-    EXPECT_EQUAL(testvalues_double, refvalues_double);
-  }
-  /// (2) floats
-  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc + 1.
-  oops::Log::test() << "putAtLoction with floats" << std::endl;
-  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
-    std::vector<float> refvalues_float(gval.nlevs(var1));
-    std::iota(refvalues_float.begin(), refvalues_float.end(), jloc + 1);
-    gval.putAtLocation(refvalues_float, var1, jloc);
-  }
-  oops::Log::test() << "testing putAtLoction with floats" << std::endl;
-  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
-    // Get the test vector on this level.
-    std::vector <float> testvalues_float(gval.nlocs());
-    gval.getAtLevel(testvalues_float, var1, jlev);
-    // Recreate reference vector for this level.
-    std::vector <float> refvalues_float(gval.nlocs());
-    std::iota(refvalues_float.begin(), refvalues_float.end(), jlev + 1);
-    // Compare the two vectors.
-    EXPECT_EQUAL(testvalues_float, refvalues_float);
-  }
-  /// (3) ints
-  /// The reference GeoVaLs at indices (jlev, jloc) are equal to jlev + jloc + 2.
-  oops::Log::test() << "putAtLoction with ints" << std::endl;
-  for (size_t jloc = 0; jloc < gval.nlocs(); ++jloc) {
-    std::vector<int> refvalues_int(gval.nlevs(var1));
-    std::iota(refvalues_int.begin(), refvalues_int.end(), jloc + 2);
-    gval.putAtLocation(refvalues_int, var1, jloc);
-  }
-  oops::Log::test() << "testing putAtLoction with ints" << std::endl;
-  for (size_t jlev = 0; jlev < gval.nlevs(var1); ++jlev) {
-    // Get the test vector on this level.
-    std::vector <int> testvalues_int(gval.nlocs());
-    gval.getAtLevel(testvalues_int, var1, jlev);
-    // Recreate reference vector for this level.
-    std::vector <int> refvalues_int(gval.nlocs());
-    std::iota(refvalues_int.begin(), refvalues_int.end(), jlev + 2);
-    // Compare the two vectors.
-    EXPECT_EQUAL(testvalues_int, refvalues_int);
-  }
+  // Test the putProfile and getAtLevel methods.
+  testPutProfileOrPutAtLocationAndGetAtLevel(gval, var1, 1.3 /*seed*/, PutMethod::PUT_PROFILE);
+  // Again, in this test case putProfile and putAtLocation are equivalent, so let's test the latter
+  // too.
+  testPutProfileOrPutAtLocationAndGetAtLevel(gval, var1, 2.7 /*seed*/, PutMethod::PUT_AT_LOCATION);
 
-  /// Check code paths that throw exceptions for the getAtLocation method.
-  std::vector<double> testvalues_loc_wrongsize(gval.nlevs(var1) + 1, 0.0);
-  EXPECT_THROWS(gval.getAtLocation(testvalues_loc_wrongsize, var1, 1));
-  std::vector<double> testvalues_loc(gval.nlevs(var1), 0.0);
-  EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, -1));
-  EXPECT_THROWS(gval.getAtLocation(testvalues_loc, var1, gval.nlocs()));
+  /// Check code paths that throw exceptions for the getProfile method.
+  std::vector<double> testvalues_path_wrongsize(gval.nlevs(var1) + 1, 0.0);
+  EXPECT_THROWS(gval.getProfile(testvalues_path_wrongsize, var1, 1));
+  std::vector<double> testvalues_path(gval.nlevs(var1), 0.0);
+  EXPECT_THROWS(gval.getProfile(testvalues_path, var1, -1));
+  EXPECT_THROWS(gval.getProfile(testvalues_path, var1, nprofiles));
 
-  /// Check code paths that throw exceptions for the putAtLocation method.
-  EXPECT_THROWS(gval.putAtLocation(testvalues_loc_wrongsize, var1, 1));
-  EXPECT_THROWS(gval.putAtLocation(testvalues_loc, var1, -1));
-  EXPECT_THROWS(gval.putAtLocation(testvalues_loc, var1, gval.nlocs()));
+  /// Check code paths that throw exceptions for the putProfile method.
+  EXPECT_THROWS(gval.putProfile(testvalues_path_wrongsize, var1, 1));
+  EXPECT_THROWS(gval.putProfile(testvalues_path, var1, -1));
+  EXPECT_THROWS(gval.putProfile(testvalues_path, var1, nprofiles));
 
   /// test 3D put and get
   for (size_t jlev = 0; jlev < nlevs1; ++jlev) {
     const float fillvalue = 3.0*(jlev+1);
-    const std::vector<double> refvalues(gval.nlocs(), fillvalue);
+    const std::vector<double> refvalues(nprofiles, fillvalue);
     gval.putAtLevel(refvalues, var1, jlev);
     oops::Log::test() << jlev << " level: put fill value: " << fillvalue << std::endl;
-    std::vector<double> testvalues(gval.nlocs(), 0);
+    std::vector<double> testvalues(nprofiles, 0);
     gval.getAtLevel(testvalues, var1, jlev);
     oops::Log::test() << jlev << " level: get result: " << testvalues << std::endl;
     EXPECT_EQUAL(testvalues, refvalues);
@@ -360,6 +405,8 @@ void testGeoVaLsAllocatePutGet() {
 /// constructor. Tests that levels get correctly allocated, and that the GeoVaLs are zeroed
 /// out.
 void testGeoVaLsConstructor() {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   const eckit::LocalConfiguration testconf(conf, "geovals get test");
 
@@ -367,36 +414,168 @@ void testGeoVaLsConstructor() {
   const std::string var2 = "variable2";
   const oops::Variables testvars({var1, var2});
 
-  /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
-  const Locations locs(testconf, oops::mpi::world());
+  /// Setup GeoVaLs; test that they are allocated
+  SampledLocations_ sampledLocations(testconf, oops::mpi::world());
+  const size_t npaths = sampledLocations.sampledLocations().size();
   const std::vector<size_t> testnlevs({10, 1});
-  GeoVaLs gval(locs, testvars, testnlevs);
+  GeoVaLs gval(std::move(sampledLocations), testvars, testnlevs);
   oops::Log::test() << "Created and allocated GeoVaLs: " << var1 << "; nlevs(var1) = " <<
                        gval.nlevs(var1) << ", " << var2 << "; nlevs(var2) = " <<
                        gval.nlevs(var2) << std::endl;
   EXPECT_EQUAL(gval.nlevs(var1), 10);
   EXPECT_EQUAL(gval.nlevs(var2), 1);
+  EXPECT_EQUAL(gval.nprofiles(var1), npaths);
+  EXPECT_EQUAL(gval.nprofiles(var2), npaths);
 
-  const std::vector<double> refvalues(gval.nlocs(), 0.0);
-  const std::vector<float>  refvalues_float(gval.nlocs(), 0.0);
-  const std::vector<int>    refvalues_int(gval.nlocs(), 0);
+  const std::vector<double> refvalues(npaths, 0.0);
+  const std::vector<float>  refvalues_float(npaths, 0.0);
+  const std::vector<int>    refvalues_int(npaths, 0);
 
   /// check that get method returns zeroes (initial values in GeoVaLs)
-  std::vector<double> testvalues(gval.nlocs(), 1.0);
+  std::vector<double> testvalues(npaths, 1.0);
   gval.get(testvalues, var2);
   oops::Log::test() << "Get result:        " << testvalues << std::endl;
   EXPECT_EQUAL(testvalues, refvalues);
-  std::vector<float> testvalues_float(gval.nlocs(), 1.0);
+  std::vector<float> testvalues_float(npaths, 1.0);
   gval.get(testvalues_float, var2);
   oops::Log::test() << "Get(float) result: " << testvalues_float << std::endl;
   EXPECT_EQUAL(testvalues_float, refvalues_float);
-  std::vector<int> testvalues_int(gval.nlocs(), 1);
+  std::vector<int> testvalues_int(npaths, 1);
   gval.get(testvalues_int, var2);
   oops::Log::test() << "Get(int) result:   " << testvalues_int << std::endl;
   EXPECT_EQUAL(testvalues_int, refvalues_int);
 }
 
+// Classes and functions needed by the following test
 
+class GeoVaLParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GeoVaLParameters, Parameters)
+ public:
+  oops::RequiredParameter<std::string> name{"variable", this};
+  oops::RequiredParameter<size_t> nlevels{"nlevels", this};
+  oops::RequiredParameter<size_t> samplingMethod{"sampling method", this};
+};
+
+class SamplingMethodParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SamplingMethodParameters, Parameters)
+ public:
+  oops::RequiredParameter<std::vector<float>> longitudes{"longitudes", this};
+  oops::RequiredParameter<std::vector<float>> latitudes{"latitudes", this};
+  oops::RequiredParameter<std::vector<util::DateTime>> datetimes{"datetimes", this};
+  oops::RequiredParameter<std::vector<std::pair<size_t, size_t>>> pathsGroupedByLocation{
+    "paths grouped by location", this};
+};
+
+class MultipleSamplingMethodsTestParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(MultipleSamplingMethodsTestParameters, Parameters)
+ public:
+  oops::RequiredParameter<std::vector<SamplingMethodParameters>> samplingMethods{
+      "sampling methods", this};
+  oops::RequiredParameter<std::vector<GeoVaLParameters>> geovals{"geovals", this};
+  oops::RequiredParameter<size_t> gnlocs{"gnlocs", this};
+};
+
+class Selector : public oops::SamplingMethodSelector {
+ public:
+  explicit Selector(std::map<std::string, size_t> samplingMethodIndexByVar) :
+    samplingMethodIndexByVar_(std::move(samplingMethodIndexByVar))
+  {}
+
+  size_t methodIndex(const std::string &varName) const override {
+    return samplingMethodIndexByVar_.at(varName);
+  }
+
+ private:
+  std::map<std::string, size_t> samplingMethodIndexByVar_;
+};
+
+std::shared_ptr<ioda::Distribution> makeDistribution(size_t gnlocs) {
+  auto dist = std::make_shared<ioda::RoundRobin>(
+        oops::mpi::world(), ioda::EmptyDistributionParameters());
+  const eckit::geometry::Point2 point(0, 0);
+  for (size_t loc = 0; loc < gnlocs; ++loc) {
+    dist->assignRecord(loc, loc, point);
+  }
+  dist->computePatchLocs();
+  return dist;
+}
+
+/// Create a GeoVaLs object holding variables interpolated along paths produced by multiple
+/// location sampling methods.
+/// Verify that the GeoVaLs have been allocated to the correct size and they are linked to the
+/// correct sampling methods.
+/// Verify that the put... and get... methods work correctly.
+void testGeoVaLsWithMultipleSamplingMethods() {
+  typedef oops::Locations<ObsTraits> Locations_;
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+  const eckit::LocalConfiguration testconf(conf, "multiple sampling methods test");
+
+  MultipleSamplingMethodsTestParameters params;
+  params.validateAndDeserialize(testconf);
+
+  std::shared_ptr<ioda::Distribution> dist = makeDistribution(params.gnlocs);
+
+  oops::Variables variables;
+  std::vector<size_t> nlevels;
+  std::map<std::string, size_t> samplingMethodIndexByVar;
+  for (const GeoVaLParameters & geovalParams : params.geovals.value()) {
+    variables.push_back(geovalParams.name);
+    nlevels.push_back(geovalParams.nlevels);
+    samplingMethodIndexByVar[geovalParams.name] = geovalParams.samplingMethod;
+  }
+
+  std::vector<SampledLocations_> sampledLocationsVec;
+  for (const SamplingMethodParameters & samplingMethodParams : params.samplingMethods.value()) {
+    std::vector<util::Range<size_t>> pathsGroupedByLocation;
+    for (const std::pair<size_t, size_t> &range :
+         samplingMethodParams.pathsGroupedByLocation.value())
+      pathsGroupedByLocation.emplace_back(util::Range<size_t>{range.first, range.second});
+
+    sampledLocationsVec.emplace_back(
+          std::make_unique<SampledLocations>(samplingMethodParams.longitudes,
+                                             samplingMethodParams.latitudes,
+                                             samplingMethodParams.datetimes,
+                                             dist,
+                                             pathsGroupedByLocation));
+  }
+
+  // Reference values to compare against later
+  std::map<std::string, size_t> expectedNumProfilesByVar;
+  std::map<std::string, std::vector<util::Range<size_t>>> expectedGroupedProfileIndicesByVar;
+  for (size_t ivar = 0; ivar < variables.size(); ++ivar) {
+    const SampledLocations &sampledLocations =
+        sampledLocationsVec[samplingMethodIndexByVar.at(variables[ivar])].sampledLocations();
+    expectedNumProfilesByVar[variables[ivar]] = sampledLocations.size();
+    expectedGroupedProfileIndicesByVar[variables[ivar]] = sampledLocations.pathsGroupedByLocation();
+  }
+
+  // Create an Locations object and pass it to a GeoVaLs constructor.
+  Locations_ locations(std::move(sampledLocationsVec),
+                       std::make_unique<Selector>(samplingMethodIndexByVar));
+  GeoVaLs geovals(std::move(locations), variables, nlevels);
+
+  // Test that GeoVaLs have the correct size and are linked to the correct sampling methods.
+  for (size_t ivar = 0; ivar < variables.size(); ++ivar) {
+    EXPECT_EQUAL(geovals.nlevs(variables[ivar]), nlevels[ivar]);
+    EXPECT_EQUAL(geovals.nprofiles(variables[ivar]), expectedNumProfilesByVar.at(variables[ivar]));
+
+    std::vector<util::Range<size_t>> groupedProfileIndices;
+    geovals.getProfileIndicesGroupedByLocation(variables[ivar], groupedProfileIndices);
+    const std::vector<util::Range<size_t>> &expectedGroupedProfileIndices =
+        expectedGroupedProfileIndicesByVar.at(variables[ivar]);
+
+    EXPECT_EQUAL(groupedProfileIndices, expectedGroupedProfileIndices);
+  }
+
+  for (size_t ivar = 0; ivar < variables.size(); ++ivar) {
+    testPutAtLevelAndGetProfileOrGetAtLocation(geovals, variables[ivar], 1.3 /*seed*/,
+                                               GetMethod::GET_PROFILE);
+    testPutProfileOrPutAtLocationAndGetAtLevel(geovals, variables[ivar], 2.7 /*seed*/,
+                                               PutMethod::PUT_PROFILE);
+  }
+}
 // -----------------------------------------------------------------------------
 
 class GeoVaLs : public oops::Test {
@@ -415,6 +594,8 @@ class GeoVaLs : public oops::Test {
       { testGeoVaLsAllocatePutGet(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsConstructor")
       { testGeoVaLsConstructor(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsWithMultipleSamplingMethods")
+      { testGeoVaLsWithMultipleSamplingMethods(); });
   }
 
   void clear() const override {}

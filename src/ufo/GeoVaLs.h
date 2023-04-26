@@ -26,13 +26,21 @@
 
 #include "ufo/Fortran.h"
 
+namespace oops {
+  template <typename OBS> class Locations;
+}
+
+namespace util {
+  template <typename T> struct Range;
+}
+
 namespace ioda {
   class ObsSpace;
   class Distribution;
 }
 
 namespace ufo {
-  class Locations;
+struct ObsTraits;
 
 /// \brief Parameters controlling GeoVaLs read/write
 class GeoVaLsParameters : public oops::Parameters {
@@ -54,7 +62,10 @@ class GeoVaLsParameters : public oops::Parameters {
 // -----------------------------------------------------------------------------
 
 /// GeoVaLs: geophysical values at locations
-
+///
+/// Instances of this class store values of (model) variables interpolated along collections of
+/// paths sampling the observation locations. Different variables may be interpolated along
+/// different sets of paths.
 class GeoVaLs : public util::Printable,
                 private util::ObjectCounter<GeoVaLs> {
   /// \brief A reference to a read-only vector-valued expression.
@@ -80,15 +91,17 @@ class GeoVaLs : public util::Printable,
 
  public:
   typedef GeoVaLsParameters Parameters_;
+  typedef oops::Locations<ObsTraits> Locations_;
 
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &);
+  GeoVaLs(const Locations_ &, const oops::Variables &,
+          const std::vector<size_t> &);
 
-// Deprecated default constructor - Please do not use this constructor in new code.
+// Deprecated constructor - Please do not use this constructor in new code.
   GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
-// Deprecated default constructor - Please do not use this constructor in new code.
-  GeoVaLs(const Locations &, const oops::Variables &);
+// Deprecated constructor - Please do not use this constructor in new code.
+  GeoVaLs(const Locations_ &, const oops::Variables &);
 // Constructor for tests - Please do not use this constructor in new code.
   GeoVaLs(const Parameters_ &, const ioda::ObsSpace &, const oops::Variables &);
 
@@ -104,14 +117,15 @@ class GeoVaLs : public util::Printable,
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator *= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs &) const;
-  void split(GeoVaLs &, GeoVaLs &) const;
-  void merge(const GeoVaLs &, const GeoVaLs &);
 
   /// \brief Deprecated method. Allocates GeoVaLs for \p vars variables with
   /// \p nlev number of levels
   /// \details Please do not use in any new code. This method is currently
   /// only used for ObsDiagnostics and will be removed soon. Rely on
-  /// GeoVaLs(const Locations &, const oops::Variables &, const std::vector<size_t> &)
+  ///
+  ///     GeoVaLs(const Locations &, const oops::Variables &,
+  ///             const std::vector<size_t> &)
+  ///
   /// to allocate GeoVaLs correctly.
   /// Fails if at least one of the \p vars doesn't exist in GeoVaLs.
   /// Only allocates variables that haven't been allocated before.
@@ -130,6 +144,9 @@ class GeoVaLs : public util::Printable,
   const oops::Variables & getVars() const {return vars_;}
 
   size_t nlevs(const std::string & var) const;
+  /// Return the number of profiles in the variable \p var (i.e. the number of paths along which
+  /// it has been interpolated).
+  size_t nprofiles(const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs)
   void get(std::vector<double> &, const std::string & var) const;
   /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to float
@@ -144,11 +161,31 @@ class GeoVaLs : public util::Printable,
   /// Get GeoVaLs at a specified level and convert to int
   void getAtLevel(std::vector<int> &, const std::string &, const int) const;
 
+  /// Get a specified profile of the variable `var` (i.e. the result of its interpolation along a
+  /// specified path)
+  void getProfile(std::vector<double> &vals, const std::string &var, const int profileIndex) const;
+  /// Get a specified profile of the variable `var` and convert to float
+  void getProfile(std::vector<float> &, const std::string &, const int profileIndex) const;
+  /// Get a specified profile of the variable `var` and convert to int
+  void getProfile(std::vector<int> &, const std::string &, const int profileIndex) const;
+
   /// Get GeoVaLs at a specified location
-  void getAtLocation(std::vector<double> &, const std::string &, const int) const;
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the getProfile()
+  /// function to handle the general case.
+  void getAtLocation(std::vector<double> &vals, const std::string &var, const int loc) const;
   /// Get GeoVaLs at a specified location and convert to float
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the getProfile()
+  /// function to handle the general case.
   void getAtLocation(std::vector<float> &, const std::string &, const int) const;
   /// Get GeoVaLs at a specified location and convert to int
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the getProfile()
+  /// function to handle the general case.
   void getAtLocation(std::vector<int> &, const std::string &, const int) const;
 
   /// Put GeoVaLs for double variable \p var at level \p lev.
@@ -158,16 +195,59 @@ class GeoVaLs : public util::Printable,
   /// Put GeoVaLs for int variable \p var at level \p lev.
   void putAtLevel(const std::vector<int> & vals, const std::string & var, const int lev) const;
 
+  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
+  /// specified interpolation path)
+  void putProfile(const std::vector<double> & vals, const std::string & var,
+                  const int profileIndex) const;
+  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
+  /// specified interpolation path)
+  void putProfile(const std::vector<float> & vals, const std::string & var,
+                  const int profileIndex) const;
+  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
+  /// specified interpolation path)
+  void putProfile(const std::vector<int> & vals, const std::string & var,
+                  const int profileIndex) const;
+
   /// Put GeoVaLs for double variable \p var at location \p loc.
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the putProfile()
+  /// function to handle the general case.
   void putAtLocation(const std::vector<double> & vals, const std::string & var,
                      const int loc) const;
   /// Put GeoVaLs for float variable \p var at location \p loc.
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the putProfile()
+  /// function to handle the general case.
   void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc) const;
   /// Put GeoVaLs for int variable \p var at location \p loc.
+  ///
+  /// This function works only if the variable `var` has been interpolated along one path per
+  /// observation location; otherwise it throws an exception. Use the putProfile()
+  /// function to handle the general case.
   void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
+
+  /// \brief Retrieve a vector mapping the index of each observation location to the range of
+  /// indices of the profiles obtained by interpolating the variable `var` along the paths sampling
+  /// that location.
+  ///
+  /// For instance, the profiles obtained by sampling the `i`th location have indices from
+  /// `profileIndicesGroupedByLocation[i].begin` up to but not including
+  /// `profileIndicesGroupedByLocation[i].end`.
+  void getProfileIndicesGroupedByLocation(
+      const std::string &var,
+      std::vector<util::Range<size_t>> &profileIndicesGroupedByLocation) const;
 
   void read(const Parameters_ &, const ioda::ObsSpace &);
   void write(const Parameters_ &) const;
+
+  /// \brief Return the number of observation locations.
+  ///
+  /// Note that each GeoVaL may contain multiple profiles obtained by interpolating the
+  /// corresponding model variable along paths sampling the same location, and the set of
+  /// interpolation paths may vary from one variable to another. Call nprofiles() to retrieve the
+  /// number of profiles in a specific GeoVaL.
   size_t nlocs() const;
 
   void fill(const std::string &name, const ConstVectorRef<size_t> &indx,
@@ -180,6 +260,17 @@ class GeoVaLs : public util::Printable,
 
  private:
   void print(std::ostream &) const;
+
+  /// Convert data stored in a Locations_ object into the form required by
+  /// the Fortran GeoVaLs setup subroutines.
+  void fillSetupInputs(const Locations_ & locations,
+                       size_t & nlocs, std::vector<size_t> & numPathsByMethod,
+                       std::vector<size_t> & samplingMethodByVar) const;
+
+  /// Finish setting up the Fortran GeoVaLs object by letting it know which interpolation paths
+  /// sample which observation locations.
+  void setupSamplingMethods(const Locations_ & locations);
+
   // -----------------------------------------------------------------------------
   /*! \brief Take the input vector and recast to type<T> whilst respecting
              missing values */

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "oops/base/Variables.h"
-#include "ufo/Locations.h"
+#include "ufo/SampledLocations.h"
 
 #include "ioda/ObsSpace.h"
 
@@ -20,7 +20,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations & locs,
+ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os,
+                               const Locations_ & locs,
                                const oops::Variables & vars)
   : obsdb_(os), gdiags_(locs, vars)
 {}

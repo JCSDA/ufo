@@ -49,7 +49,7 @@ class ObsTimeOper : public ObsOperatorBase,
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  std::unique_ptr<Locations> locations() const override;
+  Locations_ locations() const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return actualoperator_->requiredVars();}

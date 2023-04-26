@@ -10,15 +10,17 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/base/Locations.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasOperator.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/ObsTraits.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 
@@ -62,7 +64,7 @@ const oops::Variables & ObsOperator::requiredVars() const {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsOperator::locations() const {
+ObsOperator::Locations_ ObsOperator::locations() const {
   return oper_->locations();
 }
 

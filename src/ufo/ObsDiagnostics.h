@@ -19,6 +19,7 @@
 
 // Forward declarations
 namespace oops {
+  template <typename OBS> class Locations;
   class Variables;
 }
 
@@ -27,7 +28,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class Locations;
+  struct ObsTraits;
 
 // -----------------------------------------------------------------------------
 
@@ -35,8 +36,10 @@ class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
   typedef GeoVaLs::Parameters_ Parameters_;
+  typedef oops::Locations<ObsTraits> Locations_;
 
-  ObsDiagnostics(const ioda::ObsSpace &, const Locations &, const oops::Variables &);
+  ObsDiagnostics(const ioda::ObsSpace &, const Locations_ &,
+                 const oops::Variables &);
   ObsDiagnostics(const Parameters_ &, const ioda::ObsSpace &,
                  const oops::Variables &);
   ~ObsDiagnostics() {}

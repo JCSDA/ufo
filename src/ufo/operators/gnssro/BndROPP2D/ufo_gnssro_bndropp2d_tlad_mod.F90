@@ -190,17 +190,17 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
      call abor1_ftn(err_msg)
   endif
       
-! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)*n_horiz ) then
-     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent! geovals%nlocs, size(hofx), &
-                                 and n_horiz are', geovals%nlocs, size(hofx), n_horiz
-     call abor1_ftn(err_msg)
-  endif
-
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
+
+! check if the number of geoval profiles is correct
+  if (t_d%nprofiles /= size(hofx)*n_horiz .or. q_d%nprofiles /= size(hofx)*n_horiz .or. &
+      prs_d%nprofiles /= size(hofx)*n_horiz) then
+     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     call abor1_ftn(err_msg)
+  endif
 
   nlev    = self%nval
   nlocs   = self%nlocs
@@ -375,16 +375,18 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
      write(err_msg,*) myname_, ' trajectory wasnt set!'
      call abor1_ftn(err_msg)
   endif
-! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)*n_horiz) then
-     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
-     call abor1_ftn(err_msg)
-  endif
      
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
+
+! check if the number of geoval profiles is correct
+  if (t_d%nprofiles /= size(hofx)*n_horiz .or. q_d%nprofiles /= size(hofx)*n_horiz .or. &
+      prs_d%nprofiles /= size(hofx)*n_horiz) then
+     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     call abor1_ftn(err_msg)
+  endif
 
   nlev    = self%nval
   nlocs   = self%nlocs

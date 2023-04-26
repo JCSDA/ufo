@@ -155,9 +155,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
     call fckit_exception%throw(err_msg)
   end if
 
-  write(message, '(A,10I6)') 'Q: ', q%nval, q%nlocs, shape(q%vals)
+  write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
   call fckit_log%info(message)
-  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nlocs, shape(prs%vals)
+  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
   call fckit_log%info(message)
 
   nobs  = obsspace_get_nlocs(obss)
