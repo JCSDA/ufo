@@ -48,9 +48,7 @@ Variable::Variable(const eckit::Configuration & conf)
 
 Variable::Variable(const std::string & fullname, const eckit::LocalConfiguration options)
   : varname_(), grpname_(), channels_(), options_(options) {
-  oops::Log::trace() << "ufo::Variable(name) start" << std::endl;
   splitVarGroup(fullname, varname_, grpname_);
-  oops::Log::trace() << "ufo::Variable(name) done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
