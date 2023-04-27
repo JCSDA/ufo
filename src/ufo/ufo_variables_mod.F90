@@ -47,7 +47,8 @@ character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of_snow_particle"
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
-character(len=MAXVARLEN), public, parameter :: var_cldfrac= "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cldfrac = "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cldfrac_vol = "cloud_volume_fraction_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
 character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)
