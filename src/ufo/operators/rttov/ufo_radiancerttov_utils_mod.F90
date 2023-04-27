@@ -41,7 +41,7 @@ module ufo_radiancerttov_utils_mod
 
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
-    var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac, &
+    var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac_vol, &
     var_q, var_mixr, var_oz, var_co2, &
     var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit, &
     var_sfc_wdir, var_sfc_wspeed, &
@@ -83,7 +83,7 @@ module ufo_radiancerttov_utils_mod
     var_sfc_tskin /)
 
   character(len=maxvarlen), dimension(4), public :: varin_scatt = &
-    (/var_prsi, var_clw, var_cli, var_cldfrac /)
+    (/var_prsi, var_clw, var_cli, var_cldfrac_vol /)
 
   ! copy of ABSORBER_ID_NAME defined in rttov_const
   character(len=*), parameter :: &
@@ -1225,11 +1225,11 @@ contains
         call abor1_ftn(message)
       end if
       
-      ! cloud fraction from var_cldfrac TODO (IR update)
+      ! cloud fraction from var_cldfrac_vol TODO (IR update)
 
       ! The input cloud concentrations must be the layer grid-box-average 
       ! concentration (as opposed to the concentration within the cloudy fraction of each layer)
-      call ufo_geovals_get_var(geovals, var_cldfrac, geoval)
+      call ufo_geovals_get_var(geovals, var_cldfrac_vol, geoval)
       do iprof = 1, nprofiles
         profiles_scatt(iprof) % cc(top_level:bottom_level:stride) = &
           geoval%vals(:, iprof)

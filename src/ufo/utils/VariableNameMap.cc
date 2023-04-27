@@ -19,7 +19,7 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
   Aliases_["relativeHumidity"] = "relative_humidity";
   Aliases_["pressure"] = "air_pressure";
   Aliases_["virtualTemperature"] = "virtual_temperature";
-  Aliases_["potentialTemperature"] = "theta";
+  Aliases_["potentialTemperature"] = "potential_temperature";
   Aliases_["stationPressure"] = "surface_pressure";
   Aliases_["depthBelowWaterSurface"] = "ocean_depth";
   Aliases_["waterTemperature"] = "ocean_temperature";

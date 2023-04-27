@@ -151,7 +151,7 @@ struct VariableNames
   static constexpr const char* const geovals_height = "height";
   static constexpr const char* const geovals_height_rho = "height_levels";
   static constexpr const char* const geovals_height_rho_minus_one = "height_levels_minus_one";
-  static constexpr const char* const geovals_potential_temperature = "theta";
+  static constexpr const char* const geovals_potential_temperature = "potential_temperature";
   static constexpr const char* const geovals_air_temperature = "air_temperature";
   static constexpr const char* const geovals_surface_pressure = "surface_pressure";
   static constexpr const char* const geovals_relative_humidity = "relative_humidity";
