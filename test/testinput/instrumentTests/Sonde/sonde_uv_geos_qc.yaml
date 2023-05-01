@@ -24,6 +24,9 @@ observations:
        variables:
        - name: windEastward
        - name: windNorthward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       interpolation method: log-linear
   obs filters:
   #
   - filter: Perform Action

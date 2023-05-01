@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2023 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_H_
-#define UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_H_
+#ifndef UFO_OPERATORS_VERTINTERP_OBSVERTINTERP_H_
+#define UFO_OPERATORS_VERTINTERP_OBSVERTINTERP_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/atmvertinterp/ObsAtmVertInterpParameters.h"
+#include "ufo/operators/vertinterp/ObsVertInterpParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -28,16 +28,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-/// AtmVertInterp observation operator
-class ObsAtmVertInterp : public ObsOperatorBase,
-                      private util::ObjectCounter<ObsAtmVertInterp> {
+/// VertInterp observation operator
+class ObsVertInterp : public ObsOperatorBase,
+                      private util::ObjectCounter<ObsVertInterp> {
  public:
-  static const std::string classname() {return "ufo::ObsAtmVertInterp";}
+  static const std::string classname() {return "ufo::ObsVertInterp";}
 
-  typedef ObsAtmVertInterpParameters Parameters_;
+  typedef ObsVertInterpParameters Parameters_;
 
-  ObsAtmVertInterp(const ioda::ObsSpace &, const Parameters_ &);
-  virtual ~ObsAtmVertInterp();
+  ObsVertInterp(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsVertInterp();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
@@ -47,12 +47,12 @@ class ObsAtmVertInterp : public ObsOperatorBase,
 
   oops::Variables simulatedVars() const override {return operatorVars_;}
 
-  int & toFortran() {return keyOperAtmVertInterp_;}
-  const int & toFortran() const {return keyOperAtmVertInterp_;}
+  int & toFortran() {return keyOperVertInterp_;}
+  const int & toFortran() const {return keyOperVertInterp_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperAtmVertInterp_;
+  F90hop keyOperVertInterp_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
   oops::Variables operatorVars_;
@@ -61,4 +61,4 @@ class ObsAtmVertInterp : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_H_
+#endif  // UFO_OPERATORS_VERTINTERP_OBSVERTINTERP_H_

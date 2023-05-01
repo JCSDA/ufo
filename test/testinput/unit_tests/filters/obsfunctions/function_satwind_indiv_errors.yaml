@@ -7,6 +7,7 @@ observations:
     observation alias file: ../resources/namemap/test_name_map.yaml
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
+    interpolation method: log-linear
   obs space:
     name: Satwind
     obsdatain:

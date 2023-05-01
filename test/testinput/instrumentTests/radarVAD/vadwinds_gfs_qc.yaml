@@ -23,6 +23,9 @@ observations:
   obs operator:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   obs filters:
   # Reject all obs with PreQC mark already set above 3
   # - filter: PreQC

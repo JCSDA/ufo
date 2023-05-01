@@ -17,6 +17,9 @@ observations:
     filename: Data/ufo/testinput_tier_1/sondes_q_geoval_2020121500.nc4
   obs operator:
     name: VertInterp
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   obs function:
     name: ObsFunction/ObsErrorModelHumidity
     options:

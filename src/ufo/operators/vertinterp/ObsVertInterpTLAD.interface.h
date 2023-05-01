@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
-#define UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
+#ifndef UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_INTERFACE_H_
+#define UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_INTERFACE_H_
 
 #include "ufo/Fortran.h"
 
@@ -33,7 +33,7 @@ namespace ufo {
 extern "C" {
 
 // -----------------------------------------------------------------------------
-//  AtmVertInterp observation operator
+//  VertInterp tl/ad observation operator
 // -----------------------------------------------------------------------------
 
   /// \param operatorVars
@@ -50,16 +50,21 @@ extern "C" {
   /// Example: if the list of simulated variables in the ObsSpace is
   /// [air_temperature, northward_wind, eastward_wind] and \p operatorVars is
   /// [northward_wind, eastward_wind], then \p operatorVarIndices should be set to [1, 2].
-  void ufo_atmvertinterp_setup_f90(F90hop &, const eckit::Configuration &,
-                                   const oops::Variables &operatorVars,
-                                   const int *operatorVarIndices, const int numOperatorVarIndices,
-                                   oops::Variables &requiredVars);
-  void ufo_atmvertinterp_delete_f90(F90hop &);
-  void ufo_atmvertinterp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                 const int &, const int &, double &);
+  void ufo_vertinterp_tlad_setup_f90(F90hop &, const eckit::Configuration &,
+                                        const oops::Variables &operatorVars,
+                                        const int *operatorVarIndices,
+                                        const int numOperatorVarIndices,
+                                        oops::Variables &requiredVars);
+  void ufo_vertinterp_tlad_delete_f90(F90hop &);
+  void ufo_vertinterp_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
+  void ufo_vertinterp_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                                    const int &, const int &, double &);
+  void ufo_vertinterp_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                                    const int &, const int &, const double &);
+
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
+#endif  // UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_INTERFACE_H_

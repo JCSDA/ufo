@@ -1,9 +1,9 @@
-! (C) Copyright 2017-2019 UCAR
+! (C) Copyright 2017-2023 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-module ufo_atmvertinterp_mod
+module ufo_vertinterp_mod
 
 use oops_variables_mod
 use ufo_vars_mod
@@ -11,7 +11,7 @@ use ufo_interp_param_mod
 
 ! ------------------------------------------------------------------------------
 
-  type, public :: ufo_atmvertinterp
+  type, public :: ufo_vertinterp
      type(oops_variables), public :: geovars
      type(oops_variables), public :: obsvars ! Variables to be simulated
      integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
@@ -30,19 +30,19 @@ use ufo_interp_param_mod
 
      integer, public :: selected_interp
    contains
-     procedure :: setup  => atmvertinterp_setup_
-     procedure :: simobs => atmvertinterp_simobs_
-  end type ufo_atmvertinterp
+     procedure :: setup  => vertinterp_setup_
+     procedure :: simobs => vertinterp_simobs_
+  end type ufo_vertinterp
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_setup_(self, grid_conf)
+subroutine vertinterp_setup_(self, grid_conf)
   use iso_c_binding
   use fckit_configuration_module, only: fckit_configuration
   implicit none
-  class(ufo_atmvertinterp), intent(inout) :: self
+  class(ufo_vertinterp), intent(inout) :: self
   type(fckit_configuration), intent(in)   :: grid_conf
 
   character(kind=c_char,len=:), allocatable :: coord_name
@@ -112,18 +112,18 @@ subroutine atmvertinterp_setup_(self, grid_conf)
     self%o_v_group = "MetaData"
   endif
 
-end subroutine atmvertinterp_setup_
+end subroutine vertinterp_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine vertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use kinds
   use missing_values_mod
   use obsspace_mod
   use vert_interp_mod
   use ufo_geovals_mod
   implicit none
-  class(ufo_atmvertinterp), intent(in)        :: self
+  class(ufo_vertinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
   type(ufo_geovals), intent(in)               :: geovals
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
@@ -273,8 +273,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   if (allocated(wind_scaling_factor)) deallocate(wind_scaling_factor)
 
-end subroutine atmvertinterp_simobs_
+end subroutine vertinterp_simobs_
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_atmvertinterp_mod
+end module ufo_vertinterp_mod

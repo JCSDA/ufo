@@ -51,6 +51,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -92,6 +95,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -129,6 +135,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -168,6 +177,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -210,6 +222,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -252,6 +267,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -296,6 +314,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -340,6 +361,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
     - name: Composite
       components:
        - name: Identity
@@ -351,6 +375,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -395,6 +422,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -439,6 +469,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: Incorrect number of operator labels specified
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -484,6 +517,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The operator Composite has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -529,6 +565,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The operator Composite has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -573,6 +612,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
     - name: Composite
       components:
        - name: Identity
@@ -584,6 +626,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: There are at least two duplicate component operators. Consider using the 'operator labels' configuration option to differentiate between them
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -625,6 +670,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The operator Nonexistent has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -666,6 +714,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The operator Nonexistent has not been configured
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -707,6 +758,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The categorical variable must be a vector of either strings or integers
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
@@ -752,6 +806,9 @@ observations:
          variables:
          - name: windNorthward
          - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
   expect constructor to throw exception with message: The categorical variable Nonexistent does not exist
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4

@@ -23,6 +23,9 @@ observations:
     variables:
     - name: airTemperature
     observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
+    vertical coordinate: air_pressure
+    interpolation method: log-linear
 
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4

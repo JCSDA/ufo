@@ -13,7 +13,6 @@ add_subdirectory( seaicethickness )
 add_subdirectory( chleuzintegr )
 if( ${gsw_FOUND} )
   add_subdirectory( insitutemperature )
-  add_subdirectory( marinevertinterp )
   add_subdirectory( obsop )
 endif( ${gsw_FOUND} )
 
@@ -24,14 +23,12 @@ PREPEND( _p_seaicethickness_files     "operators/marine/seaicethickness"     ${s
 PREPEND( _p_chleuzintegr_files        "operators/marine/chleuzintegr"        ${chleuzintegr_files} )
 if( ${gsw_FOUND} )
   PREPEND( _p_insitutemperature_files   "operators/marine/insitutemperature"   ${insitutemperature_files} )
-  PREPEND( _p_marinevertinterp_files    "operators/marine/marinevertinterp"    ${marinevertinterp_files} )
   PREPEND( _p_obsop_files               "operators/marine/obsop"               ${obsop_files} )
 endif( ${gsw_FOUND} )
 
 set ( marine_src_files
     ${_p_adt_files}
     ${_p_coolskin_files}
-    ${_p_marinevertinterp_files}
     ${_p_obsop_files}
     ${_p_seaicefraction_files}
     ${_p_seaicethickness_files}

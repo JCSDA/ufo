@@ -4,6 +4,9 @@ window end: 2020-12-01T15:00:00Z
 observations:
 - obs operator:
     name: VertInterp
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   obs space:
     name: test_obserrorfactorconv
     obsdatain:
