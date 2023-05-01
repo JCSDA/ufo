@@ -1476,7 +1476,7 @@ do jlev = 1, geoval%nval
   do jprofile=1, c_nprofiles
     iprofile = c_indx(jprofile) + 1
     if (iprofile<1 .or. iprofile>geoval%nprofiles) call abor1_ftn("ufo_geovals_fillad: error iprofile")
-    c_vals(jprofile, jlev) = geoval%vals(jlev,iprofile)
+    c_vals(jprofile, jlev) = geoval%vals(ilev,iprofile)
   enddo
   ilev = ilev + linc
 enddo
