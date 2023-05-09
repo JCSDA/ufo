@@ -12,6 +12,9 @@ observations:
   obs operator:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   vector ref: GsiHofX
@@ -27,6 +30,9 @@ observations:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
     apply near surface wind scaling: true
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
   vector ref: GsiHofX

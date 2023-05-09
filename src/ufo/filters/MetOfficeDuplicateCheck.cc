@@ -36,7 +36,7 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
 
   const int nlocs = obsAccessor.totalNumObservations();
 
-  std::vector<size_t> validObsIds = getValidObservationIds(apply);
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
   std::vector<bool> isThinned(nlocs, false);
 
   const std::vector <float> latitude =
@@ -179,18 +179,6 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
 ObsAccessor MetOfficeDuplicateCheck::createObsAccessor() const {
   return ObsAccessor::toAllObservations(obsdb_);
 }
-
-std::vector<std::size_t> MetOfficeDuplicateCheck::getValidObservationIds
-  (const std::vector<bool> & apply) const {
-  std::vector<int> globalApply(apply.begin(), apply.end());
-  obsdb_.distribution()->allGatherv(globalApply);
-  std::vector<std::size_t> validObsIds;
-  for (size_t obsId = 0; obsId < globalApply.size(); ++obsId)
-    if (globalApply[obsId])
-      validObsIds.push_back(obsId);
-  return validObsIds;
-}
-
 
 void MetOfficeDuplicateCheck::print(std::ostream & os) const {
   os << "MetOfficeDuplicateCheck: config = " << options_ << std::endl;

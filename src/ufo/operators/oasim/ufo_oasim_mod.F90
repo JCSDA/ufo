@@ -64,26 +64,27 @@ call self%oasim_%delete()
 end subroutine ufo_oasim_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_oasim_simobs(self, geovals, hofx, obss)
+subroutine ufo_oasim_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 
     class(ufo_oasim),          intent(in)    :: self
     type(ufo_geovals),         intent(in)    :: geovals
-    real(c_double),            intent(inout) :: hofx(:,:)
+    integer,                   intent(in)    :: nvars, nlocs
+    real(c_double),            intent(inout) :: hofx(nlocs,nvars )
     type(c_ptr),  value,       intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_oasim_simobs"
     character(max_string) :: err_msg
 
     logical :: is_midnight 
-    integer :: km, day_of_year
+    integer :: km, day_of_year, nlt
     real(kind_real) :: cosz, dt
     type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, cldtau, clwp, cldre
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
     type(ufo_geoval), pointer :: cocco, dino, phaeo
 
-    real (kind_real), allocatable :: tirrq(:,:), cdomabsq(:,:), avgq(:,:)
+    real (kind_real), allocatable :: tirrq(:,:), cdomabsq(:,:), avgq(:,:), rlwnref(:,:)
     integer :: obss_nlocs
     integer :: iobs
     real(c_double) :: missing
@@ -126,7 +127,8 @@ implicit none
 
     ! To Do change this part later to read form obs file
     is_midnight = .FALSE.
-    km = size(phaeo%vals,dim=1)
+    km = 1  
+    nlt = size(ta_in%vals,dim=1) 
     day_of_year = 90
     cosz = 0.5
     dt = 86400/2.0
@@ -134,6 +136,7 @@ implicit none
     allocate(tirrq(obss_nlocs,km))
     allocate(cdomabsq(obss_nlocs,km))
     allocate(avgq(obss_nlocs,km))
+    allocate(rlwnref(obss_nlocs,nlt))
 
     do iobs = 1, obss_nlocs
        ! check if the ocean thickness is positive (valid)
@@ -145,8 +148,9 @@ implicit none
                cldre%vals(1,iobs), ta_in%vals(:,iobs), wa_in%vals(:,iobs), asym%vals(:,iobs), &
                dh%vals(:,iobs), cdet%vals(:,iobs), pic%vals(:,iobs), cdc%vals(:,iobs), &
                diatom%vals(:,iobs), chloro%vals(:,iobs), cyano%vals(:,iobs), &
-               cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:))
-          hofx(iobs,:)=sum(avgq(iobs,:)) 
+               cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), rlwnref(iobs,:))
+
+          hofx(iobs,:)=sum(rlwnref(iobs,:)) 
        endif
     enddo
 

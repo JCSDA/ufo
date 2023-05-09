@@ -45,43 +45,62 @@ call ufo_geovals_default_constr(self)
 
 end subroutine ufo_geovals_default_constr_c
 
-subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars, c_nvars, c_sizes) bind(c,name='ufo_geovals_setup_f90')
+subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars, c_nvars, c_sizes, c_nsampling_methods, &
+                               c_npaths_by_method, c_sampling_method_by_var) &
+                               bind(c,name='ufo_geovals_setup_f90')
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 integer(c_int), intent(in)     :: c_nlocs, c_nvars
 type(c_ptr), value, intent(in) :: c_vars
-integer(c_size_t), intent(in)     :: c_sizes(c_nvars)
+integer(c_size_t), intent(in)  :: c_sizes(c_nvars)
+integer(c_size_t), intent(in)  :: c_nsampling_methods
+integer(c_size_t), intent(in)  :: c_npaths_by_method(c_nsampling_methods)
+integer(c_size_t), intent(in)  :: c_sampling_method_by_var(c_nvars)
 
 type(ufo_geovals), pointer :: self
 type(oops_variables) :: vars
+integer              :: nsampling_methods
+integer(c_size_t)    :: sampling_method_by_var(c_nvars)
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 vars = oops_variables(c_vars)
-call ufo_geovals_setup(self, vars, c_nlocs, c_nvars, c_sizes)
+nsampling_methods = c_nsampling_methods
+sampling_method_by_var(:) = 1 + c_sampling_method_by_var(:)  ! convert 0- to 1-based indexing
+call ufo_geovals_setup(self, c_nlocs, vars, c_nvars, c_sizes, &
+                       nsampling_methods, c_npaths_by_method, sampling_method_by_var)
 
 end subroutine ufo_geovals_setup_c
 
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
-subroutine ufo_geovals_partial_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_partial_setup_f90')
+subroutine ufo_geovals_partial_setup_c(c_key_self, c_nlocs, c_vars, c_nvars, c_nsampling_methods, &
+                                       c_sampling_method_by_var) &
+                                       bind(c,name='ufo_geovals_partial_setup_f90')
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
-integer(c_int), intent(in)     :: c_nlocs
+integer(c_int), intent(in)     :: c_nlocs, c_nvars
 type(c_ptr), value, intent(in) :: c_vars
+integer(c_size_t), intent(in)  :: c_nsampling_methods
+integer(c_size_t), intent(in)  :: c_sampling_method_by_var(c_nvars)
 
 type(ufo_geovals), pointer :: self
 type(oops_variables) :: vars
+integer              :: nsampling_methods
+integer(c_size_t)    :: sampling_method_by_var(c_nvars)
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 vars = oops_variables(c_vars)
-call ufo_geovals_partial_setup(self, vars, c_nlocs)
+nsampling_methods = c_nsampling_methods
+sampling_method_by_var(:) = 1 + c_sampling_method_by_var(:)  ! convert 0- to 1-based indexing
+call ufo_geovals_partial_setup(self, c_nlocs, vars, c_nvars, nsampling_methods, &
+                               sampling_method_by_var)
 
 end subroutine ufo_geovals_partial_setup_c
 
@@ -102,6 +121,57 @@ vars = oops_variables(c_vars)
 call ufo_geovals_allocate(self, vars, c_nlevels)
 
 end subroutine ufo_geovals_allocate_c
+
+! ------------------------------------------------------------------------------
+!> Specify which interpolation paths produced by a given method sample which observation locations.
+subroutine ufo_geovals_setup_sampling_method_c(c_key_self, c_sampling_method, &
+                                               c_npaths, c_nlocs, c_paths_by_loc) &
+                                               bind(c,name='ufo_geovals_setup_sampling_method_f90')
+implicit none
+integer(c_int), intent(inout)     :: c_key_self
+integer(c_size_t), intent(in)     :: c_sampling_method, c_npaths, c_nlocs
+type(ufo_index_range), intent(in) :: c_paths_by_loc(c_nlocs)
+
+type(ufo_geovals), pointer :: self
+integer                    :: npaths, nlocs, sampling_method
+type(ufo_index_range)      :: paths_by_loc(c_nlocs)
+integer(c_size_t)          :: i
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+npaths = c_npaths
+nlocs = c_nlocs
+! Convert from 0- to 1-based indexing
+sampling_method = 1 + c_sampling_method
+do i = 1, c_nlocs
+  paths_by_loc(i)%begin = 1 + c_paths_by_loc(i)%begin
+  paths_by_loc(i)%end = 1 + c_paths_by_loc(i)%end
+enddo
+
+call ufo_geovals_setup_sampling_method(self, sampling_method, npaths, nlocs, paths_by_loc)
+
+end subroutine ufo_geovals_setup_sampling_method_c
+
+! ------------------------------------------------------------------------------
+!> Designate an observation location sampling method as "trivial", i.e. one producing a set of
+!> interpolation paths such that each location is sampled solely by the path with the same index.
+subroutine ufo_geovals_setup_trivial_sampling_method_c(c_key_self, c_sampling_method) &
+  bind(c,name='ufo_geovals_setup_trivial_sampling_method_f90')
+implicit none
+integer(c_int), intent(inout)     :: c_key_self
+integer(c_size_t), intent(in)     :: c_sampling_method
+
+type(ufo_geovals), pointer :: self
+integer                    :: sampling_method
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+! Convert from 0- to 1-based indexing
+sampling_method = 1 + c_sampling_method
+
+call ufo_geovals_setup_trivial_sampling_method(self, sampling_method)
+
+end subroutine ufo_geovals_setup_trivial_sampling_method_c
 
 ! ------------------------------------------------------------------------------
 !> Copy one GeoVaLs object into another
@@ -150,14 +220,14 @@ end subroutine ufo_geovals_copy_one_c
 !> Analytic init
 
 subroutine ufo_geovals_analytic_init_c(c_key_self, c_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
-use ufo_locations_mod
+use ufo_sampled_locations_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), value, intent(in) :: c_locs
 type(c_ptr), value, intent(in) :: c_conf
 
 type(ufo_geovals), pointer :: self
-type(ufo_locations) ::locs
+type(ufo_sampled_locations) ::locs
 character(len=30) :: ic
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
@@ -167,7 +237,7 @@ call ufo_geovals_registry%get(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 call f_conf%get_or_die("method",str)
 ic = str
-locs = ufo_locations(c_locs)
+locs = ufo_sampled_locations(c_locs)
 call ufo_geovals_analytic_init(self,locs,ic)
 
 end subroutine ufo_geovals_analytic_init_c
@@ -376,36 +446,6 @@ end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_split_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_split_f90')
-implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
-type(ufo_geovals), pointer :: self, other1, other2
-
-call ufo_geovals_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_other1, other1)
-call ufo_geovals_registry%get(c_key_other2, other2)
-
-call ufo_geovals_split(self, other1, other2)
-
-end subroutine ufo_geovals_split_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_merge_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_merge_f90')
-implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
-type(ufo_geovals), pointer :: self, other1, other2
-
-call ufo_geovals_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_other1, other1)
-call ufo_geovals_registry%get(c_key_other2, other2)
-
-call ufo_geovals_merge(self, other1, other2)
-
-end subroutine ufo_geovals_merge_c
-
-! ------------------------------------------------------------------------------
-
 subroutine ufo_geovals_minmaxavg_c(c_key_self, kobs, kvar, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -422,16 +462,44 @@ end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_nlocs_c(c_key_self, kobs) bind(c, name='ufo_geovals_nlocs_f90')
+subroutine ufo_geovals_nlocs_c(c_key_self, nlocs) bind(c, name='ufo_geovals_nlocs_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
 implicit none
-integer(c_int),    intent(in) :: c_key_self
-integer(c_size_t), intent(inout) :: kobs
+integer(c_int), intent(in) :: c_key_self
+integer(c_size_t), intent(out) :: nlocs
+
 type(ufo_geovals), pointer :: self
 
 call ufo_geovals_registry%get(c_key_self, self)
-kobs = self%nlocs
+
+nlocs = self%nlocs
 
 end subroutine ufo_geovals_nlocs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_nprofiles_c(c_key_self, lvar, c_var, nprofiles) bind(c, name='ufo_geovals_nprofiles_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_size_t), intent(out) :: nprofiles
+
+type(ufo_geoval), pointer :: geoval
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_get_var(self, varname, geoval)
+
+nprofiles = geoval%nprofiles
+
+end subroutine ufo_geovals_nprofiles_c
 
 ! ------------------------------------------------------------------------------
 
@@ -459,15 +527,15 @@ end subroutine ufo_geovals_nlevs_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get2d_c(c_key_self, lvar, c_var, nlocs, values) bind(c, name='ufo_geovals_get2d_f90')
+subroutine ufo_geovals_get2d_c(c_key_self, lvar, c_var, nprofiles, values) bind(c, name='ufo_geovals_get2d_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
 integer(c_int),    intent(in) :: c_key_self
 integer(c_int),    intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int),    intent(in) :: nlocs
-real(c_double), intent(inout) :: values(nlocs)
+integer(c_int),    intent(in) :: nprofiles
+real(c_double), intent(inout) :: values(nprofiles)
 
 character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
@@ -483,8 +551,8 @@ if (size(geoval%vals,1) /= 1) then
   write(err_msg,*)'ufo_geovals_get2d_f90',trim(varname),'is not a 2D var:',size(geoval%vals,1), ' levels'
   call abor1_ftn(err_msg)
 endif
-if (nlocs /= size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_get2d_f90',trim(varname),'error locs number:',nlocs,size(geoval%vals,2)
+if (nprofiles /= size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get2d_f90',trim(varname),'error profiles number:',nprofiles,size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
 
@@ -494,7 +562,7 @@ end subroutine ufo_geovals_get2d_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, c_lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
+subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, c_lev, nprofiles, values) bind(c, name='ufo_geovals_get_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
@@ -502,8 +570,8 @@ integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_lev
-integer(c_int), intent(in) :: nlocs
-real(c_float), intent(inout) :: values(nlocs)
+integer(c_int), intent(in) :: nprofiles
+real(c_float), intent(inout) :: values(nprofiles)
 
 character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
@@ -524,8 +592,8 @@ if (lev<1 .or. lev>size(geoval%vals,1)) then
                   size(geoval%vals,1), ', lev=', lev
   call abor1_ftn(err_msg)
 endif
-if (nlocs /= size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_get_f90 "',trim(varname),'" error locs number:',nlocs,&
+if (nprofiles /= size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get_f90 "',trim(varname),'" error profiles number:',nprofiles,&
                   ' /= ',size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
@@ -536,14 +604,15 @@ end subroutine ufo_geovals_get_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_loc_c(c_key_self, lvar, c_var, c_loc, nlevs, values) bind(c, name='ufo_geovals_get_loc_f90')
+subroutine ufo_geovals_get_profile_c(c_key_self, lvar, c_var, c_profile, nlevs, values) &
+  bind(c, name='ufo_geovals_get_profile_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: c_loc
+integer(c_int), intent(in) :: c_profile
 integer(c_int), intent(in) :: nlevs
 real(c_double), intent(inout) :: values(nlevs)
 
@@ -551,32 +620,32 @@ character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
-integer(c_int) :: loc
+integer(c_int) :: profile
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
 
 call ufo_geovals_get_var(self, varname, geoval)
 
-! Convert location index from the C++ to the Fortran convention.
-loc = c_loc + 1
+! Convert profile index from the C++ to the Fortran convention.
+profile = c_profile + 1
 
-if (loc<1 .or. loc>size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_get_loc_f90',trim(varname),'location out of range:',loc,size(geoval%vals,2)
+if (profile<1 .or. profile>size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get_profile_f90',trim(varname),'profile index out of range:',profile,size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
 if (nlevs /= size(geoval%vals,1)) then
-  write(err_msg,*)'ufo_geovals_get_loc_f90',trim(varname),'incorrect number of levels:',nlevs,size(geoval%vals,1)
+  write(err_msg,*)'ufo_geovals_get_profile_f90',trim(varname),'incorrect number of levels:',nlevs,size(geoval%vals,1)
   call abor1_ftn(err_msg)
 endif
 
-values(:) = geoval%vals(:,loc)
+values(:) = geoval%vals(:,profile)
 
-end subroutine ufo_geovals_get_loc_c
+end subroutine ufo_geovals_get_profile_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_getdouble_c(c_key_self, lvar, c_var, c_lev, nlocs, values)&
+subroutine ufo_geovals_getdouble_c(c_key_self, lvar, c_var, c_lev, nprofiles, values)&
   bind(c, name='ufo_geovals_getdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
@@ -585,8 +654,8 @@ integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_lev
-integer(c_int), intent(in) :: nlocs
-real(c_double), intent(inout) :: values(nlocs)
+integer(c_int), intent(in) :: nprofiles
+real(c_double), intent(inout) :: values(nprofiles)
 
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
@@ -605,15 +674,15 @@ end subroutine ufo_geovals_getdouble_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, c_lev, nlocs, values) bind(c, name='ufo_geovals_putdouble_f90')
+subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, c_lev, nprofiles, values) bind(c, name='ufo_geovals_putdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: c_lev
-integer(c_int), intent(in) :: nlocs
-real(c_double), intent(in) :: values(nlocs)
+integer(c_int), intent(in) :: nprofiles
+real(c_double), intent(in) :: values(nprofiles)
 
 type(ufo_geoval), pointer  :: geoval
 character(len=MAXVARLEN)   :: varname
@@ -631,7 +700,7 @@ geoval%vals(lev,:) = values(:)
 end subroutine ufo_geovals_putdouble_c
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_geovals_put_loc_c(c_key_self, lvar, c_var, c_loc, nlevs, values) bind(c, name='ufo_geovals_put_loc_f90')
+subroutine ufo_geovals_put_profile_c(c_key_self, lvar, c_var, c_profile, nlevs, values) bind(c, name='ufo_geovals_put_profile_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 
@@ -639,7 +708,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
-integer(c_int), intent(in) :: c_loc
+integer(c_int), intent(in) :: c_profile
 integer(c_int), intent(in) :: nlevs
 real(c_double), intent(in) :: values(nlevs)
 
@@ -647,27 +716,73 @@ character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
-integer(c_int) :: loc
+integer(c_int) :: profile
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_get_var(self, varname, geoval)
 
-! Convert location index from the C++ to the Fortran convention.
-loc = c_loc + 1
+! Convert profile index from the C++ to the Fortran convention.
+profile = c_profile + 1
 
-if (loc<1 .or. loc>size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_put_loc_f90',trim(varname),'location out of range:',loc,size(geoval%vals,2)
+if (profile<1 .or. profile>size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_put_profile_f90',trim(varname),'profile out of range:',profile,size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
 if (nlevs /= size(geoval%vals,1)) then
-  write(err_msg,*)'ufo_geovals_put_loc_f90',trim(varname),'incorrect number of levels:',nlevs,size(geoval%vals,1)
+  write(err_msg,*)'ufo_geovals_put_profile_f90',trim(varname),'incorrect number of levels:',nlevs,size(geoval%vals,1)
   call abor1_ftn(err_msg)
 endif
 
-geoval%vals(:,loc) = values(:)
+geoval%vals(:,profile) = values(:)
 
-end subroutine ufo_geovals_put_loc_c
+end subroutine ufo_geovals_put_profile_c
+
+! ------------------------------------------------------------------------------
+subroutine ufo_geovals_get_profile_indices_grouped_by_loc_c( &
+  c_key_self, lvar, c_var, c_nlocs, c_profile_indices_grouped_by_loc) &
+  bind(c, name='ufo_geovals_get_profile_indices_grouped_by_loc_f90')
+use ufo_vars_mod, only: ufo_vars_getindex, MAXVARLEN
+use string_f_c_mod
+
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_size_t), intent(in) :: c_nlocs
+type(ufo_index_range), intent(inout) :: c_profile_indices_grouped_by_loc(c_nlocs)
+
+character(max_string) :: err_msg
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+integer :: ivar, iloc, jv
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+if (c_nlocs /= self%nlocs) then
+  write(err_msg,*) 'ufo_geovals_get_profile_indices_grouped_by_loc_f90: nlocs mismatch: received ', &
+    c_nlocs, ', expected ', self%nlocs
+  call abor1_ftn(err_msg)
+endif
+
+ivar = ufo_vars_getindex(self%variables, varname)
+
+if (ivar < 0) then
+  write(err_msg,*) 'ufo_geovals_get_profile_indices_grouped_by_loc_f90: ', trim(varname), ' doesn''t exist'
+  call abor1_ftn(err_msg)
+endif
+
+c_profile_indices_grouped_by_loc(:) = &
+  self%sampling_methods(self%sampling_method_by_var(ivar))%paths_by_loc(:)
+
+! Convert profile indices from the Fortran to the C++ convention.
+do iloc = 1, self%nlocs
+  c_profile_indices_grouped_by_loc(iloc)%begin = c_profile_indices_grouped_by_loc(iloc)%begin - 1
+  c_profile_indices_grouped_by_loc(iloc)%end = c_profile_indices_grouped_by_loc(iloc)%end - 1
+enddo
+
+end subroutine ufo_geovals_get_profile_indices_grouped_by_loc_c
 
 ! ------------------------------------------------------------------------------
 

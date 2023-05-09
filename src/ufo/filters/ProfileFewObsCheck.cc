@@ -58,11 +58,11 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
   const oops::Variables observed = obsdb_.obsvariables();
 
   // Check the number of channels and variables to process
-  const size_t nchans = std::max(obsdb_.nchans(), 1LU);
-  // For multi-level data "nvars" is the number of simulated variables times the
+  const size_t nChans = std::max(obsdb_.nchans(), 1LU);
+  // For multi-channel data "nvars" is the number of simulated variables times the
   // number of channels.  Therefore, divide "nvars" by the number of channels
   // to get the number of simulated variables.
-  const size_t nActualVars = filtervars.nvars() / nchans;
+  const size_t nActualVars = filtervars.nvars() / nChans;
 
   bool belowThreshold = false;
 
@@ -75,23 +75,30 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << std::endl;
 
   // Loop over the number of actual variables
-  for (size_t ivar=0; ivar < nActualVars; ++ivar) {
+  for (size_t iVar=0; iVar < nActualVars; ++iVar) {
+    std::vector<size_t> variableIndicesMap(nChans, -1);
+    for (size_t iChan = 0; iChan < nChans; ++iChan) {
+        const size_t iFilterVar = iVar * nChans + iChan;
+        const std::string variableName = filtervars.variable(iFilterVar).variable();
+        variableIndicesMap[iChan] = observed.find(variableName);
+    }
+
     // Loop over the unique profiles
     for (size_t iProfile : record_numbers) {
       const std::vector<size_t> & obs_numbers = obsdb_.recidx_vector(iProfile);
 
       int numValid = 0;
       int numTotal = 0;
-      // For each channel (vertical level) start counting the number of valid observations
-      for (size_t ichan=0; ichan < nchans; ++ichan) {
-        const size_t iFilterVar = ivar * nchans + ichan;
-        const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+      // For each channel and vertical level count the number of valid observations
+      for (size_t iChan=0; iChan < nChans; ++iChan) {
+        const size_t iFilterVar = iVar * nChans + iChan;
+        const size_t jVar = variableIndicesMap[iChan];
 
         // Count the number of valid observations in this profile
         for (size_t jobs : obs_numbers) {
           if (apply[jobs]) {
             numTotal++;
-            if ((*flags_)[iVar][jobs] == QCflags::pass)
+            if ((*flags_)[jVar][jobs] == QCflags::pass)
               numValid++;
           }
         }
@@ -104,19 +111,19 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
                          < parameters_.fraction.value().value();
       }
 
-      oops::Log::debug() << "For var " << ivar << ", profile " << iProfile
+      oops::Log::debug() << "For var " << iVar << ", profile " << iProfile
                          << " there are " << numValid << "/" << numTotal << " valid observations"
                          << " belowThreshold = " << (belowThreshold ? "true" : "false")
                          << std::endl;
       if (belowThreshold) {
         // Reject profiles which don't contain sufficient observations
-        for (size_t ichan=0; ichan < nchans; ++ichan) {
+        for (size_t iChan=0; iChan < nChans; ++iChan) {
           // Note that this assumes that all the channels for each variable are
           // grouped together
-          const size_t iFilterVar = ivar * nchans + ichan;
-          const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+          const size_t iFilterVar = iVar * nChans + iChan;
+          const size_t jVar = variableIndicesMap[iChan];
           for (size_t jobs : obs_numbers)
-            if (apply[jobs] && (*flags_)[iVar][jobs] == QCflags::pass)
+            if (apply[jobs] && (*flags_)[jVar][jobs] == QCflags::pass)
               flagged[iFilterVar][jobs] = true;
         }
       }

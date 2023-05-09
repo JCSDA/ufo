@@ -1,9 +1,9 @@
 # These tests compare the output of the Track Check filter against reference
 # results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
 # a baseline; in subsequent test cases the filter's configuration contains one parameter
-# whose value differs from the first case. The last two cases are identical to the first one
+# whose value differs from the first case. The last four cases are identical to the first one
 # except that observations are grouped explicitly by the stationIdentification variable rather than the
-# record number.
+# record number. The final two cases illustrate the behaviour of the 'ignore existing QC flags' option.
 
 window begin: 2000-01-01T00:00:00Z
 window end: 2029-12-12T23:59:59Z
@@ -598,3 +598,87 @@ observations:
   flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
   benchmarkFlag: 21 # track
+
+# Reject all but one observation for a particular flight ID (AU2UOHBA).
+# The Track Check is configured in the same way as for the first example in this file.
+# The remaining observation for ID AU2UOHBA is not flagged by the Track Check because it
+# has no valid buddies that could be used to reject it.
+# The total number of observations passing is 991.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out9.nc
+    simulated variables: [specificHumidity]
+  obs filters:
+  - filter: Perform Action
+    action:
+      name: reject
+    where:
+    - variable:
+        name: MetaData/stationIdentification
+      is_in: ["AU2UOHBA"]
+    - variable:
+        name: MetaData/longitude
+      is_not_close_to_any_of: [264.718]
+      absolute_tolerance: 1.0e-5
+  - filter: Track Check
+    temporal_resolution: PT00H00M30S
+    spatial_resolution: 20.000000
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 3
+    max_climb_rate: 200.000000
+    max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
+    rejection_threshold: 0.500000
+    pressure_coordinate: pressure
+    pressure_group: MetaData
+    station_id_variable: MetaData/stationIdentification
+  passedBenchmark: 991
+
+# Reject all but one observation for a particular flight ID (AU2UOHBA).
+# The Track Check is configured in the same way as for the first example in this file.
+# Additionally, the Track Check option 'ignore existing QC flags' is set to true.
+# The remaining observation for ID AU2UOHBA *is* flagged by the Track Check because it
+# now has valid buddies even though they have been rejected beforehand.
+# The total number of observations passing is 990.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_m_trackcheck_out9.nc
+    simulated variables: [specificHumidity]
+  obs filters:
+  - filter: Perform Action
+    action:
+      name: reject
+    where:
+    - variable:
+        name: MetaData/stationIdentification
+      is_in: ["AU2UOHBA"]
+    - variable:
+        name: MetaData/longitude
+      is_not_close_to_any_of: [264.718]
+      absolute_tolerance: 1.0e-5
+  - filter: Track Check
+    temporal_resolution: PT00H00M30S
+    spatial_resolution: 20.000000
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 3
+    max_climb_rate: 200.000000
+    max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
+    rejection_threshold: 0.500000
+    pressure_coordinate: pressure
+    pressure_group: MetaData
+    station_id_variable: MetaData/stationIdentification
+    ignore existing QC flags: true
+  passedBenchmark: 990

@@ -176,6 +176,14 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
     // Loop over the unique profiles to check for valid data and unflag if there is agreement
     obsdb_.get_db(filtervars.variable(iVar).group(), filtervars.variable(iVar).variable(),
                   variableData);
+
+    std::vector<size_t> variableIndicesMap(nChans, -1);
+    for (size_t iChan = 0; iChan < nChans; ++iChan) {
+        const size_t iFilterVar = iVar * nChans + iChan;
+        const std::string variableName = filtervars.variable(iFilterVar).variable();
+        variableIndicesMap[iChan] = observed.find(variableName);
+    }
+
     for (size_t iProfile : recordNumbers) {
       const std::vector<size_t> & allObsNumbers = obsdb_.recidx_vector(iProfile);
 
@@ -188,26 +196,26 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
       // Accept observations with valid neighbours within a tolerance.
       for (size_t iChan = 0; iChan < nChans; ++iChan) {
         const size_t iFilterVar = iVar * nChans + iChan;
-        const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+        const size_t jVar = variableIndicesMap[iChan];
         int numMadeValid = 0;
         for (size_t jObsProfile = 0; jObsProfile < obsNumbers.size(); ++jObsProfile) {
           size_t jObsGlobal = obsNumbers[jObsProfile];
           const float absTol = (*absoluteToleranceCalculate)(jObsGlobal);
-          if (((*flags_)[iVar][jObsGlobal] != QCflags::pass) &&
-              ((*flags_)[iVar][jObsGlobal] != QCflags::passive) &&
-              ((*flags_)[iVar][jObsGlobal] != QCflags::missing)) {
+          if (((*flags_)[jVar][jObsGlobal] != QCflags::pass) &&
+              ((*flags_)[jVar][jObsGlobal] != QCflags::passive) &&
+              ((*flags_)[jVar][jObsGlobal] != QCflags::missing)) {
             bool makeValid = false;
             if (jObsProfile == 0) {
               makeValid = true;
             } else {
               const size_t jObsMinus = obsNumbers[jObsProfile-1];
-              makeValid = (*flags_)[iVar][jObsMinus] == QCflags::pass &&
+              makeValid = (*flags_)[jVar][jObsMinus] == QCflags::pass &&
                   (std::abs(variableData[jObsMinus] - variableData[jObsGlobal]) < absTol);
             }
             if (jObsProfile < obsNumbers.size()-1) {
               const size_t jObsPlus = obsNumbers[jObsProfile+1];
               makeValid = makeValid &&
-                  ((*flags_)[iVar][jObsPlus] == QCflags::pass) &&
+                  ((*flags_)[jVar][jObsPlus] == QCflags::pass) &&
                   (std::abs(variableData[jObsPlus] - variableData[jObsGlobal]) < absTol);
             }
             if (makeValid) {
@@ -217,7 +225,7 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
           }
         }
         if ((iChan == 0) && (numMadeValid > 0))
-          oops::Log::debug() << "\nUnFlagObsCheck " << filtervars.variable(iVar).variable()
+          oops::Log::debug() << "\nUnFlagObsCheck " << observed[variableIndicesMap[iChan]]
             << " profile "  << iProfile << " [channel] numMadeValid:";
         if (numMadeValid > 0)
           oops::Log::debug() << " [" << iChan << "] " << numMadeValid;

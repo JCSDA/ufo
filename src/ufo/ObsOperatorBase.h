@@ -25,6 +25,7 @@
 #include "ufo/utils/VariableNameMap.h"
 
 namespace oops {
+  template <typename OBS> class Locations;
   class Variables;
 }
 
@@ -34,8 +35,8 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
+  struct ObsTraits;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation operators
@@ -49,6 +50,8 @@ namespace ufo {
 class ObsOperatorBase : public util::Printable,
                         private boost::noncopyable {
  public:
+  typedef oops::Locations<ObsTraits> Locations_;
+
   explicit ObsOperatorBase(const ioda::ObsSpace & odb,
                            const VariableNameMap & nameMap = VariableNameMap(boost::none))
      : odb_(odb), nameMap_(nameMap) {}
@@ -60,8 +63,12 @@ class ObsOperatorBase : public util::Printable,
 /// Operator input required from Model
   virtual const oops::Variables & requiredVars() const = 0;
 
-/// Locations for GeoVaLs
-  virtual std::unique_ptr<Locations> locations() const;
+/// \brief Model variable interpolation paths.
+///
+/// The default implementation places a vertical interpolation path at the latitude, longitude and
+/// time of each observation location and asks for all required model variables to be interpolated
+/// along these paths.
+  virtual Locations_ locations() const;
 
 /// \brief List of variables simulated by this operator.
 ///

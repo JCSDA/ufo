@@ -32,7 +32,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 /// \brief Options controlling the ObsBackgroundErrorVertInterp observation operator.

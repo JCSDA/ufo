@@ -18,6 +18,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/base/Locations.h"
 #include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/mpi/mpi.h"
@@ -27,10 +28,10 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "test/TestEnvironment.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperator.h"
+#include "ufo/ObsTraits.h"
 
 namespace eckit
 {
@@ -106,8 +107,7 @@ void testObsDiagnostics() {
   // create diagnostics to hold HofX diags
   const oops::Variables &diagvars = params.obsDiagnostics.value().variables;
   EXPECT(diagvars.size() > 0);
-  std::unique_ptr<Locations> locs(hop.locations());
-  ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
+  ObsDiagnostics diags(ospace, hop.locations(), diagvars);
 
   // call H(x) to compute diagnostics
   hop.simulateObs(gval, hofx, ybias, bias, diags);

@@ -16,7 +16,10 @@ observations:
        variables:
        - name: waterTemperature
        observation alias file: ../resources/namemap/test_name_map.yaml
-     - name: MarineVertInterp
+     - name: VertInterp
+       vertical coordinate: sea_water_depth
+       observation vertical coordinate: depth
+       interpolation method: linear
        variables:
        - name: salinity
        observation alias file: ../resources/namemap/test_name_map.yaml

@@ -17,6 +17,9 @@ obs space:
   simulated variables: [airTemperature, virtualTemperature, specificHumidity, windEastward, windNorthward]
 obs operator:
   name: VertInterp
+  vertical coordinate: air_pressure
+  observation vertical coordinate: pressure
+  interpolation method: log-linear
 obs filters:
 - filter: Bounds Check
   filter variables:

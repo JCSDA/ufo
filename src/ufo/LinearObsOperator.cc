@@ -7,15 +7,19 @@
 
 #include "ufo/LinearObsOperator.h"
 
+#include <utility>
 #include <vector>
 
 #include "ioda/ObsVector.h"
+#include "oops/base/Locations.h"
+#include "oops/interface/SampledLocations.h"
 #include "ufo/LinearObsBiasOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsTraits.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 
@@ -40,6 +44,8 @@ LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const Parameters_ & pa
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   oops::Variables vars;
   vars += bias.requiredHdiagnostics();
   std::vector<float> lons(odb_.nlocs());
@@ -48,7 +54,8 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
   odb_.get_db("MetaData", "dateTime", times);
-  ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.distribution()), vars);
+  auto locs = std::make_unique<SampledLocations>(lons, lats, times, odb_.distribution());
+  ObsDiagnostics ydiags(odb_, SampledLocations_(std::move(locs)), vars);
   oper_->setTrajectory(gvals, ydiags);
   if (bias) {
     biasoper_.reset(new LinearObsBiasOperator(odb_));

@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
@@ -19,6 +20,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/interface/SampledLocations.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
@@ -26,7 +28,6 @@
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/StringUtils.h"
 
@@ -34,6 +35,8 @@ namespace ufo {
 namespace test {
 
 void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
 
@@ -74,12 +77,12 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   ioda::ObsVector bias(obsSpace);
   bias.zero();
 
-  ufo::Locations locations(conf, obsSpace.comm());
+  SampledLocations_ locs(conf, obsSpace.comm());
   const eckit::LocalConfiguration diagConf = conf.getSubConfiguration("obs diagnostics");
   oops::Variables diagVars;
   for (const std::string &name : diagConf.keys())
     diagVars.push_back(name);
-  ufo::ObsDiagnostics obsDiags(obsSpace, locations, diagVars);
+  ufo::ObsDiagnostics obsDiags(obsSpace, std::move(locs), diagVars);
   obsDiags.allocate(1, diagVars);
   for (const std::string &name : diagConf.keys()) {
     const std::vector<double> diag = diagConf.getDoubleVector(name);

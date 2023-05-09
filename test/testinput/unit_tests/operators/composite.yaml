@@ -124,6 +124,10 @@ observations:
        variables:
        - name: windNorthward
        - name: windEastward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: Identity
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
@@ -160,6 +164,10 @@ observations:
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: Identity
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
@@ -190,6 +198,10 @@ observations:
        variables:
        - name: windEastward
        - name: windNorthward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: Identity
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
@@ -219,6 +231,10 @@ observations:
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
        - name: windEastward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: Identity
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
@@ -255,6 +271,8 @@ observations:
        - name: windEastward
        vertical coordinate: air_pressure
        observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
   linear obs operator test:
@@ -292,6 +310,8 @@ observations:
        - name: airTemperature
        vertical coordinate: air_pressure
        observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: VertInterp
        observation alias file: ../resources/namemap/test_name_map.yaml
        variables:
@@ -299,6 +319,8 @@ observations:
        - name: windEastward
        vertical coordinate: air_pressure_levels
        observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_composite_operator_sonde_geovals.nc4
   linear obs operator test:

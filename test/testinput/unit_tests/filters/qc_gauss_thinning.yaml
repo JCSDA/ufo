@@ -923,3 +923,19 @@ observations:
       name: MetaData/priority
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
+# Ignore existing QC flags (including for missing values) in the thinning.
+# This causes more observations to be thinned together, reducing the overall number
+# that are selected.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+    simulated variables: [airTemperature]
+    observed variables: [airTemperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    ignore existing QC flags: true
+  passedBenchmark: 6

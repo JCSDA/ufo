@@ -47,7 +47,8 @@ character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of_snow_particle"
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
-character(len=MAXVARLEN), public, parameter :: var_cldfrac= "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cldfrac = "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cldfrac_vol = "cloud_volume_fraction_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
 character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)
@@ -100,7 +101,7 @@ character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_ref
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
-character(len=MAXVARLEN), public, parameter :: var_surf_tau = "transmission_at_surface" 
+character(len=MAXVARLEN), public, parameter :: var_surf_tau = "transmission_at_surface"
 character(len=MAXVARLEN), public, parameter :: var_sfc_landmask   = "landmask"       ! 0 (sea), 1 (land)
 character(len=MAXVARLEN), public, parameter :: var_sfc_seaicefrac = "seaice_fraction"
 
@@ -115,6 +116,7 @@ character(len=MAXVARLEN), public :: var_ocn_abs_salt    = "sea_water_absolute_sa
 character(len=MAXVARLEN), public :: var_ocn_pra_salt    = "sea_water_practical_salinity"
 character(len=MAXVARLEN), public :: var_ocn_salt        = "sea_water_salinity"
 character(len=MAXVARLEN), public :: var_ocn_lay_thick   = "sea_water_cell_thickness"
+character(len=MAXVARLEN), public :: var_ocn_depth       = "sea_water_depth"
 character(len=MAXVARLEN), public :: var_ocn_sst         = "sea_surface_temperature"
 character(len=MAXVARLEN), public :: var_sea_td          = "sea_surface_foundation_temperature"
 character(len=MAXVARLEN), public :: var_latent_vap      = "latent_heat_vaporization"

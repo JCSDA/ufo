@@ -16,7 +16,6 @@ add_subdirectory( variabletransforms )
 
 # Operators
 add_subdirectory( operators/aerosols )
-add_subdirectory( operators/atmvertinterp )
 add_subdirectory( operators/atmvertinterplay )
 add_subdirectory( operators/atmsfcinterp )
 add_subdirectory( operators/columnretrieval )
@@ -44,6 +43,7 @@ add_subdirectory( operators/sattcwv )
 add_subdirectory( operators/scatwind )
 add_subdirectory( operators/sfcpcorrected )
 add_subdirectory( operators/timeoper )
+add_subdirectory( operators/vertinterp )
 
 
 # Base files
@@ -65,8 +65,6 @@ list( APPEND ufo_src_files
     LinearObsOperator.h
     LinearObsOperatorBase.cc
     LinearObsOperatorBase.h
-    Locations.cc
-    Locations.h
     ObsBias.cc
     ObsBias.h
     ObsBiasCovariance.cc
@@ -86,10 +84,12 @@ list( APPEND ufo_src_files
     ObsOperatorBase.h
     ObsOperatorParametersBase.h
     ObsTraits.h
-    locations_f.cc
-    locations_f.h
+    SampledLocations.cc
+    SampledLocations.h
+    sampled_locations_f.cc
+    sampled_locations_f.h
     ufo_geovals_mod.F90
-    ufo_locations_mod.F90
+    ufo_sampled_locations_mod.F90
     ufo_variables_mod.F90
     ufo_constants_mod.F90
 )
@@ -105,7 +105,7 @@ list( APPEND ufo_src_files
     ${predictor_src_files}
     ${obslocalization_src_files}
     ${identity_src_files}
-    ${atmvertinterp_src_files}
+    ${vertinterp_src_files}
     ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
     ${columnretrieval_src_files}
@@ -117,7 +117,6 @@ list( APPEND ufo_src_files
     ${aerosols_src_files}
     ${sfcpcorrected_src_files}
     ${radarradialvelocity_src_files}
-    ${timeoper_src_files}
     ${profile_src_files}
     ${groundgnss_src_files}
     ${variabletransforms_src_files}
@@ -130,6 +129,7 @@ list( APPEND ufo_src_files
     ${fov_src_files}
     ${marine_src_files}
     ${oasim_src_files}
+    ${timeoper_src_files}
 )
 
 ## Create Library target

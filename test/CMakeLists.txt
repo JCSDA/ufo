@@ -18,6 +18,17 @@ list( APPEND ufo_test_input
   testinput/parameters.yaml
   testinput/primitive_variables.yaml
   testinput/recordhandler.yaml
+  testinput/ufo_geovals_setup_with_mismatched_nvars.yaml
+  testinput/ufo_geovals_setup_with_sampling_method_set_to_0.yaml
+  testinput/ufo_geovals_setup_with_sampling_method_set_to_3.yaml
+  testinput/ufo_geovals_partial_setup_with_mismatched_nvars.yaml
+  testinput/ufo_geovals_partial_setup_with_sampling_method_set_to_0.yaml
+  testinput/ufo_geovals_partial_setup_with_sampling_method_set_to_3.yaml
+  testinput/ufo_geovals_setup_sampling_method_0.yaml
+  testinput/ufo_geovals_setup_sampling_method_3.yaml
+  testinput/ufo_geovals_setup_sampling_method_with_mismatched_nlocs.yaml
+  testinput/ufo_geovals_setup_trivial_sampling_method_0.yaml
+  testinput/ufo_geovals_setup_trivial_sampling_method_3.yaml
   testinput/variables.yaml
 )
 
@@ -126,6 +137,16 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
     saved to ${TESTFILE_DIR_REPO} for ${repo}")
 
     set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
+
+  elseif( DEFINED ENV{UFO_TESTFILES} )
+    # Any branch of ufo is being built.
+    # ufo-data repository is already cloned by bundle/CMakeLists.txt.
+    # Link test files in ufo-data repo to build directory.
+    # get_ufo_test_data checks the existence of test file directory.
+    set( TESTFILE_DIR_REPO $ENV{UFO_TESTFILES} )
+    list( APPEND REPO_DATA_DOWNLOADER_ARGS
+          ${TESTFILE_DIR_REPO} )
+    set (REPO_DATA_DOWNLOADER ufo_data_checker.py )
 
   # Any branch of REPO is being built.
   # repo-data repository is already cloned by bundle/CMakeLists.txt.
@@ -238,6 +259,11 @@ ecbuild_add_executable( TARGET  test_NearestNeighborInterpolation.x
                         LIBS    ufo
                        )
 
+ecbuild_add_executable( TARGET  test_FortranGeoVaLs.x
+                        SOURCES mains/TestFortranGeoVaLs.cc ufo/geovals_test.F90
+                        LIBS    ufo
+                       )
+
 ####################################################################
 # Establish test tiering
 
@@ -339,8 +365,10 @@ ecbuild_add_test( TARGET  test_ufo_geovals_spec
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_locations
-                  SOURCES mains/TestLocations.cc ufo/Locations.h ufo/locations_test.F90
+ecbuild_add_test( TARGET  test_ufo_sampled_locations
+                  SOURCES mains/TestSampledLocations.cc
+                          ufo/SampledLocations.h
+                          ufo/sampled_locations_test.F90
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
@@ -352,6 +380,105 @@ ecbuild_add_test( TARGET  test_ufo_recordhandler
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_RecordHandler.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_with_mismatched_nvars
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_with_mismatched_nvars.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_with_mismatched_nvars
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup: mismatch in the number of variables.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_with_sampling_method_set_to_0
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_with_sampling_method_set_to_0.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_with_sampling_method_set_to_0
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup: sampling method +0 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_with_sampling_method_set_to_3
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_with_sampling_method_set_to_3.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_with_sampling_method_set_to_3
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup: sampling method +3 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_partial_setup_with_mismatched_nvars
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_partial_setup_with_mismatched_nvars.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_partial_setup_with_mismatched_nvars
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_partial_setup: mismatch in the number of variables.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_partial_setup_with_sampling_method_set_to_0
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_partial_setup_with_sampling_method_set_to_0.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_partial_setup_with_sampling_method_set_to_0
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_partial_setup: sampling method +0 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_partial_setup_with_sampling_method_set_to_3
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_partial_setup_with_sampling_method_set_to_3.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_partial_setup_with_sampling_method_set_to_3
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_partial_setup: sampling method +3 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_sampling_method_0
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_sampling_method_0.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_sampling_method_0
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup_sampling_method: sampling method +0 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_sampling_method_3
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_sampling_method_3.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_sampling_method_3
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup_sampling_method: sampling method +3 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_sampling_method_with_mismatched_nlocs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup_sampling_method: mismatch in nlocs.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_trivial_sampling_method_0
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_trivial_sampling_method_0.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_trivial_sampling_method_0
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup_trivial_sampling_method: sampling method +0 +does not exist.*")
+
+ecbuild_add_test( TARGET  test_ufo_geovals_setup_trivial_sampling_method_3
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x
+                  ARGS    "testinput/ufo_geovals_setup_trivial_sampling_method_3.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_FortranGeoVaLs.x )
+set_tests_properties(test_ufo_geovals_setup_trivial_sampling_method_3
+                     PROPERTIES
+                     PASS_REGULAR_EXPRESSION ".*ufo_geovals_setup_trivial_sampling_method: sampling method +3 +does not exist.*")
 
 #####################################################################
 # Files for CRTM tests

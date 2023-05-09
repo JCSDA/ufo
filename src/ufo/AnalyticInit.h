@@ -14,7 +14,7 @@
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
+  class SampledLocations;
 
 /// Parameters for Analytic init (empty except for analytic init method defined
 /// in the base class)
@@ -27,7 +27,7 @@ class AnalyticInit : public oops::interface::AnalyticInitBase<ObsTraits> {
  public:
   typedef AnalyticInitParameters Parameters_;
   explicit AnalyticInit(const Parameters_ &);
-  void fillGeoVaLs(const Locations &, GeoVaLs &) const override;
+  void fillGeoVaLs(const SampledLocations &, GeoVaLs &) const override;
 
  private:
   const Parameters_ options_;

@@ -100,7 +100,7 @@ contains
     end do coefloop
 
     if ( any(self % coefindex == 0) ) then
-      write(message,*) 'ufo_radiancerttov_setup error: input channels not in the coefficient file'
+      message = 'ufo_radiancerttov_setup error: input channels not in the coefficient file'
       call abor1_ftn(message)
     end if
 
@@ -116,12 +116,12 @@ contains
 
     if (debug) then
       do j=1,size(self%varin)
-        write(message,'(I4,1x,A)') j, self%varin(j)
+        write(message,'(I4,1x,A)') j, trim(self%varin(j))
         call fckit_log%debug(message)
       enddo
     end if
 
-    write(message,'(A)') 'Finished setting up rttov'
+    message = 'Finished setting up rttov'
     call fckit_log%info(message)
 
   end subroutine ufo_radiancerttov_setup
@@ -180,7 +180,7 @@ contains
     include 'rttov_k.interface'
     include 'rttov_scatt_ad.interface'
 
-    write(message,'(A, A, I0, A, I0, A)') trim(routine_name), ': Simulating observations'
+    message = trim(routine_name) // ': Simulating observations'
     call fckit_log%debug(message)
 
     !Initialisations
@@ -206,15 +206,14 @@ contains
     if (nprofiles == 0) return
 
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
-    write(message,'(A, A, I0, A, I0, A)')                                              &
+    write(message,'(2A, I0, A, I0, A)') &
       trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
     call fckit_log%debug(message)
 
     call self % RTprof % alloc_profiles(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
     !Assign the atmospheric and surface data from the GeoVaLs
-    write(message,'(A, A, I0, A, I0, A)')                                              &
-      trim(routine_name), ': Creating RTTOV profiles from geovals'
+    message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
     call fckit_log%debug(message)
     if(present(ob_info)) then
       call self % RTprof % setup_rtprof(geovals,obss,self % conf,ob_info=ob_info)
@@ -244,13 +243,13 @@ contains
     nchan_sim = nprof_sim * size(self%channels)
 
     ! Allocate structures for RTTOV direct code (and, if needed, K code)
-    write(message,'(A,A,I0,A,I0,A)')                                                   &
+    write(message,'(2A,I0,A,I0,A)')                                                   &
       trim(routine_name), ': Allocating resources for RTTOV direct code: ', nprof_sim, ' and ', nchan_sim, ' channels'
     call fckit_log%debug(message)
     call self % RTprof % alloc_direct(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
 
     if (jacobian_needed) then
-      write(message,'(A,A,I0,A,I0,A)')                                                 &
+      write(message,'(2A,I0,A,I0,A)')                                                 &
         trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
       call fckit_log%debug(message)
 
@@ -418,7 +417,7 @@ contains
           end if
           
           if ( errorstatus /= errorstatus_success ) then
-            write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, &
+            write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, &
               ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
             call fckit_log%info(message)
           end if
@@ -452,7 +451,7 @@ contains
           end if
           
           if ( errorstatus /= errorstatus_success ) then
-            write(message,'(A, A, 2I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
+            write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
                                          ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
             call fckit_log%info(message)
             if (present(ob_info)) ob_info % rterror = .true.
@@ -513,7 +512,7 @@ contains
       
     end do RTTOV_loop
 
-    write(message,'(A)') 'Deallocating resource for RTTOV...'
+    message = 'Deallocating resource for RTTOV...'
     call fckit_log%debug(message)
 
     ! Deallocate structures for rttov_direct
@@ -532,10 +531,10 @@ contains
     deallocate(self % RTprof % sensor_index_array)
     
     if (errorstatus /= errorstatus_success) then
-      write(message,'(A)') 'after rttov_alloc_direct (deallocation)'
+      message = 'after rttov_alloc_direct (deallocation)'
       call abor1_ftn(message)
     else
-      write(message,'(A)') 'Done. Returning'
+      message = 'Done. Returning'
       call fckit_log%debug(message)
     end if
 

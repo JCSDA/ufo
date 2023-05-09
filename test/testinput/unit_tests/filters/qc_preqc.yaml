@@ -5,6 +5,9 @@ observations:
 - obs operator:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
+    vertical coordinate: air_pressure
+    interpolation method: log-linear
   obs space:
     name: Radiosonde
     obsdatain:

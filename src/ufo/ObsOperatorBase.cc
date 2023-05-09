@@ -10,22 +10,28 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
+#include "oops/base/Locations.h"
+#include "oops/interface/SampledLocations.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
-#include "ufo/Locations.h"
+#include "ufo/ObsTraits.h"
+#include "ufo/SampledLocations.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsOperatorBase::locations() const {
+ObsOperatorBase::Locations_ ObsOperatorBase::locations() const {
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
   std::vector<float> lons(odb_.nlocs());
   std::vector<float> lats(odb_.nlocs());
   std::vector<util::DateTime> times(odb_.nlocs());
   odb_.get_db("MetaData", "latitude", lats);
   odb_.get_db("MetaData", "longitude", lons);
   odb_.get_db("MetaData", "dateTime", times);
-  return std::unique_ptr<Locations>(new Locations(lons, lats, times, odb_.distribution()));
+  return SampledLocations_(
+        std::make_unique<SampledLocations>(lons, lats, times, odb_.distribution()));
 }
 
 // -----------------------------------------------------------------------------

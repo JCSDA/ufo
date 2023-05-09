@@ -36,9 +36,9 @@ contains
 subroutine ufo_insitutemperature_setup(self)
    class(ufo_insitutemperature), intent(inout) :: self
 
-   call self%geovars%push_back("sea_water_potential_temperature")
-   call self%geovars%push_back("sea_water_salinity")
-   call self%geovars%push_back("sea_water_cell_thickness")
+   call self%geovars%push_back(var_ocn_pot_temp)
+   call self%geovars%push_back(var_ocn_salt)
+   call self%geovars%push_back(var_ocn_depth)
 
 end subroutine ufo_insitutemperature_setup
 
@@ -52,8 +52,7 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
    real(c_double),            intent(inout) :: hofx(nvars, nlocs)
 
    integer :: iobs, ilev
-   type(ufo_geoval), pointer :: temp, salt, h
-   real (kind_real), allocatable :: depth(:,:)
+   type(ufo_geoval), pointer :: temp, salt, depth
    real(kind_real), allocatable :: obs_lon(:)
    real(kind_real), allocatable :: obs_lat(:)
    real(kind_real), allocatable :: obs_depth(:)
@@ -64,7 +63,7 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
    ! Associate geoval pointers
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
     call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
-    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
+    call ufo_geovals_get_var(geovals, var_ocn_depth, depth)
 
     ! Read in obs data
     allocate(obs_lon(nlocs))
@@ -74,25 +73,12 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
     call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
     call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
 
-   ! calculate depth from layer thickness, TODO just ask model for depth??
-   allocate(depth(h%nval, nlocs))
-   do iobs = 1, nlocs
-      !< Depth from layer thickness
-      depth(1,iobs)=0.5*h%vals(1,iobs)
-      do ilev = 2, h%nval
-         depth(ilev,iobs)=sum(h%vals(1:ilev-1,iobs))+0.5*h%vals(ilev,iobs)
-      end do
-   end do
-
    ! calculate interpolation weights
    allocate(wi(nlocs))
    allocate(wf(nlocs))
    do iobs = 1, nlocs
-      call vert_interp_weights(h%nval, obs_depth(iobs), depth(:,iobs), wi(iobs), wf(iobs))
+      call vert_interp_weights(depth%nval, obs_depth(iobs), depth%vals(:,iobs), wi(iobs), wf(iobs))
    end do
-
-   deallocate(depth)
-
 
    do iobs = 1, nlocs
        ! Interpolate temp_p, salt_p to deptho
