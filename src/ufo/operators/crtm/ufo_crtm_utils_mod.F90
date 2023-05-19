@@ -124,20 +124,24 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !CO2
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
+ !** BTJ Note:  N_VALID_CLOUD_CATEGORIES==6 under normal circumstances, but not with v2.4.1  
+ !** Here we override N_VALID_CLOUD_CATEGORIES with the value "6" (the value used in v2.4.0, 
+ !** and in v3.0.x).   
+ INTEGER, PARAMETER :: N_VALID_CLOUD_CATEGORIES_TMP = 6 !** BTJ remove this line in v3.0
 
  character(len=MAXVARLEN), parameter :: &
-      UFO_Clouds(N_VALID_CLOUD_CATEGORIES,2) = &
+      UFO_Clouds(N_VALID_CLOUD_CATEGORIES_TMP,2) = &
          reshape( &
             [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
               var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
-            , [N_VALID_CLOUD_CATEGORIES,2] )
+            , [N_VALID_CLOUD_CATEGORIES_TMP,2] )
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
  character(len=MAXVARLEN), parameter :: &
-      CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
-         CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
+      CRTM_Clouds(N_VALID_CLOUD_CATEGORIES_TMP) = &
+         CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES_TMP)
  integer, parameter :: &
-      CRTM_Cloud_Id(N_VALID_CLOUD_CATEGORIES) = &
+      CRTM_Cloud_Id(1:N_VALID_CLOUD_CATEGORIES_TMP) = &
          [   WATER_CLOUD, &
                ICE_CLOUD, &
               RAIN_CLOUD, &

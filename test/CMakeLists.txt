@@ -47,8 +47,8 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
-set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
-#set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
+# set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
+set( CRTM_COEFFS_BRANCH "2.4.1_skylab_4.0" )
 
 # Test data filenames
 set(ufo_test_data  ufo_testinput_tier_1_1.6.0.tar.gz)
@@ -115,7 +115,7 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
     if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL} )
       set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL}/${repo}/${GIT_TAG_FUNC}" )
     else()
-      #set( ECBUILD_DOWNLOAD_BASE_URL https://gdex.ucar.edu/dataset/jedi-skylab/file )
+      # set( ECBUILD_DOWNLOAD_BASE_URL https://gdex.ucar.edu/dataset/jedi-skylab/file )
       set( ECBUILD_DOWNLOAD_BASE_URL https://ftp.ssec.wisc.edu/pub/s4/CRTM/file )
     endif()
 
@@ -148,12 +148,11 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
     list( APPEND REPO_DATA_DOWNLOADER_ARGS
           ${TESTFILE_DIR_REPO} )
     set (REPO_DATA_DOWNLOADER ufo_data_checker.py )
-
-  # Any branch of REPO is being built.
-  # repo-data repository is already cloned by bundle/CMakeLists.txt.
-  # Link test files in repo-data repo to build directory.
-  # get_repo_test_data checks the existence of test file directory
   else()
+    # Any branch of REPO is being built.
+    # repo-data repository is already cloned by bundle/CMakeLists.txt.
+    # Link test files in repo-data repo to build directory.
+    # get_repo_test_data checks the existence of test file directory
     set( TESTFILE_DIR_REPO ${CMAKE_SOURCE_DIR}/${repo}-data )
     list( APPEND REPO_DATA_DOWNLOADER_ARGS
           ${TESTFILE_DIR_REPO} )
@@ -579,8 +578,8 @@ SpcCoeff/Little_Endian/avhrr3_n18.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/avhrr3_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_n20.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
-SpcCoeff/Little_Endian/tropics_sv1_srf_v1.SpcCoeff.bin
-TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v1.TauCoeff.bin
+SpcCoeff/Little_Endian/tropics_sv1_srf_v3.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v3.TauCoeff.bin
 )
 
 if( crtm_FOUND )
