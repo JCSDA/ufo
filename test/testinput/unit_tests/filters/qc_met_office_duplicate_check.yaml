@@ -520,3 +520,53 @@ observations:
     - 986
     - 992
     - 995
+
+# All observations have the same priority and a category variable is defined.
+# If an observation O is thinned, all observations with the same value of the category variable as O
+# are also thinned.
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_duplicate_check_out.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Met Office Duplicate Check
+    priority name: priority_1
+    latitude band width: 1.5
+    latitude bin half-width: 1.0
+    longitude bin half-width: 1.0
+    time bin half-width: 30.0
+    pressure bin half-width: 250.0
+    category variable name: stationIdentification
+  passedBenchmark: 24
+  passedObservationsBenchmark:
+    - 116
+    - 117
+    - 118
+    - 119
+    - 120
+    - 121
+    - 122
+    - 123
+    - 124
+    - 125
+    - 126
+    - 127
+    - 128
+    - 129
+    - 130
+    - 131
+    - 132
+    - 133
+    - 134
+    - 135
+    - 136
+    - 137
+    - 138
+    - 139

@@ -56,6 +56,17 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
   std::vector <int> priority =
     obsAccessor.getIntVariableFromObsSpace("MetaData", options_.priorityName);
 
+  // Optional category variable. If defined, determine the locations associated with
+  // each distinct value of this variable.
+  std::vector <std::string> categoryVariable;
+  std::unordered_map <std::string, std::vector<int>> categoryVariableLocations;
+  if (options_.categoryVariableName.value() != boost::none) {
+    categoryVariable = obsAccessor.getStringVariableFromObsSpace
+      ("MetaData", options_.categoryVariableName.value().value());
+    for (size_t obsId : validObsIds)
+      categoryVariableLocations[categoryVariable[obsId]].push_back(obsId);
+  }
+
   const float latBandWidth = options_.latBandWidth.value();
   const int numLatitudeBands = std::ceil(180.0 / latBandWidth);
   // Assign a latitude band index to each location.
@@ -154,14 +165,23 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
               std::fabs(pressure[jlocSort] - pressure[jlocSearchSort]) <= pBinHalfWidth) {
             // A duplicate pair of observations has been found. Retain one observation based on
             // values of priority.
+            const size_t jlocThin = priority[jlocSort] < priority[jlocSearchSort] ?
+                                                         jlocSort : jlocSearchSort;
+            // If the category variable has been defined, thin all observations whose category
+            // match that of the initial thinned observation.
+            if (options_.categoryVariableName.value() != boost::none) {
+              const std::string thinnedCategory = categoryVariable[jlocThin];
+              for (size_t thinnedLocation : categoryVariableLocations[thinnedCategory]) {
+                priority[thinnedLocation] = -1;
+                isThinned[thinnedLocation] = true;
+              }
+            } else {
+              priority[jlocThin] = -1;
+              isThinned[jlocThin] = true;
+            }
             if (priority[jlocSort] < priority[jlocSearchSort]) {
-              priority[jlocSort] = -1;
-              isThinned[jlocSort] = true;
               nextjloc = true;
               break;
-            } else {
-              priority[jlocSearchSort] = -1;
-              isThinned[jlocSearchSort] = true;
             }
           }
         }
