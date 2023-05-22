@@ -63,7 +63,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool> > & flagged) const {
   util::DateTime widerWindowStart = obsdb_.windowStart() - options_.timeBeforeStartOfWindow.value();
-  util::DateTime widerWindowEnd = obsdb_.windowEnd() - options_.timeAfterEndOfWindow.value();
+  util::DateTime widerWindowEnd = obsdb_.windowEnd() + options_.timeAfterEndOfWindow.value();
   // In order to prevent the MPI from distributing the aux spaces's observations to different
   // ranks from the distribution used for obsdb_, widerObsSpace uses the myself communicator
   // for both time and spatial communicators, ensuring that all observations in widerObsSpace
