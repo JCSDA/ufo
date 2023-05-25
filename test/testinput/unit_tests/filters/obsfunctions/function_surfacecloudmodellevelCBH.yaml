@@ -1,0 +1,32 @@
+window begin: 2021-07-01T11:30:00Z
+window end: 2021-07-01T12:30:00Z
+
+observations:
+- obs space: &obsspace
+    name: SurfaceCloud
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_base_height_check.nc4
+    simulated variables: [stationPressure]
+    derived variables: [stationPressure]
+  geovals: &geovals
+    filename: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_base_height_check_geovals.nc4
+  obs operator:
+    name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: MetaData/heightOfModelLevelAboveCloudBase
+        type: float
+        function:
+          name: ObsFunction/SurfaceCloudModelLevelCBH
+          options:
+            cloud base height: MetaData/cloudBaseHeightAMSL
+  compareVariables:
+  - reference:
+      name: TestReference/cloudBaseHeightAMSLTest
+    test:
+      name: MetaData/heightOfModelLevelAboveCloudBase
+    absTol: 1.0e-4
