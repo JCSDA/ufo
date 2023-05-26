@@ -519,7 +519,9 @@ TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/atms_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/atms_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/atms_n20.SpcCoeff.bin
+SpcCoeff/Little_Endian/atms_n21.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/atms_n20.TauCoeff.bin
+TauCoeff/ODPS/Little_Endian/atms_n21.TauCoeff.bin
 SpcCoeff/Little_Endian/gmi_gpm.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/gmi_gpm.TauCoeff.bin
 SpcCoeff/Little_Endian/seviri_m08.SpcCoeff.bin
@@ -556,7 +558,11 @@ SpcCoeff/Little_Endian/ssmis_f17.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ssmis_f17.TauCoeff.bin
 SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
+SpcCoeff/Little_Endian/viirs-i_n21.SpcCoeff.bin
+SpcCoeff/Little_Endian/viirs-m_n21.SpcCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/viirs-i_n21.TauCoeff.bin
+TauCoeff/ODPS/Little_Endian/viirs-m_n21.TauCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_j1.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_j1.TauCoeff.bin
@@ -577,7 +583,9 @@ TauCoeff/ODPS/Little_Endian/avhrr3_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/avhrr3_n18.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/avhrr3_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_n20.SpcCoeff.bin
+SpcCoeff/Little_Endian/cris-fsr_n21.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
+TauCoeff/ODPS/Little_Endian/cris-fsr_n21.TauCoeff.bin
 SpcCoeff/Little_Endian/tropics_sv1_srf_v3.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v3.TauCoeff.bin
 )
