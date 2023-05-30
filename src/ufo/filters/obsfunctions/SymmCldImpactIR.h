@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
@@ -27,6 +28,7 @@ class SymmCldImpactIRParameters : public oops::Parameters {
  public:
   /// channels for which SCI will be calculated
   oops::RequiredParameter<std::string> chlist{"channels", this};
+  oops::Parameter<bool> scale_by_omb{"scale by omb", false, this};
 };
 
 // -----------------------------------------------------------------------------

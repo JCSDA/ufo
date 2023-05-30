@@ -10,11 +10,13 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
@@ -28,6 +30,7 @@ static ObsFunctionMaker<SymmCldImpactIR> makerSCIIR_("SymmCldImpactIR");
 
 SymmCldImpactIR::SymmCldImpactIR(const eckit::LocalConfiguration config)
   : invars_(), channels_() {
+  oops::Log::debug() << "SymmCldImpactIR: config = " << config << std::endl;
   // Initialize options
   options_.deserialize(config);
 
@@ -53,13 +56,19 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
   // Get dimensions
   size_t nlocs = in.nlocs();
 
+  // Is the option for scaling by obs-minus-background enabled
+  bool scale_by_omb = options_.scale_by_omb.value();
+
   // Allocate vectors common across channels
   std::vector<float> clr(nlocs);
   std::vector<float> bak(nlocs);
   std::vector<float> obs(nlocs);
   std::vector<float> bias(nlocs);
 
-  float Cmod, Cobs;
+  const float c1 = 10.0f;
+  const float c2 = 20.0f;
+
+  float Cmod, Cobs, Comb, dx, frac;
 
   for (size_t ich = 0; ich < SCI.nvars(); ++ich) {
     // Get channel-specific clr, bak, obs, and bias
@@ -82,6 +91,12 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
         Cmod = std::abs(clr[iloc] - bak[iloc] + bias[iloc]);
         Cobs = std::abs(clr[iloc] - obs[iloc] + bias[iloc]);
         SCI[ich][iloc] = 0.5f * (Cmod + Cobs);
+        if (scale_by_omb) {
+          Comb = std::min(std::abs(obs[iloc] - bak[iloc]), 100.0f);
+          dx = (Comb - c2)*0.01f;
+          frac = std::max(0.1f, 1.0f/(1.0f + exp(-c1*dx)));
+          SCI[ich][iloc] = frac * SCI[ich][iloc];
+        }
       } else {
         SCI[ich][iloc] = missing;
       }
