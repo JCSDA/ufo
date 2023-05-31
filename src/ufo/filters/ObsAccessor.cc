@@ -164,7 +164,7 @@ const std::vector<size_t> ObsAccessor::getValidObsIdsInProfile(const size_t & iP
   const UnselectLocationIf mode = candidateForRetentionIfAnyFilterVariablesPassedQC ?
         UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED :
         UnselectLocationIf::ANY_FILTER_VARIABLE_REJECTED;
-  unselectRejectedLocations(isValid, filtervars, flags, mode);
+  unselectRejectedLocations(isValid, filtervars, flags, mode, obs_inds);
   for (size_t ind = 0; ind < obs_inds.size(); ++ind) {
     if (isValid[obs_inds[ind]]) {
       validObsIds.push_back(obs_inds[ind]);
