@@ -72,24 +72,24 @@ obs filters:
 - filter: Perform Action
   filter variables:
   - name: brightnessTemperature
-    channels: *abi_g16_channels
+    channels: *abi_g17_channels
   action:
     name: assign error
     error function:
       name: ObsFunction/ObsErrorModelRamp
       options:
-        channels: *abi_g16_channels
+        channels: *abi_g17_channels
         xvar:
           name: ObsFunction/SymmCldImpactIR
-          channels: *abi_g16_channels
+          channels: *abi_g17_channels
           options:
-            channels: *abi_g16_channels
+            channels: *abi_g17_channels
             scale by omb: true
         x0: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         x1: [40.0, 30.0, 30.0, 30.0, 35.0, 35.0, 30.0, 30.0, 35.0, 35.0]
         err0: [3.0, 1.0, 1.0, 1.0, 3.0, 3.0, 1.5, 1.5, 2.5, 2.5]
         err1: [35.0, 25.0, 25.0, 25.0, 30.0, 30.0, 25.0, 25.0, 30.0, 30.0]
-      channels: *abi_g16_channels
+      channels: *abi_g17_channels
 # Gross error check with (O - B) / ObsError greater than threshold.
 - filter: Background Check
   filter variables:
