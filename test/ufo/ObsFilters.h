@@ -584,6 +584,9 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
         break;
       case ioda::ObsDtype::None:
         ASSERT_MSG(false, "Reference variable not found in observation space");
+        break;
+      case ioda::ObsDtype::Empty:
+        ASSERT_MSG(false, "Test function is not set up to handle empty observation space");
       }
     }
   }
