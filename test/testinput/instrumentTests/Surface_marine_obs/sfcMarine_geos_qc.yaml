@@ -82,4 +82,4 @@ observations:
           variable: specificHumidity
     defer to post: true
 
-  passedBenchmark: 53429
+  passedBenchmark: 592

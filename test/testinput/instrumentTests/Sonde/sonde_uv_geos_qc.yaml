@@ -157,4 +157,4 @@ observations:
       name: reject
     defer to post: true
 
-  passedBenchmark: 72352
+  passedBenchmark: 430

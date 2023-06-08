@@ -12,7 +12,7 @@ observations:
         group variables: ["stationIdentification", "releaseTime"]
         sort variable: "pressure"
         sort order: "descending"
-#   obsdataout: 
+#   obsdataout:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2020121500_m_out.nc
@@ -73,4 +73,4 @@ observations:
           variable: specificHumidity
     defer to post: true
 
-  passedBenchmark: 29006
+  passedBenchmark: 201
