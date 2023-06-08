@@ -1,0 +1,76 @@
+window begin: 2020-12-14T20:30:00Z
+window end: 2020-12-15T03:30:00Z
+
+observations:
+- obs space:
+    name: sonde_QC
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/geos_sondes_obs_2020121500.nc4
+      obsgrouping:
+        group variables: ["stationIdentification", "releaseTime"]
+        sort variable: "pressure"
+        sort order: "descending"
+#   obsdataout: 
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2020121500_m_out.nc
+    simulated variables: [specificHumidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/geos_sondes_geoval_2020121500.nc4
+    levels_are_top_down: false
+  obs operator:
+    name: Composite
+    components:
+     - name: VertInterp
+       observation alias file: ../resources/namemap/test_name_map.yaml
+       variables:
+       - name: specificHumidity
+
+  obs filters:
+
+  # Assign error with saturated specific humidity inflation
+  - filter: Perform Action
+    filter variables:
+    - name: specificHumidity
+    where:
+    - variable: ObsType/specificHumidity
+    action:
+      name: assign error
+      error function:
+        name: ObsFunction/ObsErrorSatSpecHumidity
+        options:
+          variable: specificHumidity
+          surface_obs: false
+          input_error_name: GsiInputObsError
+
+  # Pressure check
+  - filter: BlackList
+    filter variables:
+    - name: specificHumidity
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsErrorFactorPressureCheck@ObsFunction
+        options:
+          variable: specificHumidity
+          inflation factor: 8.0
+          surface_obs: false
+          adjusted_error_name: GsiAdjustObsError
+    defer to post: true
+
+ # Duplicate factor
+  - filter: Perform Action
+    filter variables:
+    - name: specificHumidity
+    action:
+      name: inflate error
+      inflation variable:
+        name: ObsFunction/ObsErrorFactorDuplicateCheck
+        options:
+          use_air_pressure: true
+          variable: specificHumidity
+    defer to post: true
+
+  passedBenchmark: 29006

@@ -30,13 +30,24 @@ ufo_add_test( NAME    instrument_sonde_gfs_qc
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 
-ufo_add_test( NAME    instrument_sonde_geos_qc
+ufo_add_test( NAME    instrument_sonde_geos_qc_uv
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sonde_uv_geos_qc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  sonde QC instrument
+              LABELS  sonde GEOS UV QC instrument
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+
+ufo_add_test( NAME    instrument_sonde_geos_qc_q
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sonde_q_geos_qc.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  sonde GEOS Q QC instrument
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )

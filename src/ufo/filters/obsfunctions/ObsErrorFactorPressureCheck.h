@@ -30,6 +30,8 @@ class ObsErrorFactorPressureCheckParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> inflatevars{"variable", this};
 
   oops::RequiredParameter<float> infl_coeff{"inflation factor", this};
+  oops::RequiredParameter<bool> surface_obs{"surface_obs", this};
+  oops::RequiredParameter<std::string> adjusterr_name{"adjusted_error_name", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};

@@ -243,6 +243,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
       obsfunctions/ObsErrorBoundMW.h
+      obsfunctions/ObsErrorSatSpecHumidity.cc
+      obsfunctions/ObsErrorSatSpecHumidity.h
       obsfunctions/ObsErrorFactorDuplicateCheck.cc
       obsfunctions/ObsErrorFactorDuplicateCheck.h
       obsfunctions/ObsErrorFactorPressureCheck.cc
