@@ -243,6 +243,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorBoundMW.cc
       obsfunctions/ObsErrorBoundMW.h
+      obsfunctions/ObsErrorSatSpecHumidity.cc
+      obsfunctions/ObsErrorSatSpecHumidity.h
       obsfunctions/ObsErrorFactorDuplicateCheck.cc
       obsfunctions/ObsErrorFactorDuplicateCheck.h
       obsfunctions/ObsErrorFactorPressureCheck.cc
@@ -301,6 +303,8 @@ set ( filters_files
       obsfunctions/SunGlintAngle.h
       obsfunctions/SurfTypeCheckRad.cc
       obsfunctions/SurfTypeCheckRad.h
+      obsfunctions/SurfaceCloudModelLevelCBH.cc
+      obsfunctions/SurfaceCloudModelLevelCBH.h
       obsfunctions/TropopauseEstimate.cc
       obsfunctions/TropopauseEstimate.h
       obsfunctions/WindDirAngleDiff.cc

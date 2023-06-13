@@ -201,6 +201,9 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
   } else if (!options_.selectMedian.value() && options_.writeMedian.value()) {
     throw eckit::UserError(
           ": write median has no effect if select median is not set.", Here());
+  } else if (!options_.selectMedian.value() && options_.opsCompatibilityMode.value()) {
+    throw eckit::UserError(
+          ": ops compatibility mode has no effect if select median is not set.", Here());
   }
 }
 
@@ -273,8 +276,8 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
     // Select points to retain within the category.
     if (options_.selectMedian.value()) {
-      thinCategoryMedian(obsData, obsIdsInCategory, prioritySplitter,
-                         numSpatialDims, numNonspatialDims, obsForMedian, isThinned);
+      thinCategoryMedian(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims,
+                         numNonspatialDims, obsForMedian, isThinned, options_.opsCompatibilityMode);
     } else {
       thinCategory(obsData, obsIdsInCategory, prioritySplitter,
                    numSpatialDims, numNonspatialDims, isThinned);
@@ -483,25 +486,26 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
                                              int numSpatialDims,
                                              int numNonspatialDims,
                                              std::vector<float> &obsForMedian,
-                                             std::vector<bool> &isThinned) const {
+                                             std::vector<bool> &isThinned,
+                                             bool opsCompatibilityMode) const {
   switch (numSpatialDims + numNonspatialDims) {
   case 0:
     return;  // nothing to do
   case 1:
     return thinCategoryMedian<1>(obsData, obsIdsInCategory, prioritySplitter,
-                                 numSpatialDims, obsForMedian, isThinned);
+                                 numSpatialDims, obsForMedian, isThinned, opsCompatibilityMode);
   case 2:
     return thinCategoryMedian<2>(obsData, obsIdsInCategory, prioritySplitter,
-                                 numSpatialDims, obsForMedian, isThinned);
+                                 numSpatialDims, obsForMedian, isThinned, opsCompatibilityMode);
   case 3:
     return thinCategoryMedian<3>(obsData, obsIdsInCategory, prioritySplitter,
-                                 numSpatialDims, obsForMedian, isThinned);
+                                 numSpatialDims, obsForMedian, isThinned, opsCompatibilityMode);
   case 4:
     return thinCategoryMedian<4>(obsData, obsIdsInCategory, prioritySplitter,
-                                 numSpatialDims, obsForMedian, isThinned);
+                                 numSpatialDims, obsForMedian, isThinned, opsCompatibilityMode);
   case 5:
     return thinCategoryMedian<5>(obsData, obsIdsInCategory, prioritySplitter,
-                                 numSpatialDims, obsForMedian, isThinned);
+                                 numSpatialDims, obsForMedian, isThinned, opsCompatibilityMode);
   }
 
   ABORT("Unexpected number of thinning dimensions");
@@ -539,7 +543,8 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
                                              const RecursiveSplitter &prioritySplitter,
                                              int numSpatialDims,
                                              std::vector<float> &obsForMedian,
-                                             std::vector<bool> &isThinned) const {
+                                             std::vector<bool> &isThinned,
+                                             bool opsCompatibilityMode) const {
   // Find all observations enclosed in the exclusion volume that have not previously
   // been found and retain the one closest to the median and thin the rest.
   //
@@ -550,6 +555,17 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
   //
   std::vector<bool> isUsed(obsData.totalNumObs, false);
   const float medianMissingValue = util::missingValue(medianMissingValue);
+
+  // Function to check if a candidate observation is the median (depends on opsCompatibilityMode).
+  auto isMedian = [opsCompatibilityMode](float medianObCandidate,
+                                         float obsValueMedianBelow,
+                                         float obsValueMedianAbove) {
+    const bool obsValueMedianBelowMatch = (medianObCandidate == obsValueMedianBelow);
+    if (opsCompatibilityMode) return obsValueMedianBelowMatch;
+    const bool obsValueMedianAboveMatch = (medianObCandidate == obsValueMedianAbove);
+    return obsValueMedianBelowMatch || obsValueMedianAboveMatch;
+  };
+
   for (auto priorityGroup : prioritySplitter.groups()) {
     // Generate vectors of quantities to avoid having to recalculate them
     // repeatedly.
@@ -658,17 +674,17 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
       if (nMedianObs > 1) {
         std::vector<float> medianObsSorted(medianObs);
         std::stable_sort(medianObsSorted.begin(), medianObsSorted.end());
-        const size_t obsIndexMedian1 = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
-        const size_t obsIndexMedian2 = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
-        const float obsValueMedian1 = medianObsSorted[obsIndexMedian1];
-        const float obsValueMedian2 = medianObsSorted[obsIndexMedian2];
-        bool stillToFindMedian = true;
+        const size_t obsIndexMedianBelow = static_cast<size_t>(std::floor(0.5 * (nMedianObs - 1)));
+        const size_t obsIndexMedianAbove = static_cast<size_t>(std::ceil(0.5 * (nMedianObs - 1)));
+        const float obsValueMedianBelow = medianObsSorted[obsIndexMedianBelow];
+        const float obsValueMedianAbove = medianObsSorted[obsIndexMedianAbove];
+        bool foundMedian = false;
         for (size_t medianIndex = 0; medianIndex < nMedianObs; medianIndex++) {
-          if (((medianObs[medianIndex] == obsValueMedian1) ||
-               (medianObs[medianIndex] == obsValueMedian2)) &&
-               stillToFindMedian) {
-            stillToFindMedian = false;
-            obsForMedian[medianIndices[medianIndex]] = 0.5 * (obsValueMedian1 + obsValueMedian2);
+          if (!foundMedian &&
+              isMedian(medianObs[medianIndex], obsValueMedianBelow, obsValueMedianAbove)) {
+            foundMedian = true;
+            obsForMedian[medianIndices[medianIndex]] =
+                                                  0.5 * (obsValueMedianBelow + obsValueMedianAbove);
           } else {
             isThinned[medianIndices[medianIndex]] = true;
             obsForMedian[medianIndices[medianIndex]] = medianMissingValue;

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERPPARAMETERS_H_
-#define UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERPPARAMETERS_H_
+#ifndef UFO_OPERATORS_VERTINTERP_OBSVERTINTERPPARAMETERS_H_
+#define UFO_OPERATORS_VERTINTERP_OBSVERTINTERPPARAMETERS_H_
 
 #include <string>
 #include <vector>
@@ -47,9 +47,9 @@ struct ParameterTraits<ufo::InterpolationMethod> :
 
 namespace ufo {
 
-/// Configuration options recognized by the AtmVertInterp operator.
-class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsAtmVertInterpParameters, ObsOperatorParametersBase)
+/// Configuration options recognized by the VertInterp operator.
+class ObsVertInterpParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsVertInterpParameters, ObsOperatorParametersBase)
 
  public:
   /// List of variables to be simulated: the default is to simulate all ObsSpace
@@ -83,7 +83,7 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
 
   oops::Parameter<InterpolationMethod> interpMethod
     {"interpolation method",
-     "interpolation method (options: automatic, linear, log-linear)",
+     "interpolation method (options: automatic, linear, log-linear, nearest-neighbor)",
      InterpolationMethod::AUTOMATIC,
      this};
 
@@ -94,4 +94,4 @@ class ObsAtmVertInterpParameters : public ObsOperatorParametersBase {
 };
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_ATMVERTINTERP_OBSATMVERTINTERPPARAMETERS_H_
+#endif  // UFO_OPERATORS_VERTINTERP_OBSVERTINTERPPARAMETERS_H_

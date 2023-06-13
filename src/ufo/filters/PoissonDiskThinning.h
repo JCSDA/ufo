@@ -106,7 +106,8 @@ class PoissonDiskThinning : public FilterBase,
                           int numSpatialDims,
                           int numNonspatialDims,
                           std::vector<float> &obsForMedian,
-                          std::vector<bool> &isThinned) const;
+                          std::vector<bool> &isThinned,
+                          bool opsCompatibilityMode) const;
 
   /// Thin observations belonging to a single category.
   template <int numDims>
@@ -122,7 +123,8 @@ class PoissonDiskThinning : public FilterBase,
                           const RecursiveSplitter &prioritySplitter,
                           int numSpatialDims,
                           std::vector<float> &obsForMedian,
-                          std::vector<bool> &isThinned) const;
+                          std::vector<bool> &isThinned,
+                          bool opsCompatibilityMode) const;
 
   template <int numDims>
   std::array<float, numDims> getObservationPosition(

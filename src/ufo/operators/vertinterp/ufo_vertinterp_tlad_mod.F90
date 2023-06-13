@@ -1,9 +1,9 @@
-! (C) Copyright 2017-2019 UCAR
+! (C) Copyright 2017-2023 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-module ufo_atmvertinterp_tlad_mod
+module ufo_vertinterp_tlad_mod
 
   use oops_variables_mod
   use ufo_vars_mod
@@ -14,7 +14,7 @@ module ufo_atmvertinterp_tlad_mod
 
 ! ------------------------------------------------------------------------------
 
-  type, public :: ufo_atmvertinterp_tlad
+  type, public :: ufo_vertinterp_tlad
   private
     type(oops_variables), public :: obsvars ! Variables to be simulated
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
@@ -35,22 +35,22 @@ module ufo_atmvertinterp_tlad_mod
 
     integer, public :: selected_interp
   contains
-    procedure :: setup => atmvertinterp_tlad_setup_
-    procedure :: cleanup => atmvertinterp_tlad_cleanup_
-    procedure :: settraj => atmvertinterp_tlad_settraj_
-    procedure :: simobs_tl => atmvertinterp_simobs_tl_
-    procedure :: simobs_ad => atmvertinterp_simobs_ad_
+    procedure :: setup => vertinterp_tlad_setup_
+    procedure :: cleanup => vertinterp_tlad_cleanup_
+    procedure :: settraj => vertinterp_tlad_settraj_
+    procedure :: simobs_tl => vertinterp_simobs_tl_
+    procedure :: simobs_ad => vertinterp_simobs_ad_
     final :: destructor
-  end type ufo_atmvertinterp_tlad
+  end type ufo_vertinterp_tlad
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_setup_(self, grid_conf)
+subroutine vertinterp_tlad_setup_(self, grid_conf)
   use fckit_configuration_module, only: fckit_configuration
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(inout) :: self
+  class(ufo_vertinterp_tlad), intent(inout) :: self
   type(fckit_configuration), intent(in) :: grid_conf
 
   character(kind=c_char,len=:), allocatable :: coord_name
@@ -117,15 +117,15 @@ subroutine atmvertinterp_tlad_setup_(self, grid_conf)
     self%o_v_group = "MetaData"
   endif
 
-end subroutine atmvertinterp_tlad_setup_
+end subroutine vertinterp_tlad_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
+subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   use missing_values_mod
   use obsspace_mod
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(inout) :: self
+  class(ufo_vertinterp_tlad), intent(inout) :: self
   type(ufo_geovals),         intent(in)    :: geovals
   type(c_ptr), value,        intent(in)    :: obss
 
@@ -210,13 +210,13 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   deallocate(obsvcoord)
   deallocate(tmp)
 
-end subroutine atmvertinterp_tlad_settraj_
+end subroutine vertinterp_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(in) :: self
+  class(ufo_vertinterp_tlad), intent(in) :: self
   type(ufo_geovals),         intent(in) :: geovals
   integer,                   intent(in) :: nvars, nlocs
   real(c_double),         intent(inout) :: hofx(nvars, nlocs)
@@ -249,13 +249,13 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
       enddo
     end if
   enddo
-end subroutine atmvertinterp_simobs_tl_
+end subroutine vertinterp_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(in) :: self
+  class(ufo_vertinterp_tlad), intent(in) :: self
   type(ufo_geovals),         intent(inout) :: geovals
   integer,                   intent(in)    :: nvars, nlocs
   real(c_double),            intent(in)    :: hofx(nvars, nlocs)
@@ -296,23 +296,23 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
       enddo
     end if
   enddo
-end subroutine atmvertinterp_simobs_ad_
+end subroutine vertinterp_simobs_ad_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_cleanup_(self)
+subroutine vertinterp_tlad_cleanup_(self)
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(inout) :: self
+  class(ufo_vertinterp_tlad), intent(inout) :: self
   self%nval = 0
   self%nlocs = 0
   if (allocated(self%wi)) deallocate(self%wi)
   if (allocated(self%wf)) deallocate(self%wf)
-end subroutine atmvertinterp_tlad_cleanup_
+end subroutine vertinterp_tlad_cleanup_
 
 ! ------------------------------------------------------------------------------
 
 subroutine  destructor(self)
-  type(ufo_atmvertinterp_tlad), intent(inout)  :: self
+  type(ufo_vertinterp_tlad), intent(inout)  :: self
 
   call self%cleanup()
 
@@ -320,4 +320,4 @@ end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_atmvertinterp_tlad_mod
+end module ufo_vertinterp_tlad_mod

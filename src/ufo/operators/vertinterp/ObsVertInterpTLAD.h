@@ -1,25 +1,23 @@
 /*
- * (C) Copyright 2017-2022 UCAR
+ * (C) Copyright 2017-2023 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERPTLAD_H_
-#define UFO_OPERATORS_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERPTLAD_H_
+#ifndef UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_H_
+#define UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_H_
 
 #include <ostream>
 #include <string>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
-#include "ufo/ObsOperatorParametersBase.h"
-
+#include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/marine/marinevertinterp/ObsMarineVertInterpParameters.h"
-#include "ufo/operators/marine/marinevertinterp/ObsMarineVertInterpTLAD.interface.h"
+#include "ufo/operators/vertinterp/ObsVertInterpParameters.h"
 
+// Forward declarations
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -30,16 +28,16 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-
-/// Marinevertinterp for observation operator TL and AD class
-class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
-                                 private util::ObjectCounter<ObsMarineVertInterpTLAD> {
+/// VertInterp observation operator
+class ObsVertInterpTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsVertInterpTLAD> {
  public:
-  typedef ObsMarineVertInterpParameters Parameters_;
-  static const std::string classname() {return "ufo::ObsMarineVertInterpTLAD";}
+  static const std::string classname() {return "ufo::ObsVertInterpTLAD";}
 
-  ObsMarineVertInterpTLAD(const ioda::ObsSpace &, const ObsMarineVertInterpParameters &);
-  ~ObsMarineVertInterpTLAD() override;
+  typedef ObsVertInterpParameters Parameters_;
+
+  ObsVertInterpTLAD(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsVertInterpTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -48,11 +46,15 @@ class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
 
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}
-  oops::Variables simulatedVars() const override { return operatorVars_; }
+
+  oops::Variables simulatedVars() const override {return operatorVars_;}
+
+  int & toFortran() {return keyOperVertInterp_;}
+  const int & toFortran() const {return keyOperVertInterp_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOper_;
+  F90hop keyOperVertInterp_;
   oops::Variables varin_;
   oops::Variables operatorVars_;
 };
@@ -60,4 +62,4 @@ class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERPTLAD_H_
+#endif  // UFO_OPERATORS_VERTINTERP_OBSVERTINTERPTLAD_H_

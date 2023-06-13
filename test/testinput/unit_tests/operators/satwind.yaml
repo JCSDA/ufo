@@ -8,6 +8,9 @@ observations:
   linear obs operator:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
   obs space:
     name: Satwind
     obsdatain:

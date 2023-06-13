@@ -28,6 +28,10 @@ observations:
        - name: specificHumidity
        - name: windEastward
        - name: windNorthward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       observation vertical coordinate group: MetaData
+       interpolation method: log-linear
      - name: SfcPCorrected
        variables:
        - name: stationPressure

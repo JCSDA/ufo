@@ -29,7 +29,6 @@ private
    integer,              public :: obsvaridx
    type(oops_variables), public :: geovars
    integer                            :: nlocs       !< Number of observations
-   integer                            :: nval       !< Number of level in model's profiles
    real (kind=kind_real), allocatable :: tempo(:)   !< temp interpolated at observation location
    real (kind=kind_real), allocatable :: salto(:)   !< salt interpolated at observation location
    real(kind_real), allocatable       :: wf(:)      !< Vertical interpolation weights
@@ -72,8 +71,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    type(ufo_geovals),                 intent(in)    :: geovals !< Model background
    type(c_ptr), value,                intent(in)    :: obss    !< Insitu temperature observations
 
-   type(ufo_geoval), pointer :: temp, salt, h
-   real (kind_real), allocatable :: depth(:,:)
+   type(ufo_geoval), pointer :: temp, salt, depth
    real(kind_real), allocatable :: obs_lon(:)
    real(kind_real), allocatable :: obs_lat(:)
    real(kind_real), allocatable :: obs_depth(:)
@@ -85,8 +83,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    ! get geovals
    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
    call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
-   call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
-   self%nval = h%nval
+   call ufo_geovals_get_var(geovals, var_ocn_depth, depth)
    self%nlocs = obsspace_get_nlocs(obss)
 
    ! Read in obs data
@@ -97,24 +94,12 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
    call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
 
-   ! calculate depth from layer thickness, TODO just ask model for depth??
-   allocate(depth(h%nval, self%nlocs))
-   do iobs = 1, self%nlocs
-      !< Depth from layer thickness
-      depth(1,iobs)=0.5*h%vals(1,iobs)
-      do ilev = 2, h%nval
-         depth(ilev,iobs)=sum(h%vals(1:ilev-1,iobs))+0.5*h%vals(ilev,iobs)
-      end do
-   end do
-
    ! calculate interpolation weights
    allocate(self%wi(self%nlocs))
    allocate(self%wf(self%nlocs))
    do iobs = 1, self%nlocs
-      call vert_interp_weights(h%nval, obs_depth(iobs), depth(:,iobs), self%wi(iobs), self%wf(iobs))
+      call vert_interp_weights(depth%nval, obs_depth(iobs), depth%vals(:,iobs), self%wi(iobs), self%wf(iobs))
    end do
-
-   deallocate(depth) ! depth is no longer needed after this point
 
    ! Jacobian
    allocate(self%jac(2,self%nlocs))

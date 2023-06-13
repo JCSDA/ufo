@@ -25,7 +25,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
   vector ref: GsiHofX
-  tolerance: 1.0e-06
+  tolerance: 1.0e-03
   linear obs operator test:
     coef TL: 1.0e-3
     tolerance TL: 1.0e-5

@@ -16,7 +16,6 @@ add_subdirectory( variabletransforms )
 
 # Operators
 add_subdirectory( operators/aerosols )
-add_subdirectory( operators/atmvertinterp )
 add_subdirectory( operators/atmvertinterplay )
 add_subdirectory( operators/atmsfcinterp )
 add_subdirectory( operators/columnretrieval )
@@ -35,6 +34,7 @@ add_subdirectory( operators/marine )
 if(oasim_FOUND)
     add_subdirectory( operators/oasim)
 endif()
+add_subdirectory( operators/product )
 add_subdirectory( operators/radarradialvelocity )
 if( rttov_FOUND )
     add_subdirectory( operators/rttov )
@@ -44,6 +44,7 @@ add_subdirectory( operators/sattcwv )
 add_subdirectory( operators/scatwind )
 add_subdirectory( operators/sfcpcorrected )
 add_subdirectory( operators/timeoper )
+add_subdirectory( operators/vertinterp )
 
 
 # Base files
@@ -105,7 +106,8 @@ list( APPEND ufo_src_files
     ${predictor_src_files}
     ${obslocalization_src_files}
     ${identity_src_files}
-    ${atmvertinterp_src_files}
+    ${product_src_files}
+    ${vertinterp_src_files}
     ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
     ${columnretrieval_src_files}

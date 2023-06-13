@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2022 UCAR
+ * (C) Copyright 2023- UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,19 +7,20 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
-
+#include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
-class ObsMarineVertInterpParameters : public ObsOperatorParametersBase  {
-  OOPS_CONCRETE_PARAMETERS(ObsMarineVertInterpParameters, ObsOperatorParametersBase )
+class ObsProductParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsProductParameters, ObsOperatorParametersBase)
 
  public:
   /// An optional `variables` parameter, which controls which ObsSpace
@@ -31,6 +32,10 @@ class ObsMarineVertInterpParameters : public ObsOperatorParametersBase  {
      "variables",
      "List of variables to be simulated",
      this};
+
+  /// h(x) = x(lowest level) * geovals
+  oops::RequiredParameter<std::string> geovalsToScaleHofxBy{"geovals to scale hofx by", this};
 };
 
 }  // namespace ufo
+

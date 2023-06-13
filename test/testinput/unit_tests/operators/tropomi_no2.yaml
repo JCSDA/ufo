@@ -15,8 +15,6 @@ observations:
   obs operator:
     name: ColumnRetrieval
     nlayers_retrieval: 34
-    AvgKernelVar: averaging_kernel_level
-    PresLevVar: pressure_level
     tracer variables: [volume_mixing_ratio_of_no2]
     isApriori: false
     isAveragingKernel: true
@@ -44,8 +42,6 @@ observations:
   obs operator:
     name: ColumnRetrieval
     nlayers_retrieval: 34
-    AvgKernelVar: averaging_kernel_level
-    PresLevVar: pressure_level
     tracer variables: [volume_mixing_ratio_of_no2]
     isApriori: false
     isAveragingKernel: true

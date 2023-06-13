@@ -14,7 +14,7 @@ variable maps:
   - name: virtualTemperature
     alias: virtual_temperature
   - name: potentialTemperature
-    alias: theta
+    alias: potential_temperature
   - name: stationPressure
     alias: surface_pressure
   - name: depthBelowWaterSurface

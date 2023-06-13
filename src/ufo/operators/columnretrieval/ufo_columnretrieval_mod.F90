@@ -25,7 +25,7 @@ module ufo_columnretrieval_mod
    integer :: nlayers_retrieval
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar
    character(kind=c_char,len=:), allocatable :: tracervars, stretch
-   logical :: isapriori, isaveragingkernel
+   logical :: isapriori, isaveragingkernel, totalnovertice
    real(kind_real) :: convert_factor_model
  contains
    procedure :: setup  => ufo_columnretrieval_setup
@@ -43,16 +43,9 @@ subroutine ufo_columnretrieval_setup(self, f_conf)
   type(fckit_configuration), intent(in) :: f_conf
   integer :: nlevs_yaml
   integer :: ivar, nvars
-  character(len=max_string) :: err_msg
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_retrieval", self%nlayers_retrieval)
-
-  ! get variable name from IODA for observation averaging kernel
-  call f_conf%get_or_die("AvgKernelVar", self%obskernelvar)
-
-  ! get vertical pressure grid 
-  call f_conf%get_or_die("PresLevVar", self%obspressurevar)
 
   ! get name of geoval/tracer to use from the model
   call f_conf%get_or_die("tracer variables", self%tracervars)
@@ -68,6 +61,9 @@ subroutine ufo_columnretrieval_setup(self, f_conf)
 
   ! do we need a conversion factor, say between ppmv and unity?
   call f_conf%get_or_die("model units coeff", self%convert_factor_model)
+
+  ! perform a simple total column calculation using model whole profile
+  call f_conf%get_or_die("totalNoVertice", self%totalnovertice)
 
   ! add variables to geovars that are needed
   ! specified tracers
@@ -116,55 +112,60 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
   real(c_double) :: missing
+  character(len=max_string) :: err_msg
 
   missing = missing_value(missing)
+
+  !prevent impossible options
+  if (self%totalnovertice .and. (self%nlayers_retrieval > 1 .or. &
+                                   self%isaveragingkernel )) then
+    write(err_msg, *) "Error: wrong combination of yaml options, &
+                  & totalNoVertice, isAveragingKernel, nlayers_retrieval"
+    call abor1_ftn(err_msg)
+  end if
+
 
   ! get geovals of atmospheric pressure
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
   call ufo_geovals_get_var(geovals, self%geovars%variable(nvars+1), prsi)
 
-  ! grab necesary metadata from IODA
-  ! get observation averaging kernel
-  ! once 2D arrays are allowed, rewrite/simplify this part
-  ! TEMPORARY: reverse do loops to make sure we follow the convention
-  ! TEMPORARY: top->bottom; increasing pressure 
+  ! getting the apriori term if applicable
+  allocate(apriori_term(nlocs))
+  ! set to zero
+  apriori_term = zero
+  if (self%isapriori) then
+    call obsspace_get_db(obss, "RetrievalAncillaryData", &
+                         "aprioriTerm", apriori_term)
+  end if
 
   allocate(avgkernel_obs(self%nlayers_retrieval, nlocs))
   ! set to 1.0 if no ak provided
   avgkernel_obs = one
   if (self%isaveragingkernel) then
-    do ilev = self%nlayers_retrieval, 1, -1
-      write(levstr, fmt = "(I3)") ilev
-      levstr = adjustl(levstr)
-      varstring = trim(self%obskernelvar)//"_"//trim(levstr)
-      call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
-                           avgkernel_obs(self%nlayers_retrieval+1-ilev, :))
-    end do
+    call obsspace_get_db_2d(obss, "RetrievalAncillaryData", &
+                            "averagingKernel", avgkernel_obs)
   end if
 
   ! get prsi_obs
   allocate(prsi_obs(self%nlayers_retrieval+1, nlocs))
-  do ilev = self%nlayers_retrieval+1, 1, -1
-    write(levstr, fmt = "(I3)") ilev
-    levstr = adjustl(levstr)
-    varstring = trim(self%obspressurevar)//"_"//trim(levstr)
-    call obsspace_get_db(obss, "RtrvlAncData", trim(varstring), &
-                         prsi_obs(self%nlayers_retrieval+2-ilev, :))
-  end do
-
-  ! getting the apriori term if applicable
-  allocate(apriori_term(nlocs))
-  apriori_term = zero
-  if (self%isapriori) then
-    call obsspace_get_db(obss, "RtrvlAncData", "apriori_term", apriori_term)
+  if (.not. self%totalnovertice) then
+    call obsspace_get_db_2d(obss, "RetrievalAncillaryData", &
+                          "pressureVertice", prsi_obs)
+  else
+    prsi_obs(1, :) = prsi%vals(1, :)
+    prsi_obs(self%nlayers_retrieval+1, :) = prsi%vals(prsi%nval, :)
   end if
 
   ! nvars is always 1 for this operator
   call ufo_geovals_get_var(geovals, self%tracervars, tracer)
+
+
   do iobs = 1, nlocs
     if (avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
-      call simulate_column_ob(self%nlayers_retrieval, tracer%nval, avgkernel_obs(:,iobs), &
-                              prsi_obs(:,iobs), prsi%vals(:,iobs), &
+      call simulate_column_ob(self%nlayers_retrieval, tracer%nval, &
+                              avgkernel_obs(:,iobs), &
+                              prsi_obs(:,iobs), &
+                              prsi%vals(:,iobs), &
                               tracer%vals(:,iobs)*self%convert_factor_model, &
                               hofx_tmp, self%stretch)
       hofx(nvars,iobs) = hofx_tmp + apriori_term(iobs)
@@ -173,10 +174,6 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
     end if
   end do
 
-
 end subroutine ufo_columnretrieval_simobs
-
-
-! ------------------------------------------------------------------------------
 
 end module ufo_columnretrieval_mod

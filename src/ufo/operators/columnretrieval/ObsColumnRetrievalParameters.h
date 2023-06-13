@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2022 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OPERATORS_COLUMNRETRIEVAL_OBSCOLUMNRETRIEVALPARAMETERS_H_
@@ -26,24 +26,6 @@ class ObsColumnRetrievalParameters : public ObsOperatorParametersBase {
     {"nlayers_retrieval",
      "Number of layers in the retrieval kernel",
      1,
-     this};
-
-  oops::Parameter <std::string> AvgKernelVar
-    {"AvgKernelVar",
-     "Name of observation variable used in averaging kernel",
-     "averaging_kernel",
-     this};
-
-  oops::Parameter <std::string> PresLevVar
-    {"PresLevVar",
-     "Name of vertical pressure coordinate in observation metadata",
-     "pressure_level",
-     this};
-
-  oops::Parameter <std::string> APrioriVar
-    {"APrioriVar",
-     "Name of a priori retrieval term in observation metadata",
-     "apriori_term",
      this};
 
   oops::RequiredParameter <std::vector<std::string>> tracerVariables
@@ -73,6 +55,12 @@ class ObsColumnRetrievalParameters : public ObsOperatorParametersBase {
     {"model units coeff",
      "Conversion between model units",
      1.0,
+     this};
+
+  oops::Parameter <bool> totalNoVertice
+    {"totalNoVertice",
+     "Total column calculation without AK and apriori (no vertices needed)",
+     false,
      this};
 };
 

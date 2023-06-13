@@ -20,7 +20,6 @@ obs operator:
   obs options:
     Sensor_ID: abi_g16
     EndianType: little_endian
-monitoring only: true
 obs bias:
   variational bc:
     predictors:
@@ -43,11 +42,11 @@ obs bias:
         ratio: 1.1
         ratio for small dataset: 2.0
 obs filters:
-## Data Quality Flags (DQF) from original data are in PreQC (0=good, 1=conditionally_usable, 2 or 3 are bad) # TODO: activate it back when files change PreQC to be integer
-#- filter: PreQC
-#  maxvalue: 1
-#  action:
-#    name: reject
+# Data Quality Flags (DQF) from original data are in PreQC (0=good, 1=conditionally_usable, 2 or 3 are bad)
+- filter: PreQC
+  maxvalue: 1
+  action:
+    name: reject
 # Reject observation points that are towards the limb of the satellite view.
 - filter: RejectList
   filter variables:
@@ -59,30 +58,56 @@ obs filters:
     minvalue: 69.0
   action:
     name: reject
+# A large overlap exists between G16 and G17, so chop off western side of G16 since G17 has it better viewed.
+- filter: RejectList
+  filter variables:
+  - name: brightnessTemperature
+    channels: *abi_g16_channels
+  where:
+  - variable:
+      name: MetaData/longitude
+    maxvalue: -97.5
+  action:
+    name: reject
 # Gross check the brightness temperatures are physically sensible.
 - filter: Bounds Check
   filter variables:
   - name: brightnessTemperature
     channels: *abi_g16_channels
-  minvalue: 130
-  maxvalue: 335
+  minvalue: 110
+  maxvalue: 345
   action:
     name: reject
-# Assign observation errors.
+
+# Assign obsError using ramp and symmetric cloud impact obsfunctions.
 - filter: Perform Action
   filter variables:
   - name: brightnessTemperature
     channels: *abi_g16_channels
   action:
     name: assign error
-    error parameter vector: [6.5, 4.5, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5]
+    error function:
+      name: ObsFunction/ObsErrorModelRamp
+      options:
+        channels: *abi_g16_channels
+        xvar:
+          name: ObsFunction/SymmCldImpactIR
+          channels: *abi_g16_channels
+          options:
+            channels: *abi_g16_channels
+            scale by omb: true
+        x0: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        x1: [40.0, 30.0, 30.0, 30.0, 35.0, 35.0, 30.0, 30.0, 35.0, 35.0]
+        err0: [3.0, 0.5, 0.5, 0.5, 2.0, 2.0, 0.5, 0.5, 1.5, 1.5]
+        err1: [35.0, 25.0, 25.0, 25.0, 30.0, 30.0, 25.0, 25.0, 30.0, 30.0]
+      channels: *abi_g16_channels
+
 # Gross error check with (O - B) / ObsError greater than threshold.
 - filter: Background Check
   filter variables:
   - name: brightnessTemperature
     channels: *abi_g16_channels
-  threshold: 4.0
-  absolute threshold: 25.0
+  absolute threshold: 35.0
   action:
     name: reject
 # Decide which channels we wish to ignore (-1) or use (1).
@@ -95,7 +120,7 @@ obs filters:
     channels: *abi_g16_channels
     options:
       channels: *abi_g16_channels
-      use_flag: [-1, 1, 1, 1, -1, -1, 1, 1, 1, 1]
+      use_flag: [-1, 1, 1, 1, -1, -1, -1, -1, -1, -1]
   minvalue: 1.0e-12
   action:
     name: reject
