@@ -559,10 +559,10 @@ TauCoeff/ODPS/Little_Endian/ssmis_f17.TauCoeff.bin
 SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/viirs-i_n21.SpcCoeff.bin
-SpcCoeff/Little_Endian/viirs-m_n21.SpcCoeff.bin
-SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/viirs-i_n21.TauCoeff.bin
+SpcCoeff/Little_Endian/viirs-m_n21.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/viirs-m_n21.TauCoeff.bin
+SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_j1.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_j1.TauCoeff.bin
@@ -592,6 +592,10 @@ TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n21.TauCoeff.bin
 SpcCoeff/Little_Endian/tropics_sv1_srf_v3.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v3.TauCoeff.bin
+SpcCoeff/Little_Endian/cowvr_ors6.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/cowvr_ors6.TauCoeff.bin
+SpcCoeff/Little_Endian/tempest-D_cubesat.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/tempest-D_cubesat.TauCoeff.bin
 )
 
 if( crtm_FOUND )

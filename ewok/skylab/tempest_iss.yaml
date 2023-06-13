@@ -1,0 +1,76 @@
+obs space:
+  name: tempest_iss
+  obsdatain:
+    engine:
+      type: H5File
+  obsdataout:
+    engine:
+      type: H5File
+      allow overwrite: true
+  io pool:
+    write multiple files: true
+  _source: noaa
+  simulated variables: [brightnessTemperature]
+  channels: &tempest_iss_channels 1, 2, 3, 4, 5
+monitoring only: true
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3]
+  Clouds: [Water, Ice, Rain, Snow, Graupel]
+  Cloud_Fraction: 1.0
+  obs options:
+    Sensor_ID: tempest-D_cubesat
+    EndianType: little_endian
+obs bias:
+  variational bc:
+    predictors:
+    - name: constant
+    - name: emissivity
+    - name: scan_angle
+      order: 4
+    - name: scan_angle
+      order: 3
+    - name: scan_angle
+      order: 2
+    - name: scan_angle
+  covariance:
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.0]
+    step size: 1.0e-4
+    largest analysis variance: 10000.0
+    prior:
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+obs filters:
+- filter: Bounds Check
+  filter variables:
+  - name: brightnessTemperature
+    channels: *tempest_iss_channels
+  action:
+    name: assign error
+    error parameter vector: [7.5, 2.5, 4.0, 3.0, 4.0]
+- filter: BlackList
+  filter variables:
+  - name: brightnessTemperature
+    channels: *tempest_iss_channels
+  where:
+  - variable:
+      name: MetaData/sensorZenithAngle
+    minvalue: 80
+- filter: Background Check
+  threshold: 3
+# Useflag check
+- filter: Bounds Check
+  filter variables:
+  - name: brightnessTemperature
+    channels: *tempest_iss_channels
+  test variables:
+  - name: ObsFunction/ChannelUseflagCheckRad
+    channels: *tempest_iss_channels
+    options:
+      channels: *tempest_iss_channels
+      use_flag: [-1, -1, -1, -1, -1]
+  minvalue: 1.0e-12
+  action:
+    name: reject
