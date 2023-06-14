@@ -18,7 +18,7 @@ obs operator:
   Clouds: [Water, Ice, Rain, Snow, Graupel]
   Cloud_Fraction: 1.0
   obs options:
-    Sensor_ID: tropics_sv1_srf_v1
+    Sensor_ID: tropics_sv1_srf_v3
     EndianType: little_endian
 monitoring only: true
 obs bias:

@@ -24,6 +24,8 @@ observations:
     variables:
     - name: airTemperature
     vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
 
   geovals: &geoval
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4

@@ -4,6 +4,9 @@ window end: 2020-12-15T03:30:00Z
 observations:
 - obs operator:
     name: VertInterp
+    vertical coordinate: geopotential_height
+    observation vertical coordinate: height
+    interpolation method: linear
     observation alias file: ../resources/namemap/test_name_map.yaml
   obs space:
     name: RadarVAD

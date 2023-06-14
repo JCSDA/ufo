@@ -69,7 +69,8 @@ ObsRadianceOASIM::~ObsRadianceOASIM() {
 
 void ObsRadianceOASIM::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                               ObsDiagnostics &) const {
-  ufo_radianceoasim_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
+  ufo_radianceoasim_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(),
+                               ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceOASIM: observation operator run" << std::endl;
 }
 

@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/operators/gnssro/QC/ROobserror.h"
@@ -51,15 +51,12 @@ void ROobserror::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ROobserror using priorFilter" << std::endl;
-  // Check that we have valid data to apply the filter to
-  if (obsdb_.nlocs() > 0) {
-    // Call the fortran routines to do the processing
-    flags_->save("FortranQC");    // should pass values to fortran properly
-    obserr_->save("FortranERR");  // should pass values to fortran properly
-    ufo_roobserror_prior_f90(key_);
-    flags_->read("FortranQC");    // should get values from fortran properly
-    obserr_->read("FortranERR");  // should get values from fortran properly
-  }
+  // Call the fortran routines to do the processing
+  flags_->save("FortranQC");    // should pass values to fortran properly
+  obserr_->save("FortranERR");  // should pass values to fortran properly
+  ufo_roobserror_prior_f90(key_);
+  flags_->read("FortranQC");    // should get values from fortran properly
+  obserr_->read("FortranERR");  // should get values from fortran properly
 }
 
 

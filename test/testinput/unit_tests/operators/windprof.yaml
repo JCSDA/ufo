@@ -5,6 +5,8 @@ observations:
 - obs operator:
     name: VertInterp
     vertical coordinate: geopotential_height
+    observation vertical coordinate: height
+    interpolation method: linear
   linear obs operator test:
     coef TL: 0.1
     tolerance TL: 1.0e-13

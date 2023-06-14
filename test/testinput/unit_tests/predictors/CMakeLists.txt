@@ -218,3 +218,14 @@ ufo_add_test( NAME    test_ufo_thickness_predictor
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+
+ufo_add_test( NAME    test_ufo_obsvalue_predictor
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsvalue_predictor.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )

@@ -44,7 +44,8 @@ enum class UnselectLocationIf {
 void unselectRejectedLocations(std::vector<bool> &selected,
                                const ufo::Variables &filtervars,
                                const ioda::ObsDataVector<int> &qcflags,
-                               UnselectLocationIf mode);
+                               UnselectLocationIf mode,
+                               const std::vector<size_t> &obs_inds = {});
 
 }  // namespace ufo
 

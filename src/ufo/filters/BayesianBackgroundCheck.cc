@@ -164,6 +164,10 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         }
         // PGE:
         obsdb_.get_db("GrossErrorProbability", varname1, PGE1);
+        // Get total (combined) probability distribution if previously exists
+        if (obsdb_.has("GrossErrorProbabilityTotal", varname1)) {
+            obsdb_.get_db("GrossErrorProbabilityTotal", varname1, TotalPd);
+          }
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (apply[jobs]) {
             applycondition[jobs] = true;
@@ -184,6 +188,10 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         }
         // PGE:
         obsdb_.get_db("GrossErrorProbability", varname1, PGE1);
+        // Get total (combined) probability distribution if previously exists
+        if (obsdb_.has("GrossErrorProbabilityTotal", varname1)) {
+          obsdb_.get_db("GrossErrorProbabilityTotal", varname1, TotalPd);
+        }
         for (size_t jobs=0; jobs < obsdb_.nlocs(); ++jobs) {
           if (apply[jobs]) {
             applycondition[jobs] = true;

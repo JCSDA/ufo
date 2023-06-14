@@ -8,14 +8,15 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sondes_uv_obs_2020121500.nc4
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/geos_sondes_obs_2020121500.nc4
 #    obsdataout:
 #      engine:
 #        type: H5File
 #        obsfile: Output/sondes_qc_2020121500.nc4
     simulated variables: [windEastward, windNorthward]
   geovals:
-    filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_uv_geoval_2020121500.nc4
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/geos_sondes_geoval_2020121500.nc4
+    levels_are_top_down: false
   obs operator:
     name: Composite
     components:
@@ -24,6 +25,9 @@ observations:
        variables:
        - name: windEastward
        - name: windNorthward
+       vertical coordinate: air_pressure
+       observation vertical coordinate: pressure
+       interpolation method: log-linear
   obs filters:
   #
   - filter: Perform Action
@@ -82,6 +86,9 @@ observations:
         options:
           variable: windEastward
           inflation factor: 4.0
+          surface_obs: false
+          adjusted_error_name: GsiAdjustObsError
+
   #wgu
   - filter: Perform Action
     filter variables:
@@ -97,6 +104,9 @@ observations:
         options:
           variable: windNorthward
           inflation factor: 4.0
+          surface_obs: false
+          adjusted_error_name: GsiAdjustObsError
+
   #wgu
   #Gross Check
   - filter: Background Check
@@ -147,4 +157,4 @@ observations:
       name: reject
     defer to post: true
 
-  passedBenchmark: 200
+  passedBenchmark: 430

@@ -56,16 +56,23 @@ subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
 
   hofx = zero
   profile_obslayers = zero
-  do k=1,nlayers_obs  
-     ! get obs layer bound model indexes and weights for staggered 
+  do k=1,nlayers_obs
+     ! get obs layer bound model indexes and weights for staggered
      ! obs and geoval levels
-     call vert_interp_weights(nlayers_model+1, pobs(k), pmod, wi_a, wf_a) 
+     call vert_interp_weights(nlayers_model+1, pobs(k), pmod, wi_a, wf_a)
      call vert_interp_weights(nlayers_model+1, pobs(k+1), pmod, wi_b, wf_b)
+
+     !check if pmod is monotonic and decreasing
+     if ((pmod(wi_a+1) < pmod(wi_a)) .or. (pmod(wi_b+1) < pmod(wi_b))) then
+       write(err_msg, *) "Error: inverted pressure coordinate in geovals, &
+               &convention: top->bottom, decreasing pressures"
+       call abor1_ftn(err_msg)
+     end if
 
      ! when multiple geovals levels are in a obs layer
      if ( wi_a < wi_b ) then
         profile_obslayers(k) = profile_obslayers(k) + profile_model(wi_a) * &
-             (pmod(wi_a+1)-pmod(wi_a)) * wf_a / (M_dryair*grav)  
+             (pmod(wi_a+1)-pmod(wi_a)) * wf_a / (M_dryair*grav)
         do j=wi_a+1,wi_b-1
            profile_obslayers(k) = profile_obslayers(k) + profile_model(j) * &
                 (pmod(j+1)-pmod(j)) / (M_dryair*grav)
@@ -103,7 +110,7 @@ subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
   real(kind_real), dimension(nlayers_obs) :: profile_obslayers
   integer, parameter :: max_string=800
   real(kind_real), dimension(nlayers_obs+1) :: pobs
-  real(kind_real), dimension(nlayers_model+1) :: pmod 
+  real(kind_real), dimension(nlayers_model+1) :: pmod
   character(len=max_string) :: err_msg
   character(len=:), intent(in   ), allocatable :: stretch
   integer :: k, j, wi_a, wi_b
@@ -118,6 +125,13 @@ subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
      ! obs and geoval levels
      call vert_interp_weights(nlayers_model+1, pobs(k), pmod, wi_a, wf_a)
      call vert_interp_weights(nlayers_model+1, pobs(k+1), pmod, wi_b, wf_b)
+
+     !check if pmod is monotonic and decreasing
+     if ((pmod(wi_a+1) < pmod(wi_a)) .or. (pmod(wi_b+1) < pmod(wi_b))) then
+       write(err_msg, *) "Error: inverted pressure coordinate in geovals, &
+               &convention: top->bottom, decreasing pressures"
+       call abor1_ftn(err_msg)
+     end if
 
      ! when multiple geovals levels are in a obs layer
      if ( wi_a < wi_b ) then
@@ -177,6 +191,13 @@ subroutine simulate_column_ob_ad(nlayers_obs, nlayers_model, avgkernel_obs, &
      ! obs and geoval levels
      call vert_interp_weights(nlayers_model+1, pobs(k), pmod, wi_a, wf_a)
      call vert_interp_weights(nlayers_model+1, pobs(k+1), pmod, wi_b, wf_b)
+
+     !check if pmod is monotonic and decreasing
+     if ((pmod(wi_a+1) < pmod(wi_a)) .or. (pmod(wi_b+1) < pmod(wi_b))) then
+       write(err_msg, *) "Error: inverted pressure coordinate in geovals, &
+               &convention: top->bottom, decreasing pressures"
+       call abor1_ftn(err_msg)
+     end if
 
      ! when multiple geovals levels are in a obs layer
      if ( wi_a < wi_b ) then

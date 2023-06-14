@@ -46,14 +46,18 @@ bool shouldUnselectLocation(size_t location,
 void unselectRejectedLocations(std::vector<bool> &selected,
                                const ufo::Variables &filtervars,
                                const ioda::ObsDataVector<int> &qcflags,
-                               UnselectLocationIf mode) {
+                               UnselectLocationIf mode,
+                               const std::vector<size_t> &obs_inds) {
   std::vector<ioda::ObsDataRow<int>> filterVariableFlags;
   // Select flags for respective filtervars
   for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
     const std::string filterVariableName = filtervars.variable(ivar).variable();
     filterVariableFlags.push_back(qcflags[filterVariableName]);
   }
-  for (size_t loc = 0; loc < selected.size(); ++loc) {
+  const bool specificInds = (obs_inds.size() > 0);
+  const size_t nLoc = specificInds ? obs_inds.size() : selected.size();
+  for (size_t iloc = 0; iloc < nLoc; ++iloc) {
+    const size_t loc = specificInds ? obs_inds[iloc] : iloc;
     if (selected[loc] && shouldUnselectLocation(loc, filterVariableFlags, mode))
       selected[loc] = false;
   }

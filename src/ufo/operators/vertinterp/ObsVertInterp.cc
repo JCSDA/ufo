@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2023 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/atmvertinterp/ObsAtmVertInterp.h"
+#include "ufo/operators/vertinterp/ObsVertInterp.h"
 
 #include <ostream>
 #include <vector>
@@ -16,19 +16,19 @@
 
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/operators/atmvertinterp/ObsAtmVertInterp.interface.h"
+#include "ufo/operators/vertinterp/ObsVertInterp.interface.h"
 #include "ufo/utils/OperatorUtils.h"  // for getOperatorVariables
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
+static ObsOperatorMaker<ObsVertInterp> makerVertInterp_("VertInterp");
 // -----------------------------------------------------------------------------
 
-ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
+ObsVertInterp::ObsVertInterp(const ioda::ObsSpace & odb,
                                    const Parameters_ & params)
   : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
-    keyOperAtmVertInterp_(0), odb_(odb), varin_()
+    keyOperVertInterp_(0), odb_(odb), varin_()
 {
   std::vector<int> operatorVarIndices;
   getOperatorVariables(params.variables.value(), odb.assimvariables(),
@@ -36,36 +36,36 @@ ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
 
   varin_ += nameMap_.convertName(operatorVars_);
 
-  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, params.toConfiguration(),
-                              operatorVars_, operatorVarIndices.data(), operatorVarIndices.size(),
-                              varin_);
+  ufo_vertinterp_setup_f90(keyOperVertInterp_, params.toConfiguration(),
+                              operatorVars_, operatorVarIndices.data(),
+                              operatorVarIndices.size(), varin_);
 
-  oops::Log::trace() << "ObsAtmVertInterp created." << std::endl;
+  oops::Log::trace() << "ObsVertInterp created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsAtmVertInterp::~ObsAtmVertInterp() {
-  ufo_atmvertinterp_delete_f90(keyOperAtmVertInterp_);
-  oops::Log::trace() << "ObsAtmVertInterp destructed" << std::endl;
+ObsVertInterp::~ObsVertInterp() {
+  ufo_vertinterp_delete_f90(keyOperVertInterp_);
+  oops::Log::trace() << "ObsVertInterp destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                    ObsDiagnostics &) const {
-  oops::Log::trace() << "ObsAtmVertInterp::simulateObs entered" << std::endl;
+  oops::Log::trace() << "ObsVertInterp::simulateObs entered" << std::endl;
 
-  ufo_atmvertinterp_simobs_f90(keyOperAtmVertInterp_, gom.toFortran(), odb_,
+  ufo_vertinterp_simobs_f90(keyOperVertInterp_, gom.toFortran(), odb_,
                                ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
-  oops::Log::trace() << "ObsAtmVertInterp::simulateObs exit" << std::endl;
+  oops::Log::trace() << "ObsVertInterp::simulateObs exit" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterp::print(std::ostream & os) const {
-  os << "ObsAtmVertInterp::print not implemented";
+void ObsVertInterp::print(std::ostream & os) const {
+  os << "ObsVertInterp::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

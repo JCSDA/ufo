@@ -14,6 +14,9 @@ obs space:
 #
 obs operator:
   name: VertInterp
+  vertical coordinate: air_pressure
+  observation vertical coordinate: pressure
+  interpolation method: log-linear
 #
 obs filters:
   # Observation Range Sanity Check

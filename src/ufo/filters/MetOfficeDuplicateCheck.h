@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/optional.hpp>
@@ -49,6 +50,12 @@ class MetOfficeDuplicateCheckParameters : public FilterParametersBase {
   oops::RequiredParameter <float> pBinHalfWidth
     {"pressure bin half-width",
      "Half-width (Pa) of pressure bin used to define duplicate pairs of observations.",
+     this};
+  oops::OptionalParameter <std::string> categoryVariableName
+    {"category variable name",
+     "Name of a category variable in the MetaData group. "
+     "If defined, whenever an observation O is thinned, all other observations with the same value "
+     "of the category variable as O are also thinned.",
      this};
 };
 

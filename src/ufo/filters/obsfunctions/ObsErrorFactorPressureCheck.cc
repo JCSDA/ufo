@@ -19,6 +19,9 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/utils/Constants.h"
 
+#include "ufo/GeoVaLs.h"
+#include "ufo/utils/PiecewiseLinearInterpolation.h"
+
 namespace ufo {
 
 namespace {
@@ -76,7 +79,6 @@ static ObsFunctionMaker<ObsErrorFactorPressureCheck> makerSteps_("ObsErrorFactor
 
 ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configuration &config)
   : invars_() {
-  oops::Log::debug() << "ObsErrorFactorPressureCheck: config = " << config << std::endl;
   const float missing = util::missingValue(missing);
   // Initialize options
   options_.reset(new ObsErrorFactorPressureCheckParameters());
@@ -103,6 +105,7 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable("GeoVaLs/geopotential_height");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
+  invars_ += Variable("GeoVaLs/saturated_specific_humidity_profile");
 }
 
 // -----------------------------------------------------------------------------
@@ -127,6 +130,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   const float infl_coeff = options_->infl_coeff.value();
   const std::string errgrp = options_->testObserr.value();
   const std::string flaggrp = options_->testQCflag.value();
+  const bool surface_obs = options_->surface_obs.value();
+  const std::string adjusterr_name = options_->adjusterr_name.value();
 
   std::vector<int> itype(nlocs);
   data.get(Variable("ObsType/"+inflatevars), itype);
@@ -148,6 +153,9 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   std::vector<float> obs_pressure(nlocs);
   data.get(Variable("MetaData/pressure"), obs_pressure);
 
+  std::vector<float> adjustErr;
+  data.get(Variable(adjusterr_name+"/"+inflatevars), adjustErr);
+
   std::vector<float> zsges(nlocs);
   data.get(Variable("GeoVaLs/surface_geometric_height"), zsges);
   std::vector<float> model_pressure_sfc(nlocs);
@@ -155,17 +163,24 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
 
   std::vector<std::vector<float>> zges(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = ilev;
+    const size_t level = nlevs - ilev - 1;
     data.get(Variable("GeoVaLs/geopotential_height"), level, zges[ilev]);
   }
 
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = ilev;
+    const size_t level = nlevs - ilev - 1;
     data.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
+  std::vector<std::vector<double>> q_profile(nlevs, std::vector<double>(nlocs));
+  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
+    const size_t level = nlevs - ilev - 1;
+    data.get(Variable("GeoVaLs/saturated_specific_humidity_profile"), level, q_profile[ilev]);
+  }
+
   int iflag;
+  double sat_specific_humidity;
   const float grav = Constants::grav;
   const float deg2rad = Constants::deg2rad;
   const float grav_equator = Constants::grav_equator;
@@ -175,13 +190,16 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   const float flattening = Constants::flattening;
   const float grav_ratio = Constants::grav_ratio;
   float fact, slat, sin2, termg, termr, termrg;
-  float dpres, sfcchk, logobspres, logsfcpres, rlow, rhgh, drpx;
+  float dpres, sfcchk, logobspres, logsfcpres, rlow, rhgh, drpx, ramp;
   float obserror, new_error, error_factor;
   std::vector<float> zges_mh(nlevs);
   std::vector<float> logprsl(nlevs);
+  std::vector<double> q_profile_iloc(nlevs);
   bool reported_height = false;
   bool iflag_print_one = true;
   bool iflag_print_negone = true;
+  std::vector<double> logprsl_double(nlevs);
+  double errorx;
 
   for (size_t iv = 0; iv < nvars; ++iv) {   // Variable loop
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
@@ -251,16 +269,27 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if (dpres > static_cast<float>(nlevs)) drpx = 1.e6f;
 
         sfcchk = 0.0f;
+        rlow = std::max(sfcchk-dpres, 0.0f);
+        ramp = rlow;
+        rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
+        obserr[iv][iloc] = 1.0;
+        if (qcflagdata[iloc] == 0) {
+          obserr[iv][iloc] = (currentObserr[iloc]+drpx+1.e6*rhgh+infl_coeff*rlow)
+                           /currentObserr[iloc];
+          if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
+          if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
+        }
 
       } else {
         logobspres = std::log(obs_pressure[iloc]);
         logsfcpres = std::log(model_pressure_sfc[iloc]);
         for (size_t k = 0 ; k < nlevs ; ++k) {
           logprsl[k] = std::log(prsl[k][iloc]);
+          logprsl_double[k] = std::log(prsl[k][iloc]);
         }
 
         ASSERT(logprsl[0] > logprsl[nlevs-1]);
-        iflag = -1;    // in decrasing order
+        iflag = -1;    // in decreasing order
         if (iflag_print_negone) {
           std::cout << "iflag = " << iflag << std::endl;
           iflag_print_negone = false;
@@ -271,24 +300,40 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         // Apply this drpx correction only to surface or surface_ship data
         if ((itype[iloc] > 179 && itype[iloc] <= 190) ||
             (itype[iloc] >= 192 && itype[iloc] < 199)) {
-          drpx = abs(1.0f-pow(model_pressure_sfc[iloc]/obs_pressure[iloc],
-                 ufo::Constants::rd_over_cp))
-                * ufo::Constants::t0c;
+          drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
         } else {
           drpx = 0.0f;
         }
-      }
 
-      rlow = std::max(sfcchk-dpres, 0.0f);
-      rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
-      // Ouput is an error inflation factor
-      obserr[iv][iloc] = 1.0;
-      if (qcflagdata[iloc] == 0) {
-        obserr[iv][iloc] = (currentObserr[iloc]+drpx+1.e6*rhgh+infl_coeff*rlow)
-                           /currentObserr[iloc];
-        if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
-        if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
-      }
+        if ((itype[iloc] > 179 && itype[iloc] < 186) ||
+            (itype[iloc] == 199)) dpres = 1.0;
+
+        // Retrieve q_profile at location
+        for (size_t k = 0 ; k < nlevs ; ++k) {
+          q_profile_iloc[k] = q_profile[k][iloc];
+        }
+
+        ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile_iloc);
+        if (surface_obs) {
+            sat_specific_humidity = q_profile_iloc[0];
+        } else {
+            sat_specific_humidity = vert_interp_model(logobspres);
+        }
+
+        rlow = std::max(sfcchk-dpres, 0.0f);
+        ramp = rlow;
+        rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
+        // Ouput is an error inflation factor
+        obserr[iv][iloc] = 1.0;
+        if (qcflagdata[iloc] == 0) {
+          errorx = (adjustErr[iloc]+drpx)*sat_specific_humidity;
+          errorx = std::max(0.0001, errorx);
+          obserr[iv][iloc] = (errorx + (1.e6*rhgh)+(infl_coeff*ramp)) /(currentObserr[iloc]);
+
+          if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
+          if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
+       }
+     }
     }
   }
 }

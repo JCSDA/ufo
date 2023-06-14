@@ -90,7 +90,7 @@ character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_
      'cloud top pressure  ', &
      'cloud fraction      ', &
      'emissivity pcs      ', &
-     var_cldfrac /)
+     var_cldfrac_vol /)
 
 contains
 

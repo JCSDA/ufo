@@ -178,6 +178,12 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// was used to find a median but is not the median observation. Defaults to false.
   oops::Parameter<bool> writeMedian{"write median", false, this};
 
+  /// If select median is true, ops compatibility mode can be set to true to alter the behaviour of
+  /// the code if there is an even number of values going into the median. If ops compatility mode
+  /// is false, the first observation of the two central observations is retained/overwritten. If
+  /// true, the lower value observation is retained/overwritten. Defaults to false.
+  oops::Parameter<bool> opsCompatibilityMode{"ops compatibility mode", false, this};
+
   /// If true, observations will be randomly shuffled before being inspected as candidates
   /// for retaining.
   ///

@@ -65,14 +65,14 @@ end subroutine ufo_radianceoasim_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radianceoasim_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nlt, c_nobs, c_hofx) &
+subroutine ufo_radianceoasim_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
   bind(c,name='ufo_radianceoasim_simobs_f90')
 
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs, c_nlt
-real(c_double), intent(inout) :: c_hofx(c_nlt,c_nobs)
+integer(c_int), intent(in) :: c_nlocs, c_nvars
+real(c_double), intent(inout) :: c_hofx(c_nlocs,c_nvars)
 
 type(ufo_oasim), pointer :: self
 type(ufo_geovals), pointer :: geovals
@@ -80,7 +80,7 @@ type(ufo_geovals), pointer :: geovals
 call ufo_radianceoasim_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs(geovals, c_hofx, c_obsspace)
+call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_radianceoasim_simobs_c
 
