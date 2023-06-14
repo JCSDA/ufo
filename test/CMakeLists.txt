@@ -636,9 +636,23 @@ mietable/mietable_metop_amsuamhs.bin
 CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
+# Extract rtcoeffs in binDir/Data
 
-file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst
-                     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
+set(archive "${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst")
+set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+  file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
+else()
+  file(MAKE_DIRECTORY ${out_dir})
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
+    WORKING_DIRECTORY {out_dir}
+    RESULT_VARIABLE ret
+  )
+  if(NOT ret EQUAL 0)
+    message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
+  endif()
+endif()
 
 endif( ${rttov_FOUND} )
 
