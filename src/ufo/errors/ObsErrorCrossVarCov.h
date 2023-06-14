@@ -1,5 +1,6 @@
 /*
  * (C) Copyright 2021 UCAR.
+ * (C) Crown copyright 2023 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -17,8 +18,8 @@
 
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsErrorBase.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/ObsTraits.h"
 
@@ -28,6 +29,52 @@ namespace ioda {
 
 namespace ufo {
 
+enum class ReconditionMethod {
+  MINIMUMEIGENVALUE, RIDGEREGRESSION, NORECONDITIONING
+};
+
+struct ReconditionMethodParameterTraitsHelper {
+  typedef ReconditionMethod EnumType;
+  static constexpr char enumTypeName[] = "ReconditionMethod";
+  static constexpr util::NamedEnumerator<ReconditionMethod> namedValues[] = {
+    { ReconditionMethod::MINIMUMEIGENVALUE, "Minimum Eigenvalue" },
+    { ReconditionMethod::RIDGEREGRESSION, "Ridge Regression" },
+    { ReconditionMethod::NORECONDITIONING, "No reconditioning" }
+  };
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::ReconditionMethod> :
+    public EnumParameterTraits<ufo::ReconditionMethodParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+namespace ufo {
+/// \brief Parameters for Recondition method
+class ReconditionParameters : public oops::ObsErrorParametersBase {
+    OOPS_CONCRETE_PARAMETERS(ReconditionParameters, ObsErrorParametersBase)
+ public:
+  /// Method of reconditioning, either Ridge regression or minimum eigenvalue
+  oops::Parameter<ReconditionMethod> ReconMethod{"recondition method",
+                                                 "recondition method (options:"
+                                                 " Minimum Eigenvalue,"
+                                                 " Ridge Regression,"
+                                                 " No reconditioning)",
+                                                 ReconditionMethod::NORECONDITIONING,
+                                                 this};
+  /// Target fraction of condition number
+  oops::OptionalParameter<float> kFrac{"fraction", this};
+  /// Threshold for Minimum EigenValue
+  oops::OptionalParameter<float> Threshold{"threshold", this};
+  /// Shift for Ridge Regression
+  oops::OptionalParameter<float> Shift{"shift", this};
+};
+
 /// \brief Parameters for obs errors with cross-variable correlations
 class ObsErrorCrossVarCovParameters : public oops::ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorCrossVarCovParameters, ObsErrorParametersBase)
@@ -35,8 +82,9 @@ class ObsErrorCrossVarCovParameters : public oops::ObsErrorParametersBase {
   /// Input file containing correlations or covariances. If covariances are
   /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> inputFile{"input file", this};
-};
 
+  oops::OptionalParameter<ReconditionParameters> reconditioning{"reconditioning", this};
+};
 // -----------------------------------------------------------------------------
 /// \brief Observation error covariance matrix with cross-variable
 ///        correlations.
@@ -45,7 +93,9 @@ class ObsErrorCrossVarCovParameters : public oops::ObsErrorParametersBase {
 ///          deviations are read from ObsSpace as ObsError group.
 ///          Full observation error covariance matrix is R = D^{1/2} * C * D^{1/2}
 ///          where D^{1/2} is a diagonal matrix with stddev_ (ObsError group)
-///          on the diagonal, and C is the correlation matrix.
+///          on the diagonal, and C is the correlation matrix. The cross-variable
+///          R matrices at each location can be reconditioned to reduce their condition
+///          number, in order to speed up convergence of minimisation.
 class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
  public:
   /// The type of parameters passed to the constructor.
@@ -58,6 +108,9 @@ class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
 
   /// Update obs error standard deviations to be equal to \p stddev
   void update(const ioda::ObsVector & stddev) override;
+
+  /// Recondition the R matrix.
+  void recondition(const Parameters_ & options, const ioda::ObsVector & mask);
 
   /// Multiply \p y by this observation error covariance
   /// Computed as R * dy = D^{1/2} * C * D^{1/2} * dy

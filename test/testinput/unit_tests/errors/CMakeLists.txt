@@ -74,3 +74,25 @@ ufo_add_test( NAME    test_ufo_obserrordiagonal
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+
+ufo_add_test( NAME    test_ufo_reconditioning
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestReconditioning.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+
+ufo_add_test( NAME    test_ufo_reconditioning_mpi
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestReconditioning.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
