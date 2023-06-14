@@ -556,6 +556,8 @@ SpcCoeff/Little_Endian/sndrD4_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD4_g15.TauCoeff.bin
 SpcCoeff/Little_Endian/ssmis_f17.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ssmis_f17.TauCoeff.bin
+SpcCoeff/Little_Endian/ssmis_f18.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/ssmis_f18.TauCoeff.bin
 SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/viirs-i_n21.SpcCoeff.bin

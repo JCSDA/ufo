@@ -1,5 +1,5 @@
 obs space:
-  name: ssmis_f17
+  name: ssmis_f18
   obsdatain:
     engine:
       type: H5File
@@ -11,7 +11,7 @@ obs space:
     write multiple files: true
   _source: noaa
   simulated variables: [brightnessTemperature]
-  channels: &ssmis_f17_channels 1-24
+  channels: &ssmis_f18_channels 1-24
 monitoring only: true
 obs operator:
   name: CRTM
@@ -19,7 +19,7 @@ obs operator:
   Clouds: [Water, Ice, Rain, Snow, Graupel]
   Cloud_Fraction: 1.0
   obs options:
-    Sensor_ID: &Sensor_ID ssmis_f17
+    Sensor_ID: &Sensor_ID ssmis_f18
     EndianType: little_endian
 obs filters:
 # set sensor view angle (fake for now)
@@ -57,17 +57,17 @@ obs filters:
 - filter: Perform Action
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   action:
     name: assign error
     error parameter vector: [1.50, 0.50, 0.50, 0.50, 0.50, 1.00, 1.00, 3.00, 3.00, 3.00,
-                             3.00, 2.40, 1.27, 1.44, 3.00, 1.34, 1.74, 3.75, 3.00, 3.00,
+                             3.00, 5.00, 5.00, 5.00, 5.00, 5.00, 3.75, 3.75, 3.00, 3.00,
                              2.00, 6.40, 1.00, 1.00]
 # gross check (setuprad)
 - filter: Background Check
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   threshold: 1.5
   action:
     name: reject
@@ -75,7 +75,7 @@ obs filters:
 - filter: Background Check
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   absolute threshold: 3.5
   remove bias correction: true
   action:
@@ -223,7 +223,7 @@ obs filters:
 - filter: Domain Check
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   where:
   - variable:
       name: GeoVaLs/surface_altitude
@@ -250,15 +250,15 @@ obs filters:
 - filter: BlackList
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   action:
     name: inflate error
     inflation variable:
       # surface jacobian check
       name: ObsFunction/ObsErrorFactorSurfJacobianRad
-      channels: *ssmis_f17_channels
+      channels: *ssmis_f18_channels
       options:
-        channels: *ssmis_f17_channels
+        channels: *ssmis_f18_channels
         sensor: *Sensor_ID
         obserr_demisf: [0.010, 0.010, 0.010, 0.010, 0.010]
         obserr_dtempf: [0.500, 0.500, 0.500, 0.500, 0.500]
@@ -266,13 +266,13 @@ obs filters:
 - filter: Bounds Check
   filter variables:
   - name: brightnessTemperature
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
   test variables:
   - name: ObsFunction/ChannelUseflagCheckRad
-    channels: *ssmis_f17_channels
+    channels: *ssmis_f18_channels
     options:
-      channels: *ssmis_f17_channels
-      use_flag: [ 1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1]
+      channels: *ssmis_f18_channels
+      use_flag: [ -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1]
   minvalue: 1.0e-12
   action:
     name: reject
