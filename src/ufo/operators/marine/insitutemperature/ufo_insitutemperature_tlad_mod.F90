@@ -76,6 +76,9 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    real(kind_real), allocatable :: obs_lat(:)
    real(kind_real), allocatable :: obs_depth(:)
    integer :: ilev, iobs
+   real(c_double) :: missing
+
+   missing = missing_value(missing)
 
    ! make sure nothing allocated
    call self%delete()
@@ -105,14 +108,25 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    allocate(self%jac(2,self%nlocs))
    allocate(self%tempo(self%nlocs))
    allocate(self%salto(self%nlocs))
-   do iobs = 1, self%nlocs
+   outer: do iobs = 1, self%nlocs
+      ! if any values in the the geovals profile are missing, skip
+      ! TODO: be less restrictive if there is the possibility of partially 
+      !  missing geoval profiles? (probably would never happen)
+      do ilev = 1, temp%nval
+         if (temp%vals(ilev,iobs) == missing .or. &
+             salt%vals(ilev,iobs) == missing) then
+            self%jac(:,iobs) = 0.0
+            cycle outer
+         end if
+      end do
+
       ! Interpolate background to obs depth and save in traj
       call vert_interp_apply(temp%nval, temp%vals(:,iobs), self%tempo(iobs), self%wi(iobs), self%wf(iobs))
       call vert_interp_apply(salt%nval, salt%vals(:,iobs), self%salto(iobs), self%wi(iobs), self%wf(iobs))
 
       ! Compute jacobian
       call insitu_t_jac(self%jac(:,iobs), self%tempo(iobs), self%salto(iobs), obs_lon(iobs), obs_lat(iobs), obs_depth(iobs))
-   end do
+   end do outer
 
    deallocate(obs_lon, obs_lat, obs_depth)
 

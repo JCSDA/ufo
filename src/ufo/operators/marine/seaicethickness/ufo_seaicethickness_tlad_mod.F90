@@ -113,10 +113,14 @@ type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_seaicethick_simobs_tl"
 character(max_string) :: err_msg
+real(c_double) :: missing
 
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icethick_d, icefrac_d, snowthick
 real(kind=kind_real) :: rho_wiw, rho_wsw
+
+!> Set missing value
+missing = missing_value(missing)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -149,6 +153,14 @@ select case (trim(self%obsvars%variable(1)))
 case ("seaIceFreeboard")
    do iobs = 1, size(hofx,1)
       do icat = 1, ncat
+         ! check for missing input values
+         if (self%icefrac%vals(icat,iobs) == missing .or. &
+             self%icethick%vals(icat,iobs) == missing .or. &
+             self%snowthick%vals(icat,iobs) == missing ) then
+            hofx(iobs) = missing
+            exit
+         end if
+
          hofx(iobs) = hofx(iobs) +                                         &
                       rho_wiw * self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) + &
                       rho_wiw * icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) + &
@@ -158,6 +170,13 @@ case ("seaIceFreeboard")
 case ("iceThickness")
    do iobs = 1, size(hofx,1)
       do icat = 1, ncat
+         ! check for missing input values
+         if (self%icefrac%vals(icat,iobs) == missing .or. &
+             self%icethick%vals(icat,iobs) == missing) then
+            hofx(iobs) = missing
+            exit
+         end if
+
          hofx(iobs) = hofx(iobs) +                                         &
                       self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) + &
                       icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs)

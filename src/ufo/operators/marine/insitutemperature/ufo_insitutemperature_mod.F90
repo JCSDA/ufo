@@ -59,6 +59,9 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
    real(kind_real) :: tp, sp
    integer, allocatable :: wi(:)
    real(kind_real), allocatable :: wf(:)
+   real(c_double) :: missing
+
+   missing = missing_value(missing)
 
    ! Associate geoval pointers
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
@@ -80,13 +83,24 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
       call vert_interp_weights(depth%nval, obs_depth(iobs), depth%vals(:,iobs), wi(iobs), wf(iobs))
    end do
 
-   do iobs = 1, nlocs
+   outer: do iobs = 1, nlocs
+      ! if any values in the the geovals profile are missing, skip
+      ! TODO: be less restrictive if there is the possibility of partially 
+      !  missing geoval profiles? (probably would never happen)
+      do ilev = 1, temp%nval
+         if (temp%vals(ilev,iobs) == missing .or. &
+             salt%vals(ilev,iobs) == missing) then
+            hofx(self%obsvaridx, iobs) = missing
+            cycle outer
+         end if
+      end do
+
        ! Interpolate temp_p, salt_p to deptho
        call vert_interp_apply(temp%nval, temp%vals(:,iobs), tp, wi(iobs), wf(iobs))
        call vert_interp_apply(salt%nval, salt%vals(:,iobs), sp, wi(iobs), wf(iobs))
 
        call insitu_t_nl(hofx(self%obsvaridx, iobs), tp, sp, obs_lon(iobs), obs_lat(iobs), obs_depth(iobs))
-   end do
+   end do outer
 
    ! done, cleanup
 
