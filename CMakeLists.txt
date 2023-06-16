@@ -9,7 +9,7 @@
 
 cmake_minimum_required( VERSION 3.12 )
 
-project( ufo VERSION 1.6.0 LANGUAGES C CXX Fortran )
+project( ufo VERSION 1.7.0 LANGUAGES C CXX Fortran )
 
 ## Ecbuild integration
 find_package( ecbuild 3.3.2 REQUIRED )
@@ -50,16 +50,16 @@ find_package( Eigen3 REQUIRED NO_MODULE HINTS
 find_package(gsl-lite REQUIRED HINTS $ENV{gsl_lite_DIR})
 
 # eckit
-find_package( eckit 1.11.6 REQUIRED )
+find_package( eckit 1.23.0 REQUIRED )
 
 # fckit
-find_package( fckit 0.7.0 REQUIRED )
+find_package( fckit 0.10.1 REQUIRED )
 
 # ioda
-find_package( ioda 1.0.0 REQUIRED )
+find_package( ioda 2.6.0 REQUIRED )
 
 # oops
-find_package( oops 1.0.0 REQUIRED )
+find_package( oops 1.7.0 REQUIRED )
 
 # crtm
 find_package( crtm 2.3 QUIET )
