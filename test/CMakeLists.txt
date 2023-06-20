@@ -269,6 +269,11 @@ ecbuild_add_executable( TARGET  test_FortranGeoVaLs.x
 
 set( UFO_TEST_TIER 1 CACHE STRING "UFO test tier. Run tests up to and including this tier.")
 
+# Override UFO_TEST_TIER using environment variable
+if( DEFINED ENV{UFO_TEST_TIER} )
+    set( UFO_TEST_TIER $ENV{UFO_TEST_TIER} )
+endif()
+
 message(STATUS "Running ufo tests for tiers up to and including tier " ${UFO_TEST_TIER})
 
 ####################################################################
@@ -556,13 +561,15 @@ SpcCoeff/Little_Endian/sndrD4_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD4_g15.TauCoeff.bin
 SpcCoeff/Little_Endian/ssmis_f17.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ssmis_f17.TauCoeff.bin
+SpcCoeff/Little_Endian/ssmis_f18.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/ssmis_f18.TauCoeff.bin
 SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/viirs-i_n21.SpcCoeff.bin
-SpcCoeff/Little_Endian/viirs-m_n21.SpcCoeff.bin
-SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/viirs-i_n21.TauCoeff.bin
+SpcCoeff/Little_Endian/viirs-m_n21.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/viirs-m_n21.TauCoeff.bin
+SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_j1.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_j1.TauCoeff.bin
@@ -592,6 +599,10 @@ TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_n21.TauCoeff.bin
 SpcCoeff/Little_Endian/tropics_sv1_srf_v3.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/tropics_sv1_srf_v3.TauCoeff.bin
+SpcCoeff/Little_Endian/cowvr_ors6.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/cowvr_ors6.TauCoeff.bin
+SpcCoeff/Little_Endian/tempest-D_cubesat.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/tempest-D_cubesat.TauCoeff.bin
 )
 
 if( crtm_FOUND )
@@ -625,9 +636,23 @@ mietable/mietable_metop_amsuamhs.bin
 CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
+# Extract rtcoeffs in binDir/Data
 
-file(ARCHIVE_EXTRACT INPUT ${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst
-                     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Data )
+set(archive "${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst")
+set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+  file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
+else()
+  file(MAKE_DIRECTORY ${out_dir})
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
+    WORKING_DIRECTORY {out_dir}
+    RESULT_VARIABLE ret
+  )
+  if(NOT ret EQUAL 0)
+    message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
+  endif()
+endif()
 
 endif( ${rttov_FOUND} )
 

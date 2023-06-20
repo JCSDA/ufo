@@ -43,6 +43,9 @@ subroutine ufo_coolskin_tlad_setup(self, f_conf)
 class(ufo_coolskin_tlad), intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
 
+! Set missing flag
+self%r_miss_val = missing_value(self%r_miss_val)
+
 end subroutine ufo_coolskin_tlad_setup
 
 ! ------------------------------------------------------------------------------
@@ -79,12 +82,17 @@ call ufo_geovals_get_var(geovals, var_sea_fric_vel , u )
 
 self%ltraj  = .true.
 
-! Set missing flag
-self%r_miss_val = missing_value(self%r_miss_val)
-
 ! Initialize and compute traj dependent Jacobian
 allocate(self%jac(6,self%nlocs))
 do iobs = 1, self%nlocs
+   ! check for missing values
+   ! (the atmospheric fields *shouldn't* be masked, so dont bother checking)
+   if (Td%vals(1, iobs) == self%r_miss_val .or. &
+       u%vals(1,iobs) == self%r_miss_val) then
+     self%jac(:,iobs) = 0.0
+     cycle
+   end if
+
    call ufo_coolskin_jac(self%jac(:,iobs),&
                          S_ns%vals(1,iobs),&
                          H_I%vals(1,iobs),&
@@ -137,6 +145,14 @@ endif
 ! Perturbation coolskin obs operator
 hofx = 0.0
 do iobs = 1, self%nlocs
+   ! check for missing values
+   ! (the atmospheric fields *shouldn't* be masked, so dont bother checking)
+   if (Td%vals(1,iobs) == self%r_miss_val .or. &
+        u%vals(1,iobs) == self%r_miss_val) then
+          hofx(iobs) = self%r_miss_val
+      cycle
+    end if
+
    hofx(iobs) = self%jac(1,iobs)*S_ns%vals(1,iobs) + &
                 self%jac(2,iobs)*H_I%vals(1,iobs) + &
                 self%jac(3,iobs)*H_s%vals(1,iobs) + &

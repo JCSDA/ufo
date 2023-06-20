@@ -1,0 +1,134 @@
+window begin: 2021-07-31T20:59:00Z
+window end: 2021-08-01T03:00:00Z
+
+observations:
+- obs space:
+    name: aircraftBCOffline
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraftBCOffline_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aircraftBCOffline_geoval.nc4
+  obs operator:
+    name: VertInterp
+  obs filters:
+    # Reassign any AIREP/PIREP (type=130) airTemperature MetaData/stationIdentification to 'KX130   '
+    - filter: Variable Assignment
+      where:
+      - variable:
+          name: ObsType/airTemperature
+        is_in: 130 
+      assignments:
+      - name: MetaData/stationIdentification
+        value: 'KX130   '
+    # Reassign any airTemperature MetaData/windUpward >30. to a value of 30.
+    - filter: Variable Assignment
+      where:
+      - variable:
+          name: MetaData/windUpward
+        minvalue: 30.
+      assignments:
+      - name: MetaData/windUpward
+        value: 30.
+    # The BiasCorrectionTerm/constantPredictor can be pulled directly
+    # from the BiasCoefficientValue/constantPredictor, since the
+    # term is just the coefficient value * 1.
+    - filter: Variable Assignment
+      assignments:
+      - name: BiasCorrectionTerm/constantPredictor
+        type: float
+        function:
+          name: ObsFunction/DrawValueFromFile
+          options:
+            file: Data/ufo/testinput_tier_1/aircraftBCOffline_constant.csv
+            group: BiasCoefficientValue
+            interpolation:
+            - name: MetaData/stationIdentification
+              method: exact
+      defer to post: true
+    # The BiasCorrectionTerm/ascentPredictor requires use of
+    # ObsFunction/AircraftBiasCorrectionTerm to combine the coefficient
+    # with the predictor value, so for now we assign the coefficient to
+    # its own variable.
+    - filter: Variable Assignment
+      assignments:
+      - name: BiasCoefficientValue/ascentPredictor
+        type: float
+        function:
+          name: ObsFunction/DrawValueFromFile
+          options:
+            file: Data/ufo/testinput_tier_1/aircraftBCOffline_ascent.csv
+            group: BiasCoefficientValue
+            interpolation:
+            - name: MetaData/stationIdentification
+              method: exact
+      defer to post: true
+    # The BiasCorrectionTerm/ascentSquaredPredictor requires use of
+    # ObsFunction/AircraftBiasCorrectionTerm to combine the coefficient
+    # with the predictor value raised to order=2, so for now we assign
+    # the coefficient to its own variable.
+    - filter: Variable Assignment
+      assignments:
+      - name: BiasCoefficientValue/ascentSquaredPredictor
+        type: float
+        function:
+          name: ObsFunction/DrawValueFromFile
+          options:
+            file: Data/ufo/testinput_tier_1/aircraftBCOffline_ascentSquared.csv
+            group: BiasCoefficientValue
+            interpolation:
+            - name: MetaData/stationIdentification
+              method: exact
+      defer to post: true
+    # Compute the BiasCorrectionTerm/ascentPredictor as
+    # coefficient * predictor (order=1)
+    - filter: Variable Assignment
+      assignments:
+      - name: BiasCorrectionTerm/ascentPredictor
+        type: float
+        function:
+          name: ObsFunction/AircraftBiasCorrectionTerm
+          options:
+            coeff_grpvarname: BiasCoefficientValue/ascentPredictor
+            predi_grpvarname: MetaData/windUpward
+            predi_order: 1.
+      defer to post: true
+    # Compute the BiasCorrectionTerm/ascentSquaredPredictor as
+    # coefficient * predictor (order=2)
+    - filter: Variable Assignment
+      assignments:
+      - name: BiasCorrectionTerm/ascentSquaredPredictor
+        type: float
+        function:
+          name: ObsFunction/AircraftBiasCorrectionTerm
+          options:
+            coeff_grpvarname: BiasCoefficientValue/ascentSquaredPredictor
+            predi_grpvarname: MetaData/windUpward
+            predi_order: 2.
+      defer to post: true
+    # Use ObsFunction/LinearCombination to combine ObsValue/airTemperature with the
+    # BiasCorrectionPredictor/<predictor> variables to produce a bias-corrected
+    # HofX
+    - filter: Variable Assignment
+      assignments:
+      - name: HofXBc/airTemperature
+        type: float
+        function:
+          name: ObsFunction/LinearCombination
+          options:
+            variables: [HofX/airTemperature, BiasCorrectionTerm/constantPredictor, BiasCorrectionTerm/ascentPredictor, BiasCorrectionTerm/ascentSquaredPredictor]
+            coefs: [1.0, 1.0, 1.0, 1.0]
+      defer to post: true
+  # Test against GsiHofXbc
+  compareVariables:
+    - test:
+        name: HofXBc/airTemperature
+      reference:
+        name: GsiHofXBc/airTemperature
+      absTol: 1.0e-4
