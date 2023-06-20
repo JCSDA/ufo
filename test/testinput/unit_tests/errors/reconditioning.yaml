@@ -1,0 +1,228 @@
+window begin: 2020-11-01T12:00:00Z
+window end: 2020-11-02T12:00:00Z
+
+observations:
+- obs space:
+    name: iasi_metop-b
+    obsdatain:
+      engine:
+       type: H5File
+       obsfile: Data/ufo/testinput_tier_1/iasi_metop-b_202011012_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 16, 29, 49, 51, 55, 57, 59
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/Rcov_iasi_metop-b_sea.nc4
+    reconditioning:
+      recondition method: No reconditioning
+
+- obs space:
+    name: No recondition
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: No reconditioning
+
+- obs space:
+    name: Ridge Regression, fraction provided, compare to known output
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Ridge Regression
+      fraction: 0.9
+  obs error test:
+    test reader: true
+    reference: [1.11913, 0.2, 0.6]
+
+- obs space:
+    name: Ridge Regression, shift provided, compare to known output
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Ridge Regression
+      shift: 2.0
+  obs error test:
+    test reader: true
+    reference: [3, 0.2, 0.6]
+
+- obs space:
+    name: Minimum Eigen Value, threshold provided, compare to known output
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [0, 1, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Minimum Eigenvalue
+      threshold: 2
+  obs error test:
+    test reader: true
+    reference: [0.15298, 4.00212, 0.903267]
+
+- obs space:
+    name: Minimum Eigen Value, fraction provided, compare to known output
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Minimum Eigenvalue
+      fraction: 0.9
+  obs error test:
+    test reader: true
+    reference: [1.10476, 0.19528, 0.59272]
+
+- obs space:
+    name: Ridge Regression, no option
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Ridge Regression
+  expectExceptionWithMessage: No viable reconditioning metric for ridge regression provided.
+
+- obs space:
+    name: Minimum Eigen Value, no option
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Minimum Eigenvalue
+  expectExceptionWithMessage: No viable reconditioning metric for minimum eigenvalue provided.
+
+- obs space:
+    name: Ridge Regression, too many options
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Ridge Regression
+      shift: 2.0
+      fraction: 0.9
+  expectExceptionWithMessage: Too many reconditioning metrics provided.
+
+- obs space:
+    name: Minimum Eigen Value, too many options
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [1]
+        lons: [1]
+        dateTimes: [300]
+        obs errors: [1, 2, 3]
+        obs values: [1, 0, 0]
+    simulated variables: [variable1, variable2, variable3]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_test.nc4
+    reconditioning:
+      recondition method: Minimum Eigenvalue
+      threshold: 2.0
+      fraction: 0.9
+  expectExceptionWithMessage: Too many reconditioning metrics provided.
+
+- obs space:
+    name: Ridge Regression, unviable kmax
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_fake_20201101.nc4
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+    reconditioning:
+      recondition method: Ridge Regression
+      fraction: 0.9
+  obs error test:
+    test reader: true
+    reference: [322.344, 175.324, 172.246, 171.112, 306.504, 304.488, 308.808, 136.096, 135.072, 135.2, 135.456, 136.48, 217.65, 217.05, -39.7808, 10.9244, 257.347,  -24.9413, 257.347, -24.9413, 378.599, 29.5187, 1.66567, 11.4509, 388.917, 30.2972,  388.917, 30.2972, 255.538, -47.3862, 66.2016, 4.83985, 55.3914, 4.25661, 66.2016,   4.83985, 19.2356, 16.0838,  0.384269, 6.61122, 43.5569, 11.5326, 38.808, -0.332819, 41.013, -0.35173, 276.057, -26.7547, 50.9972, 18.0833, 276.057, -26.7547, 294.976, 23.5684, 67.7589, 17.4986, 135.324, 10.4766, 135.324, 10.4766, 118.673, -21.6472, 6.19375, 17.9316, 235, -2.01537, 235, -2.01537, 177.984, -1.5264, 118.673, -21.6472, 5.66687, 16.4062, 87.5585, 22.6204, 136.972,  -1.17468, 136.972, -1.17468, 87.5585, 22.6204, 106.36, -10.1725, 106.36, -10.1725, -0.236596, 27.588, -0.215576, 25.137, -10.7807, 23.0228, -9.87597, 20.3692, -7.67854, 21.2323, -7.67854, 21.2323, -25.3818, 21.4161, -25.3818, 21.4161, -30.1766, 25.166, -31.633, 26.6223, -21.5674, 21.5674, -19.2376, 19.2376, -7.39354, 19.714, -12.6735, 15.2116, -12.6735, 15.2116, -12.6735, 15.2116, -12.1791, 17.2552, -12.1791, 17.2552, -15.2116, 12.6735, -17.8155, 4.87744, -18.4365, -1.41677, -18.4365, -1.41677, -19.6367, 7.36788, -19.0138, 13.4371, -13.637, 16.0908, -13.637, 16.0908, -8.83868, 7.50025, -9.77341, 11.558]
+
+- obs space:
+    name: Minimum Eigenvalue, unviable kmax
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_fake_20201101.nc4
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  obs error:
+    covariance model: cross variable covariances
+    input file: Data/ufo/testinput_tier_1/obserror_corr_3var.nc4
+    reconditioning:
+      recondition method: Minimum Eigenvalue
+      fraction: 0.9
+  obs error test:
+    test reader: true
+    reference: [322.344, 175.324, 172.246, 171.112, 306.504, 304.488, 308.808, 136.096, 135.072, 135.2, 135.456, 136.48, 217.65, 217.05, -39.7808, 10.9244, 257.347,  -24.9413, 257.347, -24.9413, 378.599, 29.5187, 1.66567, 11.4509, 388.917, 30.2972,  388.917, 30.2972, 255.538, -47.3862, 66.2016, 4.83985, 55.3914, 4.25661, 66.2016,   4.83985, 19.2356, 16.0838,  0.384269, 6.61122, 43.5569, 11.5326, 38.808, -0.332819, 41.013, -0.35173, 276.057, -26.7547, 50.9972, 18.0833, 276.057, -26.7547, 294.976, 23.5684, 67.7589, 17.4986, 135.324, 10.4766, 135.324, 10.4766, 118.673, -21.6472, 6.19375, 17.9316, 235, -2.01537, 235, -2.01537, 177.984, -1.5264, 118.673, -21.6472, 5.66687, 16.4062, 87.5585, 22.6204, 136.972,  -1.17468, 136.972, -1.17468, 87.5585, 22.6204, 106.36, -10.1725, 106.36, -10.1725, -0.236596, 27.588, -0.215576, 25.137, -10.7807, 23.0228, -9.87597, 20.3692, -7.67854, 21.2323, -7.67854, 21.2323, -25.3818, 21.4161, -25.3818, 21.4161, -30.1766, 25.166, -31.633, 26.6223, -21.5674, 21.5674, -19.2376, 19.2376, -7.39354, 19.714, -12.6735, 15.2116, -12.6735, 15.2116, -12.6735, 15.2116, -12.1791, 17.2552, -12.1791, 17.2552, -15.2116, 12.6735, -17.8155, 4.87744, -18.4365, -1.41677, -18.4365, -1.41677, -19.6367, 7.36788, -19.0138, 13.4371, -13.637, 16.0908, -13.637, 16.0908, -8.83868, 7.50025, -9.77341, 11.558]

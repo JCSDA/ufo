@@ -47,6 +47,8 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   int nlocs = ovec.size();
   int nlevs = gv.nlevs("mass_concentration_of_chlorophyll_in_sea_water");
 
+  const double missing = util::missingValue(missing);
+
   // common vectors storage
   std::vector <double> tmp(nlocs, 0.0);
 
@@ -62,6 +64,12 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   // Calculate mean chlorophyll averaged over euphotic layer (euz_mod)
   for ( std::size_t i = 0; i < nlocs; ++i ) {
+    // skip missing geovals
+    if (chl[0][i] == missing) {
+      ovec[i] = missing;
+      continue;
+    }
+
     double euz = Constants::euzc_0 * pow(chl[0][i], Constants::euzc_1);
     double euz_mod = 0.0;
     int elev = 0;

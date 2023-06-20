@@ -90,6 +90,15 @@ implicit none
     
     ! simulated obs, hofx(iobs)=Ts 
     do iobs = 1, obss_nlocs
+      ! check for missing values
+      ! (the atmospheric fields *shouldn't* be masked, so dont
+      ! bother checking)
+      if (Td%vals(1, iobs) == missing .or. &
+          u%vals(1,iobs) == missing) then
+        hofx(iobs) = missing
+        cycle
+      end if
+
        call ufo_coolskin_sim(hofx(iobs),&
                              dTc,&
                              S_ns%vals(1,iobs),&

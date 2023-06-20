@@ -52,6 +52,17 @@ ufo_add_test( NAME    test_ufo_function_arithmetic
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_function_aircraft_bc_offline
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_aircraftBCOffline.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_function_averagetemperaturebelow
               TIER    1
               ECBUILD

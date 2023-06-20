@@ -16,6 +16,7 @@ module ufo_seaicethickness_mod
  use ufo_vars_mod
  use obsspace_mod
  use oops_variables_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -70,10 +71,13 @@ type(c_ptr), value, intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_seaicethick_simobs"
     character(max_string) :: err_msg
+    real(c_double) :: missing
 
     integer :: iobs, icat, ncat
     type(ufo_geoval), pointer :: icethick, icefrac, snowthick
     real(kind=kind_real) :: rho_wiw, rho_wsw
+
+    missing = missing_value(missing)
 
     ! check if nlocs is consistent in geovals & hofx
     if (geovals%nlocs /= size(hofx,1)) then
@@ -102,6 +106,14 @@ type(c_ptr), value, intent(in)    :: obss
     case ("seaIceFreeboard")
        do iobs = 1, size(hofx,1)
           do icat = 1, ncat
+             ! check for missing input values
+             if (icefrac%vals(icat,iobs) == missing .or. &
+                 icethick%vals(icat,iobs) == missing .or. &
+                 snowthick%vals(icat,iobs) == missing ) then
+                  hofx(iobs) = missing
+                  exit
+             end if
+
              hofx(iobs) = hofx(iobs)+ rho_wiw*icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)&
                                     + rho_wsw*icefrac%vals(icat,iobs) * snowthick%vals(icat,iobs)
           enddo
@@ -109,6 +121,13 @@ type(c_ptr), value, intent(in)    :: obss
     case ("iceThickness")
        do iobs = 1, size(hofx,1)
           do icat = 1, ncat
+             ! check for missing input values
+             if (icefrac%vals(icat,iobs) == missing .or. &
+                 icethick%vals(icat,iobs) == missing) then                  
+               hofx(iobs) = missing
+               exit
+             end if
+
              hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)
           enddo
        enddo
