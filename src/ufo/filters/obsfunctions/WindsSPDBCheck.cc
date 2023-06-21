@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/SatWindsSPDBCheck.h"
+#include "ufo/filters/obsfunctions/WindsSPDBCheck.h"
 
 #include <algorithm>
 #include <cmath>
@@ -18,13 +18,12 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<SatWindsSPDBCheck> makerObsFuncSatWindsSPDBCheck_("SatWindsSPDBCheck");
+static ObsFunctionMaker<WindsSPDBCheck> makerObsFuncWindsSPDBCheck_("WindsSPDBCheck");
 
 // -----------------------------------------------------------------------------
 
-SatWindsSPDBCheck::SatWindsSPDBCheck(const eckit::LocalConfiguration & conf)
+WindsSPDBCheck::WindsSPDBCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
-  oops::Log::debug() << "SatWindsSPDBCheck: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -62,11 +61,11 @@ SatWindsSPDBCheck::SatWindsSPDBCheck(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SatWindsSPDBCheck::~SatWindsSPDBCheck() {}
+WindsSPDBCheck::~WindsSPDBCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void SatWindsSPDBCheck::compute(const ObsFilterData & in,
+void WindsSPDBCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue(missing);
@@ -92,7 +91,7 @@ void SatWindsSPDBCheck::compute(const ObsFilterData & in,
   std::vector<float> obs_pressure(nlocs);
   in.get(Variable("MetaData/pressure"), obs_pressure);
 
-  // Retrieve SatWinds observations of wind components
+  // Retrieve Winds observations of wind components
   std::vector<float> u(nlocs), v(nlocs);
   in.get(Variable("ObsValue/windEastward"), u);
   in.get(Variable("ObsValue/windNorthward"), v);
@@ -175,7 +174,7 @@ void SatWindsSPDBCheck::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & SatWindsSPDBCheck::requiredVariables() const {
+const ufo::Variables & WindsSPDBCheck::requiredVariables() const {
   return invars_;
 }
 

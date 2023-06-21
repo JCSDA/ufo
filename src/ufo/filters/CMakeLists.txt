@@ -289,8 +289,8 @@ set ( filters_files
       obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc
       obsfunctions/SatWindsLNVDCheck.h
-      obsfunctions/SatWindsSPDBCheck.cc
-      obsfunctions/SatWindsSPDBCheck.h
+      obsfunctions/WindsSPDBCheck.cc
+      obsfunctions/WindsSPDBCheck.h
       obsfunctions/SatWindsErrnormCheck.cc
       obsfunctions/SatWindsErrnormCheck.h
       obsfunctions/ScatWindsAmbiguityCheck.cc
