@@ -79,12 +79,16 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
   const std::vector<int> var_idx =
          getRequiredVarOrChannelIndices(obsgroup, vars_, false);
 
+  // Report the number of channels/variables without error correlation provided.
+  std::size_t count_noErrCorrect = 0;
+  std::size_t count_ttl_vars = var_idx.size();
   for (size_t ivar = 0; ivar < var_idx.size(); ++ivar) {
     if (var_idx[ivar] < 0) {
-      oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
-                           << "variable " << vars_[ivar] << " in "
-                           << options.inputFile.value() << ", correlations set to zero."
-                           << std::endl;
+      ++count_noErrCorrect;
+      // Print into to the trace log
+      oops::Log::trace() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
+                         << "variable " << vars_[ivar] << " in "
+                         << options.inputFile.value() << ", correlations set to zero.\n";
     } else {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
         if (var_idx[jvar] >= 0) {
@@ -92,6 +96,14 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
         }
       }
     }
+  }
+
+  // Report how many channels/variables are missing error correlation in the log file.
+  if (count_noErrCorrect > 0) {
+    oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
+                         << count_noErrCorrect << " of " << count_ttl_vars
+                         << " channels/variables in file: " << options.inputFile.value()
+                         << ". To see which channels, turn on OOPS_TRACE\n";
   }
 
   // Checking valid reconditioning options if reconditioning specified.
@@ -128,7 +140,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
       case ufo::ReconditionMethod::NORECONDITIONING:
         oops::Log::trace() << "'No reconditioning' option selected, "
                               "recondition method can be tested, "
-                              "R matrix should not change." << std::endl;
+                              "R matrix should not change.\n";
         break;
     }
   }
@@ -168,7 +180,7 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
     if (nused <= 1) {
       oops::Log::trace() << "nused = " << nused
                          << "at jloc = " << jloc
-                         << ", skipping reconditioning." << std::endl;
+                         << ", skipping reconditioning.\n";
       continue;
     }
     oops::Log::trace() << "\nReconditioning R matrix at jloc = " << jloc << std::endl;
@@ -201,8 +213,7 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
     double eval_min = evals.minCoeff();
     if (eval_min <= 0.0) {
       oops::Log::trace() << "eval_min = " << eval_min
-                         << " , performing a ridge regression to ensure positive definiteness"
-                         << std::endl;
+                         << " , performing a ridge regression to ensure positive definiteness\n";
       double alpha = 1.0 + 1e-15;
       alpha = (eval_min == 0.0) ? alpha - 1.0 : alpha * abs(eval_min);
       for (size_t jvar = 0; jvar < nused; ++jvar) {
@@ -218,7 +229,7 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
     double delta = 0.0;
     switch (recon_method) {
       case ufo::ReconditionMethod::MINIMUMEIGENVALUE:
-        oops::Log::trace() << "Performing Minimum Eigen Value reconditioning" << std::endl;
+        oops::Log::trace() << "Performing Minimum Eigen Value reconditioning\n";
         // Determining threshold from options
         if (options.reconditioning.value()->Threshold.value() != boost::none) {
           threshold = options.reconditioning.value()->Threshold.value().value();
@@ -227,7 +238,7 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
           if (kmax < 1.0) {
             oops::Log::warning() << "Unviable kmax = "
                                  << kmax
-                                 << ", skipping reconditioning" << std::endl;
+                                 << ", skipping reconditioning\n";
             continue;
           }
           threshold = evals.maxCoeff() / kmax;
@@ -240,14 +251,14 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
         }
         break;
       case ufo::ReconditionMethod::RIDGEREGRESSION:
-        oops::Log::trace() << "Performing Ridge Regression reconditioning" << std::endl;
+        oops::Log::trace() << "Performing Ridge Regression reconditioning\n";
         // Determining delta from options
         if (options.reconditioning.value()->kFrac.value() != boost::none) {
           const double kmax = precondno * options.reconditioning.value()->kFrac.value().value();
           if (kmax < 1.0) {
             oops::Log::warning() << "Unviable kmax = "
                                  << kmax
-                                 << ", skipping reconditioning" << std::endl;
+                                 << ", skipping reconditioning\n";
             continue;
           }
           delta = (evals.maxCoeff() - evals.minCoeff() * kmax)/(kmax - 1);
@@ -269,8 +280,7 @@ void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::O
     if (eval_min <= 0.0) {
       oops::Log::trace() << "eval_min = " << eval_min
                          << " at jloc = " << jloc
-                         << " , skipping reconditioning"
-                         << std::endl;
+                         << " , skipping reconditioning\n";
       continue;
     }
 
@@ -444,9 +454,9 @@ std::unique_ptr<ioda::ObsVector> ObsErrorCrossVarCov::getInverseVariance() const
 
 // -----------------------------------------------------------------------------
 void ObsErrorCrossVarCov::print(std::ostream & os) const {
-  os << "Observation error covariance with cross-variable correlations." << std::endl;
+  os << "Observation error covariance with cross-variable correlations.\n";
   os << " Obs error stddev: " << stddev_ << std::endl;
-  os << " Cross-variable correlations: " << std::endl;
+  os << " Cross-variable correlations: \n";
   if (varcorrelations_.rows() < 8) {
     os << varcorrelations_;
   } else {
