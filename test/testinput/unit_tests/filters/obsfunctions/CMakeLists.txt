@@ -118,6 +118,18 @@ if( rttov_FOUND )
                   LABELS  rttov filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
                   TEST_DEPENDS ufo_get_ufo_test_data )
+#
+    ufo_add_test( NAME    test_ufo_function_cloudcost_surfwind
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_surfwind.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  rttov filters obsfunctions
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 endif( rttov_FOUND )
 #
 ufo_add_test( NAME    test_ufo_function_clouddetect_airs

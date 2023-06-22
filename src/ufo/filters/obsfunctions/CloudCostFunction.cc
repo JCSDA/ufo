@@ -52,6 +52,10 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
   // List of required data
   for (size_t i = 0; i < fields_.size(); ++i) {
     invars_ += Variable("ObsDiag/brightness_temperature_jacobian_"+fields_[i], channels_);
+    if (fields_[i] == "uwind_at_10m")
+       invars_ += Variable("GeoVaLs/uwind_at_10m");
+    if (fields_[i] == "vwind_at_10m")
+       invars_ += Variable("GeoVaLs/vwind_at_10m");
   }
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
   invars_ += Variable(options_.HofXGroup.value() + "/brightnessTemperature", channels_);
@@ -113,6 +117,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   bool split_rain = options_.qtotal_split_rain.value();
 
   std::vector<float> gv_pres(nlocs), gv_temp(nlocs), gv_qgas(nlocs), gv_clw(nlocs), gv_ciw(nlocs),
+                     gv_surfuwind(nlocs), gv_surfvwind(nlocs), jac_store_vwind_at_10m(nlocs),
                      humidity_total(nlocs);
 
   // Determine if pressure is ascending or descending (B-matrix assumption)
@@ -216,6 +221,36 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           }
         }
 
+        // vwind_at_10m if present is dealt with below as part of uwind_at_10m
+        if (fields_[ifield] == "vwind_at_10m") continue;
+        // surface wind geovals and jacobians
+        if (fields_[ifield] == "uwind_at_10m") {
+          if (std::find(fields_.begin(), fields_.end(), "vwind_at_10m") == fields_.end()) {
+            throw eckit::UserError("vwind_at_10m must also be present when uwind_at_10m is present",
+                                   Here());
+          }
+          in.get(Variable("ObsDiag/brightness_temperature_jacobian_vwind_at_10m", channels_)[ichan],
+                 level_jac, jac_store_vwind_at_10m);
+          in.get(Variable("GeoVaLs/uwind_at_10m"), level_gv, gv_surfuwind);
+          in.get(Variable("GeoVaLs/vwind_at_10m"), level_gv, gv_surfvwind);
+          double surfwind(0.0);
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            surfwind = std::sqrt(gv_surfuwind[iloc]*gv_surfuwind[iloc] +
+                                 gv_surfvwind[iloc]*gv_surfvwind[iloc]);
+            if (surfwind > 0.0) {
+              // directional derivative of obs operator H(x) wrt surface wind w:
+              // dH = (grad(H),dw) = (dH/du vers(u) + dH/dv vers(v), dw) =
+              //    = dH/du u/w dw + dH/dv v/w dw
+              // => dH/dw = dH/du u/w + dH/dv v/w
+              jac_store[iloc] *= gv_surfuwind[iloc];
+              jac_store[iloc] += jac_store_vwind_at_10m[iloc]*gv_surfvwind[iloc];
+              jac_store[iloc] /= surfwind;
+            } else {
+              jac_store[iloc] = 0.0;
+            }
+          }
+        }
+
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           if (fields_[ifield] == "surface_emissivity") {
             // B-matrix contains emissivity error covariances only for selected surface-sensitive
@@ -294,6 +329,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     float Cost_final = 0.5*dy.transpose()*Scratch_matrix2;
     Cost_final /= static_cast<float>(nchans);  // normalise by number of channels
     out[0][iloc] = std::min(Cost_final, options_.maxCost.value());
+    oops::Log::info() << "Stefano cost: " << out[0][iloc] << " "  << std::endl;
   }
 }
 

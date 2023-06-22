@@ -619,6 +619,7 @@ if( ${rttov_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
+rttov7pred54L/rtcoef_gpm_1_gmi.dat
 rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_3_amsuamhs.dat
