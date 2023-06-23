@@ -42,7 +42,6 @@ observations:
         name: ObsFunction/ObsErrorSatSpecHumidity
         options:
           variable: specificHumidity
-          surface_obs: false
           input_error_name: GsiInputObsError
 
   # Pressure check
@@ -56,7 +55,6 @@ observations:
         options:
           variable: specificHumidity
           inflation factor: 8.0
-          surface_obs: false
           adjusted_error_name: GsiAdjustObsError
     defer to post: true
 

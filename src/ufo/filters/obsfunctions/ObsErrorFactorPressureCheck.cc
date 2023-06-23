@@ -105,7 +105,6 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable("GeoVaLs/geopotential_height");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
-  invars_ += Variable("GeoVaLs/saturated_specific_humidity_profile");
 }
 
 // -----------------------------------------------------------------------------
@@ -130,8 +129,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   const float infl_coeff = options_->infl_coeff.value();
   const std::string errgrp = options_->testObserr.value();
   const std::string flaggrp = options_->testQCflag.value();
-  const bool surface_obs = options_->surface_obs.value();
   const std::string adjusterr_name = options_->adjusterr_name.value();
+  const ufo::GeoVaLs * gvals = data.getGeoVaLs();
 
   std::vector<int> itype(nlocs);
   data.get(Variable("ObsType/"+inflatevars), itype);
@@ -173,28 +172,22 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
     data.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
-  std::vector<std::vector<double>> q_profile(nlevs, std::vector<double>(nlocs));
-  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    const size_t level = nlevs - ilev - 1;
-    data.get(Variable("GeoVaLs/saturated_specific_humidity_profile"), level, q_profile[ilev]);
-  }
-
   int iflag;
   double sat_specific_humidity;
   const float grav = Constants::grav;
   const float deg2rad = Constants::deg2rad;
   const float grav_equator = Constants::grav_equator;
   const float somigliana = Constants::somigliana;
-  const float eccentricity = Constants::eccentricity_sq;
+  const float eccentricity_sq = Constants::eccentricity_sq;
   const float semi_major_axis = Constants::semi_major_axis;
   const float flattening = Constants::flattening;
   const float grav_ratio = Constants::grav_ratio;
   float fact, slat, sin2, termg, termr, termrg;
-  float dpres, sfcchk, logobspres, logsfcpres, rlow, rhgh, drpx, ramp;
+  float dpres, sfcchk, logobspres, logsfcpres, rlow, rhgh, drpx;
   float obserror, new_error, error_factor;
   std::vector<float> zges_mh(nlevs);
   std::vector<float> logprsl(nlevs);
-  std::vector<double> q_profile_iloc(nlevs);
+  std::vector<double> q_profile(nlevs);
   bool reported_height = false;
   bool iflag_print_one = true;
   bool iflag_print_negone = true;
@@ -245,7 +238,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
           slat = lat[iloc]*deg2rad;
           sin2  = sin(slat)*sin(slat);
           termg = grav_equator *
-             ((1.0f+somigliana*sin2)/sqrt(1.0f-eccentricity*sin2));
+             ((1.0f+somigliana*sin2)/sqrt(1.0f-eccentricity_sq*sin2));
           termr = semi_major_axis/(1.0f + flattening + grav_ratio -
                 2.0f*flattening*sin2);
           termrg = (termg/grav)*termr;
@@ -269,16 +262,6 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if (dpres > static_cast<float>(nlevs)) drpx = 1.e6f;
 
         sfcchk = 0.0f;
-        rlow = std::max(sfcchk-dpres, 0.0f);
-        ramp = rlow;
-        rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
-        obserr[iv][iloc] = 1.0;
-        if (qcflagdata[iloc] == 0) {
-          obserr[iv][iloc] = (currentObserr[iloc]+drpx+1.e6*rhgh+infl_coeff*rlow)
-                           /currentObserr[iloc];
-          if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
-          if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
-        }
 
       } else {
         logobspres = std::log(obs_pressure[iloc]);
@@ -308,31 +291,33 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if ((itype[iloc] > 179 && itype[iloc] < 186) ||
             (itype[iloc] == 199)) dpres = 1.0;
 
-        // Retrieve q_profile at location
-        for (size_t k = 0 ; k < nlevs ; ++k) {
-          q_profile_iloc[k] = q_profile[k][iloc];
+        if (inflatevars.compare("specificHumidity") == 0) {
+            gvals->getAtLocation(q_profile, "saturated_specific_humidity_profile", iloc);
+            std::reverse(q_profile.begin(), q_profile.end());
+
+            ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile);
+            if ((itype[iloc] >= 180) && (itype[iloc] <= 184)) {
+                sat_specific_humidity = q_profile[0];
+            } else {
+                sat_specific_humidity = vert_interp_model(logobspres);
+            }
         }
+      }  // reported pressure conditional statement bracket
 
-        ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile_iloc);
-        if (surface_obs) {
-            sat_specific_humidity = q_profile_iloc[0];
-        } else {
-            sat_specific_humidity = vert_interp_model(logobspres);
-        }
-
-        rlow = std::max(sfcchk-dpres, 0.0f);
-        ramp = rlow;
-        rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
-        // Ouput is an error inflation factor
-        obserr[iv][iloc] = 1.0;
-        if (qcflagdata[iloc] == 0) {
-          errorx = (adjustErr[iloc]+drpx)*sat_specific_humidity;
-          errorx = std::max(0.0001, errorx);
-          obserr[iv][iloc] = (errorx + (1.e6*rhgh)+(infl_coeff*ramp)) /(currentObserr[iloc]);
-
+      rlow = std::max(sfcchk-dpres, 0.0f);
+      rhgh = std::max(dpres-0.001f- static_cast<float>(nlevs)-1.0f, 0.0f);
+      obserr[iv][iloc] = 1.0;
+      if (qcflagdata[iloc] == 0) {
+          if (inflatevars.compare("specificHumidity") == 0) {
+              errorx = (adjustErr[iloc]+drpx)*sat_specific_humidity;
+              errorx = std::max(0.0001, errorx);
+              obserr[iv][iloc] = (errorx + (1.e6*rhgh)+(infl_coeff*rlow)) /(currentObserr[iloc]);
+          } else {
+              obserr[iv][iloc] = (currentObserr[iloc]+drpx+1.e6*rhgh+infl_coeff*rlow)
+                                /currentObserr[iloc];
+          }
           if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
           if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
-       }
      }
     }
   }

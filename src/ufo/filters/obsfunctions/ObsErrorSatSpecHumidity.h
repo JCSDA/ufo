@@ -29,7 +29,6 @@ class ObsErrorSatSpecHumidityParameters : public oops::Parameters {
  public:
   /// Inflate variables
   oops::RequiredParameter<std::string> inflatevars{"variable", this};
-  oops::RequiredParameter<bool> surface_obs{"surface_obs", this};
   oops::RequiredParameter<std::string> inputerr_name{"input_error_name", this};
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
@@ -41,8 +40,7 @@ class ObsErrorSatSpecHumidityParameters : public oops::Parameters {
 ///
 /// ObsErrorSatSpecHumidity assigns the errors with an inflation using
 /// saturated specific humdity. This field is obtained through GSI geovals as a
-/// profile and the "surface_obs" boolean dictates whether to do the interpolation or
-/// choose lowest level of the profile as the inflation factor.
+/// profile
 ///
 /// Notes:
 /// - This obs function is designed for specific humidity observations only. When
@@ -59,8 +57,8 @@ class ObsErrorSatSpecHumidityParameters : public oops::Parameters {
 ///         name: ObsFunction/ObsErrorSaturatedSpecificHumidity
 ///         options:
 ///           variable: specificHumidity
-///           surface_obs: true
-
+///           input_error_name: GsiInputObsError
+///
 class ObsErrorSatSpecHumidity : public ObsFunctionBase<float> {
  public:
   static const std::string classname() {return "ObsErrorSatSpecHumidity";}

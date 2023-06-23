@@ -52,7 +52,6 @@ observations:
         name: ObsFunction/ObsErrorSatSpecHumidity
         options:
           variable: specificHumidity
-          surface_obs: true
           input_error_name: GsiInputObsError
 
   # Pressure check
@@ -66,7 +65,6 @@ observations:
         options:
           variable: specificHumidity
           inflation factor: 8
-          surface_obs: true
           adjusted_error_name: GsiAdjustObsError
 
  # Duplicate factor
