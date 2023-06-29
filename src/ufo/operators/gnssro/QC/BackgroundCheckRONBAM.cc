@@ -59,6 +59,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> impactparameter(obsdb_, "impactParameterRO", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> earthradius(obsdb_, "earthRadiusCurvature", "MetaData");
+  ioda::ObsDataVector<int> satelliteid(obsdb_, "satelliteIdentifier", "MetaData");
   // next line is actually background (model) virtual temperature at obs location
   ioda::ObsDataVector<float> temperature(obsdb_, "virtual_temperature", "MetaData");
 
@@ -80,7 +81,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         float imp = impactparameter[0][jobs]/1000.0 - earthradius[0][jobs]/1000.0;
         float lat = latitude[0][jobs]*0.01745329251;  // deg2rad
         float tmp = temperature[0][jobs];
-
+        int satid = satelliteid[0][jobs];
 //      Threshold for current observation
         float cutoff   = std::numeric_limits<float>::max();
         float cutoff1  = std::numeric_limits<float>::max();
@@ -92,11 +93,21 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         float cutoff34 = std::numeric_limits<float>::max();
 
         cutoff = 0.0;
-        cutoff1  = (-4.725+0.045*imp+0.005*imp*imp)*2.0/3.0;
+        if (satid >= 750 && satid <= 755) {
+           cutoff1  = (-4.725+0.045*imp+0.005*imp*imp)/2.0;
+        } else {
+           cutoff1  = (-4.725+0.045*imp+0.005*imp*imp)*2.0/3.0;
+        }
         cutoff2  = 1.5+cos(lat);
-        cutoff3  = 4.0/3.0;
-        if (tmp > 240.0) cutoff3  = ( 0.005*tmp*tmp-2.3*tmp+266.0 )*2.0/3.0;
-        cutoff4  = (4.0+8.0*cos(lat))*2.0/3.0;
+        cutoff3  = 2.0;
+        if (tmp > 240.0) cutoff3 = 0.005*tmp*tmp-2.3*tmp+266.0;
+        if (satid >= 750 && satid <= 755) {
+           cutoff3  = cutoff3/2.0;
+           cutoff4  = (4.0+8.0*cos(lat))/2.0;
+        } else {
+           cutoff3  = cutoff3*2.0/3.0;
+           cutoff4  = (4.0+8.0*cos(lat))*2.0/3.0;
+        }
         cutoff12 = ( (36.0-imp)/2.0)*cutoff2 + ((imp-34.0)/2.0)*cutoff1;
         cutoff23 = ( (11.0-imp)/2.0)*cutoff3 + ((imp-9.0)/2.0)*cutoff2;
         cutoff34 = ( (6.0-imp)/2.0)*cutoff4 + ((imp-4.0)/2.0)*cutoff3;
@@ -107,8 +118,11 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         if (imp <= 9.0  && imp > 6.0)  cutoff = cutoff3;
         if (imp <= 6.0  && imp > 4.0)  cutoff = cutoff34;
         if (imp <= 4.0) cutoff = cutoff4;
-
-        cutoff = 0.03*cutoff;
+        if (satid >= 750 && satid <= 755) {
+          cutoff = 0.02*cutoff;
+        } else {
+          cutoff = 0.03*cutoff;
+        }
         ASSERT(cutoff < std::numeric_limits<float>::max() && cutoff > 0.0);
 
 //      Apply bias correction

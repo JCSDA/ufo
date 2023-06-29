@@ -12,8 +12,8 @@ module ufo_gnssro_bndnbam_util_mod
   use vert_interp_mod
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
   use gnssro_mod_transform
-  use gnssro_mod_grids, only: get_coordinate_value
-  use ufo_constants_mod, only: two, zero
+  use gnssro_mod_grids,   only: get_coordinate_value
+  use ufo_constants_mod,  only: two, zero
 
   implicit none
   public             :: ufo_gnssro_bndnbam_simobs_single
@@ -26,7 +26,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
            grids, ngrd, &
            nlev, nlevExt, nlevAdd, nlevCheck, &
            radius,ref,refIndex,refXrad, &
-           bendingAngle)
+           bendingAngle,super_refraction_flag)
 ! -------------------------------------------------------------------------------
   character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
 
@@ -55,7 +55,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   real(kind_real)                 :: rnlevExt
   real(kind_real)                 :: derivRef_s(ngrd)
   real(kind_real)                 :: refXrad_s(ngrd)
-
+  integer, intent(inout) :: super_refraction_flag
 !------------------------------------------------------------
 ! Extend atmosphere above interface level nlev
   d_refXrad = refXrad(nlev) - refXrad(nlev-1)
@@ -95,7 +95,10 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
        endif
 
        derivRef_s(igrd)=dot_product(dw4,ref(indx-1:indx+2)) !derivative dN/dx_s
-       derivRef_s(igrd)=max(zero,abs(derivRef_s(igrd)))
+       if (derivRef_s(igrd).gt.zero) then
+          super_refraction_flag = 3
+          return
+       end if
 
     else
       return
@@ -108,7 +111,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
      bndIntgd     = ds*derivRef_s(igrd)/refXrad_s(igrd)
      bendingAngle = bendingAngle + two*bndIntgd
   end do
-  bendingAngle=r1em6 * obsImpP * bendingAngle
+  bendingAngle = (-1)* r1em6 * obsImpP * bendingAngle
 
 end subroutine ufo_gnssro_bndnbam_simobs_single
 ! ------------------------------------------------------------------------------

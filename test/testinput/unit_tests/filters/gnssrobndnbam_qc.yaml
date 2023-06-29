@@ -46,7 +46,7 @@ observations:
         name:  MetaData/longitude
       minvalue: -180.0
       maxvalue: 360.0
-  passedBenchmark: 661
+  passedBenchmark: 660
 - obs operator:
     name: GnssroBndNBAM
     obs options:
@@ -89,4 +89,4 @@ observations:
         name:  MetaData/longitude
       minvalue: -180.0
       maxvalue: 360.0
-  passedBenchmark: 663
+  passedBenchmark: 662

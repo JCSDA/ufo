@@ -25,7 +25,7 @@ observations:
     filter variables:
     - name: bendingAngle
     errmodel: NBAM
-  passedBenchmark: 668
+  passedBenchmark: 667
 - obs operator:
     name: GnssroBndNBAM
   obs space:
@@ -46,7 +46,7 @@ observations:
     filter variables:
     - name: bendingAngle
     errmodel: ECMWF
-  passedBenchmark: 668
+  passedBenchmark: 667
 - obs operator:
     name: GnssroBndNBAM
     obs options:
@@ -70,7 +70,7 @@ observations:
     filter variables:
     - name: bendingAngle
     errmodel: NRL
-  passedBenchmark: 668
+  passedBenchmark: 667
 - obs operator:
    name: GnssroRefNCEP
   obs space:

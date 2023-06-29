@@ -25,6 +25,7 @@ real(kind_real), parameter, public :: quarter = 0.25_kind_real
 real(kind_real), parameter, public :: half    = 0.5_kind_real
 real(kind_real), parameter, public :: one     = 1.0_kind_real
 real(kind_real), parameter, public :: two     = 2.0_kind_real
+real(kind_real), parameter, public :: three   = 3.0_kind_real
 real(kind_real), parameter, public :: four    = 4.0_kind_real
 real(kind_real), parameter, public :: five    = 5.0_kind_real
 real(kind_real), parameter, public :: ten     = 10.0_kind_real

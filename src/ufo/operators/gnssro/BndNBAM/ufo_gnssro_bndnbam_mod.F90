@@ -20,7 +20,7 @@ module ufo_gnssro_bndnbam_mod
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
   use ufo_utils_mod, only: cmp_strings 
-  use ufo_constants_mod, only: zero, half, one, two, grav, rd, rv_over_rd
+  use ufo_constants_mod, only: zero, half, one, two, three, five, grav, rd, rv_over_rd
 
   implicit none
   public             :: ufo_gnssro_BndNBAM
@@ -81,7 +81,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,          allocatable           :: super_refraction_flag(:), super(:), obs_max(:)
   real(kind_real),  allocatable           :: toss_max(:)
   integer                                 :: sr_hgt_idx
-  real(kind_real)                         :: gradRef, obsImpH
+  real(kind_real)                         :: gradRef, obsImpH, obsHgt
   integer,          allocatable           :: LayerIdx(:)
 
   write(err_msg,*) myname, ": begin"
@@ -244,7 +244,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   iobs = 0
   hofx =  missing
-  super = 0
+  super    = 0
   obs_max  = 0
   toss_max = 0
 
@@ -267,7 +267,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !     Data rejection based on model background !
 !     (1) skip data beyond model levels
       call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
-      if (sIndx < one .or. sIndx > float(nlev))  cycle obs_loop
+      if (sIndx < three .or. sIndx > float(nlev))  cycle obs_loop
 
 !     save the obs vertical location index (unit: model layer)
       LayerIdx(iobs) = min(max(1, int(sIndx)), nlev)
@@ -289,41 +289,47 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       end if
 
 !     (2) super-refaction
-!     (2.1) GSI style super refraction check
+!     (2.1) GSI style super refraction check 
       if(cmp_strings(self%roconf%super_ref_qc, "NBAM")) then
 
-        obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
-
-        if (obsImpH <= six) then
-           do k = nlevCheck, 1, -1
+        obsHgt = (obsImpP(iobs) - obsLocR(iobs) - obsGeoid(iobs) - gesZs(iobs)) * r1em3 ! height to ground
+        if (obsHgt <= five) then
+           kloop: do k = nlevCheck, 1, -1
 
 !             N gradient
               gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
 !             check for model SR layer
-              if (abs(gradRef) >= 0.75*crit_gradRefr .and. obsImpP(iobs) <= refXrad(k+2)) then
-                  super_refraction_flag(iobs) = 1
-                  cycle obs_loop
+              if (abs(gradRef) >= 0.75*crit_gradRefr ) then
+                 if (obsImpP(iobs) <= refXrad(k+5)) then
+                    super_refraction_flag(iobs) = 1
+                    cycle obs_loop
+                 else if ( LayerIdx(iobs) < k+1) then
+                    call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(k+1),nlev-k-1,"increasing")
+                    super_refraction_flag(iobs) = 1 ! adjusting super_refraction_flag
+                    LayerIdx(iobs) = min(max(1, int(sIndx)), nlev) + 1000 ! diagnostic purpose
+                    exit kloop
+                 end if
               endif
-           end do
+
+           end do kloop
 
 !          relax to close-to-SR conditions, and check if obs is inside model SR layer
            
            if (self%roconf%sr_steps > 1                 &
-              .and. obsValue(iobs) >= 0.03 ) then
-
+              .and. obsValue(iobs) >= 0.03) then
                do k = nlevCheck, 1, -1
                   gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
                   if (abs(gradRef) >= half*crit_gradRefr & 
                      .and. super(iobs) == 0                   &
-                     .and. toss_max(irec) <= obsValue(iobs)) then
+                     .and. toss_max(irec) <= obsImpP(iobs) ) then
                       obs_max(irec) = iobs
-                      toss_max(irec)= max(toss_max(irec), obsValue(iobs))
+                      toss_max(irec)= max(toss_max(irec),obsImpP(iobs) ) !-obsLocR(iobs) )
                       super(iobs) = 1
                   end if
               end do ! k
  
            end if   ! end if(self%roconf%sr_steps > 1 
-        end if ! obsImpH <= six
+        end if ! obsHgt <= five
 
 !    ROPP style super refraction check
      else if(cmp_strings(self%roconf%super_ref_qc, "ECMWF")) then
@@ -352,7 +358,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                grids, ngrd, &
                nlev, nlevExt, nlevAdd, nlevCheck, &
                radius(1:nlev),ref(1:nlevExt),refIndex(1:nlev),refXrad(0:nlevExt),  &
-               hofx(iobs))
+               hofx(iobs), super_refraction_flag(iobs))
 
      end if
     end do obs_loop
@@ -362,12 +368,12 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      rec_loop2: do irec = 1, nrecs
 
        if (obs_max(irec) > 0 ) then
-
           obs_loop2: do k = nlocs_begin(irec), nlocs_end(irec)
-            obsImpH = (obsImpP(k) - obsLocR(k)) * r1em3
-            if (obsImpH<=six .and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
+            obsHgt = (obsImpP(k) - obsLocR(k) - obsGeoid(k) - gesZs(k)) * r1em3
+            if (obsHgt<=five.and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
                 hofx(k)/=missing .and. super_refraction_flag(k)==0) then
                 super_refraction_flag(k)=2
+             !  hofx(k)=missing  ! keep this line for further improvement
             end if
           end do obs_loop2
 
