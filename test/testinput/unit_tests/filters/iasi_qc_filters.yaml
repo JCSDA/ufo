@@ -568,7 +568,8 @@ observations:
     action:
       name: reject
 # passedBenchmark: 858 # crtm v2.3
-  passedBenchmark: 860 # crtm v2.4
+# passedBenchmark: 860 # crtm v2.4
+  passedBenchmark: 965 # crtm v3.0
 ##  Useflag Check
 #   - filter: BlackList
 #     filter variables:

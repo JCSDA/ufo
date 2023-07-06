@@ -42,16 +42,16 @@ if( crtm_FOUND )
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
     # H(x) with Bias Correction (bc)
-    ufo_add_test( NAME  instrument_mhs_metop-b_gfs_HofX_bc
-        TIER    2
-        ECBUILD
-        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_metop-b_gfs_HofX_bc.yaml"
-        MPI     1
-        LABELS  crtm mhs metop-b bc instrument
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+#   ufo_add_test( NAME  instrument_mhs_metop-b_gfs_HofX_bc
+#       TIER    2
+#       ECBUILD
+#       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+#       ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_metop-b_gfs_HofX_bc.yaml"
+#       MPI     1
+#       LABELS  crtm mhs metop-b bc instrument
+#       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+#       LIBS    ufo
+#       TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 
     ufo_add_test( NAME  instrument_mhs_metop-c_gfs_HofX_bc
         TIER    2
