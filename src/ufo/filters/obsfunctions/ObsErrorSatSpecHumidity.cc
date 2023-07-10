@@ -65,11 +65,13 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
   const size_t nlevs = data.nlevs(Variable("GeoVaLs/air_pressure"));
 
   const std::string inflatevars = options_->inflatevars.value();
-  const bool surface_obs = options_->surface_obs.value();
   const std::string errgrp = options_->testObserr.value();
   const std::string inputerr_name = options_->inputerr_name.value();
   std::vector<float> error(nlocs);
   data.get(Variable(errgrp+"/"+inflatevars), error);
+
+  std::vector<int> itype(nlocs);
+  data.get(Variable("ObsType/"+inflatevars), itype);
 
   // Get obs pressure
   std::vector<float> ob_pressure(nlocs);
@@ -96,7 +98,7 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
     logp_ob = log(ob_pressure[jobs]);
 
     ufo::PiecewiseLinearInterpolation vert_interp_model(logp, q_profile);
-    if (surface_obs) {
+    if ((itype[jobs] >= 180) && (itype[jobs] <= 184)) {
       satSpecificHumidity = q_profile[0];
     } else {
       satSpecificHumidity = vert_interp_model(logp_ob);

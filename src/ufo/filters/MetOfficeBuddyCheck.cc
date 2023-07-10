@@ -691,7 +691,17 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
       for (Eigen::Index jlev=0; jlev < cols; jlev++) {
         if (pges(jA, jlev) >= maxGrossErrorProbability ||
             pges(jB, jlev) >= maxGrossErrorProbability ||
-            pges(jA, jlev) == missing || pges(jB, jlev) == missing)
+            pges(jA, jlev) == missing ||
+            pges(jB, jlev) == missing ||
+            obsValues(jA, jlev) == missing ||
+            obsValues(jB, jlev) == missing ||
+            bgValues(jA, jlev) == missing ||
+            bgValues(jB, jlev) == missing ||
+            bgErrors(jA, jlev) == missing ||
+            bgErrors(jB, jlev) == missing ||
+            (*bgErrors2)(jA, jlev) == missing ||
+            (*bgErrors2)(jB, jlev) == missing
+            )
           continue;  // skip to next level
 
         if (numLevels == 1) {
@@ -787,7 +797,15 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
       for (Eigen::Index jlev=0; jlev < cols; jlev++) {
         if (pges(jA, jlev) >= maxGrossErrorProbability ||
             pges(jB, jlev) >= maxGrossErrorProbability ||
-            pges(jA, jlev) == missing || pges(jB, jlev) == missing)
+            pges(jA, jlev) == missing ||
+            pges(jB, jlev) == missing ||
+            obsValues(jA, jlev) == missing ||
+            obsValues(jB, jlev) == missing ||
+            bgValues(jA, jlev) == missing ||
+            bgValues(jB, jlev) == missing ||
+            bgErrors(jA, jlev) == missing ||
+            bgErrors(jB, jlev) == missing
+            )
           continue;  // skip to next level
 
         // Differences from background

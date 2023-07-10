@@ -14,7 +14,7 @@ observations:
     filter variables:
     - name: windEastward
     function absolute threshold:
-    - name: ObsFunction/SatWindsSPDBCheck
+    - name: ObsFunction/WindsSPDBCheck
       options:
         wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
                   250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
@@ -32,7 +32,7 @@ observations:
     filter variables:
     - name: windNorthward
     function absolute threshold:
-    - name: ObsFunction/SatWindsSPDBCheck
+    - name: ObsFunction/WindsSPDBCheck
       options:
         wndtype: [240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
                   250,  251,  252,  253,  254,  256,  257,  258,  259,  260]

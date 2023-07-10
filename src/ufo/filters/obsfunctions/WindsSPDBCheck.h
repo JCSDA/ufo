@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_SATWINDSSPDBCHECK_H_
-#define UFO_FILTERS_OBSFUNCTIONS_SATWINDSSPDBCHECK_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_WINDSSPDBCHECK_H_
+#define UFO_FILTERS_OBSFUNCTIONS_WINDSSPDBCHECK_H_
 
 #include <string>
 #include <vector>
@@ -30,8 +30,8 @@ namespace ufo {
 ///  specified to override the default test_hofx group name used for testing purposes.
 ///  This can be set to GsiHofX, for example.
 ///
-class SatWindsSPDBCheckParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(SatWindsSPDBCheckParameters, Parameters)
+class WindsSPDBCheckParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(WindsSPDBCheckParameters, Parameters)
 
  public:
   /// the existence of min,max error values are required
@@ -104,7 +104,7 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
 ///   filter variables:
 ///   - name: windEastward
 ///    function absolute threshold:
-///    - name: ObsFunction/SatWindsSPDBCheck
+///    - name: ObsFunction/WindsSPDBCheck
 ///      options:
 ///        wndtype: [  240,  241,  242,  243,  244,  245,  246,  247,  248,  249,
 ///                    250,  251,  252,  253,  254,  256,  257,  258,  259,  260]
@@ -118,23 +118,23 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
 ///    action:
 //      name: reject
 ///
-class SatWindsSPDBCheck : public ObsFunctionBase<float> {
+class WindsSPDBCheck : public ObsFunctionBase<float> {
  public:
-  static const std::string classname() {return "SatWindsSPDBCheck";}
+  static const std::string classname() {return "WindsSPDBCheck";}
 
-  explicit SatWindsSPDBCheck(const eckit::LocalConfiguration &
-                                 = eckit::LocalConfiguration());
-  ~SatWindsSPDBCheck();
+  explicit WindsSPDBCheck(const eckit::LocalConfiguration &
+                              = eckit::LocalConfiguration());
+  ~WindsSPDBCheck();
 
   void compute(const ObsFilterData &, ioda::ObsDataVector<float> &) const;
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
-  SatWindsSPDBCheckParameters options_;
+  WindsSPDBCheckParameters options_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_SATWINDSSPDBCHECK_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_WINDSSPDBCHECK_H_

@@ -48,7 +48,7 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 # set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
-set( CRTM_COEFFS_BRANCH "2.4.1_skylab_4.0" )
+set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
 
 # Test data filenames
 set(ufo_test_data  ufo_testinput_tier_1_1.6.0.tar.gz)
@@ -619,6 +619,7 @@ if( ${rttov_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
 rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
+rttov7pred54L/rtcoef_gpm_1_gmi.dat
 rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
 rttov7pred54L/rtcoef_metop_3_amsuamhs.dat

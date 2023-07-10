@@ -12,10 +12,12 @@ list( APPEND ufo_resources
   bmatrix/rttov/amsr_bmatrix_70_test.dat
   bmatrix/rttov/atms_bmatrix_70_test.dat
   bmatrix/rttov/atovs_bmatrix_70_test.dat
+  bmatrix/rttov/gmihigh_bmatrix_70_test.dat
   bmatrix/rttov/iasi_bmatrix_70_test.dat
   bmatrix/rttov/ssmis_bmatrix_70_test.dat
   rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
   rmatrix/rttov/amsr_gcomw1_rmatrix_test.nc4
+  rmatrix/rttov/gmihigh_gpm_rmatrix_test.nc4
   rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
   rmatrix/rttov/ssmis_dmspf17_rmatrix_test.nc4
   rmatrix/rttov/atovs_metopb_rmatrix_test.nc4
