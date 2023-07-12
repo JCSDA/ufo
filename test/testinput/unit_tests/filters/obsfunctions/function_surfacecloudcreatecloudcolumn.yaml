@@ -1,0 +1,57 @@
+window begin: 2021-07-01T11:29:59Z
+window end: 2021-07-01T12:29:59Z
+
+observations:
+- obs space: &obsspace
+    name: SurfaceCloud
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_column_check.nc4
+    simulated variables: [stationPressure]
+    derived variables: [stationPressure]
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: /Data/met_office_surfacecloud_cloud_column_check_out.nc4
+  geovals: &geovals
+    filename: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_column_check_geovals.nc4
+  obs operator:
+    name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  obs filters:
+    - filter: Variable Assignment
+      assignments:
+      - name: DerivedObsValue/Cloud
+        channels: 1-70
+        type: float
+        function:
+          name: ObsFunction/SurfaceCloudCreateCloudColumn
+          options:
+            cloud fraction at base: MetaData/cloudFractionAtBase
+            cloud fraction at base for metar second layer: MetaData/cloudFractionAtBaseForMetarLayer2
+            cloud fraction at base for metar third layer: MetaData/cloudFractionAtBaseForMetarLayer3
+            cloud fraction at base for dcc first layer: MetaData/cloudFractionAtBaseForDCCLayer1
+            cloud fraction at base for dcc second layer: MetaData/cloudFractionAtBaseForDCCLayer2
+            cloud fraction at base for dcc third layer: MetaData/cloudFractionAtBaseForDCCLayer3
+            model level cloud base height: MetaData/heightOfModelLevelAboveCloudBase
+            model level cloud base height for metar second layer: MetaData/heightOfModelLevelAboveCloudBaseForMetarLayer2
+            model level cloud base height for metar third layer: MetaData/heightOfModelLevelAboveCloudBaseForMetarLayer3
+            model level cloud base height for dcc first layer: MetaData/heightOfModelLevelAboveCloudBaseForDCCLayer1
+            model level cloud base height for dcc second layer: MetaData/heightOfModelLevelAboveCloudBaseForDCCLayer2
+            model level cloud base height for dcc third layer: MetaData/heightOfModelLevelAboveCloudBaseForDCCLayer3
+            channels: 1-70
+            error clear: 0.32
+            error overcast: 0.14
+  compareVariables:
+  - reference:
+      name: TestReference/cloudColumnTest
+    test:
+      name: DerivedObsValue/Cloud
+    absTol: 1.0e-4
+  - reference:
+      name: TestReference/cloudErrorTest
+    test:
+      name: DerivedObsError/CloudError
+    absTol: 1.0e-4
+
