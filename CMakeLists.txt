@@ -62,7 +62,7 @@ find_package( ioda 2.6.0 REQUIRED )
 find_package( oops 1.7.0 REQUIRED )
 
 # crtm
-find_package( crtm 3.0 QUIET )
+find_package( crtm 2.3 QUIET )
 if( ${crtm_FOUND} )
   message(STATUS "CRTM FOUND; Including CRTM Observation Operator")
 else( ${crtm_FOUND} )
