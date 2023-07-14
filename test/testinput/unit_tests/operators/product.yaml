@@ -23,3 +23,28 @@ observations:
     tolerance AD: 1.0e-13
   rms ref: 6.736593278810636
   tolerance: 1.0e-06
+
+# Test division
+- obs space:
+    name: Test division
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/productOperator_testData.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/productOperator_testOut.nc4
+    simulated variables: [var1]
+  obs operator:
+    name: Product
+    geovals to scale hofx by: scaling_variable
+    geovals exponent: -0.5
+  geovals:
+    filename: Data/ufo/testinput_tier_1/productOperator_geovalsTestData.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 1.0
+  tolerance: 1.0e-06

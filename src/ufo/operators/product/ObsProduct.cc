@@ -7,11 +7,13 @@
 
 #include "ufo/operators/product/ObsProduct.h"
 
+#include <algorithm>
 #include <ostream>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
+#include "oops/util/FloatCompare.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
@@ -36,6 +38,11 @@ ObsProduct::ObsProduct(const ioda::ObsSpace & odb,
 
   // Add scaling variable to the list
   requiredVars_.push_back(parameters.geovalsToScaleHofxBy.value());
+
+  // Set geovals exponent
+  if (parameters.geovalsExponent.value() != boost::none) {
+      geovalsExponent_ = parameters.geovalsExponent.value().value();
+  }
 
   oops::Log::trace() << "ObsProduct constructor finished" << std::endl;
 }
@@ -62,6 +69,27 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
     element = (element == missing) ? 1.0 : element;
   }
 
+  // If exponent is set, do (geovals)^a
+  if (geovalsExponent_ != 0) {
+      const bool exponentIsFraction = static_cast<int>(geovalsExponent_) != geovalsExponent_;
+      for (double& element : scalingGeoVaLs) {
+          if (element < 0 && exponentIsFraction) {
+              oops::Log::warning() << "Trying to raise a negative number to non-integer exponent,"
+                                      " '" << element << "' in scaling geovals set to missing"
+                                   << std::endl;
+              element = missing;
+          } else if (geovalsExponent_ < 0 &&
+                     oops::is_close_absolute(element, 0.0, 1e-10, 0, oops::TestVerbosity::SILENT)) {
+              oops::Log::warning() << "Trying to divide by zero, '"
+                                   << element << "' in scaling geovals set to missing"
+                                   << std::endl;
+              element = missing;
+          } else {
+              element = std::pow(element, geovalsExponent_);
+          }
+      }
+  }
+
   std::vector<double> vec(ovec.nlocs());
   for (int jvar : operatorVarIndices_) {
     const std::string varname = nameMap_.convertName(ovec.varnames().variables()[jvar]);
@@ -69,7 +97,11 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
     gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
       const size_t idx = jloc * ovec.nvars() + jvar;
-      ovec[idx] = vec[jloc] * scalingGeoVaLs[jloc];
+      if (scalingGeoVaLs[jloc] != missing) {
+          ovec[idx] = vec[jloc] * scalingGeoVaLs[jloc];
+      } else {
+          ovec[idx] = missing;
+      }
     }
   }
 

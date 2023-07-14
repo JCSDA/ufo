@@ -67,6 +67,9 @@ class ObsProduct : public ObsOperatorBase,
 
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
+
+  /// Exponent of geovals
+  float geovalsExponent_ = 0;
 };
 
 // -----------------------------------------------------------------------------

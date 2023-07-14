@@ -64,6 +64,9 @@ class ObsProductTLAD : public LinearObsOperatorBase,
 
   /// Name for GeoVaLs used to scale
   std::string scalingGeoVar_;
+
+  /// Exponent of geovals
+  float geovalsExponent_ = 0;
 };
 
 // -----------------------------------------------------------------------------
