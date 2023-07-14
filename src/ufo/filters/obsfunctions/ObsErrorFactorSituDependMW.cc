@@ -54,6 +54,7 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
 
   // Include list of required data from ObsSpace
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
@@ -123,17 +124,20 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> clwmatchidx(in.obsspace(), clwmatchidxvar.toOopsVariables());
   in.get(clwmatchidxvar, clwmatchidx);
 
-  // Get Original Observation Error
+  // Get Original Observation Error (if ObsError is filled up with missing values, replace it)
   std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
+  const float missing = util::missingValue(missing);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
+    for (size_t iloc = 0; iloc < nlocs; iloc++) {
+      if (obserr0[ichan][iloc] == missing) obserr0[ichan][iloc] = obserr_clr[ichan];
+    }
   }
 
   // Get ObsErrorData (obs error from previous QC step) and convert to inverse of error variance
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   std::vector<float> obserrdata;
   std::vector<int> qcflagdata;
-  const float missing = util::missingValue(missing);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
     in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);

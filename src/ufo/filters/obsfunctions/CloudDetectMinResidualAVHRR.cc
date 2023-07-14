@@ -55,8 +55,8 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
-  invars_ += Variable("ObsValue/brightnessTtemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTtemperature", channels_);
+  invars_ += Variable("ObsValue/brightnessTemperature", channels_);
+  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");

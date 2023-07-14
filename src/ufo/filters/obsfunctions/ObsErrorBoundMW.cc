@@ -56,7 +56,6 @@ ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
   // Include list of required data from ObsSpace
   invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
