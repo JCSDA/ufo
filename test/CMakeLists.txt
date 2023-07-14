@@ -617,46 +617,66 @@ endif()
 # Files for RTTOV tests
 #####################################################################
 if( ${rttov_FOUND} )
-list( APPEND rttov_test_input
-rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
-rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
-rttov7pred54L/rtcoef_gpm_1_gmi.dat
-rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
-rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
-rttov7pred54L/rtcoef_metop_3_amsuamhs.dat
-rttov7pred54L/rtcoef_noaa_15_amsuamhs.dat
-rttov7pred54L/rtcoef_noaa_18_amsuamhs.dat
-rttov7pred54L/rtcoef_noaa_19_amsuamhs.dat
-rttov7pred54L/rtcoef_metop_1_iasi.dat
-rttov7pred54L/rtcoef_noaa_19_amsua.dat
-rttov7pred54L/rtcoef_jpss_0_atms.dat
-rttov7pred54L/rtcoef_noaa_20_atms.dat
-mietable/mietable_metop_amsuamhs.bin
-)
+  list( APPEND rttov_test_input
+    rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
+    rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
+    rttov7pred54L/rtcoef_gpm_1_gmi.dat
+    rttov7pred54L/rtcoef_metop_1_amsuamhs.dat
+    rttov7pred54L/rtcoef_metop_2_amsuamhs.dat
+    rttov7pred54L/rtcoef_metop_3_amsuamhs.dat
+    rttov7pred54L/rtcoef_noaa_15_amsuamhs.dat
+    rttov7pred54L/rtcoef_noaa_18_amsuamhs.dat
+    rttov7pred54L/rtcoef_noaa_19_amsuamhs.dat
+    rttov7pred54L/rtcoef_metop_1_iasi.dat
+    rttov7pred54L/rtcoef_noaa_19_amsua.dat
+    rttov7pred54L/rtcoef_jpss_0_atms.dat
+    rttov7pred54L/rtcoef_noaa_20_atms.dat
+    )
 
-# Symlink RTcoef files
-CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
-                         ${CMAKE_CURRENT_BINARY_DIR}/Data
-                         ${rttov_test_input} )
-# Extract rtcoeffs in binDir/Data
-
-set(archive "${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst")
-set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data")
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
-  file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
-else()
-  file(MAKE_DIRECTORY ${out_dir})
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
-    WORKING_DIRECTORY {out_dir}
-    RESULT_VARIABLE ret
-  )
-  if(NOT ret EQUAL 0)
-    message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
+  if( DEFINED  ENV{RTTOV_LOCAL_COEF_DIR} )
+    set( RTTOV_LOCAL_COEF_DIR "$ENV{RTTOV_LOCAL_COEF_DIR}" )
+    if( EXISTS ${RTTOV_LOCAL_COEF_DIR} )
+      set(RTTOV_COEF_DIR "${RTTOV_LOCAL_COEF_DIR}")
+      set(RTTOV_EXTRACT_COMPRESSED_COEFS FALSE)
+      message("Using local RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
+      list( APPEND rttov_test_input mietable/mietable_metop_amsuamhs.bin )
+    else()
+      set(RTTOV_COEF_DIR ${rttov_SOURCE_DIR}/rtcoef_rttov12)
+      set(RTTOV_EXTRACT_COMPRESSED_COEFS TRUE)
+      message("Cannot find ${RTTOV_LOCAL_COEF_DIR}")
+      message("Using default RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
+    endif()
+  else()
+    set(RTTOV_COEF_DIR ${rttov_SOURCE_DIR}/rtcoef_rttov12)
+    set(RTTOV_EXTRACT_COMPRESSED_COEFS TRUE)
+    message("Using default RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
   endif()
-endif()
 
-endif( ${rttov_FOUND} )
+  # Extract mietable to binDir/Data
+  if(${RTTOV_EXTRACT_COMPRESSED_COEFS})
+    set(archive "${rttov_SOURCE_DIR}/rtcoef_rttov12/mietable/mietable_metop_amsuamhs.tar.zst")
+    set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data/")
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+      file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
+    else()
+      file(MAKE_DIRECTORY ${out_dir})
+      execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
+        WORKING_DIRECTORY {out_dir}
+        RESULT_VARIABLE ret
+        )
+      if(NOT ret EQUAL 0)
+        message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
+      endif()
+    endif()
+  endif()
+    
+  # Symlink RTcoef files
+  create_symlink_filename( ${RTTOV_COEF_DIR}
+                           ${CMAKE_CURRENT_BINARY_DIR}/Data
+                           ${rttov_test_input} )
+                         
+endif()
 
 ######
 #Files for geos-aero tests
