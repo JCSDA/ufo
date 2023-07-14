@@ -75,7 +75,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
   // (stationIdVariable) or otherwise assume observations all taken by the same station (1 group)
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
-  std::vector<bool> isRejected(validObsIds.size(), false);
+  std::vector<bool> isRejected(obsAccessor.totalNumObservations(), false);
   std::vector<std::string> filterVariables = filtervars.toOopsVariables().variables();
   // Iterates through observations to see how long each variable is stuck on one observation
   for (std::string const& variable : filterVariables) {
