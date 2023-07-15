@@ -33,6 +33,9 @@ module ufo_vertinterp_tlad_mod
     character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
     character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
 
+    logical, public :: use_fact10 ! Apply scaling factor to winds below lowest model level
+    real(kind_real), allocatable :: wind_scaling_factor(:)
+
     integer, public :: selected_interp
   contains
     procedure :: setup => vertinterp_tlad_setup_
@@ -97,6 +100,12 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     endif
   endif
 
+  !> Apply scaling to winds below lowest model level
+  self%use_fact10 = .false.
+  if ( grid_conf%has("apply near surface wind scaling") ) then
+    call grid_conf%get_or_die("apply near surface wind scaling", self%use_fact10)
+  endif
+
   !> Determine observation vertical coordinate.
   !  Use the model vertical coordinate unless the option
   !  'observation vertical coordinate' is specified.
@@ -130,7 +139,7 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   type(c_ptr), value,        intent(in)    :: obss
 
   real(kind_real), allocatable :: obsvcoord(:)
-  type(ufo_geoval), pointer :: vcoordprofile
+  type(ufo_geoval), pointer :: vcoordprofile, fact10
   integer :: ilev, iobs, nlevs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
@@ -156,6 +165,13 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))
   allocate(self%wf(self%nlocs))
+
+  ! If scaling the wind record the observation pressure and get GeoVaLs
+  if (self%use_fact10) then
+    allocate(self%wind_scaling_factor(self%nlocs))
+    self%wind_scaling_factor = 1.0_kind_real
+    call ufo_geovals_get_var(geovals, "wind_reduction_factor_at_10m", fact10)
+  end if
 
   ! Calculate the interpolation weights
   if (self%use_constant_vcoord) then
@@ -204,6 +220,12 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     else
       call vert_interp_weights(nlevs, tmp2, tmp, self%wi(iobs), self%wf(iobs))
     end if
+
+    ! Set scaling factor
+    if (self%use_fact10) then
+      if (tmp2 >= tmp(1)) self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
+    end if
+
   enddo
 
   ! Cleanup memory
@@ -216,24 +238,25 @@ end subroutine vertinterp_tlad_settraj_
 
 subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   implicit none
-  class(ufo_vertinterp_tlad), intent(in) :: self
-  type(ufo_geovals),         intent(in) :: geovals
-  integer,                   intent(in) :: nvars, nlocs
-  real(c_double),         intent(inout) :: hofx(nvars, nlocs)
-  type(c_ptr), value,        intent(in) :: obss
+  class(ufo_vertinterp_tlad), intent(in)    :: self
+  type(ufo_geovals),          intent(in)    :: geovals
+  integer,                    intent(in)    :: nvars
+  integer,                    intent(in)    :: nlocs
+  real(c_double),             intent(inout) :: hofx(nvars, nlocs)
+  type(c_ptr), value,         intent(in)    :: obss
 
   integer :: iobs, iobsvar, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
 
+  ! Loop over the variables
   do iobsvar = 1, size(self%obsvarindices)
+
     ! Get the index of the row of hofx to fill
     ivar = self%obsvarindices(iobsvar)
 
-    ! Get the name of input variable in geovals
+    ! Get pointer to profile for this variable in geovals
     geovar = self%geovars%variable(iobsvar)
-
-    ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
@@ -248,38 +271,72 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
                                 & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
       enddo
     end if
+
+    ! Apply a scaling to winds below lowest model level
+    if (self%use_fact10) then
+
+      ! Check that this is a typical wind variable
+      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
+          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
+
+        ! Loop over the observations and apply wind scaling
+        do iobs = 1, nlocs
+          hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
+        enddo
+
+      end if
+    end if
   enddo
+
+
 end subroutine vertinterp_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
-subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
   implicit none
-  class(ufo_vertinterp_tlad), intent(in) :: self
-  type(ufo_geovals),         intent(inout) :: geovals
-  integer,                   intent(in)    :: nvars, nlocs
-  real(c_double),            intent(in)    :: hofx(nvars, nlocs)
-  type(c_ptr), value,        intent(in)    :: obss
+  class(ufo_vertinterp_tlad), intent(in)    :: self
+  type(ufo_geovals),          intent(inout) :: geovals
+  integer,                    intent(in)    :: nvars
+  integer,                    intent(in)    :: nlocs
+  real(c_double),             intent(in)    :: hofx_in(nvars, nlocs)
+  type(c_ptr), value,         intent(in)    :: obss
 
   integer :: iobs, iobsvar, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
   real(c_double) :: missing
+  real(c_double) :: hofx(nvars, nlocs)
 
   missing = missing_value(missing)
 
+  ! Copy hofx_in to hofx, in case it needs to be scaled
+  hofx = hofx_in
+
+  ! Loop over the variables
   do iobsvar = 1, size(self%obsvarindices)
+
     ! Get the index of the row of hofx to fill
     ivar = self%obsvarindices(iobsvar)
 
-    ! Get the name of input variable in geovals
-    geovar = self%geovars%variable(iobsvar)
-
     ! Get pointer to profile for this variable in geovals
+    geovar = self%geovars%variable(iobsvar)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
-    ! Adjoint of interpolate, from hofx into geovals
-    ! Interpolate from geovals to observational location into hofx
+    ! Adjoint of apply wind scaling
+    if (self%use_fact10) then
+
+      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
+          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
+
+        do iobs = 1, nlocs
+          hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
+        enddo
+
+      end if
+    endif
+
+    ! Adjoint of interpolatation
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
@@ -295,7 +352,9 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
         endif
       enddo
     end if
+
   enddo
+
 end subroutine vertinterp_simobs_ad_
 
 ! ------------------------------------------------------------------------------
@@ -307,6 +366,7 @@ subroutine vertinterp_tlad_cleanup_(self)
   self%nlocs = 0
   if (allocated(self%wi)) deallocate(self%wi)
   if (allocated(self%wf)) deallocate(self%wf)
+  if (allocated(self%wind_scaling_factor)) deallocate(self%wind_scaling_factor)
 end subroutine vertinterp_tlad_cleanup_
 
 ! ------------------------------------------------------------------------------
