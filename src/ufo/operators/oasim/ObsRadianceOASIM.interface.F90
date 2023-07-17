@@ -36,17 +36,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radianceoasim_setup_c(c_key_self, c_conf) bind(c,name='ufo_radianceoasim_setup_f90')
+subroutine ufo_radianceoasim_setup_c(c_key_self, c_conf, c_nchan, c_channels) bind(c,name='ufo_radianceoasim_setup_f90')
 
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
+integer(c_int), intent(in) :: c_nchan
+integer(c_int), intent(in) :: c_channels(c_nchan)
 
 type(ufo_oasim), pointer :: self
 type(fckit_configuration) :: f_conf
 
 call ufo_radianceoasim_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
-call self%setup(f_conf)
+
+call self%setup(f_conf, c_channels)
 
 end subroutine ufo_radianceoasim_setup_c
 

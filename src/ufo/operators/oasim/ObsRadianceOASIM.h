@@ -55,6 +55,8 @@ class ObsRadianceOASIM : public ObsOperatorBase,
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
+
+  ObsRadianceOASIMParameters parameters_;
 };
 
 // -----------------------------------------------------------------------------

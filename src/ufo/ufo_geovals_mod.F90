@@ -1232,6 +1232,7 @@ if(ierr /= nf90_noerr) then
   write(err_msg,*) "Error: Dimension nlocs not found in ", trim(filename)
   call abor1_ftn(err_msg)
 endif
+
 call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
 call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = global_npaths))
 
@@ -1276,6 +1277,7 @@ if (loc_multiplier > 0) then
     path_ranges_by_loc(my_loc)%end = my_path
   enddo
 else
+
   ! Negative loc_multipliers are no longer supported. They used to map each location to a set
   ! of paths with non-consecutive indices, which cannot be represented with the current data
   ! structures.
@@ -1307,20 +1309,26 @@ do ivar = 1, self%nvar
   call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
                                          ndims = ndims, dimids = dimids))
   !> read 1d variable
+
   if (ndims == 1) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = var_global_npaths))
     if (var_global_npaths /= global_npaths) then
       call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
     endif
+
     nval = 1
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,my_npaths))
 
     allocate(field1d(var_global_npaths))
+
     call check('nf90_get_var', nf90_get_var(ncid, varid, field1d))
+
     self%geovals(ivar)%vals(1,:) = field1d(global_path_by_my_path)
+
     deallocate(field1d)
+
   !> read 2d variable
   elseif (ndims == 2) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
@@ -1328,10 +1336,12 @@ do ivar = 1, self%nvar
     if (var_global_npaths /= global_npaths) then
       call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
     endif
+
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,my_npaths))
     allocate(field2d(nval, var_global_npaths))
+
     call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
     if (.not. levels_are_top_down) then 
       self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,global_path_by_my_path)
@@ -1341,6 +1351,7 @@ do ivar = 1, self%nvar
     deallocate(field2d)
   !> only 1d & 2d vars
   else
+
     call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')
   endif
 
@@ -1352,6 +1363,7 @@ enddo
 call check('nf90_close', nf90_close(ncid))
 
 call ufo_geovals_update_linit(self)
+
 if (.not. self%linit) then
   write(err_msg,*) "ufo_geovals_read_netcdf: internal error: not all data structures have been properly initialized"
   call abor1_ftn(err_msg)

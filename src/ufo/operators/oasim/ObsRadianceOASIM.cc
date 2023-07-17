@@ -17,7 +17,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
-
+#include "ufo/operators/oasim/ObsRadianceOASIM.interface.h"
 
 namespace ufo {
 
@@ -26,7 +26,7 @@ static ObsOperatorMaker<ObsRadianceOASIM> makerOASIM_("OASIM");
 // -----------------------------------------------------------------------------
 
 ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_ & params)
-  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_()
+  : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_(), parameters_(params)
 {
   const std::vector<std::string> vvin{"surface_pressure_at_mean_sea_level",
                                       "surface_wind_speed",
@@ -53,8 +53,14 @@ ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_
                                       "cyano-bacteria_concentration"};
 
   varin_.reset(new oops::Variables(vvin));
+  // parse channels from the config and create variable names
+  const oops::Variables & observed = odb.assimvariables();
+  std::vector<int> channels_list = observed.channels();
 
-  ufo_radianceoasim_setup_f90(keyOper_, params.toConfiguration());
+  ufo_radianceoasim_setup_f90(keyOper_, params.toConfiguration(),
+                              channels_list.size(), channels_list[0]);
+
+  oops::Log::info() << "ObsRadianceOASIM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceOASIM created." << std::endl;
 }
 
