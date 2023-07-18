@@ -53,11 +53,6 @@ HydrometeorCheckATMS::HydrometeorCheckATMS(const eckit::LocalConfiguration & con
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
   invars_ += Variable(biasgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
-  invars_ += Variable(biastermgrp+"/constant", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_4", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_3", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_2", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -69,6 +64,13 @@ HydrometeorCheckATMS::HydrometeorCheckATMS(const eckit::LocalConfiguration & con
 
   const Variable &clwretfunc = options_.clwretFunction.value();
   invars_ += clwretfunc;
+
+  // Include list of optional data
+  invars_ += Variable(biastermgrp+"/constant", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_4", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_3", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle_order_2", channels_);
+  invars_ += Variable(biastermgrp+"/scan_angle", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -128,20 +130,23 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
          hofxclr1650);
 
   // Get ObsBiasTerm: constant term for 23.8GHz channel
-  std::vector<float> bias_const238(nlocs);
-  in.get(Variable(biastermgrp+"/constant", channels_)[ich238], bias_const238);
-
+  std::vector<float> bias_const238(nlocs, 0.0f);
+  if (in.has(Variable(biastermgrp+"/constant", channels_)[ich238])) {
+    in.get(Variable(biastermgrp+"/constant", channels_)[ich238], bias_const238);
+  }
   // Get ObsBiasTerm: scan angle terms for 23.8GHz channel
   size_t nangs = 4;
-  std::vector<float> values(nlocs);
+  std::vector<float> values(nlocs, 0.0f);
   std::vector<std::string> scanterms(nangs);
-  std::vector<float> bias_scanang238(nlocs);
+  std::vector<float> bias_scanang238(nlocs, 0.0f);
   scanterms[0] = biastermgrp+"/scan_angle_order_4";
   scanterms[1] = biastermgrp+"/scan_angle_order_3";
   scanterms[2] = biastermgrp+"/scan_angle_order_2";
   scanterms[3] = biastermgrp+"/scan_angle";
   for (size_t iang = 0; iang < nangs; ++iang) {
-    in.get(Variable(scanterms[iang], channels_)[ich238], values);
+    if (in.has(Variable(scanterms[iang], channels_)[ich238])) {
+      in.get(Variable(scanterms[iang], channels_)[ich238], values);
+    }
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       bias_scanang238[iloc] = bias_scanang238[iloc] + values[iloc];
     }
