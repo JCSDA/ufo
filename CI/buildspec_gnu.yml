@@ -1,6 +1,7 @@
 version: 0.2
 
 env:
+  shell: bash
   parameter-store:
     GIT_USER: "/CodeBuild/Git_USER"
     GIT_PASS: "/CodeBuild/Git_PASS"
@@ -26,6 +27,7 @@ phases:
       # Codebuild only runs on PUSH events if HEAD_REF
       # is refs/heads/develop (merge to develop). In this
       # case CODEBUILD_GIT_BRANCH="develop"
+
       - if [ "$CODEBUILD_WEBHOOK_EVENT" = "PUSH" ];
         then export CODEBUILD_GIT_BRANCH="develop";
         echo "Merging to develop";
@@ -47,7 +49,6 @@ phases:
   pre_build:
     commands:
       - echo Executing pre_build phase
-      - git lfs install # creates .gitconfig
       - mkdir -p /jcsda/ufo-bundle
 
       # Upload branch name and commit sha as CodeBuild artifact to S3
@@ -58,6 +59,7 @@ phases:
       - cd CI
 
       #  Setting git credentials
+      - git lfs install # creates .gitconfig
       - sed -i '/ssh/d' ~/.gitconfig
       - sed '/instead/d' ~/.gitconfig
       - git config --global credential.helper store
@@ -77,6 +79,9 @@ phases:
       # oops
       - ./clone.sh jcsda-internal/oops $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle oops ${GIT_BASE_BRANCH} develop
 
+      # crtm
+      - ./clone.sh jcsda/crtmv3 $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle crtm ${GIT_BASE_BRANCH} develop
+
       # rttov
       - ./clone.sh jcsda-internal/rttov $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle rttov ${GIT_BASE_BRANCH} develop
 
@@ -86,7 +91,7 @@ phases:
       # geos-aero
       - ./clone.sh jcsda-internal/geos-aero $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle geos-aero ${GIT_BASE_BRANCH} develop
 
-      #gsw
+      # gsw
       - ./clone.sh jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle gsw ${GIT_BASE_BRANCH} develop
 
       # ufo-test
@@ -99,10 +104,13 @@ phases:
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
       # cdash upload setup
-      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle/
+      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle
       - sed -i "s@CDASH_URL@$CDASH_URL@g" /jcsda/ufo-bundle/CTestConfig.cmake
 
       - chmod -R 777 /jcsda/ufo-bundle
+
+      - cd /jcsda/ufo-bundle
+      - ls
 
   build:
     on-failure: CONTINUE
@@ -112,15 +120,15 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
+      # configure and build
       - su - nonroot -c "cd /home/nonroot
         && echo $CC
         && echo $CXX
         && echo $FC
         && CC=mpicc CXX=mpicxx FC=mpifort
-        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=GNUContainer -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE -DENABLE_GPROF=ON -DFIND_crtm=OFF /jcsda/ufo-bundle/"
+        && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=GNUContainer -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE -DENABLE_GPROF=ON /jcsda/ufo-bundle/"
 
 
-      # configure and build
       - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
@@ -144,7 +152,6 @@ phases:
         && ctest -C RelWithDebInfo -D ExperimentalTest"
 
     finally:
-      # upload ctest report to CDASH
       - su - nonroot -c "cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
