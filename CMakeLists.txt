@@ -66,7 +66,7 @@ find_package( crtm 2.4.0 QUIET )
 if( ${crtm_FOUND} )
     message(STATUS "CRTM FOUND; Including CRTM Observation Operator (${crtm_VERSION})")
 else( ${crtm_FOUND} )
-  message(STATUS "CRTM NOT FOUND; Excluding CRTM Observation Operator")
+    message(STATUS "CRTM NOT FOUND; Excluding CRTM Observation Operator")
 endif( ${crtm_FOUND} )
 
 # RTTOV
@@ -90,7 +90,7 @@ find_package( ropp-ufo QUIET )
 if( ${ropp-ufo_FOUND} )
     message(STATUS "ROPP FOUND; Including GNSSRO Bending angle ROPP Operators (${ropp-ufo_VERSION})")
 else( ${ropp-ufo_FOUND} )
-    message(STATUS "ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
+    message(STATUS "ROPP NOT FOUND: Excluding GNSSRO Bending angle ROPP Operators")
 endif( ${ropp-ufo_FOUND} )
 
 # GEOS-AERO
@@ -98,7 +98,7 @@ find_package( geos-aero QUIET )
 if( ${geos-aero_FOUND} )
     message(STATUS "GEOS-AERO FOUND; Including AOD operator from GEOS (${geos-aero_VERSION})")
 else( ${geos-aero_FOUND} )
-    message(STATUS "GEOS-AERO NOT FOUND: Excluding  AOD operator from GEOS")
+    message(STATUS "GEOS-AERO NOT FOUND: Excluding AOD operator from GEOS")
 endif( ${geos-aero_FOUND} )
 
 # OASIM

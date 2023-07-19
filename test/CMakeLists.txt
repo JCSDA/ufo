@@ -47,8 +47,11 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
-# set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
-set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
+if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
+    set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
+else()
+    set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
+endif()
 
 # Test data filenames
 set(ufo_test_data  ufo_testinput_tier_1_1.7.0.tar.gz)
@@ -71,7 +74,7 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
   # If a tagged version of REPO is being built set GIT_TAG_FUNC to REPO's current tag.
   find_branch_name(REPO_DIR_NAME ${repo})
 
-  if ( ${repo} STREQUAL "crtm" )
+  if( ${repo} STREQUAL "crtm" )
     set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
   endif()
 
@@ -314,7 +317,7 @@ ecbuild_add_test( TARGET  test_ufo_nearest_neighbor_interpolation
                   TEST_DEPENDS test_NearestNeighborInterpolation.x)
 
 # Test Parameters
-if (eckit_VERSION VERSION_GREATER_EQUAL 1.16)
+if(eckit_VERSION VERSION_GREATER_EQUAL 1.16)
   ecbuild_add_test( TARGET  test_ufo_parameters
                     SOURCES mains/TestParameters.cc
                     ARGS    "testinput/parameters.yaml"
