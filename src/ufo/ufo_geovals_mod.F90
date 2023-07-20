@@ -19,7 +19,7 @@ private
 integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval, ufo_index_range
-public :: ufo_geovals_get_var
+public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
 public :: ufo_geovals_setup_sampling_method, ufo_geovals_setup_trivial_sampling_method
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
@@ -451,9 +451,6 @@ character(max_string) :: err_msg
 integer :: ivar, jv
 
 geoval => NULL()
-if (.not. self%linit) then
-   !return
-endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
 
@@ -469,6 +466,30 @@ else
 endif
 
 end subroutine ufo_geovals_get_var
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_get_var_by_index(self, ivar, geoval)
+implicit none
+type(ufo_geovals), target, intent(in)    :: self
+integer, intent(in) :: ivar
+type(ufo_geoval), pointer, intent(inout)    :: geoval
+
+character(len=*), parameter :: myname_="ufo_geovals_get_var_by_index"
+
+character(max_string) :: err_msg
+integer :: jv
+
+geoval => NULL()
+
+if (ivar <= 0 .or. ivar > self % nvar) then
+  write(err_msg,*) myname_, " index ", ivar, ' doesnt exist'
+  call abor1_ftn(err_msg)
+else
+  geoval => self%geovals(ivar)
+endif
+
+end subroutine ufo_geovals_get_var_by_index
 
 ! ------------------------------------------------------------------------------
 

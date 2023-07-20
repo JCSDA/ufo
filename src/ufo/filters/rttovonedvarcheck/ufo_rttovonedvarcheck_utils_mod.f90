@@ -28,6 +28,7 @@ public ufo_rttovonedvarcheck_adjust_bmatrix
 public ufo_rttovonedvarcheck_check_ctp
 public ufo_rttovonedvarcheck_all_to_subset_by_channels
 public ufo_rttovonedvarcheck_subset_to_all_by_channels
+public ufo_rttovonedvarcheck_geovals_index_by_channels
 
 character(len=max_string) :: message
 
@@ -469,6 +470,36 @@ used_loop: do i = 1, size(channels_subset)
 end do used_loop
 
 end subroutine ufo_rttovonedvarcheck_all_to_subset_by_channels
+
+! -------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_geovals_index_by_channels(channels, &
+                          base_name, hofxdiags_list, geoval_index_list)
+
+implicit none
+integer, intent(in)          :: channels(:)
+character(len=*), intent(in) :: base_name
+character(len=*), intent(in) :: hofxdiags_list(:)
+integer, intent(out)         :: geoval_index_list(:)
+
+character(len=MAXVARLEN) :: varname
+integer :: jchan, ihofx, numchans
+
+geoval_index_list(:) = 0
+numchans = size(channels)
+
+jchan = 1
+write(varname, "(a,i0)") base_name, channels(1)
+do ihofx = 1, size(hofxdiags_list)
+  if (varname == hofxdiags_list(ihofx)) then
+    geoval_index_list(jchan) = ihofx
+    jchan = jchan + 1
+    if (jchan > numchans) exit
+    write(varname, "(a,i0)") base_name, channels(jchan)
+  end if
+end do
+
+end subroutine ufo_rttovonedvarcheck_geovals_index_by_channels
 
 ! -------------------------------------------------------------
 
