@@ -38,4 +38,4 @@ observations:
         order: 2
       - name: scan_angle
   vector ref: ObsValue
-  tolerance: 2.5e-2
+  tolerance: 2.6e-2

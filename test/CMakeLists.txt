@@ -49,8 +49,10 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
     set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
+    set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput" )
 else()
     set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
+    set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput/CRTMv2" )
 endif()
 
 # Test data filenames
