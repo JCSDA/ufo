@@ -1,0 +1,84 @@
+window begin: '2020-09-03T15:00:00Z'
+window end: '2020-09-03T21:00:00Z'
+observations:
+- obs space:
+    name: NO2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tempo_no2_troposphere.nc
+        #   obsdataout:
+        #     engine:
+        #       type: H5File
+        #       obsfile: Data/tempo_no2_opr_out1.nc4
+    simulated variables: [nitrogendioxideColumn]
+  obs operator:
+    name: ColumnRetrieval
+    nlayers_retrieval: 47
+    tracer variables: [volume_mixing_ratio_of_no2]
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
+    model units coeff: 1e-6 # ppmv to 1/1
+  linear obs operator test:
+    coef TL: 1.0e-8
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tempo_no2_geovals.nc4
+  rms ref: 1.0757342508807481e-11
+  tolerance: 1.0e-7
+- obs space:
+    name: NO2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tempo_no2_total.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/tempo_no2_opr_out2.nc4
+    simulated variables: [nitrogendioxideTotal]
+  obs operator:
+    name: ColumnRetrieval
+    nlayers_retrieval: 47
+    tracer variables: [volume_mixing_ratio_of_no2]
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
+    model units coeff: 1e-6 # ppmv to 1/1
+  linear obs operator test:
+    coef TL: 1.0e-8
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tempo_no2_geovals.nc4
+  rms ref: 9.3804366326033382e-11
+  tolerance: 1.0e-7
+- obs space:
+    name: NO2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tempo_no2_stratosphere.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/tempo_no2_opr_out3.nc4
+    simulated variables: [nitrogendioxideColumn]
+  obs operator:
+    name: ColumnRetrieval
+    nlayers_retrieval: 47
+    tracer variables: [volume_mixing_ratio_of_no2]
+    isApriori: false
+    isAveragingKernel: true
+    stretchVertices: topbottom #options: top, bottom, topbottom, none
+    model units coeff: 1e-6 # ppmv to 1/1
+  linear obs operator test:
+    coef TL: 1.0e-8
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tempo_no2_geovals.nc4
+  rms ref: 8.4734255336663887e-11
+  tolerance: 1.0e-7
