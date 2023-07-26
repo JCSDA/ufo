@@ -637,4 +637,48 @@ observations:
       test:
         name: GrossErrorProbability/salinity
       absTol: 2.0e-4
-
+- obs space: # Comparison against Met Office OPS system, overriding obs grouping
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level.nc
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/met_office_buddy_check_multi_level_diag.nc
+  obs filters:
+  - filter: Met Office Buddy Check
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+      options:
+        first_component_of_two: true
+    - name: windNorthward
+    sort_by_pressure: false  # true for sat wind and aircraft (group:4), not sonde (group:5)
+    # Maps latitudes to kms
+    horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
+                                   "-20": 8400, "-30": 9600, "-90": 9600}
+    temporal_correlation_scale: PT6H
+    num_zonal_bands: 36
+    num_levels: 1
+    override_obs_grouping: true
+    search_radius: 3000 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+    pressure_coordinate: pressure
+    pressure_group: MetaData
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  passedBenchmark: 84
