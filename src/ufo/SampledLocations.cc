@@ -205,6 +205,19 @@ size_t SampledLocations::nlocs() const {
 
 // -------------------------------------------------------------------------------------------------
 
+bool SampledLocations::areLocationsSampledOnceAndInOrder() const {
+  if (pathsGroupedByLocation_.empty())
+    return true;
+
+  for (size_t loc = 0; loc < pathsGroupedByLocation_.size(); ++loc)
+    if (pathsGroupedByLocation_[loc].begin != loc || pathsGroupedByLocation_[loc].end != loc + 1)
+      return false;
+
+  return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
 void SampledLocations::initializeObsGroup(const size_t npaths) {
   ioda::Engines::BackendCreationParameters params;
   ioda::Group g = constructBackend(ioda::Engines::BackendNames::ObsStore, params);

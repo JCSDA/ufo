@@ -90,6 +90,18 @@ ObsGnssroBndROPP2D::locations() const {
 
 // -----------------------------------------------------------------------------
 
+void ObsGnssroBndROPP2D::computeReducedVars(const oops::Variables & reducedVars,
+                                            GeoVaLs & /*geovals*/) const {
+  // No method for reducing the set of nhoriz_ profiles sampling each location into a single profile
+  // has been implemented so far, so when this obs operator is in use, neither it nor any obs
+  // filters or bias predictors can request variables in the reduced format.
+  if (reducedVars.size() != 0)
+    throw eckit::NotImplemented("ObsGnssroBndROPP2D is unable to compute the reduced "
+                                "representation of GeoVaLs", Here());
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsGnssroBndROPP2D::print(std::ostream & os) const {
   os << "ObsGnssroBndROPP2D::print not implemented";
 }

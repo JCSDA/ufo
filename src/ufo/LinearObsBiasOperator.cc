@@ -17,6 +17,7 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -33,6 +34,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
                                           ObsDiagnostics & ydiags) {
   oops::Log::trace() << "LinearObsBiasOperator::setTrajectory starts." << std::endl;
 
+  ScopedDefaultGeoVaLFormatChange change(geovals, GeoVaLFormat::REDUCED);
   const std::vector<std::shared_ptr<const PredictorBase>> variablePredictors =
       bias.variablePredictors();
   const std::size_t npreds = variablePredictors.size();

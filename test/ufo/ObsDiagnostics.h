@@ -91,11 +91,17 @@ void testObsDiagnostics() {
   // variables simulated by the observation operator, other init)
   ObsOperator hop(ospace, params.obsOperator);
 
-  // read geovals from the file
-  const GeoVaLs gval(params.geovals, ospace, hop.requiredVars());
-
   // initialize bias correction
   const ObsBias ybias(ospace, params.obsBias);
+
+  // initialize geovals
+  oops::Variables hopvars = hop.requiredVars();
+  oops::Variables reducedHopvars = ybias.requiredVars();
+  hopvars += reducedHopvars;  // the reduced format is derived from the sampled format
+  // read geovals from the file
+  GeoVaLs gval(params.geovals, ospace, hopvars);
+  // convert geovals to the reduced format
+  hop.computeReducedVars(reducedHopvars, gval);
 
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);

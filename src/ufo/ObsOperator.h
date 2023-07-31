@@ -54,6 +54,8 @@ class ObsOperator : public util::Printable,
 /// Model variable interpolation paths
   Locations_ locations() const;
 
+  void computeReducedVars(const oops::Variables & vars, GeoVaLs & geovals) const;
+
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsOperatorBase> oper_;

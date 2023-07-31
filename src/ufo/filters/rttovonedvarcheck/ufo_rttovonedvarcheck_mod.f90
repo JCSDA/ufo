@@ -142,6 +142,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   integer(c_size_t), allocatable     :: ret_nlevs(:)
   integer(c_size_t)                  :: npaths_by_method(1)
   integer(c_size_t), allocatable     :: sampling_method_by_var(:)
+  type(oops_variables)               :: reduced_vars
+  integer(c_size_t)                  :: nreduced_vals(0)
+  logical(c_bool), parameter         :: is_sampling_method_trivial(1) = (/ .true. /)
 
   ! ------------------------------------------
   ! 1. Setup
@@ -308,9 +311,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
 
       ! Setup hofxdiags for this retrieval
+      reduced_vars = oops_variables()
       call ufo_geovals_setup(hofxdiags, 1, hofxdiags_vars, hofxdiags_vars % nvars(), ret_nlevs, &
-                             size(npaths_by_method), npaths_by_method, &
-                             sampling_method_by_var)
+                             size(npaths_by_method), npaths_by_method, sampling_method_by_var, &
+                             reduced_vars, reduced_vars % nvars(), nreduced_vals, &
+                             is_sampling_method_trivial)
+      call reduced_vars % destruct()
       call ufo_geovals_setup_trivial_sampling_method(hofxdiags, sampling_method = 1)
 
       if (self % FullDiagnostics) then

@@ -42,6 +42,33 @@ namespace ioda {
 namespace ufo {
 struct ObsTraits;
 
+// -----------------------------------------------------------------------------
+
+/// \brief GeoVaL format.
+///
+/// \see GeoVaLs for more information about the formats.
+///
+/// \note The enumerator values must be kept in sync with the constants defined in
+/// `ufo_geovals_mod.F90`.
+enum class GeoVaLFormat : int {
+  /// \brief Not a format in itself, but a special value signaling that the code should defer to
+  /// the format returned by GeoVaLs::defaultFormat().
+  ///
+  /// The default format can be adjusted by calling GeoVaLs::setDefaultFormat(), either directly or
+  /// using a ScopedDefaultGeoVaLFormatChange object.
+  DEFAULT = 0,
+
+  /// \brief The sampled format (with one GeoVaL profile per interpolation path).
+  SAMPLED = 1,
+
+  /// \brief The reduced format (with one GeoVaL profile per observation location).
+  REDUCED = 2
+};
+
+std::ostream & operator<<(std::ostream &os, GeoVaLFormat format);
+
+// -----------------------------------------------------------------------------
+
 /// \brief Parameters controlling GeoVaLs read/write
 class GeoVaLsParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(GeoVaLsParameters, Parameters)
@@ -61,11 +88,25 @@ class GeoVaLsParameters : public oops::Parameters {
 
 // -----------------------------------------------------------------------------
 
-/// GeoVaLs: geophysical values at locations
+/// \brief Stores values of geophysical variables at observation locations.
 ///
-/// Instances of this class store values of (model) variables interpolated along collections of
-/// paths sampling the observation locations. Different variables may be interpolated along
-/// different sets of paths.
+/// The values of each variable can be stored in up to two formats:
+///
+/// (a) *Sampled*, i.e. as profiles obtained by direct interpolation of a model field along a
+///     set of paths sampling the observation locations. The mapping between locations and paths
+///     does not need to be 1-to-1; in particular, each location may be sampled by multiple paths.
+///     Different variables may be interpolated along different sets of paths. This format of
+///     variable values is most commonly used by observation operators.
+///
+/// (b) *Reduced*, i.e. computed by replacing each set of profiles obtained by interpolation along
+///     the paths sampling a single location by a single profile. This format of variable values
+///     is most commonly used by observation filters and bias operators.
+///
+/// In the simplest and most common case, in which each location is sampled by just a single path,
+/// the two formats are identical to each other. The UFO implementation of the GeoVaLs interface
+/// automatically detects whether this is the case for given variable and if so, stores only one
+/// copy of its values. When there are multiple paths per location, values in the sampled format
+/// are typically converted to the reduced format by an appropriate form of averaging.
 class GeoVaLs : public util::Printable,
                 private util::ObjectCounter<GeoVaLs> {
   /// \brief A reference to a read-only vector-valued expression.
@@ -95,15 +136,15 @@ class GeoVaLs : public util::Printable,
 
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const Locations_ &, const oops::Variables &,
-          const std::vector<size_t> &);
+  GeoVaLs(const Locations_ & locations,
+          const oops::Variables & vars, const std::vector<size_t> & nlevs);
 
 // Deprecated constructor - Please do not use this constructor in new code.
-  GeoVaLs(std::shared_ptr<const ioda::Distribution>, const oops::Variables &);
+  GeoVaLs(std::shared_ptr<const ioda::Distribution> dist, const oops::Variables & vars);
 // Deprecated constructor - Please do not use this constructor in new code.
-  GeoVaLs(const Locations_ &, const oops::Variables &);
+  GeoVaLs(const Locations_ & locations, const oops::Variables & vars);
 // Constructor for tests - Please do not use this constructor in new code.
-  GeoVaLs(const Parameters_ &, const ioda::ObsSpace &, const oops::Variables &);
+  GeoVaLs(const Parameters_ & params, const ioda::ObsSpace & obspace, const oops::Variables & vars);
 
   GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
@@ -134,99 +175,157 @@ class GeoVaLs : public util::Printable,
   /// allocated with \p nlev.
   void allocate(const int & nlev, const oops::Variables & vars);
 
+  /// \brief Instructs a GeoVaLs object to store some GeoVaLs in the reduced format.
+  ///
+  /// Space will be allocated for the reduced representation of these variables unless they are
+  /// already stored in the sampled format and their reduced and sampled representations are
+  /// identical.
+  ///
+  /// \param vars
+  ///   Names of the variables to be stored in the reduced format. They must not already be stored
+  ///   in this format.
+  /// \param nlevs
+  ///   A vector of length `vars.size()` whose ith element indicates how many values per
+  ///   location will be stored in the GeoVaL corresponding to the ith variable in `vars`.
+  void addReducedVars(const oops::Variables & vars, const std::vector<size_t> & nlevs);
+
   void zero();
   void reorderzdir(const std::string &, const std::string &);
   void random();
   double rms() const;
   double normalizedrms(const GeoVaLs &) const;
 
-  bool has(const std::string & var) const {return vars_.has(var);}
+  /// \brief Return true if this GeoVaLs object contains variable `var` stored in format `format`.
+  bool has(const std::string & var, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// \brief Return the list of variables stored in the sampled format.
   const oops::Variables & getVars() const {return vars_;}
+  /// \brief Return the list of variables stored in the reduced format.
+  const oops::Variables & getReducedVars() const {return reducedVars_;}
 
-  size_t nlevs(const std::string & var) const;
+  /// \brief Return true if the reduced and sampled formats of variable `var` are stored in the
+  /// same block of memory (and therefore are identical).
+  bool areReducedAndSampledFormatsAliased(const std::string & var) const;
+
+  /// \brief Return the format of variables accessed by functions such as get...() and put...()
+  /// if their `format` parameter is set to GeoVaLFormat::DEFAULT.
+  GeoVaLFormat defaultFormat() const;
+  /// \brief Set the format of variables accessed by functions such as get...() and put...()
+  /// if their `format` parameter is set to GeoVaLFormat::DEFAULT.
+  void setDefaultFormat(GeoVaLFormat format);
+
+  /// Return the number of levels in the variable \p var stored in format \p format.
+  size_t nlevs(const std::string & var, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Return the number of profiles in the variable \p var (i.e. the number of paths along which
-  /// it has been interpolated).
-  size_t nprofiles(const std::string & var) const;
-  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs)
-  void get(std::vector<double> &, const std::string & var) const;
-  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to float
-  void get(std::vector<float> &, const std::string & var) const;
-  /// Get 2D GeoVaLs for variable \p var (fails for 3D GeoVaLs), and convert to int
-  void get(std::vector<int> &, const std::string & var) const;
+  /// it has been interpolated) stored in format \p format.
+  size_t nprofiles(const std::string & var, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Get 2D GeoVaLs for variable \p var stored in format \p format (fails for 3D GeoVaLs)
+  void get(std::vector<double> &, const std::string & var,
+           GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Get 2D GeoVaLs for variable \p var stored in format \p format (fails for 3D GeoVaLs),
+  /// and convert to float
+  void get(std::vector<float> &, const std::string & var,
+           GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Get 2D GeoVaLs for variable \p var stored in format \p format (fails for 3D GeoVaLs),
+  /// and convert to int
+  void get(std::vector<int> &, const std::string & var,
+           GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
   /// Get GeoVaLs at a specified level
-  void getAtLevel(std::vector<double> &, const std::string &, const int) const;
+  void getAtLevel(std::vector<double> &, const std::string &, const int,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get GeoVaLs at a specified level and convert to float
-  void getAtLevel(std::vector<float> &, const std::string &, const int) const;
+  void getAtLevel(std::vector<float> &, const std::string &, const int,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get GeoVaLs at a specified level and convert to int
-  void getAtLevel(std::vector<int> &, const std::string &, const int) const;
+  void getAtLevel(std::vector<int> &, const std::string &, const int,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  /// Get a specified profile of the variable `var` (i.e. the result of its interpolation along a
-  /// specified path)
-  void getProfile(std::vector<double> &vals, const std::string &var, const int profileIndex) const;
+  /// Get a specified profile of the variable `var` stored in format \p format
+  ///
+  /// For variables stored in the sampled format, each profile contains the results of variable
+  /// interpolation along a specific path. For variables stored in the reduced format, each profile
+  /// contains values computed by reducing all profiles sampling a specific observation location to
+  /// a single profile.
+  void getProfile(std::vector<double> &vals, const std::string &var, const int profileIndex,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get a specified profile of the variable `var` and convert to float
-  void getProfile(std::vector<float> &, const std::string &, const int profileIndex) const;
+  void getProfile(std::vector<float> &, const std::string &, const int profileIndex,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get a specified profile of the variable `var` and convert to int
-  void getProfile(std::vector<int> &, const std::string &, const int profileIndex) const;
+  void getProfile(std::vector<int> &, const std::string &, const int profileIndex,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
   /// Get GeoVaLs at a specified location
   ///
-  /// This function works only if the variable `var` has been interpolated along one path per
-  /// observation location; otherwise it throws an exception. Use the getProfile()
-  /// function to handle the general case.
-  void getAtLocation(std::vector<double> &vals, const std::string &var, const int loc) const;
+  /// For variables stored in the sampled format, this function works only if the variable `var`
+  /// has been interpolated along one path per observation location; otherwise it throws an
+  /// exception. Use the getProfile() function to handle the general case.
+  void getAtLocation(std::vector<double> &vals, const std::string &var, const int loc,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get GeoVaLs at a specified location and convert to float
   ///
-  /// This function works only if the variable `var` has been interpolated along one path per
-  /// observation location; otherwise it throws an exception. Use the getProfile()
-  /// function to handle the general case.
-  void getAtLocation(std::vector<float> &, const std::string &, const int) const;
+  /// For variables stored in the sampled format, this function works only if the variable `var`
+  /// has been interpolated along one path per observation location; otherwise it throws an
+  /// exception. Use the getProfile() function to handle the general case.
+  void getAtLocation(std::vector<float> &, const std::string &, const int,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
   /// Get GeoVaLs at a specified location and convert to int
   ///
-  /// This function works only if the variable `var` has been interpolated along one path per
-  /// observation location; otherwise it throws an exception. Use the getProfile()
-  /// function to handle the general case.
-  void getAtLocation(std::vector<int> &, const std::string &, const int) const;
+  /// For variables stored in the sampled format, this function works only if the variable `var`
+  /// has been interpolated along one path per observation location; otherwise it throws an
+  /// exception. Use the getProfile() function to handle the general case.
+  void getAtLocation(std::vector<int> &, const std::string &, const int,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  /// Put GeoVaLs for double variable \p var at level \p lev.
-  void putAtLevel(const std::vector<double> & vals, const std::string & var, const int lev) const;
-  /// Put GeoVaLs for float variable \p var at level \p lev.
-  void putAtLevel(const std::vector<float> & vals, const std::string & var, const int lev) const;
-  /// Put GeoVaLs for int variable \p var at level \p lev.
-  void putAtLevel(const std::vector<int> & vals, const std::string & var, const int lev) const;
+  /// Put GeoVaLs at level \p lev for variable \p var of type \c double stored in format \p format.
+  void putAtLevel(const std::vector<double> & vals, const std::string & var, const int lev,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Put GeoVaLs at level \p lev for variable \p var of type \c float stored in format \p format.
+  void putAtLevel(const std::vector<float> & vals, const std::string & var, const int lev,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Put GeoVaLs at level \p lev for variable \p var of type \c int stored in format \p format.
+  void putAtLevel(const std::vector<int> & vals, const std::string & var, const int lev,
+                  GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
-  /// specified interpolation path)
+  /// Store the specified profile of variable \p var stored in format \p format.
+  ///
+  /// For variables stored in the sampled format, each profile contains the results of variable
+  /// interpolation along a specific path. For variables stored in the reduced format, each profile
+  /// contains values computed by reducing all profiles sampling a specific observation location to
+  /// a single profile.
   void putProfile(const std::vector<double> & vals, const std::string & var,
-                  const int profileIndex) const;
-  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
-  /// specified interpolation path)
+                  const int profileIndex, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Store the specified profile of variable \p var stored in format \p format.
   void putProfile(const std::vector<float> & vals, const std::string & var,
-                  const int profileIndex) const;
-  /// Store the specified profile of variable \p var (i.e. the values of this variable along the
-  /// specified interpolation path)
+                  const int profileIndex, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Store the specified profile of variable \p var stored in format \p format.
   void putProfile(const std::vector<int> & vals, const std::string & var,
-                  const int profileIndex) const;
+                  const int profileIndex, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  /// Put GeoVaLs for double variable \p var at location \p loc.
+  /// Put GeoVaLs at location \p loc for variable \p var of type \c double
+  /// stored in format \p format.
   ///
   /// This function works only if the variable `var` has been interpolated along one path per
   /// observation location; otherwise it throws an exception. Use the putProfile()
   /// function to handle the general case.
-  void putAtLocation(const std::vector<double> & vals, const std::string & var,
-                     const int loc) const;
-  /// Put GeoVaLs for float variable \p var at location \p loc.
+  void putAtLocation(const std::vector<double> & vals, const std::string & var, const int loc,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Put GeoVaLs at location \p loc for variable \p var of type \c float
+  /// stored in format \p format.
   ///
   /// This function works only if the variable `var` has been interpolated along one path per
   /// observation location; otherwise it throws an exception. Use the putProfile()
   /// function to handle the general case.
-  void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc) const;
-  /// Put GeoVaLs for int variable \p var at location \p loc.
+  void putAtLocation(const std::vector<float> & vals, const std::string & var, const int loc,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
+  /// Put GeoVaLs at location \p loc for variable \p var of type \c int
+  /// stored in format \p format.
   ///
   /// This function works only if the variable `var` has been interpolated along one path per
   /// observation location; otherwise it throws an exception. Use the putProfile()
   /// function to handle the general case.
-  void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc) const;
+  void putAtLocation(const std::vector<int> & vals, const std::string & var, const int loc,
+                     GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
   /// \brief Retrieve a vector mapping the index of each observation location to the range of
   /// indices of the profiles obtained by interpolating the variable `var` along the paths sampling
@@ -237,19 +336,21 @@ class GeoVaLs : public util::Printable,
   /// `profileIndicesGroupedByLocation[i].end`.
   void getProfileIndicesGroupedByLocation(
       const std::string &var,
-      std::vector<util::Range<size_t>> &profileIndicesGroupedByLocation) const;
+      std::vector<util::Range<size_t>> &profileIndicesGroupedByLocation,
+      GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
   void read(const Parameters_ &, const ioda::ObsSpace &);
   void write(const Parameters_ &) const;
 
   /// \brief Return the number of observation locations.
   ///
-  /// Note that each GeoVaL may contain multiple profiles obtained by interpolating the
-  /// corresponding model variable along paths sampling the same location, and the set of
-  /// interpolation paths may vary from one variable to another. Call nprofiles() to retrieve the
-  /// number of profiles in a specific GeoVaL.
+  /// Note that each GeoVaL stored in the sampled format may contain multiple profiles obtained by
+  /// interpolating the corresponding model variable along paths sampling the same location, and
+  /// the set of interpolation paths may vary from one variable to another. Call nprofiles() to
+  /// retrieve the number of profiles in a specific GeoVaL.
   size_t nlocs() const;
 
+  // This always acts on sampled GeoVaLs
   void fill(const std::string &name, const ConstVectorRef<size_t> &indx,
             const ConstMatrixRef<double> &vals, const bool levelsTopDown);
   void fillAD(const std::string &name, const ConstVectorRef<size_t> &indx,
@@ -263,9 +364,14 @@ class GeoVaLs : public util::Printable,
 
   /// Convert data stored in a Locations_ object into the form required by
   /// the Fortran GeoVaLs setup subroutines.
+  ///
+  /// \note `isSamplingMethodTrivial` is declared as a `unique_ptr` to an array rather than as a
+  /// vector because we need to pass a `bool*` pointer to Fortran, but the internal representation
+  /// of the data held by a `std::vector<bool>` may be different from an array of `bool`s.
   void fillSetupInputs(const Locations_ & locations,
                        size_t & nlocs, std::vector<size_t> & numPathsByMethod,
-                       std::vector<size_t> & samplingMethodByVar) const;
+                       std::vector<size_t> & samplingMethodByVar,
+                       std::unique_ptr<bool[]> & isSamplingMethodTrivial) const;
 
   /// Finish setting up the Fortran GeoVaLs object by letting it know which interpolation paths
   /// sample which observation locations.
@@ -287,12 +393,19 @@ class GeoVaLs : public util::Printable,
                    });
   }
 
+  /// \brief If `format` is set to DEFAULT, convert it to ORIGINAL or REDUCED depending on the
+  /// value returned by defaultFormat().
+  GeoVaLFormat explicitFormat(GeoVaLFormat format) const;
+
+  /// \brief Like explicitFormat(), except that the result is converted to `int` to allow it to be
+  /// passed to Fortran.
+  int explicitFormatAsInt(GeoVaLFormat format) const;
+
   F90goms keyGVL_;
   oops::Variables vars_;
+  oops::Variables reducedVars_;
   std::shared_ptr<const ioda::Distribution> dist_;   /// observations MPI distribution
 };
-
-// -----------------------------------------------------------------------------
 
 }  // namespace ufo
 

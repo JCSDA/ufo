@@ -42,6 +42,33 @@ oops::Variables ObsOperatorBase::simulatedVars() const {
 
 // -----------------------------------------------------------------------------
 
+void ObsOperatorBase::computeReducedVars(const oops::Variables & /*vars*/, GeoVaLs & gvals) const {
+  // Ask the GeoVaLs object to store a reduced representation of all variables for which this
+  // representation has not yet been allocated (the Doxygen comment explains why the `vars` argument
+  // is ignored)
+  const oops::Variables allVars = gvals.getVars();
+  oops::Variables missingVars = allVars;
+  missingVars -= gvals.getReducedVars();
+  std::vector<size_t> sizes(missingVars.size());
+  for (size_t i = 0; i < missingVars.size(); ++i) {
+    // Variable `missingVars[i]` must already exist in the sampled format; otherwise the program
+    // will be aborted.
+    sizes[i] = gvals.nlevs(missingVars[i], GeoVaLFormat::SAMPLED);
+  }
+  gvals.addReducedVars(missingVars, sizes);
+
+  // Throw an exception if the reduced version of any variable is not aliased with (stored in the
+  // same piece of memory as) the sampled version -- it means we're expected to fill it, but we
+  // don't know how. (If reduction of this variable is really needed, the obs operator should
+  // override this method appropriately.)
+  for (size_t i = 0; i < allVars.size(); ++i) {
+    if (!gvals.areReducedAndSampledFormatsAliased(allVars[i]))
+      throw eckit::NotImplemented("Unable to reduce variable " + allVars[i], Here());
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 ObsOperatorFactory::ObsOperatorFactory(const std::string & name) {
   if (getMakers().find(name) != getMakers().end()) {
     oops::Log::error() << name << " already registered in ufo::ObsOperatorFactory." << std::endl;

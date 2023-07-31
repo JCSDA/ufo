@@ -63,17 +63,22 @@ template <typename OBS> class RunCRTM : public oops::Application {
       obsopparams.deserialize(obsopconf);
       ObsOperator_ hop(obsdb[jj], obsopparams);
 
-      const eckit::LocalConfiguration gconf(conf[jj], "geovals");
-      GeoVaLsParameters_ geovalsparams;
-      if (validate) geovalsparams.validate(gconf);
-      geovalsparams.deserialize(gconf);
-      const GeoVaLs_ gval(geovalsparams, obsdb[jj], hop.requiredVars());
-
       eckit::LocalConfiguration biasconf = conf[jj].getSubConfiguration("obs bias");
       typename ObsAuxCtrl_::Parameters_ biasparams;
       if (validate) biasparams.validate(biasconf);
       biasparams.deserialize(biasconf);
       const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
+
+      oops::Variables vars = hop.requiredVars();
+      oops::Variables reducedVars = ybias.requiredVars();
+      vars += reducedVars;  // the reduced format is derived from the sampled format
+
+      const eckit::LocalConfiguration gconf(conf[jj], "geovals");
+      GeoVaLsParameters_ geovalsparams;
+      if (validate) geovalsparams.validate(gconf);
+      geovalsparams.deserialize(gconf);
+      GeoVaLs_ gval(geovalsparams, obsdb[jj], vars);
+      hop.computeReducedVars(reducedVars, gval);
 
       ObsVector_ hofx(obsdb[jj]);
       ObsVector_ bias(obsdb[jj]);

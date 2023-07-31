@@ -25,16 +25,21 @@ namespace test {
 // -----------------------------------------------------------------------------
 extern "C" {
   void test_ufo_geovals_setup_with_mismatched_nvars_f90();
+  void test_ufo_geovals_setup_with_mismatched_nreduced_vars_f90();
   void test_ufo_geovals_setup_with_sampling_method_set_to_0_f90();
   void test_ufo_geovals_setup_with_sampling_method_set_to_3_f90();
+  void test_ufo_geovals_setup_with_method_mislabelled_as_trivial_f90();
   void test_ufo_geovals_partial_setup_with_mismatched_nvars_f90();
   void test_ufo_geovals_partial_setup_with_sampling_method_set_to_0_f90();
   void test_ufo_geovals_partial_setup_with_sampling_method_set_to_3_f90();
   void test_ufo_geovals_setup_sampling_method_0_f90();
   void test_ufo_geovals_setup_sampling_method_3_f90();
   void test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_f90();
+  void test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_f90();
   void test_ufo_geovals_setup_trivial_sampling_method_0_f90();
   void test_ufo_geovals_setup_trivial_sampling_method_3_f90();
+  void test_ufo_geovals_set_invalid_default_format_f90();
+  void test_ufo_geovals_get_nonexistent_var_f90();
 }
 
 // -----------------------------------------------------------------------------
@@ -48,10 +53,14 @@ void abortingTests() {
     const std::string name = conf.getString("aborting test");
     if (name == "ufo_geovals_setup_with_mismatched_nvars")
       test_ufo_geovals_setup_with_mismatched_nvars_f90();
+    else if (name == "ufo_geovals_setup_with_mismatched_nreduced_vars")
+      test_ufo_geovals_setup_with_mismatched_nreduced_vars_f90();
     else if (name == "ufo_geovals_setup_with_sampling_method_set_to_0")
       test_ufo_geovals_setup_with_sampling_method_set_to_0_f90();
     else if (name == "ufo_geovals_setup_with_sampling_method_set_to_3")
       test_ufo_geovals_setup_with_sampling_method_set_to_3_f90();
+    else if (name == "ufo_geovals_setup_with_method_mislabelled_as_trivial")
+      test_ufo_geovals_setup_with_method_mislabelled_as_trivial_f90();
     else if (name == "ufo_geovals_partial_setup_with_mismatched_nvars")
       test_ufo_geovals_partial_setup_with_mismatched_nvars_f90();
     else if (name == "ufo_geovals_partial_setup_with_sampling_method_set_to_0")
@@ -64,10 +73,16 @@ void abortingTests() {
       test_ufo_geovals_setup_sampling_method_3_f90();
     else if (name == "ufo_geovals_setup_sampling_method_with_mismatched_nlocs")
       test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_f90();
+    else if (name == "ufo_geovals_setup_sampling_method_mislabelled_as_trivial")
+      test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_f90();
     else if (name == "ufo_geovals_setup_trivial_sampling_method_0")
       test_ufo_geovals_setup_trivial_sampling_method_0_f90();
     else if (name == "ufo_geovals_setup_trivial_sampling_method_3")
       test_ufo_geovals_setup_trivial_sampling_method_3_f90();
+    else if (name == "ufo_geovals_set_invalid_default_format")
+      test_ufo_geovals_set_invalid_default_format_f90();
+    else if (name == "ufo_geovals_get_nonexistent_var")
+      test_ufo_geovals_get_nonexistent_var_f90();
     else
       throw std::runtime_error("Invalid test name: " + name);
   }

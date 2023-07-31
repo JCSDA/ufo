@@ -66,7 +66,8 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     geovalsparams.validateAndDeserialize(gconf);
     oops::Variables requiredVars = bias.requiredVars();
     requiredVars += targetBias.requiredVars();
-    const GeoVaLs geovals(geovalsparams, odb, requiredVars);
+    GeoVaLs geovals(geovalsparams, odb, requiredVars);
+    geovals.setDefaultFormat(GeoVaLFormat::REDUCED);
 
     // set up obs diagnostics
     oops::Variables requiredHdiagnostics;

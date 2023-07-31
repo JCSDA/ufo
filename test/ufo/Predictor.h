@@ -62,7 +62,7 @@ void testPredictor() {
     // Initialize GeoVaLs
     oops::Variables gvars;
     gvars += ybias.requiredVars();
-    std::unique_ptr<const GeoVaLs> gval;
+    std::unique_ptr<GeoVaLs> gval;
     if (gvars.size() > 0) {
       // Read GeoVaLs from a file
       eckit::LocalConfiguration gconf(conf, "geovals");
@@ -71,8 +71,9 @@ void testPredictor() {
       gval.reset(new GeoVaLs(geovalsparams, ospace, gvars));
     } else {
       // Create an empty GeoVaLs object
-      gval.reset(new GeoVaLs(ospace.distribution(), gvars));
+      gval.reset(new GeoVaLs(ospace.distribution(), oops::Variables()));
     }
+    gval->setDefaultFormat(GeoVaLFormat::REDUCED);
 
     // initialize Obs diagnostics
     oops::Variables diagvars;

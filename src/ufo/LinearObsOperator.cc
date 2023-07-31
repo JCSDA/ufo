@@ -20,6 +20,7 @@
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/SampledLocations.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -56,6 +57,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   odb_.get_db("MetaData", "dateTime", times);
   auto locs = std::make_unique<SampledLocations>(lons, lats, times, odb_.distribution());
   ObsDiagnostics ydiags(odb_, SampledLocations_(std::move(locs)), vars);
+  ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
   oper_->setTrajectory(gvals, ydiags);
   if (bias) {
     biasoper_.reset(new LinearObsBiasOperator(odb_));
@@ -67,6 +69,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
 
 void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & yy,
                                       const ObsBiasIncrement & bias) const {
+  ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
@@ -79,6 +82,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
 
 void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & yy,
                                       ObsBiasIncrement & bias) const {
+  ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);

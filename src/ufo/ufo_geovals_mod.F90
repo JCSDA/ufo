@@ -19,9 +19,13 @@ private
 integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval, ufo_index_range
+public :: ufo_geoval_sampled, ufo_geoval_reduced
 public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
 public :: ufo_geovals_setup_sampling_method, ufo_geovals_setup_trivial_sampling_method
+public :: ufo_geovals_add_reduced_vars, ufo_geovals_get_vars
+public :: ufo_geovals_get_default_format, ufo_geovals_set_default_format
+public :: ufo_geovals_are_reduced_and_sampled_formats_aliased
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_scalmult
 public :: ufo_geovals_allocate, ufo_geovals_print
 public :: ufo_geovals_profmult
@@ -48,6 +52,9 @@ end type ufo_index_range
 !> Unlike in ufo_sampled_locations, here we aren't interested in the geometry of these paths
 !> (their latitude, longitude etc.), but just in their mapping to obs locations.
 type :: ufo_location_sampling_method
+  !> Whether each location is sampled exactly once: by the interpolation path with the same index
+  !> as the location.
+  logical :: trivial = .false.
   !> Number of interpolation paths produced by this sampling method.
   integer :: npaths = 0
   !> Maps the index of each observation to the range of indices of the interpolation paths sampling
@@ -62,15 +69,32 @@ type :: ufo_geoval
   integer :: nprofiles = 0          !< number of profiles
 end type ufo_geoval
 
+!> GeoVaL formats (consistent with the GeoVaLFormat C++ enum)
+integer(c_int), parameter :: ufo_geoval_sampled = 1
+integer(c_int), parameter :: ufo_geoval_reduced = 2
+
 !> type to hold interpolated fields required by the obs operators
 type :: ufo_geovals
   integer :: nlocs  = 0          !< number of observations
-  integer :: nvar  = 0           !< number of variables stored in `geovals`
+  integer :: nvar  = 0           !< number of elements of the `geovals` array
+                                 !< (note: a given variable may be stored twice: once in the
+                                 !< sampled and once in the reduced form)
+  !> the variable format used when the optional parameter `format` of various `ufo_geovals_*`
+  !> subroutines is not present
+  integer(c_int) :: default_format = ufo_geoval_sampled
 
   type(ufo_geoval), allocatable :: geovals(:)  !< array of interpolated
                                                !< vertical profiles for all obs (nvar)
 
-  character(len=MAXVARLEN), allocatable :: variables(:)  !< variable list
+  ! The following two arrays are of length `nvar` and index elements of `geovals`.
+  ! If `variables(i)` is nonempty and set to `varname`, `geovals(i)` stores the values of variable
+  ! `varname` in the sampled format (with one profile per interpolation path).
+  ! Similarly, if `reduced_variables(i)` is nonempty and set to `varname`, `geovals(i)` stores the
+  ! values of variable `varname` in the reduced format (with one profile per location).
+  ! Note that the sampled and reduced representations of a variable may be identical and stored
+  ! in the same element of `geovals`.
+  character(len=MAXVARLEN), allocatable :: variables(:)
+  character(len=MAXVARLEN), allocatable :: reduced_variables(:)
 
   !< number of available methods of sampling observation locations with sets of interpolation paths
   integer :: nsampling_methods = 0
@@ -85,6 +109,15 @@ type :: ufo_geovals
                                  !< were allocated and have data and if all sampling methods have
                                  !< been set up
 end type ufo_geovals
+
+interface move
+  module procedure :: move_ufo_geoval, move_location_sampling_method
+end interface move
+
+interface resize
+  module procedure :: resize_geovals, resize_location_sampling_methods, &
+                      resize_varnames, resize_integers
+end interface resize
 
 ! ------------------------------------------------------------------------------
 contains
@@ -133,7 +166,7 @@ end subroutine ufo_geovals_update_linit
 !> @param nlocs
 !>   Number of observation locations.
 !> @param vars
-!>   Names of variables to be stored in the new GeoVaLs object.
+!>   Names of variables to be stored in the new GeoVaLs object in the sampled format.
 !> @param nvars
 !>   Number of variables.
 !> @param nvals
@@ -147,27 +180,47 @@ end subroutine ufo_geovals_update_linit
 !>   An array of length `nvars` whose ith element is the index of the observation location
 !>   sampling method producing the set of paths along which the ith variable will be
 !>   interpolated. Valid values are integers from 1 to `nsampling_methods`.
+!> @param reduced_vars
+!>   Names of the variables to be stored in the new GeoVaLs in the reduced format.
+!> @param nreduced_vars
+!>   Number of variables in `reduced_vars`.
+!> @param nreduced_vals
+!>   Array of length `nreduced_vars` whose ith element indicates how many values per
+!>   location will be stored in the GeoVaL corresponding to the ith variable.
+!> @param is_sampling_method_trivial
+!>   Array of length `nsampling_methods` whose ith element indicates whether the ith sampling method
+!>   produces a set of interpolation paths sampling all locations exactly once in ascending order.
 !>
 !> This call must be followed by calls to ufo_geovals_setup_(trivial_)sampling_method() mapping
 !> locations to interpolation paths.
 subroutine ufo_geovals_setup(self, nlocs, vars, nvars, nvals, &
-                             nsampling_methods, npaths_by_method, sampling_method_by_var)
+                             nsampling_methods, npaths_by_method, sampling_method_by_var, &
+                             reduced_vars, nreduced_vars, nreduced_vals, &
+                             is_sampling_method_trivial)
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(oops_variables), intent(in) :: vars
-integer, intent(in) :: nlocs, nvars
-integer(c_size_t), intent(in) :: nvals(nvars)
+type(oops_variables), intent(in) :: vars, reduced_vars
+integer, intent(in) :: nlocs, nvars, nreduced_vars
+integer(c_size_t), intent(in) :: nvals(nvars), nreduced_vals(nreduced_vars)
 integer, intent(in) :: nsampling_methods
 integer(c_size_t), intent(in) :: npaths_by_method(nsampling_methods)
 integer(c_size_t), intent(in) :: sampling_method_by_var(nvars)
+logical(c_bool), intent(in) :: is_sampling_method_trivial(nsampling_methods)
 
 character(max_string) :: err_msg
-integer :: i
+integer :: ivar, ireduced_var, igeoval, imethod
+integer(c_size_t) :: reduced_vars_sampling_method
+integer, allocatable :: reduced_geovals(:)  ! Indices of geovals storing reduced variables
 
 if (nvars /= vars%nvars()) then
   write(err_msg,*) "ufo_geovals_setup: mismatch in the number of variables (nvars = ", &
     nvars, ", vars%nvars() = ", vars%nvars(), ")"
+  call abor1_ftn(err_msg)
+endif
+if (nreduced_vars /= reduced_vars%nvars()) then
+  write(err_msg,*) "ufo_geovals_setup: mismatch in the number of reduced variables ", &
+    "(nreduced_vars = ", nreduced_vars, ", reduced_vars%nvars() = ", reduced_vars%nvars(), ")"
   call abor1_ftn(err_msg)
 endif
 if (any(sampling_method_by_var < 1)) then
@@ -180,30 +233,94 @@ if (any(sampling_method_by_var > nsampling_methods)) then
     maxval(sampling_method_by_var), " does not exist"
   call abor1_ftn(err_msg)
 endif
+do imethod = 1, nsampling_methods
+  if (is_sampling_method_trivial(imethod) .and. npaths_by_method(imethod) /= nlocs) then
+    write(err_msg,*) "ufo_geovals_setup: trivial sampling methods must sample each location exactly once"
+    call abor1_ftn(err_msg)
+  endif
+enddo
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
 self%missing_value = missing_value(self%missing_value)
 
 self%nvar = vars%nvars()
+allocate(reduced_geovals(reduced_vars%nvars()))
+do ireduced_var = 1, reduced_vars%nvars()
+  if (vars%has(reduced_vars%variable(ireduced_var))) then
+    ivar = vars%find(reduced_vars%variable(ireduced_var))
+    if (.not. is_sampling_method_trivial(sampling_method_by_var(ivar)) .or. &
+        nvals(ivar) /= nreduced_vals(ireduced_var)) then
+      ! The reduced version of this variable is different from the sampled version,
+      ! so it needs to be stored separately
+      self%nvar = self%nvar + 1
+      reduced_geovals(ireduced_var) = self%nvar
+    else
+      ! The reduced and sampled versions of this variable are identical
+      reduced_geovals(ireduced_var) = ivar
+    endif
+  else
+    ! Only the reduced version of this variable will be stored; the sampled version won't
+    self%nvar = self%nvar + 1
+    reduced_geovals(ireduced_var) = self%nvar
+  endif
+enddo
+
+reduced_vars_sampling_method = 0
+if (reduced_vars%nvars() > 0) then
+  do imethod = 1, nsampling_methods
+    if (is_sampling_method_trivial(imethod)) then
+      reduced_vars_sampling_method = imethod
+      exit
+    endif
+  enddo
+  if (reduced_vars_sampling_method == 0) then
+    ! Reduced variables need to be mapped to a trivial sampling method, but none has been provided.
+    ! We need to create one on our own.
+    reduced_vars_sampling_method = nsampling_methods + 1
+  endif
+endif
+
 allocate(self%geovals(self%nvar))
 allocate(self%variables(self%nvar))
-do i = 1, self%nvar
-  self%variables(i) = vars%variable(i)
-  self%geovals(i)%nprofiles = npaths_by_method(sampling_method_by_var(i))
-  self%geovals(i)%nval = nvals(i)
-  allocate(self%geovals(i)%vals(self%geovals(i)%nval, self%geovals(i)%nprofiles))
-  self%geovals(i)%vals(:,:) = 0.0
-enddo
-
-self%nsampling_methods = nsampling_methods
-allocate(self%sampling_methods(self%nsampling_methods))
-do i = 1, self%nsampling_methods
-  self%sampling_methods(i)%npaths = npaths_by_method(i)
-enddo
-
+allocate(self%reduced_variables(self%nvar))
 allocate(self%sampling_method_by_var(self%nvar))
-self%sampling_method_by_var(:) = sampling_method_by_var
+
+self%variables(:) = ""
+self%reduced_variables(:) = ""
+
+! Handle the sampled versions of variables
+do ivar = 1, vars%nvars()
+  igeoval = ivar
+  self%variables(igeoval) = vars%variable(ivar)
+  call ufo_geovals_setup_geoval(self, igeoval, sampling_method_by_var(ivar), &
+                                nvals(ivar), npaths_by_method(sampling_method_by_var(ivar)))
+enddo
+! Handle the reduced versions of variables non-aliased with the sampled versions
+do ireduced_var = 1, reduced_vars%nvars()
+  igeoval = reduced_geovals(ireduced_var)
+  self%reduced_variables(igeoval) = reduced_vars%variable(ireduced_var)
+  if (igeoval > vars%nvars()) then
+    call ufo_geovals_setup_geoval(self, igeoval, reduced_vars_sampling_method, &
+                                  nreduced_vals(ireduced_var), int(nlocs, kind=c_size_t))
+  endif
+enddo
+
+if (reduced_vars_sampling_method == nsampling_methods + 1) then
+  self%nsampling_methods = nsampling_methods + 1
+else
+  self%nsampling_methods = nsampling_methods
+endif
+allocate(self%sampling_methods(self%nsampling_methods))
+do imethod = 1, nsampling_methods
+  self%sampling_methods(imethod)%trivial = is_sampling_method_trivial(imethod)
+  self%sampling_methods(imethod)%npaths = npaths_by_method(imethod)
+enddo
+if (reduced_vars_sampling_method == nsampling_methods + 1) then
+  self%sampling_methods(nsampling_methods + 1)%trivial = .true.
+  self%sampling_methods(nsampling_methods + 1)%npaths = nlocs
+  call ufo_geovals_setup_trivial_sampling_method(self, nsampling_methods + 1)
+endif
 
 end subroutine ufo_geovals_setup
 
@@ -218,7 +335,7 @@ end subroutine ufo_geovals_setup
 !> @param nlocs
 !>   Number of observation locations.
 !> @param vars
-!>   Names of variables to be stored in the new GeoVaLs object.
+!>   Names of variables to be stored in the new GeoVaLs object in the sampled format.
 !> @param nvars
 !>   Number of variables.
 !> @param nsampling_methods
@@ -227,21 +344,30 @@ end subroutine ufo_geovals_setup
 !>   An array of length `nvars` whose ith element is the index of the observation location
 !>   sampling method producing the set of paths along which the ith variable will be
 !>   interpolated. Valid values are integers from 1 to `nsampling_methods`.
+!> @param reduced_vars
+!>   Names of the variables to be stored in the new GeoVaLs in the reduced format.
+!> @param is_sampling_method_trivial
+!>   Array of length `nsampling_methods` whose ith element indicates whether the ith sampling method
+!>   produces a set of interpolation paths sampling all locations exactly once in ascending order.
 !>
 !> This call must be followed by calls to ufo_geovals_setup_(trivial_)sampling_method() mapping
 !> locations to interpolation paths and ufo_geovals_allocate() allocating specific GeoVaLs.
 subroutine ufo_geovals_partial_setup(self, nlocs, vars, nvars, nsampling_methods, &
-                                     sampling_method_by_var)
+                                     sampling_method_by_var, &
+                                     reduced_vars, is_sampling_method_trivial)
 use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(oops_variables), intent(in) :: vars
+type(oops_variables), intent(in) :: vars, reduced_vars
 integer, intent(in) :: nlocs, nvars
 integer, intent(in) :: nsampling_methods
 integer(c_size_t), intent(in) :: sampling_method_by_var(nvars)
+logical(c_bool), intent(in) :: is_sampling_method_trivial(nsampling_methods)
 
 character(max_string) :: err_msg
-integer :: i
+integer :: igeoval, ivar, ireduced_var, imethod
+integer(c_size_t) :: reduced_vars_sampling_method
+integer, allocatable :: reduced_geovals(:)
 
 if (nvars /= vars%nvars()) then
   write(err_msg,*) "ufo_geovals_partial_setup: mismatch in the number of variables (nvars = ", &
@@ -264,19 +390,78 @@ self%nlocs = nlocs
 self%missing_value = missing_value(self%missing_value)
 
 self%nvar = vars%nvars()
-allocate(self%geovals(self%nvar))
-allocate(self%variables(self%nvar))
-do i = 1, self%nvar
-  self%variables(i) = vars%variable(i)
-  self%geovals(i)%nprofiles = 0
-  self%geovals(i)%nval = 0
+allocate(reduced_geovals(reduced_vars%nvars()))
+do ireduced_var = 1, reduced_vars%nvars()
+  if (vars%has(reduced_vars%variable(ireduced_var))) then
+    ivar = vars%find(reduced_vars%variable(ireduced_var))
+    if (.not. is_sampling_method_trivial(sampling_method_by_var(ivar))) then
+      ! The reduced version of this variable is different from the sampled version,
+      ! so it needs to be stored separately
+      self%nvar = self%nvar + 1
+      reduced_geovals(ireduced_var) = self%nvar
+    else
+      ! The reduced and sampled versions of this variable are identical
+      reduced_geovals(ireduced_var) = ivar
+    endif
+  else
+    ! Only the reduced version of this variable will be stored; the sampled version won't
+    self%nvar = self%nvar + 1
+    reduced_geovals(ireduced_var) = self%nvar
+  endif
 enddo
 
-self%nsampling_methods = nsampling_methods
-allocate(self%sampling_methods(self%nsampling_methods))
+reduced_vars_sampling_method = 0
+if (reduced_vars%nvars() > 0) then
+  do imethod = 1, nsampling_methods
+    if (is_sampling_method_trivial(imethod)) then
+      reduced_vars_sampling_method = imethod
+      exit
+    endif
+  enddo
+  if (reduced_vars_sampling_method == 0) then
+    ! Reduced variables need to be mapped to a trivial sampling method, but none has been provided.
+    ! We need to create one on our own.
+    reduced_vars_sampling_method = nsampling_methods + 1
+  endif
+endif
 
+allocate(self%geovals(self%nvar))
+allocate(self%variables(self%nvar))
+allocate(self%reduced_variables(self%nvar))
 allocate(self%sampling_method_by_var(self%nvar))
-self%sampling_method_by_var(:) = sampling_method_by_var
+
+self%variables(:) = ""
+self%reduced_variables(:) = ""
+
+! Handle the sampled versions of variables
+do ivar = 1, vars%nvars()
+  igeoval = ivar
+  self%variables(igeoval) = vars%variable(ivar)
+  call ufo_geovals_partial_setup_geoval(self, igeoval, sampling_method_by_var(ivar))
+enddo
+! Handle the reduced versions of variables non-aliased with the sampled versions
+do ireduced_var = 1, reduced_vars%nvars()
+  igeoval = reduced_geovals(ireduced_var)
+  self%reduced_variables(igeoval) = reduced_vars%variable(ireduced_var)
+  if (igeoval > vars%nvars()) then
+    call ufo_geovals_partial_setup_geoval(self, igeoval, reduced_vars_sampling_method)
+  endif
+enddo
+
+if (reduced_vars_sampling_method == nsampling_methods + 1) then
+  self%nsampling_methods = nsampling_methods + 1
+else
+  self%nsampling_methods = nsampling_methods
+endif
+allocate(self%sampling_methods(self%nsampling_methods))
+do imethod = 1, nsampling_methods
+  self%sampling_methods(imethod)%trivial = is_sampling_method_trivial(imethod)
+enddo
+if (reduced_vars_sampling_method == nsampling_methods + 1) then
+  self%sampling_methods(nsampling_methods + 1)%trivial = .true.
+  self%sampling_methods(nsampling_methods + 1)%npaths = nlocs
+  call ufo_geovals_setup_trivial_sampling_method(self, nsampling_methods + 1)
+endif
 
 end subroutine ufo_geovals_partial_setup
 
@@ -292,33 +477,44 @@ type(ufo_geovals), intent(inout) :: self
 type(oops_variables), intent(in) :: vars
 integer, intent(in) :: nlevels
 
-integer :: ivar, ivar_gvals
+integer :: ivar, ivar_gvals, ireducedvar_gvals
 character(max_string) :: err_msg
 
 do ivar = 1, vars%nvars()
-  ! find index of variable to be allocated
+  ! find the index of the geoval to be allocated
   ivar_gvals = ufo_vars_getindex(self%variables, vars%variable(ivar))
-  ! abort if we are trying to allocate geovals for nonexistent variable
-  if (ivar_gvals < 0) then
+  if (ivar_gvals > 0) call allocate_geoval(ivar_gvals)
+
+  ireducedvar_gvals = ufo_vars_getindex(self%reduced_variables, vars%variable(ivar))
+  if (ireducedvar_gvals > 0) call allocate_geoval(ireducedvar_gvals)
+
+  if (ivar_gvals <= 0 .and. ireducedvar_gvals <= 0) then
     write(err_msg,*) "ufo_geovals_allocate: ", trim(vars%variable(ivar)), " doesn't exist in geovals"
     call abor1_ftn(err_msg)
-  endif
-  ! abort if we are trying to allocate geovals again, and with a different size
-  if (allocated(self%geovals(ivar_gvals)%vals) .and. (self%geovals(ivar_gvals)%nval /= nlevels)) then
-    write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",          &
-                     trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(ivar_gvals)%nval, &
-                     " levels; now trying to allocate as ", nlevels, " levels."
-    call abor1_ftn(err_msg)
-  ! only allocate if not already allocated
-  elseif (.not. allocated(self%geovals(ivar_gvals)%vals)) then
-    self%geovals(ivar_gvals)%nval  = nlevels
-    allocate(self%geovals(ivar_gvals)%vals(nlevels, self%geovals(ivar_gvals)%nprofiles))
   endif
 enddo
 
 ! check if all variables are now allocated and all sampling methods set up, and set self%linit
 ! accordingly
 call ufo_geovals_update_linit(self)
+
+contains
+
+  subroutine allocate_geoval(igeoval)
+    implicit none
+    integer, intent(in) :: igeoval
+
+    if (allocated(self%geovals(igeoval)%vals) .and. (self%geovals(igeoval)%nval /= nlevels)) then
+      write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",       &
+                       trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(igeoval)%nval, &
+                       " levels; now trying to allocate as ", nlevels, " levels."
+      call abor1_ftn(err_msg)
+    ! only allocate if not already allocated
+    elseif (.not. allocated(self%geovals(igeoval)%vals)) then
+      self%geovals(igeoval)%nval  = nlevels
+      allocate(self%geovals(igeoval)%vals(nlevels, self%geovals(igeoval)%nprofiles))
+    endif
+  end subroutine
 
 end subroutine ufo_geovals_allocate
 
@@ -357,6 +553,14 @@ endif
 if (nlocs /= self%nlocs) then
   write(err_msg,*) "ufo_geovals_setup_sampling_method: mismatch in nlocs"
   call abor1_ftn(err_msg)
+endif
+if (self%sampling_methods(sampling_method)%trivial) then
+  do iloc = 1, nlocs
+    if (paths_by_loc(iloc)%begin /= iloc .or. paths_by_loc(iloc)%end /= iloc + 1) then
+      write(err_msg,*) "ufo_geovals_setup_sampling_method: the method should be trivial but is not"
+      call abor1_ftn(err_msg)
+    endif
+  enddo
 endif
 
 self%sampling_methods(sampling_method)%npaths = npaths
@@ -428,6 +632,7 @@ if (allocated(self%geovals)) then
   deallocate(self%geovals)
 endif
 if (allocated(self%variables)) deallocate(self%variables)
+if (allocated(self%reduced_variables)) deallocate(self%reduced_variables)
 if (allocated(self%sampling_methods)) deallocate(self%sampling_methods)
 if (allocated(self%sampling_method_by_var)) deallocate(self%sampling_method_by_var)
 self%nvar = 0
@@ -439,28 +644,229 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_var(self, varname, geoval)
+subroutine ufo_geovals_add_reduced_vars(self, vars, nvars, nvals)
+use oops_variables_mod
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(oops_variables), intent(in) :: vars
+integer(c_int), intent(in)       :: nvars
+integer(c_size_t), intent(in)    :: nvals(nvars)
+
+character(max_string) :: err_msg
+integer :: ivar, inew_var, new_nvars, igeoval, imethod
+integer :: sampling_method
+integer, allocatable :: geoval_indices(:)  ! Indices of geovals storing the newly added variables
+
+if (nvars /= vars%nvars()) then
+  write(err_msg,*) "ufo_geovals_add_reduced_vars: mismatch in the number of variables ", &
+    "(nvars = ", nvars, ", vars%nvars() = ", vars%nvars(), ")"
+  call abor1_ftn(err_msg)
+endif
+
+if (nvars == 0) return  ! Nothing to do
+
+new_nvars = self%nvar
+allocate(geoval_indices(vars%nvars()))
+do inew_var = 1, vars%nvars()
+  ivar = ufo_vars_getindex(self%reduced_variables, vars%variable(inew_var))
+  if (ivar >= 1) then
+    write(err_msg,*) "ufo_geovals_add_reduced_vars: variable ", vars%variable(inew_var), &
+      " already exists in reduced format"
+    call abor1_ftn(err_msg)
+  endif
+  ivar = ufo_vars_getindex(self%variables, vars%variable(inew_var))
+  if (ivar >= 1) then
+    if (.not. self%sampling_methods(self%sampling_method_by_var(ivar))%trivial .or. &
+        nvals(inew_var) /= self%geovals(ivar)%nval) then
+      ! The reduced version of this variable is different from the sampled version,
+      ! so it needs to be stored separately
+      new_nvars = new_nvars + 1
+      geoval_indices(inew_var) = new_nvars
+    else
+      ! The reduced and sampled versions of this variable are identical
+      geoval_indices(inew_var) = ivar
+    endif
+  else
+    ! Only the reduced version of this variable will be stored; the sampled version won't
+    new_nvars = new_nvars + 1
+    geoval_indices(inew_var) = new_nvars
+  endif
+enddo
+
+sampling_method = 0
+do imethod = 1, self%nsampling_methods
+  if (self%sampling_methods(imethod)%trivial) then
+    sampling_method = imethod
+    exit
+  endif
+enddo
+if (sampling_method == 0) then
+  ! Reduced variables need to be mapped to a trivial sampling method, but none exists.
+  ! We need to create one on our own.
+  call resize(self%sampling_methods, self%nsampling_methods + 1)
+  self%nsampling_methods = self%nsampling_methods + 1
+  sampling_method = self%nsampling_methods
+  self%sampling_methods(sampling_method)%trivial = .true.
+  self%sampling_methods(sampling_method)%npaths = self%nlocs
+  call ufo_geovals_setup_trivial_sampling_method(self, sampling_method)
+endif
+
+call resize(self%geovals, new_nvars)
+call resize(self%variables, new_nvars)
+call resize(self%reduced_variables, new_nvars)
+call resize(self%sampling_method_by_var, new_nvars)
+
+self%variables(self%nvar + 1 :) = ""
+
+do inew_var = 1, vars%nvars()
+  igeoval = geoval_indices(inew_var)
+  self%reduced_variables(igeoval) = vars%variable(inew_var)
+  if (igeoval > self%nvar) then
+    call ufo_geovals_setup_geoval(self, igeoval, int(sampling_method, kind=c_size_t), &
+                                  nvals(inew_var), int(self%nlocs, kind=c_size_t))
+  endif
+enddo
+
+self%nvar = new_nvars
+
+end subroutine ufo_geovals_add_reduced_vars
+
+! ------------------------------------------------------------------------------
+
+!> Set `vars` to the list of variables stored in the format `format`.
+subroutine ufo_geovals_get_vars(self, vars, format)
+use oops_variables_mod
+implicit none
+type(ufo_geovals), intent(in), target :: self
+type(oops_variables), intent(inout) :: vars
+integer(c_int), intent(in), optional :: format
+
+integer(c_int) :: actual_format
+character(len=MAXVARLEN), pointer :: variables(:)  !< either the sampled or reduced variable list
+integer :: i
+
+if (present(format)) then
+  actual_format = format
+else
+  actual_format = self%default_format
+endif
+
+if (actual_format == ufo_geoval_sampled) then
+  variables => self%variables
+else if (actual_format == ufo_geoval_reduced) then
+  variables => self%reduced_variables
+else
+  call abor1_ftn('ufo_geovals_get_vars: format must be either ufo_geoval_sampled or ufo_geoval_reduced')
+endif
+
+call vars%clear()
+do i = 1, size(variables)
+  if (variables(i) /= "") call vars%push_back(variables(i))
+enddo
+
+end subroutine ufo_geovals_get_vars
+
+! ------------------------------------------------------------------------------
+
+integer(c_int) function ufo_geovals_get_default_format(self)
+implicit none
+type(ufo_geovals), intent(in) :: self
+
+ufo_geovals_get_default_format = self%default_format
+
+end function ufo_geovals_get_default_format
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_set_default_format(self, format)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer(c_int), intent(in) :: format
+
+if (format /= ufo_geoval_sampled .and. format /= ufo_geoval_reduced) then
+  call abor1_ftn('ufo_geovals_set_default_format: format must be either ufo_geoval_sampled or ufo_geoval_reduced')
+endif
+
+self%default_format = format
+
+end subroutine ufo_geovals_set_default_format
+
+! ------------------------------------------------------------------------------
+
+logical(c_bool) function ufo_geovals_are_reduced_and_sampled_formats_aliased(self, varname)
+implicit none
+type(ufo_geovals), intent(in) :: self
+character(len=*), intent(in) :: varname
+
+integer :: ivar, ireduced_var
+
+ivar = ufo_vars_getindex(self%variables, varname)
+ireduced_var = ufo_vars_getindex(self%reduced_variables, varname)
+
+ufo_geovals_are_reduced_and_sampled_formats_aliased = ivar > 0 .and. ivar == ireduced_var
+
+end function ufo_geovals_are_reduced_and_sampled_formats_aliased
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_get_var(self, varname, geoval, format, must_be_found)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(len=*), intent(in) :: varname
 type(ufo_geoval), pointer, intent(inout)    :: geoval
+integer(c_int), intent(in), optional :: format
+!> By default, the program will abort if the GeoVaL `varname` is not found. Set `must_be_found` to
+!> `.false.` if in these circumstances the subroutine should set `geoval` to a null pointer instead.
+logical, intent(in), optional :: must_be_found
 
 character(len=*), parameter :: myname_="ufo_geovals_get_var"
 
 character(max_string) :: err_msg
+integer(c_int) :: actual_format
+logical :: actual_must_be_found
+character(len=MAXVARLEN), pointer :: variables(:)  !< either the sampled or reduced variable list
 integer :: ivar, jv
 
 geoval => NULL()
 
-ivar = ufo_vars_getindex(self%variables, varname)
+if (present(format)) then
+  actual_format = format
+else
+  actual_format = self%default_format
+endif
+
+if (present(must_be_found)) then
+  actual_must_be_found = must_be_found
+else
+  actual_must_be_found = .true.
+endif
+
+if (actual_format == ufo_geoval_sampled) then
+  variables => self%variables
+else if (actual_format == ufo_geoval_reduced) then
+  variables => self%reduced_variables
+else
+  write(err_msg,*) myname_, ' format must be either ufo_geoval_sampled or ufo_geoval_reduced'
+  call abor1_ftn(err_msg)
+endif
+
+ivar = ufo_vars_getindex(variables, varname)
 
 if (ivar < 0) then
-  write(0,*)'ufo_geovals_get_var looking for ',trim(varname),' in:'
-  do jv=1,self%nvar
-    write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables(jv))
-  enddo
-  write(err_msg,*) myname_, " ", trim(varname), ' doesnt exist'
-  call abor1_ftn(err_msg)
+  if (actual_must_be_found) then
+    write(0,*)'ufo_geovals_get_var looking for '
+    if (actual_format == ufo_geoval_sampled) then
+      write(0,*)'sampled '
+    else
+      write(0,*)'reduced '
+    endif
+    write(0,*)'variable ',trim(varname),' in:'
+    do jv=1,self%nvar
+      write(0,*)'ufo_geovals_get_var ',jv,trim(variables(jv))
+    enddo
+    write(err_msg,*) myname_, " ", trim(varname), ' doesnt exist'
+    call abor1_ftn(err_msg)
+  endif  ! if actual_must_be_found is .false., we leave geoval as a null pointer
 else
   geoval => self%geovals(ivar)
 endif
@@ -622,11 +1028,12 @@ end subroutine ufo_geovals_profmult
 
 subroutine ufo_geovals_assign(self, rhs)
 implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_geovals), intent(in) :: rhs
+type(ufo_geovals), intent(inout), target :: self
+type(ufo_geovals), intent(in), target :: rhs
 integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
+character(len=MAXVARLEN), pointer :: self_variables(:), rhs_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_assign: geovals not allocated")
@@ -640,17 +1047,28 @@ if (self%nlocs /= rhs%nlocs) then
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(rhs%variables, self%variables(jv))
+  ! Determine if this is an sampled or reduced variable
+  if (self%variables(jv) /= "") then
+    self_variables => self%variables
+    rhs_variables => rhs%variables
+  else if (self%reduced_variables(jv) /= "") then
+    self_variables => self%reduced_variables
+    rhs_variables => rhs%reduced_variables
+  else
+    continue
+  endif
+
+  iv = ufo_vars_getindex(rhs_variables, self_variables(jv))
   if (iv < 0) then
-    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self%variables(jv)), ' doesnt exist in rhs'
+    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self_variables(jv)), ' doesnt exist in rhs'
     call abor1_ftn(trim(err_msg))
   endif
   if (self%geovals(jv)%nval /= rhs%geovals(iv)%nval) then
-    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
     call abor1_ftn(trim(err_msg))
   endif
   if (self%geovals(jv)%nprofiles /= rhs%geovals(iv)%nprofiles) then
-    write(err_msg,*) 'ufo_geovals_assign: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+    write(err_msg,*) 'ufo_geovals_assign: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
     call abor1_ftn(trim(err_msg))
   endif
   do jo=1,self%geovals(jv)%nprofiles
@@ -722,11 +1140,12 @@ end subroutine ufo_geovals_reorderzdir
 
 subroutine ufo_geovals_add(self, other)
 implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_geovals), intent(in) :: other
+type(ufo_geovals), intent(inout), target :: self
+type(ufo_geovals), intent(in), target :: other
 integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
+character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
@@ -736,14 +1155,25 @@ if (.not. other%linit) then
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(other%variables, self%variables(jv))
+  ! Determine if this is an sampled or reduced variable
+  if (self%variables(jv) /= "") then
+    self_variables => self%variables
+    other_variables => other%variables
+  else if (self%reduced_variables(jv) /= "") then
+    self_variables => self%reduced_variables
+    other_variables => other%reduced_variables
+  else
+    continue
+  endif
+
+  iv = ufo_vars_getindex(other_variables, self_variables(jv))
   if (iv .ne. -1) then !Only add if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_add: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_add: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
-    endif    
+    endif
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_add: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_add: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     do jo=1,self%geovals(jv)%nprofiles
@@ -761,11 +1191,12 @@ end subroutine ufo_geovals_add
 
 subroutine ufo_geovals_diff(self, other)
 implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_geovals), intent(in) :: other
+type(ufo_geovals), intent(inout), target :: self
+type(ufo_geovals), intent(in), target :: other
 integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
+character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
@@ -775,14 +1206,25 @@ if (.not. other%linit) then
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(other%variables, self%variables(jv))
+  ! Determine if this is an sampled or reduced variable
+  if (self%variables(jv) /= "") then
+    self_variables => self%variables
+    other_variables => other%variables
+  else if (self%reduced_variables(jv) /= "") then
+    self_variables => self%reduced_variables
+    other_variables => other%reduced_variables
+  else
+    continue
+  endif
+
+  iv = ufo_vars_getindex(other_variables, self_variables(jv))
   if (iv .ne. -1) then !Only subtract if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_diff: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_diff: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_diff: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_diff: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     do jo=1,self%geovals(jv)%nprofiles
@@ -800,11 +1242,12 @@ end subroutine ufo_geovals_diff
 
 subroutine ufo_geovals_schurmult(self, other)
 implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_geovals), intent(in) :: other
+type(ufo_geovals), intent(inout), target :: self
+type(ufo_geovals), intent(in), target :: other
 integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
+character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
@@ -814,14 +1257,25 @@ if (.not. other%linit) then
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(other%variables, self%variables(jv))
+  ! Determine if this is an sampled or reduced variable
+  if (self%variables(jv) /= "") then
+    self_variables => self%variables
+    other_variables => other%variables
+  else if (self%reduced_variables(jv) /= "") then
+    self_variables => self%reduced_variables
+    other_variables => other%reduced_variables
+  else
+    continue
+  endif
+
+  iv = ufo_vars_getindex(other_variables, self_variables(jv))
   if (iv .ne. -1) then !Only mult if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_schurmult: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_schurmult: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_schurmult: nprofiles for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_schurmult: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     do jo=1,self%geovals(jv)%nprofiles
@@ -852,8 +1306,11 @@ call ufo_geovals_delete(other)
 
 other%nlocs = self%nlocs
 other%nvar = self%nvar
+other%default_format = self%default_format
 allocate(other%variables(other%nvar))
 other%variables(:) = self%variables(:)
+allocate(other%reduced_variables(other%nvar))
+other%reduced_variables(:) = self%reduced_variables(:)
 
 other%nsampling_methods = self%nsampling_methods
 allocate(other%sampling_methods(size(self%sampling_methods)))
@@ -899,8 +1356,11 @@ call ufo_geovals_delete(self)
 
 self%nlocs = 1
 self%nvar = other%nvar
+self%default_format = other%default_format
 allocate(self%variables(self%nvar))
 self%variables(:) = other%variables(:)
+allocate(self%reduced_variables(self%nvar))
+self%reduced_variables(:) = other%reduced_variables(:)
 
 self%nsampling_methods = other%nsampling_methods
 allocate(self%sampling_methods(size(other%sampling_methods)))
@@ -1087,7 +1547,7 @@ if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
 endif
 if (self%nvar /= other%nvar) then
-  call abor1_ftn("ufo_geovals_normalize: reference geovals object must have the same variables as the original")
+  call abor1_ftn("ufo_geovals_normalize: reference geovals object must have the same variables as the sampled")
 endif
 
 
@@ -1211,7 +1671,7 @@ subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, levels_are_to
 use netcdf
 use oops_variables_mod
 implicit none
-type(ufo_geovals), intent(inout)  :: self
+type(ufo_geovals), intent(inout), target :: self
 character(max_string), intent(in) :: filename
 integer, intent(in)               :: loc_multiplier
 logical, intent(in)               :: levels_are_top_down
@@ -1223,6 +1683,8 @@ integer :: nval
 integer :: obs_nlocs
 integer :: obs_all_nlocs
 integer :: my_npaths, my_loc, global_loc, my_path, global_path, global_path_start, global_path_end
+character(len=MAXVARLEN), pointer :: varname
+type(oops_variables)  :: reduced_vars
 
 integer :: ncid, dimid, varid, vartype, ndims
 integer, dimension(3) :: dimids
@@ -1241,8 +1703,9 @@ real, allocatable :: field2d(:,:), field1d(:)
 ! At the time being, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
 ! along the same set of paths composed of as many paths as there are observation locations.
 ! The format will be made more general in future.
-integer(c_size_t) :: npaths_by_method(1)
+integer, parameter :: nsampling_methods = 1
 integer(c_size_t), allocatable :: sampling_method_by_var(:)
+logical(c_bool) :: is_sampling_method_trivial(1)
 
 ! open netcdf file
 call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
@@ -1309,9 +1772,26 @@ end if
 ! define a common sampling method for all variables
 allocate(sampling_method_by_var(vars%nvars()))
 sampling_method_by_var(:) = 1
+is_sampling_method_trivial(1) = (loc_multiplier == 1)
+
+! Currently NetCDF files store variables only in the sampled format. But if loc_multiplier is
+! equal to 1, there is no difference between the sampled and reduced format, so we can set up a
+! GeoVaLs object storing variables in both formats aliased with each other. Otherwise we set up an
+! VaLs object storing variables only in the sampled format.
+!
+! In future we may want to extend the NetCDF file layout to accommodate both formats at once.
+if (loc_multiplier == 1) then
+  reduced_vars = oops_variables(vars)
+else
+  reduced_vars = oops_variables()
+endif
 
 ! allocate geovals structure
-call ufo_geovals_partial_setup(self, obs_nlocs, vars, vars%nvars(), 1, sampling_method_by_var)
+call ufo_geovals_partial_setup(self, obs_nlocs, vars, vars%nvars(), &
+                               nsampling_methods, sampling_method_by_var, &
+                               reduced_vars, is_sampling_method_trivial)
+
+call reduced_vars % destruct()
 
 ! specify which paths sample which locations
 call ufo_geovals_setup_sampling_method(self, 1, my_npaths, obs_nlocs, path_ranges_by_loc)
@@ -1321,9 +1801,15 @@ deallocate(sampling_method_by_var)
 
 do ivar = 1, self%nvar
 
-  ierr = nf90_inq_varid(ncid, self%variables(ivar), varid)
+  if (self%variables(ivar) /= "") then
+    varname => self%variables(ivar)
+  else
+    varname => self%reduced_variables(ivar)
+  endif
+
+  ierr = nf90_inq_varid(ncid, varname, varid)
   if(ierr /= nf90_noerr) then
-    write(err_msg,*) "Error: Variable ", trim(self%variables(ivar)), " not found in ", trim(filename)
+    write(err_msg,*) "Error: Variable ", trim(varname), " not found in ", trim(filename)
     call abor1_ftn(err_msg)
   endif
 
@@ -1338,10 +1824,12 @@ do ivar = 1, self%nvar
     endif
 
     nval = 1
+
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,my_npaths))
 
+    !> fill the geoval
     allocate(field1d(var_global_npaths))
 
     call check('nf90_get_var', nf90_get_var(ncid, varid, field1d))
@@ -1364,7 +1852,7 @@ do ivar = 1, self%nvar
     allocate(field2d(nval, var_global_npaths))
 
     call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
-    if (.not. levels_are_top_down) then 
+    if (.not. levels_are_top_down) then
       self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,global_path_by_my_path)
     else
       self%geovals(ivar)%vals(:,:) = field2d(:,global_path_by_my_path)
@@ -1448,7 +1936,7 @@ integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fill: geovals not initialized")
 
-call ufo_geovals_get_var(self, varname, geoval)
+call ufo_geovals_get_var(self, varname, geoval, ufo_geoval_sampled)
 
 if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fill: incorrect number of levels")
 
@@ -1491,7 +1979,7 @@ integer :: lbgn, linc
 
 if (.not.self%linit) call abor1_ftn("ufo_geovals_fillad: geovals not initialized")
 
-call ufo_geovals_get_var(self, varname, geoval)
+call ufo_geovals_get_var(self, varname, geoval, ufo_geoval_sampled)
 
 if (geoval%nval /= c_nlev) call abor1_ftn("ufo_geovals_fillad: incorrect number of levels")
 
@@ -1535,18 +2023,37 @@ end subroutine check
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_print(self, iobs)
+subroutine ufo_geovals_print(self, iobs, format)
 implicit none
-type(ufo_geovals), intent(in) :: self
+! TODO(wsmigaj): iobs is currently treated as a profile index, but in reality it's a location index,
+! and each location may correspond to multiple profiles.
+type(ufo_geovals), intent(in), target :: self
 integer, intent(in) :: iobs
+integer(c_int), intent(in), optional :: format
 
 type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
+integer(c_int) :: actual_format
+character(len=MAXVARLEN), pointer :: variables(:)  !< either the sampled or reduced variable list
 integer :: ivar
 
+if (present(format)) then
+  actual_format = format
+else
+  actual_format = self%default_format
+endif
+
+if (actual_format == ufo_geoval_sampled) then
+  variables => self%variables
+else if (actual_format == ufo_geoval_reduced) then
+  variables => self%reduced_variables
+else
+  call abor1_ftn("ufo_geovals_print: format must be either ufo_geoval_sampled or ufo_geoval_reduced")
+endif
+
 do ivar = 1, self%nvar
-  varname = self%variables(ivar)
-  call ufo_geovals_get_var(self, varname, geoval)
+  varname = variables(ivar)
+  call ufo_geovals_get_var(self, varname, geoval, actual_format)
   if (associated(geoval)) then
     print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)
   else
@@ -1555,6 +2062,136 @@ do ivar = 1, self%nvar
 enddo
 
 end subroutine ufo_geovals_print
+
+! ------------------------------------------------------------------------------
+
+!> Initialize and allocate a single geoval.
+subroutine ufo_geovals_setup_geoval(self, igeoval, isampling_method, nvals, nprofiles)
+implicit none
+
+type(ufo_geovals), intent(inout) :: self
+integer, intent(in)              :: igeoval
+integer(c_size_t), intent(in)    :: isampling_method
+integer(c_size_t), intent(in)    :: nvals
+integer(c_size_t), intent(in)    :: nprofiles
+
+self%geovals(igeoval)%nval = nvals
+self%geovals(igeoval)%nprofiles = nprofiles
+allocate(self%geovals(igeoval)%vals(self%geovals(igeoval)%nval, self%geovals(igeoval)%nprofiles))
+self%geovals(igeoval)%vals(:,:) = 0.0
+self%sampling_method_by_var(igeoval) = isampling_method
+
+end subroutine ufo_geovals_setup_geoval
+
+! ------------------------------------------------------------------------------
+
+!> Initialize a single geoval without allocating it.
+subroutine ufo_geovals_partial_setup_geoval(self, igeoval, isampling_method)
+implicit none
+
+type(ufo_geovals), intent(inout) :: self
+integer, intent(in)           :: igeoval
+integer(c_size_t), intent(in) :: isampling_method
+
+self%geovals(igeoval)%nval = 0
+self%geovals(igeoval)%nprofiles = 0
+self%sampling_method_by_var(igeoval) = isampling_method
+
+end subroutine ufo_geovals_partial_setup_geoval
+
+! ------------------------------------------------------------------------------
+
+elemental subroutine move_ufo_geoval(from, to)
+implicit none
+type(ufo_geoval), intent(inout) :: from
+type(ufo_geoval), intent(out) :: to
+
+call move_alloc(from%vals, to%vals)
+to%nval = from%nval
+to%nprofiles = from%nprofiles
+
+end subroutine move_ufo_geoval
+
+! ------------------------------------------------------------------------------
+
+elemental subroutine move_location_sampling_method(from, to)
+implicit none
+type(ufo_location_sampling_method), intent(inout) :: from
+type(ufo_location_sampling_method), intent(out) :: to
+
+call move_alloc(from%paths_by_loc, to%paths_by_loc)
+to%trivial = from%trivial
+to%npaths = from%npaths
+
+end subroutine move_location_sampling_method
+
+! ------------------------------------------------------------------------------
+
+subroutine resize_geovals(array, new_size)
+implicit none
+type(ufo_geoval), allocatable, intent(inout) :: array(:)
+integer, intent(in) :: new_size
+
+type(ufo_geoval), allocatable :: tmp(:)
+
+if (new_size == size(array)) return
+
+allocate(tmp(new_size))
+call move(array(:), tmp(:size(array)))
+call move_alloc(tmp, array)
+
+end subroutine resize_geovals
+
+! ------------------------------------------------------------------------------
+
+subroutine resize_location_sampling_methods(array, new_size)
+implicit none
+type(ufo_location_sampling_method), allocatable, intent(inout) :: array(:)
+integer, intent(in) :: new_size
+
+type(ufo_location_sampling_method), allocatable :: tmp(:)
+
+if (new_size == size(array)) return
+
+allocate(tmp(new_size))
+call move(array(:), tmp(:size(array)))
+call move_alloc(tmp, array)
+
+end subroutine resize_location_sampling_methods
+
+! ------------------------------------------------------------------------------
+
+subroutine resize_varnames(array, new_size)
+implicit none
+character(len=MAXVARLEN), allocatable, intent(inout) :: array(:)
+integer, intent(in) :: new_size
+
+character(len=MAXVARLEN), allocatable :: tmp(:)
+
+if (new_size == size(array)) return
+
+allocate(tmp(new_size))
+tmp(:size(array)) = array(:)
+call move_alloc(tmp, array)
+
+end subroutine resize_varnames
+
+! ------------------------------------------------------------------------------
+
+subroutine resize_integers(array, new_size)
+implicit none
+integer, allocatable, intent(inout) :: array(:)
+integer, intent(in) :: new_size
+
+integer, allocatable :: tmp(:)
+
+if (new_size == size(array)) return
+
+allocate(tmp(new_size))
+tmp(:size(array)) = array(:)
+call move_alloc(tmp, array)
+
+end subroutine resize_integers
 
 ! ------------------------------------------------------------------------------
 

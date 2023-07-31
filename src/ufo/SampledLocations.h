@@ -106,6 +106,12 @@ class SampledLocations : public util::Printable,
   /// \brief Number of locations sampled by this collection of paths.
   size_t nlocs() const;
 
+  /// \brief Returns true if and only if all locations are sampled exactly once, in ascending order.
+  ///
+  /// Another way to put it is that each location is sampled solely by the interpolation path with
+  /// the same index.
+  bool areLocationsSampledOnceAndInOrder() const;
+
  private:
   void initializeObsGroup(size_t npaths);
   void print(std::ostream & os) const override;

@@ -121,6 +121,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   } else {
     geovals.reset(new GeoVaLs(obsspace.distribution(), oops::Variables()));
   }
+  geovals->setDefaultFormat(GeoVaLFormat::REDUCED);
 
   filter.preProcess();
   if (expectThrowDuringPriorFilter) {
