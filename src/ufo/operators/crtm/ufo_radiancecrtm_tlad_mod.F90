@@ -38,7 +38,7 @@ module ufo_radiancecrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
-  logical, allocatable :: Skip_Profiles(:)
+  type(CRTM_Options_type), allocatable :: Options(:)
  contains
   procedure :: setup  => ufo_radiancecrtm_tlad_setup
   procedure :: delete  => ufo_radiancecrtm_tlad_delete
@@ -132,7 +132,10 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
    deallocate(self%sfc_k)
  endif
 
- if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
+ if (allocated(self%Options)) then
+    call CRTM_Options_Destroy(self%Options)
+    deallocate(self%Options)
+ endif
 
 end subroutine ufo_radiancecrtm_tlad_delete
 
@@ -171,7 +174,6 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
-type(CRTM_Options_type),    allocatable :: Options(:)
 
 ! Define the K-MATRIX variables
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
@@ -262,7 +264,7 @@ character(len=1) :: angle_hf
              self%atm_K( self%n_Channels, self%n_Profiles ) , &
              self%sfc_K( self%n_Channels, self%n_Profiles ) , &
              rts_K( self%n_Channels, self%n_Profiles )      , &
-             Options( self%n_Profiles )                     , &
+             self%Options( self%n_Profiles )                , &
              STAT = alloc_stat                                )
    message = 'Error allocating structure arrays (setTraj)'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
@@ -330,19 +332,7 @@ character(len=1) :: angle_hf
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
-   if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
-   allocate(self%Skip_Profiles(self%n_Profiles))
-   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Skip_Profiles)
-   profile_loop: do jprofile = 1, self%n_Profiles
-      Options(jprofile)%Skip_Profile = self%Skip_Profiles(jprofile)
-      ! check for pressure monotonicity
-      do jlevel = atm(jprofile)%n_layers, 1, -1
-         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
-            Options(jprofile)%Skip_Profile = .TRUE.
-            cycle profile_loop
-         end if
-      end do
-   end do profile_loop
+   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc,self%Options)
 
    ! Call the K-matrix model
    ! -----------------------
@@ -354,7 +344,7 @@ character(len=1) :: angle_hf
                              self%atm_K  , &  ! K-MATRIX Output
                              self%sfc_K  , &  ! K-MATRIX Output
                              rts         , &  ! FORWARD  Output
-                             Options       )  ! Input
+                             self%Options  )  ! Input
    message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
    call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
    if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
@@ -388,7 +378,7 @@ character(len=1) :: angle_hf
                                 self%atm_K  , &  ! K-MATRIX Output
                                 self%sfc_K  , &  ! K-MATRIX Output
                                 rts         , &  ! FORWARD  Output
-                                Options       )  ! Input
+                                self%Options  )  ! Input
       message = 'Error calling CRTM (setTraj, geo_hf) K-Matrix Model for '&
                 //TRIM(self%conf_traj%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
@@ -412,7 +402,7 @@ character(len=1) :: angle_hf
       do jchannel = 1, size(self%channels)
          do jlevel = 1, self%atm_K(jchannel,jprofile)%n_layers
             if (ieee_is_nan(self%atm_K(jchannel,jprofile)%Temperature(jlevel))) then
-               self%Skip_Profiles(jprofile) = .TRUE.
+               self%Options(jprofile)%Skip_Profile = .TRUE.
                numNaN = numNaN + 1
                write(message,*) numNaN, 'th NaN in Jacobian Profiles'
                call fckit_log%info(message)
@@ -503,7 +493,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  if (.not.self%Skip_Profiles(jprofile)) then
+                  if (.not.self%Options(jprofile)%Skip_Profile) then
                      do jlevel = 1, hofxdiags%geovals(jvar)%nval
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                           rts(jchannel,jprofile) % layer_optical_depth(jlevel)
@@ -517,7 +507,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  if (.not.self%Skip_Profiles(jprofile)) then
+                  if (.not.self%Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         rts(jchannel,jprofile) % Brightness_Temperature
                   end if
@@ -531,7 +521,7 @@ character(len=1) :: angle_hf
               allocate(TmpVar(self%n_Profiles))
               call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
               do jprofile = 1, self%n_Profiles
-                 if (.not.self%Skip_Profiles(jprofile)) then
+                 if (.not.self%Options(jprofile)%Skip_Profile) then
                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                     total_od = 0.0
                     do jlevel = 1, self%n_Layers
@@ -552,7 +542,7 @@ character(len=1) :: angle_hf
                allocate(Tao(self%n_Layers))
                call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
-                  if (.not.self%Skip_Profiles(jprofile)) then
+                  if (.not.self%Options(jprofile)%Skip_Profile) then
                      ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
@@ -584,7 +574,7 @@ character(len=1) :: angle_hf
                allocate(Wfunc(self%n_Layers))
                call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, self%n_Profiles
-                  if (.not.self%Skip_Profiles(jprofile)) then
+                  if (.not.self%Options(jprofile)%Skip_Profile) then
                      ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
@@ -632,7 +622,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  if (.not.self%Skip_Profiles(jprofile)) then
+                  if (.not.self%Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         rts_K(jchannel,jprofile) % surface_emissivity
                   end if
@@ -662,7 +652,7 @@ character(len=1) :: angle_hf
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, rts_K, Options, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, rts_K, STAT = alloc_stat)
    if(allocated(geo_hf)) deallocate(geo_hf)
    message = 'Error deallocating structure arrays (setTraj)'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
@@ -732,7 +722,7 @@ type(ufo_geoval), pointer :: geoval_d
 
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_Profiles
-   if (.not.self%Skip_Profiles(jprofile)) then
+   if (.not.self%Options(jprofile)%Skip_Profile) then
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -754,7 +744,7 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Skip_Profiles(jprofile)) then
+     if (.not.self%Options(jprofile)%Skip_Profile) then
        do jchannel = 1, size(self%channels)
          do jlevel = 1, geoval_d%nval
            hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -777,7 +767,7 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Skip_Profiles(jprofile)) then
+     if (.not.self%Options(jprofile)%Skip_Profile) then
        do jchannel = 1, size(self%channels)
          do jlevel = 1, geoval_d%nval
            hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -802,7 +792,7 @@ type(ufo_geoval), pointer :: geoval_d
 
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -814,7 +804,7 @@ type(ufo_geoval), pointer :: geoval_d
       case(var_sfc_wspeed)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -826,7 +816,7 @@ type(ufo_geoval), pointer :: geoval_d
       case(var_sfc_wdir)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -838,7 +828,7 @@ type(ufo_geoval), pointer :: geoval_d
       case(var_sfc_sss)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -899,7 +889,7 @@ real(c_double) :: missing
 
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
-   if (.not.self%Skip_Profiles(jprofile)) then
+   if (.not.self%Options(jprofile)%Skip_Profile) then
      do jchannel = 1, size(self%channels)
        if (hofx(jchannel, jprofile) /= missing) then
          do jlevel = 1, geoval_d%nval
@@ -923,7 +913,7 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Skip_Profiles(jprofile)) then
+     if (.not.self%Options(jprofile)%Skip_Profile) then
        do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
            do jlevel = 1, geoval_d%nval
@@ -948,7 +938,7 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Skip_Profiles(jprofile)) then
+     if (.not.self%Options(jprofile)%Skip_Profile) then
        do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
            do jlevel = 1, geoval_d%nval
@@ -974,7 +964,7 @@ real(c_double) :: missing
       case(var_sfc_wtmp)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
@@ -988,7 +978,7 @@ real(c_double) :: missing
       case(var_sfc_wspeed)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
@@ -1002,7 +992,7 @@ real(c_double) :: missing
       case(var_sfc_wdir)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
@@ -1016,7 +1006,7 @@ real(c_double) :: missing
       case(var_sfc_sss)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
-            if (.not.self%Skip_Profiles(jprofile)) then
+            if (.not.self%Options(jprofile)%Skip_Profile) then
                do jchannel = 1, size(self%channels)
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1

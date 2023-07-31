@@ -471,8 +471,10 @@ end subroutine crtm_comm_stat_check
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,Skip_Profiles)
-! Profiles are skipped when the ObsValue of all channels is missing.
+subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,atm,sfc,Options)
+! Profiles are skipped when the ObsValue of all channels is missing, if the
+! pressure doesn't increase with levels, and if SST is missing for profiles with
+! non-zero sea coverage.
 ! TODO: Use complete QC information
 ! It would be more comprehensive to use EffectiveQC or EffectiveError. That
 ! would require those ObsSpace values to be initialized before calls to
@@ -483,21 +485,25 @@ implicit none
 integer,              intent(in)    :: n_Profiles, n_Channels
 type(c_ptr), value,   intent(in)    :: obss
 integer(c_int),       intent(in)    :: channels(:)
-logical,              intent(inout) :: Skip_Profiles(:)
+type(CRTM_Atmosphere_type), intent(in) :: atm(:)
+type(CRTM_Surface_type),    intent(in) :: sfc(:)
+type(CRTM_Options_type),    intent(inout) :: Options(:)
 
-integer :: jprofile, jchannel
+integer :: jprofile, jchannel, jlevel
 character(len=MAXVARLEN) :: varname
 real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
 !real(kind_real) :: EffObsErr(n_Profiles,n_Channels)
 !integer         :: EffQC(n_Profiles,n_Channels)
 
-real(c_double) :: missing
+real(c_double)  :: missing_d
+real(kind_real) :: missing_r
 
- ! Set missing value
- missing = missing_value(missing)
+ ! Set missing values
+ missing_d = missing_value(missing_d)
+ missing_r = missing_value(missing_r)
 
- ObsVal = missing
-! EffObsErr = missing
+ ObsVal = missing_d
+! EffObsErr = missing_d
 ! EffQC = 0
 
  do jchannel = 1, n_Channels
@@ -508,11 +514,29 @@ real(c_double) :: missing
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
- do jprofile = 1, n_Profiles
-   Skip_Profiles(jprofile) = all(ObsVal(jprofile,:) == missing)
-!                       .OR. all(EffObsErr(jprofile,:) == missing) &
+ profile_loop: do jprofile = 1, n_Profiles
+   ! check whether observations for all channels are missing in the input file
+   Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) == missing_d)
+!                       .OR. all(EffObsErr(jprofile,:) == missing_d) &
 !                       .OR. all(EffQC(jprofile,:) /= 0)
- end do
+
+   ! check for pressure monotonicity
+   do jlevel = atm(jprofile)%n_layers, 1, -1
+     if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
+       Options(jprofile)%Skip_Profile = .TRUE.
+       cycle profile_loop
+     end if
+   end do
+
+   ! check for missing values in water surface temperature when the mask
+   ! indicates there is water.
+   ! (this can happen with generically coupled atm and ocean components if
+   ! the land/sea masks don't match)
+   if ((sfc(jprofile)%Water_Temperature == missing_r) .and.   &
+       (sfc(jprofile)%Water_Coverage > 0.0)) then
+     Options(jprofile)%Skip_Profile = .TRUE.
+   endif
+ end do profile_loop
 
 end subroutine ufo_crtm_skip_profiles
 
