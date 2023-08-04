@@ -329,7 +329,6 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     float Cost_final = 0.5*dy.transpose()*Scratch_matrix2;
     Cost_final /= static_cast<float>(nchans);  // normalise by number of channels
     out[0][iloc] = std::min(Cost_final, options_.maxCost.value());
-    oops::Log::info() << "Stefano cost: " << out[0][iloc] << " "  << std::endl;
   }
 }
 

@@ -20,6 +20,7 @@
 #include "ufo/filters/GenericFilterParameters.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -69,6 +70,7 @@ void ObsProcessorBase::preProcess() {
 
 void ObsProcessorBase::priorFilter(const GeoVaLs & gv) {
   oops::Log::trace() << "ObsProcessorBase priorFilter begin" << std::endl;
+  ScopedDefaultGeoVaLFormatChange change(gv, GeoVaLFormat::REDUCED);
   if (prior_ || post_) data_.associate(gv);
   if (prior_) this->doFilter();
   oops::Log::trace() << "ObsProcessorBase priorFilter end" << std::endl;
@@ -82,6 +84,7 @@ void ObsProcessorBase::postFilter(const GeoVaLs & gv,
                                   const ObsDiagnostics & diags) {
   oops::Log::trace() << "ObsProcessorBase postFilter begin" << std::endl;
   if (post_) {
+    ScopedDefaultGeoVaLFormatChange change(gv, GeoVaLFormat::REDUCED);
     data_.associate(gv);
     data_.associate(hofx, "HofX");
     data_.associate(bias, "ObsBiasData");

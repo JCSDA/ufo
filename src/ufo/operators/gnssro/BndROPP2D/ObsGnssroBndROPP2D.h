@@ -59,6 +59,8 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
+  void computeReducedVars(const oops::Variables & reducedVars, GeoVaLs & geovals) const override;
+
   Locations_ locations() const override;
 
   int & toFortran() {return keyOperGnssroBndROPP2D_;}

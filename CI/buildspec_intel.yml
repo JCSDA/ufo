@@ -1,18 +1,19 @@
 version: 0.2
 
 env:
-    shell: bash
-    parameter-store:
-      GIT_USER: "/CodeBuild/Git_USER"
-      GIT_PASS: "/CodeBuild/Git_PASS"
+  shell: bash
+  parameter-store:
+    GIT_USER: "/CodeBuild/Git_USER"
+    GIT_PASS: "/CodeBuild/Git_PASS"
 
 phases:
   install:
     commands:
       - echo Executing install phase
-
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo $CODEBUILD_SOURCE_REPO_URL
+      - org_name=$(echo $CODEBUILD_SOURCE_REPO_URL | awk '{split($0,org,"/"); print org[4]}')
+      - echo $org_name
       - echo $CODEBUILD_SOURCE_VERSION
 
       - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
@@ -41,9 +42,14 @@ phases:
       - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
       - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
 
+      # read cdash url from s3
+      - wget https://ci-test-cdash-url.s3.amazonaws.com/cdash_url.txt
+      - CDASH_URL=$(cat cdash_url.txt)
+
   pre_build:
     commands:
       - echo Executing pre_build phase
+      - mkdir -p /jcsda/ufo-bundle
 
       - source /etc/profile.d/z10_spack_environment.sh
       - cat /etc/profile.d/z10_spack_environment.sh
@@ -55,19 +61,16 @@ phases:
       - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
       - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > /jcsda/artifacts/commit_sha.txt
 
-      # read cdash url from s3
-      - wget https://ci-test-cdash-url.s3.amazonaws.com/cdash_url.txt
-      - CDASH_URL=$(cat cdash_url.txt)
+      - cd CI
 
       #  Setting git credentials
+      - git lfs install # creates .gitconfig
       - sed -i '/ssh/d' ~/.gitconfig
       - sed '/instead/d' ~/.gitconfig
       - git config --global credential.helper store
       - touch ~/.git-credentials
       - chmod 0700 ~/.git-credentials
       - echo "https://${GIT_USER}:${GIT_PASS}@github.com" >~/.git-credentials
-
-      - cd CI
 
       # ufo
       - ./clone.sh jcsda-internal/ufo $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle ufo ${GIT_BASE_BRANCH} develop
@@ -81,6 +84,9 @@ phases:
       # oops
       - ./clone.sh jcsda-internal/oops $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle oops ${GIT_BASE_BRANCH} develop
 
+      # crtm
+      - ./clone.sh jcsda/crtmv3 $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle crtm ${GIT_BASE_BRANCH} develop
+
       # rttov
       - ./clone.sh jcsda-internal/rttov $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle rttov ${GIT_BASE_BRANCH} develop
 
@@ -90,7 +96,7 @@ phases:
       # geos-aero
       - ./clone.sh jcsda-internal/geos-aero $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle geos-aero ${GIT_BASE_BRANCH} develop
 
-      #gsw
+      # gsw
       - ./clone.sh jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle gsw ${GIT_BASE_BRANCH} develop
 
       # ufo-test
@@ -103,23 +109,28 @@ phases:
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
       # cdash upload setup
-      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle/
+      - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle
       - sed -i "s@CDASH_URL@$CDASH_URL@g" /jcsda/ufo-bundle/CTestConfig.cmake
-
 
       - chmod -R 777 /jcsda/ufo-bundle
 
+      - cd /jcsda/ufo-bundle
+      - ls
+
   build:
+    on-failure: CONTINUE
     commands:
       - echo Executing build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
       - mkdir /build_container
       - chmod 777 /build_container
 
+      # configure and build
       - cd /build_container
-      - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=IntelContainer -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/ufo-bundle
+      - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=IntelContainer -DUFO_TEST_TIER=2 -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/ufo-bundle
 
 
       - cd /build_container/ufo
@@ -140,7 +151,6 @@ phases:
       - ctest -C RelWithDebInfo -D ExperimentalTest
 
     finally:
-      # upload ctest report to CDASH
       - cd /build_container/ufo
       - ctest -C RelWithDebInfo -D ExperimentalSubmit -M Continuous -- --track Continuous --group Continuous
 

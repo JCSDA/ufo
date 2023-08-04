@@ -166,6 +166,15 @@ class MetOfficeBuddyCheckParameters : public FilterParametersBase {
   /// will be buddy-checked.
   oops::OptionalParameter<int> numLevels{"num_levels", this};
 
+  /// If the ObsSpace has been divided into records according to at least one grouping variable
+  /// then, by default, the multi-level buddy check will be performed. That assumes that the
+  /// user wishes to treat the records as indivisible entities to be compared against each other.
+  /// However, if the parameter `num_levels` is equal to 1, the observation grouping is disregarded
+  /// if the parameter `override_obs_grouping` is set to `true`. In that case individual
+  /// observations are treated separately in the buddy check.
+  /// The value of `override_obs_grouping` only has an effect if `num_levels` has been set to 1.
+  oops::Parameter<bool> overrideObsGrouping{"override_obs_grouping", true, this};
+
   /// Observations will be rejected if the gross error probability lies at or above this threshold.
   oops::Parameter<float> rejectionThreshold{"rejection_threshold", 0.5, this};
 

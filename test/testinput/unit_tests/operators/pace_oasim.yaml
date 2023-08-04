@@ -12,12 +12,13 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/pace_radiance_obs_2019032112.nc
     simulated variables: [radiance]
+    channels: 50-70
     obsdataout:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/pace_radiance_2019032112_out.nc
+        obsfile: Data/ufo/pace_radiance_2019032112_out.nc
   geovals:
     filename: Data/ufo/testinput_tier_1/pace_radiance_geovals_2019032112.nc
-  rms ref: 1.0183803
+  rms ref: 0.270960411
   tolerance: 1.e-6
 

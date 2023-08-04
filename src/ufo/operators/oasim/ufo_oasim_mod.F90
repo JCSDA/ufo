@@ -18,8 +18,9 @@ module ufo_oasim_mod
  use ufo_vars_mod
 
  use obsspace_mod
- use missing_values_mod
 
+ use missing_values_mod
+ use ufo_constants_mod, only: pi
 
  implicit none
  private
@@ -30,6 +31,7 @@ module ufo_oasim_mod
  type, public :: ufo_oasim
  private
    type(oasim) :: oasim_
+   integer, allocatable                   :: channels(:)
  contains
    procedure :: setup  => ufo_oasim_setup
    procedure :: delete => ufo_oasim_delete
@@ -40,9 +42,10 @@ module ufo_oasim_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_oasim_setup(self, f_conf)
+subroutine ufo_oasim_setup(self, f_conf, channels)
 class(ufo_oasim),          intent(inout)  :: self
 type(fckit_configuration), intent(in)     :: f_conf
+integer(c_int),            intent(in)     :: channels(:)  !List of channels to use 
 
 character(len=*), parameter :: myname_="ufo_oasim_simobs"
 character(max_string) :: err_msg
@@ -51,6 +54,10 @@ character(len=:), allocatable :: str
 !Path to coefficient files                                                                                                       
 call f_conf%get_or_die("CoefficientPath",str)
 call self%oasim_%create(str)
+
+! save channels
+allocate(self%channels(size(channels)))
+self%channels(:) = channels(:)
 
 end subroutine ufo_oasim_setup
 
@@ -79,13 +86,14 @@ implicit none
 
     logical :: is_midnight 
     integer :: km, day_of_year, nlt
-    real(kind_real) :: cosz, dt
+    real(kind_real) :: dt
     type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, cldtau, clwp, cldre
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
     type(ufo_geoval), pointer :: cocco, dino, phaeo
 
     real (kind_real), allocatable :: tirrq(:,:), cdomabsq(:,:), avgq(:,:), rlwnref(:,:)
-    integer :: obss_nlocs
+    real (kind_real), allocatable ::cosz(:), Wave_Ch(:), Solar_Z(:)
+    integer :: obss_nlocs, obss_nchans
     integer :: iobs
     real(c_double) :: missing
 
@@ -94,12 +102,21 @@ implicit none
     
     ! check if nobs is consistent in geovals & hofx
     obss_nlocs = obsspace_get_nlocs(obss)
+    obss_nchans= obsspace_get_nchans(obss)
 
     !nlocs = size(hofx,1)
     if (geovals%nlocs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
+
+    allocate(Wave_Ch(obss_nchans))
+    allocate(Solar_Z(obss_nlocs))
+    allocate(cosz(obss_nlocs))
+
+    ! Read wavelength and solar zenith angle from obs
+    call obsspace_get_db(obss, "MetaData", "sensorCentralWavenumber", Wave_Ch)
+    call obsspace_get_db(obss, "MetaData", "solarZenithAngle", Solar_Z)
 
     ! check if oasim input variables are in geovals and get them
     call ufo_geovals_get_var(geovals, var_pmsl , slp )
@@ -130,27 +147,26 @@ implicit none
     km = 1  
     nlt = size(ta_in%vals,dim=1) 
     day_of_year = 90
-    cosz = 0.5
+    cosz = cos(Solar_Z * pi/180)
     dt = 86400/2.0
     
     allocate(tirrq(obss_nlocs,km))
     allocate(cdomabsq(obss_nlocs,km))
     allocate(avgq(obss_nlocs,km))
-    allocate(rlwnref(obss_nlocs,nlt))
+    allocate(rlwnref(obss_nlocs,nvars))
 
     do iobs = 1, obss_nlocs
        ! check if the ocean thickness is positive (valid)
        if (dh%vals(1,iobs) > 0) then
-
           call self%oasim_%run(km, dt, is_midnight, day_of_year, &
-               cosz, slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
+               cosz(iobs), Wave_Ch(self%channels), slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
                rh%vals(1,iobs), cov%vals(1,iobs), cldtau%vals(1,iobs), clwp%vals(1,iobs), &
                cldre%vals(1,iobs), ta_in%vals(:,iobs), wa_in%vals(:,iobs), asym%vals(:,iobs), &
                dh%vals(:,iobs), cdet%vals(:,iobs), pic%vals(:,iobs), cdc%vals(:,iobs), &
                diatom%vals(:,iobs), chloro%vals(:,iobs), cyano%vals(:,iobs), &
                cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), rlwnref(iobs,:))
 
-          hofx(iobs,:)=sum(rlwnref(iobs,:)) 
+          hofx(iobs,:)=rlwnref(iobs,:) 
        endif
     enddo
 

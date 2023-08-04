@@ -7,49 +7,49 @@
 
 #
 if( crtm_FOUND )
-ufo_add_test( NAME    test_ufo_amsua_crtm_bc_channelnobc_geos
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_channelnobc_geos.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_amsua_crtm_bc_channelnobc_geos
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_channelnobc_geos.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_amsua_crtm_bc_geos
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_geos.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_amsua_crtm_bc_geos
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc_geos.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_amsua_crtm_bc_obsoperator
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_amsua_crtm_bc_obsoperator
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_amsua_crtm_bc_tlad
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
-              MPI     2
-              LIBS    ufo
-              LABELS  crtm unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_amsua_crtm_bc_tlad
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_bc.yaml"
+                  MPI     2
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff
@@ -185,27 +185,27 @@ ufo_add_test( NAME    test_ufo_satellite_selector_predictor
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 if( crtm_FOUND )
-# ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_bc
-#             TIER    1
-#             ECBUILD
-#             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_bc.yaml"
-#             MPI     1
-#             LIBS    ufo
-#             LABELS  crtm unit_tests predictors
-#             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#             TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_bc
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/predictors/ssmis_f17_gfs_backgroundcheck_bc.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_nbc
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_nbc.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+    ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_nbc
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_nbc.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_thickness_predictor

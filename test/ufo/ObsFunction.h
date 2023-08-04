@@ -176,6 +176,7 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
     GeoVaLsParameters geovalsparams;
     geovalsparams.validateAndDeserialize(gconf);
     gval.reset(new GeoVaLs(geovalsparams, ospace, geovars));
+    gval->setDefaultFormat(GeoVaLFormat::REDUCED);
     inputs.associate(*gval);
   }
 

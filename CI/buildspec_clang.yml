@@ -10,9 +10,10 @@ phases:
   install:
     commands:
       - echo Executing install phase
-      - echo Executing install phase
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo $CODEBUILD_SOURCE_REPO_URL
+      - org_name=$(echo $CODEBUILD_SOURCE_REPO_URL | awk '{split($0,org,"/"); print org[4]}')
+      - echo $org_name
       - echo $CODEBUILD_SOURCE_VERSION
 
       - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
@@ -48,18 +49,17 @@ phases:
   pre_build:
     commands:
       - echo Executing pre_build phase
-      - mkdir /build_container
-      - mkdir /jcsda
-      - cd CI
-
-      - git lfs install # creates .gitconfig
+      - mkdir -p /jcsda/ufo-bundle
 
       # Upload branch name and commit sha as CodeBuild artifact to S3
       - mkdir -p /jcsda/artifacts
       - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
       - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > /jcsda/artifacts/commit_sha.txt
 
+      - cd CI
+
       #  Setting git credentials
+      - git lfs install # creates .gitconfig
       - sed -i '/ssh/d' ~/.gitconfig
       - sed '/instead/d' ~/.gitconfig
       - git config --global credential.helper store
@@ -79,6 +79,9 @@ phases:
       # oops
       - ./clone.sh jcsda-internal/oops $CODEBUILD_GIT_BRANCH  /jcsda/ufo-bundle oops ${GIT_BASE_BRANCH} develop
 
+      # crtm
+      - ./clone.sh jcsda/crtmv3 $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle crtm ${GIT_BASE_BRANCH} develop
+
       # rttov
       - ./clone.sh jcsda-internal/rttov $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle rttov ${GIT_BASE_BRANCH} develop
 
@@ -88,7 +91,7 @@ phases:
       # geos-aero
       - ./clone.sh jcsda-internal/geos-aero $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle geos-aero ${GIT_BASE_BRANCH} develop
 
-      #gsw
+      # gsw
       - ./clone.sh jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle gsw ${GIT_BASE_BRANCH} develop
 
       # ufo-test
@@ -100,8 +103,12 @@ phases:
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/ufo-bundle
       - cp -r cmake /jcsda/ufo-bundle/
+      # cdash upload setup
       - cp /jcsda/ufo-bundle/cmake/CTestConfig.cmake /jcsda/ufo-bundle
       - sed -i "s@CDASH_URL@$CDASH_URL@g" /jcsda/ufo-bundle/CTestConfig.cmake
+
+      - chmod -R 777 /jcsda/ufo-bundle
+
       - cd /jcsda/ufo-bundle
       - ls
 
@@ -113,17 +120,23 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
+      - mkdir /build_container
+      - chmod 777 /build_container
+
       # configure and build
       - cd /build_container
       - source /etc/profile.d/z10_spack_environment.sh
       - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=ClangContainer -DUFO_TEST_TIER=2 -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/ufo-bundle
-      - cd ufo
+
+
+      - cd /build_container/ufo
       - cp ../DartConfiguration.tcl .
       - sed -i 's/ufo-bundle/ufo-bundle\/ufo/' DartConfiguration.tcl
       - sed -i 's/build_container/build_container\/ufo/' DartConfiguration.tcl
       - cat DartConfiguration.tcl
       - make -j4
 
+      - echo $CODEBUILD_BUILD_SUCCEEDING
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];
         then export BUILD_STATUS="1";
         echo "Build passed";

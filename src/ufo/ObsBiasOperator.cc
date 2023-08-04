@@ -17,6 +17,7 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -34,6 +35,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
   oops::Log::trace() << "ObsBiasOperator::computeObsBias starting" << std::endl;
 
   const double missing = util::missingValue(missing);
+  ScopedDefaultGeoVaLFormatChange change(geovals, GeoVaLFormat::REDUCED);
   const Predictors & predictors = biascoeffs.predictors();
   const std::size_t npreds = predictors.size();
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));

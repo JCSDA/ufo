@@ -16,7 +16,8 @@ use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
-use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck_all_to_subset_by_channels
+use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck_all_to_subset_by_channels, &
+                                           ufo_rttovonedvarcheck_geovals_index_by_channels
 use ufo_vars_mod
 use ufo_utils_mod, only: Ops_SatRad_Qsplit
 
@@ -130,13 +131,14 @@ integer, intent(in)                               :: channels(:)    !< channels 
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex      !< index array for x vector
 type(ufo_geovals), intent(inout)                  :: hofxdiags      !< model data to pass the jacobian
 real(kind_real), intent(out)                      :: hofx(:)        !< BT's
-real(kind_real), intent(out)                      :: H_matrix(:,:)  !< Jacobian
+real(kind_real), intent(out)                      :: H_matrix(:,:)  !< Jacobian - (chans x profindex)
 
 ! Local arguments
 integer :: nchans, nlevels, nq_levels
 integer :: i, j
 integer :: chan
 integer :: nemisspc
+integer, allocatable :: hofxdiag_index_1(:), hofxdiag_index_2(:), hofxdiag_index_3(:)
 real(kind_real),allocatable  :: q_kgkg(:)
 real(kind_real)              :: s2m_kgkg
 type(ufo_geoval), pointer    :: geoval
@@ -149,7 +151,7 @@ real(kind_real), allocatable :: dBT_dql(:)
 real(kind_real), allocatable :: dBT_dqi(:)
 real(kind_real), allocatable :: emissivity_k(:)
 real(kind_real), allocatable :: emissivity(:)
-character(len=max_string)    :: varname
+character(len=MAXVARLEN)     :: varname, basename
 real(c_double), allocatable  :: BT(:)
 real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
 
@@ -157,6 +159,7 @@ real(kind_real)              :: u, v, dBT_du, dBT_dv, windsp
 nchans = size(channels)
 H_matrix(:,:) = zero
 allocate(BT(size(ob % channels_all)))
+allocate(hofxdiag_index_1(nchans))
 
 ! Run rttov and check it works any failures return here
 call rttov_data % simobs(geovals, config % obsdb, size(ob % channels_all), 1, BT, hofxdiags, ob_info=ob)
@@ -175,9 +178,14 @@ call ufo_rttovonedvarcheck_all_to_subset_by_channels(ob % channels_all, BT, chan
 !----------------------------------------------------------------
 if (profindex % t(1) > 0) then
   nlevels = profindex % t(2) - profindex % t(1) + 1
+
+  ! Get list of indexes in hofxdiags
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_ts), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                            hofxdiags % variables, hofxdiag_index_1)
+
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_ts),"_",channels(i) ! K
-    call ufo_geovals_get_var(hofxdiags , varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % t(1):profindex % t(2)) = geoval % vals(:,1)
   end do
 end if
@@ -185,7 +193,6 @@ end if
 !------
 ! 1.2) Water vapour
 !------
-
 ! Water Vapour Jacobians must be converted from
 ! kg/kg to ln(g/kg) - the unit conversion cancels, then:
 ! dy/d(ln q) = dy/dq * q(kg/kg)
@@ -201,9 +208,13 @@ if (profindex % q(1) > 0) then
   call ufo_geovals_get_var(geovals, var_q, geoval)
   q_kgkg(:) = geoval%vals(:, 1)
 
+  ! Get list of indexes in hofxdiags
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_q), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
+
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_q),"_",channels(i) ! kg/kg
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % q(1):profindex % q(2)) = geoval % vals(:,1) * q_kgkg(:)
   end do
 
@@ -214,7 +225,6 @@ end if
 !------
 ! 1.3) Total water
 !------
-
 ! For the sake of this first implementation this will not include liquid
 ! and ice water content just water vapour which is consistent with the
 ! profile loaded from GeoVaLs.
@@ -256,23 +266,38 @@ if (profindex % qt(1) > 0) then
                     dqi_dqt(:),    & ! out
                     config % UseQtsplitRain)
 
+  ! Get geovals indexes
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_q), "_"  ! kg/kg
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                      hofxdiags % variables, hofxdiag_index_1)
+
+  allocate(hofxdiag_index_2(nchans))
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_clw), "_" ! kg/kg
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                      hofxdiags % variables, hofxdiag_index_2)
+
+  if (config % RTTOV_mwscattSwitch) then
+    allocate(hofxdiag_index_3(nchans))
+    write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_cli), "_" ! kg/kg
+    call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                      hofxdiags % variables, hofxdiag_index_3)
+  end if
+
   ! Calculate jacobian wrt humidity and clw
   do i = 1, nchans
-
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_q), "_", channels(i) ! kg/kg
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    ! var_q
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     dBT_dq(:) = zero
     dBT_dq(:) = geoval % vals(:,1)
 
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_clw), "_", channels(i) ! kg/kg
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    ! var_clw
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_2(i), geoval)
     dBT_dql(:) = zero
     dBT_dql(:) = geoval % vals(:,1)
 
     if (config % RTTOV_mwscattSwitch) then
-      ! Get liquid ice jacobian
-      write(varname,"(3a,i0)") "brightness_temperature_jacobian_", trim(var_cli), "_", channels(i) ! kg/kg
-      call ufo_geovals_get_var(hofxdiags, varname, geoval)
+      ! Get liquid ice jacobian - var_cli
+      call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_3(i), geoval)
       dBT_dqi(:) = zero
       dBT_dqi(:) = geoval % vals(:,1)
 
@@ -296,6 +321,8 @@ if (profindex % qt(1) > 0) then
   deallocate(dqi_dqt)
   deallocate(dBT_dq)
   deallocate(dBT_dql)
+  deallocate(hofxdiag_index_2)
+  if (allocated(hofxdiag_index_3)) deallocate(hofxdiag_index_3)
 
 end if
 
@@ -304,34 +331,37 @@ end if
 !----
 
 ! 2.1) Surface Temperature - var_sfc_t2m = "surface_temperature"
-
 if (profindex % t2 > 0) then
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_t2m), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_t2m),"_",channels(i) ! K
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % t2) = geoval % vals(1,1)
   end do
 end if
 
 ! 2.2) Water vapour - var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
-
 if (profindex % q2 > 0) then
   s2m_kgkg = zero
   call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval)
   s2m_kgkg = geoval%vals(1, 1)
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_q2m), "_"  ! kg/kg
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_q2m),"_",channels(i) ! kg/kg
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % q2) = geoval % vals(1,1) * s2m_kgkg
   end do
 end if
 
 ! 2.3) Surface pressure - var_ps = "surface_pressure" ! (Pa)
-
 if (profindex % pstar > 0) then
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_ps), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_ps),"_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % pstar) = geoval % vals(1,1)
   end do
 end if
@@ -339,7 +369,6 @@ end if
 ! 2.4) Windspeed - var_sfc_u10 = "uwind_at_10m"
 !                - var_sfc_v10 = "vwind_at_10m"
 !                - windsp = sqrt (u*u + v*v)
-
 if (profindex % windspeed > 0) then
   call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
   u = geoval % vals(1, 1)
@@ -347,12 +376,21 @@ if (profindex % windspeed > 0) then
   v = geoval % vals(1, 1)
   windsp = sqrt (u ** 2 + v ** 2)
 
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_u10), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
+
+  allocate(hofxdiag_index_2(nchans))
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_v10), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_2)
+
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_u10),"_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    ! var_sfc_u10
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     dBT_du = geoval % vals(1,1)
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_v10),"_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    ! var_sfc_v10
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_2(i), geoval)
     dBT_dv = geoval % vals(1,1)
     if (windsp > zero) then
       ! directional derivation of the Jacobian
@@ -361,32 +399,38 @@ if (profindex % windspeed > 0) then
       H_matrix(i,profindex % windspeed) = zero
     end if
   end do
+  deallocate(hofxdiag_index_2)
 end if
 
 ! 2.5) Skin temperature - var_sfc_tskin = "skin_temperature"  ! (K)
-
 if (profindex % tstar > 0) then
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_tskin), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_tskin),"_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % tstar) = geoval % vals(1,1)
   end do
 end if
 
 ! 2.6) Cloud top pressure
 if (profindex % cloudtopp > 0) then
+  write(basename,"(a)") "brightness_temperature_jacobian_cloud_top_pressure_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(a,i0)") "brightness_temperature_jacobian_cloud_top_pressure_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % cloudtopp) = geoval % vals(1,1)
   end do
 end if
 
 ! 2.7) Cloud fraction
 if (profindex % cloudfrac > 0) then
+  write(basename,"(a)") "brightness_temperature_jacobian_cloud_fraction_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans
-    write(varname,"(a,i0)") "brightness_temperature_jacobian_cloud_fraction_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     H_matrix(i,profindex % cloudfrac) = geoval % vals(1,1)
   end do
 end if
@@ -422,9 +466,11 @@ end if
 if (profindex % emisspc(1) > 0) THEN
   allocate(emissivity_k(nchans))
   allocate(emissivity(nchans))
+  write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_emiss), "_"
+  call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
+                                          hofxdiags % variables, hofxdiag_index_1)
   do i = 1, nchans ! loop over channels used
-    write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
-    call ufo_geovals_get_var(hofxdiags, varname, geoval)
+    call ufo_geovals_get_var_by_index(hofxdiags, hofxdiag_index_1(i), geoval)
     emissivity_k(i) = geoval % vals(1,1)
   end do
 
@@ -444,7 +490,6 @@ if (profindex % emisspc(1) > 0) THEN
 end if
 
 ! Here for diagnostics
-
 if (config % FullDiagnostics) then
   call ufo_rttovonedvarcheck_PrintHmatrix( &
     nchans,   &                  ! in

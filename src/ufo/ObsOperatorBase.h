@@ -60,20 +60,60 @@ class ObsOperatorBase : public util::Printable,
 /// Obs Operator
   virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const = 0;
 
-/// Operator input required from Model
+/// \brief Required model variables.
   virtual const oops::Variables & requiredVars() const = 0;
 
-/// \brief Model variable interpolation paths.
+/// \brief Return an object holding one or more collections of paths sampling the observation
+/// locations and indicating along which of these sets of paths individual model variables should
+/// be interpolated.
 ///
-/// The default implementation places a vertical interpolation path at the latitude, longitude and
-/// time of each observation location and asks for all required model variables to be interpolated
-/// along these paths.
+/// The default implementation places a vertical interpolation path at the latitude and longitude
+/// of each observation location and asks for all required model variables to be interpolated along
+/// these paths at the observation times.
   virtual Locations_ locations() const;
 
 /// \brief List of variables simulated by this operator.
 ///
 /// The default implementation returns the list of all simulated variables in the ObsSpace.
   virtual oops::Variables simulatedVars() const;
+
+/// \brief Convert values of model variables stored in the sampled format to the reduced format.
+///
+/// This typically consists in computing, for each location, a weighted average of all the sampled
+/// profiles obtained by model field interpolation along the paths sampling that location.
+///
+/// The sampled and reduced representations of model variables sampled along exactly one path per
+/// location are identical. The GeoVaLs class automatically detects such variables, stores
+/// explicitly only their sampled representation and treats the reduced representation as an alias
+/// for the sampled one. In consequence, this method needs to be reimplemented only in subclasses
+/// whose locations() method requests some model variables to be sampled along multiple
+/// interpolation paths per location and at least one of the following conditions is met:
+///
+/// 1. Any of these variables are needed by observation filters or bias predictors (which typically
+///    operate on GeoVaLs stored in the reduced format).
+///
+/// 2. The operator wants to use the reduced representation of any of these variables in
+///    simulateObs().
+///
+/// \param[in]
+///   List of variables whose reduced representation should be computed.
+/// \param[inout] geovals
+///   On input, an object storing the values of model variables in the sampled format.
+///   This function is expected to fill in the reduced representation of at least the variables
+///   `vars` (it may optionally do so for other variables as well).
+///
+/// The default implementation instructs `geovals` to store the reduced representation of each
+/// variable already available in the sampled format and checks if it is aliased (and therefore
+/// identical) with the sampled representation. If that is not the case, the function throws an
+/// exception.
+///
+/// The reason why by default this function operates on all variables rather than just those listed
+/// in `vars` is that obs filters and bias predictors, which operate on GeoVaLs stored in the
+/// reduced format, sometimes fail to request explicitly all the model variables they use.
+/// Operators that request some variables to be sampled along multiple paths per location may want
+/// to be less lenient and reduce only the variables in `vars`, since variable reduction may then
+/// be costly or even ill-defined.
+  virtual void computeReducedVars(const oops::Variables & vars, GeoVaLs & geovals) const;
 
  private:
   virtual void print(std::ostream &) const = 0;

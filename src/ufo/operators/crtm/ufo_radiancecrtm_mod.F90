@@ -241,7 +241,6 @@ real(kind_real), allocatable :: Tao(:)
 real(kind_real), allocatable :: Wfunc(:)
 
 integer :: n_Profiles, n_Layers, n_Channels
-logical, allocatable :: Skip_Profiles(:)
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
@@ -419,18 +418,8 @@ character(len=1) :: angle_hf
       end if
    end do
 
-   allocate(Skip_Profiles(n_Profiles))
-   call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,Skip_Profiles)
-   profile_loop: do jprofile = 1, n_Profiles
-      Options(jprofile)%Skip_Profile = Skip_Profiles(jprofile)
-      ! check for pressure monotonicity
-      do jlevel = atm(jprofile)%n_layers, 1, -1
-         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
-            Options(jprofile)%Skip_Profile = .TRUE.
-            cycle profile_loop
-         end if
-      end do
-   end do profile_loop
+   ! set profiles that should be skipeed
+   call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,atm,sfc,Options)
 
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
@@ -576,7 +565,7 @@ character(len=1) :: angle_hf
    !Set to missing, then retrieve non-missing profiles
    hofx = missing
    do m = 1, n_Profiles
-     if (.not.Skip_Profiles(m)) then
+     if (.not.Options(m)%Skip_Profile) then
         do l = 1, size(self%channels)
           hofx(l,m) = rts(l,m)%Brightness_Temperature
         end do
@@ -626,7 +615,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      do jlevel = 1, hofxdiags%geovals(jvar)%nval
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            rts(jchannel,jprofile) % layer_optical_depth(jlevel)
@@ -640,7 +629,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         rts(jchannel,jprofile) % Radiance
                   end if
@@ -652,7 +641,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag) 
                      ! to be true. For CRTM v2.3.0, that happens when 
                      ! atm(jprofile)%Cloud_Fraction > MIN_COVERAGE_THRESHOLD (1e.-6)
@@ -667,7 +656,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         rts(jchannel,jprofile) % Brightness_Temperature 
                   end if
@@ -682,7 +671,7 @@ character(len=1) :: angle_hf
                !call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle"//angle_hf, TmpVar)
                call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
                      do jlevel = 1, n_Layers
@@ -703,7 +692,7 @@ character(len=1) :: angle_hf
                allocate(Tao(n_Layers))
                call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
@@ -735,7 +724,7 @@ character(len=1) :: angle_hf
                allocate(Wfunc(n_Layers))
                call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                     ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
@@ -783,7 +772,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      do jlevel = 1, hofxdiags%geovals(jvar)%nval
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            atm_K(jchannel,jprofile) % Temperature(jlevel)
@@ -797,7 +786,7 @@ character(len=1) :: angle_hf
                hofxdiags%geovals(jvar)%vals = missing
                jspec = ufo_vars_getindex(self%conf%Absorbers, var_mixr)
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      do jlevel = 1, hofxdiags%geovals(jvar)%nval
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            atm_K(jchannel,jprofile) % Absorber(jlevel,jspec)
@@ -811,7 +800,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         sfc_K(jchannel,jprofile) % water_temperature &
                       + sfc_K(jchannel,jprofile) % land_temperature &
@@ -826,7 +815,7 @@ character(len=1) :: angle_hf
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  if (.not.Skip_Profiles(jprofile)) then
+                  if (.not.Options(jprofile)%Skip_Profile) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                         rts_K(jchannel,jprofile) % surface_emissivity
                   end if
@@ -854,7 +843,7 @@ character(len=1) :: angle_hf
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, Options, Skip_Profiles, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, Options, STAT = alloc_stat)
    if(allocated(geo_hf)) deallocate(geo_hf)
    message = 'Error deallocating structure arrays'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)

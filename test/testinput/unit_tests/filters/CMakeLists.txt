@@ -528,15 +528,15 @@ ufo_add_test( NAME    test_ufo_qc_oceancolor_preqc
 #
 if( ${gsw_FOUND} )
     ufo_add_test( NAME    test_ufo_qc_ocean_vertical_stability_check
-                TIER    1
-                ECBUILD
-                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_ocean_vertical_stability_check.yaml"
-                MPI     4
-                LIBS    ufo
-                LABELS  filters
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_ocean_vertical_stability_check.yaml"
+                  MPI     4
+                  LIBS    ufo
+                  LABELS  filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 endif( ${gsw_FOUND} )
 #
 ufo_add_test( NAME    test_ufo_qc_poisson_disk_thinning
@@ -854,34 +854,34 @@ if( crtm_FOUND )
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/airs_qc_filters.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/airs_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
-#   ufo_add_test( NAME    test_ufo_amsr2_qc
-#                 TIER    1
-#                 ECBUILD
-#                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_qc.yaml"
-#                 MPI     1
-#                 LIBS    ufo
-#                 LABELS  crtm filters
-#                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#                 TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    ufo_add_test( NAME    test_ufo_amsr2_qc
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_qc.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
-#   ufo_add_test( NAME    test_ufo_amsr2_qc_halo
-#                 TIER    2
-#                 ECBUILD
-#                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_qc_halo.yaml"
-#                 MPI     4
-#                 LIBS    ufo
-#                 LABELS  crtm filters
-#                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#                 TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    ufo_add_test( NAME    test_ufo_amsr2_qc_halo
+                  TIER    2
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_qc_halo.yaml"
+                  MPI     4
+                  LIBS    ufo
+                  LABELS  crtm filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_amsua_qc
                   TIER    1
@@ -920,7 +920,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_qc_filters.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/amsua_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -931,7 +931,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_qc_filters_geos.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/amsua_qc_filters_geos.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -953,7 +953,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_qc_filters.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/atms_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -965,7 +965,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_qc_filters_geos.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/atms_n20_qc_filters_geos.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -1005,33 +1005,33 @@ if( crtm_FOUND )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
                   TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
-#   ufo_add_test( NAME    test_ufo_gmi_qc_filters
-#                 TIER    1
-#                 ECBUILD
-#                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_qc_filters.yaml"
-#                 MPI     1
-#                 LIBS    ufo
-#                 LABELS  crtm filters
-#                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#                 TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    ufo_add_test( NAME    test_ufo_gmi_qc_filters
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_qc_filters.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
-#   ufo_add_test( NAME    test_ufo_gmi_qc_filters_geos
-#                 TIER    1
-#                 ECBUILD
-#                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_qc_filters_geos.yaml"
-#                 MPI     1
-#                 LIBS    ufo
-#                 LABELS  crtm filters
-#                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#                 TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+    ufo_add_test( NAME    test_ufo_gmi_qc_filters_geos
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_qc_filters_geos.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    test_ufo_iasi_qc_filters
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_qc_filters.yaml"
+                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/iasi_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -1120,37 +1120,37 @@ if( ${rttov_FOUND} )
                   TEST_DEPENDS ufo_get_ufo_test_data )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_multiplatform
-              TIER    2
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_multiplatform.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  rttov operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+                  TIER    2
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_multiplatform.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  rttov operators
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance
-              TIER    2
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  rttov operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+                  TIER    2
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  rttov operators
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance_multiplatform
-              TIER    2
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance_multiplatform.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  rttov operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+                  TIER    2
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance_multiplatform.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  rttov operators
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 endif( ${rttov_FOUND} )
 
 

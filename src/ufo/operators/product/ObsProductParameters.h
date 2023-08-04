@@ -35,6 +35,9 @@ class ObsProductParameters : public ObsOperatorParametersBase {
 
   /// h(x) = x(lowest level) * geovals
   oops::RequiredParameter<std::string> geovalsToScaleHofxBy{"geovals to scale hofx by", this};
+
+  /// Optional parameter to raise the geoval to a power, h(x) = x(lowest level) * (geovals)^a
+  oops::OptionalParameter<float> geovalsExponent{"geovals exponent", this};
 };
 
 }  // namespace ufo

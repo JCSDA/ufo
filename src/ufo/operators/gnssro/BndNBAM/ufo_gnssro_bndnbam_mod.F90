@@ -306,7 +306,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                  else if ( LayerIdx(iobs) < k+1) then
                     call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(k+1),nlev-k-1,"increasing")
                     super_refraction_flag(iobs) = 1 ! adjusting super_refraction_flag
-                    LayerIdx(iobs) = min(max(1, int(sIndx)), nlev) + 1000 ! diagnostic purpose
+                    LayerIdx(iobs) = min(max(1, int(sIndx)), nlev)
                     exit kloop
                  end if
               endif
@@ -373,7 +373,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
             if (obsHgt<=five.and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
                 hofx(k)/=missing .and. super_refraction_flag(k)==0) then
                 super_refraction_flag(k)=2
-             !  hofx(k)=missing  ! keep this line for further improvement
+                hofx(k)=missing  ! This line can be commented for diagnosistic purpose
             end if
           end do obs_loop2
 

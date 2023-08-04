@@ -108,7 +108,9 @@ std::vector<float> localValues(const std::vector<float> & globalValues,
 /// Return a map mapping indices of records held on all MPI ranks to the vectors of global indices
 /// of locations belonging to these records (sorted according to the criteria specified during
 /// ObsSpace construction).
-ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb) {
+ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb,
+                                                  const int numLevels,
+                                                  const bool overrideObsGrouping) {
   const size_t nlocs = obsdb.nlocs();
 
   // Identify the index of each location within the record it belongs to
@@ -133,14 +135,29 @@ ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb) {
 
   // Map each record ID to the (ordered) indices of locations belonging to it
   ioda::ObsSpace::RecIdxMap result;
-  for (const auto &kv : numLocsPerRecord) {
-    const size_t recordId = kv.first;
-    const size_t numLocsInRecord = kv.second;
-    result[recordId].resize(numLocsInRecord);
-  }
-  for (size_t gloc = 0; gloc != recordIds.size(); ++gloc)
-    result[recordIds[gloc]][locationIndexWithinItsRecord[gloc]] = gloc;
 
+  if (overrideObsGrouping && numLevels == 1) {
+    // Treat each location in each record separately in the buddy check even if
+    // the ObsSpace has been divided into records.
+    // This is only performed if the parameter `num_levels` has been set to 1.
+    // The assignment of record ID works for all ObsSpace MPI distributions because at this
+    // point in the code the `allGatherv` routine has been used to gather the obs
+    // onto all processors.
+    // In other words, recordIds[k] = k * obsdb.comm().size() for all PEs.
+    for (size_t gloc = 0; gloc < recordIds.size(); ++gloc) {
+      const size_t recid = gloc * obsdb.comm().size();
+      result[recid] = {gloc};
+    }
+  } else {
+    // Default behaviour
+    for (const auto &kv : numLocsPerRecord) {
+      const size_t recordId = kv.first;
+      const size_t numLocsInRecord = kv.second;
+      result[recordId].resize(numLocsInRecord);
+    }
+    for (size_t gloc = 0; gloc != recordIds.size(); ++gloc)
+      result[recordIds[gloc]][locationIndexWithinItsRecord[gloc]] = gloc;
+  }
   return result;
 }
 
@@ -153,7 +170,8 @@ ioda::ObsSpace::RecIdxMap mapRecordIdsToLocations(const ioda::ObsSpace &obsdb) {
 /// locations; an exception is thrown if that is not the case.
 ///
 Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
-                              const int numLevels) {
+                              const int numLevels,
+                              const bool overrideObsGrouping) {
   // Assume ObsSpace contains only the averaged profiles if this variable isn't present.
   boost::optional<std::vector<int>> extended_obs_space;
   if (obsdb.has("MetaData", "extendedObsSpace")) {
@@ -162,7 +180,8 @@ Eigen::ArrayXXi deriveIndices(const ioda::ObsSpace & obsdb,
     obsdb.distribution()->allGatherv(*extended_obs_space);
   }
 
-  ioda::ObsSpace::RecIdxMap locationsPerRecord = mapRecordIdsToLocations(obsdb);
+  ioda::ObsSpace::RecIdxMap locationsPerRecord =
+    mapRecordIdsToLocations(obsdb, numLevels, overrideObsGrouping);
   Eigen::ArrayXXi profileIndex{locationsPerRecord.size(), numLevels};
 
   int recnum = 0;
@@ -287,12 +306,11 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
   // Fetch metadata required for identifying buddy pairs.
-
   const boost::optional<int> &numLevels = options_.numLevels.value();
-
+  const bool overrideObsGrouping = options_.overrideObsGrouping;
   boost::optional<Eigen::ArrayXXi> profileIndex;
   if (numLevels)
-    profileIndex = deriveIndices(obsdb_, *numLevels);
+    profileIndex = deriveIndices(obsdb_, *numLevels, overrideObsGrouping);
 
   const std::vector<size_t> validObsIds = getValidObservationIds(apply, profileIndex);
   MetaData obsData = collectMetaData(profileIndex);

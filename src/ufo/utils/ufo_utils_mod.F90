@@ -1358,7 +1358,9 @@ function cmp_strings(str1, str2)
   character(len=*) :: str1
   character(len=*) :: str2
 
-  if (len(str1) <= len(str2)) then
+  if (len(str1) == len(str2)) then
+    cmp_strings = (str1 == str2)
+  else if (len(str1) < len(str2)) then
     cmp_strings = cmp_ordered_strings(str1, str2)
   else
     cmp_strings = cmp_ordered_strings(str2, str1)

@@ -441,11 +441,12 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     ObsOperator_ hop(obspace, *params.obsOperator.value());
     const ObsAuxCtrl_ ybias(obspace, params.obsBias.value());
     ObsVector_ hofx(obspace);
-    oops::Variables vars;
-    vars += hop.requiredVars();
-    vars += filters.requiredVars();
-    vars += ybias.requiredVars();
-    const GeoVaLs_ gval(params.geovals.value(), obspace, vars);
+    oops::Variables vars = hop.requiredVars();
+    oops::Variables reducedVars = filters.requiredVars();
+    reducedVars += ybias.requiredVars();
+    vars += reducedVars;  // the reduced format is derived from the sampled format
+    GeoVaLs_ gval(params.geovals.value(), obspace, vars);
+    hop.computeReducedVars(reducedVars, gval);
     oops::Variables diagvars;
     diagvars += filters.requiredHdiagnostics();
     diagvars += ybias.requiredHdiagnostics();

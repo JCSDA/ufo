@@ -402,8 +402,7 @@ void testGeoVaLsAllocatePutGet() {
 }
 
 /// \brief Tests GeoVaLs(const Locations &, const Variables &, const std::vector<size_t> &)
-/// constructor. Tests that levels get correctly allocated, and that the GeoVaLs are zeroed
-/// out.
+/// constructor. Tests that levels get correctly allocated, and that the GeoVaLs are zeroed out.
 void testGeoVaLsConstructor() {
   typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
@@ -576,12 +575,182 @@ void testGeoVaLsWithMultipleSamplingMethods() {
                                                PutMethod::PUT_PROFILE);
   }
 }
+
+oops::Locations<ObsTraits> createLocationsForFormatsTest() {
+  typedef oops::Locations<ObsTraits> Locations_;
+  typedef oops::SampledLocations<ObsTraits> SampledLocations_;
+
+  const size_t gnlocs = 4;
+  const size_t nlocs = 4;
+  std::shared_ptr<ioda::Distribution> dist = makeDistribution(gnlocs);
+
+  std::vector<SampledLocations_> sampledLocationsVec;
+  {  // sampling method # 0
+    const size_t npaths = nlocs;
+    std::vector<util::Range<size_t>> pathsGroupedByLocation{{0, 1}, {1, 2}, {2, 3}, {3, 4}};
+    // The actual longitudes, latitudes and times don't matter
+    std::vector<float> longitudes(npaths, 0.0);
+    std::vector<float> latitudes(npaths, 0.0);
+    std::vector<util::DateTime> times(npaths, util::DateTime(2001, 1, 1, 0, 0, 0));
+    sampledLocationsVec.emplace_back(
+          std::make_unique<SampledLocations>(longitudes, latitudes, times, dist,
+                                             pathsGroupedByLocation));
+  }
+  {  // sampling method # 1
+    const size_t npaths = 2 * nlocs;
+    std::vector<util::Range<size_t>> pathsGroupedByLocation{{0, 2}, {2, 4}, {4, 6}, {6, 8}};
+    // The actual longitudes, latitudes and times don't matter
+    std::vector<float> longitudes(npaths, 0.0);
+    std::vector<float> latitudes(npaths, 0.0);
+    std::vector<util::DateTime> times(npaths, util::DateTime(2001, 1, 1, 0, 0, 0));
+    sampledLocationsVec.emplace_back(
+          std::make_unique<SampledLocations>(longitudes, latitudes, times, dist,
+                                             pathsGroupedByLocation));
+  }
+
+  std::map<std::string, size_t> samplingMethodIndexByVar{
+    {"var1_sampled", 1},
+    {"var2_reduced", 0},
+    {"var3_sampled_aliased_with_reduced", 0},
+    {"var4_sampled_distinct_from_reduced", 1},
+  };
+
+  return Locations_(std::move(sampledLocationsVec),
+                    std::make_unique<Selector>(samplingMethodIndexByVar));
+}
+
+void testSampledAndReducedFormats(const GeoVaLs &geovals) {
+  EXPECT(geovals.has("var1_sampled", GeoVaLFormat::SAMPLED));
+  EXPECT_NOT(geovals.has("var1_sampled", GeoVaLFormat::REDUCED));
+  EXPECT_NOT(geovals.has("var2_reduced", GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has("var2_reduced", GeoVaLFormat::REDUCED));
+  EXPECT(geovals.has("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has("var3_sampled_aliased_with_reduced", GeoVaLFormat::REDUCED));
+  EXPECT(geovals.has("var4_sampled_distinct_from_reduced", GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has("var4_sampled_distinct_from_reduced", GeoVaLFormat::REDUCED));
+
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var1_sampled"));
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var2_reduced"));
+  EXPECT(geovals.areReducedAndSampledFormatsAliased("var3_sampled_aliased_with_reduced"));
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var4_sampled_distinct_from_reduced"));
+
+  {
+    size_t nprofiles = geovals.nprofiles("var1_sampled", GeoVaLFormat::SAMPLED);
+    std::vector<double> expectedValues(nprofiles, 1.0);
+    geovals.putAtLevel(expectedValues, "var1_sampled", 0, GeoVaLFormat::SAMPLED);
+    std::vector<double> values(nprofiles, 0.0);
+    geovals.getAtLevel(values, "var1_sampled", 0, GeoVaLFormat::SAMPLED);
+    EXPECT(values == expectedValues);
+  }
+
+  {
+    size_t nprofiles = geovals.nprofiles("var2_reduced", GeoVaLFormat::REDUCED);
+    std::vector<double> expectedValues(nprofiles, 2.0);
+    geovals.putAtLevel(expectedValues, "var2_reduced", 0, GeoVaLFormat::REDUCED);
+    std::vector<double> values(nprofiles, 0.0);
+    geovals.getAtLevel(values, "var2_reduced", 0, GeoVaLFormat::REDUCED);
+    EXPECT(values == expectedValues);
+  }
+
+  {
+    size_t nSampledProfiles =
+        geovals.nprofiles("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED);
+    size_t nReducedProfiles =
+        geovals.nprofiles("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED);
+    EXPECT_EQUAL(nSampledProfiles, nReducedProfiles);
+
+    {
+      std::vector<double> expectedValues(nSampledProfiles, 3.0);
+      geovals.putAtLevel(expectedValues, "var3_sampled_aliased_with_reduced", 0,
+                         GeoVaLFormat::SAMPLED);
+      {
+        std::vector<double> values(nSampledProfiles, 0.0);
+        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::SAMPLED);
+        EXPECT(values == expectedValues);
+      }
+      {
+        std::vector<double> values(nReducedProfiles, 0.0);
+        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::REDUCED);
+        EXPECT(values == expectedValues);
+      }
+    }
+
+    {
+      std::vector<double> expectedValues(nReducedProfiles, 3.5);
+      geovals.putAtLevel(expectedValues, "var3_sampled_aliased_with_reduced", 0,
+                         GeoVaLFormat::REDUCED);
+      {
+        std::vector<double> values(nSampledProfiles, 0.0);
+        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::SAMPLED);
+        EXPECT(values == expectedValues);
+      }
+      {
+        std::vector<double> values(nReducedProfiles, 0.0);
+        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::REDUCED);
+        EXPECT(values == expectedValues);
+      }
+    }
+  }
+
+  {
+    size_t nSampledProfiles =
+        geovals.nprofiles("var4_sampled_distinct_from_reduced", GeoVaLFormat::SAMPLED);
+    size_t nReducedProfiles =
+        geovals.nprofiles("var4_sampled_distinct_from_reduced", GeoVaLFormat::REDUCED);
+    EXPECT(nSampledProfiles != nReducedProfiles);
+
+    std::vector<double> expectedSampledValues(nSampledProfiles, 4.0);
+    geovals.putAtLevel(expectedSampledValues, "var4_sampled_distinct_from_reduced", 0,
+                       GeoVaLFormat::SAMPLED);
+    std::vector<double> expectedReducedValues(nReducedProfiles, 4.5);
+    geovals.putAtLevel(expectedReducedValues, "var4_sampled_distinct_from_reduced", 0,
+                       GeoVaLFormat::REDUCED);
+    {
+      std::vector<double> values(nSampledProfiles, 0.0);
+      geovals.getAtLevel(values, "var4_sampled_distinct_from_reduced", 0, GeoVaLFormat::SAMPLED);
+      EXPECT(values == expectedSampledValues);
+    }
+    {
+      std::vector<double> values(nReducedProfiles, 0.0);
+      geovals.getAtLevel(values, "var4_sampled_distinct_from_reduced", 0, GeoVaLFormat::REDUCED);
+      EXPECT(values == expectedReducedValues);
+    }
+  }
+}
+
+void testSampledAndReducedFormatsAfterOneStageConstruction() {
+  oops::Variables variables({"var1_sampled", "var3_sampled_aliased_with_reduced",
+                             "var4_sampled_distinct_from_reduced"});
+  std::vector<size_t> nlevels{1, 1, 1};
+  GeoVaLs geovals(createLocationsForFormatsTest(), variables, nlevels);
+  oops::Variables reducedVariables({"var2_reduced", "var3_sampled_aliased_with_reduced",
+                                    "var4_sampled_distinct_from_reduced"});
+  std::vector<size_t> nReducedLevels{1, 1, 1};
+  geovals.addReducedVars(reducedVariables, nReducedLevels);
+
+  testSampledAndReducedFormats(geovals);
+}
+
+void testSampledAndReducedFormatsAfterTwoStageConstruction() {
+  oops::Variables variables({"var1_sampled", "var3_sampled_aliased_with_reduced",
+                             "var4_sampled_distinct_from_reduced"});
+  GeoVaLs geovals(createLocationsForFormatsTest(), variables);
+  geovals.allocate(1, variables);
+  oops::Variables reducedVariables({"var2_reduced", "var3_sampled_aliased_with_reduced",
+                                    "var4_sampled_distinct_from_reduced"});
+  std::vector<size_t> nReducedLevels{1, 1, 1};
+  geovals.addReducedVars(reducedVariables, nReducedLevels);
+
+  testSampledAndReducedFormats(geovals);
+}
+
 // -----------------------------------------------------------------------------
 
 class GeoVaLs : public oops::Test {
  public:
   GeoVaLs() = default;
   virtual ~GeoVaLs() = default;
+
  private:
   std::string testid() const override {return "ufo::test::GeoVaLs";}
 
@@ -596,6 +765,10 @@ class GeoVaLs : public oops::Test {
       { testGeoVaLsConstructor(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsWithMultipleSamplingMethods")
       { testGeoVaLsWithMultipleSamplingMethods(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testSampledAndReducedFormatsAfterOneStageConstruction")
+      { testSampledAndReducedFormatsAfterOneStageConstruction(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testSampledAndReducedFormatsAfterTwoStageConstruction")
+      { testSampledAndReducedFormatsAfterTwoStageConstruction(); });
   }
 
   void clear() const override {}

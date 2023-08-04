@@ -207,7 +207,7 @@ observations:
     filter variables:
     - name: brightnessTemperature
       channels: 1-2,12-16
-    reference: ObsValue/brightnessTemperature_2 
+    reference: ObsValue/brightnessTemperature_2
     value: HofX/brightnessTemperature_2
     minvalue: -1.5
     maxvalue: 1.5

@@ -188,7 +188,8 @@ void testObsFilterData() {
     std::vector<eckit::LocalConfiguration> varconfs;
     confs[jconf].get("geovals variables", varconfs);
     const Variables geovars(varconfs);
-    const GeoVaLs gval(geovalsparams, ospace, geovars.toOopsVariables());
+    GeoVaLs gval(geovalsparams, ospace, geovars.toOopsVariables());
+    gval.setDefaultFormat(GeoVaLFormat::REDUCED);
 
 ///  Setup ObsDiags
     const eckit::LocalConfiguration obsdiagconf(confs[jconf], "obs diagnostics");

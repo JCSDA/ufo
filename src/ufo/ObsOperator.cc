@@ -21,6 +21,7 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/SampledLocations.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -47,6 +48,7 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
                               const ObsBias & biascoeff, ioda::ObsVector & ybias,
                               ObsDiagnostics & ydiags) const {
+  ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
   oper_->simulateObs(gvals, yy, ydiags);
   if (biascoeff) {
     ObsBiasOperator biasoper(odb_);
@@ -66,6 +68,12 @@ const oops::Variables & ObsOperator::requiredVars() const {
 
 ObsOperator::Locations_ ObsOperator::locations() const {
   return oper_->locations();
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsOperator::computeReducedVars(const oops::Variables & vars, GeoVaLs & geovals) const {
+  return oper_->computeReducedVars(vars, geovals);
 }
 
 // -----------------------------------------------------------------------------

@@ -20,7 +20,8 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_radianceoasim_setup_f90(F90hop &, const eckit::Configuration &);
+  void ufo_radianceoasim_setup_f90(F90hop &, const eckit::Configuration &,
+                                  const int &, const int &);
   void ufo_radianceoasim_delete_f90(F90hop &);
   void ufo_radianceoasim_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                     const int &, const int&, double &);

@@ -58,7 +58,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_gfs_HofX_qc.yaml"
+        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/atms/atms_n20_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm atms n20 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -69,7 +69,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_npp_gfs_HofX_qc.yaml"
+        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/atms/atms_npp_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm atms npp qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../

@@ -45,6 +45,9 @@ end subroutine ufo_insitutemperature_setup
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
+   use, intrinsic :: iso_c_binding, only: c_double, c_ptr
+   implicit none
+
    class(ufo_insitutemperature), intent(in) :: self
    type(ufo_geovals),            intent(in) :: geovals
    type(c_ptr),           value, intent(in) :: obss

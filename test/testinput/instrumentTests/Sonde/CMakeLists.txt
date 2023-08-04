@@ -51,3 +51,15 @@ ufo_add_test( NAME    instrument_sonde_geos_qc_q
               LABELS  sonde GEOS Q QC instrument
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
+
+# ObsOperator TLAD test for vertical interpolation
+ufo_add_test( NAME    instrument_sonde_geos_uv_TLAD
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sondes_uv_geos_hofx.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  sonde GEOS HofX TLAD instrument
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )

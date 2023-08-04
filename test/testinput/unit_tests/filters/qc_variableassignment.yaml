@@ -339,7 +339,7 @@ observations:
     assignments:
     - name: MetaData/string_variable_1                 # ["ABC", "DEF", "GHI", "JKL", "MNO"]
       source variable:
-        name: TestReference/assigned_string_variable_2 # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+        name: TestReference/assigned_string_variable_2 # ["MISSING*", "XYZ", "XYZ", "XYZ", "MISSING*"]
   compareVariables:
   - test:
       name: MetaData/string_variable_1
@@ -361,7 +361,7 @@ observations:
   - test:
       name: MetaData/new_variable
     reference:
-      name: TestReference/assigned_string_variable_2    # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+      name: TestReference/assigned_string_variable_2    # ["MISSING*", "XYZ", "XYZ", "XYZ", "MISSING*"]
 
 - obs space:
     <<: *ObsSpace
@@ -503,7 +503,7 @@ observations:
   - test:
       name: MetaData/string_variable_1
     reference:
-      name: TestReference/assigned_string_variable_2 # ["*** MISSING ***", "XYZ", "XYZ", "XYZ", "*** MISSING ***"]
+      name: TestReference/assigned_string_variable_2 # ["MISSING*", "XYZ", "XYZ", "XYZ", "MISSING*"]
 
 - obs space: &ObsSpace
     name: Assign values produced by a datetime-valued ObsFunction to a datetime variable

@@ -39,7 +39,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
                            std::vector<std::vector<bool>> & flagged) const {
   // get local and global number of locations
   const size_t nlocs = obsdb_.nlocs();
-  const size_t gnlocs = obsdb_.globalNumLocs();
+  const size_t max_gindex = obsdb_.sourceNumLocs();
 
   // get global indices of the local locations
   const std::vector<std::size_t> & gindex = obsdb_.index();
@@ -50,7 +50,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
   unsigned int random_seed = parameters_.randomSeed.value().value_or(std::time(0));
   random_seed += parameters_.member;
 
-  util::UniformDistribution<float> rand(gnlocs, 0.0, 1.0, random_seed);
+  util::UniformDistribution<float> rand(max_gindex, 0.0, 1.0, random_seed);
 
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < nlocs; ++jobs) {

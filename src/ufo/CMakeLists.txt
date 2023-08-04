@@ -89,6 +89,7 @@ list( APPEND ufo_src_files
     SampledLocations.h
     sampled_locations_f.cc
     sampled_locations_f.h
+    ScopedDefaultGeoVaLFormatChange.h
     ufo_geovals_mod.F90
     ufo_sampled_locations_mod.F90
     ufo_variables_mod.F90
