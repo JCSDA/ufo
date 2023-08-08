@@ -244,8 +244,8 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     std::vector<float> tsavg5(nlocs, 0.0);
     geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
 
-    std::vector<float> scanangle(nlocs, 0.0);
-    odb.get_db("MetaData", "sensorScanPosition", scanangle);
+    std::vector<int> scanpos(nlocs, 0);
+    odb.get_db("MetaData", "sensorScanPosition", scanpos);
 
     // common vectors storage, ptau5
     std::vector <float> pred(nlocs, 0.0);
@@ -287,7 +287,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     clw_bias_correction_gmi(biascoeffs,
                           bt_hofx_37vo, bt_hofx_37ho, bt_clr_37vo, bt_clr_37ho, bt37v, bt37h,
-                           water_frac, tsavg5, scanangle, ptau5, tvp, tlap, channels_, nlevs,
+                           water_frac, tsavg5, scanpos, ptau5, tvp, tlap, channels_, nlevs,
                            clw, clw_gmi_ch1_4);
   }
   if (sensor == "AMSUA" || sensor == "ATMS") {
@@ -363,7 +363,7 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
              const std::vector<float> & bt37h,
              const std::vector<float> & water_frac,
              const std::vector<float> & tsavg5,
-             const std::vector<float> & scanangle,
+             const std::vector<int> & scanpos,
              const std::vector<std::vector<std::vector<float>>> & ptau5,
              const std::vector<std::vector<float>> & tvp,
              const std::vector<float> & tlap,
@@ -406,8 +406,8 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
       for (std::size_t jord = 0; jord < 4; ++jord) {
         beta1 = biascoeffs(id_pred[id_preds-jord-1], channels_[jch37v]-1);
         beta2 = biascoeffs(id_pred[id_preds-jord-1], channels_[jch37h]-1);
-        bias_37v[jloc] += beta1 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
-        bias_37h[jloc] += beta2 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
+        bias_37v[jloc] += beta1 * pow(scanpos[jloc] * Constants::deg2rad, jord+1);
+        bias_37h[jloc] += beta2 * pow(scanpos[jloc] * Constants::deg2rad, jord+1);
       }
     }
 

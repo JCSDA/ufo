@@ -89,7 +89,7 @@ class CloudLiquidWater : public PredictorBase {
                                       const std::vector<float> &,
                                       const std::vector<float> &,
                                       const std::vector<float> &,
-                                      const std::vector<float> &,
+                                      const std::vector<int> &,
                                       const std::vector<std::vector<std::vector<float>>> &,
                                       const std::vector<std::vector<float>> &,
                                       const std::vector<float> &,

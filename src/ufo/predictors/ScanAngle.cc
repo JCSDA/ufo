@@ -41,9 +41,19 @@ void ScanAngle::compute(const ioda::ObsSpace & odb,
   const size_t nlocs = out.nlocs();
   const size_t nvars = out.nvars();
 
-  // retrieve the sensor view angle
   std::vector<float> view_angle(nlocs, 0.0);
-  odb.get_db("MetaData", var_name_, view_angle);
+
+  // retrieve the sensor view angle
+
+  if (odb.dtype("MetaData", var_name_) == ioda::ObsDtype::Integer) {
+    std::vector<int> view_angle2(nlocs, 0);
+    odb.get_db("MetaData", var_name_, view_angle2);
+    for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+      view_angle[jloc] = view_angle2[jloc]*1.0f;
+    }
+  } else {
+    odb.get_db("MetaData", var_name_, view_angle);
+  }
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {

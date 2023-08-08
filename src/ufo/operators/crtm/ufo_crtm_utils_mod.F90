@@ -872,12 +872,14 @@ type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
 type(CRTM_Geometry_type), intent(inout), optional :: geo_hf(:)
 real(kind_real), allocatable :: TmpVar(:)
+integer, allocatable :: TmpVar2(:)
 integer :: nlocs
 character(kind=c_char,len=101) :: obsname
 
  call obsspace_obsname(obss, obsname)
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
+ allocate(TmpVar2(nlocs))
 
  call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
@@ -903,8 +905,8 @@ character(kind=c_char,len=101) :: obsname
  where (abs(geo(:)%Source_Zenith_Angle) > 180.0_kind_real) &
     geo(:)%Source_Zenith_Angle = 100.0_kind_real
 
- call obsspace_get_db(obss, "MetaData", "sensorScanPosition", TmpVar)
- geo(:)%Ifov = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "sensorScanPosition", TmpVar2)
+ geo(:)%Ifov = TmpVar2(:)
 
  call obsspace_get_db(obss, "MetaData", "sensorViewAngle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
@@ -948,6 +950,7 @@ character(kind=c_char,len=101) :: obsname
  endif
  
  deallocate(TmpVar)
+ deallocate(TmpVar2)
 
 end subroutine Load_Geom_Data
 
