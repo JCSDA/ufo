@@ -20,7 +20,7 @@ use gnssro_mod_constants
 use gnssro_mod_transform, only: geop2geometric
 use fckit_log_module,  only : fckit_log
 use iso_c_binding, only: c_ptr, c_double
-use ufo_constants_mod, only: zero, half, one, two, rd_over_g, rd_over_rv, rv_over_rd
+use ufo_constants_mod, only: zero, half, one, two, three, rd_over_g, rd_over_rv, rv_over_rd
 
 implicit none
 real(c_double)                             :: missing
@@ -282,7 +282,7 @@ if (nlocs > 0 ) then
 !     data rejection based on model background !
 !     (1) skip data beyond model levels
       call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
-      if (sIndx < one .or. sIndx > float(nlev)) then
+      if (sIndx < three .or. sIndx > float(nlev)) then
          cycle obs_loop
       end if
 

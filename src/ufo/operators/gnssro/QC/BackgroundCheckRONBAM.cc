@@ -93,7 +93,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         float cutoff34 = std::numeric_limits<float>::max();
 
         cutoff = 0.0;
-        if (satid >= 750 && satid <= 755) {
+        if ( (satid >= 750 && satid <= 755) || (satid >= 265 && satid <= 269) ) {
            cutoff1  = (-4.725+0.045*imp+0.005*imp*imp)/2.0;
         } else {
            cutoff1  = (-4.725+0.045*imp+0.005*imp*imp)*2.0/3.0;
@@ -101,7 +101,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         cutoff2  = 1.5+cos(lat);
         cutoff3  = 2.0;
         if (tmp > 240.0) cutoff3 = 0.005*tmp*tmp-2.3*tmp+266.0;
-        if (satid >= 750 && satid <= 755) {
+        if ( (satid >= 750 && satid <= 755) || (satid >= 265 && satid <= 269) ) {
            cutoff3  = cutoff3/2.0;
            cutoff4  = (4.0+8.0*cos(lat))/2.0;
         } else {
@@ -118,7 +118,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         if (imp <= 9.0  && imp > 6.0)  cutoff = cutoff3;
         if (imp <= 6.0  && imp > 4.0)  cutoff = cutoff34;
         if (imp <= 4.0) cutoff = cutoff4;
-        if (satid >= 750 && satid <= 755) {
+        if ( (satid >= 750 && satid <= 755) || (satid >= 265 && satid <= 269) ) {
           cutoff = 0.02*cutoff;
         } else {
           cutoff = 0.03*cutoff;

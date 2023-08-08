@@ -203,7 +203,7 @@ case ("bendingAngle")
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSaid)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call bending_angle_obserr_NBAM(obsLat, obsImpA, obsSaid, nobs, obsErr, QCflags, missing)
+    call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
     call fckit_log%debug(err_msg)
     deallocate(obsSaid)

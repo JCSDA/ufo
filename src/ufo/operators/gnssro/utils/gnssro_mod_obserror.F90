@@ -116,8 +116,9 @@ if (QCflags(i) .eq. 0) then
            obsErr(i)=-2.41024 +0.806594 *H_km-0.027257 *H_km**2
          endif
        endif
-    else if ((ObsSaid(i) > 749) .and. (ObsSaid(i) < 756)) then
-                                        !!!! CDAAC processing: COSMIC-2 only
+    else if ( (ObsSaid(i) >= 750 .and. ObsSaid(i) <= 755) .or. (ObsSaid(i) >= 265 .and. ObsSaid(i) <= 269) ) then
+
+          !!!! CDAAC processing: COSMIC-2 and commercial data
           if ( abs(obsLat(i)) > 40.0 ) then
              if (H_km <= 8.0) then
                 obsErr(i) = -1.0304261+0.3203316*H_km+0.0141337*H_km**2
