@@ -25,6 +25,7 @@ type gnssro_conf
   real(kind_real)    :: dtheta
   character(len=20)  :: vertlayer
   character(len=20)  :: output_diags
+  character(len=20)  :: GSI_version
 end type gnssro_conf
 
 !--------- ropp2d location default parameters-----------------
@@ -67,6 +68,11 @@ roconf%output_diags="false"
 if (f_conf%has("output_diags"))  then
   call f_conf%get_or_die("output_diags",str)
   roconf%output_diags=trim(str) 
+endif
+roconf%GSI_version="EMC"
+if (f_conf%has("GSI_version"))  then
+  call f_conf%get_or_die("GSI_version",str)
+  roconf%GSI_version=trim(str)
 endif
 end subroutine gnssro_conf_setup
 

@@ -20,7 +20,7 @@ module ufo_gnssro_bndnbam_mod
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
   use ufo_utils_mod, only: cmp_strings 
-  use ufo_constants_mod, only: zero, half, one, two, three, five, grav, rd, rv_over_rd
+  use ufo_constants_mod, only: zero, half, one, two, three, five, six, grav, rd, rv_over_rd
 
   implicit none
   public             :: ufo_gnssro_BndNBAM
@@ -57,7 +57,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   character(max_string)                   :: err_msg
   integer                                 :: nrecs, nlocs
   integer, parameter                      :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
-  integer, parameter                      :: ngrd    = 80 !num of new veritcal grids for bending angle computation
+  integer                                 :: ngrd
   integer                                 :: iobs, k, igrd, irec, icount, kk
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
   type(ufo_geoval), pointer               :: t, q, gph, prs, zs
@@ -69,7 +69,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(kind_real)                         :: temp, geop
   real(kind_real)                         :: wf
   integer                                 :: wi, wi2
-  real(kind_real)                         :: grids(ngrd)
+  real(kind_real), allocatable            :: grids(:)
   real(kind_real), allocatable            :: refIndex(:), refXrad(:), geomz(:)
   real(kind_real), allocatable            :: ref(:), radius(:)
   real(kind_real)                         :: sIndx
@@ -82,7 +82,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(kind_real),  allocatable           :: toss_max(:)
   integer                                 :: sr_hgt_idx
   real(kind_real)                         :: gradRef, obsImpH, obsHgt
-  integer,          allocatable           :: LayerIdx(:)
+  integer,          allocatable           :: LayerIdx(:) 
+  integer  :: SRcheckHeight,  ModelsigLevelcheck, SRcloseLayers
 
   write(err_msg,*) myname, ": begin"
   call fckit_log%debug(err_msg)
@@ -226,6 +227,20 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   nlevExt   = nlev + nlevAdd
   nlevCheck = int(nlev/2.0)  !number of levels to check super refaction
 
+  if(cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+!    This ngrd definitioni is copied from "ns=(r61/r63)*nsig+r18" in  GSI. June 8, 2023.
+     ngrd = nint(61.0/63.0 * nlev + 18)
+     SRcheckHeight = six
+     ModelsigLevelcheck = one
+     SRcloseLayers = 2
+  else
+     ngrd = 80
+     SRcheckHeight = five
+     ModelsigLevelcheck = three
+     SRcloseLayers = 5
+  endif
+
+  allocate(grids(ngrd))
 ! define new integration grids
   do igrd = 0, ngrd-1
      grids(igrd+1) = igrd * ds
@@ -253,6 +268,13 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
       iobs = icount
+!     super refracticion chek height defination
+      if (cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+         obsHgt = (obsImpP(iobs) - obsLocR(iobs)) * r1em3
+      else
+         obsHgt = (obsImpP(iobs) - obsLocR(iobs) - obsGeoid(iobs) - gesZs(iobs)) * r1em3  ! GSI v16.3
+      end if
+
       do k = 1, nlev
 !        compute guess geometric height from geopotential height
          call geop2geometric(obsLat(iobs), gesZ(k,iobs)-gesZs(iobs), geomz(k))
@@ -267,7 +289,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !     Data rejection based on model background !
 !     (1) skip data beyond model levels
       call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
-      if (sIndx < three .or. sIndx > float(nlev))  cycle obs_loop
+      if (sIndx < ModelsigLevelcheck .or. sIndx > float(nlev))  cycle obs_loop
 
 !     save the obs vertical location index (unit: model layer)
       LayerIdx(iobs) = min(max(1, int(sIndx)), nlev)
@@ -292,15 +314,14 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !     (2.1) GSI style super refraction check 
       if(cmp_strings(self%roconf%super_ref_qc, "NBAM")) then
 
-        obsHgt = (obsImpP(iobs) - obsLocR(iobs) - obsGeoid(iobs) - gesZs(iobs)) * r1em3 ! height to ground
-        if (obsHgt <= five) then
+        if (obsHgt <= SRcheckHeight) then
            kloop: do k = nlevCheck, 1, -1
 
 !             N gradient
               gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
 !             check for model SR layer
               if (abs(gradRef) >= 0.75*crit_gradRefr ) then
-                 if (obsImpP(iobs) <= refXrad(k+5)) then
+                 if (obsImpP(iobs) <= refXrad(k+SRcloseLayers)) then
                     super_refraction_flag(iobs) = 1
                     cycle obs_loop
                  else if ( LayerIdx(iobs) < k+1) then
@@ -329,7 +350,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               end do ! k
  
            end if   ! end if(self%roconf%sr_steps > 1 
-        end if ! obsHgt <= five
+        end if ! obsHgt <= SRcheckHeight
 
 !    ROPP style super refraction check
      else if(cmp_strings(self%roconf%super_ref_qc, "ECMWF")) then
@@ -381,7 +402,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
      end do rec_loop2
   end if
-
+ 
   deallocate(obsLat)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -403,6 +424,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(super)
   deallocate(toss_max)
   deallocate(obs_max)
+  deallocate(grids)
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%debug(err_msg)

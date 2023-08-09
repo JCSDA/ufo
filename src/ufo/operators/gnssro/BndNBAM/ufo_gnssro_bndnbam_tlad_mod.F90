@@ -21,6 +21,8 @@ use gnssro_mod_transform, only: geop2geometric
 use fckit_log_module,  only : fckit_log
 use iso_c_binding, only: c_ptr, c_double
 use ufo_constants_mod, only: zero, half, one, two, three, rd_over_g, rd_over_rv, rv_over_rd
+use ufo_utils_mod, only: cmp_strings 
+
 
 implicit none
 real(c_double)                             :: missing
@@ -65,7 +67,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   character(max_string)           :: err_msg
   integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
-  integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
+  integer                         :: ngrd
   type(ufo_geoval), pointer       :: t, q, gph, prs, zs
   integer                         :: iobs,k,j, klev, irec, icount
   integer                         :: nrecs
@@ -76,7 +78,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   integer(c_size_t), allocatable  :: obsRecnum(:)
   real(kind_real)                 :: d_refXrad, gradRef
   real(kind_real)                 :: d_refXrad_tl
-  real(kind_real)                 :: grids(ngrd)
+  real(kind_real),allocatable     :: grids(:)
   real(kind_real)                 :: sIndx 
   integer                         :: indx
   real(kind_real)                 :: p_coef, t_coef, q_coef
@@ -215,6 +217,12 @@ if (nlocs > 0 ) then
     write(err_msg,*) "record number is not consistent :", icount, nrecs
     call fckit_log%info(err_msg)
   end if
+  if(cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+     ngrd = nint(61.0/63.0 * nlev + 18)
+  else
+     ngrd = 80
+  endif
+
 
   allocate(dhdp(nlev))
   allocate(dhdt(nlev))
@@ -239,6 +247,7 @@ if (nlocs > 0 ) then
   allocate(self%jac_t(nlev,nlocs))
   allocate(self%jac_q(nlev,nlocs))
   allocate(self%jac_prs(nlev1,nlocs))
+  allocate(grids(ngrd))
 
 ! Inizialize some variables
   dxidt=zero; dxidp=zero; dxidq=zero
@@ -443,6 +452,7 @@ if (nlocs > 0 ) then
   deallocate(lagConst)
   deallocate(lagConst_tl)
   deallocate(obsRecnum)
+  deallocate(grids)
   if (allocated(obsSRflag)) deallocate(obsSRflag)
 
 end if

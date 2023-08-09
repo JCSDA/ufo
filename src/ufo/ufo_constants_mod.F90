@@ -28,6 +28,7 @@ real(kind_real), parameter, public :: two     = 2.0_kind_real
 real(kind_real), parameter, public :: three   = 3.0_kind_real
 real(kind_real), parameter, public :: four    = 4.0_kind_real
 real(kind_real), parameter, public :: five    = 5.0_kind_real
+real(kind_real), parameter, public :: six     = 6.0_kind_real
 real(kind_real), parameter, public :: ten     = 10.0_kind_real
 real(kind_real), parameter, public :: k_t   = 0.65       !> Thermal conductivity of water
 real(kind_real), parameter, public :: L_e   = 2.26e+06 !> Latent heat of vaporization
