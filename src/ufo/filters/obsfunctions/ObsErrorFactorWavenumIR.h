@@ -35,12 +35,12 @@ class ObsErrorFactorWavenumIRParameters : public oops::Parameters {
 
 ///
 /// \brief Error Inflation Factor (EIF) for channels with wavenumber in the
-/// range of (2000, 2400] during daytime (sun zenith angle < 89) and containing
+/// range of (200000, 240000] during daytime (sun zenith angle < 89) and containing
 /// water fraction in the field-of-view
-/// x = wavenumber [1/cm]
+/// x = wavenumber [1/m]
 /// y = surface-to-space transmittance
 /// z = solar zenith angle [radian]
-/// EIF = SQRT[ 1 / ( 1 - (x - 2000)) * y * MAX(0, COS(z)) / 4000 ]
+/// EIF = SQRT[ 1 / ( 1 - (x - 200000)/100 ) * y * MAX(0, COS(z)) / 4000 ]
 ///
 class ObsErrorFactorWavenumIR : public ObsFunctionBase<float> {
  public:

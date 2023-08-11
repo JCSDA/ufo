@@ -170,17 +170,19 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // tzchk: threshold for SST temperature at obs location
   const float tschk = 0.2, tzchk = 0.85;
   const float e_ts = 0.5, e_ta = 1.f, e_qa = 0.85;
+  const float solar_cutoff = 240000.0;
   const float ttp = Constants::ttp;
 
   // Loop through locations
   // TODO(EL): review the use of irday with EMC
+  // reject solar contaminated points when sun is up and over water
   std::vector<int> irday(nchans);
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     bool sea = water_frac[iloc] >= 0.99;
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       irday[ichan] = 1;
       out[ichan][iloc] = 0.0;
-      if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0 && wavenumber[ichan] > 2400.0) {
+      if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0 && wavenumber[ichan] > solar_cutoff) {
         irday[ichan] = 0;
       }
     }
