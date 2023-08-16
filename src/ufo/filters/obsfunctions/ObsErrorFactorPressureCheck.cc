@@ -101,10 +101,11 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable("MetaData/pressure");
 
     // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/surface_geometric_height");
   invars_ += Variable("GeoVaLs/geopotential_height");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  invars_ += Variable("GeoVaLs/" + geovar_sfc_geomz);
 }
 
 // -----------------------------------------------------------------------------
@@ -156,7 +157,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   data.get(Variable(adjusterr_name+"/"+inflatevars), adjustErr);
 
   std::vector<float> zsges(nlocs);
-  data.get(Variable("GeoVaLs/surface_geometric_height"), zsges);
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  data.get(Variable("GeoVaLs/" + geovar_sfc_geomz), zsges);
   std::vector<float> model_pressure_sfc(nlocs);
   data.get(Variable("GeoVaLs/surface_pressure"), model_pressure_sfc);
 

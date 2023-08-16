@@ -51,11 +51,13 @@ observations:
     action:
       name: inflate error
       inflation variable:
-        name: ObsErrorFactorPressureCheck@ObsFunction
+        name: ObsFunction/ObsErrorFactorPressureCheck
         options:
           variable: specificHumidity
           inflation factor: 8.0
           adjusted_error_name: GsiAdjustObsError
+          geovar_sfc_geomz: surface_geometric_height
+
     defer to post: true
 
  # Duplicate factor

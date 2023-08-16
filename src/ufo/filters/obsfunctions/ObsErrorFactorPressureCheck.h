@@ -29,13 +29,19 @@ class ObsErrorFactorPressureCheckParameters : public oops::Parameters {
   /// Inflate variables
   oops::RequiredParameter<std::string> inflatevars{"variable", this};
   oops::RequiredParameter<float> infl_coeff{"inflation factor", this};
-  oops::RequiredParameter<std::string> adjusterr_name{"adjusted_error_name", this};
+  oops::Parameter<std::string> adjusterr_name{"adjusted_error_name", "ObsErrorData", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
+
+  /// Alternative name of GeoVaLs variable: surface altitude
+  /// The code expects to find GeoVaLs/surface_altitude and GeoVaLs/height, however,
+  /// some datasets may have GeoVaLs/surface_geometric_height and GeoVaLs/geopotential_height
+  /// in its place.
+  oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz", "surface_altitude", this};
 };
 
 /// This filter is to check an observation’s vertical relative positionn with

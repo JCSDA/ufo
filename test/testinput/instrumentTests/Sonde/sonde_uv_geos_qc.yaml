@@ -87,6 +87,7 @@ observations:
           variable: windEastward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
+          geovar_sfc_geomz: surface_geometric_height
 
   #wgu
   - filter: Perform Action
@@ -104,6 +105,7 @@ observations:
           variable: windNorthward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
+          geovar_sfc_geomz: surface_geometric_height
 
   #wgu
   #Gross Check
