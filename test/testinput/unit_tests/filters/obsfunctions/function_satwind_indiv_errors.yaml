@@ -32,6 +32,10 @@ observations:
         min frequency: 7.5e+13
         max frequency: 8.2e+13
         wind channel: ir38
+      - satobchannel: 3
+        min frequency: 4.7e+13
+        max frequency: 4.9e+13
+        wind channel: wv62
       Satellite_id:
       - Sat ID: 270
         Sat name: GOES16
@@ -42,6 +46,9 @@ observations:
   # Errors are defined as a function of:
   #     MetaData/pressure
   #     MetaData/satwindIdentifier
+  # The satwind_pressure_errors.nc4 file only contains entries for
+  # "GOES16ir112", "GOES16ir38", "MISSING*"
+  # Since we have a 'missing value' entry, then "GOES16wv62" will use that as a fallback rather than raising an exception.
   - filter: Variable Assignment
     assignments:
     - name: MetaDataError/pressure
@@ -104,6 +111,71 @@ observations:
       test:
         name: EffectiveError/windNorthward
       absTol: 1.0e-5
+#---------------------------------------------------
+# In this test, we have a MetaData/satwindIdentifier value that is not present in the pressure errors file,
+# but in this case we have no 'missing value' entry so we expect an exception to be thrown.
+- obs operator:
+    name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
+    vertical coordinate: air_pressure_levels_minus_one
+    interpolation method: log-linear
+  obs space:
+    name: Satwind
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+    simulated variables: [windEastward, windNorthward]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z.nc4
+  obs filters:
+  # Create MetaData/satwindIdentifier string variable containing channel information
+  - filter: satname
+    SatName assignments:
+    - min WMO Satellite id: 1
+      max WMO Satellite id: 999
+      Satellite_comp:
+      - satobchannel: 1
+        min frequency: 2.6e+13
+        max frequency: 2.7e+13
+        wind channel: ir112
+      - satobchannel: 1
+        min frequency: 7.5e+13
+        max frequency: 8.2e+13
+        wind channel: ir38
+      - satobchannel: 3
+        min frequency: 4.7e+13
+        max frequency: 4.9e+13
+        wind channel: wv62
+      Satellite_id:
+      - Sat ID: 270
+        Sat name: GOES16
+  # Process QI values in new BUFR from percent confidence
+  - filter: Process AMV QI
+    number of generating apps: 4
+  # Assign estimated pressure errors for each satellite and channel combination
+  # Errors are defined as a function of:
+  #     MetaData/pressure
+  #     MetaData/satwindIdentifier
+  # The satwind_pressure_errors_nomissing.nc4 file only contains entries for
+  # "GOES16ir112", "GOES16ir38"
+  # "GOES16wv62" is not present in the file so for raise an exception.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaDataError/pressure
+      type: float
+      function:
+        name: ObsFunction/DrawValueFromFile
+        options:
+          file: Data/ufo/testinput_tier_1/satwind_pressure_errors_nomissing.nc4
+          group: MetaDataError
+          interpolation:
+          - name: MetaData/satwindIdentifier
+            method: exact
+          - name: MetaData/pressure
+            method: linear
+  expectExceptionWithMessage: No match found for exact match extraction of value 'GOES16wv62' of the variable 'MetaData/satwindIdentifier'
 #---------------------------------------------------
 - obs operator:
     name: VertInterp
