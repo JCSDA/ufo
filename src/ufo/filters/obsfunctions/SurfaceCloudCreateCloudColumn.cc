@@ -121,7 +121,7 @@ void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
   in.get(Variable(options_.modelLevelCloudBaseHeightDCC3.value()), modelLevelCBHDCC3);
 
   const float missing = util::missingValue(missing);
-  const std::vector<std::string> obsErrorName = {"CloudError"};
+  const std::vector<std::string> obsErrorName = {"cloudAmount"};
   ioda::ObsDataVector<float> obsErrorOut(in.obsspace(), oops::Variables(obsErrorName, channels_));
   const int nlayers = 3;
   std::vector<float> cloudBaseHeight(nlayers);

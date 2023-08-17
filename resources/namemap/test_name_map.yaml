@@ -33,3 +33,5 @@ variable maps:
     alias: sea_surface_temperature
   - name: ozoneProfile
     alias: mole_fraction_of_ozone_in_air
+  - name: cloudAmount
+    alias: cloud_layer

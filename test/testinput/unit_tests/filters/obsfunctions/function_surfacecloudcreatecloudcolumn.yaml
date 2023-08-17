@@ -10,10 +10,6 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_column_check.nc4
     simulated variables: [stationPressure]
     derived variables: [stationPressure]
-#    obsdataout:
-#      engine:
-#        type: H5File
-#        obsfile: /Data/met_office_surfacecloud_cloud_column_check_out.nc4
   geovals: &geovals
     filename: Data/ufo/testinput_tier_1/met_office_surfacecloud_cloud_column_check_geovals.nc4
   obs operator:
@@ -22,7 +18,7 @@ observations:
   obs filters:
     - filter: Variable Assignment
       assignments:
-      - name: DerivedObsValue/Cloud
+      - name: DerivedObsValue/cloudAmount
         channels: 1-70
         type: float
         function:
@@ -47,11 +43,11 @@ observations:
   - reference:
       name: TestReference/cloudColumnTest
     test:
-      name: DerivedObsValue/Cloud
+      name: DerivedObsValue/cloudAmount
     absTol: 1.0e-4
   - reference:
       name: TestReference/cloudErrorTest
     test:
-      name: DerivedObsError/CloudError
+      name: DerivedObsError/cloudAmount
     absTol: 1.0e-4
 
