@@ -315,7 +315,7 @@ case ("GSI")
          call vert_interp_weights(model_p%nval, log(obs_psfc(iobs)), log(model_p%vals(:,iobs)), wi, wf)
          call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), obs_tv(iobs), wi, wf)
          avg_tv(iobs) = (model_tvs(iobs) + obs_tv(iobs)) / 2.0_kind_real
-         if (obs_height(iobs) < model_level1(iobs)) then
+         if (obs_height(iobs) < model_zs(iobs)) then
             ! extrapolate to surface if ob is below lowest model layer
             avg_tv(iobs) = avg_tv(iobs) - ((Lclr/2.0_kind_real) * (obs_height(iobs) - model_zs(iobs)))
          end if
