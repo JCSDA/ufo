@@ -59,6 +59,9 @@ class ObsProductTLAD : public LinearObsOperatorBase,
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
 
+  /// Geoval name to act on
+  std::string geovalName_ = "";
+
   /// Scaling GeoVaLs
   std::vector<double> scalingGeoVaLs_;
 

@@ -38,6 +38,10 @@ class ObsProductParameters : public ObsOperatorParametersBase {
 
   /// Optional parameter to raise the geoval to a power, h(x) = x(lowest level) * (geovals)^a
   oops::OptionalParameter<float> geovalsExponent{"geovals exponent", this};
+
+  /// Optional parameter to specify name of geoval H(x) is to act on, if different from
+  /// the simulated variable
+  oops::OptionalParameter<std::string> geovalVariable{"geovals to act on", this};
 };
 
 }  // namespace ufo

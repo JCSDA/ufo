@@ -38,6 +38,7 @@ observations:
     simulated variables: [var1]
   obs operator:
     name: Product
+    geovals to act on: var2
     geovals to scale hofx by: scaling_variable
     geovals exponent: -0.5
   geovals:

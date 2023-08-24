@@ -34,7 +34,23 @@ ObsProduct::ObsProduct(const ioda::ObsSpace & odb,
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
-  requiredVars_ += nameMap_.convertName(operatorVars_);
+
+  if (parameters.geovalVariable.value() != boost::none) {
+      // Check that there is only one simulated variable. When specifying geovalVariable,
+      // only one simulated variable is currently supported, this could be extended in future.
+      const bool initialized = parameters.variables.value().is_initialized();
+      if ((initialized && (parameters.variables.value().value().size() > 1))
+         || (!initialized && odb.assimvariables().size() > 1)) {
+          throw eckit::UserError(
+            "More than one simulated variable is not currently supported",
+            Here());
+      }
+      geovalName_ = parameters.geovalVariable.value().value();
+      requiredVars_.push_back(parameters.geovalVariable.value().value());
+      operatorVarIndices_.resize(1);
+     } else {
+      requiredVars_ += nameMap_.convertName(operatorVars_);
+  }
 
   // Add scaling variable to the list
   requiredVars_.push_back(parameters.geovalsToScaleHofxBy.value());
@@ -92,7 +108,9 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   std::vector<double> vec(ovec.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string varname = nameMap_.convertName(ovec.varnames().variables()[jvar]);
+    const std::string varname = (geovalName_ == "")?
+                      nameMap_.convertName(ovec.varnames().variables()[jvar])
+                      : geovalName_;
     // Get GeoVaL at the level closest to the Earth's surface.
     gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {

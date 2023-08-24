@@ -35,7 +35,14 @@ ObsProductTLAD::ObsProductTLAD(const ioda::ObsSpace & odb,
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
-  requiredVars_ += nameMap_.convertName(operatorVars_);
+
+  if (parameters.geovalVariable.value() != boost::none) {
+      geovalName_ = parameters.geovalVariable.value().value();
+      requiredVars_.push_back(parameters.geovalVariable.value().value());
+      operatorVarIndices_.resize(1);
+     } else {
+      requiredVars_ += nameMap_.convertName(operatorVars_);
+  }
 
   // Save scaling variable name
   scalingGeoVar_ = parameters.geovalsToScaleHofxBy.value();
@@ -100,7 +107,9 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) con
   std::vector<double> vec(dy.nlocs());
   const auto missing = util::missingValue(scalingGeoVaLs_[0]);
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+      const std::string varname = (geovalName_ == "")?
+                        nameMap_.convertName(dy.varnames().variables()[jvar])
+                        : geovalName_;
     // Fill dy with dx at the level closest to the Earth's surface.
     dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
@@ -123,7 +132,9 @@ void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) con
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+      const std::string varname = (geovalName_ == "")?
+                        nameMap_.convertName(dy.varnames().variables()[jvar])
+                        : geovalName_;
     // Get current value of dx at the level closest to the Earth's surface.
     dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     // Increment dx with non-missing values of dy.
