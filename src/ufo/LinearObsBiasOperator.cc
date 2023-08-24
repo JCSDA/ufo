@@ -43,6 +43,10 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
     variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
   }
 
+  // TODO(Algo): relax this assumption, update code in computeObsBiasTL/computeObsBiasAD
+  // to handle coefficients by records.
+  assert(bias.nrecs() == 1);
+
   const oops::Variables &simVars = bias.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.

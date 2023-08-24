@@ -50,12 +50,12 @@ class ObsBias : public util::Printable,
   double norm() const;
   std::size_t size() const {return biascoeffs_.size();}
 
-  /// Return the coefficient of predictor \p jpred for variable \p jvar.
+  /// Return the coefficient of record \p jrec, variable \p jvar and predictor \p jpred
   ///
   /// Note: \p jpred may be the index of a static or a variable predictor.
-  double operator()(size_t jpred, size_t jvar) const {
+  double operator()(size_t jrec, size_t jvar, size_t jpred) const {
     return jpred < numStaticPredictors_ ?
-           1.0 : biascoeffs_[index(jpred - numStaticPredictors_, jvar)];
+           1.0 : biascoeffs_[index(jrec, jvar, jpred - numStaticPredictors_)];
   }
 
   /// Return bias correction coefficients (for *variable* predictors)
@@ -71,6 +71,10 @@ class ObsBias : public util::Printable,
 
   /// Return the vector of variable predictors.
   std::vector<std::shared_ptr<const PredictorBase>> variablePredictors() const;
+
+  /// Return the number of records that are bias-corrected independently from each other,
+  /// or 1 if all obs are bias-corrected together
+  const std::size_t & nrecs() const {return nrecs_;}
 
   /// Return the list of simulated variables.
   const oops::Variables & simVars() const {return vars_;}
@@ -89,12 +93,16 @@ class ObsBias : public util::Printable,
  private:
   void print(std::ostream &) const override;
 
-  /// index in the flattened biascoeffs_ for predictor \p jpred and variable \p jvar
-  size_t index(size_t jpred, size_t jvar) const {return jvar*numVariablePredictors_ + jpred;}
+  /// index in flattened biascoeffs_ for record \p jrec, variable \p jvar
+  /// and variable predictor \p jpred
+  size_t index(size_t jrec, size_t jvar, size_t jpred) const {
+    return jrec * (vars_.size() * numVariablePredictors_)
+             + jvar * numVariablePredictors_ + jpred;
+  }
 
   void initPredictor(const PredictorParametersWrapper &params);
 
-  /// bias correction coefficients (npredictors x nprimitivevariables)
+  /// bias correction coefficients (nrecords x nprimitivevariables x npredictors)
   Eigen::VectorXd biascoeffs_;
 
   /// bias correction predictors
@@ -105,6 +113,10 @@ class ObsBias : public util::Printable,
   std::size_t numStaticPredictors_;
   /// number of variable predictors (i.e. predictors with variable coefficients)
   std::size_t numVariablePredictors_;
+
+  /// number of records that are bias-corrected independently from each other
+  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  std::size_t nrecs_;
 
   /// list of simulated variables
   oops::Variables vars_;

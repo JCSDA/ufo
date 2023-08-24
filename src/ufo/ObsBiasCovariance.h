@@ -96,6 +96,10 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
 
+  /// number of records that are bias-corrected independently from each other
+  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  std::size_t nrecs_;
+
   /// variables for which bias correction coefficients will be updated
   oops::Variables vars_;
 

@@ -31,8 +31,11 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
     prednames_.push_back(predictor->name());
   }
 
+  nrecs_ = params.BiasCorrectionByRecord ? odb.nrecs() : 1;
+  ASSERT(nrecs_ > 0);
+
   // initialize bias coefficient perturbations
-  biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
+  biascoeffsinc_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * prednames_.size());
 
   oops::Log::trace() << "ufo::ObsBiasIncrement::create done." << std::endl;
 }
@@ -40,14 +43,14 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
-  : prednames_(other.prednames_), vars_(other.vars_) {
+  : prednames_(other.prednames_), nrecs_(other.nrecs_), vars_(other.vars_) {
   oops::Log::trace() << "ufo::ObsBiasIncrement::copy ctor starting" << std::endl;
 
   // Copy the bias coefficients data, or fill in with zeros
   if (copy) {
     biascoeffsinc_ = other.biascoeffsinc_;
   } else {
-    biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
+    biascoeffsinc_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * prednames_.size());
   }
 
   oops::Log::trace() << "ufo::ObsBiasIncrement::copy ctor done." << std::endl;
@@ -62,7 +65,7 @@ void ObsBiasIncrement::diff(const ObsBias & b1, const ObsBias & b2) {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::zero() {
-  biascoeffsinc_ = Eigen::VectorXd::Zero(prednames_.size() * vars_.size());
+  biascoeffsinc_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * prednames_.size());
 }
 
 // -----------------------------------------------------------------------------
@@ -70,6 +73,7 @@ void ObsBiasIncrement::zero() {
 ObsBiasIncrement & ObsBiasIncrement::operator=(const ObsBiasIncrement & rhs) {
   if (rhs) {
     prednames_     = rhs.prednames_;
+    nrecs_         = rhs.nrecs_;
     vars_          = rhs.vars_;
     biascoeffsinc_ = rhs.biascoeffsinc_;
   }
@@ -121,6 +125,30 @@ double ObsBiasIncrement::norm() const {
 
 // -----------------------------------------------------------------------------
 
+std::vector<double> ObsBiasIncrement::coefficients(size_t jpred) const {
+  std::vector<double> coeffs(nrecs_ * vars_.size());
+  for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      const size_t jrecvar = jrec * vars_.size() + jvar;
+      coeffs[jrecvar] = biascoeffsinc_(jrecvar * prednames_.size() + jpred);
+    }
+  }
+  return coeffs;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::updateCoeff(size_t jpred, const std::vector<double> & coeffs) {
+  for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      const size_t jrecvar = jrec * vars_.size() + jvar;
+      biascoeffsinc_[jrecvar * prednames_.size() + jpred] += coeffs[jrecvar];
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsBiasIncrement::serialize(std::vector<double> & vect) const {
   std::vector<double> vec_obs(biascoeffsinc_.data(),
                               biascoeffsinc_.data() + biascoeffsinc_.size());
@@ -144,7 +172,7 @@ void ObsBiasIncrement::print(std::ostream & os) const {
   if (this->serialSize() > 0) {
     // map bias coeffs to eigen matrix
     Eigen::Map<const Eigen::MatrixXd>
-      coeffs(biascoeffsinc_.data(), prednames_.size(), vars_.size());
+      coeffs(biascoeffsinc_.data(), prednames_.size(), nrecs_ * vars_.size());
     os << "ufo::ObsBiasIncrement::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < prednames_.size(); ++p) {

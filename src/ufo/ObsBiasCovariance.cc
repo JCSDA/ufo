@@ -53,7 +53,10 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
     prednames_.push_back(pred->name());
   }
 
-  if (prednames_.size()*vars_.size() > 0) {
+  nrecs_ = params.BiasCorrectionByRecord ? odb.nrecs() : 1;
+  ASSERT(nrecs_ > 0);
+
+  if (vars_.size() * prednames_.size() > 0) {
     if (params.covariance.value() == boost::none)
       throw eckit::UserError("obs bias.covariance section missing from the YAML file");
     const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
@@ -76,22 +79,23 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
     largest_analysis_variance_ = biasCovParams.largestAnalysisVariance;
 
     // Initialize the variances to upper limit
-    variances_ = Eigen::VectorXd::Constant(prednames_.size()*vars_.size(), largest_variance_);
+    variances_ = Eigen::VectorXd::Constant(nrecs_ * vars_.size() * prednames_.size(),
+                                           largest_variance_);
 
     // Initialize the hessian contribution to zero
-    ht_rinv_h_.resize(prednames_.size() * vars_.size());
+    ht_rinv_h_.resize(nrecs_ * vars_.size() * prednames_.size());
     std::fill(ht_rinv_h_.begin(), ht_rinv_h_.end(), 0.0);
 
     // Initialize the preconditioner to default step size
-    preconditioner_.resize(prednames_.size() * vars_.size());
+    preconditioner_.resize(nrecs_ * vars_.size() * prednames_.size());
     std::fill(preconditioner_.begin(), preconditioner_.end(), step_size_);
 
     // Initialize obs_num_ to ZERO
-    obs_num_.resize(vars_.size());
+    obs_num_.resize(nrecs_ * vars_.size());
     std::fill(obs_num_.begin(), obs_num_.end(), 0);
 
     // Initialize analysis error variances to the upper limit
-    analysis_variances_.resize(prednames_.size() * vars_.size());
+    analysis_variances_.resize(nrecs_ * vars_.size() * prednames_.size());
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_analysis_variance_);
 
     // Initializes from given prior
@@ -111,11 +115,11 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance
       std::size_t ii;
-      for (std::size_t j = 0; j < vars_.size(); ++j) {
+      for (std::size_t j = 0; j < nrecs_ * vars_.size(); ++j) {
         const double inflation = (obs_num_[j] <= minimal_required_obs_number_) ?
                                  large_inflation_ratio : inflation_ratio;
         for (std::size_t p = 0; p < prednames_.size(); ++p) {
-          ii = j*prednames_.size() + p;
+          ii = j * prednames_.size() + p;
           if (inflation > inflation_ratio) {
              analysis_variances_[ii] = inflation * analysis_variances_[ii] + smallest_variance_;
              variances_[ii] = analysis_variances_[ii];
@@ -171,11 +175,15 @@ void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbcerrors(pred_idx, chan_idx) when Eigen 3.4
     // is available
-    for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
-      obs_num_[jvar] = nobsassim(var_idx[jvar]);
-      for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
-        analysis_variances_[jvar*pred_idx.size()+jpred] =
-             allbcerrors(pred_idx[jpred], var_idx[jvar]);
+    for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+      for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
+        const size_t jrecvar = jrec * vars_.size() + jvar;
+        // TODO(Algo): RHS of the following equations to be fixed (to include jrec)
+        obs_num_[jrecvar] = nobsassim(var_idx[jvar]);
+        for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+          analysis_variances_[jrecvar * pred_idx.size() + jpred] =
+               allbcerrors(pred_idx[jpred], var_idx[jvar]);
+        }
       }
     }
   }
@@ -206,7 +214,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
     std::vector<std::string> predictors(prednames_.begin(), prednames_.end());
     // map coefficients to 2D for saving
     Eigen::Map<const Eigen::MatrixXd>
-        allbcerrors(analysis_variances_.data(), prednames_.size(), vars_.size());
+        allbcerrors(analysis_variances_.data(), prednames_.size(), nrecs_ * vars_.size());
     const std::vector<int> channels = vars_.channels();
     std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
 
@@ -252,7 +260,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
-  if (prednames_.size() * vars_.size() > 0) {
+  if (vars_.size() * prednames_.size() > 0) {
     const float missing = util::missingValue(missing);
     const int missing_int = util::missingValue(missing_int);
     const int jouter = innerConf.getInt("iteration");
@@ -268,8 +276,11 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       if (odb_.has(qc_group_name, vars[jvar])) {
         odb_.get_db(qc_group_name, vars[jvar], qc_flags);
         for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
-          if (qc_flags[jloc] == 0)
-            obs_num_accumulator->addTerm(jloc, jvar, 1);
+          if (qc_flags[jloc] == 0) {
+            // TODO(Algo): map the location to the record number.
+            const size_t jrec = 0;
+            obs_num_accumulator->addTerm(jloc, jrec * vars_.size() + jvar, 1);
+          }
       } else {
         throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + qc_group_name);
       }
@@ -304,13 +315,17 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
       // for each variable
       ASSERT(r_inv.nlocs() == predx.nlocs());
-      std::size_t nvars = predx.nvars();
       // only keep the diagnoal
-      for (size_t vv = 0; vv < nvars; ++vv) {
-        for (size_t ii = 0; ii < predx.nlocs(); ++ii)
+      for (size_t vv = 0; vv < vars_.size(); ++vv) {
+        for (size_t ii = 0; ii < predx.nlocs(); ++ii) {
+          // TODO(Algo): map the location to the record number.
+          const size_t jrec = 0;
           ht_rinv_h_accumulator->addTerm(ii,
-                                         vv*prednames_.size() + p,
-                                         pow(predx[ii*nvars + vv], 2) * r_inv[ii*nvars + vv]);
+                                         jrec * (vars_.size() * prednames_.size())
+                                           + vv * prednames_.size() + p,
+                                         pow(predx[ii * vars_.size() + vv], 2)
+                                           * r_inv[ii * vars_.size() + vv]);
+        }
       }
     }
 
@@ -319,44 +334,50 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // Set obs_num_ and ht_rinv_h_ to missing for variables opted out of bias correction
     const std::vector<int> & varIndexNoBC = bias.varIndexNoBC();
-    for (const int jvar : varIndexNoBC) {
-      obs_num_[jvar] = missing_int;
-      for (std::size_t p = 0; p < prednames_.size(); ++p) {
-        ht_rinv_h_[jvar * prednames_.size() + p] = missing;
+    for (std::size_t jrec = 0; jrec < nrecs_; ++jrec) {
+      for (const int jvar : varIndexNoBC) {
+        const std::size_t jrecvar = jrec * vars_.size() + jvar;
+        obs_num_[jrecvar] = missing_int;
+        for (std::size_t p = 0; p < prednames_.size(); ++p) {
+          ht_rinv_h_[jrecvar * prednames_.size() + p] = missing;
+        }
       }
     }
 
-    for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
-      if (obs_num_[jvar] != missing_int) {
-        for (std::size_t p = 0; p < prednames_.size(); ++p) {
-          const std::size_t index = jvar * prednames_.size() + p;
+    for (std::size_t jrec = 0; jrec < nrecs_; ++jrec) {
+      for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+        const std::size_t jrecvar = jrec * vars_.size() + jvar;
+        if (obs_num_[jrecvar] != missing_int) {
+          for (std::size_t p = 0; p < prednames_.size(); ++p) {
+            const std::size_t index = jrecvar * prednames_.size() + p;
 
-          // Reset variances for bias predictor coeff. based on current data count
-          if (obs_num_[jvar] <= minimal_required_obs_number_) {
-            variances_[index] = smallest_variance_;
-          }
+            // Reset variances for bias predictor coeff. based on current data count
+            if (obs_num_[jrecvar] <= minimal_required_obs_number_) {
+              variances_[index] = smallest_variance_;
+            }
 
-          // Reset preconditioner L = \mathrm{A}^{-1}
-          if (obs_num_[jvar] > 0)
-            preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+            // Reset preconditioner L = \mathrm{A}^{-1}
+            if (obs_num_[jrecvar] > 0)
+              preconditioner_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
 
-          // Reset analysis variances
-          if (obs_num_[jvar] > minimal_required_obs_number_) {
-            if (ht_rinv_h_[index] > 0.0) {
-              analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
-            } else {
-              analysis_variances_[index] = largest_analysis_variance_;
+            // Reset analysis variances
+            if (obs_num_[jrecvar] > minimal_required_obs_number_) {
+              if (ht_rinv_h_[index] > 0.0) {
+                analysis_variances_[index] = 1.0 / (1.0 / variances_[index] + ht_rinv_h_[index]);
+              } else {
+                analysis_variances_[index] = largest_analysis_variance_;
+              }
             }
           }
-        }
-      } else {
-        // Set variances, preconditioner and analysis variances to missing
-        // for variables opted out of bias correction
-        for (std::size_t p = 0; p < prednames_.size(); ++p) {
-          const std::size_t index = jvar * prednames_.size() + p;
-          variances_[index] = missing;
-          preconditioner_[index] = missing;
-          analysis_variances_[index] = missing;
+        } else {
+          // Set variances, preconditioner and analysis variances to missing
+          // for variables opted out of bias correction
+          for (std::size_t p = 0; p < prednames_.size(); ++p) {
+            const std::size_t index = jrecvar * prednames_.size() + p;
+            variances_[index] = missing;
+            preconditioner_[index] = missing;
+            analysis_variances_[index] = missing;
+          }
         }
       }
     }
