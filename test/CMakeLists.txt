@@ -53,10 +53,12 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-    set( CRTM_COEFFS_BRANCH "3.0.0_skylab_4.0" )
+    set( CRTM_COEFFS_BRANCH "3.0.0_skylab_6.0" )
+    set( checksum "1" )
     set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput" )
 else()
     set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
+    set( checksum "0" )
     set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput/CRTMv2" )
 endif()
 
@@ -135,7 +137,6 @@ function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
     endif()
 
 
-    set( checksum "0" )
     set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${GIT_TAG_FUNC}" )
     # Create test-data-release in source directory
     file( MAKE_DIRECTORY ${TESTFILE_DIR_REPO} )
