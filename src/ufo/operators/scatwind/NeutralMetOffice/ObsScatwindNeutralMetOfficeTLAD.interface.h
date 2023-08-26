@@ -25,6 +25,8 @@ extern "C" {
 // Scatwind neutral wind tl/ad observation operator - (Met Office)
 // -----------------------------------------------------------------------------
   void ufo_scatwind_neutralmetoffice_tlad_setup_f90(F90hop &,
+                                                    const bool &,
+                                                    const int &,
                                                     const oops::Variables &,
                                                     oops::Variables &,
                                                     const size_t &,

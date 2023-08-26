@@ -32,6 +32,8 @@ ObsScatwindNeutralMetOffice::ObsScatwindNeutralMetOffice(const ioda::ObsSpace & 
   const std::vector<int> channels_list = odb.assimvariables().channels();
 
   ufo_scatwind_neutralmetoffice_setup_f90(keyOperScatwindNeutralMetOffice_,
+                                          parameters_.surfaceTypeCheck,
+                                          parameters_.surfaceTypeSea,
                                           odb.assimvariables(),
                                           varin_,
                                           channels_list.size(),

@@ -33,11 +33,19 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_scatwind_neutralmetoffice_tlad_setup_c(c_key_self, c_obsvars, &
-                                                 c_geovars, c_nchan, c_channels, c_conf) bind(c,name='ufo_scatwind_neutralmetoffice_tlad_setup_f90')
+subroutine ufo_scatwind_neutralmetoffice_tlad_setup_c(c_key_self,         &
+                                                      surface_type_check, &
+                                                      surface_type_sea,   &
+                                                      c_obsvars,          &
+                                                      c_geovars,          &
+                                                      c_nchan,            &
+                                                      c_channels,         &
+                                                      c_conf) bind(c,name='ufo_scatwind_neutralmetoffice_tlad_setup_f90')
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
+logical(c_bool), intent(in)    :: surface_type_check !< Whether to check we are over sea before calculating H(x)
+integer(c_int), intent(in)     :: surface_type_sea   !< Value for sea to be used in the surface type check
 type(c_ptr), intent(in), value :: c_obsvars !< variables to be simulated
 type(c_ptr), intent(in), value :: c_geovars !< variables requested from the model
 
@@ -54,7 +62,7 @@ f_conf = fckit_configuration(c_conf)
 self%obsvars = oops_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 
-call self%setup(c_channels)
+call self%setup(c_channels, surface_type_check, surface_type_sea)
 
 end subroutine ufo_scatwind_neutralmetoffice_tlad_setup_c
   

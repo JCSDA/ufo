@@ -23,6 +23,7 @@ observations:
   tolerance: 1.0e-05
 - obs operator:
     name: ScatwindNeutralMetOffice
+    surface_type_check: false
   obs space:
     name: Missing windNorthward from simulated variables, throwing an exception
     obsdatain:
@@ -36,6 +37,7 @@ observations:
   expect simulateObs to throw exception with message: HofX should have 2 variables windEastward and windNorthward
 - obs operator:
     name: ScatwindNeutralMetOffice
+    surface_type_check: false
   obs space:
     name: GeoVaLs are in the wrong order, throwing an exception
     obsdatain:
@@ -52,6 +54,7 @@ observations:
 #  used to store ambiguities and not channels. This will be changed in future.
 - obs operator:
     name: ScatwindNeutralMetOffice
+    surface_type_check: false
   obs space:
     name: Scatwind channels 2d
     obsdatain:
