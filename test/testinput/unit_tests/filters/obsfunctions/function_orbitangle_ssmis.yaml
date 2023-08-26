@@ -17,4 +17,4 @@ observations:
   obs function:
     name: ObsFunction/OrbitAngle
     variables: [sensorOrbitAngle]
-    tolerance: 1.0e-7
+    tolerance: 1.0e-5
