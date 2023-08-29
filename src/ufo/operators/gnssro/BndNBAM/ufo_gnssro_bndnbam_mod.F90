@@ -394,7 +394,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
             if (obsHgt<=five.and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
                 hofx(k)/=missing .and. super_refraction_flag(k)==0) then
                 super_refraction_flag(k)=2
-                hofx(k)=missing  ! This line can be commented for diagnosistic purpose
+                ! Do not remove those points with GEOS 
+                if (.not. cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+                    hofx(k)=missing  ! This line can be commented for diagnosistic purpose
+                end if
             end if
           end do obs_loop2
 
