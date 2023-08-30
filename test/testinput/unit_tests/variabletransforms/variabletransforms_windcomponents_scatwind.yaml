@@ -20,7 +20,7 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
-  passedBenchmark: 83518           #  Passes for channels 1-4: 16462, 16366, 5580, 3351, for 2 variables
+  passedBenchmark: 938             #  Passes for channels 1-4: 188, 182, 56, 43, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
         name: TestReference/windEastward_derivedobsvalue
