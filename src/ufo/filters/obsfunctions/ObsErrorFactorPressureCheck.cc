@@ -220,6 +220,12 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         }
       }
 
+///   Use pressure coordinate for airTemperature and virtualTemperature observations.
+      if (inflatevars.compare("airTemperature") == 0 ||
+          inflatevars.compare("virtualTemperature") == 0) {
+        reported_height = false;
+      }
+
       if (reported_height) {
         fact = 0.0f;
         if (obs_height[iloc]-dstn[iloc] > 10.0f) {
@@ -285,15 +291,22 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         // Apply this drpx correction only to surface or surface_ship data
         if ((itype[iloc] > 179 && itype[iloc] <= 190) ||
             (itype[iloc] >= 192 && itype[iloc] < 199)) {
-          drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
+          if (inflatevars.compare("airTemperature") == 0 ||
+            inflatevars.compare("virtualTemperature") == 0) {
+            drpx = abs(1.0f-pow(model_pressure_sfc[iloc]/obs_pressure[iloc],
+                 ufo::Constants::rd_over_cp))*ufo::Constants::t0c;
+            if (abs(dpres) > 4.0f) {
+              drpx = 1.0e10f;
+            }
+          } else {
+            drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
+          }
         } else {
           drpx = 0.0f;
         }
-
-        if ((itype[iloc] > 179 && itype[iloc] < 186) ||
-            (itype[iloc] == 199)) dpres = 1.0;
-
         if (inflatevars.compare("specificHumidity") == 0) {
+            if ((itype[iloc] > 179 && itype[iloc] < 186) ||
+                (itype[iloc] == 199)) dpres = 1.0;
             gvals->getAtLocation(q_profile, "saturated_specific_humidity_profile", iloc);
             std::reverse(q_profile.begin(), q_profile.end());
 
