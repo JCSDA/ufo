@@ -1,0 +1,50 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs space:
+    name: atms_n20
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark_tolerance.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseReportSurface: true
+      UseReportElevation: true
+      UseAAPPSurfaceClass: true
+      UseSurfaceWaterFraction: true
+      HeightTolerance: 1.0e-9
+    variables: [surfaceQualifier]
+    tolerance: 1.0e-7
+
+
+
+- obs space:
+    name: atms_n20
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark_tolerance.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseReportSurface: true
+      UseReportElevation: true
+      UseAAPPSurfaceClass: true
+      UseSurfaceWaterFraction: true
+      HeightTolerance: 1.0e-10
+    variables: [surfaceQualifier]
+    tolerance: 1.0e-7
+    expectExceptionWithMessage: rms_out[ivar] < 100*tol

@@ -82,6 +82,12 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   oops::Parameter<int> SurfaceTypeLand{"SurfaceTypeLand", 0, this};
   oops::Parameter<int> SurfaceTypeSea{"SurfaceTypeSea", 1, this};
   oops::Parameter<int> SurfaceTypeSeaIce{"SurfaceTypeSeaIce", 2, this};
+
+  /// Set a tolerance for the height value
+  /// Default is zero tolerance
+  /// For example HeightTolerance: 0.01 (m) would allow values between -0.01 and 0.01 (m) to be
+  /// valid to define a point as ocean given an expected height of 0.
+  oops::Parameter<float> HeightTolerance{"HeightTolerance", 0, this};
 };
 
 ///

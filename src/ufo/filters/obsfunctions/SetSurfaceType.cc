@@ -77,6 +77,8 @@ namespace ufo {
     int surftype_sea_    = options_.SurfaceTypeSea.value();
     int surftype_seaice_ = options_.SurfaceTypeSeaIce.value();
 
+    float heighttolerance = options_.HeightTolerance.value();
+
     // if available and requested, set elevation to ob surface height
     if (options_.UseReportElevation.value()) {
       if (in.has(Variable("MetaData/heightOfSurface"))) {
@@ -95,7 +97,9 @@ namespace ufo {
     // require the model height to be non-zero to be recognised as land which is likely but this is
     // probably not logically correct.
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      land_sea[iloc] = (elevation[iloc] > 0.0f || model_height[iloc] != 0.0f) ?
+      land_sea[iloc] = (elevation[iloc] > 0.0f ||
+                        model_height[iloc] > 0.0f + heighttolerance ||
+                        model_height[iloc] < 0.0f - heighttolerance) ?
         surftype_land_ : surftype_sea_;
     }
 
