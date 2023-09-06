@@ -223,7 +223,9 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
 
     ! Set scaling factor
     if (self%use_fact10) then
-      if (tmp2 >= tmp(1)) self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
+      if (tmp2 /= missing .and. tmp(1) /= missing) then
+        if (tmp2 >= tmp(1)) self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
+      end if
     end if
 
   enddo
@@ -246,8 +248,11 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   type(c_ptr), value,         intent(in)    :: obss
 
   integer :: iobs, iobsvar, ivar
+  real(c_double) :: missing
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
+
+  missing = missing_value(missing)
 
   ! Loop over the variables
   do iobsvar = 1, size(self%obsvarindices)
@@ -262,13 +267,17 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     ! Interpolate from geovals to observational location into hofx
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
       do iobs = 1, nlocs
+        if (hofx(ivar,iobs) /= missing) then
         call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                                            & hofx(ivar,iobs), self%wi(iobs))
+        end if
       enddo
     else
       do iobs = 1, nlocs
+        if (hofx(ivar,iobs) /= missing) then
         call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                                 & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
+        end if
       enddo
     end if
 
@@ -281,6 +290,7 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
 
         ! Loop over the observations and apply wind scaling
         do iobs = 1, nlocs
+          if (hofx(ivar,iobs) /= missing) &
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
         enddo
 
@@ -330,6 +340,7 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
           (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
 
         do iobs = 1, nlocs
+          if (hofx(ivar,iobs) /= missing) &
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
         enddo
 
