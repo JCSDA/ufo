@@ -52,12 +52,13 @@ contains
 
     type(fckit_configuration)               :: f_confOpts ! RTcontrol
     integer                                 :: ind, j, jspec, ii, jj, jnew
-    logical                                 :: setup_linear_model = .false.
+    integer                                 :: nvars_in
+    character(len=800)                      :: message
 
     call f_confOper % get_or_die("obs options",f_confOpts)
 
 ! Begin RTTOV configuration and determine ngas (Absorbers)
-    call rttov_conf_setup(self % conf, f_confOpts, f_confOper, setup_linear_model)
+    call rttov_conf_setup(self % conf, f_confOpts, f_confOper)
 
 ! Count mandatory inputs and additional gases
     nvars_in = size(varin_default) + self%conf%ngas
@@ -82,13 +83,15 @@ contains
       ind = ind + 1
     end do
 
-    allocate(self % channels(size(channels)))
-    allocate(self % coefindex(size(channels)))
+    ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
+    self % RTprof % nchan_inst = size(channels)
+    allocate(self % channels(self % RTprof % nchan_inst))
+    allocate(self % coefindex(self % RTprof % nchan_inst))
     self % coefindex(:) = 0
     self % channels(:) = channels
 
     jnew = 1
-    coefloop: do ii = 1, size(channels)
+    coefloop: do ii = 1, self % RTprof % nchan_inst
       jj = jnew
       do while ( jj <= self % conf % rttov_coef_array(1) % coef % fmv_chn )
         if (channels(ii) == self % conf % rttov_coef_array(1) % coef % ff_ori_chn(jj)) then
@@ -114,10 +117,10 @@ contains
       enddo
     end if
 
-    if (debug) then
+    if (self % conf % debug) then
       do j=1,size(self%varin)
         write(message,'(I4,1x,A)') j, trim(self%varin(j))
-        call fckit_log%debug(message)
+        call fckit_log % debug(message)
       enddo
     end if
 
@@ -160,8 +163,10 @@ contains
 
     ! Local Variables
     character(*), parameter                 :: routine_name = 'ufo_radiancerttov_simobs'
+    character(len=800)                      :: message
     type(rttov_chanprof), allocatable       :: chanprof(:)
     type(ufo_geoval), pointer               :: geoval_temp
+    type(rttov_hofxdiags)                   :: hofxdiags_methods
 
     integer                                 :: nprofiles, nlevels
     integer(kind=jpim)                      :: errorstatus  ! Error status of RTTOV subroutine calls
@@ -171,6 +176,7 @@ contains
     integer                                 :: nchan_sim
     integer                                 :: prof_start, prof_end
     integer                                 :: sensor_index
+    integer, allocatable                    :: prof_list(:,:)  ! store list of 'good' profiles
 
     logical                                 :: jacobian_needed
     real(kind_real), allocatable            :: sfc_emiss(:,:)
@@ -194,7 +200,8 @@ contains
     ! Note this sets the jacobian_needed flag
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
     !!   non-jacobian var --> <ystr>_<chstr>
-    call parse_hofxdiags(hofxdiags, jacobian_needed)
+    call hofxdiags_methods % reset()
+    call hofxdiags_methods % parse(hofxdiags, jacobian_needed)
 
     ! Get number of profiles and levels from geovals
     nprofiles = geovals % nlocs
@@ -221,12 +228,9 @@ contains
       call self % RTprof % setup_rtprof(geovals,obss,self % conf)
     end if
 
-    ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
-    nchan_inst = size(self % channels)
-
     ! Read emissivity from obs space if its requested
     if (self % conf % surface_emissivity_group /= "") then
-      allocate(sfc_emiss(nchan_inst, nprofiles)) ! nchans, nprofiles
+      allocate(sfc_emiss(self % RTprof % nchan_inst, nprofiles)) ! nchans, nprofiles
       call rttov_read_emissivity_from_obsspace(obss, self % conf % surface_emissivity_group, &
                                                self % channels, sfc_emiss)
     end if
@@ -235,7 +239,7 @@ contains
     if(self % conf % prof_by_prof) then
       nprof_max_sim = 1
     else
-      nprof_max_sim = max(1,self % conf % nchan_max_sim / nchan_inst)
+      nprof_max_sim = max(1,self % conf % nchan_max_sim / self % RTprof % nchan_inst)
     end if
     nprof_sim = min(nprof_max_sim, nprofiles)
 
@@ -258,7 +262,7 @@ contains
     end if
 
     ! Used for keeping track of profiles for setting emissivity
-    allocate(self % RTprof % chanprof ( nprofiles * nchan_inst ))
+    allocate(self % RTprof % chanprof ( nprofiles * self % RTprof % nchan_inst ))
 
     prof_start = 1; prof_end = nprofiles
     nchan_total = 0
@@ -278,7 +282,6 @@ contains
       nchan_sim = 0_jpim
 
       !allocate list used to store 'good' profiles
-      !prof_list is defined in utils_mod
       !initialise to -1, so no bad profile is given an emissivity
       allocate(prof_list(nprof_sim,2))
       prof_list = -1 
@@ -299,7 +302,7 @@ contains
         ! check sfc_emiss valid if read in
         if(errorstatus == errorstatus_success) then
           if (allocated(sfc_emiss)) then
-            do ichan = 1, nchan_inst
+            do ichan = 1, self % RTprof % nchan_inst
               if ((sfc_emiss(ichan,iprof) > 1.0) .or. (sfc_emiss(ichan,iprof) < 0.0)) then
                 errorstatus = errorstatus_fatal
               end if
@@ -308,7 +311,7 @@ contains
 
           prof_list(iprof_rttov,1) = iprof_rttov ! chunk index
           prof_list(iprof_rttov,2) = iprof       ! all-obs index
-          do ichan = 1, nchan_inst
+          do ichan = 1, self % RTprof % nchan_inst
             ichan_sim = ichan_sim + 1_jpim
             chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
             chanprof(ichan_sim) % chan = self % coefindex(ichan)
@@ -343,7 +346,7 @@ contains
         if (allocated(sfc_emiss)) then
           self % RTprof % calcemis(:) = .false.
           outerloop: do ichan = 1, ichan_sim  ! list of channels*profiles
-            do jchan = 1, nchan_inst  ! list of self % channels
+            do jchan = 1, self % RTprof % nchan_inst  ! list of self % channels
               ! if the channel number for this channel * profile == channel number needed
               ! chanprof(ichan) % chan refers to the index in the coefficient file
               if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
@@ -357,18 +360,18 @@ contains
             end do
           end do outerloop
         else
-          call self % RTProf % init_default_emissivity(self % conf, prof_start)
+          call self % RTProf % init_default_emissivity(self % conf, prof_list)
         end if
       end if
 
       ! Write out emissivity if checking profile
-      if(size(self % conf % inspect) > 0) then
-        do ichan = 1, ichan_sim, nchan_inst
+      if (size(self % conf % inspect) > 0) then
+        do ichan = 1, ichan_sim, self % RTprof % nchan_inst
           iprof = prof_start + chanprof(ichan) % prof - 1
           if(any(self % conf % inspect == iprof)) then
             write(*,*) "profile ", iprof
-            write(*,*) "calcemiss = ",self % RTprof % calcemis(ichan:ichan+nchan_inst-1)
-            write(*,*) "emissivity in = ",self % RTprof % emissivity(ichan:ichan+nchan_inst-1) % emis_in
+            write(*,*) "calcemiss = ",self % RTprof % calcemis(ichan:ichan+self%RTprof%nchan_inst-1)
+            write(*,*) "emissivity in = ",self % RTprof % emissivity(ichan:ichan+self%RTprof%nchan_inst-1) % emis_in
           end if
         end do
       end if
@@ -478,27 +481,28 @@ contains
           enddo
 
           ! Write out emissivity out and hofx
-          if(size(self % conf % inspect) > 0) then
-            do ichan = 1, ichan_sim, nchan_inst
+          if (size(self % conf % inspect) > 0) then
+            do ichan = 1, ichan_sim, self % RTprof % nchan_inst
               iprof = prof_start + chanprof(ichan) % prof - 1
               if(any(self % conf % inspect == iprof)) then
                 write(*,*) "profile ", iprof
-                write(*,*) "emissivity out = ",self % RTprof % emissivity(ichan:ichan+nchan_inst-1) % emis_out
+                write(*,*) "emissivity out = ",self % RTprof % emissivity(ichan:ichan+self%RTprof%nchan_inst-1) % emis_out
                 write(*,*) "hofx out = ",hofx(1:size(self%channels),iprof)
                 
                 if (self % conf % do_mw_scatt) then
-                  write(*,*) "emis_retrieval cfrac = ",self % RTprof % mw_scatt % emis_retrieval % cfrac(ichan:ichan+nchan_inst-1)
-                  write(*,*) "emis_retrieval tau_clr = ",self % RTprof % mw_scatt % emis_retrieval % tau_clr(ichan:ichan+nchan_inst-1)
-                  write(*,*) "emis_retrieval tau_cld = ",self % RTprof % mw_scatt % emis_retrieval % tau_cld(ichan:ichan+nchan_inst-1)
+                  write(*,*) "emis_retrieval cfrac = ",self % RTprof % mw_scatt % emis_retrieval % cfrac(ichan:ichan+self%RTprof%nchan_inst-1)
+                  write(*,*) "emis_retrieval tau_clr = ",self % RTprof % mw_scatt % emis_retrieval % tau_clr(ichan:ichan+self%RTprof%nchan_inst-1)
+                  write(*,*) "emis_retrieval tau_cld = ",self % RTprof % mw_scatt % emis_retrieval % tau_cld(ichan:ichan+self%RTprof%nchan_inst-1)
                 else
-                  write(*,*) "tau_total out = ",self % RTProf % transmission % tau_total(ichan:ichan+nchan_inst-1)
+                  write(*,*) "tau_total out = ",self % RTProf % transmission % tau_total(ichan:ichan+self%RTprof%nchan_inst-1)
                 end if
               end if
             end do
           end if
 
           ! Put simulated diagnostics into hofxdiags
-          if(hofxdiags%nvar > 0) call populate_hofxdiags(self % RTProf, chanprof, self % conf, prof_start, hofxdiags)
+          if(hofxdiags % nvar > 0) &
+            call hofxdiags_methods % populate(self % RTProf, chanprof, self % conf, prof_start, hofxdiags)
         end if
       end if ! nchan_sim > 0
 
