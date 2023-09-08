@@ -198,32 +198,26 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
 
   for (size_t iv = 0; iv < nvars; ++iv) {   // Variable loop
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-///   To determine if the observation is reported with pressure or
+///   To determine the observation's relative location by pressure or
 ///   geometric height.  Default: pressure.
 
       reported_height = false;
 
+///   For some wind observations, it is determined by geometric height.
 ///   Surface Marine, Surface Land, Atlas Buoy and Surface MESONET(280-299)
 ///   reported with geometric height.
-      if (itype[iloc] >= 280 && itype[iloc] < 300) {
-        reported_height = true;
-      }
-
 ///   PIBAL(221), WIND PROFILER(228) and WIND PROFILER DECODED FROM PILOT
 ///   (PIBAL)(229). If the reported geometric height is missing, then
 ///   the reported pressure is used instead.
-      if (itype[iloc] >= 221 && itype[iloc] <= 229) {
-        if (abs(obs_height[iloc]) < 1.e10) {
+      if (inflatevars.compare("windEastward") == 0 ||
+          inflatevars.compare("windNorthward") == 0) {
+        if (itype[iloc] >= 280 && itype[iloc] < 300) {
           reported_height = true;
-        } else {
-          reported_height = false;
+        } else if ((itype[iloc] >= 221 && itype[iloc] <= 229) || (itype[iloc] == 261)) {
+          if (abs(obs_height[iloc]) < 1.e10) {
+            reported_height = true;
+          }
         }
-      }
-
-///   Use pressure coordinate for airTemperature and virtualTemperature observations.
-      if (inflatevars.compare("airTemperature") == 0 ||
-          inflatevars.compare("virtualTemperature") == 0) {
-        reported_height = false;
       }
 
       if (reported_height) {
@@ -235,8 +229,11 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
               fact = (obs_height[iloc]-dstn[iloc])/990.0f;
            }
         }
-        dpres = obs_height[iloc]-(dstn[iloc]+fact*(zsges[iloc]-dstn[iloc]));
-
+        if (itype[iloc] == 261) {
+          dpres = obs_height[iloc];
+        } else {
+          dpres = obs_height[iloc]-(dstn[iloc]+fact*(zsges[iloc]-dstn[iloc]));
+        }
         for (size_t k = 0 ; k < nlevs ; ++k) {
           zges_mh[k] = zges[k][iloc];
         }
