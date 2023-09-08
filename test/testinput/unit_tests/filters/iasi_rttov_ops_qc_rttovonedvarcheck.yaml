@@ -84,6 +84,10 @@ observations:
 #       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
+  obs bias: &ObsBias
+    static bc:
+      predictors:
+      - name: read_bias
   obs filters:
 ### No Channels ###
   - filter: BlackList
@@ -143,7 +147,6 @@ observations:
     nlevels: 70
     UseMLMinimization: true
     defer to post: true
-    obs bias group for testing: ObsBias
     Max1DVarIterations: 10
     MaxMLIterations: 10
     SkinTempErrorLand: 5.0

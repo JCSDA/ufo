@@ -222,9 +222,6 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
 
   /// Final observation to run through 1d-var, subsetting for testing
   oops::Parameter<int> FinishOb{"FinishOb", 0, this};
-
-  /// Get ObsBias from database if testing code.
-  oops::OptionalParameter<std::string> obsBiasGroupForTesting{"obs bias group for testing", this};
 };
 
 }  // namespace ufo

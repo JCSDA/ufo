@@ -22,6 +22,8 @@ set ( predictor_files
   Legendre.cc
   OrbitalAngle.h
   OrbitalAngle.cc
+  ReadBias.h
+  ReadBias.cc
   SatelliteSelector.h
   SatelliteSelector.cc
   ScanAngle.h
@@ -30,8 +32,6 @@ set ( predictor_files
   SineOfLatitude.cc
   Thickness.h
   Thickness.cc
-  ObsValue.h
-  ObsValue.cc
 )
 
 PREPEND( _p_predictor_files     "predictors"            ${predictor_files} )

@@ -130,15 +130,8 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // Read in ObsBias for all channels in the database and save to db for access in Fortran
 // there is currently no mechanism for passing ioda::ObsDataVectors to Fortran.
 // This is saved to ObsBias rather than ObsBiasData to avoid replication of datasets because
-// the oops::Observer saves to ObsBias.  For testing the ObsBias can be read from another
-// location using the obsBiasGroupForTesting optional parameter.
-  std::string group;
-  if (parameters_.obsBiasGroupForTesting.value().is_initialized()) {
-    group = parameters_.obsBiasGroupForTesting.value().get();
-  } else {
-    group = "ObsBiasData";
-  }
-  Variable obsbiasvar(group + "/brightnessTemperature",
+// the oops::Observer saves to ObsBias.
+  Variable obsbiasvar("ObsBiasData/brightnessTemperature",
                       obsdb_.obsvariables().channels());
   ioda::ObsDataVector<float> obsbias(obsdb_, obsbiasvar.toOopsVariables());
   data_.get(obsbiasvar, obsbias);
