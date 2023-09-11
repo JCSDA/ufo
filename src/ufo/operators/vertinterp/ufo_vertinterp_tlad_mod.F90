@@ -37,6 +37,15 @@ module ufo_vertinterp_tlad_mod
     real(kind_real), allocatable :: wind_scaling_factor(:)
 
     integer, public :: selected_interp
+
+    ! Backup coordinate/method for interpolation
+    logical :: use_backup_coordinate
+    character(len=MAXVARLEN), public :: o_v_coord_backup     ! Obs vertical coordinate (backup)
+    character(len=MAXVARLEN), public :: o_v_group_backup     ! Obs vertical coord group (backup)
+    character(len=MAXVARLEN), public :: v_coord_backup       ! GeoVaL vert coordinate (backup)
+    character(len=MAXVARLEN), public :: interp_method_backup ! Interpolation method (backup)
+    integer, public :: selected_interp_backup
+
   contains
     procedure :: setup => vertinterp_tlad_setup_
     procedure :: cleanup => vertinterp_tlad_cleanup_
@@ -60,6 +69,7 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: coord_group
   character(kind=c_char,len=:), allocatable :: interp_method
   integer :: ivar, nlevs
+  character(len=MAXVARLEN) :: interp_method_backup
 
   !> grab what vertical coordinate/variable to use from the config
   !> check if constant vertical coordinate is provided
@@ -126,6 +136,75 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     self%o_v_group = "MetaData"
   endif
 
+  !> Look to see if the user wants to use a backup coordinate for the interpolation
+  self%use_backup_coordinate = .false.
+  if ( grid_conf%has("observation vertical coordinate backup") ) then
+
+    ! Set flag to true
+    self%use_backup_coordinate = .true.
+
+    !> Use of a backup coordinate is not tested with also using self%use_constant_vcoord
+    if (self%use_constant_vcoord) &
+      call abor1_ftn('Requesting a backup coordinate in the vertical interpolation, but ' // &
+                     'also using a constant vertical coordinate is not supported.')
+
+    !> Get the name of the backup coordinate
+    call grid_conf%get_or_die("observation vertical coordinate backup", coord_name)
+    self%o_v_coord_backup = coord_name
+
+    ! Set others to defaults
+     self%o_v_group_backup     = self%o_v_group
+     self%v_coord_backup       = self%v_coord
+     self%interp_method_backup = self%interp_method
+
+    !> Get group backup
+    if ( grid_conf%has("observation vertical coordinate group backup") ) then
+      call grid_conf%get_or_die("observation vertical coordinate group backup", coord_group)
+      self%o_v_group_backup = coord_group
+    endif
+
+    !> Get model backgup coodinate
+    if ( grid_conf%has("vertical coordinate backup") ) then
+      call grid_conf%get_or_die("vertical coordinate backup", coord_name)
+      self%v_coord_backup = coord_name
+      !call self%geovars%push_back(self%v_coord_backup)
+    endif
+
+    !> Get interpolation method backup
+    call grid_conf%get_or_die("interpolation method backup", interp_method)
+    interp_method_backup = interp_method
+
+    !> Linear interpolation is used by default.
+    self%selected_interp_backup = LINEAR_INTERP
+    if (trim(interp_method_backup) == "linear") then
+      self%selected_interp_backup = LINEAR_INTERP
+    else if (trim(interp_method_backup) == "log-linear") then
+      self%selected_interp_backup = LOG_LINEAR_INTERP
+    else if (trim(interp_method_backup) == "nearest-neighbor") then
+      self%selected_interp_backup = NEAREST_NEIGHBOR_INTERP
+    else
+      !> the method is automatic
+      if (trim(interp_method_backup) == "automatic") then
+         !> Log-linear interpolation is used when v_coord is pressure
+         if ((trim(self%v_coord_backup) .eq. var_prs) .or. &
+             (trim(self%v_coord_backup) .eq. var_prsi) .or. &
+             (trim(self%v_coord_backup) .eq. var_prsimo)) then
+           self%selected_interp_backup = LOG_LINEAR_INTERP
+         endif
+      endif
+    endif
+
+    !> Assert that if nearest neighbor is chosen for the regular interpolation, then it is also
+    !  chosen for the backup interpolation
+    if ((self%selected_interp == NEAREST_NEIGHBOR_INTERP .and. &
+         self%selected_interp_backup .ne. NEAREST_NEIGHBOR_INTERP) .or. &
+        (self%selected_interp .ne. NEAREST_NEIGHBOR_INTERP .and. &
+         self%selected_interp_backup == NEAREST_NEIGHBOR_INTERP)) &
+      call abor1_ftn('If the regular interpolation method is nearest neighbor, then the ' // &
+                     'backup interpolation method must also be nearest neighbor (and vice versa).')
+
+  endif
+
 end subroutine vertinterp_tlad_setup_
 
 ! ------------------------------------------------------------------------------
@@ -138,12 +217,13 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   type(ufo_geovals),         intent(in)    :: geovals
   type(c_ptr), value,        intent(in)    :: obss
 
-  real(kind_real), allocatable :: obsvcoord(:)
-  type(ufo_geoval), pointer :: vcoordprofile, fact10
+  real(kind_real), allocatable :: obsvcoord(:), obsvcoord_backup(:)
+  type(ufo_geoval), pointer :: vcoordprofile, vcoordprofile_backup, fact10
   integer :: ilev, iobs, nlevs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
   real(kind_real) :: missing
+  integer, allocatable :: selected_interp(:)
 
   ! Make sure nothing already allocated
   call self%cleanup()
@@ -188,9 +268,38 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     allocate(tmp(vcoordprofile%nval))
   endif
 
+  ! Turn selected interpolation into an array
+  allocate(selected_interp(self%nlocs))
+  selected_interp = self%selected_interp
+
+  ! If using a backup coordinate for the interpolation, get the backup coordinate
+  if (self%use_backup_coordinate) then
+
+    ! Get the backup observation vertical coordinates
+    allocate(obsvcoord_backup(self%nlocs))
+    call obsspace_get_db(obss, self%o_v_group_backup, self%o_v_coord_backup, obsvcoord_backup)
+
+    ! Get the backup coorindate from the model
+    call ufo_geovals_get_var(geovals, self%v_coord_backup, vcoordprofile_backup)
+
+    ! Loop over observations and use backup if necessary
+    do iobs = 1, self%nlocs
+      if (obsvcoord(iobs) == missing) then
+        ! Use backup coordinate for this observation
+        obsvcoord(iobs) = obsvcoord_backup(iobs)
+
+        ! Use backup interpolation method for this observation
+        selected_interp(iobs) = self%selected_interp_backup
+
+        ! Use backup coordinate profile for this observation
+        vcoordprofile%vals(:, iobs) = vcoordprofile_backup%vals(:, iobs)
+      endif
+    enddo
+  endif
+
   do iobs = 1, self%nlocs
     if (.not. self%use_constant_vcoord) then
-      if (self%selected_interp == LOG_LINEAR_INTERP) then
+      if (selected_interp(iobs) == LOG_LINEAR_INTERP) then
         ! the lines below are computing a "missing value safe" log, that passes missing value inputs
         ! through to the output. the simpler "tmp = log(rhs)" produces NaN for missing value inputs.
         do ilev = 1, vcoordprofile%nval
@@ -205,7 +314,7 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
       endif
     endif
 
-    if (self%selected_interp == LOG_LINEAR_INTERP) then
+    if (selected_interp(iobs) == LOG_LINEAR_INTERP) then
       if (obsvcoord(iobs) /= missing) then
          tmp2 = log(obsvcoord(iobs))
       else
