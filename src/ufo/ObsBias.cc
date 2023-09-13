@@ -33,7 +33,7 @@ namespace ufo {
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
   : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
-    rank_(odb.distribution()->rank()) {
+    rank_(odb.distribution()->rank()), commTime_(odb.commTime()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
@@ -87,7 +87,8 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     numVariablePredictors_(other.numVariablePredictors_),
     nrecs_(other.nrecs_),
     vars_(other.vars_), varIndexNoBC_(other.varIndexNoBC_),
-    geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_) {
+    geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_),
+    commTime_(other.commTime_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
@@ -217,7 +218,7 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
 
 void ObsBias::write(const Parameters_ & params) const {
   // only write files out on the task with MPI rank 0
-  if (rank_ != 0) return;
+  if (rank_ != 0 || commTime_.rank() != 0) return;
 
   if (params.outputFile.value() != boost::none) {
     // FIXME: only implemented for channels currently

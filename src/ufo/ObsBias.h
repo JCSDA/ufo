@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "eckit/mpi/Comm.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -130,6 +132,9 @@ class ObsBias : public util::Printable,
 
   /// MPI rank, used to determine whether the task should output bias coeffs to a file
   size_t rank_;
+
+  /// MPI communicator used in time decomposition for 4DEnVar and weak-constraint 4DVar
+  const eckit::mpi::Comm & commTime_;
 };
 
 // -----------------------------------------------------------------------------

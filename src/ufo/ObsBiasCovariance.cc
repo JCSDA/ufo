@@ -42,7 +42,8 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
                                      const Parameters_ & params)
   : odb_(odb), ht_rinv_h_(0), preconditioner_(0), obs_num_(0),
     minimal_required_obs_number_(0), analysis_variances_(0), variances_(),
-    prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()) {
+    prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()),
+    commTime_(odb.commTime()) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
   // Predictor factory
@@ -194,7 +195,7 @@ void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
 
 void ObsBiasCovariance::write(const Parameters_ & params) {
   // only write files out on the task with MPI rank 0
-  if (rank_ != 0) return;
+  if (rank_ != 0 || commTime_.rank() != 0) return;
 
   oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
   const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
@@ -288,6 +289,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // Sum across the processors
     obs_num_ = obs_num_accumulator->computeResult();
+    // Sum across time subwindows
+    commTime_.allReduceInPlace(obs_num_.begin(), obs_num_.end(), eckit::mpi::sum());
 
     // compute the hessian contribution from Jo bias terms channel by channel
     // retrieve the effective error (after QC) for this channel
@@ -331,6 +334,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // Sum the hessian contributions across the tasks
     ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
+    // Sum across time subwindows
+    commTime_.allReduceInPlace(ht_rinv_h_.begin(), ht_rinv_h_.end(), eckit::mpi::sum());
 
     // Set obs_num_ and ht_rinv_h_ to missing for variables opted out of bias correction
     const std::vector<int> & varIndexNoBC = bias.varIndexNoBC();
