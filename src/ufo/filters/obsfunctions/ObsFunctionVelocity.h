@@ -29,6 +29,14 @@ class VelocityParameters : public oops::Parameters {
  public:
   /// List of channels available for assimilation
   oops::Parameter<std::string> channelList{"channels", "", this};
+  /// Observation group name. Default is ObsValue.
+  oops::Parameter<std::string> group{"type", "ObsValue", this};
+  /// Variable name of the u(windEastward) component. Default is windEastward.
+  oops::Parameter<std::string> EastwardWindVariable{"eastward wind variable",
+                                                    "windEastward", this};
+  /// Variable name of the v(windNorthward) component. Default is windNorthward.
+  oops::Parameter<std::string> NorthwardWindVariable{"northward wind variable",
+                                                     "windNorthward", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -71,6 +79,8 @@ class Velocity : public ObsFunctionBase<FunctionValue> {
   ufo::Variables invars_;
   std::string group_;
   std::vector<int> channels_;
+  std::string eastwardwindvariable_;
+  std::string northwardwindvariable_;
 };
 
 // -----------------------------------------------------------------------------

@@ -26,3 +26,18 @@ observations:
       type: ObsValue
     variables: [windSpeed]
     tolerance: 1.e-7
+
+- obs space:
+    name: Surface
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/wind_unit_transforms_surface.nc4
+    simulated variables: [windSpeedAt10M,windDirectionAt10M]
+  obs function:
+    name: ObsFunction/Velocity
+    options:
+      eastward wind variable: windEastwardAt10M
+      northward wind variable: windNorthwardAt10M
+    variables: [windSpeedAt10M]
+    tolerance: 1.e-7  # compare TestResult/windSpeedAt10M with TestReference/windSpeedAt10M
