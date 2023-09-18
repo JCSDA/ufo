@@ -15,7 +15,7 @@ observations:
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: gmi_gpm
+    name: GMI FROM GPM
     obsdatain:
       engine:
         type: H5File

@@ -37,7 +37,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_radiancecrtm_setup_f90(F90hop &, const eckit::Configuration &,
                                   const int &, const int &,
-                                  oops::Variables &);
+                                  oops::Variables &, const eckit::mpi::Comm &);
   void ufo_radiancecrtm_delete_f90(F90hop &);
   void ufo_radiancecrtm_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const size_t &, const size_t &, double &, const F90goms &);

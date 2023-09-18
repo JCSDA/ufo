@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/operators/crtm/ObsRadianceCRTM.h"
@@ -33,7 +33,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
 
   // call Fortran setup routine
   ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, parameters_.toConfiguration(),
-                             channels_list.size(), channels_list[0], varin_);
+                             channels_list.size(), channels_list[0], varin_, odb.comm());
 
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;

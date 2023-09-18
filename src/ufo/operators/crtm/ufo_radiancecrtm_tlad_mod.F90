@@ -10,6 +10,7 @@ module ufo_radiancecrtm_tlad_mod
  use crtm_module
 
  use fckit_configuration_module, only: fckit_configuration
+ use fckit_mpi_module,   only: fckit_mpi_comm
  use iso_c_binding
  use kinds
  use missing_values_mod
@@ -54,12 +55,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup(self, f_confOper, channels)
+subroutine ufo_radiancecrtm_tlad_setup(self, f_confOper, channels, comm)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
 type(fckit_configuration),    intent(in)    :: f_confOper
 integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
+type(fckit_mpi_comm),         intent(in)    :: comm
 
 integer :: nvars_in
 integer :: ind, jspec
@@ -67,13 +69,13 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
 character(max_string) :: err_msg
 
  call f_confOper%get_or_die("obs options",f_confOpts)
- call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper)
+ call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper, comm)
 
  if ( f_confOper%has("linear obs operator") ) then
     call f_confOper%get_or_die("linear obs operator",f_confLinOper)
-    call crtm_conf_setup(self%conf, f_confOpts, f_confLinOper)
+    call crtm_conf_setup(self%conf, f_confOpts, f_confLinOper, comm)
  else
-    call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
+    call crtm_conf_setup(self%conf, f_confOpts, f_confOper, comm)
  end if
 
  ! request from the model var_ts +
@@ -316,7 +318,7 @@ character(len=1) :: angle_hf
    call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
    if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
       allocate( geo_hf( self%n_Profiles ))
-      call Load_Geom_Data(obss,geo,geo_hf)
+      call Load_Geom_Data(obss,geo,geo_hf,self%conf%SENSOR_ID(n))
    else
       call Load_Geom_Data(obss,geo)
    endif
