@@ -17,6 +17,7 @@ observations:
     interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
+    levels_are_top_down: false
   vector ref: GsiHofX
   tolerance: 1.0e-5
 - obs space:
@@ -35,5 +36,6 @@ observations:
     interpolation method: log-linear
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/conventional/aircraft_geoval_2020121500_m.nc
+    levels_are_top_down: false
   vector ref: GsiHofX
   tolerance: 1.0e-5

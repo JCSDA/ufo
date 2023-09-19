@@ -92,6 +92,14 @@ class ObsVertInterpParameters : public ObsOperatorParametersBase {
      "apply near surface wind scaling",
      this};
 
+  // Sometimes the vertical coordinate may need to be adjusted. Functions for doing this can be
+  // called using the below parameter.
+
+  oops::OptionalParameter<std::string> CoordinateAdjust
+    {"observation vertical coordinate adjustment function",
+     "optional function to call to adjust vertical coordinate",
+     this};
+
   // Is some cases it might be desirable to have a backup coordinate and interpolation method
   // in case of missing values. For example when conventional data has height reports for some
   // observations and only pressure reports for others. In this case, it might be preferable to
@@ -118,6 +126,11 @@ class ObsVertInterpParameters : public ObsOperatorParametersBase {
     {"interpolation method backup",
      "interpolation method (backup) (options: automatic, linear, log-linear, nearest-neighbor)",
      InterpolationMethod::AUTOMATIC,
+     this};
+
+  oops::OptionalParameter<std::string> CoordinateAdjustBackup
+    {"observation vertical coordinate adjustment function backup",
+     "optional function to call to adjust vertical coordinate (backup)",
      this};
 };
 

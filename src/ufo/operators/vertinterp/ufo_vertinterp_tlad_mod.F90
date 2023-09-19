@@ -38,6 +38,8 @@ module ufo_vertinterp_tlad_mod
 
     integer, public :: selected_interp
 
+    character(len=MAXVARLEN), public :: o_v_coord_adjust
+
     ! Backup coordinate/method for interpolation
     logical :: use_backup_coordinate
     character(len=MAXVARLEN), public :: o_v_coord_backup     ! Obs vertical coordinate (backup)
@@ -45,6 +47,7 @@ module ufo_vertinterp_tlad_mod
     character(len=MAXVARLEN), public :: v_coord_backup       ! GeoVaL vert coordinate (backup)
     character(len=MAXVARLEN), public :: interp_method_backup ! Interpolation method (backup)
     integer, public :: selected_interp_backup
+    character(len=MAXVARLEN), public :: o_v_coord_adjust_backup
 
   contains
     procedure :: setup => vertinterp_tlad_setup_
@@ -68,6 +71,7 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: coord_group
   character(kind=c_char,len=:), allocatable :: interp_method
+  character(kind=c_char,len=:), allocatable :: o_v_coord_adjust
   integer :: ivar, nlevs
   character(len=MAXVARLEN) :: interp_method_backup
 
@@ -126,6 +130,14 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
      self%o_v_coord = self%v_coord
   endif
 
+  !> Check if config has the adjustment function
+  self%o_v_coord_adjust = "none"
+  if ( grid_conf%has("observation vertical coordinate adjustment function") ) then
+    call grid_conf%get_or_die("observation vertical coordinate adjustment function", o_v_coord_adjust)
+    self%o_v_coord_adjust = o_v_coord_adjust
+    call check_adjustment_function(self%o_v_coord_adjust, self%o_v_coord)
+  endif
+
   !> Determine observation vertical coordinate group.
   !  Use MetaData unless the option
   !  'observation vertical coordinate' is specified.
@@ -167,7 +179,6 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     if ( grid_conf%has("vertical coordinate backup") ) then
       call grid_conf%get_or_die("vertical coordinate backup", coord_name)
       self%v_coord_backup = coord_name
-      !call self%geovars%push_back(self%v_coord_backup)
     endif
 
     !> Get interpolation method backup
@@ -192,6 +203,15 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
            self%selected_interp_backup = LOG_LINEAR_INTERP
          endif
       endif
+    endif
+
+    !> Check if config has the adjustment function
+    self%o_v_coord_adjust_backup = "none"
+    if ( grid_conf%has("observation vertical coordinate adjustment function backup") ) then
+      call grid_conf%get_or_die("observation vertical coordinate adjustment function backup", &
+                                o_v_coord_adjust)
+      self%o_v_coord_adjust_backup = o_v_coord_adjust
+      call check_adjustment_function(self%o_v_coord_adjust_backup, self%o_v_coord_backup)
     endif
 
     !> Assert that if nearest neighbor is chosen for the regular interpolation, then it is also
@@ -253,6 +273,12 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     call ufo_geovals_get_var(geovals, "wind_reduction_factor_at_10m", fact10)
   end if
 
+  ! Optionally call the functions to adjust the observation vertical coordinate
+  if (trim(self%o_v_coord_adjust) == "subtract scaled station elevation") then
+    call adjust_obs_coordinate_subtract_scaled_station_elevation(self%nlocs, geovals, obss, &
+                                                                 obsvcoord)
+  endif
+
   ! Calculate the interpolation weights
   if (self%use_constant_vcoord) then
     nlevs = size(self%const_v_coord)
@@ -278,6 +304,12 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     ! Get the backup observation vertical coordinates
     allocate(obsvcoord_backup(self%nlocs))
     call obsspace_get_db(obss, self%o_v_group_backup, self%o_v_coord_backup, obsvcoord_backup)
+
+    ! Optionally call the functions to adjust the observation vertical coordinate
+    if (trim(self%o_v_coord_adjust_backup) == "subtract scaled station elevation") then
+      call adjust_obs_coordinate_subtract_scaled_station_elevation(self%nlocs, geovals, obss, &
+                                                                   obsvcoord_backup)
+    endif
 
     ! Get the backup coorindate from the model
     call ufo_geovals_get_var(geovals, self%v_coord_backup, vcoordprofile_backup)
@@ -332,8 +364,9 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
 
     ! Set scaling factor
     if (self%use_fact10) then
-      if (tmp2 /= missing .and. tmp(1) /= missing) then
-        if (tmp2 >= tmp(1)) self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
+      if ((tmp2 >= tmp(vcoordprofile%nval) .and. tmp(2) > tmp(1)) .or. &
+          (tmp2 <= tmp(vcoordprofile%nval) .and. tmp(2) < tmp(1))) then
+        self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
       end if
     end if
 

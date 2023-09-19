@@ -10,9 +10,10 @@ observations:
     apply near surface wind scaling: true
 
     # Use height vertical coordinate first
-    vertical coordinate: geometric_height
+    vertical coordinate: geopotential_height
     observation vertical coordinate: height
     interpolation method: linear
+    observation vertical coordinate adjustment function: "subtract scaled station elevation"
 
     # Use pressure vertical coordinate backup
     vertical coordinate backup: air_pressure
