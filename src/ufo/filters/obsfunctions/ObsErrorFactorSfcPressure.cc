@@ -83,7 +83,7 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
 
   // Get MetaData of station elevation
   std::vector<float> ob_elevation(nlocs);
-  data.get(Variable("MetaData/stationElevation"), ob_elevation);
+  data.get(Variable("MetaData/height"), ob_elevation);
 
   // Get ObsValue of surface pressure
   std::vector<float> ob_pressure_sfc(nlocs);
@@ -163,12 +163,12 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     // If missing surface pressure or station_elevation,
     // set error factor to something very high (for rejection).
     if (ob_elevation[iloc] == missing || ob_pressure_sfc[iloc] == missing) {
-      obserr[iv][iloc] = 99.99f;
+      obserr[iv][iloc] = 1.0f;
     } else {
       rdelz = ob_elevation[iloc]-model_elevation[iloc];
       // Calculate drbx with observed surface temperature (if not missing)
       // OR model temperature at observed surface altitude
-      if (ob_temp_sfc[iloc] != missing) {
+      if ((ob_temp_sfc[iloc] < 350.0f) && (ob_temp_sfc[iloc] > 150.0f)) {
         // drbx is the amount of temperature changes from temp diff & altitude diff
         drbx = 0.5f*std::abs(model_temp_sfc[iloc]-ob_temp_sfc[iloc])
                +0.2f+0.005f*std::abs(rdelz);
