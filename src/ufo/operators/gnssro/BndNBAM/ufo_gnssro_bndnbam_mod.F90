@@ -78,10 +78,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,allocatable                     :: nlocs_begin(:)
   integer,allocatable                     :: nlocs_end(:)
   real(c_double)                          :: missing
-  integer,          allocatable           :: super_refraction_flag(:), super(:), obs_max(:)
-  real(kind_real),  allocatable           :: toss_max(:)
+  integer,          allocatable           :: super_refraction_flag(:), super(:), iftoss(:)
+  real(kind_real),  allocatable           :: toss_max(:),  max_obstoss(:)
   integer                                 :: sr_hgt_idx
-  real(kind_real)                         :: gradRef, obsImpH, obsHgt
+  real(kind_real)                         :: gradRef, obsImpH, obsHgt, maxHgt
   integer,          allocatable           :: LayerIdx(:) 
   integer  :: SRcheckHeight,  ModelsigLevelcheck, SRcloseLayers
 
@@ -255,13 +255,16 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   allocate(super(nlocs))
   allocate(toss_max(nrecs))
-  allocate(obs_max(nrecs))
+  allocate(iftoss(nrecs))
+  allocate(max_obstoss(nrecs))
+
 
   iobs = 0
   hofx =  missing
   super    = 0
-  obs_max  = 0
   toss_max = 0
+  iftoss = 0
+  max_obstoss = 0
 
   rec_loop: do irec = 1, nrecs
 
@@ -323,7 +326,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               if (abs(gradRef) >= 0.75*crit_gradRefr ) then
                  if (obsImpP(iobs) <= refXrad(k+SRcloseLayers)) then
                     super_refraction_flag(iobs) = 1
-                    cycle obs_loop
+                    exit kloop
                  else if ( LayerIdx(iobs) < k+1) then
                     call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(k+1),nlev-k-1,"increasing")
                     super_refraction_flag(iobs) = 1 ! adjusting super_refraction_flag
@@ -338,16 +341,17 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
            
            if (self%roconf%sr_steps > 1                 &
               .and. obsValue(iobs) >= 0.03) then
-               do k = nlevCheck, 1, -1
+               kloop2: do k = nlevCheck, 1, -1
                   gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
                   if (abs(gradRef) >= half*crit_gradRefr & 
                      .and. super(iobs) == 0                   &
                      .and. toss_max(irec) <= obsImpP(iobs) ) then
-                      obs_max(irec) = iobs
-                      toss_max(irec)= max(toss_max(irec),obsImpP(iobs) ) !-obsLocR(iobs) )
-                      super(iobs) = 1
+                      toss_max(irec)= max(toss_max(irec),obsImpP(iobs))
+                      super(iobs)  = 1
+                      iftoss(irec) = 1
+                      exit kloop2
                   end if
-              end do ! k
+              end do kloop2
  
            end if   ! end if(self%roconf%sr_steps > 1 
         end if ! obsHgt <= SRcheckHeight
@@ -388,23 +392,51 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   if (cmp_strings(self%roconf%super_ref_qc, "NBAM") .and. self%roconf%sr_steps > 1 ) then
      rec_loop2: do irec = 1, nrecs
 
-       if (obs_max(irec) > 0 ) then
-          obs_loop2: do k = nlocs_begin(irec), nlocs_end(irec)
-            obsHgt = (obsImpP(k) - obsLocR(k) - obsGeoid(k) - gesZs(k)) * r1em3
-            if (obsHgt<=five.and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
-                hofx(k)/=missing .and. super_refraction_flag(k)==0) then
-                super_refraction_flag(k)=2
-                ! Do not remove those points with GEOS 
-                if (.not. cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+       maxHgt=0.0
+       if (iftoss(irec) > 0 ) then
+          if (self%roconf%sr_steps==2) then
+
+             do k = nlocs_begin(irec), nlocs_end(irec)
+                obsHgt = (obsImpP(k) - obsLocR(k) - obsGeoid(k) - gesZs(k)) * r1em3
+                if (obsHgt<=five .and. obsValue(k)>=0.03 .and. super(k)>0) then
+                   max_obstoss(irec)= max(max_obstoss(irec),obsValue(k) )
+                   if (obsValue(k)==max_obstoss(irec))  maxHgt = obsImpP(k)
+                end if
+             end do
+             do k = nlocs_begin(irec), nlocs_end(irec)
+                obsHgt = (obsImpP(k) - obsLocR(k) - obsGeoid(k) - gesZs(k)) * r1em3
+
+                if (obsHgt<=five .and. max_obstoss(irec)>0 .and. &
+                   (obsValue(k)==max_obstoss(irec) .or. obsImpP(k)<=maxHgt) .and. &
+                    hofx(k)/=missing .and. super_refraction_flag(k)==0) then
+                    super_refraction_flag(k)=2
                     hofx(k)=missing  ! This line can be commented for diagnosistic purpose
                 end if
-            end if
-          end do obs_loop2
+            end do
 
-       end if
+          else if (self%roconf%sr_steps==3) then
+
+            do k = nlocs_begin(irec), nlocs_end(irec)
+               obsHgt = (obsImpP(k) - obsLocR(k) - obsGeoid(k) - gesZs(k)) * r1em3
+               if (obsHgt<=five .and. obsValue(k)>=0.03 .and. super(k)>0) then
+                  maxHgt = max(maxHgt,obsImpP(k))
+               end if
+            end do
+
+            do k = nlocs_begin(irec), nlocs_end(irec)
+               if (obsImpP(k)<=maxHgt .and. &
+                  hofx(k)/=missing .and. super_refraction_flag(k)==0) then
+                  super_refraction_flag(k)=2
+                  hofx(k)=missing
+               end if
+            end do
+
+          end if ! self%roconf%sr_steps
+
+       end if  ! iftoss(irec)
 
      end do rec_loop2
-  end if
+  end if  ! self%roconf%sr_steps > 1
  
   deallocate(obsLat)
   deallocate(obsImpP)
@@ -425,8 +457,9 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(nlocs_begin)
   deallocate(nlocs_end)
   deallocate(super)
+  deallocate(iftoss)
+  deallocate(max_obstoss)
   deallocate(toss_max)
-  deallocate(obs_max)
   deallocate(grids)
 
   write(err_msg,*) myname, ": complete"
