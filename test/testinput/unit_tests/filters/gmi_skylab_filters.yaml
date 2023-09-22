@@ -1,0 +1,52 @@
+window begin: 2022-02-15T21:00:00Z
+window end: 2022-02-16T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3] #, CO2]
+    Clouds: [Water, Ice, Rain, Snow, Graupel]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3] #, CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: &Sensor_ID gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2022021600.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2022021600.nc4
+  obs filters:
+  # Assign variables that were in skylab yaml
+  - filter: Variable Assignment
+    assignments:
+    # sensor Azimuth angle (fake for now)
+    - name: MetaData/sensorAzimuthAngle
+      type: float
+      value: 0.0
+    # solar Azimuth angle (should use function)
+    - name: MetaData/solarAzimuthAngle
+      type: float
+      value: 0.0
+    # solar zenith angle using function
+    - name: MetaData/solarZenithAngle
+      type: float
+      function:
+        name: ObsFunction/SolarZenith
+  #  CLW Retrieval Check from ObsValue
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-13
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 175
