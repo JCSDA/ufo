@@ -74,6 +74,9 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   static constexpr float g_over_rd = 1.0f*Constants::grav/Constants::rd;
   const float lapse_rate = 1.0f*Constants::Lclr;
 
+  // If no observations on this processor then nothing to do
+  if (data.nlocs() == 0) return;
+
   // Ensure that only one output variable is expected.
   ASSERT(obserr.nvars() == 1);
 
