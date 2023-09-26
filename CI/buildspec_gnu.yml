@@ -121,7 +121,8 @@ phases:
       - echo $BUILD_STATUS
 
       # configure and build
-      - su - nonroot -c "cd /home/nonroot
+      - su - nonroot -c "source /opt/spack-environment/activate.sh
+        && cd /home/nonroot
         && echo $CC
         && echo $CXX
         && echo $FC
@@ -129,7 +130,8 @@ phases:
         && ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=GNUContainer -DUFO_TEST_TIER=2 -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE -DENABLE_GPROF=ON /jcsda/ufo-bundle/"
 
 
-      - su - nonroot -c "cd /home/nonroot/ufo
+      - su - nonroot -c "source /opt/spack-environment/activate.sh
+        && cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
@@ -147,12 +149,14 @@ phases:
       - echo $BUILD_STATUS
 
       # run ctest
-      - su - nonroot -c "CC=mpicc CXX=mpicxx FC=mpifort
+      - su - nonroot -c "source /opt/spack-environment/activate.sh
+        && CC=mpicc CXX=mpicxx FC=mpifort
         && cd /home/nonroot/ufo
         && ctest -C RelWithDebInfo -D ExperimentalTest"
 
     finally:
-      - su - nonroot -c "cd /home/nonroot/ufo
+      - su - nonroot -c "source /opt/spack-environment/activate.sh
+        && cd /home/nonroot/ufo
         && export FC=mpifort
         && export CC=mpicc
         && export CXX=mpicxx
