@@ -1,0 +1,36 @@
+window begin: 2022-02-15T21:00:00Z
+window end: 2022-02-16T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3] #, CO2]
+    Clouds: [Water, Ice, Rain, Snow, Graupel]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3] #, CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: &Sensor_ID tropics_sv1_srf_v3
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: tropics
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tms_tropics-01_obs_2022021600.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-12
+  geovals:
+    filename: Data/ufo/testinput_tier_1/tms_tropics-01_geovals_2022021600.nc4
+  obs filters:
+  #  CLW Retrieval Check from ObsValue
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-12
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 60
