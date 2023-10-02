@@ -63,7 +63,7 @@ else()
 endif()
 
 # Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.7.0.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1_1.8.0.tar.gz)
 set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
 
 #############################################
