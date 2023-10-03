@@ -7,13 +7,11 @@ observations:
     name: VertInterp
     observation alias file: ../resources/namemap/test_name_map.yaml
     variables: [windEastward, windNorthward]
-    apply near surface wind scaling: true
 
     # Use height vertical coordinate first
     vertical coordinate: geopotential_height
     observation vertical coordinate: height
     interpolation method: linear
-    observation vertical coordinate adjustment function: "subtract scaled station elevation"
 
     # Use pressure vertical coordinate backup
     vertical coordinate backup: air_pressure

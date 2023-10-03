@@ -87,17 +87,14 @@ class ObsVertInterpParameters : public ObsOperatorParametersBase {
      InterpolationMethod::AUTOMATIC,
      this};
 
-  oops::OptionalParameter<bool> ApplyFact10
-    {"apply near surface wind scaling",
-     "apply near surface wind scaling",
+  oops::OptionalParameter<std::string> HofxScalingField
+    {"hofx scaling field",
+     "hofx scaling field",
      this};
 
-  // Sometimes the vertical coordinate may need to be adjusted. Functions for doing this can be
-  // called using the below parameter.
-
-  oops::OptionalParameter<std::string> CoordinateAdjust
-    {"observation vertical coordinate adjustment function",
-     "optional function to call to adjust vertical coordinate",
+  oops::OptionalParameter<std::string> HofxScalingFieldGroup
+    {"hofx scaling field group",
+     "hofx scaling field group",
      this};
 
   // Is some cases it might be desirable to have a backup coordinate and interpolation method
@@ -126,11 +123,6 @@ class ObsVertInterpParameters : public ObsOperatorParametersBase {
     {"interpolation method backup",
      "interpolation method (backup) (options: automatic, linear, log-linear, nearest-neighbor)",
      InterpolationMethod::AUTOMATIC,
-     this};
-
-  oops::OptionalParameter<std::string> CoordinateAdjustBackup
-    {"observation vertical coordinate adjustment function backup",
-     "optional function to call to adjust vertical coordinate (backup)",
      this};
 };
 

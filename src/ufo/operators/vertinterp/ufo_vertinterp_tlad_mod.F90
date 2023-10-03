@@ -32,13 +32,12 @@ module ufo_vertinterp_tlad_mod
     character(len=MAXVARLEN), public :: o_v_coord ! Observation vertical coordinate
     character(len=MAXVARLEN), public :: o_v_group ! Observation vertical coordinate group
     character(len=MAXVARLEN), public :: interp_method ! Vertical interpolation method
-
-    logical, public :: use_fact10 ! Apply scaling factor to winds below lowest model level
-    real(kind_real), allocatable :: wind_scaling_factor(:)
-
     integer, public :: selected_interp
 
-    character(len=MAXVARLEN), public :: o_v_coord_adjust
+    logical, public :: hofx_scaling ! Apply scaling factor to hofx
+    character(len=MAXVARLEN), public :: hofx_scaling_field
+    character(len=MAXVARLEN), public :: hofx_scaling_field_group
+    real(kind_real), allocatable :: scaling_field(:)
 
     ! Backup coordinate/method for interpolation
     logical :: use_backup_coordinate
@@ -47,7 +46,6 @@ module ufo_vertinterp_tlad_mod
     character(len=MAXVARLEN), public :: v_coord_backup       ! GeoVaL vert coordinate (backup)
     character(len=MAXVARLEN), public :: interp_method_backup ! Interpolation method (backup)
     integer, public :: selected_interp_backup
-    character(len=MAXVARLEN), public :: o_v_coord_adjust_backup
 
   contains
     procedure :: setup => vertinterp_tlad_setup_
@@ -71,7 +69,8 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: coord_group
   character(kind=c_char,len=:), allocatable :: interp_method
-  character(kind=c_char,len=:), allocatable :: o_v_coord_adjust
+  character(kind=c_char,len=:), allocatable :: hofx_scaling_field
+  character(kind=c_char,len=:), allocatable :: hofx_scaling_field_group
   integer :: ivar, nlevs
   character(len=MAXVARLEN) :: interp_method_backup
 
@@ -114,12 +113,6 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     endif
   endif
 
-  !> Apply scaling to winds below lowest model level
-  self%use_fact10 = .false.
-  if ( grid_conf%has("apply near surface wind scaling") ) then
-    call grid_conf%get_or_die("apply near surface wind scaling", self%use_fact10)
-  endif
-
   !> Determine observation vertical coordinate.
   !  Use the model vertical coordinate unless the option
   !  'observation vertical coordinate' is specified.
@@ -130,12 +123,19 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
      self%o_v_coord = self%v_coord
   endif
 
-  !> Check if config has the adjustment function
-  self%o_v_coord_adjust = "none"
-  if ( grid_conf%has("observation vertical coordinate adjustment function") ) then
-    call grid_conf%get_or_die("observation vertical coordinate adjustment function", o_v_coord_adjust)
-    self%o_v_coord_adjust = o_v_coord_adjust
-    call check_adjustment_function(self%o_v_coord_adjust, self%o_v_coord)
+  !> Scale hofx by an incoming field. Can come from GeoVaLs or ObsSpace
+  self%hofx_scaling = .false.
+  if ( grid_conf%has("hofx scaling field") ) then
+    self%hofx_scaling = .true.
+    call grid_conf%get_or_die("hofx scaling field", hofx_scaling_field)
+    self%hofx_scaling_field = hofx_scaling_field
+    self%hofx_scaling_field_group = "GeoVaLs"
+    if ( grid_conf%has("hofx scaling field group") ) then
+      call grid_conf%get_or_die("hofx scaling field group", hofx_scaling_field_group)
+      self%hofx_scaling_field_group = hofx_scaling_field_group
+    endif
+    ! If the group is GeoVaLs then push back the variable name
+    call self%geovars%push_back(trim(self%hofx_scaling_field))
   endif
 
   !> Determine observation vertical coordinate group.
@@ -205,15 +205,6 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
       endif
     endif
 
-    !> Check if config has the adjustment function
-    self%o_v_coord_adjust_backup = "none"
-    if ( grid_conf%has("observation vertical coordinate adjustment function backup") ) then
-      call grid_conf%get_or_die("observation vertical coordinate adjustment function backup", &
-                                o_v_coord_adjust)
-      self%o_v_coord_adjust_backup = o_v_coord_adjust
-      call check_adjustment_function(self%o_v_coord_adjust_backup, self%o_v_coord_backup)
-    endif
-
     !> Assert that if nearest neighbor is chosen for the regular interpolation, then it is also
     !  chosen for the backup interpolation
     if ((self%selected_interp == NEAREST_NEIGHBOR_INTERP .and. &
@@ -238,12 +229,14 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   type(c_ptr), value,        intent(in)    :: obss
 
   real(kind_real), allocatable :: obsvcoord(:), obsvcoord_backup(:)
-  type(ufo_geoval), pointer :: vcoordprofile, vcoordprofile_backup, fact10
+  type(ufo_geoval), pointer :: vcoordprofile, vcoordprofile_backup
   integer :: ilev, iobs, nlevs
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
   real(kind_real) :: missing
   integer, allocatable :: selected_interp(:)
+  ! Scaling by field
+  type(ufo_geoval), pointer :: scaling_field_gval
 
   ! Make sure nothing already allocated
   call self%cleanup()
@@ -265,19 +258,6 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))
   allocate(self%wf(self%nlocs))
-
-  ! If scaling the wind record the observation pressure and get GeoVaLs
-  if (self%use_fact10) then
-    allocate(self%wind_scaling_factor(self%nlocs))
-    self%wind_scaling_factor = 1.0_kind_real
-    call ufo_geovals_get_var(geovals, "wind_reduction_factor_at_10m", fact10)
-  end if
-
-  ! Optionally call the functions to adjust the observation vertical coordinate
-  if (trim(self%o_v_coord_adjust) == "subtract scaled station elevation") then
-    call adjust_obs_coordinate_subtract_scaled_station_elevation(self%nlocs, geovals, obss, &
-                                                                 obsvcoord)
-  endif
 
   ! Calculate the interpolation weights
   if (self%use_constant_vcoord) then
@@ -304,12 +284,6 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     ! Get the backup observation vertical coordinates
     allocate(obsvcoord_backup(self%nlocs))
     call obsspace_get_db(obss, self%o_v_group_backup, self%o_v_coord_backup, obsvcoord_backup)
-
-    ! Optionally call the functions to adjust the observation vertical coordinate
-    if (trim(self%o_v_coord_adjust_backup) == "subtract scaled station elevation") then
-      call adjust_obs_coordinate_subtract_scaled_station_elevation(self%nlocs, geovals, obss, &
-                                                                   obsvcoord_backup)
-    endif
 
     ! Get the backup coorindate from the model
     call ufo_geovals_get_var(geovals, self%v_coord_backup, vcoordprofile_backup)
@@ -362,15 +336,21 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
       call vert_interp_weights(nlevs, tmp2, tmp, self%wi(iobs), self%wf(iobs))
     end if
 
-    ! Set scaling factor
-    if (self%use_fact10) then
-      if ((tmp2 >= tmp(vcoordprofile%nval) .and. tmp(2) > tmp(1)) .or. &
-          (tmp2 <= tmp(vcoordprofile%nval) .and. tmp(2) < tmp(1))) then
-        self%wind_scaling_factor(iobs) = fact10%vals(1,iobs)
-      end if
-    end if
-
   enddo
+
+  ! Scaling to hofx
+  if (self%hofx_scaling) then
+
+    ! Get the scaling factor
+    allocate(self%scaling_field(self%nlocs))
+    if (trim(self%hofx_scaling_field_group) == "GeoVaLs") then
+      call ufo_geovals_get_var(geovals, self%hofx_scaling_field, scaling_field_gval)
+      self%scaling_field(:) = scaling_field_gval%vals(0, :)
+    else
+      call obsspace_get_db(obss, self%hofx_scaling_field_group, self%hofx_scaling_field, &
+                           self%scaling_field)
+    endif
+  endif
 
   ! Cleanup memory
   deallocate(obsvcoord)
@@ -423,23 +403,14 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
       enddo
     end if
 
-    ! Apply a scaling to winds below lowest model level
-    if (self%use_fact10) then
+    ! Scaling to hofx
+    if (self%hofx_scaling) then
+      do iobs = 1, nlocs
+        hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+      enddo
+    endif
 
-      ! Check that this is a typical wind variable
-      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
-          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
-
-        ! Loop over the observations and apply wind scaling
-        do iobs = 1, nlocs
-          if (hofx(ivar,iobs) /= missing) &
-          hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
-        enddo
-
-      end if
-    end if
   enddo
-
 
 end subroutine vertinterp_simobs_tl_
 
@@ -475,18 +446,11 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
     geovar = self%geovars%variable(iobsvar)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
-    ! Adjoint of apply wind scaling
-    if (self%use_fact10) then
-
-      if ((trim(self%obsvars%variable(iobsvar)) == 'windEastward') .or. &
-          (trim(self%obsvars%variable(iobsvar)) == 'windNorthward')) then
-
-        do iobs = 1, nlocs
-          if (hofx(ivar,iobs) /= missing) &
-          hofx(ivar,iobs) = hofx(ivar,iobs) * self%wind_scaling_factor(iobs)
-        enddo
-
-      end if
+    ! Scaling to hofx
+    if (self%hofx_scaling) then
+      do iobs = 1, nlocs
+        hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+      enddo
     endif
 
     ! Adjoint of interpolatation
@@ -519,7 +483,7 @@ subroutine vertinterp_tlad_cleanup_(self)
   self%nlocs = 0
   if (allocated(self%wi)) deallocate(self%wi)
   if (allocated(self%wf)) deallocate(self%wf)
-  if (allocated(self%wind_scaling_factor)) deallocate(self%wind_scaling_factor)
+  if (allocated(self%scaling_field)) deallocate(self%scaling_field)
 end subroutine vertinterp_tlad_cleanup_
 
 ! ------------------------------------------------------------------------------

@@ -1,10 +1,9 @@
-# (C) Copyright 2020-2021 UCAR.
+# (C) Copyright 2020-2023 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 # Instrument tests for rawinsonde and dropsonde observations
-
 
 # H(x) test
 ufo_add_test( NAME    instrument_sonde_gfs_HofX
@@ -30,47 +29,14 @@ ufo_add_test( NAME    instrument_sonde_gfs_qc
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 
-ufo_add_test( NAME    instrument_sonde_geos_qc_uv
+# H(x) with QC (GMAO setup)
+ufo_add_test( NAME    instrument_sonde_geos_qc
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sonde_uv_geos_qc.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sonde_geos_qc.yaml"
               MPI     1
               LIBS    ufo
               LABELS  sonde GEOS UV QC instrument
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
-
-ufo_add_test( NAME    instrument_pibal_geos_qc
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pibal_geos_qc.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  sonde GEOS UV QC instrument
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
-
-ufo_add_test( NAME    instrument_sonde_geos_qc_q
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sonde_q_geos_qc.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  sonde GEOS Q QC instrument
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
-
-# ObsOperator TLAD test for vertical interpolation
-ufo_add_test( NAME    instrument_sonde_geos_uv_TLAD
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sondes_uv_geos_hofx.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  sonde GEOS HofX TLAD instrument
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )

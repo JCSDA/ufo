@@ -4,7 +4,7 @@ window end: 2020-12-15T03:30:00Z
 observations:
 - obs space:
     name: sfcship_QC
-    obsdatain: 
+    obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_obs_2020121500_m.nc
@@ -42,7 +42,7 @@ observations:
     minvalue: 37499
     maxvalue: 106999
     action:
-      name: reject 
+      name: reject
   #
   - filter: Bounds Check
     filter variables:

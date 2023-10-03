@@ -33,11 +33,16 @@ class ObsProductParameters : public ObsOperatorParametersBase {
      "List of variables to be simulated",
      this};
 
-  /// h(x) = x(lowest level) * geovals
-  oops::RequiredParameter<std::string> geovalsToScaleHofxBy{"geovals to scale hofx by", this};
+  /// h(x) = x(lowest level) * variableToScaleHofxBy
+  oops::RequiredParameter<std::string> variableNameToScaleHofxBy{"geovals to scale hofx by", this};
 
-  /// Optional parameter to raise the geoval to a power, h(x) = x(lowest level) * (geovals)^a
-  oops::OptionalParameter<float> geovalsExponent{"geovals exponent", this};
+  // Optionally specify the group for the scaling variable (default is GeoVaLs)
+  oops::Parameter<std::string> variableGroupToScaleHofxBy{"group of geovals to scale hofx by",
+                                                    "GeoVaLs", this};
+
+  /// Optional parameter to raise the scaling variable to a power, h(x) = x(lowest level) *
+  /// (variable)^a
+  oops::OptionalParameter<float> scalingVariableExponent{"geovals exponent", this};
 
   /// Optional parameter to specify name of geoval H(x) is to act on, if different from
   /// the simulated variable
