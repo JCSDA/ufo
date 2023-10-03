@@ -180,17 +180,19 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     std::vector<float> scanangle(nlocs);
     odb.get_db("MetaData", "sensorViewAngle", scanangle);
 
+    ASSERT(biascoeffs.nrecs() == 1);
+
     const Predictors & predictors = biascoeffs.predictors();
     const std::size_t npreds = predictors.size();
     double beta1, beta2;
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
-      beta1 = biascoeffs(0, channels_[0]-1);
-      beta2 = biascoeffs(0, channels_[1]-1);
+      beta1 = biascoeffs(0, channels_[0]-1, 0);
+      beta2 = biascoeffs(0, channels_[1]-1, 0);
       bt238fBC[jloc] = bt238f[jloc] + beta1;
       bt314fBC[jloc] = bt314f[jloc] + beta2;
       for (std::size_t jord = 0; jord < 4; ++jord) {
-        beta1 = biascoeffs(npreds-jord-1, channels_[0]-1);
-        beta2 = biascoeffs(npreds-jord-1, channels_[1]-1);
+        beta1 = biascoeffs(0, channels_[0]-1, npreds-jord-1);
+        beta2 = biascoeffs(0, channels_[1]-1, npreds-jord-1);
         bt238fBC[jloc] += beta1 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
         bt314fBC[jloc] += beta2 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
       }
@@ -244,8 +246,8 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     std::vector<float> tsavg5(nlocs, 0.0);
     geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
 
-    std::vector<float> scanangle(nlocs, 0.0);
-    odb.get_db("MetaData", "sensorScanPosition", scanangle);
+    std::vector<int> scanpos(nlocs, 0);
+    odb.get_db("MetaData", "sensorScanPosition", scanpos);
 
     // common vectors storage, ptau5
     std::vector <float> pred(nlocs, 0.0);
@@ -287,7 +289,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     clw_bias_correction_gmi(biascoeffs,
                           bt_hofx_37vo, bt_hofx_37ho, bt_clr_37vo, bt_clr_37ho, bt37v, bt37h,
-                           water_frac, tsavg5, scanangle, ptau5, tvp, tlap, channels_, nlevs,
+                           water_frac, tsavg5, scanpos, ptau5, tvp, tlap, channels_, nlevs,
                            clw, clw_gmi_ch1_4);
   }
   if (sensor == "AMSUA" || sensor == "ATMS") {
@@ -363,7 +365,7 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
              const std::vector<float> & bt37h,
              const std::vector<float> & water_frac,
              const std::vector<float> & tsavg5,
-             const std::vector<float> & scanangle,
+             const std::vector<int> & scanpos,
              const std::vector<std::vector<std::vector<float>>> & ptau5,
              const std::vector<std::vector<float>> & tvp,
              const std::vector<float> & tlap,
@@ -398,16 +400,16 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
 
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
       // constant term
-      beta1 = biascoeffs(id_pred[0], channels_[jch37v]-1);
-      beta2 = biascoeffs(id_pred[0], channels_[jch37h]-1);
+      beta1 = biascoeffs(0, channels_[jch37v]-1, id_pred[0]);
+      beta2 = biascoeffs(0, channels_[jch37h]-1, id_pred[0]);
       bias_37v[jloc] = beta1;
       bias_37h[jloc] = beta2;
       // scan_position term
       for (std::size_t jord = 0; jord < 4; ++jord) {
-        beta1 = biascoeffs(id_pred[id_preds-jord-1], channels_[jch37v]-1);
-        beta2 = biascoeffs(id_pred[id_preds-jord-1], channels_[jch37h]-1);
-        bias_37v[jloc] += beta1 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
-        bias_37h[jloc] += beta2 * pow(scanangle[jloc] * Constants::deg2rad, jord+1);
+        beta1 = biascoeffs(0, channels_[jch37v]-1, id_pred[id_preds-jord-1]);
+        beta2 = biascoeffs(0, channels_[jch37h]-1, id_pred[id_preds-jord-1]);
+        bias_37v[jloc] += beta1 * pow(scanpos[jloc] * Constants::deg2rad, jord+1);
+        bias_37h[jloc] += beta2 * pow(scanpos[jloc] * Constants::deg2rad, jord+1);
       }
     }
 
@@ -422,8 +424,9 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
         tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
                   (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
       }
-      bias_37v[jloc] += (biascoeffs(id_pred[1], channels_[jvar]-1)*pow((tlapchn - tlap[jvar]), 2));
-      bias_37v[jloc] += (biascoeffs(id_pred[2], channels_[jvar]-1)*(tlapchn - tlap[jvar]));
+      bias_37v[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[1]) *
+                        pow((tlapchn - tlap[jvar]), 2));
+      bias_37v[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[2])*(tlapchn - tlap[jvar]));
 //    For channel_37h
       jvar = jch37h;
       tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
@@ -432,8 +435,9 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
         tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
                   (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
       }
-      bias_37h[jloc] += (biascoeffs(id_pred[1], channels_[jvar]-1)*pow((tlapchn - tlap[jvar]), 2));
-      bias_37h[jloc] += (biascoeffs(id_pred[2], channels_[jvar]-1)*(tlapchn - tlap[jvar]));
+      bias_37h[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[1]) *
+                        pow((tlapchn - tlap[jvar]), 2));
+      bias_37h[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[2])*(tlapchn - tlap[jvar]));
     }
 //  End of tlap BC for GMI data
 

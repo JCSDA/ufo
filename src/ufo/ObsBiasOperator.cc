@@ -86,7 +86,9 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
 
       for (std::size_t jp = 0; jp < npreds; ++jp) {
         // axpy
-        const double beta = biascoeffs(jp, jvar);
+        // TODO(Algo): relax the assumption below that there is no indexing over
+        // the records.
+        const double beta = biascoeffs(0, jvar, jp);
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
           if (predData[jp][jl * nvars + jvar] != missing) {
             biasTerm[jl] = predData[jp][jl * nvars + jvar] * beta;

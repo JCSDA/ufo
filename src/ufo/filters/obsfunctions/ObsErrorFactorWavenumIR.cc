@@ -75,20 +75,20 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   std::vector<float> wavenumber(nchans);
   in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
 
-  // Inflate obs error for wavenumber in the range of (2000, 2400] during daytime over water surface
-  // as a function of wavenumber number, surface-to-space transmittance, solar zenith angle, and
-  // surface type
+  // Inflate obs error for wavenumber in the range of (200000, 240000]
+  // during daytime over water surface as a function of wavenumber (1/m),
+  // surface-to-space transmittance, solar zenith angle, and surface type
   std::vector<float> tao_sfc(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
     for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0;
-    if (wavenumber[ich] > 2000.0 && wavenumber[ich] <= 2400.0) {
+    if (wavenumber[ich] > 200000.0 && wavenumber[ich] <= 240000.0) {
       in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich],
              nlevs - 1, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         if (water_frac[iloc] > 0.f && solza[iloc] <= 89.f) {
           float factor = std::fmax(0.f, cos(Constants::deg2rad * solza[iloc]));
           factor = tao_sfc[iloc] * factor *(1.f / 400.f);
-          out[ich][iloc] = sqrt(1.f / (1.f - (wavenumber[ich] - 2000.f) * factor));
+          out[ich][iloc] = sqrt(1.f / (1.f - (wavenumber[ich] - 200000.f)/100.f * factor));
         }
       }
     }

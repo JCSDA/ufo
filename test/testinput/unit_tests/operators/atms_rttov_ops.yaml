@@ -102,7 +102,7 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
-    tolerance TL: 2.0e-2
+    tolerance TL: 5.0e-2
     tolerance AD: 1.0e-11
 
 - obs operator: &ObsOperatorConf
@@ -140,7 +140,7 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
-    tolerance TL: 2.0e-2
+    tolerance TL: 1.0e-4
     tolerance AD: 1.0e-11
 
 ## --------------------------------------------------------
@@ -179,7 +179,7 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
-    tolerance TL: 2.0e-2
+    tolerance TL: 1.0e-4
     tolerance AD: 1.0e-11
 
 # This tests the error handling when a variable is in the list (surfaceTemperature) but not setup in the

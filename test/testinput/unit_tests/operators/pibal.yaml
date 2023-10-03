@@ -1,0 +1,42 @@
+window begin: 2021-12-11T21:00:00Z
+window end: 2021-12-12T03:00:00Z
+
+observations:
+
+- obs operator:
+    name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    variables: [windEastward, windNorthward]
+
+    # Use height vertical coordinate first
+    vertical coordinate: geopotential_height
+    observation vertical coordinate: height
+    interpolation method: linear
+
+    # Use pressure vertical coordinate backup
+    vertical coordinate backup: air_pressure
+    observation vertical coordinate backup: pressure
+    interpolation method backup: log-linear
+
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-15
+    tolerance AD: 1.0e-14
+
+  obs space:
+    name: pibal
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/pibal_obs_2021121200_m.nc4
+      obsgrouping:
+        group variables: ["stationIdentification", "releaseTime"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [windEastward, windNorthward]
+
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/pibal_geoval_2021121200_m.nc4
+
+  vector ref: GsiHofX
+  tolerance: 1.0e-2

@@ -6,7 +6,7 @@
 module ufo_interp_param_mod
 
   implicit none
- 
+
   public
 
   integer, parameter :: UNSPECIFIED_INTERP = -1

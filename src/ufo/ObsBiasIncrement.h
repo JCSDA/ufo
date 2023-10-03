@@ -53,23 +53,10 @@ class ObsBiasIncrement : public util::Printable {
   const Eigen::VectorXd & data() const {return biascoeffsinc_;}
   Eigen::VectorXd & data() {return biascoeffsinc_;}
 
-  // We could store coefficients in a different order. Then it would
-  // be easier to extract part of the existing vector.
-  /// Return bias coefficient increments for predictor with index \p jpred
-  std::vector<double> coefficients(size_t jpred) const {
-    std::vector<double> coeffs(vars_.size());
-    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
-      coeffs[jvar] = biascoeffsinc_(jvar*prednames_.size() + jpred);
-    }
-    return coeffs;
-  }
-  /// Increment bias coeffiecient increments for predictor with index \p jpred
-  /// with \p coeffs
-  void updateCoeff(size_t jpred, const std::vector<double> &coeffs) {
-    for (size_t jj = 0; jj < vars_.size(); ++jj) {
-      biascoeffsinc_[jj*prednames_.size() + jpred] += coeffs[jj];
-    }
-  }
+  /// Return bias coefficient increments for one predictor
+  std::vector<double> coefficients(size_t) const;
+  /// Increment bias coeffiecient increments for one predictor
+  void updateCoeff(size_t, const std::vector<double> &);
 
   // Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
@@ -86,7 +73,11 @@ class ObsBiasIncrement : public util::Printable {
   Eigen::VectorXd biascoeffsinc_;
   std::vector<std::string> prednames_;
 
-  /// Variables that need to be bias-corrected
+  /// Number of records that are bias-corrected independently from each other
+  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  std::size_t nrecs_;
+
+  /// List of simulated variables
   oops::Variables vars_;
 };
 

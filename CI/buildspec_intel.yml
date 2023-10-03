@@ -51,8 +51,7 @@ phases:
       - echo Executing pre_build phase
       - mkdir -p /jcsda/ufo-bundle
 
-      - source /etc/profile.d/z10_spack_environment.sh
-      - cat /etc/profile.d/z10_spack_environment.sh
+      - source /opt/spack-environment/activate.sh
       - source /opt/intel/oneapi/compiler/latest/env/vars.sh
       - source /opt/intel/oneapi/mpi/latest/env/vars.sh
 

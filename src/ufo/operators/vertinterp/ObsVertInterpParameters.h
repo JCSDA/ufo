@@ -87,9 +87,42 @@ class ObsVertInterpParameters : public ObsOperatorParametersBase {
      InterpolationMethod::AUTOMATIC,
      this};
 
-  oops::OptionalParameter<bool> ApplyFact10
-    {"apply near surface wind scaling",
-     "apply near surface wind scaling",
+  oops::OptionalParameter<std::string> HofxScalingField
+    {"hofx scaling field",
+     "hofx scaling field",
+     this};
+
+  oops::OptionalParameter<std::string> HofxScalingFieldGroup
+    {"hofx scaling field group",
+     "hofx scaling field group",
+     this};
+
+  // Is some cases it might be desirable to have a backup coordinate and interpolation method
+  // in case of missing values. For example when conventional data has height reports for some
+  // observations and only pressure reports for others. In this case, it might be preferable to
+  // use height and avoid the use of standard atmospheric pressure but fallback on pressure to avoid
+  // discarding the observation entirely. The code will only look for ObsVertGroupBackup,
+  // VertCoordBackup and interpMethodBackup if ObsVertCoord is set in the config.
+
+  oops::OptionalParameter<std::string> ObsVertCoordBackup
+    {"observation vertical coordinate backup",
+     "vertical coordinate for the observations (backup)",
+     this};
+
+  oops::OptionalParameter<std::string> ObsVertGroupBackup
+    {"observation vertical coordinate group backup",
+     "observation vertical coordinate group (backup)",
+     this};
+
+  oops::OptionalParameter<std::string> VertCoordBackup
+    {"vertical coordinate backup",
+     "vertical coordinate used by the model (backup)",
+     this};
+
+  oops::Parameter<InterpolationMethod> interpMethodBackup
+    {"interpolation method backup",
+     "interpolation method (backup) (options: automatic, linear, log-linear, nearest-neighbor)",
+     InterpolationMethod::AUTOMATIC,
      this};
 };
 

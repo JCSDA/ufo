@@ -68,8 +68,20 @@ class ObsProduct : public ObsOperatorBase,
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
 
+  /// Geoval name to act on
+  std::string geovalName_ = "";
+
   /// Exponent of geovals
-  float geovalsExponent_ = 0;
+  float scalingVariableExponent_ = 0;
+
+  /// Group for variable to scale hofx by
+  std::string variableGroupToScaleHofxBy_;
+
+  /// Variable to scale hofx by
+  std::string variableNameToScaleHofxBy_;
+
+  /// Ref to the ObsSpace
+  const ioda::ObsSpace& odb_;
 };
 
 // -----------------------------------------------------------------------------

@@ -26,16 +26,19 @@ static ObsFunctionMaker<Velocity<float>> floatMaker("Velocity");
 
 template <typename FunctionValue>
 Velocity<FunctionValue>::Velocity(const eckit::LocalConfiguration & conf)
-  : invars_(), group_() {
+  : invars_() {
   // Check options
   options_.deserialize(conf);
-  group_ = conf.getString("type", "ObsValue");
 
-  // Get channels from options
+  // Get parameters from options
   std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
-  invars_ += Variable(group_ + "/windEastward", channels_);
-  invars_ += Variable(group_ + "/windNorthward", channels_);
+  group_ = options_.group.value();
+  eastwardwindvariable_ = options_.EastwardWindVariable.value();
+  northwardwindvariable_ = options_.NorthwardWindVariable.value();
+  // Include list of required data from ObsSpace
+  invars_ += Variable(group_ + "/" + eastwardwindvariable_, channels_);
+  invars_ += Variable(group_ + "/" + northwardwindvariable_, channels_);
 }
 
 // -----------------------------------------------------------------------------

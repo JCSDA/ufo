@@ -108,7 +108,8 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
   // Note that the dimension label "nchans" is being (mis)used here as a second observed
   // dimension for wind observations. This will be changed in the future.
   const size_t nlocs = obsdb_.nlocs();
-  const size_t nchans = obsdb_.nchans();
+  // Parse channels from the config
+  const size_t nchans = obsdb_.assimvariables().channels().size();
 
   if (nchans == 0) {
     std::vector<float> windSpeed, windFromDirection;

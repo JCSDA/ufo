@@ -29,6 +29,8 @@ class SymmCldImpactIRParameters : public oops::Parameters {
   /// channels for which SCI will be calculated
   oops::RequiredParameter<std::string> chlist{"channels", this};
   oops::Parameter<bool> scale_by_omb{"scale by omb", false, this};
+  oops::Parameter<float> sigmoid_c1{"sigmoid constant 1", 10.0f, this};
+  oops::Parameter<float> sigmoid_c2{"sigmoid constant 2", 10.0f, this};
 };
 
 // -----------------------------------------------------------------------------

@@ -36,8 +36,8 @@ void ROobserrInflation::apply(const Variables & vars,
                               ioda::ObsDataVector<float> & obserr) const {
   const float missing = util::missingValue(missing);
   size_t nlocs = data.nlocs();
-  const std::vector<size_t> & recordNumbers = data.obsspace().recidx_all_recnums();
   ioda::ObsDataVector<int> layeridx(data.obsspace(), "modelLayerIndex", "ObsDiag");
+  const std::vector<size_t> & recordNumbers = data.obsspace().recnum();
 
   std::vector<int> rec_idx(nlocs);
   std::vector<int> layer_idx(nlocs);

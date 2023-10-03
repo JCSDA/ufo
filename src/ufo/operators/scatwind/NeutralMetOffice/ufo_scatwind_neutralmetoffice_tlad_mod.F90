@@ -39,6 +39,8 @@ private
     type(oops_variables), public     :: geovars
     type(oops_variables), public     :: obsvars
     integer, allocatable, public     :: channels(:)
+    logical                          :: surface_type_check
+    integer                          :: surface_type_sea
     character(len=maxvarlen), public :: v_coord      ! GeoVaL to use to interpolate in vertical
     integer                          :: nval, nlocs
     real(kind_real), allocatable     :: CDR10(:)     ! 10m neutral winds interpolation coefficient
@@ -60,13 +62,20 @@ character(len=maxvarlen), dimension(2), parameter :: geovars_default = (/ &
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_scatwind_neutralmetoffice_tlad_setup(self, channels)
+subroutine ufo_scatwind_neutralmetoffice_tlad_setup(self,               &
+                                                    channels,           &
+                                                    surface_type_check, &
+                                                    surface_type_sea)
   implicit none
   class(ufo_scatwind_neutralmetoffice_tlad), intent(inout) :: self
   integer(c_int), intent(in)                               :: channels(:)  !List of channels to use
+  logical(c_bool), intent(in)                              :: surface_type_check
+  integer(c_int), intent(in)                               :: surface_type_sea
 
   call self%geovars%push_back(geovars_default)
   self%v_coord = var_zimo
+  self % surface_type_check = surface_type_check
+  self % surface_type_sea = surface_type_sea
 
   ! save channels
   allocate(self%channels(size(channels)))
@@ -111,20 +120,17 @@ subroutine ufo_scatwind_neutralmetoffice_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer    :: cx_za               ! Model heights of wind levels
   type(ufo_geoval), pointer    :: cx_friction_vel     ! Model friction velocity
   type(ufo_geoval), pointer    :: cx_obukhov_length   ! Model obukhov length
-  type(ufo_geoval), pointer    :: cx_orog             ! Model orography
-  type(ufo_geoval), pointer    :: cx_seaice           ! Model sea ice
   real(kind_real), parameter   :: scatt_height = 10.0 ! height of observation in m
   real(kind_real), allocatable :: za(:)
   real(kind_real)              :: missing
   integer                      :: iobs
+  integer, allocatable         :: surface_type(:)     ! Surface type qualifier
 
   ! Make sure nothing already allocated
   call self%cleanup()
 
   ! Get variables from geovals
   call ufo_geovals_get_var(geovals, self%v_coord, cx_za)                ! heights
-  call ufo_geovals_get_var(geovals, var_sfc_ifrac, cx_seaice)           ! Sea ice
-  call ufo_geovals_get_var(geovals, var_sfc_geomz, cx_orog)             ! Orography
   call ufo_geovals_get_var(geovals, var_sea_fric_vel, cx_friction_vel)  ! Friction velocity
   call ufo_geovals_get_var(geovals, var_obk_length, cx_obukhov_length)  ! Obukhov length
   self%nval = cx_za%nval
@@ -143,6 +149,12 @@ subroutine ufo_scatwind_neutralmetoffice_tlad_settraj(self, geovals, obss)
   allocate(self%CDR10(self%nlocs))
   self%CDR10(:) = missing_value(self%CDR10(1))
 
+  ! Allocate array for surface type qualifier
+  allocate(surface_type(self%nlocs))
+  if (self % surface_type_check) then
+    call obsspace_get_db(obss, "MetaData", "surfaceQualifier", surface_type)
+  end if
+
   allocate(za(cx_za%nval))
   do iobs = 1, self%nlocs
     ! Calculate the vertical interpolation index wi and weight wf
@@ -153,13 +165,15 @@ subroutine ufo_scatwind_neutralmetoffice_tlad_settraj(self, geovals, obss)
                             cx_za % vals(:, iobs),            &
                             cx_friction_vel % vals(1,iobs),   &
                             cx_obukhov_length % vals(1,iobs), &
-                            cx_seaice % vals(1,iobs),         &
-                            cx_orog % vals(1,iobs),           &
+                            surface_type(iobs),               &
+                            self % surface_type_check,        &
+                            self % surface_type_sea,          &
                             self%CDR10(iobs))
   enddo
 
   ! Cleanup memory
   deallocate(za)
+  deallocate(surface_type)
 
 end subroutine ufo_scatwind_neutralmetoffice_tlad_settraj
 
@@ -410,12 +424,13 @@ end subroutine ufo_scatwind_neutralmetoffice_simobs_ad
 !! \date 27/09/2022: Created
 !!
 ! ------------------------------------------------------------------------------
-subroutine ops_scatwind_cdr10(nlevz,  &
-                              za,     &
-                              ustr,   &
-                              oblen,  &
-                              seaice, &
-                              orog,   &
+subroutine ops_scatwind_cdr10(nlevz,                   &
+                              za,                      &
+                              ustr,                    &
+                              oblen,                   &
+                              scat_surface_type,       &
+                              scat_surface_type_check, &
+                              scat_surface_type_sea,   &
                               cdr10)
 
 use ufo_constants_mod, only: &
@@ -425,8 +440,9 @@ integer, intent(in)            :: nlevz        !< no. of height levels in state 
 real(kind_real), intent(in)    :: za(:)        !< heights of rho levs
 real(kind_real), intent(in)    :: ustr         !< Model friction velocity
 real(kind_real), intent(in)    :: oblen        !< Model obukhov length
-real(kind_real), intent(in)    :: seaice       !< Model sea ice fraction
-real(kind_real), intent(in)    :: orog         !< Model orography
+integer, intent(in)            :: scat_surface_type       !< Surface type
+logical, intent(in)            :: scat_surface_type_check !< Option: check for surface type being sea?
+integer, intent(in)            :: scat_surface_type_sea   !< Surface type value for sea
 real(kind_real), intent(inout) :: cdr10        !< 10m interpolation coefficients
 !
 ! Local parameters
@@ -447,6 +463,7 @@ real                         :: phi_m_10     ! Monin-Obukhov stability function
                                              ! integrated to 10m
 real                         :: phi_mn_10    ! Neutral form of stability
                                              ! function integrated to 10m
+logical                      :: over_sea
 
 if (za(nlevz) == missing_value(za(nlevz))) then  ! height missing
   write(message, *) myname_, "Missing value z1_uv"
@@ -463,16 +480,6 @@ if (ustr == missing_value(ustr)) then  ! friction vel missing
   call abor1_ftn(message)
 end if
 
-if (orog == missing_value(orog)) then  ! orogoraphy missing
-  write(message, *) myname_, "Missing value orography"
-  call fckit_log % warning(message)
-end if
-
-if (seaice == missing_value(seaice)) then  ! sea ice missing
-  write(message, *) myname_, "Missing value sea ice"
-  call fckit_log % warning(message)
-end if
-
 ! Height (m) of lowest wind (rho) level
 z1_uv = za(nlevz)
 
@@ -480,7 +487,15 @@ z1_uv = za(nlevz)
 oblen_1 = sign( max(1.0E-6, abs(oblen)),oblen)
 recip_l_mo = 1.0 / oblen_1
 
-if (orog == 0.0 .and. seaice == 0.0 .and. z1_uv > 0.0) then ! over sea only
+! Optionally check the surface type
+over_sea = .true.
+if (scat_surface_type_check) then
+  if (scat_surface_type /= scat_surface_type_sea) then
+    over_sea = .false.
+  end if
+end if
+
+if (over_sea .and. z1_uv > 0.0) then ! over sea only
 
   ! Calculate roughness height for momentum
   z0m = 1.54E-6 / (1.0E-5 + ustr) + (charnock / grav) * ustr * ustr

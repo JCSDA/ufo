@@ -1,15 +1,16 @@
 /*
- * (C) Copyright 2023 NOAA NWS NCEP EMC
+ * (C) Copyright 2023 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_PREDICTORS_OBSVALUE_H_
-#define UFO_PREDICTORS_OBSVALUE_H_
+#ifndef UFO_PREDICTORS_READBIAS_H_
+#define UFO_PREDICTORS_READBIAS_H_
 
 #include <string>
 
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/predictors/PredictorBase.h"
@@ -26,22 +27,22 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-/// Configuration parameters of the ObsValue predictor.
-class ObsValueParameters: public PredictorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsValueParameters, PredictorParametersBase);
+/// Configuration parameters of the ReadBias predictor.
+class ReadBiasParameters: public PredictorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ReadBiasParameters, PredictorParametersBase);
 
  public:
-  /// Name of the variable (from the ObsValue group) containing the observation value.
-  oops::RequiredParameter<std::string> varName{"variable name", this};
+  /// Name of the group containing the values to be read.
+  oops::Parameter<std::string> groupName{"group name", "ObsBias", this};
 };
 
-class ObsValue : public PredictorBase {
+class ReadBias : public PredictorBase {
  public:
   /// The type of parameters accepted by the constructor of this predictor.
   /// This typedef is used by the PredictorFactory.
-  typedef ObsValueParameters Parameters_;
+  typedef ReadBiasParameters Parameters_;
 
-  ObsValue(const Parameters_ &, const oops::Variables &);
+  ReadBias(const Parameters_ &, const oops::Variables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -49,11 +50,11 @@ class ObsValue : public PredictorBase {
                const ObsBias &,
                ioda::ObsVector &) const override;
  private:
-  std::string var_name_;
+  std::string group_name_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_PREDICTORS_OBSVALUE_H_
+#endif  // UFO_PREDICTORS_READBIAS_H_

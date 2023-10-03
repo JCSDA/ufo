@@ -8,6 +8,7 @@
 MODULE ufo_crtm_utils_mod
 
 use fckit_configuration_module, only: fckit_configuration
+use fckit_mpi_module,   only: fckit_mpi_comm
 use iso_c_binding
 use kinds
 
@@ -49,7 +50,7 @@ REAL(kind_real), PARAMETER :: &
      &tice = 273.16_kind_real,&
      &grav = 9.81_kind_real,&
      &aerosol_concentration_minvalue=1.e-16_kind_real,&
-     &aerosol_concentration_minvalue_layer=tiny(rdgas),& 
+     &aerosol_concentration_minvalue_layer=tiny(rdgas),&
      &ozone_default_value=1.e-3_kind_real ! in ppmv in crtm
 
 integer, parameter, public :: max_string=800
@@ -98,7 +99,7 @@ END INTERFACE qsmith
 
 
  ! Add more UFO_Absorbers as needed
- ! Note: must have same ordering as CRTM_Absorbers, 
+ ! Note: must have same ordering as CRTM_Absorbers,
  !       CRTM_Absorber_Id, and CRTM_Absorber_Units
  character(len=MAXVARLEN), parameter :: &
       UFO_Absorbers(3) = &
@@ -124,9 +125,9 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !CO2
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
- !** BTJ Note:  N_VALID_CLOUD_CATEGORIES==6 under normal circumstances, but not with v2.4.1  
- !** Here we override N_VALID_CLOUD_CATEGORIES with the value "6" (the value used in v2.4.0, 
- !** and in v3.0.x).   
+ !** BTJ Note:  N_VALID_CLOUD_CATEGORIES==6 under normal circumstances, but not with v2.4.1
+ !** Here we override N_VALID_CLOUD_CATEGORIES with the value "6" (the value used in v2.4.0,
+ !** and in v3.0.x).
  INTEGER, PARAMETER :: N_VALID_CLOUD_CATEGORIES_TMP = 6 !** BTJ remove this line in v3.0
 
  character(len=MAXVARLEN), parameter :: &
@@ -155,7 +156,7 @@ END INTERFACE qsmith
       UFO_Surfaces(4) = &
          [ var_sfc_wtmp, var_sfc_wspeed, var_sfc_wdir, var_sfc_sss]
 
- character(len=MAXVARLEN), parameter :: & 
+ character(len=MAXVARLEN), parameter :: &
       CRTM_Surfaces(4) = &
          [  character(len=MAXVARLEN):: 'Water_Temperature', 'Wind_Speed', 'Wind_Direction', 'Salinity' ]
 
@@ -166,12 +167,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine crtm_conf_setup(conf, f_confOpts, f_confOper)
+subroutine crtm_conf_setup(conf, f_confOpts, f_confOper, comm)
 
 implicit none
-type(crtm_conf),            intent(inout) :: conf
-type(fckit_configuration),  intent(in)    :: f_confOpts
-type(fckit_configuration),  intent(in)    :: f_confOper
+type(crtm_conf),                intent(inout) :: conf
+type(fckit_configuration),      intent(in)    :: f_confOpts
+type(fckit_configuration),      intent(in)    :: f_confOper
+type(fckit_mpi_comm), optional, intent(in)    :: comm
 
 character(*), PARAMETER :: routine_name = 'crtm_conf_setup'
 character(len=255) :: IRwaterCoeff, VISwaterCoeff, &
@@ -183,6 +185,7 @@ character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
 
 CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
+logical :: message_flag = .true.
 
 
  !Some config needs to come from user
@@ -193,6 +196,12 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  conf%n_Sensors = 1
 
  ! absorbers, clouds and aerosols (should match what model will provide)
+
+ ! Set print rank
+ ! --------------
+ if (present(comm)) then
+   if (comm%rank() .ne. 0) message_flag = .false.
+ endif
 
  ! Absorbers
  !----------
@@ -238,7 +247,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  allocate( conf%Clouds  ( conf%n_Clouds,2), &
            conf%Cloud_Id( conf%n_Clouds ) )
  if (conf%n_Clouds > 0) then
-   call f_confOper%get_or_die("Clouds",str_array) 
+   call f_confOper%get_or_die("Clouds",str_array)
    conf%Clouds(1:conf%n_Clouds,1) = str_array
 
    if (f_confOper%has("Cloud_Fraction")) then
@@ -255,7 +264,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
      message = trim(ROUTINE_NAME) // &
              ': Cloud_Fraction is not provided in conf.' // &
              ' Will request as a geoval.'
-     CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+     if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
    end if
  end if
 
@@ -617,10 +626,10 @@ character(max_string) :: err_msg
 
   ! When n_Clouds>0, Cloud_Fraction must either be provided as geoval or in conf
   ! If Cloud_Fraction is provided in conf,then use the Cloud_Fraction in conf
-  ! If Cloud_Fraction is not provided in conf , then use the Cloud_Fraction in geoval 
+  ! If Cloud_Fraction is not provided in conf , then use the Cloud_Fraction in geoval
   ! and make sure the cloud fraction interpolated from background is in the valid range [0.0,1.0]
   if (conf%n_Clouds > 0) then
-    if ( conf%Cloud_Fraction >= 0.0  ) then 
+    if ( conf%Cloud_Fraction >= 0.0  ) then
       do k1 = 1, n_Profiles
         atm(k1)%Cloud_Fraction(:) = conf%Cloud_Fraction
       end do
@@ -630,7 +639,7 @@ character(max_string) :: err_msg
         do k1 = 1, n_Profiles
           where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
           where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
-          atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)  
+          atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)
         end do
       end if
     end if
@@ -842,7 +851,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
   do k1 = 1, n_Profiles
     sfc(k1)%Soil_Temperature = geoval%vals(1, k1)
   end do
-  
+
   !Sea_Surface_Salinity
   if (cmp_strings(conf%salinity_option, "on")) THEN
     call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
@@ -865,19 +874,20 @@ end subroutine Load_Sfc_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Geom_Data(obss,geo,geo_hf)
+subroutine Load_Geom_Data(obss,geo,geo_hf,sensor_id)
 
 implicit none
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
 type(CRTM_Geometry_type), intent(inout), optional :: geo_hf(:)
+character(len=255),       intent(in),    optional :: sensor_id
 real(kind_real), allocatable :: TmpVar(:)
+integer, allocatable :: TmpVar2(:)
 integer :: nlocs
-character(kind=c_char,len=101) :: obsname
 
- call obsspace_obsname(obss, obsname)
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
+ allocate(TmpVar2(nlocs))
 
  call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
@@ -903,8 +913,8 @@ character(kind=c_char,len=101) :: obsname
  where (abs(geo(:)%Source_Zenith_Angle) > 180.0_kind_real) &
     geo(:)%Source_Zenith_Angle = 100.0_kind_real
 
- call obsspace_get_db(obss, "MetaData", "sensorScanPosition", TmpVar)
- geo(:)%Ifov = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "sensorScanPosition", TmpVar2)
+ geo(:)%Ifov = TmpVar2(:)
 
  call obsspace_get_db(obss, "MetaData", "sensorViewAngle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
@@ -912,42 +922,45 @@ character(kind=c_char,len=101) :: obsname
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
     geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
-!read geophysical values for gmi high frequency channels 10-13.
- if (cmp_strings(trim(obsname),'GMI-GPM') .or. cmp_strings(trim(obsname),'gmi_gpm')) then
+ ! Read geophysical values for gmi high frequency channels 10-13.
+ if (present(sensor_id)) then
+   if (cmp_strings(trim(sensor_id),'gmi_gpm')) then
     if ( present(geo_hf) ) then
-       geo_hf = geo
-       if (obsspace_has(obss, "MetaData", "sensorZenithAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensorZenithAngle1", TmpVar)
-          geo_hf(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
-       endif
-       if (obsspace_has(obss, "MetaData", "solarZenithAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "solarZenithAngle1", TmpVar)
-          geo_hf(:)%Source_Zenith_Angle = TmpVar(:)
-       endif
-       if (obsspace_has(obss, "MetaData", "sensorAzimuthAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle1", TmpVar)
-          geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
-       endif
-       if (obsspace_has(obss, "MetaData", "solarAzimuthAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle1", TmpVar)
-          geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
-       endif
-       if (obsspace_has(obss, "MetaData", "sensorViewAngle1")) then
-          call obsspace_get_db(obss, "MetaData", "sensorViewAngle1", TmpVar)
-          geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
-       endif
-!      For some microwave instruments the solar and sensor azimuth angles can be
-!      missing  (given a value of 10^11).  Set these to zero to get past CRTM QC.
-       where (geo_hf(:)%Source_Azimuth_Angle < 0.0_kind_real .or. &
-              geo_hf(:)%Source_Azimuth_Angle > 360.0_kind_real) &
-          geo_hf(:)%Source_Azimuth_Angle = 0.0_kind_real
-       where (geo_hf(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
-              geo_hf(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
-          geo_hf(:)%Sensor_Azimuth_Angle = 0.0_kind_real
+      geo_hf = geo
+      if (obsspace_has(obss, "MetaData", "sensorZenithAngle1")) then
+        call obsspace_get_db(obss, "MetaData", "sensorZenithAngle1", TmpVar)
+        geo_hf(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
+      endif
+      if (obsspace_has(obss, "MetaData", "solarZenithAngle1")) then
+        call obsspace_get_db(obss, "MetaData", "solarZenithAngle1", TmpVar)
+        geo_hf(:)%Source_Zenith_Angle = TmpVar(:)
+      endif
+      if (obsspace_has(obss, "MetaData", "sensorAzimuthAngle1")) then
+        call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle1", TmpVar)
+        geo_hf(:)%Sensor_Azimuth_Angle = TmpVar(:)
+      endif
+      if (obsspace_has(obss, "MetaData", "solarAzimuthAngle1")) then
+        call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle1", TmpVar)
+        geo_hf(:)%Source_Azimuth_Angle = TmpVar(:)
+      endif
+      if (obsspace_has(obss, "MetaData", "sensorViewAngle1")) then
+        call obsspace_get_db(obss, "MetaData", "sensorViewAngle1", TmpVar)
+        geo_hf(:)%Sensor_Scan_Angle = TmpVar(:)
+      endif
+      ! For some microwave instruments the solar and sensor azimuth angles can be
+      ! missing  (given a value of 10^11).  Set these to zero to get past CRTM QC.
+      where (geo_hf(:)%Source_Azimuth_Angle < 0.0_kind_real .or. &
+            geo_hf(:)%Source_Azimuth_Angle > 360.0_kind_real) &
+        geo_hf(:)%Source_Azimuth_Angle = 0.0_kind_real
+      where (geo_hf(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
+            geo_hf(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
+        geo_hf(:)%Sensor_Azimuth_Angle = 0.0_kind_real
     endif
+  endif
  endif
- 
+
  deallocate(TmpVar)
+ deallocate(TmpVar2)
 
 end subroutine Load_Geom_Data
 
@@ -1035,7 +1048,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     CALL assign_aerosols(aerosol_option)
 
-  CONTAINS 
+  CONTAINS
 
     SUBROUTINE assign_aerosols(aerosol_option)
 
@@ -1056,40 +1069,40 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     END SUBROUTINE assign_aerosols
 
     SUBROUTINE assign_gocart_default
-      
-!this is the original version of GOCART parameterization that exists 
+
+!this is the original version of GOCART parameterization that exists
 !in CRTM (bc1,bc2,oc1,oc2,sulf,dust1-5,seas1-4)
-      
+
       INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
       REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
            &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
-      
+
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
-      
+
       REAL(kind_real), DIMENSION(n_layers) :: layer_factors
-      
+
       INTEGER :: i,k,m
-      
+
       CHARACTER(len=MAXVARLEN) :: varname
 
       varname=var_rh
       CALL ufo_geovals_get_var(geovals, varname, geoval)
       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
       WHERE (rh > 1_kind_real) rh=1_kind_real
-      
+
       DO m=1,n_profiles
-         
+
          CALL calculate_aero_layer_factor(atm(m),layer_factors)
-         
+
          DO i=1,n_aerosols_gocart_default
-            
+
             varname=var_aerosols_gocart_default(i)
             CALL ufo_geovals_get_var(geovals,varname, geoval)
-            
+
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
                  &MAX(geoval%vals(:,m)*layer_factors,aerosol_concentration_minvalue_layer)
-                 
+
             SELECT CASE (TRIM(varname))
             CASE (var_sulfate)
                atm(m)%aerosol(i)%TYPE  = SULFATE_AEROSOL
@@ -1098,7 +1111,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%TYPE, &
                        &rh(k,m))
                ENDDO
-               
+
             CASE (var_bcphobic)
                atm(m)%aerosol(i)%TYPE  = BLACK_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
@@ -1110,7 +1123,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &gocart_aerosol_size(atm(m)%aerosol(i)&
                        &%TYPE, rh(k,m))
                ENDDO
-               
+
             CASE (var_ocphobic)
                atm(m)%aerosol(i)%TYPE  = ORGANIC_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)= AeroC&
@@ -1122,7 +1135,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        & gocart_aerosol_size(atm(m)%aerosol(i)&
                        &%TYPE, rh(k,m))
                ENDDO
-               
+
             CASE (var_du001)
                atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)&
@@ -1143,7 +1156,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)&
                     &=dust_radii(5)
-               
+
             CASE (var_ss001)
                atm(m)%aerosol(i)%TYPE  = seas_types(1)
                DO k=1,n_layers
@@ -1173,29 +1186,29 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &%TYPE, rh(k,m))
                ENDDO
             END SELECT
-            
+
          ENDDO
-              
+
       ENDDO
-      
-           
+
+
     END SUBROUTINE assign_gocart_default
-         
+
     SUBROUTINE assign_gocart_1
- 
+
 !this is a version of GOCART parameterization
 !(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
 !in NOAA's GEFS-Aerosols model
-      
+
       message = 'this aerosol not implemented in the CRTM - check&
            & later'
       CALL Display_Message( aerosol_option, message, FAILURE )
       STOP
-      
+
     END SUBROUTINE assign_gocart_1
-    
+
     SUBROUTINE assign_gocart_2
-!this is a version of GOCART parameterization 
+!this is a version of GOCART parameterization
 !(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
 !in NOAA's UFS-Aerosols model
 
@@ -1215,12 +1228,12 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       STOP
 
     END SUBROUTINE assign_other
-    
+
 
   END SUBROUTINE load_aerosol_data
 
   SUBROUTINE assign_aerosol_names(aerosol_option,var_aerosols)
-    
+
     CHARACTER(*), INTENT(in) :: aerosol_option
     CHARACTER(len=MAXVARLEN), ALLOCATABLE, INTENT(out) :: var_aerosols(:)
 
@@ -1253,7 +1266,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER :: k
 
      DO k=1,SIZE(layer_factors)
-!correct for mixing ratio factor layer_factors 
+!correct for mixing ratio factor layer_factors
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
         layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
@@ -1272,7 +1285,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
      DO k=1,SIZE(layer_factors,1)
         DO m=1,SIZE(layer_factors,2)
-!correct for mixing ratio factor layer_factors 
+!correct for mixing ratio factor layer_factors
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
            layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
@@ -1280,7 +1293,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                 &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
         ENDDO
      ENDDO
-     
+
    END SUBROUTINE calculate_aero_layer_factor_atm
 
    FUNCTION gocart_aerosol_size( itype, rh ) & ! rh input in 0-1
@@ -1431,27 +1444,27 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
    END SUBROUTINE qsmith_profiles
 
    SUBROUTINE qsmith_init(table,des)
-     
+
      REAL, ALLOCATABLE, INTENT(out) :: table(:),des(:)
-     INTEGER, PARAMETER:: length=2621 
+     INTEGER, PARAMETER:: length=2621
      INTEGER i
-     
+
      IF( .NOT. ALLOCATED(table) ) THEN
 !                            Generate es table (dT = 0.1 deg. C)
-        
+
         ALLOCATE ( table(length) )
         ALLOCATE (  des (length) )
-        
+
         CALL qs_table(length, table)
-        
+
         DO i=1,length-1
            des(i) = table(i+1) - table(i)
         ENDDO
         des(length) = des(length-1)
      ENDIF
-     
+
    END SUBROUTINE qsmith_init
-   
+
    SUBROUTINE qs_table(n,table)
      INTEGER, INTENT(in):: n
      REAL table (n)
@@ -1474,8 +1487,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
         e   =  alog10(esbasw)
         table(i)  = 0.1*10**(aa+b+c+d+e)
      ENDDO
-     
+
    END SUBROUTINE qs_table
-   
-END MODULE ufo_crtm_utils_mod   
+
+END MODULE ufo_crtm_utils_mod
 

@@ -62,7 +62,7 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
-    tolerance TL: 5.0e-2
+    tolerance TL: 1.0e-4
     tolerance AD: 1.0e-11
 
 # Test iasi with variables produced from 1D-Var
@@ -107,5 +107,5 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4
-    tolerance TL: 5.0e-2
+    tolerance TL: 1.0e-2
     tolerance AD: 1.0e-11

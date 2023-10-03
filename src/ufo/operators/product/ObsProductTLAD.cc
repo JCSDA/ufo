@@ -29,23 +29,31 @@ static LinearObsOperatorMaker<ObsProductTLAD> makerProductTL_("Product");
 
 ObsProductTLAD::ObsProductTLAD(const ioda::ObsSpace & odb,
                                  const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value()))
+  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())), odb_(odb)
 {
   oops::Log::trace() << "ObsProductTLAD constructor starting" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
-  requiredVars_ += nameMap_.convertName(operatorVars_);
+
+  if (parameters.geovalVariable.value() != boost::none) {
+      geovalName_ = parameters.geovalVariable.value().value();
+      requiredVars_.push_back(parameters.geovalVariable.value().value());
+      operatorVarIndices_.resize(1);
+     } else {
+      requiredVars_ += nameMap_.convertName(operatorVars_);
+  }
 
   // Save scaling variable name
-  scalingGeoVar_ = parameters.geovalsToScaleHofxBy.value();
+  variableGroupToScaleHofxBy_ = parameters.variableGroupToScaleHofxBy.value();
+  variableNameToScaleHofxBy_ = parameters.variableNameToScaleHofxBy.value();
 
-  // Initialize the vector that will hold the scaling GeoVaLs with the correct length.
-  scalingGeoVaLs_.resize(odb.nlocs());
+  // Initialize the vector that will hold the scaling variable with the correct length.
+  scalingVariable_.resize(odb.nlocs());
 
-  // Set geovals Exponent
-  if (parameters.geovalsExponent.value() != boost::none) {
-      geovalsExponent_ = parameters.geovalsExponent.value().value();
+  // Set scaling variable Exponent
+  if (parameters.scalingVariableExponent.value() != boost::none) {
+      scalingVariableExponent_ = parameters.scalingVariableExponent.value().value();
   }
 
   oops::Log::trace() << "ObsProductTLAD constructor finished" << std::endl;
@@ -60,36 +68,44 @@ ObsProductTLAD::~ObsProductTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &) {
-  // Save the scaling geovals
-  gv.get(scalingGeoVaLs_, scalingGeoVar_);
+  oops::Log::trace() << "ObsProductTLAD::setTrajectory starting" << std::endl;
+
+  // Get variable that will scale h(x)
+  if (variableGroupToScaleHofxBy_ == "GeoVaLs") {
+    gv.get(scalingVariable_, variableNameToScaleHofxBy_);
+  } else {
+    // Get from the observation space
+    odb_.get_db(variableGroupToScaleHofxBy_, variableNameToScaleHofxBy_, scalingVariable_);
+  }
 
   // Set missing values to 1.0
-  auto missing = util::missingValue(scalingGeoVaLs_[0]);
-  for (double& element : scalingGeoVaLs_) {
+  auto missing = util::missingValue(scalingVariable_[0]);
+  for (double& element : scalingVariable_) {
     element = (element == missing) ? 1.0 : element;
   }
 
-  // If exponent is set, do (geovals)^a
-  if (geovalsExponent_ != 0) {
-      const bool exponentIsFraction = static_cast<int>(geovalsExponent_) != geovalsExponent_;
-      for (double& element : scalingGeoVaLs_) {
+  // If exponent is set, do (scalingVariable)^a
+  if (scalingVariableExponent_ != 0) {
+      const bool exponentIsFraction =
+                             static_cast<int>(scalingVariableExponent_) != scalingVariableExponent_;
+      for (double& element : scalingVariable_) {
           if (element < 0 && exponentIsFraction) {
               oops::Log::warning() << "Trying to raise a negative number to non-integer exponent,"
                                       " '" << element << "' in scaling geovals set to missing"
                                    << std::endl;
               element = missing;
-          } else if (geovalsExponent_ < 0 &&
+          } else if (scalingVariableExponent_ < 0 &&
                      oops::is_close_absolute(element, 0.0, 1e-10, 0, oops::TestVerbosity::SILENT)) {
               oops::Log::warning() << "Trying to divide by zero, '"
                                    << element << "' in scaling geovals set to missing"
                                    << std::endl;
               element = missing;
           } else {
-              element = std::pow(element, geovalsExponent_);
+              element = std::pow(element, scalingVariableExponent_);
           }
       }
   }
-  oops::Log::trace() << "ObsProductTLAD: trajectory set" << std::endl;
+  oops::Log::trace() << "ObsProductTLAD::setTrajectory done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -98,15 +114,17 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) con
   oops::Log::trace() << "ObsProductTLAD: TL observation operator starting" << std::endl;
 
   std::vector<double> vec(dy.nlocs());
-  const auto missing = util::missingValue(scalingGeoVaLs_[0]);
+  const auto missing = util::missingValue(scalingVariable_[0]);
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+      const std::string varname = (geovalName_ == "")?
+                        nameMap_.convertName(dy.varnames().variables()[jvar])
+                        : geovalName_;
     // Fill dy with dx at the level closest to the Earth's surface.
     dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
-      if (scalingGeoVaLs_[jloc] != missing) {
-          dy[idx] = vec[jloc] * scalingGeoVaLs_[jloc];
+      if (scalingVariable_[jloc] != missing) {
+          dy[idx] = vec[jloc] * scalingVariable_[jloc];
       }
     }
   }
@@ -123,14 +141,16 @@ void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) con
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+      const std::string varname = (geovalName_ == "")?
+                        nameMap_.convertName(dy.varnames().variables()[jvar])
+                        : geovalName_;
     // Get current value of dx at the level closest to the Earth's surface.
     dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
     // Increment dx with non-missing values of dy.
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
-      if (dy[idx] != missing && scalingGeoVaLs_[jloc] != missing)
-        vec[jloc] += dy[idx] * scalingGeoVaLs_[jloc];
+      if (dy[idx] != missing && scalingVariable_[jloc] != missing)
+        vec[jloc] += dy[idx] * scalingVariable_[jloc];
     }
     // Store new value of dx.
     dx.putAtLevel(vec, varname, dx.nlevs(varname) - 1);

@@ -8,6 +8,7 @@ set (  neutralmetoffice_src_files
        ObsScatwindNeutralMetOffice.cc
        ObsScatwindNeutralMetOfficeTLAD.h
        ObsScatwindNeutralMetOfficeTLAD.cc
+       ObsScatwindNeutralMetOfficeParameters.h
        ObsScatwindNeutralMetOffice.interface.h
        ObsScatwindNeutralMetOffice.interface.F90
        ObsScatwindNeutralMetOfficeTLAD.interface.h

@@ -203,7 +203,21 @@ case ("bendingAngle")
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSaid)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call bending_angle_obserr_NBAM(obsLat, obsImpA, obsSaid, nobs, obsErr, QCflags, missing)
+    call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
+    call fckit_log%debug(err_msg)
+    deallocate(obsSaid)
+    deallocate(obsLat)
+    ! update obs error
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
+
+  case ("NBAM_GEOStmp")
+    allocate(obsSaid(nobs))
+    allocate(obsLat(nobs))
+    call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSaid)
+    call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
+    ! Same as above the case of "NBAM", but "obsImpH" is use here.
+    call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
     call fckit_log%debug(err_msg)
     deallocate(obsSaid)
@@ -278,7 +292,7 @@ case ("bendingAngle")
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case default
-    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, NRL or MetOffice"
+    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, NBAM_GEOStmp, ECMWF, NRL or MetOffice"
     call abor1_ftn(err_msg)
   end select
   deallocate(obsImpP)

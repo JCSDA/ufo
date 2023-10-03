@@ -307,18 +307,23 @@ case ("GSI")
       deallocate(obs_t)
    end if
    allocate(avg_tv(nobs))
-   avg_tv = (model_tvs + obs_tv) / 2.0_kind_real
+   avg_tv = model_tvs
    do iobs = 1, nobs
-      if (obs_psfc(iobs) /= missing .and. obs_height(iobs) /= missing .and. obs_tv(iobs) == missing) then
-         ! If observed temperature is missing,
-         ! extrapolate model temperature to obs_height
-         call vert_interp_weights(model_p%nval, log(obs_psfc(iobs)), log(model_p%vals(:,iobs)), wi, wf)
-         call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), obs_tv(iobs), wi, wf)
+
+      if ( (obs_tv(iobs) /= missing) .and. (obs_tv(iobs) > 150.0_kind_real .and.  obs_tv(iobs) < 350.0_kind_real)) then
          avg_tv(iobs) = (model_tvs(iobs) + obs_tv(iobs)) / 2.0_kind_real
-         if (obs_height(iobs) < model_level1(iobs)) then
-            ! extrapolate to surface if ob is below lowest model layer
-            avg_tv(iobs) = avg_tv(iobs) - ((Lclr/2.0_kind_real) * (obs_height(iobs) - model_zs(iobs)))
-         end if
+      else
+          if (obs_psfc(iobs) /= missing .and. obs_height(iobs) /= missing) then
+            ! If observed temperature is missing,
+            ! extrapolate model temperature to obs_height
+            call vert_interp_weights(model_p%nval, log(obs_psfc(iobs)), log(model_p%vals(:,iobs)), wi, wf)
+            call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), obs_tv(iobs), wi, wf)
+            avg_tv(iobs) = (model_tvs(iobs) + obs_tv(iobs)) / 2.0_kind_real
+            if (obs_height(iobs) < model_zs(iobs)) then
+               ! extrapolate to surface if ob is below lowest model layer
+               avg_tv(iobs) = avg_tv(iobs) - ((Lclr/2.0_kind_real) * (obs_height(iobs) - model_zs(iobs)))
+            end if
+          end if
       end if
    end do
 
@@ -341,11 +346,7 @@ do iobsvar = 1, size(self%obsvarindices)
    ivar = self%obsvarindices(iobsvar)
    ! cor_psfc is the corrected model surface pressure in the GSI scheme
    if (trim(self%da_psfc_scheme) == "GSI") then
-      where (obs_psfc /= missing)
-         hofx(ivar,:) = cor_psfc
-      else where
-         hofx(ivar,:) = model_psfc
-      end where
+      hofx(ivar,:) = cor_psfc
    ! cor_psfc is the corrected obs surface pressure in the UKMO/WRFDA scheme
    else
       do iobs = 1, nlocs

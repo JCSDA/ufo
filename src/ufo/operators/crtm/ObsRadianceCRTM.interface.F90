@@ -8,6 +8,7 @@
 module ufo_radiancecrtm_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
+  use fckit_mpi_module,   only: fckit_mpi_comm
   use iso_c_binding
   use ufo_radiancecrtm_mod
   use ufo_geovals_mod
@@ -35,7 +36,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
+subroutine ufo_radiancecrtm_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist, c_comm) &
                                     bind(c,name='ufo_radiancecrtm_setup_f90')
 use oops_variables_mod
 implicit none
@@ -44,15 +45,19 @@ type(c_ptr), value, intent(in) :: c_conf
 integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 type(c_ptr), intent(in), value :: c_varlist
+type(c_ptr), value, intent(in) :: c_comm
 
 type(oops_variables) :: oops_vars
 type(ufo_radiancecrtm), pointer :: self
 type(fckit_configuration) :: f_conf
+type(fckit_mpi_comm) :: f_comm
 
 call ufo_radiancecrtm_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf, c_channels)
+f_comm = fckit_mpi_comm(c_comm)
+
+call self%setup(f_conf, c_channels, f_comm)
 
 !> Update C++ ObsOperator with input variable list
 oops_vars = oops_variables(c_varlist)

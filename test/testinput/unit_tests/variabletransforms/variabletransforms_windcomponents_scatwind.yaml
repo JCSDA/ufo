@@ -20,7 +20,7 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: WindComponents
-  passedBenchmark: 83518           #  Passes for channels 1-4: 16462, 16366, 5580, 3351, for 2 variables
+  passedBenchmark: 938             #  Passes for channels 1-4: 188, 182, 56, 43, for 2 variables
   compareVariables:                #  test output matches precalculated values
     - reference:
         name: TestReference/windEastward_derivedobsvalue
@@ -31,4 +31,65 @@ observations:
         name: TestReference/windNorthward_derivedobsvalue
       test:
         name: DerivedObsValue/windNorthward
+      absTol: 2.0e-5
+- obs space:
+    name: ScatwindChosen
+    #  Test selecting a single, chosen wind speed and direction (i.e.no channels) 
+    #  and calculate the components. Use the "At10M" naming convention to differentiate. 
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_2020100106.nc4
+    simulated variables: [windEastwardAt10M, windNorthwardAt10M]
+    observed variables: []
+    derived variables: [windEastwardAt10M, windNorthwardAt10M]
+  obs filters:
+  #----------------------------------------------------------------------------
+  # Select chosen 10m wind solution from input 2d wind speed/direction
+  # - for test purposes just copy channel 1
+  #----------------------------------------------------------------------------
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/windDirectionAt10M
+      type: float
+      source variable:
+        name: ObsValue/windDirection
+        channels: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/windSpeedAt10M
+      type: float
+      source variable:
+        name: ObsValue/windSpeed
+        channels: 1
+  # Wind components at 10m
+  - filter: Variable Transforms
+    Transform: WindComponents
+    wind speed variable: windSpeedAt10M
+    wind direction variable: windDirectionAt10M
+  # Extract the test reference values from channel 1 for comparison
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/windEastwardAt10M
+      type: float
+      source variable:
+        name: TestReference/windEastward_derivedobsvalue
+        channels: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/windNorthwardAt10M
+      type: float
+      source variable:
+        name: TestReference/windNorthward_derivedobsvalue
+        channels: 1
+  compareVariables:                #  test output matches precalculated values
+    - reference:
+        name: TestReference/windEastwardAt10M
+      test:
+        name: DerivedObsValue/windEastwardAt10M
+      absTol: 2.0e-5
+    - reference:
+        name: TestReference/windNorthwardAt10M
+      test:
+        name: DerivedObsValue/windNorthwardAt10M
       absTol: 2.0e-5

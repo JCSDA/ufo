@@ -43,6 +43,8 @@ type, public :: ufo_scatwind_neutralmetoffice
     type(oops_variables), public :: geovars
     type(oops_variables), public :: obsvars
     integer, allocatable, public :: channels(:)
+    logical                      :: surface_type_check
+    integer                      :: surface_type_sea
   contains
     procedure :: setup     => ufo_scatwind_neutralmetoffice_setup
     procedure :: delete    => ufo_scatwind_neutralmetoffice_delete
@@ -61,12 +63,19 @@ character(len=maxvarlen), dimension(7), parameter :: geovars_default = (/ &
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_scatwind_neutralmetoffice_setup(self, channels)
+subroutine ufo_scatwind_neutralmetoffice_setup(self,               &
+                                               channels,           &
+                                               surface_type_check, &
+                                               surface_type_sea)
   implicit none
   class(ufo_scatwind_neutralmetoffice), intent(inout) :: self
   integer(c_int), intent(in)                          :: channels(:)  !List of channels to use
+  logical(c_bool), intent(in)                         :: surface_type_check
+  integer(c_int), intent(in)                          :: surface_type_sea
 
   call self%geovars%push_back(geovars_default)
+  self % surface_type_check = surface_type_check
+  self % surface_type_sea = surface_type_sea
 
   ! save channels
   allocate(self%channels(size(channels)))
@@ -116,11 +125,10 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   type(ufo_geoval), pointer          :: cx_za             ! Model heights of wind levels
   type(ufo_geoval), pointer          :: cx_friction_vel   ! Model friction velocity
   type(ufo_geoval), pointer          :: cx_obukhov_length ! Model obukhov length
-  type(ufo_geoval), pointer          :: cx_orog           ! Model orography
-  type(ufo_geoval), pointer          :: cx_seaice         ! Model sea ice
   real(kind_real), allocatable       :: CDR10(:)          ! 10m interpolation coefficients
   real(c_double)                     :: hofx_u(nlocs)     ! The model equivalent of windEastward
   real(c_double)                     :: hofx_v(nlocs)     ! The model equivalent of windNorthward
+  integer, allocatable               :: surface_type(:)   ! Surface type qualifier
   integer                            :: nchans
   integer                            :: ichan
 
@@ -150,15 +158,17 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
     endif
   end if
 
-  write(message, *) myname_, ' Running Met Office neutral wind operator'
+  write(message, *) myname_, ' Running Met Office neutral wind operator with'
+  call fckit_log%info(message)
+
+  write(message, *) 'surface_type_check =', self % surface_type_check, &
+    'surface_type_sea =', self % surface_type_sea
   call fckit_log%info(message)
 
   ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_u, cx_u)                        ! Eastward wind
   call ufo_geovals_get_var(geovals, var_v, cx_v)                        ! Northward wind
   call ufo_geovals_get_var(geovals, var_zimo, cx_za)                    ! Geopotential height of wind levels
-  call ufo_geovals_get_var(geovals, var_sfc_ifrac, cx_seaice)           ! Sea ice
-  call ufo_geovals_get_var(geovals, var_sfc_geomz, cx_orog)             ! Orography
   call ufo_geovals_get_var(geovals, var_sea_fric_vel, cx_friction_vel)  ! Friction velocity
   call ufo_geovals_get_var(geovals, var_obk_length, cx_obukhov_length)  ! Obukhov length
 
@@ -171,6 +181,12 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   allocate(CDR10(nlocs))
   CDR10(:) = missing_value(CDR10(1))
 
+  ! Allocate array for surface type qualifier
+  allocate(surface_type(nlocs))
+  if (self % surface_type_check) then
+    call obsspace_get_db(obss, "MetaData", "surfaceQualifier", surface_type)
+  end if
+
   write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs: begin observation loop, nobs =  ", nlocs
   call fckit_log%info(err_msg)
 
@@ -181,12 +197,14 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
                                    cx_v % vals(:, iobs),             &
                                    cx_friction_vel % vals(1,iobs),   &
                                    cx_obukhov_length % vals(1,iobs), &
-                                   cx_seaice % vals(1,iobs),         &
-                                   cx_orog % vals(1,iobs),           &
+                                   surface_type(iobs),               &
+                                   self % surface_type_check,        &
+                                   self % surface_type_sea,          &
                                    hofx(:,iobs),                     &
                                    CDR10(iobs))
   end do obs_loop
 
+  deallocate(surface_type)
   deallocate(CDR10)
 
   ! if we have channels then need to spread these values across the channels correctly
@@ -248,15 +266,16 @@ end subroutine ufo_scatwind_neutralmetoffice_simobs
 !! \date 22/12/2020: Created
 !!
 ! ------------------------------------------------------------------------------
-subroutine ops_scatwind_forwardmodel(nlevz,  &
-                                     za,     &
-                                     u,      &
-                                     v,      &
-                                     ustr,   &
-                                     oblen,  &
-                                     seaice, &
-                                     orog,   &
-                                     ycalc,  &
+subroutine ops_scatwind_forwardmodel(nlevz,                   &
+                                     za,                      &
+                                     u,                       &
+                                     v,                       &
+                                     ustr,                    &
+                                     oblen,                   &
+                                     scat_surface_type,       &
+                                     scat_surface_type_check, &
+                                     scat_surface_type_sea,   &
+                                     ycalc,                   &
                                      cdr10)
 
 use ufo_constants_mod, only: &
@@ -269,8 +288,9 @@ real(kind_real), intent(in)    :: u(:)         !< Model eastward wind profile
 real(kind_real), intent(in)    :: v(:)         !< Model northward wind profile
 real(kind_real), intent(in)    :: ustr         !< Model friction velocity
 real(kind_real), intent(in)    :: oblen        !< Model obukhov length
-real(kind_real), intent(in)    :: seaice       !< Model sea ice fraction
-real(kind_real), intent(in)    :: orog         !< Model orography
+integer, intent(in)            :: scat_surface_type       !< Surface type
+logical, intent(in)            :: scat_surface_type_check !< Option: check for surface type being sea?
+integer, intent(in)            :: scat_surface_type_sea   !< Surface type value for sea
 real(kind_real), intent(inout) :: ycalc(:)     !< Model equivalent of the obs
 real(kind_real), intent(inout) :: cdr10        !< 10m interpolation coefficients
 !
@@ -297,6 +317,7 @@ real                         :: phi_m_10     ! Monin-Obukhov stability function
 real                         :: phi_mn_10    ! Neutral form of stability
                                              ! function integrated to 10m
 character(max_string)        :: err_msg      ! Error message to be output
+logical                      :: over_sea
 
 if (u(nlevz) == missing_value(u(nlevz))) then  ! u wind missing
   write(message, *) myname_, "Missing value u1"
@@ -323,16 +344,6 @@ if (ustr == missing_value(ustr)) then  ! friction vel missing
   call abor1_ftn(message)
 end if
 
-if (orog == missing_value(orog)) then  ! orogoraphy missing
-  write(message, *) myname_, "Missing value orography"
-  call fckit_log % warning(message)
-end if
-
-if (seaice == missing_value(seaice)) then  ! sea ice missing
-  write(message, *) myname_, "Missing value sea ice"
-  call fckit_log % warning(message)
-end if
-
 ! Get u,v wind components at 10m
 call vert_interp_weights(nlevz, scatt_height , za, wi, wf)
 call vert_interp_apply(nlevz, u, u10, wi, wf)
@@ -345,7 +356,15 @@ z1_uv = za(nlevz)
 oblen_1 = sign( max(1.0E-6, abs(oblen)),oblen)
 recip_l_mo = 1.0 / oblen_1
 
-if (orog == 0.0 .and. seaice == 0.0 .and. z1_uv > 0.0) then ! over sea only
+! Optionally check the surface type
+over_sea = .true.
+if (scat_surface_type_check) then
+  if (scat_surface_type /= scat_surface_type_sea) then
+    over_sea = .false.
+  end if
+end if
+
+if (over_sea .and. z1_uv > 0.0) then ! over sea only
 
   ! Calculate roughness height for momentum
   z0m = 1.54E-6 / (1.0E-5 + ustr) + (charnock / grav) * ustr * ustr

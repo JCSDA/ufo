@@ -33,7 +33,7 @@ namespace ufo {
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
   : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
-    rank_(odb.distribution()->rank()) {
+    rank_(odb.distribution()->rank()), commTime_(odb.commTime()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   // Predictor factory
@@ -48,10 +48,13 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     ++numVariablePredictors_;
   }
 
-  if (prednames_.size() * vars_.size() > 0) {
+  nrecs_ = params.BiasCorrectionByRecord ? odb.nrecs() : 1;
+  ASSERT(nrecs_ > 0);
+
+  if (vars_.size() * prednames_.size() > 0) {
     // Initialize the coefficients of variable predictors to 0. (Coefficients of static predictors
     // are not stored; they are always equal to 1.)
-    biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
+    biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
     // Read or initialize bias coefficients
     this->read(params);
   }
@@ -82,12 +85,14 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     prednames_(other.prednames_),
     numStaticPredictors_(other.numStaticPredictors_),
     numVariablePredictors_(other.numVariablePredictors_),
+    nrecs_(other.nrecs_),
     vars_(other.vars_), varIndexNoBC_(other.varIndexNoBC_),
-    geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_) {
+    geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_),
+    commTime_(other.commTime_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
+  biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -111,6 +116,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     prednames_  = rhs.prednames_;
     numStaticPredictors_ = rhs.numStaticPredictors_;
     numVariablePredictors_ = rhs.numVariablePredictors_;
+    nrecs_      = rhs.nrecs_;
     vars_       = rhs.vars_;
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
@@ -155,7 +161,10 @@ void ObsBias::read(const Parameters_ & params) {
 
     for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
-         biascoeffs_[index(jpred, jvar)] = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
+        for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+          // TODO(Someone): fix RHS to handle records
+          biascoeffs_[index(jrec, jvar, jpred)] = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
+        }
       }
     }
   } else {
@@ -209,7 +218,7 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
 
 void ObsBias::write(const Parameters_ & params) const {
   // only write files out on the task with MPI rank 0
-  if (rank_ != 0) return;
+  if (rank_ != 0 || commTime_.rank() != 0) return;
 
   if (params.outputFile.value() != boost::none) {
     // FIXME: only implemented for channels currently
@@ -227,8 +236,8 @@ void ObsBias::write(const Parameters_ & params) const {
                                         prednames_.end());
     // map coefficients to 2D for saving
     Eigen::Map<const Eigen::MatrixXd>
-        coeffs(biascoeffs_.data(), numVariablePredictors_, vars_.size());
-
+        coeffs(biascoeffs_.data(), numVariablePredictors_, nrecs_ * vars_.size());
+    // TODO(Someone): change to relax the channels assumption and handle records when needed.
     saveBiasCoeffsWithChannels(group, predictors, vars_.channels(), coeffs);
   } else {
     if (numVariablePredictors_ > 0) {
@@ -245,7 +254,7 @@ double ObsBias::norm() const {
   double zz = 0.0;
 
   // Static predictors
-  const int numUnitCoeffs = numStaticPredictors_ * vars_.size();
+  const int numUnitCoeffs = nrecs_ * vars_.size() * numStaticPredictors_;
   zz += numUnitCoeffs;
 
   // Variable predictors
@@ -262,7 +271,7 @@ double ObsBias::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBias::zero() {
-  biascoeffs_ = Eigen::VectorXd::Zero(numVariablePredictors_ * vars_.size());
+  biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
 }
 
 // -----------------------------------------------------------------------------
@@ -278,14 +287,14 @@ void ObsBias::print(std::ostream & os) const {
   if (this->size() > 0) {
     // map bias coeffs to eigen matrix
     Eigen::Map<const Eigen::MatrixXd>
-      coeffs(biascoeffs_.data(), numVariablePredictors_, vars_.size());
+      coeffs(biascoeffs_.data(), numVariablePredictors_, nrecs_ * vars_.size());
     os << "Obs bias coefficients: " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     for (std::size_t p = 0; p < numStaticPredictors_; ++p) {
       os << std::fixed << std::setw(20) << prednames_[p]
          << ":  Min= " << std::setw(15) << 1.0f
          << ",  Max= " << std::setw(15) << 1.0f
-         << ",  Norm= " << std::setw(15) << std::sqrt(static_cast<double>(vars_.size()))
+         << ",  Norm= " << std::setw(15) << std::sqrt(static_cast<double>(nrecs_ * vars_.size()))
          << std::endl;
     }
     for (std::size_t p = 0; p < numVariablePredictors_; ++p) {

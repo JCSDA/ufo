@@ -62,7 +62,7 @@ observations:
     simulated variables: [stationPressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
-  rms ref: 98241.06303706
+  rms ref: 99633.58066186
   tolerance: 1.e-08
   linear obs operator test:
     coef TL: 0.1
@@ -128,5 +128,5 @@ observations:
     simulated variables: [stationPressure]
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
-  rms ref: 99603.43831377
+  rms ref: 99672.22998383 
   tolerance: 1.e-08

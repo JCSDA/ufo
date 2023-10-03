@@ -30,7 +30,7 @@ ufo_add_test( NAME    instrument_sfcMarine_gfs_qc
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 
-# H(x) with QC - GEOS
+# H(x) with QC (GMAO setup)
 ufo_add_test( NAME    instrument_sfcMarine_geos_qc
               TIER    1
               ECBUILD

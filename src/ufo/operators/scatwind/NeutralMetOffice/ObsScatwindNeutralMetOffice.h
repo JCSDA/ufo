@@ -15,6 +15,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/scatwind/NeutralMetOffice/ObsScatwindNeutralMetOffice.interface.h"
+#include "ufo/operators/scatwind/NeutralMetOffice/ObsScatwindNeutralMetOfficeParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -24,11 +25,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
-
-/// Configuration options recognized by the ObsScatwindNeutralMetOffice operator.
-class ObsScatwindNeutralMetOfficeParameters : public ObsOperatorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsScatwindNeutralMetOfficeParameters, ObsOperatorParametersBase)
-};
 
 // -----------------------------------------------------------------------------
 

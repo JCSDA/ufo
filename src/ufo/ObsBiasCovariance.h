@@ -14,6 +14,8 @@
 #include <vector>
 #include <boost/noncopyable.hpp>
 
+#include "eckit/mpi/Comm.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -96,11 +98,18 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
 
+  /// number of records that are bias-corrected independently from each other
+  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  std::size_t nrecs_;
+
   /// variables for which bias correction coefficients will be updated
   oops::Variables vars_;
 
   /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
-  size_t rank_;
+  const size_t rank_;
+
+  /// MPI communicator used in time decomposition for 4DEnVar and weak-constraint 4DVar
+  const eckit::mpi::Comm & commTime_;
 };
 
 // -----------------------------------------------------------------------------

@@ -24,6 +24,7 @@ observations:
 #  used to store ambiguities and not channels. This will be changed in future.
 - obs operator:
     name: ScatwindNeutralMetOffice
+    surface_type_check: false
   obs space:
     name: Scatwind channels 2d
     obsdatain:

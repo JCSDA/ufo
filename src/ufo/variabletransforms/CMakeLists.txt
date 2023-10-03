@@ -21,13 +21,21 @@ set ( variabletransforms_files
       Cal_Wind.h
       Cal_Wind.cc
       Cal_ProfileHorizontalDrift.h
-      Cal_ProfileHorizontalDrift.cc 
+      Cal_ProfileHorizontalDrift.cc
       Cal_QNHtoQFEpressure.h
       Cal_QNHtoQFEpressure.cc
       Cal_PStar.h
       Cal_PStar.cc
       Cal_PotentialTFromT.h
       Cal_PotentialTFromT.cc
+      Cal_AdjustedHeightCoordinate.h
+      Cal_AdjustedHeightCoordinate.cc
+      Cal_SurfaceWindScalingCombined.h
+      Cal_SurfaceWindScalingCombined.cc
+      Cal_SurfaceWindScalingHeight.h
+      Cal_SurfaceWindScalingHeight.cc
+      Cal_SurfaceWindScalingPressure.h
+      Cal_SurfaceWindScalingPressure.cc
       LookupTable.h
       TransformBase.cc
       TransformBase.h
@@ -47,7 +55,7 @@ if( ${gsw_FOUND} )
             OceanConversions/OceanPracticalSalinityToAbsoluteSalinity.cc
             OceanConversions/OceanPracticalSalinityToAbsoluteSalinity.h
       )
-      
+
       PREPEND( _p_variabletransforms_oceanfiles       "variabletransforms"       ${variabletransforms_oceanfiles} )
 endif( ${gsw_FOUND} )
 

@@ -101,10 +101,11 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable("MetaData/pressure");
 
     // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/surface_geometric_height");
   invars_ += Variable("GeoVaLs/geopotential_height");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  invars_ += Variable("GeoVaLs/" + geovar_sfc_geomz);
 }
 
 // -----------------------------------------------------------------------------
@@ -156,7 +157,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   data.get(Variable(adjusterr_name+"/"+inflatevars), adjustErr);
 
   std::vector<float> zsges(nlocs);
-  data.get(Variable("GeoVaLs/surface_geometric_height"), zsges);
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  data.get(Variable("GeoVaLs/" + geovar_sfc_geomz), zsges);
   std::vector<float> model_pressure_sfc(nlocs);
   data.get(Variable("GeoVaLs/surface_pressure"), model_pressure_sfc);
 
@@ -196,25 +198,25 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
 
   for (size_t iv = 0; iv < nvars; ++iv) {   // Variable loop
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-///   To determine if the observation is reported with pressure or
+///   To determine the observation's relative location by pressure or
 ///   geometric height.  Default: pressure.
 
       reported_height = false;
 
+///   For some wind observations, it is determined by geometric height.
 ///   Surface Marine, Surface Land, Atlas Buoy and Surface MESONET(280-299)
 ///   reported with geometric height.
-      if (itype[iloc] >= 280 && itype[iloc] < 300) {
-        reported_height = true;
-      }
-
 ///   PIBAL(221), WIND PROFILER(228) and WIND PROFILER DECODED FROM PILOT
 ///   (PIBAL)(229). If the reported geometric height is missing, then
 ///   the reported pressure is used instead.
-      if (itype[iloc] >= 221 && itype[iloc] <= 229) {
-        if (abs(obs_height[iloc]) < 1.e10) {
+      if (inflatevars.compare("windEastward") == 0 ||
+          inflatevars.compare("windNorthward") == 0) {
+        if (itype[iloc] >= 280 && itype[iloc] < 300) {
           reported_height = true;
-        } else {
-          reported_height = false;
+        } else if ((itype[iloc] >= 221 && itype[iloc] <= 229) || (itype[iloc] == 261)) {
+          if (abs(obs_height[iloc]) < 1.e10) {
+            reported_height = true;
+          }
         }
       }
 
@@ -227,8 +229,11 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
               fact = (obs_height[iloc]-dstn[iloc])/990.0f;
            }
         }
-        dpres = obs_height[iloc]-(dstn[iloc]+fact*(zsges[iloc]-dstn[iloc]));
-
+        if (itype[iloc] == 261) {
+          dpres = obs_height[iloc];
+        } else {
+          dpres = obs_height[iloc]-(dstn[iloc]+fact*(zsges[iloc]-dstn[iloc]));
+        }
         for (size_t k = 0 ; k < nlevs ; ++k) {
           zges_mh[k] = zges[k][iloc];
         }
@@ -283,16 +288,23 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         // Apply this drpx correction only to surface or surface_ship data
         if ((itype[iloc] > 179 && itype[iloc] <= 190) ||
             (itype[iloc] >= 192 && itype[iloc] < 199)) {
-          drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
+          if (inflatevars.compare("airTemperature") == 0 ||
+            inflatevars.compare("virtualTemperature") == 0) {
+            drpx = abs(1.0f-pow(model_pressure_sfc[iloc]/obs_pressure[iloc],
+                 ufo::Constants::rd_over_cp))*ufo::Constants::t0c;
+            if (abs(dpres) > 4.0f) {
+              drpx = 1.0e10f;
+            }
+          } else {
+            drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
+          }
         } else {
           drpx = 0.0f;
         }
-
-        if ((itype[iloc] > 179 && itype[iloc] < 186) ||
-            (itype[iloc] == 199)) dpres = 1.0;
-
         if (inflatevars.compare("specificHumidity") == 0) {
-            gvals->getAtLocation(q_profile, "saturated_specific_humidity_profile", iloc);
+            if ((itype[iloc] > 179 && itype[iloc] < 186) ||
+                (itype[iloc] == 199)) dpres = 1.0;
+            gvals->getAtLocation(q_profile, "saturation_specific_humidity", iloc);
             std::reverse(q_profile.begin(), q_profile.end());
 
             ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile);

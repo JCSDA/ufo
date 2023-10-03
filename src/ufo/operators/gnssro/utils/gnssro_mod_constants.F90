@@ -16,7 +16,6 @@ integer, parameter,         public :: max_string    = 800
 integer, parameter,         public :: MAXVARLEN     = 20
 real(kind_real), parameter, public :: r1em6 = 1.0e-6_kind_real
 real(kind_real), parameter, public :: r1em3 = 1.0e-3_kind_real
-real(kind_real), parameter, public :: six   = 6.0_kind_real
 real(kind_real), parameter, public :: ds    = 10000.0_kind_real
 real(kind_real), parameter, public :: crit_gradRefr = 157.0_kind_real !criteria for the refractivity gradient
 

@@ -43,7 +43,7 @@ ObsErrorSatSpecHumidity::ObsErrorSatSpecHumidity(const eckit::Configuration &con
   // Include list of required data for the estimation of saturation specific humidity
   invars_ += Variable("MetaData/pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
-  invars_ += Variable("GeoVaLs/saturated_specific_humidity_profile");
+  invars_ += Variable("GeoVaLs/saturation_specific_humidity");
 }
 
 // -----------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
 
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     gvals->getAtLocation(pressure_gval, "air_pressure", jobs);
-    gvals->getAtLocation(q_profile, "saturated_specific_humidity_profile", jobs);
+    gvals->getAtLocation(q_profile, "saturation_specific_humidity", jobs);
 
     // Convert pressure to log(pressure)
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {

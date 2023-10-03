@@ -99,10 +99,11 @@ do i = 1, nobs
 if (QCflags(i) .eq. 0) then
 
    H_km  = obsImpH(i)/1000.0_kind_real
+!  processed at EUMETSAT
    if( (ObsSaid(i)==41).or.(ObsSaid(i)==722).or.(ObsSaid(i)==723).or.   &
-       (ObsSaid(i)==4).or.(ObsSaid(i)==42).or.(ObsSaid(i)==3).or.       &
-       (ObsSaid(i)==5).or.(ObsSaid(i)==821.or.(ObsSaid(i)==421)).or.    &
-       (ObsSaid(i)==440).or.(ObsSaid(i)==43)) then   !!!!EUMETSAT processing
+       (ObsSaid(i)>=3.and.ObsSaid(i)<=5).or.(ObsSaid(i)==42).or.        &
+       (ObsSaid(i)==821).or.(ObsSaid(i)==421).or.    &
+       (ObsSaid(i)==440).or.(ObsSaid(i)==43) ) then
        if( abs(obsLat(i)) > 40.0 ) then
          if(H_km > 12.0) then
            obsErr(i)=0.19032 +0.287535 *H_km-0.00260813*H_km**2
@@ -116,42 +117,41 @@ if (QCflags(i) .eq. 0) then
            obsErr(i)=-2.41024 +0.806594 *H_km-0.027257 *H_km**2
          endif
        endif
-    else if ((ObsSaid(i) > 749) .and. (ObsSaid(i) < 756)) then
-                                        !!!! CDAAC processing: COSMIC-2 only
-          if ( abs(obsLat(i)) > 40.0 ) then
-             if (H_km <= 8.0) then
-                obsErr(i) = -1.0304261+0.3203316*H_km+0.0141337*H_km**2
-             elseif (H_km > 8.0.and.H_km <= 12.0) then
-                obsErr(i) = 2.1750271+0.0431177*H_km-0.0008567*H_km**2
-             else
-                obsErr(i) = -0.3447429+0.2829981*H_km-0.0028545*H_km**2
-             endif
-          else
-             if (H_km <= 4.0) then
-                obsErr(i) = 0.7285212-1.1138755*H_km+0.2311123*H_km**2
-             elseif (H_km <= 18.0 .and. H_km > 4.0) then
-                obsErr(i) = -3.3878629+0.8691249*H_km-0.0297196*H_km**2
-             else
-                obsErr(i) = -2.3875749+0.3667211*H_km-0.0037542*H_km**2
-             endif
-          endif
-   else !!!! CDAAC processing
-     if( abs(obsLat(i)) > 40.0 ) then
-       if ( H_km > 12.00 ) then
-          obsErr(i)=-0.685627 +0.377174 *H_km-0.00421934 *H_km**2
+!  COSMIC-2 (750-755) and Commercial (265-269)
+   else if ( (ObsSaid(i) >= 750 .and. ObsSaid(i) <= 755) .or. (ObsSaid(i) >= 265 .and. ObsSaid(i) <= 269) ) then
+       if ( abs(obsLat(i)) > 40.0 ) then
+         if (H_km <= 8.0) then
+            obsErr(i) = -1.0304261+0.3203316*H_km+0.0141337*H_km**2
+         else if (H_km > 8.0.and.H_km <= 12.0) then
+            obsErr(i) = 2.1750271+0.0431177*H_km-0.0008567*H_km**2
+         else
+            obsErr(i) = -0.3447429+0.2829981*H_km-0.0028545*H_km**2
+         endif
        else
-          obsErr(i)=-3.27737 +1.20003 *H_km-0.0558024 *H_km**2
+         if (H_km <= 4.0) then
+            obsErr(i) = 0.7285212-1.1138755*H_km+0.2311123*H_km**2
+         elseif (H_km <= 18.0 .and. H_km > 4.0) then
+            obsErr(i) = -3.3878629+0.8691249*H_km-0.0297196*H_km**2
+         else
+            obsErr(i) = -2.3875749+0.3667211*H_km-0.0037542*H_km**2
+         endif
        endif
-     else
-       if( H_km > 18.0 ) then
-          obsErr(i)=-2.73867 +0.447663 *H_km-0.00475603 *H_km**2
+   else ! Other
+       if( abs(obsLat(i)) > 40.0 ) then
+         if ( H_km > 12.00 ) then
+            obsErr(i)=-0.685627 +0.377174 *H_km-0.00421934 *H_km**2
+         else
+            obsErr(i)=-3.27737 +1.20003 *H_km-0.0558024 *H_km**2
+         endif
        else
-          obsErr(i)=-3.45303 +0.908216 *H_km-0.0293331 *H_km**2
+         if( H_km > 18.0 ) then
+            obsErr(i)=-2.73867 +0.447663 *H_km-0.00475603 *H_km**2
+         else
+            obsErr(i)=-3.45303 +0.908216 *H_km-0.0293331 *H_km**2
+         endif
        endif
-     endif
-
-  endif
-  obsErr(i) = 0.001 /abs(exp(obsErr(i)))
+   endif
+   obsErr(i) = 0.001 /abs(exp(obsErr(i)))
 
 end if
 

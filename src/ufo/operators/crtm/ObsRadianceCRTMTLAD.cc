@@ -32,7 +32,7 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
 
   // call Fortran setup routine
   ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, params.toConfiguration(),
-                                  channels_list.size(), channels_list[0], varin_);
+                                  channels_list.size(), channels_list[0], varin_, odb.comm());
 
   oops::Log::trace() << "ObsRadianceCRTMTLAD created" << std::endl;
 }

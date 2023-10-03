@@ -59,14 +59,23 @@ class ObsProductTLAD : public LinearObsOperatorBase,
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;
 
-  /// Scaling GeoVaLs
-  std::vector<double> scalingGeoVaLs_;
+  /// Geoval name to act on
+  std::string geovalName_ = "";
 
-  /// Name for GeoVaLs used to scale
-  std::string scalingGeoVar_;
+  /// Scaling variable
+  std::vector<double> scalingVariable_;
 
-  /// Exponent of geovals
-  float geovalsExponent_ = 0;
+  /// Group for scaling variable
+  std::string variableGroupToScaleHofxBy_;
+
+  /// Name for scaling variable
+  std::string variableNameToScaleHofxBy_;
+
+  /// Exponent of scaling variable
+  float scalingVariableExponent_ = 0;
+
+  /// Ref to the ObsSpace
+  const ioda::ObsSpace& odb_;
 };
 
 // -----------------------------------------------------------------------------
