@@ -21,8 +21,19 @@ set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 ## Configuration options
 option( ENABLE_UFO_DOC "Build UFO documentation" OFF )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_FORTRAN_STANDARD 08)
+set(CMAKE_FORTRAN_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_FORTRAN_EXTENSIONS OFF)
+
 include( ${PROJECT_NAME}_compiler_flags )
 include( GNUInstallDirs )
+
 
 
 ################################################################################
