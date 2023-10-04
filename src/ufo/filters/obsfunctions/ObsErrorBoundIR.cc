@@ -50,7 +50,6 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   // Include list of required data from ObsSpace
   invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 }
 
 // -----------------------------------------------------------------------------
@@ -77,8 +76,21 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsVariables());
   in.get(obserrtaotop, errftaotop);
 
+  // Get original observation error.  If not explicitly passed through the YAML, check the ObsSpace
+  // This channel-dependent error is assumed to be constant across all obs locations.
+  std::vector<float> obserr(nchans, 0.0f);
+  if (options_.obserrOriginal.value() != boost::none) {
+    obserr = options_.obserrOriginal.value().get();
+  } else {
+  // Get original observation error (uninflated) from ObsSpace
+      std::vector<std::vector<float>> obserr2(nchans, std::vector<float>(nlocs));
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr2[ichan]);
+      obserr[ichan] = obserr2[ichan][0];
+    }
+  }
+
   // Output integrated error bound for gross check
-  std::vector<float> obserr(nlocs);      //!< original obs error
   std::vector<float> obserrdata(nlocs);  //!< effective obs err
   std::vector<int> qcflagdata(nlocs);    //!< effective qcflag
   const std::string &errgrp = options_.testObserr.value();
@@ -88,14 +100,13 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
     in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;
       (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
-      out[ichan][iloc] = obserr[iloc];
+      out[ichan][iloc] = obserr[ichan];
       if (varinv > 0.0) {
-        out[ichan][iloc] = std::fmin(3.0 * obserr[iloc]
+        out[ichan][iloc] = std::fmin(3.0 * obserr[ichan]
                                * (1.0 / pow(errflat[0][iloc], 2))
                                * (1.0 / pow(errftaotop[ichan][iloc], 2)), obserr_bound_max[ichan]);
       }

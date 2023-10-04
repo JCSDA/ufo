@@ -145,10 +145,18 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get original observation error (uninflated)
-  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+  // Get original observation error.  If not explicitly passed through the YAML check the ObsSpace
+  // This channel-dependent error is assumed to be constant across all obs locations.
+  std::vector<float> obserr(nchans, 0.0f);
+  if (options_.obserrOriginal.value() != boost::none) {
+    obserr = options_.obserrOriginal.value().get();
+  } else {
+    // Get original observation error (uninflated) from ObsSpace
+    std::vector<std::vector<float>> obserr2(nchans, std::vector<float>(nlocs));
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr2[ichan]);
+      obserr[ichan] = obserr2[ichan][0];
+    }
   }
 
   // Get variables from GeoVaLS
@@ -220,7 +228,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                  && dbtdts[ichan][iloc] >= tschk) {
           icount = icount + 1;
           ts_ave = ts_ave + dbtdts[ichan][iloc];
-          float w_rad = pow((1.0 / obserr[ichan][iloc]), 2);
+          float w_rad = pow((1.0 / obserr[ichan]), 2);
           a11 = a11 + w_rad * dbtdts[ichan][iloc] * dbtdts[ichan][iloc];
           a12 = a12 + w_rad * dbtdts[ichan][iloc] * tb_ta[ichan];
           a13 = a13 + w_rad * dbtdts[ichan][iloc] * tb_qa[ichan];

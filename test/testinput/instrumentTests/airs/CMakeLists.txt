@@ -42,4 +42,16 @@ if( crtm_FOUND )
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+
+    # H(x) with QC (obs error input via namelist)
+    ufo_add_test( NAME  instrument_airs_aqua_gfs_HofX_qc_obin
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/airs/airs_aqua_gfs_HofX_qc_obin.yaml"
+        MPI     1
+        LABELS  crtm airs aqua qc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo
+        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 endif( crtm_FOUND )

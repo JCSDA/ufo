@@ -56,7 +56,6 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   invars_ += Variable(errgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
-  invars_ += Variable("ObsError/brightnessTemperature", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -161,10 +160,18 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get original observation error (uninflated) from ObsSpaec
-  std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr[ichan]);
+  // Get original observation error.  If not explicitly passed through the YAML, check the ObsSpace
+  // This channel-dependent error is assumed to be constant across all obs locations.
+  std::vector<float> obserr(nchans, 0.0f);
+  if (options_.obserrOriginal.value() != boost::none) {
+    obserr = options_.obserrOriginal.value().get();
+  } else {
+  // Get original observation error (uninflated) from ObsSpace
+    std::vector<std::vector<float>> obserr2(nchans, std::vector<float>(nlocs));
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr2[ichan]);
+      obserr[ichan] = obserr2[ichan][0];
+    }
   }
 
   // Get variables from GeoVaLS
@@ -341,7 +348,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
           dts = std::min(dts_threshold, dts);
         }
         for (size_t ichan=0; ichan < nchans; ++ichan) {
-          delta = std::max(0.05 * obserr[ichan][iloc], 0.02);
+          delta = std::max(0.05 * obserr[ichan], 0.02);
           if (std::abs(dts * dbtdts[ichan][iloc]) > delta) out[ichan][iloc] = 2;
         }
       }
