@@ -256,7 +256,6 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         ASSERT(zges_mh[nlevs-1] > zges_mh[0]);
         iflag = 1;  // in increasing order
         if (iflag_print_one) {
-          std::cout << "iflag = " << iflag << std::endl;
           iflag_print_one = false;
         }
         dpres = grdcrd1(dpres, zges_mh, nlevs, iflag);
@@ -279,7 +278,6 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         ASSERT(logprsl[0] > logprsl[nlevs-1]);
         iflag = -1;    // in decreasing order
         if (iflag_print_negone) {
-          std::cout << "iflag = " << iflag << std::endl;
           iflag_print_negone = false;
         }
         dpres = grdcrd1(logobspres, logprsl, nlevs, iflag);
